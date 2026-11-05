@@ -1,6 +1,26 @@
 {
   "schema_version": "workload-validation-checklist/v1",
   "updated_at": "2026-11-04",
+  "server_32080_recovery": {
+    "verified_host_fingerprint": "SHA256:OWM9Z+WsBq8M0cTJzqBnA/Z58UCXb0zkuNnBdIDKQOY",
+    "model": "Qwen/Qwen3.5-9B",
+    "physical_npu": 0,
+    "launch_stage": "qwen9-restore-32080-9bndq8si",
+    "pid_at_launch": 242084,
+    "health_http": 200,
+    "bounded_generation_smoke": {
+      "finish_reason": "stop",
+      "nonempty_content": true,
+      "prompt_tokens": 16,
+      "completion_tokens": 2,
+      "scope": "One infrastructure smoke request, not a dataset task or benchmark result. Private response retained in the launch stage."
+    },
+    "vllm_distribution": "0.23.0+empty",
+    "vllm_ascend_distribution": "0.23.0",
+    "torch_distribution": "2.10.0+cpu",
+    "torch_npu_distribution": "2.10.0.post4",
+    "scope": "Original saved model command reused after both NPUs were observed without running processes. Health and bounded generation now pass; historical result environment equivalence and benchmark execution are not implied."
+  },
   "checked_receipt_reference_audit": {
     "checked_sources": 102,
     "public_sources": 94,
@@ -227,6 +247,16 @@
         "extracted_or_executed": false
       },
       "model_weights_downloaded": false,
+      "official_simulator_model_acquisition": {
+        "server_stage": "mirrorapi-official-model-j7t01yiq",
+        "pid_at_launch": 269123,
+        "repo": "stabletoolbench/MirrorAPI-Cache",
+        "revision": "df8f586d0f8d17bcbbaee11f1e8f9dd178a28c68",
+        "architecture_from_pinned_config": "Qwen2ForCausalLM",
+        "status": "DOWNLOAD_IN_PROGRESS_NOT_VERIFIED",
+        "storage": "Dedicated shared task directory after checking more than 24 GiB free. Local /data is read-only; no download to Windows or the nearly full /root volume.",
+        "scope": "Anonymous fixed-revision mirror acquisition, no substitute model, no NPU allocation or simulator inference yet."
+      },
       "publisher_fac_entry_review": {
         "revision": "aa4ed9f4737ad98bd706663f01d63623c3427812",
         "wrapper": "run_fac_eval.sh",
@@ -252,6 +282,19 @@
       "official_judge_weights_and_npu_execution_verified": false
       },
       "publisher_g1_instruction_acquisition": {
+        "fixed_relevant_api_cache_preparation": {
+          "server_stage": "stabletoolbench-fixed-cache-d1ihjs25",
+          "original_cache_files": 6,
+          "bytes": 76322,
+          "advertised_api_cache_extension": {
+            "additional_files": 9,
+            "additional_bytes": 10783,
+            "advertised_api_entries_without_cache_file": 8,
+            "original_api_list_preserved": true,
+            "scope": "All original advertised APIs were checked, not just reference-relevant APIs. Missing cache files remain missing; do not remove those tools, fabricate responses, or call external APIs silently."
+          },
+          "scope": "Original relevant-API cache files selected using original per-task API definitions and author normalization, copied without rewriting. Other advertised APIs and cache-miss behavior remain to qualify; no model calls or task result."
+        },
         "revision": "aa4ed9f4737ad98bd706663f01d63623c3427812",
         "server_directory": "stabletoolbench-g1.lpOcQ6",
         "original_files_git_blob_verified": 2,
@@ -263,6 +306,16 @@
         "native_execution_verified": false
       },
       "publisher_cache_route_review": {
+        "public_loopback_server_cache_control": {
+          "entrypoint": "scripts/run_stabletoolbench_local_server.py",
+          "server_stage": "stabletoolbench-local-service-32080-001",
+          "pid_at_launch": 279691,
+          "bind": "127.0.0.1:19468",
+          "original_cache_request_http_status": 200,
+          "response_equals_original_cache_record": true,
+          "model_calls": 0,
+          "scope": "Actual HTTP cache-hit control through the pinned author handler. Real API tier is explicitly a local HTTP503; official simulator endpoint is separate and not yet ready. No task run or scoring."
+        },
         "pinned_full_source_archive": {
           "revision": "aa4ed9f4737ad98bd706663f01d63623c3427812",
           "server_artifact": "stabletoolbench-full-source.CEnQEg/author.tar.gz",
