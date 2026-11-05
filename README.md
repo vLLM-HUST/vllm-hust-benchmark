@@ -768,6 +768,11 @@ prompt/媒体时不能伪造原始请求；有官方回放工具的按原工具�
 [机器核验记录](docs/workload-data/dataset-validation-status.json)。ARM64 环境下两道固定原题已有真实 NPU 运行：一道获得原生奖励
 1，另一道达到步数上限、奖励 0。仅覆盖基础网页交互，不替代 WebArena、WorkArena 或桌面操作；尚未进入统一研究消费入口，不计入已交付项。
 
+加 `--agent-profile visual` 使用作者原始 VisualAgent 截图／坐标动作配置，不将 DOM 模式冒充视觉输入。相同两道原题按
+seed42、20步、每次4096输出token验证，43次请求均携带截图；两题均达到步数上限、奖励0，结果如实保留。[视觉原生回执](docs/workload-data/validation/miniwob-visual-native-20261105.json)。服务端须支持真实图像输入；客户端仅对回环服务使用占位
+API key。启动 Chromium 的任务子进程须移除本环境会触发崩溃的 `LD_PRELOAD`，并显式配置所需的任务级系统库、Fontconfig、Playwright
+浏览器路径；不修改模型服务环境。
+
 [API-Bank 发布方源码](https://github.com/AlibabaResearch/DAMO-ConvAI/tree/main/api-bank) ·
 [固定对话输入与保存结果评分入口](scripts/score_api_bank_saved.py) ·
 [机器核验记录](docs/workload-data/dataset-validation-status.json)。固定三段原始对话的 14 个模型调用位置已在 NPU

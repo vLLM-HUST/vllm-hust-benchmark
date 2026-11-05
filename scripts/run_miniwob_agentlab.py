@@ -7,6 +7,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 from urllib.parse import urlsplit
 
 
@@ -95,9 +96,15 @@ def loopback_url(value):
     return value
 
 
+def original_task_name(value):
+    if not re.fullmatch(r"miniwob\.[a-z0-9][a-z0-9-]*", value):
+        raise argparse.ArgumentTypeError("original miniwob.<task-name> required")
+    return value
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--task", choices=TASKS, required=True)
+    parser.add_argument("--task", type=original_task_name, required=True)
     parser.add_argument("--site", type=loopback_url)
     parser.add_argument("--endpoint", type=loopback_url)
     parser.add_argument("--model")
@@ -123,6 +130,8 @@ def main():
         args.max_output_tokens,
     )
     if args.verify_saved is not None:
+        if args.task not in SAVED_PROFILES:
+            parser.error("no pinned saved receipt for this task")
         if (
             args.execute
             or args.agent_profile != "axtree"
@@ -169,11 +178,13 @@ def main():
         "local-loopback"  # pragma: allowlist secret - unauthenticated loopback placeholder
     )
     import browsergym.miniwob  # noqa: F401
+    import gymnasium
     from agentlab.agents.generic_agent.agent_configs import FLAGS_CUSTOM
     from agentlab.agents.generic_agent.generic_agent import GenericAgentArgs
     from agentlab.llm.chat_api import SelfHostedModelArgs
     from browsergym.experiments.loop import EnvArgs, ExpArgs
 
+    gymnasium.spec("browsergym/" + args.task)
     flags = FLAGS_CUSTOM
     agent_type = GenericAgentArgs
     expected_actions = ["bid"]
