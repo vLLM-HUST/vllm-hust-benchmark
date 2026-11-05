@@ -1,6 +1,6 @@
 {
   "schema_version": "workload-validation-checklist/v1",
-  "updated_at": "2026-11-05",
+  "updated_at": "2026-11-06",
   "server_32080_recovery": {
     "verified_host_fingerprint": "SHA256:OWM9Z+WsBq8M0cTJzqBnA/Z58UCXb0zkuNnBdIDKQOY",
     "model": "Qwen/Qwen3.5-9B",
@@ -22,10 +22,10 @@
     "scope": "Original saved model command reused after both NPUs were observed without running processes. Health and bounded generation now pass; historical result environment equivalence and benchmark execution are not implied."
   },
   "checked_receipt_reference_audit": {
-    "checked_sources": 103,
-    "public_sources": 95,
+    "checked_sources": 104,
+    "public_sources": 96,
     "enterprise_private_sources": 8,
-    "distinct_tracked_receipt_paths": 95,
+    "distinct_tracked_receipt_paths": 96,
     "scope": "Each checked source references an existing Git-tracked receipt; JSON receipts parse. Shared receipts are counted once. This is a reference integrity check, not a new execution, score, or independent requalification of each receipt."
   },
   "replacement_candidate_audits": {
@@ -5377,8 +5377,11 @@
       },
       "available_execution_tools": {
         "agent": "scripts/run_mlagentbench_local_agent.py",
+        "imdb_isolated_software_data_probe": "scripts/check_mlagentbench_imdb_environment.py",
         "boundary": "Existing CIFAR10 and graph evidence can be reused; the fixed IMDb protocol still needs an isolated NPU training executor."
       },
+      "imdb_child_python_bootstrap": "configs/workload-native/mlagentbench-imdb-bootstrap/sitecustomize.py",
+      "imdb_host_isolation_preflight_receipt": "docs/workload-data/validation/mlagentbench-imdb-host-isolation-preflight-20261105.json",
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
       "status": "IN_PROGRESS",
@@ -5859,17 +5862,34 @@
     "SWESMITH": {
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
-      "blocker": "All11 original shards and59136-row reader verified; actual green CI wheel82 payloads and fixed3 public/research readbacks passed. Official Agent and scoring pending; official amd64 runtime not qualified on current ARM64 executor.24 reused author trajectories are historical data, not our native runs.",
+      "delivery_receipt": "docs/workload-data/validation/swesmith-fixed3-native-20261106.json",
+      "blocker": null,
+      "scope_limits": "Original first3 Python/oauthlib monorepo tasks under disclosed ARM/runtime health compatibility. Official resolved0/3, errors0/timeouts0; no quality/performance success or full-corpus/other-language/amd64/GPT4o reproduction claim. Current candidate wheel96 payloads/current research fixed3 readbacks verified; current changed-code GitHub CI/publication pending.",
       "partial_reuse_receipt": "docs/workload-data/validation/swesmith-author-history-reuse-20261102.json",
       "native_semantics_receipt": "docs/workload-data/validation/swesmith-original-semantics-audit-20261102.json",
       "original_task_preparation_receipt": "docs/workload-data/validation/swesmith-original-first3-preparation-20261102.json",
       "original_asset_profile": "configs/workload-native/swesmith-original-task-assets.json",
-      "original_asset_preparer": "scripts/prepare_swesmith_original_assets.py"
+      "original_asset_preparer": "scripts/prepare_swesmith_original_assets.py",
+      "original_environment_asset_profile": "configs/workload-native/swesmith-env-author-source.json",
+      "native_agent_client_recipe": "configs/workload-native/sweagent-original-client.Dockerfile",
+      "native_agent_entry": "scripts/run_swesmith_original_agent.py",
+      "remote_health_compatibility_20261106": {
+        "observed_failure": "Original SWE-agent autosubmission at the75-call boundary passes timeout=10 to SWE-ReX1.4 RemoteDeployment.is_alive, which does not accept that keyword; attempt002 first task did not write a terminal prediction.",
+        "binding": "Controller-only asyncio.wait_for around the unchanged native health call; original return and failures preserved, original method restored after run.",
+        "actual_control": "Server swesmith-health-api-control-20261106-001/qualification-public.json: original RemoteDeployment start and real timeout10 health control passed, exit0; owned control container stopped. No model call or original task completion.",
+        "native_terminal_validation_pending": false,
+        "native_terminal_validation_scope": "Attempt003 first original task now exits as exit_cost and saves native .pred; original scoring unresolved1/1, errors0/timeouts0. Remaining two tasks and final source handoff still pending."
+      },
+      "native_arm_evaluation_entry": "scripts/run_swesmith_arm_evaluation.py",
+      "native_arm_evaluation_status": "Attempt003 original fixed3 complete: native terminal predictions and unchanged official scoring, resolved0/3, infrastructure errors0/timeouts0.228 real NPU queries/responses preserve all original forwarded bodies. Local reference token metadata is not an enforced wire cap; max_tokens absent as in author client, actual maximum prompt71839/completion553. Current candidate wheel96 payloads and current unchanged research consumer fixed3 roundtrip verified. Prior environment failures retained; owned completed task runtimes cleaned, model services preserved. See delivery_receipt for exact environment and scope.",
+      "original_environment_asset_preparer": "scripts/prepare_jsonschemabench_author_source.py --source swesmith-env",
+      "original_environment_assets_verified": "Four original build files, 3302 bytes, server Git blob/SHA256 and public verifier passed. Disclosed ARM candidate preserves Python and pip versions; base tests 673 passed/2 skipped, all fixed3 original F2P/P2P bug/reverse-reference controls matched. This does not qualify the official Agent/scorer or full original runtime.",
+      "fixed3_original_git_snapshot_recovery": "scripts/recover_swesmith_fixed3_repository.py",
+      "fixed3_original_git_snapshot_status": "Initial depth1 recovery314 objects; grading-parent extension now321 original objects with exact commit/tree IDs and strict fsck. All3 task checkout followed by HEAD~1 succeeds, restoring55 original test files per task. Not full history or native Agent/scorer execution; see native_semantics_receipt."
     },
     "WORKARENA": {
       "original_instance_access_check": {

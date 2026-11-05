@@ -60,6 +60,7 @@ def main():
             "toolbench-examples",
             "ljspeech-vits",
             "mlagentbench",
+            "swesmith-env",
             "webarena",
             "visualwebarena",
             "mlebench",
