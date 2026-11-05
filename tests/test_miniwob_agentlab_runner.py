@@ -41,8 +41,18 @@ def test_metadata_capture_preserves_response_and_restores_client(tmp_path):
     raw = path.read_text("utf-8")
     assert "private" not in raw
     assert [json.loads(line) for line in raw.splitlines()] == [
-        {"finish_reason": "length", "content_is_null": True, "completion_tokens": 1024},
-        {"finish_reason": "stop", "content_is_null": False, "completion_tokens": 1024},
+        {
+            "finish_reason": "length",
+            "content_is_null": True,
+            "completion_tokens": 1024,
+            "request_image_parts": 0,
+        },
+        {
+            "finish_reason": "stop",
+            "content_is_null": False,
+            "completion_tokens": 1024,
+            "request_image_parts": 0,
+        },
     ]
 
 
@@ -81,6 +91,43 @@ def test_terminal_summary(tmp_path, terminated, truncated, reward, error, valid)
         "terminated": terminated,
         "truncated": truncated,
     }
+
+
+def test_visual_request_metadata_counts_images_without_payload(tmp_path):
+    script = Path(__file__).resolve().parents[1] / "scripts/run_miniwob_agentlab.py"
+    capture = runpy.run_path(str(script))["response_metadata"]
+    response = SimpleNamespace(
+        choices=[
+            SimpleNamespace(
+                finish_reason="stop", message=SimpleNamespace(content="action")
+            )
+        ],
+        usage=SimpleNamespace(completion_tokens=12),
+    )
+
+    class Client:
+        def create(self, **kwargs):
+            return response
+
+    path = tmp_path / "metadata.jsonl"
+    with capture(Client, path):
+        Client().create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "private instruction"},
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": "data:image/png;base64,private"},
+                        },
+                    ],
+                }
+            ]
+        )
+    raw = path.read_text("utf-8")
+    assert json.loads(raw)["request_image_parts"] == 1
+    assert "private" not in raw
 
 
 def run_cli(tmp_path, endpoint):

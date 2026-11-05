@@ -31,11 +31,19 @@ def response_metadata(client_type, destination):
 
     def capture(client, *args, **kwargs):
         result = original(client, *args, **kwargs)
+        image_parts = sum(
+            part.get("type") == "image_url"
+            for message in kwargs.get("messages", [])
+            if isinstance(message, dict) and isinstance(message.get("content"), list)
+            for part in message["content"]
+            if isinstance(part, dict)
+        )
         for choice in result.choices:
             row = {
                 "finish_reason": choice.finish_reason,
                 "content_is_null": choice.message.content is None,
                 "completion_tokens": getattr(result.usage, "completion_tokens", None),
+                "request_image_parts": image_parts,
             }
             with destination.open("a", encoding="utf-8") as stream:
                 stream.write(json.dumps(row) + "\n")
@@ -97,6 +105,12 @@ def main():
     parser.add_argument("--max-steps", type=int)
     parser.add_argument("--max-output-tokens", type=int)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument(
+        "--agent-profile",
+        choices=("axtree", "visual"),
+        default="axtree",
+        help="visual uses the unmodified author VisualAgent coordinate/screenshot defaults",
+    )
     parser.add_argument("--record-response-metadata", action="store_true")
     parser.add_argument("--verify-saved", type=Path, metavar="RESULT_DIR")
     args = parser.parse_args()
@@ -111,6 +125,7 @@ def main():
     if args.verify_saved is not None:
         if (
             args.execute
+            or args.agent_profile != "axtree"
             or args.record_response_metadata
             or any(v is not None for v in runtime_options)
         ):
@@ -150,25 +165,41 @@ def main():
 
     os.environ["MINIWOB_URL"] = args.site
     os.environ["VLLM_API_URL"] = args.endpoint
+    os.environ["OPENAI_API_KEY"] = (
+        "local-loopback"  # pragma: allowlist secret - unauthenticated loopback placeholder
+    )
     import browsergym.miniwob  # noqa: F401
     from agentlab.agents.generic_agent.agent_configs import FLAGS_CUSTOM
     from agentlab.agents.generic_agent.generic_agent import GenericAgentArgs
     from agentlab.llm.chat_api import SelfHostedModelArgs
     from browsergym.experiments.loop import EnvArgs, ExpArgs
 
-    action_set = FLAGS_CUSTOM.action.action_set
-    if list(action_set.subsets) != ["bid"] or action_set.multiaction:
+    flags = FLAGS_CUSTOM
+    agent_type = GenericAgentArgs
+    expected_actions = ["bid"]
+    if args.agent_profile == "visual":
+        from agentlab.agents.visual_agent.agent_configs import DEFAULT_PROMPT_FLAGS
+        from agentlab.agents.visual_agent.visual_agent import VisualAgentArgs
+
+        flags = DEFAULT_PROMPT_FLAGS
+        agent_type = VisualAgentArgs
+        expected_actions = ["coord"]
+        if not flags.obs.use_screenshot or flags.obs.use_som:
+            raise RuntimeError("author screenshot-only visual profile changed")
+    action_set = flags.action.action_set
+    if list(action_set.subsets) != expected_actions or action_set.multiaction:
         raise RuntimeError("MiniWoB++ requires the fixed single browser-action profile")
 
     args.output.mkdir(parents=True, exist_ok=False)
     run = ExpArgs(
-        agent_args=GenericAgentArgs(
+        agent_args=agent_type(
             chat_model_args=SelfHostedModelArgs(
                 model_name=args.model,
                 backend="vllm",
                 max_new_tokens=args.max_output_tokens,
+                vision_support=args.agent_profile == "visual",
             ),
-            flags=FLAGS_CUSTOM,
+            flags=flags,
         ),
         env_args=EnvArgs(task_name=args.task, task_seed=42, max_steps=args.max_steps),
     )
@@ -190,6 +221,7 @@ def main():
                 "task": args.task,
                 "seed": 42,
                 "model": args.model,
+                "agent_profile": args.agent_profile,
                 "max_steps": args.max_steps,
                 "max_output_tokens": args.max_output_tokens,
                 **terminal_summary(run.exp_dir),
