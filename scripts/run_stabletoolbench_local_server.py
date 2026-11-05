@@ -87,7 +87,7 @@ def main():
     threading.Thread(target=fallback.serve_forever, daemon=True).start()
     args.output.mkdir(exist_ok=False)
     config = dict(
-        api_key="local-loopback",
+        api_key="local-loopback",  # pragma: allowlist secret - noncredential for loopback-only service
         api_base=args.simulator_endpoint,
         model=args.simulator_model,
         temperature=0,

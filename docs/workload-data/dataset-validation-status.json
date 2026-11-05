@@ -32,6 +32,8 @@
     "WEBSHOP": {
       "research_consumer_source_audit": {
         "research_checkout_short_commit": "fa8e7d6",
+        "remote_main_rechecked_short_commit": "9f1f6a5",
+        "remote_main_findings": "Tracked Python references to WebShop are the AgentBench environment-to-family mapping and its taxonomy test. No MiniWoB++ or StableToolBench Python reference was found. This does not establish a standalone candidate consumer adapter.",
         "source_registration": "Research observation matrix describes WebShop text browsing.",
         "native_consumer_verified": false,
         "scope": "The tracked Python source search did not find a dedicated WebShop, MiniWoB++ or StableToolBench adapter in this checkout. A matrix entry is not evidence of a public-provider readback. Existing native launcher and receipts remain separate from research observations."
@@ -254,6 +256,11 @@
         "revision": "df8f586d0f8d17bcbbaee11f1e8f9dd178a28c68",
         "architecture_from_pinned_config": "Qwen2ForCausalLM",
         "status": "DOWNLOAD_IN_PROGRESS_NOT_VERIFIED",
+        "partial_weight_integrity": {
+          "verified_shards": ["model-00001-of-00004.safetensors", "model-00002-of-00004.safetensors"],
+          "check": "Completed files match fixed-revision sizes and LFS SHA256; full model not yet verified."
+        },
+        "verify_and_launch_worker_pid": 307997,
         "fixed_revision_file_manifest": {
           "server_file": "mirrorapi-official-model-j7t01yiq/publisher-files.json",
           "selected_files": 13,
@@ -291,6 +298,9 @@
         "official_judge_model_acquisition": {
           "server_stage": "fac-official-model-a9jinq7y",
           "pid_at_launch": 293141,
+          "download_state": "RESUMED_SAME_PID_AFTER_SPACE_RECOVERED",
+          "resume_gate": "Observed shared free space recovered to54GiB; checked more than45GiB free and exact original downloader cmdline before SIGCONT. No task or evidence deleted and no new downloader started.",
+          "storage_control": "Exact Evaluator downloader PID/cmdline verified before SIGSTOP. Already downloaded bytes retained; simulator download,9B service,tool server and native controller remain untouched. Resume the same PID only after checking space; no restart or redownload implied.",
           "repo": "stabletoolbench/Evaluator",
           "revision": "228c3bf20640ce6712c978bd9e574ae183fedef7",
           "weight_shards": 4,
