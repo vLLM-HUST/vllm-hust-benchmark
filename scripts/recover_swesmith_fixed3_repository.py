@@ -17,9 +17,9 @@ import zlib
 
 REPOSITORY = "swesmith/oauthlib__oauthlib.1fd52536"
 COMMITS = {
-    "oauthlib__oauthlib.1fd52536.combine_file__09vlzwgc": "3b1e6ec37ffeacc5bed0e55e287f86166b4db21c",
-    "oauthlib__oauthlib.1fd52536.combine_file__0fceycuu": "a480f4738267579b0f93cb0dbf2ea2389b5e44b0",
-    "oauthlib__oauthlib.1fd52536.combine_file__0fukhdzk": "ea82f1c5b3539878f309ec79e0d16092e743870b",
+    "oauthlib__oauthlib.1fd52536.combine_file__09vlzwgc": "3b1e6ec37ffeacc5bed0e55e287f86166b4db21c",  # pragma: allowlist secret - original public task Git object
+    "oauthlib__oauthlib.1fd52536.combine_file__0fceycuu": "a480f4738267579b0f93cb0dbf2ea2389b5e44b0",  # pragma: allowlist secret - original public task Git object
+    "oauthlib__oauthlib.1fd52536.combine_file__0fukhdzk": "ea82f1c5b3539878f309ec79e0d16092e743870b",  # pragma: allowlist secret - original public task Git object
 }
 
 

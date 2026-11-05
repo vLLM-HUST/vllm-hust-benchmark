@@ -26,10 +26,8 @@ from appworld_model_transport import model_proxy
 from recover_swesmith_fixed3_repository import COMMITS
 from run_swesmith_arm_evaluation import fixed_original_rows
 
-AGENT_ARCHIVE_SHA256 = (
-    "a02724577cde3c7033343efff74184ad33ca783b9f3b81bea90c13f4c47219a4"
-)
-CONFIG_SHA256 = "678478618344a2aef726ba529345e37dd37640b089ea197b46d98b43ec9195e0"
+AGENT_ARCHIVE_SHA256 = "a02724577cde3c7033343efff74184ad33ca783b9f3b81bea90c13f4c47219a4"  # pragma: allowlist secret - fixed public author source archive
+CONFIG_SHA256 = "678478618344a2aef726ba529345e37dd37640b089ea197b46d98b43ec9195e0"  # pragma: allowlist secret - unchanged public author config
 
 
 def select_task_ids(requested):

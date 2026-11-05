@@ -12,8 +12,8 @@ if __package__ in {None, ""}:
 
 from run_mlagentbench_local_agent import check_isolation, verify_port
 
-TOKENIZER_FILE = "9b5ad71b2ce5302211f9c61530b329a4922fc6a4"
-TOKENIZER_SHA256 = "223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7"
+TOKENIZER_FILE = "9b5ad71b2ce5302211f9c61530b329a4922fc6a4"  # pragma: allowlist secret - public tiktoken cache filename
+TOKENIZER_SHA256 = "223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7"  # pragma: allowlist secret - public tokenizer digest
 
 
 def append_paths(paths):

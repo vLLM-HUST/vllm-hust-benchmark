@@ -48,13 +48,11 @@ Full-Duplex-Bench：已取得原包时，用
 
 2026-11-05 补充软件预检：在服务器对已取得的 `moshi==0.2.13` wheel 运行
 `python scripts/inspect_moshi_runtime_requirements.py --wheel <原wheel> --torch-version 2.10.0+cpu`。
-该入口需要 `packaging`，仅解析归档，不导入模型、不下载权重、不访问加速卡。
-真实 wheel SHA-256 为 `beeb3ebc1d769a800e22b26bf4ec0d25f9525d54ae77979b37c86a2f782f4e64`；
-声明的 `torch>=2.2.0,<2.10` 不接受现有 2.10.0+cpu，原服务第72行仍包含 CUDA 同步调用。
-这证明不能直接按依赖声明复用现有模型服务环境，不证明 Moshi 无法适配 NPU。
-后续应在独立环境核验匹配版本及加速器调用，再运行原双工任务和原 ASR 评分；来源总勾保持未完成。
-本次服务器宿主 Python 缺少 `packaging`；实际静态检查通过显式使用现有客户端的 pip vendored
-`packaging` 完成，未修改全局依赖。这不是独立 Moshi 推理环境安装成功的证据。
+该入口需要 `packaging`，仅解析归档，不导入模型、不下载权重、不访问加速卡。 真实 wheel SHA-256 为
+`beeb3ebc1d769a800e22b26bf4ec0d25f9525d54ae77979b37c86a2f782f4e64`； 声明的 `torch>=2.2.0,<2.10` 不接受现有
+2.10.0+cpu，原服务第72行仍包含 CUDA 同步调用。 这证明不能直接按依赖声明复用现有模型服务环境，不证明 Moshi 无法适配 NPU。
+后续应在独立环境核验匹配版本及加速器调用，再运行原双工任务和原 ASR 评分；来源总勾保持未完成。 本次服务器宿主 Python 缺少 `packaging`；实际静态检查通过显式使用现有客户端的
+pip vendored `packaging` 完成，未修改全局依赖。这不是独立 Moshi 推理环境安装成功的证据。
 
 MLE-bench：在隔离执行节点按[固定版本官方说明](https://github.com/openai/mle-bench/blob/507f92e1138bb6e40dac5c6ee7a6758e6424bf97/README.md)安装。由操作者配置自己的
 Kaggle 访问权限和凭据，勿提交凭据或竞赛文件。对既定竞赛运行 `mlebench prepare -c <competition-id>`，保留官方拆分；原生 Agent 生成提交 CSV
@@ -436,10 +434,10 @@ CPU构建适配，不是作者CUDA环境。检查命令：`python scripts/verify
 
 当前专用CPU为ARM64；官方容器创建与评分路径显式请求x86_64。尚未验证兼容执行，不能仅凭profile支持ARM镜像就宣称可跑。见[源码语义审计](validation/swesmith-original-semantics-audit-20261102.json)。
 
-2026-11-05 补齐固定oauthlib环境的[发布方构建资产](https://github.com/SWE-bench/SWE-smith-envs/tree/21549127f50e75d0ed62db9740d6b458f09683f7/env/oauthlib__oauthlib.1fd52536)：
-Dockerfile、setup脚本、原导出安装脚本及Conda清单共4文件3302字节，服务器逐文件Git blob及SHA-256核验通过。
-原始下载连接重置后改用同一发布方Git blob API，未改文件。
-用现有公共入口获取或核验：
+2026-11-05
+补齐固定oauthlib环境的[发布方构建资产](https://github.com/SWE-bench/SWE-smith-envs/tree/21549127f50e75d0ed62db9740d6b458f09683f7/env/oauthlib__oauthlib.1fd52536)：
+Dockerfile、setup脚本、原导出安装脚本及Conda清单共4文件3302字节，服务器逐文件Git blob及SHA-256核验通过。 原始下载连接重置后改用同一发布方Git blob
+API，未改文件。 用现有公共入口获取或核验：
 
 ```bash
 python scripts/prepare_jsonschemabench_author_source.py --source swesmith-env --author-root /external/swesmith-env --action prepare --max-bytes 3302
@@ -449,12 +447,12 @@ python scripts/prepare_jsonschemabench_author_source.py --source swesmith-env --
 原Dockerfile明确指定x86_64，原Conda清单还固定linux-64包及构建号，因此不能只换Docker的platform参数后称为原环境。
 下一步须单独核验ARM依赖替换、固定原仓库和原测试行为，并披露兼容差异；当前未构建镜像、未执行Agent或评分，来源不打总勾。
 
-后续ARM候选验证：保留Python3.10.15、全部13项原pip依赖及3项导出构建工具版本，
-使用固定摘要的官方ARM Python基础镜像替代原x86 Conda系统库；这是披露差异的兼容候选，不是原镜像。
+后续ARM候选验证：保留Python3.10.15、全部13项原pip依赖及3项导出构建工具版本， 使用固定摘要的官方ARM Python基础镜像替代原x86
+Conda系统库；这是披露差异的兼容候选，不是原镜像。
 [候选Dockerfile](../../configs/workload-native/swesmith-oauthlib-arm-candidate.Dockerfile)在断网条件构建成功，
 `pip check`退出0。固定原oauthlib仓库的原全套命令
-`pytest --disable-warnings --color=no --tb=no --verbose`在断网、只读根、cap-drop ALL、NoNewPrivs容器中退出0：
-673 passed、2 skipped，原测试未删改，0模型调用、不挂NPU。
+`pytest --disable-warnings --color=no --tb=no --verbose`在断网、只读根、cap-drop ALL、NoNewPrivs容器中退出0： 673
+passed、2 skipped，原测试未删改，0模型调用、不挂NPU。
 这是基础仓库兼容控制；固定任务bug分支、反向gold/正向候选评分对照、完整Agent工具链及原生三题仍待核验，来源总勾不变。
 基础候选镜像约69MB，依赖准备只在服务器，未下载到本地；具体镜像、源码、日志摘要见上述语义审计记录。
 
@@ -479,11 +477,9 @@ python scripts/prepare_jsonschemabench_author_source.py --source swesmith-env --
 网络正常时优先直接克隆原仓库；该恢复入口只是固定样本的传输后备，不限制用户正常取得全部原任务分支。
 
 后续已补齐评分必需的直接父提交：原`run_patch_in_container`评分时执行`git checkout <instance_id>`后再执行`git checkout HEAD~1`，
-用于恢复任务分支中隐藏的测试，因此深度1不能用于完整评分。
-恢复工具增加`--include-grading-parents`，目录中还需包含语义审计记录所列三个父提交的原归档。
+用于恢复任务分支中隐藏的测试，因此深度1不能用于完整评分。 恢复工具增加`--include-grading-parents`，目录中还需包含语义审计记录所列三个父提交的原归档。
 服务器已恢复6份原提交/树、共321个原Git对象并通过严格fsck；三个固定任务逐一执行上述两条原Git命令成功，
-每题所需55份原测试文件均存在。未获取更早历史不自动等同于原协议受阻，后续只按实际执行需要补齐。
-原Agent与官方评分尚未运行，不因Git控制通过而打总勾。
+每题所需55份原测试文件均存在。未获取更早历史不自动等同于原协议受阻，后续只按实际执行需要补齐。 原Agent与官方评分尚未运行，不因Git控制通过而打总勾。
 
 官方评分客户端已补齐：固定原作者归档安装其`validate`最小依赖；第一次自动取得SWE-bench5.0.2，
 原评分器因缺`KEY_PREDICTION`导入失败。按官方v4.1.0的常量接口固定`swebench==4.1.0`后，
@@ -494,16 +490,16 @@ python scripts/prepare_jsonschemabench_author_source.py --source swesmith-env --
 F2P/P2P数量与原任务一致。没有重跑测试或模型；这只补评分函数控制，不等于完整容器评分harness或原生Agent完成。
 
 完整容器评分harness后续已实跑：公共`run_swesmith_arm_evaluation.py`在执行前后核对原作者5个核心模块字节，
-保留原题、原七字段、原gold反向补丁、原测试集合及计分逻辑。
-原gold控制为3/3解决，明确标注的空补丁负对照为0/3解决；两次均退出0、无超时/评分错误，6份原报告已检查。
+保留原题、原七字段、原gold反向补丁、原测试集合及计分逻辑。 原gold控制为3/3解决，明确标注的空补丁负对照为0/3解决；两次均退出0、无超时/评分错误，6份原报告已检查。
 ARM部署适配仅绑定本地兼容镜像/平台、安全选项及真实系统Python的激活方式，原pytest命令不变；未伪造Conda命令。
-可信评分控制器使用Docker套接字，不执行生成程序；原题子容器实查网络禁用且无端点、无主机挂载、无设备、
-cap-drop ALL、NoNewPrivs，内存保留原10GiB。本轮控制均无模型调用，不是模型修复成绩。
+可信评分控制器使用Docker套接字，不执行生成程序；原题子容器实查网络禁用且无端点、无主机挂载、无设备、 cap-drop
+ALL、NoNewPrivs，内存保留原10GiB。本轮控制均无模型调用，不是模型修复成绩。
 仍须接原SWE-agent配置、本地NPU工具调用、三个固定任务的真实Agent输出和对应原评分，以及交付接通，不打来源总勾。
 
 原SWE-agent前端软件已补齐：固定官方提交`3ea751c087f32b16e039a2233dd6eefecef325d5`归档，
 原409份文件与两个内部文档符号链接经安全路径核验提取，源码未改，以editable方式保留原tools/config路径。
-[官方客户端配方](../../configs/workload-native/sweagent-original-client.Dockerfile)在服务器独立ARM Python3.11环境构建成功；
+[官方客户端配方](../../configs/workload-native/sweagent-original-client.Dockerfile)在服务器独立ARM
+Python3.11环境构建成功；
 断网、无NPU容器中原`sweagent run-batch --help`退出0并列出原生`SWESmithInstances`，实际版本SWE-agent1.1.0、SWE-ReX1.4.0。
 原横幅的Git hash为unavailable是固定归档无.git所致，另记录原提交及归档摘要，不伪造Git元数据。
 现有9B服务实查已开启`--enable-auto-tool-choice`和`qwen3_xml`解析器，未重启服务。
@@ -514,58 +510,43 @@ cap-drop ALL、NoNewPrivs，内存保留原10GiB。本轮控制均无模型调�
 任务专用Docker内部网络不发布端口；可信主机直连控制探测HTTP200，容器对外部地址连接返回errno101。
 起初两次端口发布控制未取得端点，失败记录保留；改用原生RemoteDeployment，不修改SWE-ReX执行代码。
 经原RemoteDeployment、原CreateBashSessionRequest及原BashAction，实际执行`python --version`返回Python3.10.15、exit0，
-无主机挂载/设备、0模型调用；测试容器已保存证据后停止。
-原RemoteDeployment析构重复关闭警告保留，未修补生命周期逻辑或掩盖错误。
+无主机挂载/设备、0模型调用；测试容器已保存证据后停止。 原RemoteDeployment析构重复关闭警告保留，未修补生命周期逻辑或掩盖错误。
 另用原SWESmithInstances类实读三题，原ID、image_name、分支和第三题空issue均保留，未伪造旧SWE-bench字段。
-2026-11-06真实Agent首次尝试在首个模型请求前因缺少`mcp`依赖失败，队列请求与响应均为0；
-已保留原日志并停止该次调用器及其三个任务容器，未停止模型服务。
+2026-11-06真实Agent首次尝试在首个模型请求前因缺少`mcp`依赖失败，队列请求与响应均为0； 已保留原日志并停止该次调用器及其三个任务容器，未停止模型服务。
 按LiteLLM1.108.0声明的`mcp`额外依赖补装（实际mcp2.3.0），派生客户端镜像
-`workload-sweagent-native-client:20261106-002`完成依赖检查及断网导入。
-第二次尝试另建私有输出与队列，原固定三题、原模板、75次调用上限及工具预算不变；
-真实9B请求已进入服务，早期快照为6个请求、5个响应，调用器与三个隔离任务容器仍运行。
-这仅证明原Agent已开始调用模型，不代表三题结束或评分通过；来源完成勾仍保持未勾选。
+`workload-sweagent-native-client:20261106-002`完成依赖检查及断网导入。 第二次尝试另建私有输出与队列，原固定三题、原模板、75次调用上限及工具预算不变；
+真实9B请求已进入服务，早期快照为6个请求、5个响应，调用器与三个隔离任务容器仍运行。 这仅证明原Agent已开始调用模型，不代表三题结束或评分通过；来源完成勾仍保持未勾选。
 私有运行位置为服务器`swesmith-native-agent-run-20261106-002`，原日志与远程执行凭据不公开。
 
 第二次尝试的第一题随后达到75次原调用边界；自动收尾暴露上游接口不兼容：
 SWE-agent调用`RemoteDeployment.is_alive(timeout=10)`，已安装且当前PyPI最新的SWE-ReX1.4.0
-该方法不接受`timeout`，导致第一题预测未落盘。不能将该轨迹算完整原生交付。
-公共调用器现增加明确披露的进程内健康检查适配：对原方法应用`asyncio.wait_for`，
-保留调用方10秒截止时间、真实返回值及失败，不修改原源码、任务、工具或评分。
-离线测试验证原返回值、真实超时、异常传播及非正超时拒绝；真实收尾仍待验证。
-运行完成后恢复原方法。旧尝试继续保留，部署适配前的运行不追认成适配后的结果。
-在另一专用任务容器中，原RemoteDeployment启动与适配后的真实`is_alive(timeout=10)`
-检查退出0，控制容器已停止；这是0模型调用的接口控制，不是原题完成。
-调用器支持重复指定`--task-id`，仅可选择原固定三题中的未完成题，仍由原生filter筛选，
+该方法不接受`timeout`，导致第一题预测未落盘。不能将该轨迹算完整原生交付。 公共调用器现增加明确披露的进程内健康检查适配：对原方法应用`asyncio.wait_for`，
+保留调用方10秒截止时间、真实返回值及失败，不修改原源码、任务、工具或评分。 离线测试验证原返回值、真实超时、异常传播及非正超时拒绝；真实收尾仍待验证。
+运行完成后恢复原方法。旧尝试继续保留，部署适配前的运行不追认成适配后的结果。 在另一专用任务容器中，原RemoteDeployment启动与适配后的真实`is_alive(timeout=10)`
+检查退出0，控制容器已停止；这是0模型调用的接口控制，不是原题完成。 调用器支持重复指定`--task-id`，仅可选择原固定三题中的未完成题，仍由原生filter筛选，
 不允许引入替换题或重复ID。若旧尝试某题已有有效终态及预测，则复用其结果，不再次生成。
 
-第二次尝试现已自然结束：三题各保存75步轨迹，228个请求均有对应响应；
-三题的原`exit_status`均为空，且没有原生预测，全部保留为环境收尾失败，不补造空预测。
+第二次尝试现已自然结束：三题各保存75步轨迹，228个请求均有对应响应； 三题的原`exit_status`均为空，且没有原生预测，全部保留为环境收尾失败，不补造空预测。
 在核实调用器退出及0在途请求后，已停止其三个具名任务容器，原日志、轨迹和摘要保留。
 随后在`swesmith-native-agent-run-20261106-003`启动披露健康检查兼容的新原三题尝试；
 这是补跑未形成有效终态的原题，未重复任何有效原生结果。该尝试仍待原生终态、原评分及接入核验。
 
 预测接入保留原SWE-agent的`model_patch: null`：作者`save_predictions`直接保存原submission，
 原SWE-smith的`run_patch_in_container(patch: str | None)`允许空提交并在原故障环境评分。
-公共评分入口因此允许明确存在的字符串或null字段，拒绝字段缺失、数值或列表；
-不把null改造为空字符串，不为没有原生预测文件的失败轨迹补造预测。
+公共评分入口因此允许明确存在的字符串或null字段，拒绝字段缺失、数值或列表； 不把null改造为空字符串，不为没有原生预测文件的失败轨迹补造预测。
 
-第三次尝试第一题已完成原生终态与原评分：`exit_cost`、76步轨迹（含原框架收尾步骤），
-原`.pred`的`model_patch`为null。逐字节复制为单条JSONL后交给原评分器，
+第三次尝试第一题已完成原生终态与原评分：`exit_cost`、76步轨迹（含原框架收尾步骤）， 原`.pred`的`model_patch`为null。逐字节复制为单条JSONL后交给原评分器，
 官方报告`patch_exists=false`、`resolved=false`，汇总unresolved=1/total=1，0评分错误、0超时。
-原测试输出和报告已保存；这是模型负面结果，不改题或重采样追求答对。
-首次可信评分控制器断网导致元数据DNS失败，保留记录；仅恢复可信控制器出网后复用同一预测评分，
-生成代码测试容器实际核验为断网、无挂载/设备、cap-drop ALL、NoNewPrivs及10GiB内存。
-第一题结果不再生成；其余两题与全项接入仍待完成，来源总勾保持未勾。
+原测试输出和报告已保存；这是模型负面结果，不改题或重采样追求答对。 首次可信评分控制器断网导致元数据DNS失败，保留记录；仅恢复可信控制器出网后复用同一预测评分，
+生成代码测试容器实际核验为断网、无挂载/设备、cap-drop ALL、NoNewPrivs及10GiB内存。 第一题结果不再生成；其余两题与全项接入仍待完成，来源总勾保持未勾。
 服务器原证据为`swesmith-agent-output-scoring-20261106-003/task0-native-result-public.json`。
 
 第二题现已完成原生终态与原评分：`submitted (exit_cost)`、76步轨迹，原补丁6666字符；
 官方报告`patch_exists=true`、`resolved=false`，0评分错误、0超时。
-原报告中F2P成功0/失败13、P2P成功0/失败660如实保留，不把模型补丁失败改成评分环境成功修复。
-该评分容器在实时检查前已经结束，保留部署保护逻辑和部署绑定；不冒称取得了该容器的实时隔离快照。
+原报告中F2P成功0/失败13、P2P成功0/失败660如实保留，不把模型补丁失败改成评分环境成功修复。 该评分容器在实时检查前已经结束，保留部署保护逻辑和部署绑定；不冒称取得了该容器的实时隔离快照。
 第二题原预测不再生成；服务器证据为同目录`task1-native-result-public.json`。
 
-当前研究消费者接通已重新核验：旧回执消费者摘要与当前研究工作区不同，未改写旧回执。
-在独立断网CPU容器安装当前公共源码构建的候选wheel，96份安装载荷与wheel逐字节一致；
+当前研究消费者接通已重新核验：旧回执消费者摘要与当前研究工作区不同，未改写旧回执。 在独立断网CPU容器安装当前公共源码构建的候选wheel，96份安装载荷与wheel逐字节一致；
 固定原三题经公共准备索引、公共读取器及当前未改研究consumer回查，原七字段、输入/参考分离和第三题空issue均一致，
 回查前后索引摘要不变。仅复制研究源码快照，不修改研究工作区、不启动特征/观测或模型。
 服务器证据为`swesmith-current-consumer-handoff-20261106-001/qualification-public.json`。
@@ -574,16 +555,13 @@ SWE-agent调用`RemoteDeployment.is_alive(timeout=10)`，已安装且当前PyPI�
 原生调用入口为`python scripts/run_swesmith_original_agent.py`。运行前依次准备：
 
 1. 核验固定原Parquet、原SWE-agent归档及原`swesmith_gen_gpt.yaml`；脚本会重新校验摘要。
-2. 用上述任务镜像为每个固定原ID建立独立SWE-ReX容器。容器只接入本任务内部网络，
-   不挂主机目录、NPU、Docker套接字或凭据，不发布公网端口；内存10GiB、pids512、
+1. 用上述任务镜像为每个固定原ID建立独立SWE-ReX容器。容器只接入本任务内部网络， 不挂主机目录、NPU、Docker套接字或凭据，不发布公网端口；内存10GiB、pids512、
    `--cap-drop ALL --security-opt no-new-privileges`。为每个容器生成不同的随机认证值，
    连接信息写入权限0600的私有JSON：原任务ID映射到`host`、`port`、`auth_token`、`timeout`。
-3. 可信调用器通过原`RemoteDeployment`直连这些私有地址；调用器不接收Docker套接字。
-   控制器日志可能包含远程认证值，标准输出和错误必须重定向到服务器私有文件，不上传CI工件。
-4. 启动独立文件队列的模型worker，转发到已有NPU模型服务。worker与调用器使用同一个空队列；
-   不使用历史失败队列、不丢弃原消息或工具定义。调用器使用上述Python3.11客户端镜像，
+1. 可信调用器通过原`RemoteDeployment`直连这些私有地址；调用器不接收Docker套接字。 控制器日志可能包含远程认证值，标准输出和错误必须重定向到服务器私有文件，不上传CI工件。
+1. 启动独立文件队列的模型worker，转发到已有NPU模型服务。worker与调用器使用同一个空队列； 不使用历史失败队列、不丢弃原消息或工具定义。调用器使用上述Python3.11客户端镜像，
    安装的是固定原SWE-agent源码及LiteLLM声明的MCP依赖。
-5. 在新私有输出目录运行下列入口；结束后将原生预测交给`run_swesmith_arm_evaluation.py`，
+1. 在新私有输出目录运行下列入口；结束后将原生预测交给`run_swesmith_arm_evaluation.py`，
    保留原轨迹、预测、原评分报告及部署差异，再核验公共读取与研究消费的原ID关系。
 
 ```bash
@@ -600,17 +578,13 @@ python scripts/run_swesmith_original_agent.py \
 ```
 
 模型registry使用`openai/Qwen/Qwen3.5-9B`键，输入/输出参考元数据为128000/16384。
-实际原客户端请求未传`max_tokens`，不能把这些元数据写成已强制执行的HTTP输出上限。
-三题228份原请求与转发请求逐字段相同，实际最大输入71839、最大输出553 token，均以工具调用结束；
-该观测范围内未触及参考值，不推断其他请求也会被这些元数据限长。
-原75次调用上限保持不变；本地端点外部API费用登记为0，不代表计算成本为0，
-也不与作者托管模型的2美元预算成绩直接比较。当前是本地模型的原生协议抽样验证，
-不是作者GPT-4o基线成绩复现。工具调用须由实际服务支持；仅`/health`或CLI帮助成功不足以确认。
+实际原客户端请求未传`max_tokens`，不能把这些元数据写成已强制执行的HTTP输出上限。 三题228份原请求与转发请求逐字段相同，实际最大输入71839、最大输出553
+token，均以工具调用结束； 该观测范围内未触及参考值，不推断其他请求也会被这些元数据限长。 原75次调用上限保持不变；本地端点外部API费用登记为0，不代表计算成本为0，
+也不与作者托管模型的2美元预算成绩直接比较。当前是本地模型的原生协议抽样验证， 不是作者GPT-4o基线成绩复现。工具调用须由实际服务支持；仅`/health`或CLI帮助成功不足以确认。
 
 逐题复用原生预测评分时，将原`.pred`文件逐字节复制为单条`.jsonl`，不修改其字段或null值；
 原框架最终`merge_predictions`也会生成汇总`preds.json`，其自行将null转为空字符串的行为属于作者原实现，
-不把两种文件形式说成逐字节相同。已评分题不因汇总文件出现而重复执行。
-可信评分客户端需要原源码依赖、Docker控制接口和获取公开仓库元数据的出网；
+不把两种文件形式说成逐字节相同。已评分题不因汇总文件出现而重复执行。 可信评分客户端需要原源码依赖、Docker控制接口和获取公开仓库元数据的出网；
 生成代码任务容器由评分入口强制断网，不挂控制器的Docker接口或主机目录。
 
 ```bash
@@ -624,8 +598,7 @@ python scripts/run_swesmith_arm_evaluation.py \
   --output /private/swesmith/new-task-score
 ```
 
-上述镜像ID是本次实际核验的本地ARM工件，不是可从公共注册表拉取的标签；
-在其他机器按配方重建并完成原测试/参考控制后，使用其实际镜像ID，不能跳过工件核验。
+上述镜像ID是本次实际核验的本地ARM工件，不是可从公共注册表拉取的标签； 在其他机器按配方重建并完成原测试/参考控制后，使用其实际镜像ID，不能跳过工件核验。
 
 原始任务获取与读取（仅准备，不运行Agent）：
 
@@ -655,8 +628,7 @@ for record in iter_workload("SWESMITH", data_root=Path("/external/swesmith/data"
 当前候选公共wheel及当前未改研究consumer三题回查通过，现存9B模型16份原工件只读校验通过。
 三题的负面质量结果、两次环境失败及一次评分网络失败均保留；不宣称高分、全仓库/语言执行、原amd64环境或GPT-4o论文基线复现。
 完成勾仅覆盖披露的ARM兼容Python/oauthlib原生协议；发布及新CI状态见既有草稿PR，不代表已合入main。
-完成后已停止本次三个任务容器和专用队列worker，并清理已验证原分片缓存及其硬链接；
-原生结果、评分、配置和获取身份均保留，活动共享模型未删除。新实验先按获取入口准备外部数据。
+完成后已停止本次三个任务容器和专用队列worker，并清理已验证原分片缓存及其硬链接； 原生结果、评分、配置和获取身份均保留，活动共享模型未删除。新实验先按获取入口准备外部数据。
 
 ## 完成口径：来源与原生协议分别记录
 
@@ -2313,7 +2285,7 @@ QReCC历史容量判断后来补正：数十TB是从网页重建的获取代价�
 | OPENMATH2                  | [x] 固定原始语料profile已交付               | 3个固定原分片全部1309949条字段/索引、9条原问题生成与保存核验、实际CI包及研究回读通过；其余29分片未验证，不宣称数学质量评测。                                                                                                                                                                                                                                                                                                                                                             |
 | OPENTHOUGHTS3              | [x] 原语料续写交付                          | 固定三分片30000行/索引保真，三域各3条NPU续写及保存审计、实际CI46载荷/18研究回读通过；九条均预算耗尽无最终答案，不作质量或全120万条执行结论。[回执](validation/openthoughts3-native-delivery-20261027.json)                                                                                                                                                                                                                                                                               |
 | OPENCODE                   | [x] 固定原始代码语料profile已交付           | 3个固定原分片全部300000条九字段/索引、9条原问题生成及保存核验、实际CI包57载荷和研究侧回读通过；未执行代码或评判正确率，其余47分片未验证。                                                                                                                                                                                                                                                                                                                                                |
-| SWESMITH | [x] 原生协议已交付 | 原固定三题NPU执行及原评分完成：0/3解决，错误0/超时0；当前候选wheel与当前研究端三题回查一致，原空issue保留。披露ARM兼容及实际预算边界。[回执](validation/swesmith-fixed3-native-20261106.json) |
+| SWESMITH                   | [x] 原生协议已交付                          | 原固定三题NPU执行及原评分完成：0/3解决，错误0/超时0；当前候选wheel与当前研究端三题回查一致，原空issue保留。披露ARM兼容及实际预算边界。[回执](validation/swesmith-fixed3-native-20261106.json)                                                                                                                                                                                                                                                                                            |
 | WORKARENA                  | [ ] 进行中                                  | 固定174份公开源码/静态运行资产准备与校验通过；原生实例访问、Agent、评分和研究交接待完成，不把oracle当验证                                                                                                                                                                                                                                                                                                                                                                                |
 | APPWORLD                   | [x] 固定原三题原生流程与消费交接完成        | 公共入口141步、官方评分三题各1/5且均失败；28缓存响应复用＋113新增HTTP200。14696原文件、实际CI71运行载荷及732原索引上三题公共/研究完整回读已核验。不代表全量、高分或性能；见[交付回执](validation/appworld-native-delivery-20261030.json)。                                                                                                                                                                                                                                               |
 | SCIENCEWORLD               | [x] 固定原生抽样交付完成                    | 原生9个episode/464次NPU调用及保存作者评分核验完成；7207原始记录全字段/索引、9实际CI研究回读、51安装载荷与CI闭环通过。入口支持全部30类及原生完整test。严格新环境文本重放差异保留，非确定性复现或质量/性能验收。[交付证据](validation/scienceworld-original-native-delivery-20261027.json)。                                                                                                                                                                                               |
@@ -3323,7 +3295,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [x]  | STRUCTEVAL           | structured-generation                                                                                                                                | 官方文件SHA已核验                                | 修正后组件回查50原题                       | Text→JSON原50条全部完成                                       | 官方语法/路径均分0.9616，3条未满分                            | [完整子集回执](validation/structeval-text-json-full-npu-20261022.json)，其他格式/转换未跑                                                                                                                                                                                           |
 | [ ]  | SWE_BENCH            | repository-agent-loop                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | SWE_VERIFIED         | repository-agent-loop                                                                                                                                | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 原生任务未跑                                                  | 未评分                                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，非任务执行；原生环境/全量/最终交接未完                                                                                                                                                                                    |
-| [x] | SWESMITH | repository-agent-loop | 11份原始任务分片已取得 | 全59,136条读取通过，原七字段保留 | 固定原三题原生执行及预测完成 | 官方未解决3/3，错误0/超时0 | [交付证据](validation/swesmith-fixed3-native-20261106.json)；当前双端三题接通，原ARM兼容及非全量范围保留 |
+| [x]  | SWESMITH             | repository-agent-loop                                                                                                                                | 11份原始任务分片已取得                           | 全59,136条读取通过，原七字段保留           | 固定原三题原生执行及预测完成                                  | 官方未解决3/3，错误0/超时0                                    | [交付证据](validation/swesmith-fixed3-native-20261106.json)；当前双端三题接通，原ARM兼容及非全量范围保留                                                                                                                                                                            |
 | [x]  | TAUBENCH             | policy-constrained-service                                                                                                                           | 官方归档SHA已核验                                | 原生任务引用同三条                         | telecom_full 3/3正常结束                                      | 官方环境reward 1、1、0                                        | [完整引用交接回执](validation/tau2-reference-handoff-npu-20261022.json)，其他domain/全量未跑                                                                                                                                                                                        |
 | [ ]  | TOOLACE              | structured-generation<br>tool-call-generation                                                                                                        | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 不适用：历史对话/元数据                                       | 不适用：无原生任务评分                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，非任务执行；原生环境/全量/最终交接未完                                                                                                                                                                                    |
 | [ ]  | TOOLBENCH            | application-api-workflow                                                                                                                             | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
@@ -3496,13 +3468,20 @@ profile保留；因此是替代模型的接入验证，不是GPT-4质量复现�
 
 - [ ] MLAgentBench IMDb：ARM64 Python 3.12 客户端已验证可导入 DistilBERT 分类器及
   Trainer；[依赖清单](../../configs/workload-native/mlagentbench-imdb-npu-client-supplements.txt)只补客户端。执行须使用可访问指定
-  NPU 的专用隔离容器，并保留原执行入口的隔离检查；不要把依赖导入或容器标志当成隔离证明。2026-11-05在现主机的已有Ascend镜像中完成独立Docker软件预检：断网、只读根、非root、cap-drop ALL、NoNewPrivs=1，未挂设备或Docker套接字；只读挂载驱动后DistilBERT与Trainer导入成功。镜像缺datasets、accelerate、dacite，依赖层和隔离NPU训练尚待完成；[实际预检记录](validation/mlagentbench-imdb-host-isolation-preflight-20261105.json)保留首次缺驱动失败，不计来源交付。待完成原 IMDb 训练、完整测试集 `submission.csv`
-  和原版评分；已审计的另外两题不重跑。
+  NPU
+  的专用隔离容器，并保留原执行入口的隔离检查；不要把依赖导入或容器标志当成隔离证明。2026-11-05在现主机的已有Ascend镜像中完成独立Docker软件预检：断网、只读根、非root、cap-drop
+  ALL、NoNewPrivs=1，未挂设备或Docker套接字；只读挂载驱动后DistilBERT与Trainer导入成功。镜像缺datasets、accelerate、dacite，依赖层和隔离NPU训练尚待完成；[实际预检记录](validation/mlagentbench-imdb-host-isolation-preflight-20261105.json)保留首次缺驱动失败，不计来源交付。待完成原
+  IMDb 训练、完整测试集 `submission.csv` 和原版评分；已审计的另外两题不重跑。
 
-  同日复用既有只读依赖目录，在独立断网、无设备、cap-drop ALL及NoNewPrivs容器中成功导入datasets 5.1.0、accelerate 1.15.0、DistilBERT和Trainer，0依赖下载；原目录权限为仅所有者可读，因此此导入探测使用容器root，不作为生成代码隔离执行或NPU训练合格证据。后续`pip check`实际失败：依赖层的NumPy 2.2.6与triton-ascend要求1.26.4冲突，hub 1.33.0需要更高click；基础镜像也有既存依赖冲突。不能将导入成功写成环境整体合格。下一步建立最小任务环境，不全局升级共享镜像；Agent的dacite整合仍待完成。
-  后续最小路径探测退出0：基础镜像site-packages优先，仅补挂兼容PyArrow 21.0.0、datasets 4.0.0及dacite 1.9.2，最后补入现有accelerate 1.15.0等缺失包；实际NumPy保持1.26.4、Hub保持1.19.0。原先PyArrow26/NumPy1.26和datasets5.1/Hub1.19两次导入失败均保留。新组合仅证明上述库及Trainer、DistilBERT可联合导入，未证明可分发环境、完整依赖闭包、原Agent或NPU训练合格，不替换历史依赖锁。
+  同日复用既有只读依赖目录，在独立断网、无设备、cap-drop ALL及NoNewPrivs容器中成功导入datasets 5.1.0、accelerate
+  1.15.0、DistilBERT和Trainer，0依赖下载；原目录权限为仅所有者可读，因此此导入探测使用容器root，不作为生成代码隔离执行或NPU训练合格证据。后续`pip check`实际失败：依赖层的NumPy
+  2.2.6与triton-ascend要求1.26.4冲突，hub
+  1.33.0需要更高click；基础镜像也有既存依赖冲突。不能将导入成功写成环境整体合格。下一步建立最小任务环境，不全局升级共享镜像；Agent的dacite整合仍待完成。
+  后续最小路径探测退出0：基础镜像site-packages优先，仅补挂兼容PyArrow 21.0.0、datasets 4.0.0及dacite 1.9.2，最后补入现有accelerate
+  1.15.0等缺失包；实际NumPy保持1.26.4、Hub保持1.19.0。原先PyArrow26/NumPy1.26和datasets5.1/Hub1.19两次导入失败均保留。新组合仅证明上述库及Trainer、DistilBERT可联合导入，未证明可分发环境、完整依赖闭包、原Agent或NPU训练合格，不替换历史依赖锁。
   现执行主机已重新取得固定原作者归档（1878397字节），按既有清单核验138个文件的大小和SHA-256后仅提取清单文件；版本仍为`5d71205cc20a8e95d43aa7cb7120e89ca3323e31`。原ResearchAgent导入尝试未收到容器输出，执行主机SSH随即关闭；状态未知，恢复时先查Docker实际状态，不直接重复启动。共享存储主机仍可确认归档存在。上述均不是IMDb原生执行结果。
-  SSH恢复后已确认无遗留IMDb探测容器。原`MLAgentBench.agents.agent_research`在断网、无设备隔离容器中导入退出0：首次缺原cl100k_base缓存而失败，后从原地址取得文件并核验SHA-256 `223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7`，只读补挂缓存后通过。原源码未改；可选外部提供商及API-key文件缺失警告保留，未提供外部凭据，0模型调用、0Agent动作，不代表原Agent执行或本地模型绑定已通过。
+  SSH恢复后已确认无遗留IMDb探测容器。原`MLAgentBench.agents.agent_research`在断网、无设备隔离容器中导入退出0：首次缺原cl100k_base缓存而失败，后从原地址取得文件并核验SHA-256
+  `223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7`，只读补挂缓存后通过。原源码未改；可选外部提供商及API-key文件缺失警告保留，未提供外部凭据，0模型调用、0Agent动作，不代表原Agent执行或本地模型绑定已通过。
   同一最小环境的原短名读取也已实测：断网容器中原`load_dataset("imdb")`返回train=25000、test=25000；只读挂载既有原Parquet，临时缓存随容器销毁，未请求模型或训练。该新环境读取结果不重复计入已完成数据集。
   已部署当前已提交公共脚本与配置，并用`prepare_mlagentbench_local_agent.py --action prepare`对138份原文件生成、核验披露的本地接口适配；仅原LLM接口和runner的可选导入两处变化，任务与提示未改。独立断网、无设备容器中`import MLAgentBench.runner`退出0；AutoGPT可选依赖警告保留，未选择该Agent。该检查仍为0模型调用、0Agent动作，不等于原题完成。
   公共组合检查入口已在服务器同一隔离容器实跑退出0：
@@ -3517,19 +3496,16 @@ profile保留；因此是替代模型的接入验证，不是GPT-4质量复现�
   该命令在容器`/tmp`工作目录运行：`/opt/author`是上述prepare产生的已核验适配树，
   `/opt/tiktoken-cache`为已核验原缓存，`/tmp/imdb`为原Parquet目录；三者只读。
   `/opt/compat`只补挂PyArrow21、datasets4和dacite包目录，`/opt/overlay`补既有accelerate等包，
-  脚本将两者追加到基础site-packages之后，不覆盖基础NumPy与Hub。
-  仓库脚本和configs也须一并只读挂载，以核验原文件及适配内容。
+  脚本将两者追加到基础site-packages之后，不覆盖基础NumPy与Hub。 仓库脚本和configs也须一并只读挂载，以核验原文件及适配内容。
   已验证Docker条件为`--network none --read-only --cap-drop ALL --security-opt no-new-privileges`、
   内存3GiB、pids128、`/tmp`可写tmpfs128MiB、驱动只读且不挂NPU设备。
-  原runner导入、源码核验及两个25000条划分读取均通过；原可选AutoGPT依赖和无设备警告保留。
-  这不是生成代码执行容器或NPU训练配方，下一步仍须核验设备授权和原任务流程。
+  原runner导入、源码核验及两个25000条划分读取均通过；原可选AutoGPT依赖和无设备警告保留。 这不是生成代码执行容器或NPU训练配方，下一步仍须核验设备授权和原任务流程。
 
   原Agent启动的Python子进程还需继承同一依赖路径。在专用容器设置
   `PYTHONPATH=/opt/tooling/configs/workload-native/mlagentbench-imdb-bootstrap`、
   `MLAGENTBENCH_COMPATIBILITY_DIR=/opt/compat`及`MLAGENTBENCH_SUPPLEMENTAL_DIR=/opt/overlay`；
   任务自有只读`sitecustomize.py`只追加缺失包路径，基础包仍优先，不改原任务代码。
-  已在服务器断网、无设备容器实测父进程启动新Python，子进程导入NumPy1.26.4及datasets4.0.0退出0。
-  该项只核验子进程环境继承，原Agent动作、训练和评分仍待执行。
+  已在服务器断网、无设备容器实测父进程启动新Python，子进程导入NumPy1.26.4及datasets4.0.0退出0。 该项只核验子进程环境继承，原Agent动作、训练和评分仍待执行。
   在原训练与评分命令各自的工作目录，将已核验的原始 Parquet 分片目录只读挂载为 `./imdb`，并设置
   `HF_HUB_OFFLINE=1`、`HF_DATASETS_OFFLINE=1`。原脚本无需改动：`load_dataset("imdb")` 会读取本地目录。服务器已逐行比对训练集和测试集各
   25,000 条，顺序、文本、标签均与发布方分片一致。权重目录另行只读挂载，训练输出写入独立目录。
