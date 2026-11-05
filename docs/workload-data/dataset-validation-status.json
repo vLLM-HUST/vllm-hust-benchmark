@@ -22,10 +22,10 @@
     "scope": "Original saved model command reused after both NPUs were observed without running processes. Health and bounded generation now pass; historical result environment equivalence and benchmark execution are not implied."
   },
   "checked_receipt_reference_audit": {
-    "checked_sources": 102,
-    "public_sources": 94,
+    "checked_sources": 103,
+    "public_sources": 95,
     "enterprise_private_sources": 8,
-    "distinct_tracked_receipt_paths": 94,
+    "distinct_tracked_receipt_paths": 95,
     "scope": "Each checked source references an existing Git-tracked receipt; JSON receipts parse. Shared receipts are counted once. This is a reference integrity check, not a new execution, score, or independent requalification of each receipt."
   },
   "replacement_candidate_audits": {
@@ -212,9 +212,10 @@
           "model_calls": 0,
           "scope": "Intentional synthetic miss under a Python socket audit hook; not an isolated production listener or an original task result."
         },
-        "preserves": "Tool retrieval and multi-step interaction with the author's cached or simulated API backend.",
-        "not_preserved": "Live third-party API behavior; a cache miss cannot be counted as a completed tool call.",
-        "accepted_replacement": false
+        "preserves": "Original task and advertised tool selection, multi-step calls/observations, Finish termination and separate author FAC scoring with cached/simulated API backend.",
+        "not_preserved": "Live third-party API behavior and the original ToolLLaMA/retriever path. Cache misses require the verified official simulator, never fabricated observations.",
+        "accepted_replacement": true,
+        "acceptance_basis": "User-authorized same-workload public replacement; explicitly delivered as StableToolBench, not original live ToolBench. Fixed3 native execution/FAC and all163 pinned provider/research reads verified."
       },
       "publisher": "https://github.com/THUNLP-MT/StableToolBench",
       "release_metadata_checked": "2026-11-04",
@@ -304,7 +305,7 @@
           "scores": [0, 1, 1],
           "unmodified_fac_source": true,
           "research_consumer_verified": true,
-          "source_checkbox_eligible": false
+          "source_checkbox_eligible": true
         },
         "official_judge_model_acquisition": {
           "server_stage": "fac-official-model-a9jinq7y",
@@ -4754,11 +4755,15 @@
       },
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/stabletoolbench-fixed3-native-20261105.json",
+      "delivered_source_id": "STABLETOOLBENCH",
+      "delivered_protocol": "Explicit same-workload replacement: official StableToolBench G1 CoT@1 with author cached/simulated APIs and original FAC; fixed3 native tasks and all163 provider/research rows verified.",
+      "replacement_basis": "User authorizes same-workload public alternatives when the original environment cannot be qualified. ToolBench author links StableToolBench. Preserves original multi-step tool selection, tool observations and Finish/scoring loop; does not preserve live external API behavior.",
+      "unfinished_modes": "Original ToolBench online RapidAPI backend, ToolLLaMA/retriever and original full release remain unqualified. Other StableToolBench groups and full163 Agent runs are not claimed. Research deployment dependency lock must explicitly adopt the accepted provider wheel.",
       "original_source_preparation": {
         "repository": "OpenBMB/ToolBench",
         "revision": "d56fdd89faf8c91fa135090b212bb9057ee5cfc2", "identity_note": "pragma: allowlist secret - public original author revision",
@@ -4802,7 +4807,7 @@
         "author_github_releases_observed": 0,
         "boundary": "No evidence of archive availability or permanent removal from this probe. No transformed training dataset or example files substituted."
       },
-      "blocker": "Pinned original author software acquired and public verify CLI passed; no imports or task execution. On2026-11-03 bounded checks,the README Drive folder and direct file returned404;Tsinghua returned200 but body says Link does not exist. Raw archive acquisition is blocked on an available verified original release or byte-verifiable preserved original copy,not solved by third-party processed SFT data. Full original workflow,matching NPU model/retriever and ToolEval remain pending. Mainline requires ToolBench backend key or own RapidAPI setup;neither qualified here. No fabricated responses or silent StableToolBench simulation substitution."
+      "blocker": null
     },
     "AGENTBENCH": {
       "scope": "public",
