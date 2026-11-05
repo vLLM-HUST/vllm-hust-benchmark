@@ -170,7 +170,25 @@
     "driver_or_platform_policy_changed": false,
     "generated_scientific_code_run_on_unqualified_npu_executor": false,
     "new_original_native_task_completions": 0,
-    "separate_scientific_client": "mlagentbench-scientific-npu-client-20261106-002: a clean task-only Python3.12 venv image was built with declared scientific package versions and reused immutable vendor Torch/NPU binaries. Its pip check excludes inherited CANN PYTHONPATH metadata; actual scientific imports/forward/backward and native execution still need qualification. Initial direct base-image package closure failure retained; no running serving interpreter changed."
+    "separate_scientific_client": "mlagentbench-scientific-npu-client-20261106-002: clean task-only Python3.12 venv built with declared scientific package versions and reused immutable vendor Torch/NPU binaries. Task-venv pip check, original Agent import/source verification, all100000 original dataset rows/class labels and two-review CPU classifier forward/backward now pass. Initial base closure and missing-driver-library import failures retained. No serving interpreter changed; a qualified NPU executor and full original native workflow remain missing.",
+    "separate_client_software_control": {
+      "stage_relative_receipt": "software-control002/software-control-public.json",
+      "container_exit_code": 0,
+      "python": "3.12.13",
+      "torch": "2.10.0+cpu",
+      "torch_npu_distribution": "2.10.0",
+      "transformers": "4.52.4",
+      "datasets": "4.0.0",
+      "original_source_files_verified": 138,
+      "all100000_original_rows_equal": true,
+      "two_original_reviews_cpu_forward_and_backward_passed": true,
+      "optimizer_steps": 0,
+      "agent_or_native_task_executed": false,
+      "npu_devices_exposed": false,
+      "npu_training_qualified": false,
+      "warnings_retained": "Original invalid-escape SyntaxWarnings/optional AutoGPT notice and CANN no-device/log-level warnings; successful CPU controls do not turn them into device qualification.",
+      "source_checkbox_eligible": false
+    }
   },
   "performance_or_quality_success_claim": false,
   "raw_data_models_predictions_or_generated_programs_publicly_vendored": false
