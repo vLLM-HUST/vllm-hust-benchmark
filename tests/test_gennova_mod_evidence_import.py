@@ -29,7 +29,11 @@ def test_manifest_inventory_and_boundaries():
     )
     assert manifest["scope"]["is_official_leaderboard_submission"] is False
     assert manifest["scope"]["contains_new_measurements"] is False
-    assert manifest["scope"]["website_publication_enabled"] is False
+    assert manifest["scope"]["website_publication_enabled"] is True
+    assert (
+        manifest["scope"]["website_publication_path"]
+        == "website-publication/data/mod-test-evidence.json"
+    )
 
     stats = {
         Path(item["snapshot_path"]).name: item["statistics"]

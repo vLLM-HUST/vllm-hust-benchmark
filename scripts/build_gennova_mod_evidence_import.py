@@ -134,7 +134,8 @@ def build_manifest():
             "is_official_leaderboard_submission": False,
             "contains_new_measurements": False,
             "raw_result_files_duplicated": False,
-            "website_publication_enabled": False,
+            "website_publication_enabled": True,
+            "website_publication_path": "website-publication/data/mod-test-evidence.json",
             "exclusions": [
                 "raw result payloads and large logs",
                 "private endpoints, credentials, host addresses and temporary paths",
