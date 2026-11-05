@@ -46,12 +46,16 @@ MOD；具体边界以记录内的 `boundary`、`qualification`、`quality_scope`
 ## 范围与排除项
 
 本次是已有证据的发现性归档，没有运行新实验，也没有把记录晋升为正式榜单提交。源仓库仍是原始运行文件的 权威位置；本目录没有复制大体量日志和全部 raw
-payload，也排除了协调文档中的私有端点、主机地址、临时路径、 凭据和无法由文件证据支持的会话结论。本归档不进入 `website-publication/`，因此不会让 GenNova 或这些
-MOD 重新出现在 vLLM-HUST 网站插件页。
+payload，也排除了协调文档中的私有端点、主机地址、临时路径、 凭据和无法由文件证据支持的会话结论。
+
+网站发布链现在从这些固定 snapshot 生成
+[`website-publication/data/mod-test-evidence.json`](../../website-publication/data/mod-test-evidence.json)，
+用于单独的“MOD 测试证据报告”页面。它发布的是单项、组合和负结果摘要，不把 GenNova 当作 vLLM-HUST MOD， 也不改变插件目录中的项目归属、正式榜单准入或结果边界。
 
 生成物可复核：
 
 ```bash
 python scripts/build_gennova_mod_evidence_import.py --check
+python scripts/build_gennova_mod_website_publication.py --check
 (cd reports/gennova-mod-evidence-20261105 && sha256sum -c SHA256SUMS)
 ```

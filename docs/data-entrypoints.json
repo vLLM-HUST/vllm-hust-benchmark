@@ -148,6 +148,7 @@
     "website-publication/data/mmlu-pro-20261012/report.json": "7b0a955d6554b891685bdfb332fa72ca05564a4acf35e47ba3732a29682aff54",
     "website-publication/data/mmlu-pro-20261012/runtime.json": "21f361a4b395522e77c1650619bd3d2f401c5f598c6dab34e2c57fa478f6b453",
     "website-publication/data/mod-taxonomy.json": "d05d4343bbfa285a4f11b9571f427c8f5d87e29ba23c26ffb85519b9dceeac7f",
+    "website-publication/data/mod-test-evidence.json": "f3b731bf266031e8abb210568920c46b516d5b4f0308d56404889ac692e9ba6a",
     "website-publication/data/news.json": "a3f6d7879ef9ed47aadeb94bf511f043965333013031643ec5c08a6c9a3b0e2a",
     "website-publication/data/official_targets.json": "1d39426ef451fe2e9dacb3468bc6ddc088aeb5698d387d3e35c22cd8365168bd",
     "website-publication/data/official_targets.sha256": "8a79fe0d854af570ffcef27693898fc124981ae09cc07de685752654abb2c211",
@@ -167,6 +168,7 @@
     "website-publication/data/schemas/issues_v1.schema.json": "d14376ae63a693d6c589ab1f410b92f2a1fc0548009b53e3c6bba6b1159f16d9",
     "website-publication/data/schemas/leaderboard_v1.schema.json": "d86d02c3d74f1f214d3e331699c1e1fd7a9d50df0ee801e5a261d9da1706273b",
     "website-publication/data/schemas/mod_taxonomy_v2.schema.json": "ee6f4386524fedb96875a8b7c0d60e42d859a6a18b20bf97385f88e6172de517",
+    "website-publication/data/schemas/mod_test_evidence_v1.schema.json": "7aa8805f773a1e6157091da89fc425a47da4389d307573427f7cbcde6d056453",
     "website-publication/data/schemas/official_target_registry_v1.schema.json": "f107f9cd1f136757be280a3ee5b7e2028f86acf1acbcb7988a23509d8417d658",
     "website-publication/data/schemas/plugin_workload_navigation_v1.schema.json": "890ffe5d444f46a7aee8e3891204a4abfc7ac3827204a30407e04167a72c3351",
     "website-publication/data/schemas/plugin_workshop_metadata_v1.schema.json": "3cff1a787c8079cc9c80415cff40d1b33769e0e2f37b7b8397d319f5c1d0c284",
@@ -1407,6 +1409,15 @@
       "snapshot_publication_status": "changed-since-snapshot"
     },
     {
+      "website_path": "data/mod-test-evidence.json",
+      "benchmark_path": "website-publication/data/mod-test-evidence.json",
+      "storage_paths": [
+        "website-publication/data/mod-test-evidence.json"
+      ],
+      "sha256": "f3b731bf266031e8abb210568920c46b516d5b4f0308d56404889ac692e9ba6a",
+      "snapshot_publication_status": "not-in-snapshot"
+    },
+    {
       "website_path": "data/news.json",
       "benchmark_path": "website-publication/data/news.json",
       "storage_paths": [
@@ -1576,6 +1587,15 @@
       ],
       "sha256": "ee6f4386524fedb96875a8b7c0d60e42d859a6a18b20bf97385f88e6172de517",
       "snapshot_publication_status": "same-bytes"
+    },
+    {
+      "website_path": "data/schemas/mod_test_evidence_v1.schema.json",
+      "benchmark_path": "website-publication/data/schemas/mod_test_evidence_v1.schema.json",
+      "storage_paths": [
+        "website-publication/data/schemas/mod_test_evidence_v1.schema.json"
+      ],
+      "sha256": "7aa8805f773a1e6157091da89fc425a47da4389d307573427f7cbcde6d056453",
+      "snapshot_publication_status": "not-in-snapshot"
     },
     {
       "website_path": "data/schemas/official_target_registry_v1.schema.json",
@@ -6902,6 +6922,13 @@
       "resolution": "literal-external-link-not-fetched"
     },
     {
+      "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/d04a5ccbbc1b1f3d2b25e363b289b2f3d13a99a4/reports/gennova-mod-evidence-20261105",
+      "consumers": [
+        "website-publication/data/mod-test-evidence.json"
+      ],
+      "resolution": "literal-external-link-not-fetched"
+    },
+    {
       "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/d2fee2579f34723c3e0bac40a744a9dcc5caceb5/reports/deepseek-v4-flash-910c-20261014",
       "consumers": [
         "website-publication/data/leaderboard_910c_native_evidence.json",
@@ -8667,6 +8694,14 @@
         "website-publication/data/schemas/mod_taxonomy_v2.schema.json"
       ],
       "benchmark_path": "website-publication/data/schemas/mod_taxonomy_v2.schema.json",
+      "resolution": "mapped"
+    },
+    {
+      "target": "https://vllm-hust.sage.org.ai/data/schemas/mod_test_evidence_v1.schema.json",
+      "consumers": [
+        "website-publication/data/schemas/mod_test_evidence_v1.schema.json"
+      ],
+      "benchmark_path": "website-publication/data/schemas/mod_test_evidence_v1.schema.json",
       "resolution": "mapped"
     },
     {
@@ -18976,8 +19011,8 @@
     }
   ],
   "counts": {
-    "publication_bindings": 164,
-    "references": 1230,
+    "publication_bindings": 166,
+    "references": 1232,
     "releases": 33,
     "assets": 478
   }
