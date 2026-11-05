@@ -795,14 +795,18 @@ python scripts/run_stabletoolbench_local_server.py --author-server <固定原版
 ```
 
 默认只核验作者文件并生成计划；加 `--execute` 才启动服务。该入口只监听回环地址，阻断外连，不改写缓存；真实 API 层明确返回本地 HTTP
-503，再由作者原代码进入官方模拟器，不代表验证真实 API。缓存命中的实际 HTTP 控制已通过；模拟器权重、NPU 推理和三题任务仍需单独验证。调用 Agent 时设置
+503，再由作者原代码进入官方模拟器，不代表验证真实 API。官方模拟器权重已核验并在 NPU 上运行，固定三题已完成原生 Agent 流程；官方评分及研究侧接入仍须分别核验，尚不计入交付勾选。调用
+Agent 时设置
 `SERVICE_URL=http://127.0.0.1:19468/virtual`，同时使用原始模型名及[本地模型名兼容补丁](configs/workload-native/stabletoolbench-local-model-name.patch)，不使用
 GPT 别名。
 
 如需准备 FAC 评分，准备命令同时传入 `--official-ids <test_query_ids/G1_instruction.json>`。保留三题原始 Agent 输出，用作者的
-`convert_to_answer_format.py --method CoT@1` 转换后，先运行
+`convert_to_answer_format.py --method CoT@1` 转换。新版 OpenAI 消息可能包含 `function_call: null`；须在派生源码目录应用
+[空函数调用兼容补丁](configs/workload-native/stabletoolbench-null-function-call.patch)，让原有 `tool_calls`
+或普通文本分支处理消息。补丁不改题目、调用、答案或计分，原源码与失败转换记录保留。转换后先运行
 `python scripts/check_stabletoolbench_fac_inputs.py --instructions <fixed-g1.json> --ids <fixed-g1-fac-ids.json> --answers <转换后的答案.json>`。检查通过后才把相同的答案文件和题号表交给作者
-`fac_eval.py`；缺题应排查原运行，空答案则保留并按作者规则评分。
+`fac_eval.py`；缺题应排查原运行，空答案则保留并按作者规则评分。评分器导入依赖包括作者要求的 `accelerate==0.20.3`；在 Ascend
+环境中应先加载工具链，再设置本任务独立依赖目录的 `PYTHONPATH`，避免工具链脚本覆盖该路径。
 
 [WebShop 发布方源码](https://github.com/princeton-nlp/WebShop) ·
 [原生运行与保存结果复核入口](scripts/run_webshop_original.py)。固定三个文本购物会话在 ARM64 环境和 NPU 模型上各执行 100 步，均未完成购买，到期分均为

@@ -130,3 +130,23 @@ def test_fac_map_keeps_fixed_order_and_original_values(tmp_path, monkeypatch):
         ("608", 2),
         ("1073", 3),
     ]
+
+
+def test_converter_null_function_call_patch_preserves_real_calls():
+    patch = (
+        Path(__file__).resolve().parents[1]
+        / "configs/workload-native/stabletoolbench-null-function-call.patch"
+    ).read_text()
+    additions = [
+        line[1:].strip()
+        for line in patch.splitlines()
+        if line.startswith("+") and not line.startswith("+++")
+    ]
+    assert additions == ["if message.get('function_call') is not None:"]
+    predicate = additions[0][3:-1]
+    for message, expected in [
+        ({"role": "assistant", "content": "text"}, False),
+        ({"function_call": None, "tool_calls": [{"id": "native-tool"}]}, False),
+        ({"function_call": {"name": "Finish", "arguments": "{}"}}, True),
+    ]:
+        assert eval(predicate, {"__builtins__": {}}, {"message": message}) is expected

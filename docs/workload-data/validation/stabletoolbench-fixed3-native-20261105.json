@@ -1,0 +1,72 @@
+{
+  "schema_version": "native-candidate-receipt/v1",
+  "source_id": "STABLETOOLBENCH",
+  "reviewed_against": "TOOLBENCH",
+  "source_checkbox_eligible": false,
+  "status": "NATIVE_FIXED_SAMPLE_AND_OFFICIAL_FAC_COMPLETED_CONSUMER_PENDING",
+  "publisher": "https://github.com/THUNLP-MT/StableToolBench",
+  "source_revision": "aa4ed9f4737ad98bd706663f01d63623c3427812",
+  "date": "2026-11-05",
+  "environment": {
+    "architecture": "aarch64",
+    "accelerators": "2 x Ascend 910B2",
+    "vllm": "0.23.0+empty",
+    "vllm_ascend": "0.23.0",
+    "torch": "2.10.0+cpu",
+    "torch_npu": "2.10.0.post4",
+    "client_overlay": ["termcolor==2.4.0", "tenacity==8.5.0"],
+    "scorer_overlay": ["accelerate==0.20.3"],
+    "dependency_path": "Prepend isolated PYTHONPATH after loading the Ascend set_env.sh script."
+  },
+  "protocol": {
+    "selection": "First three positions of the pinned original G1 instruction file, fixed before cache inspection.",
+    "ids": [588, 608, 1073],
+    "method": "CoT@1",
+    "agent_model": "Qwen/Qwen3.5-9B",
+    "max_tokens_per_generation": 1024,
+    "single_chain_max_step": 50,
+    "max_query_count": 200,
+    "max_observation_length": 1024,
+    "num_thread": 1,
+    "backend": "Original author cached responses or official MirrorAPI-Cache simulation. Live API tier deliberately unavailable via local HTTP503; original code then uses simulator.",
+    "simulator_revision": "df8f586d0f8d17bcbbaee11f1e8f9dd178a28c68",
+    "evaluator": "stabletoolbench/Evaluator",
+    "evaluator_revision": "228c3bf20640ce6712c978bd9e574ae183fedef7",
+    "evaluator_weights": "All 10 selected files size-checked; all four weight shards match fixed-revision LFS SHA256 obtained through hf-mirror.com.",
+    "fac_source_sha256": "f9fbb0ef486a1459696aa900bbafe48c8daed762c566cfc74bcb1ffee5e6d6d9",
+    "fac_source_unmodified": true,
+    "judge_temperature": 0,
+    "judge_max_tokens": 512
+  },
+  "compatibility_patches": [
+    "configs/workload-native/stabletoolbench-lazy-backend-imports.patch",
+    "configs/workload-native/stabletoolbench-local-model-name.patch",
+    "configs/workload-native/stabletoolbench-null-function-call.patch"
+  ],
+  "checks": {
+    "agent_exit_code": 0,
+    "all_original_rows_unchanged": true,
+    "all_three_native_finish_calls": true,
+    "converted_queries_and_final_answers_match_original_outputs": true,
+    "all_three_official_fac_rows_match_original_queries_in_fixed_order": true,
+    "research_consumer_verified": false
+  },
+  "results": [
+    {"id": 588, "agent_queries": 9, "agent_total_tokens": 35391, "official_fac_score": 0},
+    {"id": 608, "agent_queries": 3, "agent_total_tokens": 9234, "official_fac_score": 1},
+    {"id": 1073, "agent_queries": 3, "agent_total_tokens": 6088, "official_fac_score": 1}
+  ],
+  "artifacts_relative_to_private_server_task_root": {
+    "stabletoolbench-native-fixed3-32080-k3rdjlaz/answers/1073_CoT@1.json": "685fdfbc4490dd46aee2e3ca1e0c68624beb665841cffe4eeaa2bfdc2e679d43",
+    "stabletoolbench-native-fixed3-32080-k3rdjlaz/answers/588_CoT@1.json": "6e8a636457ea46c4cca2355fcf69ef31ea154b315718810fda584e71071bd975",
+    "stabletoolbench-native-fixed3-32080-k3rdjlaz/answers/608_CoT@1.json": "8e0bd528562acfa782f605c5ca3559b7ffb9dd4e3ae659b0c3106474e907e388",
+    "stabletoolbench-native-fixed3-32080-k3rdjlaz/converted.json": "a98cd0fc5dda163017480d8b84a784bb94829f3dad79ab613ff3f448fb2778e4",
+    "stabletoolbench-fac-native-0bdaz3is/fac.csv": "b7b1a68c16e33ed4837e2d3f98a891a9caf51faa382e8b2320aee1169584043e"
+  },
+  "limitations": [
+    "Three fixed tasks are a usability sample, not the complete benchmark or a model quality estimate.",
+    "Simulated external APIs are not live third-party API execution and do not establish original ToolBench delivery.",
+    "Research-side consumer and a final accepted workload replacement remain pending; no additional inventory checkbox is claimed.",
+    "Scorer startup failures and original converter null-function-call failure retained separately; no Agent rerun or task substitution."
+  ]
+}
