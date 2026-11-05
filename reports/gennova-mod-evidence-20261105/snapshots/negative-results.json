@@ -1,0 +1,1671 @@
+{
+  "current_steady_state_reassessment": "coordination/observations/steady-state-reassessment-20261019-v1.json",
+  "schema": "scoped-negative-results-v1",
+  "scope": "索引，不替代原始证据；负结果仅适用于记录的实现/组合/负载/观测/计费条件。",
+  "reopen_contract": [
+    "复用原证据，明确原假设与新假设",
+    "列出实现/组合或公共条件的实质变化，不能仅换标签",
+    "说明为何有望改变结果，给出组件或机制证据",
+    "登记最小新预算、前序负结果ID及新版本，不覆盖旧结果",
+    "质量未知不写成质量失败；未准入/基础设施失败不写成算法负收益"
+  ],
+  "entries": [
+    {
+      "id": "vspec-mtp-local-argmax-three-pairs",
+      "name": "vSpec MTP local argmax增量",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "docs/operations/handoffs/betterscale-author-20261020/vspec-local-argmax.json",
+      "scope": "Qwen3.5-35B-A3B BF16 TP2 EP-off E24/R36 ctx64k APC MTP2 FULL async, 20GiB state and 8GiB host per rank；B＋固定KV recompute＋FA Microflow；MMLU-Pro200/out256，3独立配对",
+      "result": "1200请求，三对吞吐几何平均−0.009906%，两负一正，未证实稳定边际降本；不是整个vSpec无效。",
+      "do_not_repeat": "同源码d8cbfb50、同完整组合和同负载再次筛选；重复三对已完成队列。",
+      "reopen_requires": "登记prior_negative_result、实质实现/组合/负载变化、新机制假设、有限预算和停止条件；动态gamma等不同功能单独登记，不混用本结论。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "out256性能筛选，完整任务质量未评分，不是质量失败。",
+      "search_terms": [
+        "vspec",
+        "local argmax",
+        "MTP argmax"
+      ]
+    },
+    {
+      "id": "kvcompress-long-hle",
+      "name": "KVCompress长输入",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/gennova-2-32068-20261019/runs/kvcompress-long-hle-r1/assessment.json",
+      "evidence_git_blob": "93dece9373530504782b9f9db1f32d96b7acb641",
+      "scope": "两道原始HLE长输入；同公共图配置、16GiB/rank固定池；每臂一次启动",
+      "result": "候选慢4.294%，无HBM收益；输出不同且截断，未进行语义质量验收",
+      "do_not_repeat": "同版本同池同两题重复筛查；把逻辑压缩当显存或费用收益",
+      "reopen_requires": "明确修复压缩开销，或另版冻结且有真实容量瓶颈证据的负载；不能仅换题碰运气",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "输出不同且截断，语义质量未知，不是已确认质量失败",
+      "search_terms": [
+        "kvcompress",
+        "KV压缩"
+      ]
+    },
+    {
+      "id": "output-gate-r3",
+      "name": "输出门融合当前实现",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-9-alternating/runs/output-gate-r3/assessment.json",
+      "evidence_git_blob": "6967a0ae8a03bd51023d8bd3869d7432022212c9",
+      "scope": "S/S+output-gate，真实长输入、原图参数，每臂一次启动",
+      "result": "4/4返回、两对输出摘要一致；计时候选慢60.49%，无HBM收益",
+      "do_not_repeat": "不改kernel直接重跑同模型配对；组件通过当整机收益",
+      "reopen_requires": "原trace/编译产物支持新tiling或现成库替代；实际shape组件收益后才另版有限模型配对",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "两对输出摘要一致；完整任务质量未验",
+      "search_terms": [
+        "output-gate",
+        "output_gate",
+        "输出门"
+      ],
+      "followup_evidence": {
+        "run": "output-gate-tiling-r1",
+        "evidence": "results/campaigns/gennova-9-alternating/runs/output-gate-tiling-r1/assessment.json",
+        "result": "Two distinct vector/persistent schedules20/20exact but all actual shapes slower;0modelstarts;output-gatefusiondirectionclosed. New logits cast-elision is a separate memory operation."
+      }
+    },
+    {
+      "id": "qkv-observer-r2",
+      "name": "QKV逐次审计假设",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-10-alternating/runs/observer-audit-r2/analysis.json",
+      "evidence_git_blob": "ab733461e3a5077a27ba0065ab9983d9c39a4af4",
+      "scope": "同一限长题，GateZero与加QKV，full/boundary观察器诊断",
+      "result": "14/14输出一致；full慢16.86%、boundary慢14.40%；逐次审计不是唯一原因",
+      "do_not_repeat": "重复关闭审计期待收益；推广为所有QKV负优化",
+      "reopen_requires": "新布局/别名/生命周期机制假设及独立版本；当前V独立buffer是另一未验证假设",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "14个完整输出一致但均触及256上限；无完整答案质量资格",
+      "search_terms": [
+        "qkv",
+        "observer",
+        "逐次审计"
+      ]
+    },
+    {
+      "id": "rc12-three-arm",
+      "name": "rc12累计准入",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/gennova-4-20261019/runs/rc12-staircase-admission-r3/acceptance.json",
+      "evidence_git_blob": "3726f04490e45a33997afcbeb880c1381acf20e6",
+      "scope": "单一原MMLU题，三臂独立启动、每臂预热及三次限长重复",
+      "result": "QKV中位慢0.195%，再加预布局慢2.037%；输出一致，无稳定边",
+      "do_not_repeat": "原无信号准入不改变量就追加200题矩阵",
+      "reopen_requires": "诊断明确实现修复或真实负载差异；新增验证计划说明与原组区别",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "有限限长题输出一致，完整质量未验",
+      "search_terms": [
+        "rc12",
+        "qkv",
+        "prelayout",
+        "预布局"
+      ]
+    },
+    {
+      "id": "microflow-a1",
+      "name": "Microflow a1稳定收益",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/gennova-6-microflow-20261019/runs/shared028-device-r1/confirmed-summary-a1.json",
+      "evidence_git_blob": "eccdba11af98e395baf2ffe84dee39956e0895b7",
+      "scope": "原a1联合叶子正反顺序有限配对；非完整Parent新适配",
+      "result": "正反次序未复现稳定收益；保留原窗口差异，未证明稳定降本",
+      "do_not_repeat": "重跑旧a1队列或将组件收益当整包收益",
+      "reopen_requires": "真实布局/动态shape或Parent适配变化另版；当前a5等新修订不等同旧a1重跑",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "有限ON/OFF输出对照不替代完整Native任务质量验收",
+      "search_terms": [
+        "microflow",
+        "a1",
+        "联合叶子"
+      ]
+    },
+    {
+      "id": "compact-short-prefix",
+      "name": "compact短请求与冷前缀",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/gennova-7-20261019/runs/ablation-r1/final-assessment.json",
+      "scope": "一个不同真实题；四臂各四次测量，两组cold/repeat，单次启动；原r6载体与计时范围",
+      "result": "compact-only相对本组Native慢6.547%，compact+QKV慢3.230%；预热后仍无本负载收益，转独立QKV确认",
+      "do_not_repeat": "同实现同短请求/冷前缀配对再次扩样；不能把compact负结果外推到QKV独立分支",
+      "reopen_requires": "证明切分/状态清零开销的具体修复，或有真实长前缀复用收益机制证据的另版负载；先组件再最小配对",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "各臂4/4正确、无截断、输出Token一致；仅1题覆盖，不是完整数据集资格",
+      "search_terms": [
+        "compact",
+        "compact-only",
+        "前缀切分"
+      ],
+      "evidence_git_blob": "86916a1ea2c33f7cb342cfbf58f4460b91a57655"
+    },
+    {
+      "id": "gate-zero-formal-r4-stability",
+      "name": "旧共享图Gate＋Zero稳定成本边",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/gennova-4-20261019/runs/shared-graph-formal-r4/acceptance-98-r1.json",
+      "scope": "原shared-graph-formal-r4，200题、六启动三配对；8192质量与256性能角色分开",
+      "result": "98%档质量通过；短输出配对中位数均下降但b0范围重叠、三启动敏感性区间跨零，原验收不授稳定成本边；质量批次差额包含输出变短",
+      "do_not_repeat": "相同实现/条件为挑出更有利波动重跑旧矩阵；将质量批次16.18%差额写成纯内核稳定加速",
+      "reopen_requires": "新实现或可验证的实质测量/负载变化，预先冻结新稳定判定及有限预算；已有新FIA比较是独立增量，不回写本组",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "82%→81%，保留率98.780488%；98%通过，原99%/99.9%不通过的判定保留",
+      "search_terms": [
+        "gate-zero",
+        "Gate＋Zero",
+        "shared-graph-formal-r4"
+      ],
+      "evidence_git_blob": "5c050c99fa760ed18c09435c6700d429ca4b8eb0"
+    },
+    {
+      "id": "route-single-011-confirmation",
+      "name": "单Token路由0.1.1独立确认",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/gennova-2-32068-20261019/runs/route-confirm-r1/confirmation.json",
+      "scope": "同一7209Token真实HLE、统一graph、原生加共用观察；两组独立BA/AB，每臂预热及一次测量",
+      "result": "8/8返回、四对摘要一致；候选慢1.70%和7.56%，首轮1.60%提升未复现，无稳定成本边",
+      "do_not_repeat": "不改0.1.1kernel继续同题同参数配对或挑选首轮正结果",
+      "reopen_requires": "具体实现变化先通过实际shape数值/graph/组件收益门；当前新候选去除OUT排序rank地址依赖，未证明收益",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "8/8返回、四对限长输出摘要一致，均达到256Token上限；未进行HLE语义质量验收。",
+      "search_terms": [
+        "route",
+        "单Token路由",
+        "0.1.1"
+      ]
+    },
+    {
+      "id": "logits-pair-r1",
+      "name": "纯贪心采样省略logits类型转换",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-9-alternating/runs/logits-pair-r1/assessment.json",
+      "scope": "原S载体、原HLE与预热题、统一图与采样条件；每臂一次启动；仅无修改采样处理器的贪心路径",
+      "result": "组件10/10数值一致且加速；整机4/4返回、两对输出一致、双rank转换省略及图回放已确认，但计时慢4.048%，HBM峰值不变。",
+      "do_not_repeat": "同实现同负载不追加配对；不得把argmax组件加速当成端到端收益。",
+      "reopen_requires": "给出具体开销归因或实质实现变化；先登记源码版本、前序负结果、有限预算及停止条件，再进行组件准入。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "两对限长输出一致，完整任务质量未知。",
+      "search_terms": [
+        "logits",
+        "cast",
+        "argmax",
+        "类型转换"
+      ]
+    },
+    {
+      "id": "microflow-parent-a5",
+      "name": "Parent Microflow a5 independent steady confirmation",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/gennova-6-microflow-20261019/runs/parent-fa-device-r3/confirmed-summary-a5.json",
+      "evidence_git_blob": "c9c571db630958c6222a6ac4aea7b15827ee8566",
+      "scope": "a5 Parent FA plus GDN layout a2, frozen synthetic4K/8K, two independent reversed startup pairs",
+      "result": "Steady first pair -6.8193%, reversed +10.4047%;8 exact output/token/logprob pairs; no stable benefit",
+      "do_not_repeat": "Unchanged a5 matrix or favorable-pair selection",
+      "reopen_requires": "New MOD combination with a concrete interaction hypothesis, or scoped FA/GDN attribution or implementation change; freeze matched base vs base+Microflow, bounded budget and stop conditions. No source change required for a new combination.",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "Synthetic length-capped output equivalence, not full Native task quality",
+      "search_terms": [
+        "microflow",
+        "parent",
+        "a5",
+        "FA",
+        "GDN"
+      ],
+      "candidate_disposition": "retained_for_composition",
+      "fully_negative_mod": false,
+      "exclusion_scope": "Seal only unchanged standalone a5 repetitions; do not exclude Microflow from composition candidates.",
+      "retention_decision": "results/gennova-6-microflow-20261019/runs/parent-fa-device-r3/composition-retention-decision.json"
+    },
+    {
+      "id": "kv-arrival-c8-fixed-prefix-rc16",
+      "name": "KV到达控制：C8固定共享前缀",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/kv-materialization-stack-20261019/runs/health-c8-r1/summary.json",
+      "scope": "rc16,S=Gate+Zero+QKV+prelayout,sharedgraphv1,newOpenSWE8prefixes,C8,oneindependentstartperarm",
+      "result": "16/16 complete;8/8 outputs identical;ON8full_reuse, same28672cachedtokens;singlepairsteady+2.4548%slower",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "trajectory replay only;no task-solving or98%qualification",
+      "do_not_repeat": "unchanged same-input900s queue or claim historical15% applies here",
+      "reopen_requires": "real workload evidence with diverse arrival/reuse signals causing different effective decisions;freeze minimal new bounded plan",
+      "search_terms": [
+        "KV materialization",
+        "arrival control",
+        "KV物化",
+        "kv-arrival-C8-fixed-prefix-rc16"
+      ],
+      "legacy_id": "kv-arrival-C8-fixed-prefix-rc16",
+      "original_outcome_detail": "no_incremental_effective_action_and_bounded_no_benefit"
+    },
+    {
+      "id": "output-gate-tiling-r1",
+      "name": "输出门vector8192与persistent40调度",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-9-alternating/runs/output-gate-tiling-r1/assessment.json",
+      "scope": "实际tokens 1/16/927/1065/2048、宽2048、gate stride 2048/4608；两种调度、六轮交替次序、每轮100次NPUGraph回放；零模型启动",
+      "result": "20/20数值及图回放一致；两种调度在所有被测形状上均慢于原生；本轮停止于组件，不启动模型。",
+      "do_not_repeat": "相同vector8192/persistent40调度重复调参试跑；不得忽略实际stride或只挑有利shape。",
+      "reopen_requires": "新的库实现或有编译/访存机制证据的实质内核变化；先通过所有实际shape数值、图与组件性能门，再另版有限整机验证。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "组件数值等价；未运行模型，不具备任务质量结论。",
+      "search_terms": [
+        "output-gate",
+        "output_gate",
+        "tiling",
+        "persistent40",
+        "vector8192",
+        "输出门"
+      ]
+    },
+    {
+      "id": "apc-healthy-gate-zero-r11",
+      "name": "健康Gate/controlledZero/APC短窗组合",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/gennova-5-apc-20261019/runs/native28-r1/contiguous-cost-r11.json",
+      "evidence_sha256": "e596f73e395b69bd049e1073dcb68f979b526d088f0687a1b402ac331bb3d40e",
+      "scope": "固定shared028公共图profile；同自然MMLU-Pro4671输入，5个截断机制请求；Native已有APC；候选含每请求两次额外Gate/Zero见证RPC。",
+      "result": "共启5/5通过且输出摘要逐次相同；连续四请求窗9.304028s对Native8.605365s，卡租增加8.1189%；无降本证据。",
+      "do_not_repeat": "用户明确要求停止此MOD/组合后续测试；不自动重跑原实现、同配置或换题换标签的矩阵，也不追加正式重复来追逐下降数字。",
+      "reopen_requires": "仅用户未来明确重新授权后才考虑重启；仍须有实质实现变化、独立机制证据及新有限计划。当前转向其他优化机会。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "5次输出Token完全一致，但全部cap截断，完整任务质量未知；不标98%通过或质量失败。",
+      "search_terms": [
+        "APC",
+        "Gate Zero APC",
+        "controlledZero",
+        "healthy-gate-zero-apc",
+        "gennova5 r11"
+      ],
+      "user_disposition": "Do not test this MOD/combination again under current authorization",
+      "evidence_related": [
+        "results/gennova-5-apc-20261019/runs/native28-r1/validation-r11.json",
+        "results/gennova-5-apc-20261019/runs/native28-r1/healthy-r11-assessment.json"
+      ]
+    },
+    {
+      "id": "decode-metadata-copy-reuse-v010-r12",
+      "name": "Decode元数据逐缓冲区签名与事件复用0.1.0",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-5-decode-metadata/runs/npu-admission-r1/assessment.json",
+      "evidence_sha256": "41d9c743e1a5c31862f174a1f8a9ba6aacefa007a9be2f93ced46cdd53363abf",
+      "scope": "固定Ascend910B2双卡，单Token三缓冲区实际H2D+NPUGraph组件；每卡OFF/ON/ON/OFF，每块1000步；零模型启动。",
+      "result": "设备数据、写入失效、换流和图重放通过；省略12000次复制/80000字节，但卡0/1组件耗时增加92.8607%/91.2551%；未过模型门槛。",
+      "do_not_repeat": "不重复相同0.1.0实现或换标签/换长度重测；不得把复制次数下降写成推理降本。",
+      "reopen_requires": "实质减少每步签名/流/事件检查开销的新版实现，保留安全合同，登记前序负结果和最小预算后重新准入。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "组件设备值一致；没有模型请求，完整质量和端到端成本未知。",
+      "search_terms": [
+        "decode-metadata",
+        "req_indices",
+        "query_pos",
+        "num_scheduled_tokens",
+        "metadata copy reuse"
+      ]
+    },
+    {
+      "id": "decode-metadata-batch-check-v020-r13",
+      "name": "Decode元数据按批共享检查0.2.0",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-5-decode-metadata/runs/batch-check-r1/assessment.json",
+      "evidence_sha256": "3f81bbbe157a445f7902a2a17f0e7499b67cab95ee485a588cfdc0fb6dbf3c3a",
+      "scope": "双卡910B2，1/16 Token各OFF/ON/ON/OFF1000步；合计16000次计时图重放，0模型启动。",
+      "result": "CPU10项和双卡数据/生命周期检查通过；共享检查降至每批1次并省略24000次复制，但1Token慢15.7548%/13.4447%，16Token慢20.5203%/18.8547%。",
+      "do_not_repeat": "不重复0.2.0检查复用实现或仅变换形状/标签；不删除安全保护追逐性能，不扩展模型测试。",
+      "reopen_requires": "先有与共享流/事件查询不同的实质机制或明确关键路径归因，另立有限合同；保持0.1.0与APC组合封存，当前转向不重叠候选。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "组件数据一致，不代表模型任务质量；端到端推理成本未知。",
+      "prior_negative_result": "decode-metadata-copy-reuse-v010-r12",
+      "search_terms": [
+        "decode-metadata",
+        "batch checks",
+        "req_indices",
+        "query_pos",
+        "num_scheduled_tokens"
+      ]
+    },
+    {
+      "id": "opset-shared-expert-n-tiling-r1",
+      "name": "OPset shared-expert BN64/32分块筛查",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/opset-decode-tiling-r1/assessment.json",
+      "evidence_sha256": "42e86c0a8646ba4fe404eca0754f5fc929f2e26ddf01872faa4a577e4eeb1940",
+      "scope": "冻结SDK2.13/HUST及910B2物理2/6；真实35B shared-expert每rank权重[512,2048] BF16，M1/2/4/8/16 NPUGraph组件，合成操作数；零模型启动。",
+      "result": "BN32耗时较旧BN128减少22.37%-27.12%，仍较Native增加21.58%-28.37%；无候选通过预先门槛。原脚本跨设备Graph释放警告保留，独立未计时40Graph修复通过；两次预设备launcher失败保留。",
+      "do_not_repeat": "不以同分块换标签、换有利shape或重跑模型全集寻找收益；组件加速不得换算Token降本。",
+      "reopen_requires": "实质不同kernel/数据移动实现及源码或机制证据，保留旧负结果，新版最小预算与停止条件；不私改公共Graph或强启BatchInvariant。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "候选与原producer采样输出逐值一致；没有新增任务评分、整模型吞吐或百万Token费用。",
+      "search_terms": [
+        "OPset",
+        "Linear-SwiGLU",
+        "shared expert",
+        "BLOCK_N",
+        "Ntiling"
+      ]
+    },
+    {
+      "id": "empty-padding-end-to-end",
+      "name": "空padding局部优化的端到端复核",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/gennova-2-32068-20261019/runs/route-toggle-r1/assessment.json",
+      "scope": "固定HLE长输入、路由0.1.1基线、同worker缓存角色ABBAABBA；仅空padding开关",
+      "result": "八次输出一致，元数据阶段四对两rank均快4.65%-9.87%，总请求均值慢0.279%；另版同步诊断均值慢4.411%",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "限长256的摘要一致，不是完整任务质量",
+      "do_not_repeat": "无机制变化的同输入延迟队列，或仅挑首对3.65%-10.01%正信号",
+      "reopen_requires": "新关键路径机制或有因果假设的组合；冻结匹配基线、作用点、最小预算和停止条件",
+      "candidate_disposition": "retained_for_composition",
+      "fully_negative_mod": false,
+      "exclusion_scope": "仅封存当前无稳定端到端收益条件；保留局部主机开销改善",
+      "search_terms": [
+        "empty-padding",
+        "metadata",
+        "空padding",
+        "host metadata"
+      ]
+    },
+    {
+      "id": "block-table-event-reuse-r2",
+      "name": "逐表事件Block table复制复用",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/block-table-copy-reuse-20261019/runs/model-r2/assessment.json",
+      "evidence_git_blob": "dbe857c1ddf91d9c6607e70a805a90a19ca5fcb8",
+      "scope": "Native Gate+Zero FULL_DECODE_ONLY TP2;one original MMLU-Pro item;warmup1 formal3 perarm;one start/arm",
+      "result": "8/8 exact,99.61% copies skipped;median+1.501%,ranges overlap;no whole-model benefit despite component signal",
+      "outcome_kind": "bounded_no_cost_benefit",
+      "quality_scope": "4 exact capped output pairs;not complete task-quality qualification",
+      "do_not_repeat": "Unchanged per-table snapshot/event wrapper on same load",
+      "reopen_requires": "Materially cheaper grouped checks or evidence exposed copy critical path; new bounded contract",
+      "search_terms": [
+        "block-table-copy-reuse",
+        "block_table",
+        "block-table-event"
+      ]
+    },
+    {
+      "id": "full-betterscale-v1-arrival-cold-state-rc18",
+      "name": "完整BetterScale v1+Gate冷State arrival配对",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/kv-materialization-stack-20261019/runs/full-arrival-pair-r1/assessment.json",
+      "evidence_sha256": "172490dbb9070a7e69bb626b786db81bcd80edc213878f98f919cb5b705dcbde",
+      "scope": "full v1 2c07ddd5 + retained Gate, central FULL/MTP2 profile, C4 historical SWE cold-checkpoint replay, one independent pair",
+      "result": "8/8 measured; OFF4full ON4recompute but both0cachedtokens; steady9.614979448→10.466137617 (+8.8524%);2/4exactoutput",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "real response health only,2length each arm; task quality unknown",
+      "do_not_repeat": "same cold State input/implementation expanded900s or repeated to seek favorable timing",
+      "reopen_requires": "real online exact-checkpoint hot reuse and measured pressure/transfer cost; new bounded matched plan demonstrating actual consumption difference",
+      "prior_negative_result": "kv-arrival-c8-fixed-prefix-rc16",
+      "search_terms": [
+        "BetterScale",
+        "KV materialization",
+        "arrival",
+        "State",
+        "rc18"
+      ]
+    },
+    {
+      "id": "moe-single-token-combine-model-r1",
+      "name": "单Token MoE结果合并整机复核",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-2-moe-combine-20261020/runs/model-r1/assessment.json",
+      "scope": "统一FULL_DECODE_ONLY/TP2/BF16，路由0.1.1共有、空padding关闭；HLE7209输入，单启动每臂1预热+3计时",
+      "result": "组件快6.21%/4.76%；整机8/8返回四对摘要一致，但三配对慢3.8863%/2.9527%/4.4108%，generate合计慢3.7656%，显存峰值不变",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "限长256的摘要一致，不是完整任务质量",
+      "do_not_repeat": "当前实现与输入无变化的模型队列；不能仅凭组件正信号重复加载",
+      "reopen_requires": "新关键路径机制或有因果假设的组合；冻结匹配基线、作用点、最小预算和停止条件",
+      "candidate_disposition": "retained_for_composition",
+      "fully_negative_mod": false,
+      "exclusion_scope": "当前固定形状实现的有限整机比较；保留组件正向，不推广为所有MoE合并无效",
+      "search_terms": [
+        "moe-single-token-combine",
+        "MoeTokenUnpermute",
+        "专家结果合并"
+      ]
+    },
+    {
+      "id": "opset-shared-expert-fusion-paths-r1",
+      "name": "OPset共享专家三方向融合与投影合并",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/opset-fusion-research-summary-r1/closeout.json",
+      "evidence_sha256": "155ea391d12553bfd0fb4f4e1e37dbabb1939e47e144902c5f76eb139cc56380",
+      "scope": "冻结SDK/HUST、910B2双卡、统一Graph和原70/200协议；三方向五个组件候选，一个成功35B有限验证；历史同条件Native参考，各一次启动、三计时遍。",
+      "result": "仅coalesced_selective通过组件门槛，局部耗时降低18.60%～33.13%；实际双rank新kernel生效。70题质量56→56；输出吞吐349.7677→341.0790 tok/s（-2.48%），百万输出摊销6.353423→6.515272元（+2.55%）。未证明净或稳定降本。",
+      "do_not_repeat": "不重复同一联合投影、后段融合或分块扫描，不挑最快重复/有利形状计益；保留原始数值失败、失败启动和全部计时。",
+      "reopen_requires": "实质不同实现和实际关键路径证据；另版最小计划、预算及停止条件。没有新依据不扩大本分支；不改变公共环境或测试参数。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "原70题子集；一独立候选启动，不是全12032题或跨重启稳定性；质量相同不代表所有答案相同。",
+      "search_terms": [
+        "OPset",
+        "shared expert",
+        "projection coalescing",
+        "joint_gateup",
+        "swiglu_down",
+        "coalesced_selective"
+      ]
+    },
+    {
+      "id": "gdn-projection-merge-components-r1-r2",
+      "name": "GDN输入投影直接及对齐合并",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-input-projection-20261020/runs/component-r2/assessment.json",
+      "evidence_git_blob": "742ee53606ba8090d6106c7be7e80e53d9e692b1",
+      "scope": "Native BF16 F.linear real FX shapes;synthetic values;token1/16;two NPUs",
+      "result": "All8variant/device/shape cells slower;aligned24numeric/stridechecks pass;no model launch",
+      "quality_scope": "Component exactness only;no real task quality",
+      "outcome_kind": "component_performance_regression",
+      "do_not_repeat": "Same6176or6272outputwidth on same component shapes",
+      "reopen_requires": "Do not repeat same merge/alignment. Reopen only with a new GEMM implementation, different evidenced shape regime, or independent mechanism.",
+      "search_terms": [
+        "gdn-input-projection-merge",
+        "qkvz",
+        "BA projection"
+      ]
+    },
+    {
+      "id": "mlp-gated-chunk-component-r2",
+      "name": "MLP门控共享专家两块执行v0.1.0",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-7-mlp-chunk/runs/gated-component-r2/assessment.json",
+      "evidence_sha256": "c2bc96250dd6a213f7dac535faa8591b3f02d8a9ad6024b814d479cb3e920c86",
+      "scope": "910B2双卡；BF16合成权重H2048/localI256；三种原输入长度；完整宿主forward＋融合NPU SwiGLU；组件OFF/ON/ON/OFF，0模型启动。",
+      "result": "6个设备/长度case耗时+149.55%～153.38%，峰值分配增量增加3.68～6.86MiB；12个图臂共36回放数值检查通过，非逐位相同。无速度或容量收益，未进入模型测试。",
+      "do_not_repeat": "不原样重跑两块完整forward或把组件数值通过写成模型降本；r1分解激活结果另保留。",
+      "reopen_requires": "实质减少launch/输出copy的新实现或明确新容量压力假设；新计划预算，保留专家门控和外层TP归约。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "合成权重组件近似一致；无任务质量和端到端费用结果。",
+      "search_terms": [
+        "mlp-chunk",
+        "shared expert",
+        "Qwen2MoeMLP",
+        "token chunking"
+      ]
+    },
+    {
+      "id": "rope-reuse-device-r1",
+      "name": "RoPE选行复用：首次独立配对",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-6-rope-reuse/runs/device-r1/assessment.json",
+      "scope": "公共TP2/BF16图配置，GDN a2共同基底，Microflow/Gate/Zero/CosSin关闭；单次OFF→ON，各2预热+2正式4K/8K合成请求。",
+      "result": "完整稳态10.383040→10.858848秒（+4.58%）；4对文本/token/logprob一致。实际模型编译图选行10→1，但未转化为本次整批收益。",
+      "do_not_repeat": "不将CPU节点下降当设备加速；不无假设扩大相同单项矩阵；本记录不剔除MOD。",
+      "reopen_requires": "明确组合交互、图调度/张量生命周期修订或有界统计确认假设与预算；保留Microflow等叠加探索资格。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "4对精确输出含2预热+2正式；均length256。真实任务分数未知，不构成质量回退。",
+      "search_terms": [
+        "RoPE",
+        "rope_reuse",
+        "balanced-attention"
+      ],
+      "fully_negative_mod": false,
+      "excluded": false
+    },
+    {
+      "id": "gdn-qk-l2norm-pair-component-r1",
+      "name": "GDN Q/K L2Norm合并调用组件",
+      "status": "sealed_no_blind_repeat",
+      "scope": "32047双卡串行、BF16单token、offset0/32、单归一化对NPUGraph回放",
+      "result": "16项逐值一致；四场景−0.99%/+0.08%/+0.06%/+0.54%，无一致收益，非整机结论",
+      "evidence": "results/campaigns/gennova-10-alternating/runs/qk-norm-pair-npu-r1/assessment.json",
+      "do_not_repeat": "不重复同配置组件或无收益依据直接加载模型",
+      "reopen_requires": "实质新机制或已登记更有代表性的图工作负载与新假设，保留旧结果",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "合成组件16项数值一致，真实任务质量未测"
+    },
+    {
+      "id": "moe-dynamic-mass-policy-n1-r1",
+      "name": "MoE多算子动态mass选择原型",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/moe-expert-sparsity-20261019/runs/policy-cost-r1/assessment.json",
+      "evidence_sha256": "f77cb89056c7acc8573aabeb1e10dbb711e09d40f87dbcd7b7bb57478c2a7de3",
+      "scope": "双卡、单token、真实最终decode路由、BF16合成专家权重；3选择标签涉及2不同层；完整NPUGraph链6轮交替×30回放。",
+      "result": "18数值case通过；12候选对照全部慢150.368%–176.867%；98%mass不跳过，90%mass保留7/8；单独策略156–161μs。",
+      "do_not_repeat": "不原样重复当前sort/cumsum/scatter/where多算子策略或借旧合成GMM收益声称模型降本。",
+      "reopen_requires": "实质减少选择开销的融合/固定预算实现，或有独立证据的新适用分布；先复用已采样路由测净收益，再另版质量对照。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "仅稀疏FP32参考数值；单请求最终decode样本，任务质量/整模型费用未知，batch16未执行。",
+      "search_terms": [
+        "MoE",
+        "expert sparsity",
+        "router mass",
+        "dynamic expert skipping"
+      ]
+    },
+    {
+      "id": "gdn-strided-input-r16-device-execution",
+      "name": "GDN跨步输入图重放失败",
+      "status": "sealed_no_blind_repeat",
+      "outcome_kind": "device_execution_failure_unattributed",
+      "evidence": "results/campaigns/gennova-5-gdn-gating/runs/strided-input-r2/assessment.json",
+      "evidence_sha256": "c56c686c5d9663ae7599621c47794f244cd06eaa3667d42496fb53ed4fd15e9f",
+      "scope": "BF16 16heads；计划双卡n1/2/4/8/16和stride32/64；实际NPU0图重放中止，完成范围未知",
+      "result": "507011 / MTE无效GM地址或跨设备访问超时；未获得有效性能结果，不能判为算法负优化或降本",
+      "do_not_repeat": "不原样重跑r16；不启动目标模型；不重复已封存metadata方案",
+      "reopen_requires": "先离线定位地址/图生命周期并保存逐shape/arm进度，新版本修复有证据后再最小设备准入",
+      "quality_scope": "CPU5项通过；完整NPU数值/安全矩阵未完成，模型质量未知"
+    },
+    {
+      "id": "moe-compact-topk-budget-n1-r1",
+      "name": "MoE固定专家预算多算子compact topk",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/moe-expert-sparsity-20261019/runs/fixed-budget-r1/assessment.json",
+      "evidence_sha256": "835f4f20cf10cd42c6f615077c37e6865a8110add1e4aeae11cef4a3ae6829dd",
+      "scope": "One saved actual request,3distinct final-decode layer rows, n1; synthetic BF16 weights.6alternating timing rounds30replays on2devices.",
+      "result": "18 numerical cases pass;12 candidate comparisons all slower by 32.739%–40.296%;25%/50% expert slots removed.",
+      "do_not_repeat": "Do not repeat unchanged topk+gather+reductions+normalization on n1 or treat expert-slot reduction as model savings.",
+      "reopen_requires": "Single fused selection+normalization kernel or change native router K directly; verify complete routing+MoE cost. For throughput test acquire actual n16 routes only after component benefit. No unchanged retry.",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "Synthetic sparse FP32 correctness only; full8 numerical deviation recorded; task quality and service cost unknown.",
+      "search_terms": [
+        "MoE",
+        "fixed expert budget",
+        "compact topk"
+      ]
+    },
+    {
+      "id": "moe-fused-post-router-n1-r2",
+      "name": "MoE融合后置选择单token",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/moe-expert-sparsity-20261019/runs/fused-budget-r2/assessment.json",
+      "evidence_sha256": "dbdb3811249b265ab3cce0009f50070f895230defca90b76a0a31c0f46943727",
+      "scope": "One fused Triton selection kernel; two devices,3saved n1 layer routes, synthetic BF16 expert weights; full graph6x30replays.",
+      "result": "K4 device0 faster1.11–1.97%,device1 slower2.66–4.00%;K6 both devices slower. No stable cross-device benefit.",
+      "do_not_repeat": "Do not repeat unchanged post-router fused selector on same n1 conditions; positive one-device result is not general gain.",
+      "reopen_requires": "Remove extra post-router launch via direct native K (separately tested), or materially different amortization with complete-chain evidence.",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "Sparse CPU FP32 correctness and changed-input graph replay passed; model quality unknown.",
+      "search_terms": [
+        "MoE",
+        "fused selection",
+        "expert sparsity"
+      ]
+    },
+    {
+      "id": "gdn-output-zero-r1-r2",
+      "name": "GDN输出清零省略正反启动复验",
+      "status": "sealed_no_blind_repeat",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "16/16完整输出token一致；单题256cap全部限长评分0，完整任务质量未验",
+      "evidence": "results/campaigns/gennova-10-alternating/runs/output-zero-model-r2/paired-summary.json",
+      "scope": "同源码/输入/图配置/双卡；两个独立配对AB/BA，每臂预热1正式3",
+      "result": "r1正式均值费用−3.8498%，反向r2+2.3840%；合计−0.8647%，未稳定复现净收益",
+      "do_not_repeat": "不重复同一清零省略配置的无变化第三轮；不挑选首轮作为稳定收益",
+      "reopen_requires": "新的组合交互或实现变化，具体假设与最小预算；保留本次全部反向结果"
+    },
+    {
+      "id": "moe-bf16-nz-layout-r1",
+      "name": "MoE BF16静态NZ布局",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/moe-bf16-prepack-20261020/runs/layout-r1/assessment.json",
+      "evidence_sha256": "e3b390271b8039e46d9cdece3369ef552d7f46a953b43ebb7e5182f54c980dca",
+      "scope": "Two910B2devices,BF16 synthetic256expert weights;3n1 saved route rows and2syntheticn16layouts;full top8 router+MoE graph6x30replays.",
+      "result": "20 numeric cases pass; all NZ outputs bitwise equal ND.10comparisons2positive8negative,wall reduction range-3.958% to1.613%,no stratum positive on bothdevices.",
+      "do_not_repeat": "No unchanged ND/NZ comparison on same shapes/hardware; do not infer deployment memory overhead from both-bank benchmark residency.",
+      "reopen_requires": "Different GMM implementation, supported shapes, hardware, or measured model weight-layout mismatch with mechanism evidence.",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "Exact component output agreement; model quality and service cost unmeasured.",
+      "search_terms": [
+        "MoE",
+        "BF16",
+        "NZ",
+        "prepack",
+        "weight layout"
+      ]
+    },
+    {
+      "id": "gdn-strided-model-r19-no-gain-output-drift",
+      "name": "GDN跨步读取整模型无降本且输出分歧",
+      "status": "sealed_no_blind_repeat",
+      "outcome_kind": "no_stable_benefit",
+      "evidence": "results/campaigns/gennova-5-gdn-gating/runs/model-r2/assessment.json",
+      "evidence_sha256": "c3568dc18d3a4d7116f086ef5856720c8c4b662eb79cce03f5963b6f2ba9f9d0",
+      "scope": "共享FULL_DECODE_ONLY、BF16 TP2；固定batch16，两条自然MMLU-Pro输入各重复8次，固定128输出；完成OFF/ON各1启动、1预热+3正式窗。",
+      "result": "双rank实际捕获120次候选门控，各正式381次图重放；中位耗时8.895391→9.023402s（+1.4391%），同Token正式窗总费用+0.9440%。ON正式窗2中2/16请求Token分歧；原因未归因，任务准确率未知。",
+      "do_not_repeat": "不原样重跑r19或把组件14.80%-25.34%收益转写为模型收益；on-b中止、off-b未执行保留分母。",
+      "reopen_requires": "离线定位跨步视图生命周期或宿主非确定性，提供实质修复及最小复现；先复用已存输出/图证据，不重新跑同一完整队列。",
+      "quality_scope": "ON正式46/48请求Token精确一致，不能等同任务准确率或98%质量档；一个配对不足以宣称稳定总体回归。"
+    },
+    {
+      "id": "gdn-small-gating-model-r2",
+      "name": "GDN输入门控单核小batch调度整机对照",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-small-gating-20261020/runs/model-r2/assessment.json",
+      "scope": "Gate+Zero基底，FULL_DECODE_ONLY TP2；1原题，256输出上限，两个独立启动，每臂预热1+正式3。",
+      "result": "组件四格快53%–57%，整机正式中位4.194290→4.486221秒，+6.9602%；4/4对输出一致，双rank30层捕获及每窗255次解码图回放通过。",
+      "do_not_repeat": "相同grid1/相同shape/相同实现盲目重复，或把组件速度当整机收益。",
+      "reopen_requires": "实质内核或调度变化及新机制证据；重新冻结匹配对照。",
+      "quality_scope": "均截断256，只有有界输出一致，无完整任务质量结论。",
+      "outcome_kind": "measured_performance_regression"
+    },
+    {
+      "id": "ascend-native-shared-prefix-batched-r2",
+      "name": "Ascend原生prefix接口批量解码",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/shared-prefix-attention-20261020/runs/native-r2/assessment.json",
+      "evidence_sha256": "87987115ecfb94b518bdfd2a47c5d5fe931353348af1e53b55e9e5eedbcf420c",
+      "scope": "BF16 synthetic GQA8:1,D256;B8/16,512/4096/16384prefix;shared-physical-page FIA baseline;two devices6x50replays. B1 excluded from negative scope.",
+      "result": "All8batched comparisons slower1.224%–125.140%. Numeric and changed-Q replay passed. B1separately27.3%–27.5%faster, not evidence of inter-request prefix benefit.",
+      "do_not_repeat": "Do not rerun unchanged native prefix API expecting batched speedup or compare only against duplicated KV storage.",
+      "reopen_requires": "Explicit grouped query implementation(separately tested), different kernel/tiling or materially changed measured workload with complete costs.",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "Synthetic full-attention CPU FP32 numeric checks; not model task quality.",
+      "search_terms": [
+        "shared prefix",
+        "Hydragen",
+        "FIA",
+        "APC"
+      ]
+    },
+    {
+      "id": "fi-sampling-fixed-output-stability-r1",
+      "name": "FI Sampling固定输出三对稳定性复核",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-7-fi-sampling/runs/stability-r1/assessment.json",
+      "evidence_sha256": "909e84da302545aef86ea2646d33e36909d3062f35b3d340fcdffbfc3ad973f8",
+      "scope": "Qwen3.5 BF16 TP2公共FULL_DECODE_ONLY；14类真实输入、固定128输出；三对独立启动、B1三轮/B14五轮；同一70题质量子集首对自然停止。",
+      "result": "B1/B14配对均值耗时−1.502%/−1.087%，但95%比区间[0.953294,1.017715]/[0.967751,1.010976]均跨1，未通过预设稳定性判据；不是证明收益为零。",
+      "do_not_repeat": "不得为凑显著性向本冻结三对追加同条件重复，不将历史三题4.285%作为稳定整机降本。",
+      "reopen_requires": "改变实现或有实际新负载/组合假设；如研究小幅收益，另版预注册统计功效与独立样本量并完整报告，不选择性拼入本组。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "70题55→56，98%保留率点估计通过；各5条截断保留分母；不是全量质量保证。",
+      "search_terms": [
+        "FI Sampling",
+        "随机采样",
+        "固定输出",
+        "B1",
+        "B14",
+        "stability"
+      ]
+    },
+    {
+      "id": "gdn-norm-stat-elision-component-r1",
+      "name": "GDN推理归一化统计量省略组件混合结果",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-norm-stat-elision-20261020/runs/component-r1/assessment.json",
+      "scope": "BF16 width128，tokens1/16对应rows16/256，双NPU，6轮交替100次图回放",
+      "result": "12/12数值及stride一致；n1两卡耗时-1.54%/-3.02%，n16+2.83%/+1.11%；不满足全格一致收益准入，0模型启动。",
+      "do_not_repeat": "相同省略store实现无变化重跑，或事后只保留有利形状",
+      "reopen_requires": "新存储/tiling/生命周期机制和预登记覆盖范围",
+      "outcome_kind": "mixed_component_performance",
+      "quality_scope": "合成组件一致，不具备模型任务质量结论"
+    },
+    {
+      "id": "gdn-recurrent-row-parallel-fp32-r6",
+      "name": "GDN recurrent value-row parallel FP32 matched component regression",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-10-alternating/runs/recurrent-row-component-r6/assessment.json",
+      "scope": "32047 dualNPU;single token NK8 NV16 K128 V128;FP32 state;school custom OPP;32tasks64rows;V_S fixed;10alternating500replay samples/card",
+      "result": "1280 state/output updates exact;wall+5.1798/+5.3039percent,event+5.3125/+5.6645percent;no valid model result",
+      "do_not_repeat": "Unchanged parallel64 implementation or reuse mismatched BF16 native gain as model evidence",
+      "reopen_requires": "Material scheduling/data reuse/synchronization change with preregistered hypothesis and exact custom OPP baseline",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "Synthetic recurrent state/output equivalence only;no model task quality"
+    },
+    {
+      "id": "moe-native-k6-model-r21-no-demonstrated-saving",
+      "name": "原生MoE K6两输入重复batch16整模型准入",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-5-moe-budget/runs/model-r2/assessment.json",
+      "evidence_sha256": "9b6ccb3d0599cc4137c7c434d62b8dc7d24895fc2704522a1f5ef2e0c59bbb14",
+      "scope": "Qwen3.5-35B-A3B BF16 TP2 FULL_DECODE_ONLY;two natural prompts repeated8each;fixed128output;one independent K8/K6 pair,3formalwindows per arm",
+      "result": "Median8.977627→9.228084s(+2.7898%);same-token formal cost+0.4951%;no demonstrated saving;not stable population regression",
+      "do_not_repeat": "不原样追加相同两输入重复负载，不将组件收益直接升级为模型收益。",
+      "reopen_requires": "实际专家分布/瓶颈归因、新实现或独立代表性负载假设；另版冻结统计功效、质量与预算。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "48/48 token outputs changed;task accuracy and98%retention unmeasured",
+      "search_terms": [
+        "MoE",
+        "K6",
+        "native expert budget",
+        "batch16"
+      ]
+    },
+    {
+      "id": "gdn-norm-weight-fp32-component-r1",
+      "name": "GDN归一化FP32权重缓存混合结果",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-norm-weight-cache-20261020/runs/component-r1/assessment.json",
+      "scope": "BF16输入/等价FP32缓存权重，宽128，1/16token，双卡6轮交替100次图回放",
+      "result": "12/12数值及stride一致；1token两卡耗时+2.078%/+2.067%，16token-1.975%/-1.273%；未满足一致收益准入，0模型启动。",
+      "do_not_repeat": "相同FP32缓存无变化重跑或事后仅保留16token正结果",
+      "reopen_requires": "新布局/内核机制，或预登记的不同实际shape负载",
+      "outcome_kind": "mixed_component_performance",
+      "quality_scope": "合成组件，无模型任务质量结论"
+    },
+    {
+      "id": "lm-head-global-prefix-model-r1",
+      "name": "LM-head全局前缀词表首版真实模型",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/vocab-shortlist-20261020/runs/model-r1/assessment.json",
+      "evidence_sha256": "937011673f44d1132a04070d9ef8fbab443919c9702c31e302ef3fe3e4e4d07a",
+      "scope": "One graph model epoch,TP2;global65K/131K+specials;B4 fixed64tokens,two reverse-order repeats.",
+      "result": "65K fixed-window2.769%/6.963%slower;131K7.781%slower then4.531%faster,no stable benefit. Authored12task Native12/12,65K11/12,131K12/12,both repeats.",
+      "do_not_repeat": "Do not repeat unchanged global-prefix scheme or extrapolate component81–87%gain to model.",
+      "reopen_requires": "TP-balanced row selection or compact logits path; symmetry warmup and longer matched windows, all quality changes retained.",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "12unique authored deterministic microtasks repeated twice;not official benchmark.65K loss8.333pp,91.667%retention;no quality-based stop.",
+      "search_terms": [
+        "vocabulary shortlist",
+        "LM-head",
+        "global prefix",
+        "TP imbalance"
+      ]
+    },
+    {
+      "id": "moe-small-batch-topk-component-r2",
+      "name": "固定256选8串行归约专用内核",
+      "status": "sealed_no_blind_repeat",
+      "outcome_kind": "measured_performance_regression",
+      "evidence": "results/campaigns/gennova-7-moe-topk/runs/component-r2/assessment.json",
+      "evidence_sha256": "e514354d6c4da15672712f2c32e6c97ac127ea37595ee2f388b4f90fb3b5a7ed",
+      "scope": "910B2双卡FP32合成路由logit，1/4/16 token，K8/E256，组件图事件计时",
+      "result": "30数值/ID和18动态图检查通过，六性能格全部退步47.70%～94.30%，不上模型",
+      "do_not_repeat": "不原样重复每行八次串行max/min归约；不筛选有利样本",
+      "reopen_requires": "不同并行选择算法/原生向量原语或有证据的新形状，重新冻结数值和计时合同",
+      "quality_scope": "只验组件数值及专家ID；0模型启动，任务质量和整机成本未测",
+      "search_terms": [
+        "topk",
+        "Top8",
+        "专家选择",
+        "MoE",
+        "256选8"
+      ]
+    },
+    {
+      "id": "lm-head-balanced-prefix-model-r1",
+      "name": "LM-head TP均衡词表真实模型",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/vocab-shortlist-20261020/runs/balanced-r1/assessment.json",
+      "evidence_sha256": "a4da28a73c74d6b75797fb4a1b37d7b945ca340c8dc540a78e21ab2d3002506a",
+      "scope": "One FULL_DECODE_ONLY TP2 model epoch; B4 fixed256tokens,3Latin-order repeats with symmetric per-mode batch warmup. Negative scope only prefix65536,prefix131072.",
+      "result": "prefix65536: wall reductions -5.288%,-4.673%,-4.463%; prefix131072: wall reductions -10.527%,-3.280%,-9.980%",
+      "do_not_repeat": "No unchanged repetitions to search for positive timings. Quality loss does not trigger stopping; performance evidence does not show consistent gain in this scope.",
+      "reopen_requires": "Material compact-logit/IDmapping or fused output reconstruction implementation, or justified different workload; fresh matched baseline and precision report.",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "12authored deterministic questions,two repeats; real accuracy changes retained;not HLE/MMLU certification.",
+      "search_terms": [
+        "vocabulary shortlist",
+        "LM-head",
+        "TP balanced",
+        "dense logits"
+      ]
+    },
+    {
+      "id": "gdn-norm-rsqrt-component-r1",
+      "name": "GDN归一化rsqrt替换未见一致收益",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-norm-rsqrt-20261020/runs/component-r1/assessment.json",
+      "scope": "BF16宽128，1/16token，双卡6轮交替100次图回放；只改变1/sqrt为rsqrt",
+      "result": "12/12输出及stride一致、最大绝对误差0；device0 n1/n16耗时+2.150%/+1.055%，device1 +0.698%/-1.158%；无一致收益，0模型启动。",
+      "do_not_repeat": "同实现同条件盲目重跑，或将单格小幅变化宣称为稳定整机效果",
+      "reopen_requires": "新后端/编译实现或有证据的不同实际负载并另版冻结",
+      "outcome_kind": "mixed_component_performance",
+      "quality_scope": "合成组件一致，不具备模型任务质量结论"
+    },
+    {
+      "id": "gdn-recurrent-serial64-model-r1",
+      "name": "GDN recurrent serial64 direct whole-model no benefit",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-10-alternating/runs/recurrent-serial-model-r1/assessment.json",
+      "scope": "32047 TP2 FULL_DECODE_ONLY school custom OPP FP32 state; rc12 mother; one original capped question;1warmup3formal eacharm;fixed64 serial16tasks",
+      "result": "8 outputs exact; median latency+5.5541percent;mean formal cost+4.5671percent despite component-3.09/-9.02percent",
+      "do_not_repeat": "Unchanged fixed64 serial direct launch model or old parallel queue",
+      "reopen_requires": "Material fusion/scheduling/dispatch change supported by exact matched component and request-window trace hypothesis",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "One capped original question, score0 botharms; token equivalence only, no full task quality claim"
+    },
+    {
+      "id": "gdn-serial64-r22-mixed-no-stable-benefit",
+      "name": "GDN serial64 fixed-endpoint mixed component result",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-5-gdn-serial64/runs/admission-r1/assessment.json",
+      "scope": "Single token, FP32 state, five slots/index4, two fixed endpoint NPUs, captured component",
+      "result": "192 exact updates; wall +0.9514% / -5.9080%; no stable cross-device advantage; zero model starts",
+      "do_not_repeat": "Unchanged serial64 component or model promotion without new evidence",
+      "reopen_requires": "New hotspot/tiling or workload mechanism explaining card disparity, with existing timing analysis first; no unchanged repeat",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "Exact component output/state only; no task score",
+      "search_terms": [
+        "gdn",
+        "serial64",
+        "recurrent"
+      ]
+    },
+    {
+      "id": "residual-gemma-scale-cache-model-r1",
+      "name": "Residual Gemma scale cache bounded model no benefit",
+      "status": "sealed_no_blind_repeat",
+      "outcome_kind": "no_stable_benefit",
+      "evidence": "results/campaigns/gennova-7-residual-norm/runs/model-r1/assessment.json",
+      "evidence_sha256": "cbc698f08d1de8871e8aa0fc67807476ae5c661ee77b60fcec10d1553a681f6a",
+      "scope": "Pinned35B BF16 TP2 FULL_DECODE_ONLY;81norm modules/rank; residualonly; native-first one startup/arm;3promptsx3rounds64tokens",
+      "result": "Component six strata20.08–33.88% faster, exact18numeric18graph checks; model9/9hashpairs exact and80adds eliminated/rank, but observed window+1.5999%, requestsum+1.5541%; not stable-cost or causal slowdown proof",
+      "do_not_repeat": "Unchanged standalone cache implementation and this bounded model queue",
+      "reopen_requires": "Material fusion or graph-scheduling change, or evidenced new workload hypothesis with frozen minimal matched verification",
+      "quality_scope": "Three unique original prompts,64token hashes only; no full scored quality"
+    },
+    {
+      "id": "fullb-metadata-packed-r23-component-regression",
+      "name": "FullB contiguous packed metadata adapter r23",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-5-decode-metadata/runs/fullb-admission-r1/assessment.json",
+      "scope": "Actual pinned fullB position kernel and adapter stages on both NPUs under healthy SDK; synthetic runner buffers; no full BetterScale worker/model loaded",
+      "result": "72 exact checks;874 merged uploads;full component wall +53.60%/+53.72%;zero modelstarts",
+      "do_not_repeat": "Unchanged packed48 adapter or promotion to model based only on correctness",
+      "reopen_requires": "Material reduction of host packing/bookkeeping with evidence, retaining MTP2/FULL/cache contract; no unchanged rerun",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "Exact component fields; model installation/task score not measured",
+      "search_terms": [
+        "fullB",
+        "metadata",
+        "packed transfer",
+        "MTP"
+      ]
+    },
+    {
+      "id": "hccl-host-ts-phase2-mmlu-200-70-r1",
+      "name": "HOST_TS公共图D1正式稳定成本验收",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/tp2-communication-01a151cf/runs/phase2-r1/formal-summary.json",
+      "evidence_sha256": "99ee879f0438a745860d0748aa44378608cb0a3e8c0ec527a99d7334b5eea069",
+      "scope": "固定HUST SDK/CANN/HCCL、公共图v1、Qwen3.5-35B-A3B BF16 TP2，同物理双卡；Native MODE未设置/HOST_TS；C16 offline_batch200性能@256与70质量@2048，各臂3独立启动、各轨预热1/正式3。",
+      "result": "三对卡租下降-0.988%/5.569%/-0.247%；质量保持率99.801%，三对点预算均通过；题目簇95%区间98.520%–101.053%；局部通信执行区间缩短，但主要性能三对非全正向，无稳定成本边。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "质量保持率99.801%，三对点预算均通过；题目簇95%区间98.520%–101.053%。全部截断/回退保留；不是质量失败或全12032题等价结论。",
+      "do_not_repeat": "不改实现/假设/条件重跑同矩阵挑选更好波动；不以先导或逐调用累计通信时间替代正式整批收益。",
+      "reopen_requires": "列出可验证的新负载差异、实现机制或非空S交互假设，登记本前序负结果、匹配Native或S、最小预算与停止条件；不只换标签或相加历史收益。",
+      "candidate_disposition": "retained_for_scoped_future_evaluation",
+      "fully_negative_mod": false,
+      "exclusion_scope": "仅封存本命名200题主要负载的稳定降本主张；不将此结果外推为所有长输出/并发/通信域/组合都无效。未来组合未验证。",
+      "search_terms": [
+        "HOST_TS",
+        "HCCL",
+        "TP2通信",
+        "tp2-host-ts-phase2-mmlu-200-70-graph-v1"
+      ]
+    },
+    {
+      "id": "fullb-metadata-cached-host-r24-component-regression",
+      "name": "FullB metadata cached-host v2",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-5-decode-metadata/runs/fullb-host-cost-r2/assessment.json",
+      "scope": "same n16/t48 original fullB position kernel, synthetic runner buffers on two real NPUs; no model",
+      "result": "v2 improves old19.9% but regresses native24.29%/24.30%;24 exact graphwaves;0modelstarts",
+      "do_not_repeat": "Unchanged v2 or same-version model promotion",
+      "reopen_requires": "Evidence-backed fullB lifecycle reuse removing redundant host preparation/stream checking while retaining safe completion ownership",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "Exact component fields only, model quality unmeasured",
+      "search_terms": [
+        "fullB",
+        "metadata",
+        "cached-host",
+        "MTP"
+      ]
+    },
+    {
+      "id": "shared-gate-lut-model-r1-regression",
+      "name": "Shared expert BF16 gate LUT multiply",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-2-shared-gate-lut-20261020/runs/model-r1/assessment.json",
+      "scope": "TP2 graph-v1; routing0.1.1 common; one7209token HLE case,1warmup3timed perarm",
+      "result": "Component37.76%/37.29% faster; model8/8returns,4exactpairs; timed sum5.956% slower,all3timedpairs slower",
+      "do_not_repeat": "Unchanged lookup implementation/model pair",
+      "reopen_requires": "Per-kernel critical-path evidence or material lookup-memory/scheduling change with new frozen hypothesis",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "Exact outputs on bounded case only; no formal quality score",
+      "search_terms": [
+        "shared expert",
+        "sigmoid",
+        "BF16",
+        "lookup",
+        "gate"
+      ]
+    },
+    {
+      "id": "gennova4-metadata-32047-three-pairs-no-stable-gain",
+      "name": "32047 S+Decode metadata三组独立配对方向不稳定",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gennova-4-metadata-20261020/closeout.json",
+      "scope": "rc23 sharedgraphv1,3originalrealquestions,3independentmatchedpairs x3windows eacharm; finite200qualitynotstarted",
+      "result": "前两组−5.7206%/−3.0263%，第三组+3.6446%；18窗输出摘要一致，描述合并−1.7662%不构成稳定收益；default off for qualification.",
+      "outcome_kind": "mixed_model_performance",
+      "do_not_repeat": "同实现同三题不断重跑挑有利窗口，或跨32050拼阶梯",
+      "reopen_requires": "真实请求窗profile提出可检验的新瓶颈/实现变化及新冻结预算",
+      "quality_scope": "三题2/3全部自然结束；无完整质量资格"
+    },
+    {
+      "id": "opfuse-routed-gmm-vector-r2",
+      "name": "OpFuse BF16路由专家GMM1＋SwiGLU纯向量融合",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/opfuse-routed-gmm-component-r2/assessment.json",
+      "evidence_sha256": "9c758123b7d2574938a95ca4bf68bea4d2369571caa04fa21d053b0986a0c61b",
+      "scope": "固定HUST/SDK、910B2双卡，35B TP2几何BF16、256专家/top8、M1/2/4/8/16两种路由分布；合成Graph组件。",
+      "result": "20点完整MLP全部退步；M1墙钟+46.09%～50.19%；240动态图检查通过，相对L2最大0.04363%；0模型启动。r1图捕获失败单列。",
+      "do_not_repeat": "不重复本向量GEMV分块或无变化模型队列，不将组件计时写成Token价格。",
+      "reopen_requires": "保留矩阵单元效率且支持冻结Graph的不同实现，或有证据的实际新形状；另版计划、数值/图/完整边界验证。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "合成组件数值误差已记录；任务质量和整模型费用未测。",
+      "search_terms": [
+        "OpFuse",
+        "routed expert",
+        "GMM1",
+        "SwiGLU",
+        "vector GEMV"
+      ]
+    },
+    {
+      "id": "opfuse-routed-gmm-single-row-r4",
+      "name": "OpFuse矩阵融合连续写回与单行优化",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/opfuse-routed-gmm-single-row-r4/assessment.json",
+      "evidence_sha256": "2a2db3162ef6ae0c7390c3a6558d2cf5d9622d7c05e3265ccfa53d55a79d610f",
+      "scope": "冻结HUST/SDK、910B2双卡、BF16实际TP2几何/top8；M1/2/4/8/16两种路由分布合成Graph组件。",
+      "result": "r3修复Graph但20点完整MLP全慢；r4 M1前段下降5.20%～9.41%，完整MLP卡0−0.75%/−2.47%、卡1+4.14%/+5.15%；18/20点退步，0模型启动。",
+      "do_not_repeat": "不重复当前逐行融合的填充/分块扫描或模型队列；保留2个局部正向完整MLP点，不把前段收益计为Token降本。",
+      "reopen_requires": "减少逐行调度/权重复读的实质新实现；固定Graph合法、动态数值正确、完整MLP跨卡稳定收益，另立预算。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "r3/r4各240动态图检查，最大相对L2约0.46508%；任务质量/跨进程稳定性/Token费用未验。",
+      "search_terms": [
+        "OpFuse",
+        "routed expert",
+        "GMM1",
+        "SwiGLU",
+        "Graph capture",
+        "contiguous store",
+        "single row"
+      ]
+    },
+    {
+      "id": "opfuse-routed-gmm-grouped-r5",
+      "name": "OpFuse专家分组前缀调度与权重复用",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/opfuse-routed-gmm-grouped-r5/assessment.json",
+      "evidence_sha256": "053a39bdb32805aaf3edd7bf5ba05a65e6f19dea41aae5d6ace41e76287d161c",
+      "scope": "冻结HUST/SDK/Graph、910B2双卡、BF16实际TP2几何/top8；M1/2/4/8/16两种路由分布合成组件，规划费用纳入完整MLP。",
+      "result": "分组复用后共享专家M2–16完整MLP仍慢8.69%～14.46%；19/20点墙钟更慢，0/20达到收益门槛；240动态图检查，0模型启动。",
+      "do_not_repeat": "不重复当前紧凑前缀＋逐块二分实现或只挑共享专家分布晋级；不把相对旧差原型的改善计为对Native降本。",
+      "reopen_requires": "实质减少调度/查找与矩阵流水开销的新机制；另版预算，完整MLP双卡稳定收益后才准入模型。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "合成240同分布类型内动态图检查，最大相对L2约0.46508%；未验跨组数重放、真实质量或Token费用。",
+      "search_terms": [
+        "OpFuse",
+        "routed expert",
+        "grouped GMM",
+        "expert grouping",
+        "weight reuse",
+        "prefix scheduling"
+      ]
+    },
+    {
+      "id": "opfuse-routed-gmm-model-r1",
+      "name": "OpFuse路由专家融合首次整模型有限验证",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/opfuse-routed-gmm-model-r1/model-comparison.json",
+      "evidence_sha256": "138a22ff405f17e901d44a8871863ef60079e399686c3d39d8d8ef47a27cd3c5",
+      "scope": "冻结HUST/SDK/Graph和35B TP2；原70题质量/200题性能一预热三计时；候选一次启动，复用历史同条件Native。",
+      "result": "输出吞吐349.77→258.50 tok/s（−26.09%），百万输出摊销6.353423→8.596602元（+35.31%）；质量56/70→58/70。双rank设备消费及正式窗Graph已核验。",
+      "do_not_repeat": "不重复相同r5内核及0.1.8宿主接入，不把单次启动三重复称为跨重启稳定性，不把质量多两题称为全量提升。",
+      "reopen_requires": "实质改变路由融合效率的新机制和有限预算；先证明完整MLP双卡收益，再按匹配合同验证整模型。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "原70题小样本；候选截断5、无效0、未返回0。无全量或跨重启资格，历史对照不能给出确定因果归因。",
+      "search_terms": [
+        "OpFuse",
+        "routed expert",
+        "grouped GMM",
+        "whole model",
+        "output token amortization"
+      ],
+      "causal_followup": {
+        "evidence": "results/campaigns/attention-runtime-validation/runs/opfuse-architecture-closeout-r1/assessment.json",
+        "summary": "GM交接仍在；当前适配额外AICPU Cumsum，去掉转换也不足以根据现有数据追平Native；无正式窗细粒度因果结论。",
+        "decision": "停止当前路由融合"
+      }
+    },
+    {
+      "id": "gdn-static-decay-022-unified-mmlu-r2",
+      "name": "GDN静态衰减0.2.2累计组合边际费用",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-static-decay-mingqi-20261020/runs/formal-mmlu-r2-final/assessment.json",
+      "scope": "Qwen3.5-35B-A3B BF16 TP2 graph-v1/APC/MTP-off/16GiB KV; controlled Gate+Zero plus only GDN0.2.2; named200/out256; 3 independent pairs, each3 repeats; 2*2.39CNY/hour steady card rental",
+      "result": "三对组合卡租增0.753151%/0.651687%/0.250074%，中位增0.651687%；稳定净降本未通过。组件改善及历史单题收益不代替整机组合结果。",
+      "do_not_repeat": "不改0.2.2、参考组合或实质负载/公共条件而重跑筛选；为取得正收益扩展相同模型队列；不得默认启用或加成本阶梯。",
+      "reopen_requires": "登记本prior_negative_result；新版本提出具体低开销生命周期检查/宿主回调方案或可验证的实质变化，先通过缓存安全及实际shape组件证据，再冻结有限新假设、预算和停止条件。CPU guard代理诊断不是整机收益预测。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "MMLU named200/8192全部四臂3次162/200，相对Native100%；4截断/次保留分母。完整答案各配对200对全同。HLE/FrontierScience等未测，不是质量失败。",
+      "search_terms": [
+        "gdn-static-decay",
+        "GDN静态衰减",
+        "A_log",
+        "-exp(A_log)",
+        "0.2.2"
+      ],
+      "full_report": "results/campaigns/gdn-static-decay-mingqi-20261020/runs/formal-mmlu-r2-final/README.md"
+    },
+    {
+      "id": "gdn-qknorm-recurrent-model-r3",
+      "name": "GDN Q/K归一化与递推融合有限模型验证",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/gdn-qknorm-recurrent-model-r3/assessment.json",
+      "evidence_sha256": "da71ec14188d4e43223a1747cf4b56d19214a76d5b303d96d9f829136575fc97",
+      "scope": "冻结HUST/SDK/Graph、35B TP2；原70题质量/200题性能，候选一次启动一预热三计时，历史同条件Native。",
+      "result": "组件双卡五批次均正向；模型吞吐−4.48%、百万输出摊销+4.69%，质量56/70→54/70；双rank真实消费，资源释放。",
+      "do_not_repeat": "不重复相同r9内核/宿主接入或继续盲扫分块；保留组件正向，不称稳定整机收益。",
+      "reopen_requires": "有证据的更大真实热点融合，或明确数值修正；独立新计划与预算。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "70题点估计保留96.43%未达98%档；小样本不足以证明总体退化，无全量或跨重启资格。",
+      "search_terms": [
+        "GDN",
+        "QK normalization",
+        "recurrent",
+        "AIV fusion",
+        "whole model"
+      ]
+    },
+    {
+      "id": "gdn-gating-recurrent-model-r2",
+      "name": "GDN输入门控与递推融合有限模型验证",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/gdn-gating-recurrent-model-r2/assessment.json",
+      "evidence_sha256": "3b71ee51a9933a41c2eb26925c5a18fb9edab03266cbe7b35d422ca0376e435d",
+      "scope": "冻结HUST/SDK/统一Graph，35B TP2；原70题质量/200题性能，一成功启动一预热三计时，历史同条件Native。",
+      "result": "双卡M16组件快19.04%/18.30%，实际融合消费；模型吞吐−2.02%、百万输出摊销+2.06%，质量56→54/70。",
+      "do_not_repeat": "不重跑当前r4内核及宿主、不盲扫门控分块；组件正向不记整机降本。",
+      "reopen_requires": "更大真实关键路径覆盖或明确数值新实现，并登记新假设与最小预算；原结果保留。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "70题点估计保留96.43%未达98%；小样本与历史对照不能证明总体质量退化或确定增费因果。",
+      "search_terms": [
+        "GDN input gating",
+        "recurrent fusion",
+        "softplus",
+        "sigmoid",
+        "gate_update"
+      ]
+    },
+    {
+      "id": "gdn-conv-output-layout-model-r2",
+      "name": "GDN卷积输出布局与静态预布局联合有限验证",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/gdn-conv-output-layout-model-r2/assessment.json",
+      "evidence_sha256": "09d95080f64ce095b3ebac7966077645dddf9e9570afdf8cc1586bae90c9b504",
+      "scope": "冻结HUST/SDK/统一Graph，35B TP2；输出布局单项及联合静态预布局各一次原70题质量/200题性能，一预热三计时；历史同条件Native。",
+      "result": "首版吞吐+0.08%、摊销−0.08%；联合吞吐−0.46%、摊销+0.46%，70题56/70且输出全同Native。双卡局部机制生效并明显省时，但未证明整机稳定降本。",
+      "do_not_repeat": "当前两版默认关闭，不盲扫卷积分块或原样重复；不把组件收益计入成本阶梯。",
+      "reopen_requires": "新的正式请求关键路径/调度瓶颈证据或实质联合实现，另立假设、预算和停止条件；已有静态预布局归属及结果保持。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "联合70题与Native逐Token一致，首版55/70；单启动子集不代表全量质量或跨重启稳定。",
+      "search_terms": [
+        "GDN convolution output layout",
+        "conv_layout",
+        "packed QKV",
+        "static convolution prelayout joint"
+      ]
+    },
+    {
+      "id": "prefill-matmul-allreduce-model-r1",
+      "name": "纯Prefill矩阵乘与AllReduce融合有限模型验证",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/prefill-matmul-allreduce-model-r1/assessment.json",
+      "scope": "冻结35B TP2、统一Graph、原70质量/200性能，一预热三计时；复用同条件Native。",
+      "result": "吞吐−1.75%、百万输出摊销+1.78%；55/70对56/70，50题输出Token变化。正式窗口每rank仅40次融合，大多数混合Prefill未覆盖。",
+      "do_not_repeat": "不原样重复纯Prefill版，不把组件收益当成本收益。",
+      "reopen_requires": "实质修复混合Prefill覆盖或重复宿主开销，另版组件验证后再用剩余一次模型预算。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "单启动70题子集，相对质量98.21%；98%点估计档通过、99%未过，非全量或跨重启。",
+      "search_terms": [
+        "prefill matmul allreduce",
+        "MC2 pure prefill",
+        "mixed coverage"
+      ],
+      "evidence_sha256": "36546f6eac1289d8ec945461fe7d237e0b5bfee0bac29a63e4f865ebf2d3ece9"
+    },
+    {
+      "id": "prefill-matmul-allreduce-component-r2-smallrows",
+      "name": "混合Prefill融合实际分发链小块退化",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/prefill-matmul-allreduce-component-r2/assessment.json",
+      "scope": "双卡真实两类投影权重，128/1362/2048/4095行×解码前缀1/15；每点6轮100次完整链。",
+      "result": "128行实际分发链慢15.38%～23.91%；1362以上快3.33%～10.49%。256数值样本分段准入，20纯decode守卫走Native并逐值相同。",
+      "do_not_repeat": "不把裸算子128行加速外推到真实分发，不原样重跑本版。",
+      "reopen_requires": "消除每层重复元数据扫描和静态权重检查；第三轮组件计入每40层更新一次上下文。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "合成激活与真实权重组件，非任务质量。",
+      "search_terms": [
+        "MC2 dispatcher overhead",
+        "small row prefill",
+        "metadata phase scan"
+      ],
+      "evidence_sha256": "6fbc3550bef097382f0ec8c18c11f26471ae2aeb73c2f6fd8c01eeea4070ca72"
+    },
+    {
+      "id": "prefill-matmul-allreduce-model-r2",
+      "name": "混合Prefill通算融合与分发优化整模型验证",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/prefill-matmul-allreduce-model-r2/assessment.json",
+      "evidence_sha256": "a325e59d8ba6ad1de4138756b90919992b159e6d9712190df2b9805f16cbc94c",
+      "scope": "冻结35B TP2统一Graph、原70质量/200性能，一预热三计时；同条件历史Native。",
+      "result": "覆盖修复后每rank每性能窗融合7400/7360/7360次；吞吐−4.89%、百万输出摊销+5.14%。56/70同Native，但59题输出改变；当前两版均未降本。",
+      "do_not_repeat": "当前两版默认关闭，不盲扫分块或开启纯decode，不把局部组件收益当整机收益。",
+      "reopen_requires": "新的正式关键路径证据或实质融合/通信实现；另立有限预算。硬件可运行，不把整机退化全部归于架构。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "70题2得2失、59输出变化、截断5对4；单启动三计时，非全量或跨重启资格。",
+      "search_terms": [
+        "MC2 mixed prefill",
+        "matmul allreduce fusion",
+        "per-forward phase cache"
+      ]
+    },
+    {
+      "id": "lm-head-prelayout-transposed-mm-r1",
+      "name": "全词表投影转置ND经mm后端重复转换",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/lm-head-weight-prelayout-component-r1/assessment.json",
+      "evidence_sha256": "7770d963af70eada992e7f8caffbf07ec8bf14415bb44fe4bb3a7e6fea4f2b7d",
+      "scope": "真实35B LM-head权重、BF16 TP2，合成1/2/4/8/16行，六轮100调用；仅转置ND＋torch.mm分支。",
+      "result": "完整链慢132.93%～200.69%；device trace每次增加约0.82～0.85ms权重TransData。全部160数值样本逐值一致。",
+      "do_not_repeat": "不重复原转置ND＋mm分支；不外推为所有预布局无效。",
+      "reopen_requires": "实际后端选择或持久格式发生实质变化，另立有限预算并核实完整链。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "仅合成组件数值及argmax一致；未测真实任务质量。",
+      "search_terms": [
+        "LM-head transposed ND",
+        "torch.mm aclnnMm TransData",
+        "full vocabulary weight layout"
+      ]
+    },
+    {
+      "id": "lm-head-weight-prelayout-model-r2",
+      "name": "全词表LM-head原向NZ预布局整模型验证",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/lm-head-weight-prelayout-model-r2/assessment.json",
+      "evidence_sha256": "32c26a036f3d6448193197c860b9c2a7f5ab1505b34edfb08af879a2ea9ae498",
+      "scope": "冻结35B BF16 TP2统一Graph，原70质量/200性能，一预热三计时；同条件历史Native。",
+      "result": "质量56/70且70题输出全同Native；真实NZ与Graph消费，输出吞吐−1.406%、百万输出摊销+1.426%，当前实现未证明降本。",
+      "do_not_repeat": "当前布局变体默认关闭，不盲扫转置或重复同实现；首轮观察器失败单列。",
+      "reopen_requires": "实质后端/搬运实现变化或新的正式关键路径证据，另立有限预算。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "70题逐Token一致、截断4；一成功启动，非全量或跨重启。历史Native波动和观测开销未分离，不确定归因小幅退化。",
+      "search_terms": [
+        "LM-head full vocabulary NZ prelayout",
+        "MatMulV2_NDNZ",
+        "weight format 29"
+      ]
+    },
+    {
+      "id": "shared-expert-gate-projection-merge-components-r1-r2",
+      "name": "共享主投影与标量门合并：双卡完整链",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/shared-expert-gate-projection-merge-component-r2/assessment.json",
+      "evidence_sha256": "596f4d60c896ee545b61feb9f8e16fae2e8020ecbac43a593a3cf7b56245bbac",
+      "scope": "冻结BF16 TP2实际L0权重，M1/2/4/8/16，两种路由、六配对轮，各30次Graph回放；非模型质量。",
+      "result": "修复版18/20点正向且180输出比较全同；M1/2/4双卡设备时间下降1.86%～9.26%，但M16 rank1增加0.10%～0.16%，M8 rank1分散路由wall仅4/6正向。未过原全形状门槛。",
+      "do_not_repeat": "当前实现不盲扫或重跑，不事后仅挑小批量推进当前maxseq16模型。",
+      "reopen_requires": "有实际小批量负载覆盖合同或实质更低布局/激活开销实现，独立有限预算。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "180完整输出和40独立激活/门值比较逐位一致；无模型、全量或跨重启质量/成本结论。",
+      "search_terms": [
+        "shared expert gate projection merge",
+        "544 shared_gate_unpack_swiglu",
+        "共享门投影合并"
+      ]
+    },
+    {
+      "id": "router-shared-gate-projection-merge-component-r1",
+      "name": "路由与共享标量门投影合并双卡组件",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/router-shared-gate-projection-merge-component-r1/assessment.json",
+      "evidence_sha256": "c0a7661adc149ad792d4e5e1ffb450f20157153fbc84082f32191b4a32c511f2",
+      "scope": "冻结35B BF16 TP2实际L0权重；原生FP32路由与Top8，M1/2/4/8/16各相同/独立输入、六配对轮Graph。",
+      "result": "19/20点中位正向，但M16相同输入rank1设备+0.62%、wall+0.68%；三点wall仅4/6正向。原数值容限通过，ID全同但logits/概率及少量BF16结果变化。",
+      "do_not_repeat": "当前实现封存，不盲扫padding或更改Top8，未过初始门槛不启动模型。",
+      "reopen_requires": "明确的更低拆分开销实现或新的数值/负载覆盖合同，独立有限预算。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "各输出180次比较；非整模型、任务质量或Token成本。",
+      "search_terms": [
+        "router shared gate projection merge",
+        "router_shared_gate_unpack",
+        "路由与共享门投影合并"
+      ]
+    },
+    {
+      "id": "shared-gate-pushdown-addmm-fusion-components-r1-r3",
+      "name": "共享门值前移与尾段融合三轮组件",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/shared-gate-pushdown-addmm-fusion-component-r3/assessment.json",
+      "evidence_sha256": "bef3ccf485859f40f36a11c2bf19d9180e3db088ea2940001bb916279989f358",
+      "scope": "冻结BF16 TP2实际L0权重、M1/2/4/8/16两路由、6配对轮各30Graph；2实现加1同字节独立确认。",
+      "result": "原Addmm7/20正向，M16退2.31%～7.56%；AIV修复首次20/20中位正向、120/120event正向，独立确认19/20，rank0M1spread event+0.51%，原联合门槛15/20。",
+      "do_not_repeat": "不再重复组件、改门槛或事后挑形状；当前实现不模型。",
+      "reopen_requires": "实质更低开销实现或预登记的实际负载覆盖合同，另版有限预算。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "向量版两启动各180完整、120共享诊断通过原容限，激活各120全同；非任务质量/Token成本。",
+      "search_terms": [
+        "shared gate pushdown",
+        "Addmm Cast MatMul",
+        "shared_gate_swiglu_pushdown",
+        "共享门值前移"
+      ]
+    },
+    {
+      "id": "postnorm-router-fp32-export-fusion-model-r1",
+      "name": "残差归一化与FP32导出融合原70/200模型",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/postnorm-router-fp32-export-fusion-model-r1/assessment.json",
+      "evidence_sha256": "4ad7a686eaa285dd06dcab401226f61a56604c8b25e3bf1071cf730e9788d15c",
+      "scope": "冻结35B BF16 TP2，原70题质量、200题性能，一候选启动三计时；匹配Native复用。",
+      "result": "组件20/20正向且有限输出全同；模型吞吐−2.16%、百万输出摊销+2.21%，55/70对56/70，双rank各2520真实融合调用。",
+      "do_not_repeat": "不重跑当前实现、不改统一参数或事后挑窗口；默认关闭。",
+      "reopen_requires": "实质新实现或真实覆盖/关键路径证据，独立有限预算。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "仅原70/200，57质量输出变化、2改对3改错、截断5对4；非全量、无损或跨重启验收。",
+      "search_terms": [
+        "postnorm router fp32 export fusion",
+        "postnorm_router_export_bf16",
+        "残差归一化路由导出"
+      ]
+    },
+    {
+      "id": "gdn-conv-qknorm-output-fusion-strided-components-r1-r2",
+      "name": "GDN卷积归一化融合跨步权重版",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/gdn-conv-qknorm-output-fusion-component-r2/assessment.json",
+      "evidence_sha256": "012d5fefb3ab0e2ff480684c43a9d6139f657be55ac90aeaeeb3333bd8b6fc21",
+      "scope": "实际35B L0 TP2权重、双卡M1/2/4/8/16原六配对轮；r1与分组r2各一次组件启动，无模型。",
+      "result": "M16完整链r1约退225%，r2约退289%～291%；头分组未解决stride4权重拷贝。后续同内核连续预布局r3/r4已验证修复，原负结果保留。",
+      "do_not_repeat": "不重复r1/r2跨步权重实现，不修改冻结测试或掩盖失败。",
+      "reopen_requires": "实质内存布局或实现变化与新假设、有限预算；已有连续版实测另立证据，不抹除原版本。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "2112有限组件检查通过不等于任务质量；两版均未进入整模型，Token成本未知。",
+      "search_terms": [
+        "gdn conv qknorm strided",
+        "stride4 weight",
+        "卷积归一化跨步权重"
+      ]
+    },
+    {
+      "id": "moe-shared-output-epilogue-fusion-paired-restarts-r2",
+      "name": "MoE结果还原与共享门融合四组跨启动配对",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/moe-shared-output-epilogue-fusion-paired-restarts-r2/assessment.json",
+      "evidence_sha256": "11664c22bc2f53fb1f96c24208c5e08779d1e8e73104526b109ee6c43a255fb8",
+      "scope": "冻结HUST/SDK/统一Graph、35B BF16 TP2；原70题质量/200题性能，4对8独立启动，各一预热三计时，正反顺序各两对。",
+      "result": "百万输出摊销+0.0510%/+3.0078%/+3.2580%/−0.3392%，配对中位+1.5294%；候选56/55/56/56对Native均56。实际融合与双rankGraph通过，资源释放。",
+      "do_not_repeat": "不原样重复已完成配对、盲扫尾段分块或以旧单启动−1.81%计稳定收益。",
+      "reopen_requires": "实质不同实现、正式负载关键路径证据或新的负载合同；另版计划、匹配Native与有限预算。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "原70题重复，非280独立题；各对98%档通过，第2对1得2失、59输出变化，非无损或全量质量资格。",
+      "search_terms": [
+        "MoE unpermute",
+        "shared_output_epilogue",
+        "共享门尾段融合",
+        "paired restarts",
+        "10160"
+      ]
+    },
+    {
+      "id": "attention-output-projection-prelayout-model-r1",
+      "name": "注意力输出投影预转置NZ",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/attention-output-projection-prelayout-model-r1/assessment.json",
+      "evidence_sha256": "7d828fad24e218d003634a11e736db0bf6218f22826c87b4953d4ddb6b7cc8da",
+      "scope": "冻结HUST/SDK/Graph，35B BF16 TP2；两组件独立启动，一原70/200模型启动，对全部四近期Native。",
+      "result": "目标投影物理核加速10.11%～18.59%；整模型吞吐−3.57%至−5.89%，百万输出摊销+3.70%至+6.26%；57/70对56/70。",
+      "do_not_repeat": "不原样重复本预转置NZ实现或扫描相同布局分块凑收益。",
+      "reopen_requires": "实质不同机制或正式关键路径证据，另版冻结最小计划与预算。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "70题小样本，1得0失、输出不逐位一致、截断6对4；非全量质量或跨启动资格。",
+      "search_terms": [
+        "attention output projection",
+        "预布局",
+        "out_proj",
+        "o_proj",
+        "NZ",
+        "339.166"
+      ]
+    },
+    {
+      "id": "vocab-embedding-index-fusion-model-r1",
+      "name": "词表分片索引与Embedding融合",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/vocab-embedding-index-fusion-model-r1/closeout.json",
+      "evidence_sha256": "67a0b444e0b40efbeee3030aed83327b10565ccb94630736f6d2f596b79cb1bb",
+      "scope": "冻结HUST/SDK/统一Graph、35B BF16 TP2；两次组件、一原70/200模型、一次全词表数值诊断。对全部四近期Native。",
+      "result": "组件完整链−28.22%至−45.95%，模型吞吐−2.32%至−4.67%、百万输出摊销+2.37%至+4.90%，质量55对56；全词表ID核验通过，已释放。",
+      "do_not_repeat": "不原样重复同kernel、分块扫描或相同模型队列。",
+      "reopen_requires": "不同实质机制或正式关键路径证据，另版匹配对照及有限预算。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "原70题，1得2失、63输出变化，98.214%保留；非全量或候选跨启动资格。全词表组件数值不是任务质量。",
+      "search_terms": [
+        "Embedding",
+        "词表分片",
+        "lookup",
+        "index fusion",
+        "11to1",
+        "248320"
+      ]
+    },
+    {
+      "id": "fa-qkv-input-prelayout-component-r1",
+      "name": "FA QKV输入投影两种NZ预布局",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/fa-qkv-input-prelayout-component-r1/closeout.json",
+      "evidence_sha256": "b44b24b499c3606fddcc2ed75dbc72d440426e8d698988b241327d341db0d7ce",
+      "scope": "冻结SDK/HUST、35B真实L3/L7 QKV列分片4608×2048；双卡Graph原split/QKnorm/MRoPE完整链，五种行数，六轮正反配对。",
+      "result": "NZ Linear1/20，预转置8/20完整链通过；M16四点均六轮更快，但仅省1.05～4.38微秒。原方向1000输出全同；预转置680/1000全同，其余均过原容限。0模型。",
+      "do_not_repeat": "不重复同布局或分块扫描，不将M16组件收益写成Token降本。",
+      "reopen_requires": "不同实质矩阵实现或正式关键路径证据，另版有限预算。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "组件数值而非任务评分；无模型或全量质量、Token费用与跨启动结论。",
+      "search_terms": [
+        "FA QKV",
+        "input projection",
+        "4608",
+        "NZ",
+        "prelayout"
+      ]
+    },
+    {
+      "id": "fa-rope-cache-write-fusion-model-r4",
+      "name": "FA位置索引归一化缓存写入解码融合",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/fa-rope-cache-write-fusion-model-r4/closeout.json",
+      "evidence_sha256": "787d0d2d5fbc92856543394759da6c760e45ea399a291221590f4f23f718a51a",
+      "scope": "冻结HUST/SDK/统一Graph与原70/200；仅FULL解码融合，一成功候选对四既有Native；先前三次宿主失败单列。",
+      "result": "双rank每rank630联合核、实际链9→2；351.697tok/s，百万输出6.318570元，相对四Native+0.0042%～+2.4698%；55/70对56/70。",
+      "do_not_repeat": "不原样重跑当前解码实现凑收益；预填充是另版新增覆盖组件，不计本版通过。",
+      "reopen_requires": "实质新增覆盖或关键路径机制，单列计划、数值验证与最小预算；原公共参数不变。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "原70题，1得2失、59序列变化；98.214%点估计非无损/全量资格。",
+      "search_terms": [
+        "FA",
+        "RoPE",
+        "QKnorm",
+        "paged cache",
+        "decode_only",
+        "9to2",
+        "351.697"
+      ]
+    },
+    {
+      "id": "fa-rope-cache-write-fusion-model-r6",
+      "name": "FA归一化RoPE缓存联合融合：预填充扩展",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/fa-rope-cache-write-fusion-model-r6/closeout.json",
+      "evidence_sha256": "1e7d359d024bd487f0517deea3c827865521d305677b2455e998e30cffff3c5e",
+      "scope": "冻结HUST/SDK/统一Graph与原70/200，一成功预填充候选对四既有Native；解码版另计；真实7探针验收误判原件保留。",
+      "result": "353.0731tok/s，百万输出6.293944元；对四Native增0.5355/2.0704/0.6902%、低0.3855%，56/70与四组70输出全同。双rank650联合核、预填充覆盖100%。",
+      "do_not_repeat": "不原样重复当前解码或预填充核、同分块扫描，不以组件−22%～−62%当模型降本。",
+      "reopen_requires": "更大关键路径或实质机制，另版有限计划与预算；保留统一条件。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "一次原70题，无观测损失；非全量、候选跨启动质量或稳定成本资格。",
+      "search_terms": [
+        "FA",
+        "prefill",
+        "RoPE",
+        "QKnorm",
+        "cache write",
+        "353.073",
+        "650",
+        "9to2"
+      ]
+    },
+    {
+      "id": "gdn-main-input-weight-prelayout-component-r1",
+      "name": "GDN主输入6144矩阵NZ预布局",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/gdn-main-input-weight-prelayout-component-r1/closeout.json",
+      "evidence_sha256": "224599b485ad97bb36599ed42068386e8ad27a4005c4a5b85d51246e5b1a50e4",
+      "scope": "冻结SDK、真实L0/L4权重、BF16TP2，主6144矩阵＋原BA与拆分输入生产链；五M、同/异输入、六配对轮。非完整GDN或模型。",
+      "result": "NZ8/40，预转置39/40未过原门槛；预转置单层仅省0.29～2.35us，M16约1us。4800过容限、4171逐字节全同；0模型，业务费用未知。",
+      "do_not_repeat": "不重复同布局、分块或M16-only选择，不把组件微秒换算成实测Token降本。",
+      "reopen_requires": "实质新GEMM或实际更大关键路径，独立有限计划。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "输入生产链数值，预转置有非逐位变化；无任务质量或完整GDN状态验收。",
+      "search_terms": [
+        "GDN",
+        "in_proj_qkvz",
+        "6144",
+        "weight prelayout",
+        "NZ",
+        "transposed",
+        "39of40"
+      ]
+    },
+    {
+      "id": "gdn-main-input-weight-prelayout-model-closeout-r1",
+      "name": "GDN主输入矩阵预布局整模型与去包装配对",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/gdn-main-input-weight-prelayout-closeout-r1/assessment.json",
+      "evidence_sha256": "107e77ff73a7b60d8d7d658c287f10faa72d86035261c5f025aacac0a80a4dfe",
+      "scope": "冻结HUST/SDK、统一Graph、Qwen3.5-35B-A3B BF16 TP2；原70/200协议两组三臂六启动，候选全12032跨两启动。",
+      "result": "原版百万输出费用+0.278%/+2.945%，C++版为+0.323%/+2.938%；C++相对原版+0.0446%/-0.0072%，未获稳定降本。",
+      "do_not_repeat": "暂停当前方向；不原样重跑或继续仅调Python统计包装，不用组件收益替代Token降本。",
+      "reopen_requires": "实质新实现与真实模型关键路径证据，并重新取得明确实验授权。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "候选四次56/70，Native55/70和56/70；全量9604/12032，截断1498、无效55。无完整Native全量配对；每臂仅两次启动。",
+      "search_terms": [
+        "GDN",
+        "in_proj_qkvz",
+        "NZ",
+        "weight prelayout",
+        "C++",
+        "Python wrapper",
+        "12032",
+        "three-arm"
+      ]
+    },
+    {
+      "id": "gdn-architecture-resident-bmm-0112",
+      "name": "GDN full-resident no-base-view BMM",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-delayed-maintenance-opt-20261021/runs/final-v0112/assessment.json",
+      "scope": "910B2 pinned SDK TP2 geometry, no weights, resident36 E16, FP32, changed-input graph",
+      "result": "C16 full verify~119/120us vs~80/78us control; exact component outputs; zero model starts for this route",
+      "outcome_kind": "measured_performance_regression",
+      "do_not_repeat": "same all36-resident BMM prototype",
+      "reopen_requires": "avoid all36 resident overcompute, material State layout or indexed matrix implementation; new bounded hypothesis",
+      "quality_scope": "component only"
+    },
+    {
+      "id": "gdn-architecture-indexed-dot-0112",
+      "name": "GDN indexed IEEE FP32 dot tile32",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-delayed-maintenance-opt-20261021/runs/final-v0112/assessment.json",
+      "scope": "physical4 only, C16 R29, same full verify synthetic graph",
+      "result": "fresh fixture output exact;115.02us vs80.52us; early NaN fixtures invalid, not negative evidence",
+      "outcome_kind": "measured_performance_regression",
+      "do_not_repeat": "same dense tile32 dot model promotion or unchanged sweep",
+      "reopen_requires": "material FP32 matrix scheduling/dataflow change or evidenced new shape",
+      "quality_scope": "one device component only; no model"
+    },
+    {
+      "id": "gdn-architecture-short-cadence-0112",
+      "name": "GDN shorter cadence with unchanged32-history kernel",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-delayed-maintenance-opt-20261021/runs/final-v0112/assessment.json",
+      "scope": "both physical devices; C1/4/16, full3 and ragged0/1/2/3 accepted,60wave devicecycles",
+      "result": "period2/4/6 slower than10; FP64 final state relativeL2<3e-7",
+      "outcome_kind": "measured_performance_regression",
+      "do_not_repeat": "same fixed32 kernel only shorteningperiod",
+      "reopen_requires": "actually shorten8/16 history computation or new acceptance-aware mechanism, bounded cycle gate",
+      "quality_scope": "devicecycle only"
+    },
+    {
+      "id": "gdn-architecture-compact-bmm-model-0112",
+      "name": "GDN compact FP32 BMM three independent startup pairs",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-delayed-maintenance-opt-20261021/runs/final-v0112/assessment.json",
+      "scope": "same frozen TP2/MTP2 FULL E16/R36; 3pairs AB/BA/AB;512output,3windows per C1/4/16",
+      "result": "0.1.12三组整模型配对C1/C4/C16收益中位−2.939%/−1.881%/−1.117%；各并发正负混合，没有稳定改善。原始逐组数值保留measured_results及原assessment。",
+      "outcome_kind": "no_stable_benefit",
+      "do_not_repeat": "unchanged compact route/model queue to seek favorable timing",
+      "reopen_requires": "new request-window bottleneck evidence or material State/dataflow change with new finite plan",
+      "quality_scope": "43/43 checks per start, same8 diagnostic control8/7/7 andcompact7/7/7; no full quality or equivalence",
+      "measured_results": {
+        "1": {
+          "gains_percent": [
+            2.878227517203147,
+            -6.7097062248300805,
+            -2.9390212740184607
+          ],
+          "median_percent": -2.9390212740184607
+        },
+        "4": {
+          "gains_percent": [
+            0.44267842937739665,
+            -1.88104140151939,
+            -2.628259274049194
+          ],
+          "median_percent": -1.88104140151939
+        },
+        "16": {
+          "gains_percent": [
+            0.3317085306571821,
+            -3.227037323792603,
+            -1.1174172354414202
+          ],
+          "median_percent": -1.1174172354414202
+        }
+      }
+    },
+    {
+      "id": "gdn-projection-scalar-header-0113",
+      "name": "GDN projection bank scalar header publication 0.1.13",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-delayed-maintenance-opt-20261021/runs/final-v0114/scalar-header-negative.json",
+      "scope": "single-card cache hot verification only;0.1.13 scalar header implementation, not all projection caching",
+      "result": "无refill热验证仍约1.1–1.5ms；对照约43us。后续旧dtype测试触及seal后编译，整个wrapper失败，未作模型测试。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "自定义组件数值检查通过；整个wrapper失败，无完整质量资格。",
+      "do_not_repeat": "Do not repeat the unchanged scalar header implementation",
+      "reopen_requires": "Material header publication change;0.1.14 vector64-byte header is a new tested version"
+    },
+    {
+      "id": "gdn-projection-mmlu70-quality-window-0114",
+      "name": "GDN0.1.14 original70/2048 auxiliary quality-window cost",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-delayed-maintenance-opt-20261021/runs/standard-mmlu-v0114/assessment.json",
+      "scope": "Original70/2048 quality-before-performance-warm role, once/start,3fresh pairs; not primary200/256 or dedicated warmed performance qualification",
+      "result": "质量窗口耗时三对增加17.312%/2.831%/13.449%；同70题三次总分双方168/210，截断15→20。短输出200/256性能另有+1.719%中位收益，不予否定或拼接。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "same70 repeated3; pooled retention100%, first pair96.491% misses preregistered per-pair98% gate; no whole12032 claim",
+      "do_not_repeat": "Do not rerun unchanged70/2048 quality windows to seek favorable scores or timing",
+      "reopen_requires": "new method/causal bottleneck evidence or explicitly new matched truncation/scorer diagnostic with finite frozen plan; never change original scores"
+    },
+    {
+      "id": "gdn-pack-zero-real-mmlu-increment-0116",
+      "name": "GDN输出清零融合0.1.16真实负载增量",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-delayed-maintenance-opt-20261021/runs/pack-zero-v0116/assessment.json",
+      "evidence_sha256": "8b98c313c2bab6cde18d3c78aed5c4c0aba70b8c7b5f6cdc1a9a2661d9f76d53",
+      "scope": "Pinned full-school/MTP2/FULL E16/R36; originalMMLU200/256 naturalEOS +70/2048; 3 matched independent blocks,3formalwindows/start; fused vs same-package reference",
+      "result": "组件双卡正向且逐值一致；整机融合增量三对[0.03060205798999238, 1.0891074355353414, 0.5913286408015361]%，中位+0.591329%，预注册t95稳定门禁未通过。整体相对Native另列，不否定既有0.1.14命名范围。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "同70题重复3次：reference166/210，fused167/210；不是210独立题，完整质量/SLO未验。",
+      "do_not_repeat": "Do not extend or repeat the unchanged pack-zero queue to seek favorable timing; no component-to-model extrapolation.",
+      "reopen_requires": "Material larger verified critical-path fusion or causal request-window evidence; preregister finite budget, preserve all raw outcomes; existing contiguous Host copy-run coalescing must not be reimplemented.",
+      "search_terms": [
+        "GDN",
+        "pack zero",
+        "output zero fusion",
+        "0.1.16",
+        "incremental throughput"
+      ]
+    },
+    {
+      "id": "gdn-merge-cache-cycle-0120",
+      "name": "GDN 合并同步刷新缓存0.1.20",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-delayed-maintenance-opt-20261021/runs/scenario-specialization-v0121/assessment.json",
+      "evidence_sha256": "e8a34aae34d39f0f76b80c577ee6c26c6f3874f2f6333f98b249b1c9bfc6420e",
+      "scope": "Ascend910B2 physical3/4 separately; FP32 MTP2 FULL graph; C16 60wave full3/ragged,merge cadence10; same-process same-card pack-zero reference. Component only, no new model runs.",
+      "result": "C16完整周期收益 [{\"board\": 3, \"pattern\": \"full3\", \"gain_percent\": -0.8640919707720851}, {\"board\": 3, \"pattern\": \"ragged\", \"gain_percent\": -1.1843044863101726}, {\"board\": 4, \"pattern\": \"full3\", \"gain_percent\": -0.5983842176414567}, {\"board\": 4, \"pattern\": \"ragged\", \"gain_percent\": -1.9035136082230952}]；双卡×两模式全正的预注册晋级门槛未通过。旧0.1.16整模型结果不受此组件结论替代。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "组件数值/生命周期通过；history初始verify和cycle精确，Host输出仅relativeL2<0.004、计时后浮点State<3e-5。没有新增真实任务质量或成本资格。",
+      "do_not_repeat": "Do not rerun this unchanged candidate to select favorable cards, modes or timing. No component-to-model extrapolation.",
+      "reopen_requires": "Substantive implementation or compiled critical-path evidence; retain old raw results and preregister finite budget. Prioritize16/32 history branches and real workload frequency evidence.",
+      "search_terms": [
+        "GDN",
+        "write_through",
+        "merge cache",
+        "scenario specialization",
+        "0.1.20"
+      ]
+    },
+    {
+      "id": "gdn-empty-history-cycle-0121",
+      "name": "GDN 空历史特化0.1.21",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-delayed-maintenance-opt-20261021/runs/scenario-specialization-v0121/assessment.json",
+      "evidence_sha256": "e8a34aae34d39f0f76b80c577ee6c26c6f3874f2f6333f98b249b1c9bfc6420e",
+      "scope": "Ascend910B2 physical3/4 separately; FP32 MTP2 FULL graph; C16 60wave full3/ragged,merge cadence10; same-process same-card pack-zero reference. Component only, no new model runs.",
+      "result": "C16完整周期收益 [{\"board\": 3, \"pattern\": \"full3\", \"gain_percent\": 1.427942296163076}, {\"board\": 3, \"pattern\": \"ragged\", \"gain_percent\": 0.06941716297723666}, {\"board\": 4, \"pattern\": \"full3\", \"gain_percent\": -0.36171993539229064}, {\"board\": 4, \"pattern\": \"ragged\", \"gain_percent\": 1.3505712276195236}]；双卡×两模式全正的预注册晋级门槛未通过。旧0.1.16整模型结果不受此组件结论替代。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "组件数值/生命周期通过；history初始verify和cycle精确，Host输出仅relativeL2<0.004、计时后浮点State<3e-5。没有新增真实任务质量或成本资格。",
+      "do_not_repeat": "Do not rerun this unchanged candidate to select favorable cards, modes or timing. No component-to-model extrapolation.",
+      "reopen_requires": "Substantive implementation or compiled critical-path evidence; retain old raw results and preregister finite budget. Prioritize16/32 history branches and real workload frequency evidence.",
+      "search_terms": [
+        "GDN",
+        "empty",
+        "history fine",
+        "scenario specialization",
+        "0.1.21"
+      ]
+    },
+    {
+      "id": "gdn-four-history-cycle-0121",
+      "name": "GDN 4行短历史特化0.1.21",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-delayed-maintenance-opt-20261021/runs/scenario-specialization-v0121/assessment.json",
+      "evidence_sha256": "e8a34aae34d39f0f76b80c577ee6c26c6f3874f2f6333f98b249b1c9bfc6420e",
+      "scope": "Ascend910B2 physical3/4 separately; FP32 MTP2 FULL graph; C16 60wave full3/ragged,merge cadence10; same-process same-card pack-zero reference. Component only, no new model runs.",
+      "result": "C16完整周期收益 [{\"board\": 3, \"pattern\": \"full3\", \"gain_percent\": 2.4855585385668233}, {\"board\": 3, \"pattern\": \"ragged\", \"gain_percent\": 1.1521063062378323}, {\"board\": 4, \"pattern\": \"full3\", \"gain_percent\": -1.6759682905180484}, {\"board\": 4, \"pattern\": \"ragged\", \"gain_percent\": 0.6269118932454409}]；双卡×两模式全正的预注册晋级门槛未通过。旧0.1.16整模型结果不受此组件结论替代。",
+      "outcome_kind": "no_stable_benefit",
+      "quality_scope": "组件数值/生命周期通过；history初始verify和cycle精确，Host输出仅relativeL2<0.004、计时后浮点State<3e-5。没有新增真实任务质量或成本资格。",
+      "do_not_repeat": "Do not rerun this unchanged candidate to select favorable cards, modes or timing. No component-to-model extrapolation.",
+      "reopen_requires": "Substantive implementation or compiled critical-path evidence; retain old raw results and preregister finite budget. Prioritize16/32 history branches and real workload frequency evidence.",
+      "search_terms": [
+        "GDN",
+        "four",
+        "history fine",
+        "scenario specialization",
+        "0.1.21"
+      ]
+    },
+    {
+      "id": "native-gdn-delayed-model-v024-two-pairs",
+      "name": "独立Native GDN delayed update 0.2.4：两对正式性能回退",
+      "status": "sealed_no_blind_repeat",
+      "evidence": "results/campaigns/gdn-delayed-maintenance-opt-20261021/runs/independent-native-v020/assessment.json",
+      "scope": "标准Native与标准Native加独立org.vllm-hust.native-gdn-delayed0.2.4；Ascend910B2 TP2、graph-v1、MTP关闭、FULL_DECODE_ONLY，plan-v16公共copy API兼容桥接两臂相同。原70题质量及200题性能；仅两对、四次正式启动完成。第三对Native人为中止且无workload回执，候选未启动。本项为独立Native范围，不继承旧BetterScale宿主内部+2.056%。",
+      "result": "已完成两对中候选吞吐分别−3.758091307%/−6.830782397%，批耗时分别+5.023946336%/+8.404697981%；均为性能回退，无收益、不晋级、默认OFF、成本未合格。paused_by_user；用户暂停而非三对稳定性验证完成，不填补被中止或未启动的结果。",
+      "outcome_kind": "measured_performance_regression",
+      "quality_scope": "每对同一冻结70题均为Native56/70→候选57/70；两对重复不是140道独立题。双臂跨块健康和有界组件正确性通过，不授予完整全量/SLO及组合资格；第三对无可用workload回执。",
+      "do_not_repeat": "后续实验由用户明确暂停。不得原样补跑本候选、自动补足第三对、选择有利计时，或把旧BetterScale收益并入独立Native结果；保留全部已测、失败和中止记录。",
+      "reopen_requires": "必须由用户明确恢复，并具有实质新机制/版本及预注册有限计划、预算和停止条件；保留本轮原始结果和范围，不能以继续同一候选取得有利结果为恢复理由。此字段不构成实验授权。",
+      "search_terms": [
+        "GDN",
+        "Native",
+        "delayed update",
+        "0.2.4",
+        "MTP off",
+        "FULL_DECODE_ONLY",
+        "paused_by_user",
+        "two pairs"
+      ],
+      "evidence_sha256": "ccd8c044c4893c3bc1ea8c01de0c462cfb3f5b9f98af2cbb8a32d075e7eaeac1"
+    },
+    {
+      "id": "gdn-writeback-gated-norm-model-r1",
+      "name": "GDN结果写回与门控归一化合并整模型未降本",
+      "status": "sealed_no_blind_repeat",
+      "outcome_kind": "no_stable_benefit",
+      "evidence": "results/campaigns/attention-runtime-validation/runs/gdn-writeback-gated-norm-model-r1/assessment.json",
+      "scope": "冻结HUST/SDK/Graph、35B TP2；4组件、1整模型原7/70/200一预热三正式；复用六个完成Native，非六独立配对。",
+      "result": "去冗余初始化版双卡两启均20/20完整尾段通过；模型342.42tok/s、百万输出摊销6.489747元，相对六Native+2.5734%～+5.2458%；质量56/70。",
+      "do_not_repeat": "同字节写回归一化/清零省略实现、相同条件盲扫分块或重跑挑好窗。",
+      "reopen_requires": "有证据的新关键路径或联合机制、明确假设与有限预算，保留本轮原版波动及所有模型窗。",
+      "quality_scope": "70题子集，五Native70输出全同；另一Native2得1失，不冒充完整无损或全量资格。",
+      "evidence_sha256": "d1ed2430c946865f843fec60dbf2b236579057dfa21a59eb7e2059e78d1f99a4"
+    }
+  ]
+}
