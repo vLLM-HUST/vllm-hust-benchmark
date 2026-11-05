@@ -22,7 +22,7 @@ if __package__ in {None, ""}:
 from recover_swesmith_fixed3_repository import COMMITS
 
 ROOT = Path(__file__).resolve().parents[1]
-AUTHOR_SHA256 = "2e5b7930d3546680bfc63849e10675c8d90ecd95da60201d4c5817cf841a0469"
+AUTHOR_SHA256 = "2e5b7930d3546680bfc63849e10675c8d90ecd95da60201d4c5817cf841a0469"  # pragma: allowlist secret - fixed public author archive digest
 
 
 def verify_author(archive):

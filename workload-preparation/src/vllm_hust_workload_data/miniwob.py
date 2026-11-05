@@ -8,9 +8,7 @@ import zipfile
 from .assets import asset_path, verify_file
 from .records import WorkloadRecord
 
-PREFIX = (
-    "MiniWoB-plusplus-33c3b4ddef8c6eb67c57a29663d844b1eda7e614/miniwob/html/miniwob/"
-)
+PREFIX = "MiniWoB-plusplus-33c3b4ddef8c6eb67c57a29663d844b1eda7e614/miniwob/html/miniwob/"  # pragma: allowlist secret - fixed public archive member prefix
 
 
 def original_rows(path):

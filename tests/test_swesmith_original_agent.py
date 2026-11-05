@@ -47,7 +47,7 @@ def test_private_native_runtime_bindings_preserve_exact_task_set():
         "https://172.18.0.2",
         "http://0.0.0.0",
         "http://172.18.0.2/path",
-        "http://name:password@172.18.0.2",
+        "http://name:password@172.18.0.2",  # pragma: allowlist secret - inert rejected-URL fixture, not real credentials
     ],
 )
 def test_runtime_binding_rejects_public_or_credential_urls(host):

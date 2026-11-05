@@ -20,7 +20,8 @@ SPEC.loader.exec_module(MODULE)
 
 def test_git_object_known_empty_blob():
     assert (
-        MODULE.git_object("blob", b"")[0] == "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+        MODULE.git_object("blob", b"")[0]
+        == "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"  # pragma: allowlist secret - standard Git empty-blob object ID
     )
 
 
