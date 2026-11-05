@@ -1028,7 +1028,22 @@ def test_checklist_covers_registered_sources_once():
     # implementing the already agreed118-source inventory incrementally.
     assert len(rows) == 100
     assert {row["source_id"] for row in rows} <= set(catalog["sources"])
-    assert set(catalog["sources"]) <= set(ledger["delivery_inventory"])
+    replacements = {
+        item["delivered_source_id"]: source_id
+        for source_id, item in ledger["delivery_inventory"].items()
+        if item.get("delivered_source_id")
+    }
+    for replacement, source_id in replacements.items():
+        item = ledger["delivery_inventory"][source_id]
+        assert item["checked"] and item["replacement_basis"]
+        assert replacement in catalog["sources"]
+        receipt = json.loads((ROOT / item["delivery_receipt"]).read_text("utf-8"))
+        assert receipt["source_id"] == replacement
+        assert receipt["delivery_inventory_slot"] == source_id
+        assert receipt["source_checkbox_eligible"]
+    assert set(catalog["sources"]) <= set(ledger["delivery_inventory"]) | set(
+        replacements
+    )
     markdown = (directory / "DATASET_CHECKLIST.zh-CN.md").read_text(encoding="utf-8")
     table_rows = [
         [cell.strip() for cell in line.split("|")[1:-1]]
