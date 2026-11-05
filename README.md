@@ -788,6 +788,17 @@ prompt/媒体时不能伪造原始请求；有官方回放工具的按原工具�
 588、608、1073 均已通过作者入队检查。Agent 和工具服务必须显式使用回环地址；官方缓存未命中会先尝试外连，未隔离前不要启动服务。原生执行和评分未验证，不计入已交付项，也不等同于
 ToolBench 的实时第三方 API。
 
+本地工具服务入口为 [run_stabletoolbench_local_server.py](scripts/run_stabletoolbench_local_server.py)：
+
+```bash
+python scripts/run_stabletoolbench_local_server.py --author-server <固定原版server目录> --cache <原始tool_response_cache目录> --tools <原始工具定义目录> --output <新日志目录> --simulator-endpoint http://127.0.0.1:19467/v1 --simulator-model stabletoolbench/MirrorAPI-Cache --port 19468
+```
+
+默认只核验作者文件并生成计划；加 `--execute` 才启动服务。该入口只监听回环地址，阻断外连，不改写缓存；真实 API 层明确返回本地 HTTP
+503，再由作者原代码进入官方模拟器，不代表验证真实 API。缓存命中的实际 HTTP 控制已通过；模拟器权重、NPU 推理和三题任务仍需单独验证。调用 Agent 时设置
+`SERVICE_URL=http://127.0.0.1:19468/virtual`，同时使用原始模型名及[本地模型名兼容补丁](configs/workload-native/stabletoolbench-local-model-name.patch)，不使用
+GPT 别名。
+
 如需准备 FAC 评分，准备命令同时传入 `--official-ids <test_query_ids/G1_instruction.json>`。保留三题原始 Agent 输出，用作者的
 `convert_to_answer_format.py --method CoT@1` 转换后，先运行
 `python scripts/check_stabletoolbench_fac_inputs.py --instructions <fixed-g1.json> --ids <fixed-g1-fac-ids.json> --answers <转换后的答案.json>`。检查通过后才把相同的答案文件和题号表交给作者
