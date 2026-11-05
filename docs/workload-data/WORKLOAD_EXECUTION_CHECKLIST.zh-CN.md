@@ -568,12 +568,27 @@ InfiniteBench（固定抽样已验证）：12 组原生协议均已对固定原�
 先追加 `--capacity-only` 逐题检查，只调用服务的 tokenizer，不生成或评分。 全部放得下时退出码为 0，有超限题时为 2；私有回执保留每题的容量判定。
 正式运行时移除此参数，并使用另一新的输出目录。
 
-MLAgentBench（未完成）：固定 CIFAR-10 和 OGBN-Arxiv 已原生执行并评分，保留负面结果，不重跑。只补固定 IMDb：需要隔离的 NPU 训练执行环境，能运行原
-DistilBERT 微调及评分，不能以 CPU
-编码器或其他题目代替。[CIFAR-10 回执](validation/mlagentbench-formal-cifar10-native-audit-20261102.json) ·
+MLAgentBench（未完成）：固定 CIFAR-10 和 OGBN-Arxiv 已原生执行并评分，保留负面结果，不重跑。只补固定 IMDb：原题要求微调
+DistilBERT，不能换成其他模型或题目。按已授权的任务内部科学程序隔离 CPU 执行口径部署；Agent 的 LLM 请求、辅助编码器和裁判仍使用 NPU。此前把任务内部分类器也强制限定为
+NPU 的执行限制予以更正，历史 NPU 初始化失败记录保留，不计为成功。
+[CIFAR-10 回执](validation/mlagentbench-formal-cifar10-native-audit-20261102.json) ·
 [OGBN-Arxiv 回执](validation/mlagentbench-formal-ogbn-arxiv-native-audit-20261102.json) 续跑沿用
 `scripts/run_mlagentbench_local_agent.py --task imdb`，先在专用容器内检查隔离和原源码，再用新工作及日志目录执行。 IMDb 三份分片与
-DistilBERT 权重可按机器清单的 SHA-256 回查，不需要重新下载。
+DistilBERT 权重可按机器清单的 SHA-256 回查，不需要重新下载。新环境可运行
+`python scripts/prepare_mlagentbench_imdb_assets.py --output <仓库外原资产目录> --action plan` 查看原8文件及总量； 加
+`--action acquire --max-bytes 352099709` 按固定上游URL取得并校验，断点续传另加 `--resume`； 已有文件用
+`--action verify`，不重复下载。当前服务器已复用并核验8文件；新的网络下载分支未在该服务器重跑。 新增
+`scripts/prepare_mlagentbench_imdb_offline.py` 将已校验的原文件绑定到新建的原 Agent 工作副本：
+`--assets-root <原数据和模型目录> --port-root <新原Agent副本> --cache-root <新缓存目录> --container-asset-root /assets`。
+容器将原资产目录只读挂载为 `/assets`、缓存只读挂载为 `HF_HOME`，并为 `HF_DATASETS_CACHE` 指定私有可写目录。原 `load_dataset("imdb")` 的
+train/test 逐行一致；原题未使用的 unsupervised 分片保留，不宣称已由该短名调用加载。模型缓存标签明确为本地内容标识，不伪造上游 Git revision。科学 CPU
+环境的完整 ARM64/Python3.11 包锁见
+`configs/workload-native/mlagentbench-imdb-cp311-arm64-requirements.txt`；配套离线 Dockerfile
+已构建，69份实际客户端版本与初始合格环境一致。环境检查不计来源完成。 原 Agent 终态后，将真实 stdout/stderr 捕获保存为 `<log-root>/log`；保留原轨迹和
+final 科学快照，不重跑 Agent。 在隔离评分容器只读挂载这些原日志，并使评分工作目录可读取相同原 `imdb` 数据，运行
+`python scripts/run_mlagentbench_original_eval.py --port-root <原Agent副本> --log-root <原日志> --task imdb --output <新私有评分文件> --execute`。
+入口只为作者漏导入的 `typing.Dict` 注解提供执行命名空间绑定，不改作者文件或评分规则；原评分为空或不合法时退出2，不将作者静默的 `final_score=-1/score=[]`
+当作完成。
 
 WorkArena（未完成）：使用
 `scripts/prepare_workarena_author_source.py --action prepare --archive <官方源码包> --author-root <新目录>`

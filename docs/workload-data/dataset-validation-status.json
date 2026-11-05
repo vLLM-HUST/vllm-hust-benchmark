@@ -5377,10 +5377,36 @@
       },
       "available_execution_tools": {
         "agent": "scripts/run_mlagentbench_local_agent.py",
+      "original_saved_submission_scorer": "scripts/run_mlagentbench_original_eval.py",
+      "imdb_original_asset_acquirer_or_verifier": "scripts/prepare_mlagentbench_imdb_assets.py",
         "imdb_isolated_software_data_probe": "scripts/check_mlagentbench_imdb_environment.py",
-        "boundary": "Existing CIFAR10 and graph evidence can be reused; the fixed IMDb protocol still needs an isolated NPU training executor."
+      "boundary": "Existing CIFAR10 and graph evidence is reused. The original IMDb task classifier is a task-internal scientific experiment, permitted on isolated CPU; Agent LLMs, auxiliary encoders and judges remain NPU. Historical isolated NPU initialization failures are retained, not reclassified as success."
       },
-      "imdb_child_python_bootstrap": "configs/workload-native/mlagentbench-imdb-bootstrap/sitecustomize.py",
+    "imdb_scientific_cpu_execution": {
+      "status": "ORIGINAL_AGENT_RUNNING_NOT_DELIVERED",
+      "stage": "mlagentbench-imdb-cpu-run-20261106-003",
+      "preparation_and_attempts_receipt": "docs/workload-data/validation/mlagentbench-imdb-cpu-preparation-20261106.json",
+      "offline_asset_binding": "scripts/prepare_mlagentbench_imdb_offline.py",
+      "asset_profile": "configs/workload-native/mlagentbench-imdb-original-assets.json",
+      "python_package_lock": "configs/workload-native/mlagentbench-imdb-cp311-arm64-requirements.txt",
+      "offline_recipe": "configs/workload-native/mlagentbench-imdb-cpu.Dockerfile",
+      "original_task_train_test_all_rows_equal": true,
+      "original_train_rows": 25000,
+      "original_test_rows": 25000,
+      "unused_unsupervised_original_file_preserved": true,
+      "pip_check_passed": true,
+      "original_agent_source_files_verified": 138,
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "model_device": "NPU",
+      "scientific_task_device": "dedicated isolated CPU",
+      "max_steps": 50,
+      "max_time_seconds": 18000,
+      "hash_locked_offline_recipe_qualified": true,
+      "all69_active_runtime_package_versions_equal_initial_qualified_client": true,
+      "shared_weights_downloaded_or_copied": false,
+      "scope": "Original task-internal scientific classifier uses isolated CPU; serving LLMs, auxiliary encoders and judges remain NPU. Initial9B Agent completed original50 steps/53 HTTP200 responses but produced no scientific submission; retained and not counted delivered. Attempt002 failed before Agent/model due tooling path error, retained with0 model calls. Fresh attempt003 uses existing shared-pool Qwen2.5-14B-Instruct on NPU and the built hash-locked CPU client; actual Edit Script (AI) and Execute Script actions observed. Final native state/full prediction/original scoring remain unaudited. The initial installed-PyPI report supplied the69-wheel hash lock; public offline recipe built and all69 active versions matched. No checkbox/source-count change."
+    },
+    "imdb_child_python_bootstrap": "configs/workload-native/mlagentbench-imdb-bootstrap/sitecustomize.py",
       "imdb_host_isolation_preflight_receipt": "docs/workload-data/validation/mlagentbench-imdb-host-isolation-preflight-20261105.json",
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
@@ -5440,7 +5466,7 @@
         "uncertain_or_saved_inference_resubmitted": false
       },
       "original_default_task_assets_profile": "configs/workload-native/mlagentbench-cifar10-original-assets.json",
-      "blocker": "Fixed native protocols cifar10 and ogbn-arxiv audited with original scoring and preserved negative outcomes; no quality-success/performance claims. Actual CI provider81 payloads/138 assets/16 definitions and unchanged research consumer verified. Full original graph preparation/splits preserved and actual task input/outcome matches provider/research. Public exact offline Docker recipe built; final sampler and unchanged original saved-prediction scoring qualified with default library thread limits. Grader failures and empty probe receipt preserved with disclosed recovery, no Agent/training reruns. Pinned IMDb train/test/unsupervised assets and DistilBERT weights are staged on the server. Offline original short-name loading of the train/test splits is row-for-row identical to the pinned Parquet inputs when the original assets are mounted as imdb under the task working directory. Only fixed IMDb native protocol remains: original task requires DistilBERT finetuning and no qualified isolated NPU training executor is available; CPU language encoder fallback not permitted. Source remains unchecked; no replacement of frozen samples."
+    "blocker": "Valid CIFAR10/ogbn-arxiv original-scoring evidence reused. IMDb original train/test25000 each row equality, original pretrained classifier forward, pip check, public69-wheel hash-locked offline recipe and actual active package versions qualified. Original9B attempt reached50 steps/53 HTTP200 but no scientific submission, retained unchecked; bootstrap path failure in attempt002 had0 model calls and was corrected. Fresh original ResearchAgent attempt003 now runs with existing shared-pool Qwen2.5-14B-Instruct NPU service, task-internal isolatedCPU scientific program, original50 steps/18000sec/4000-edit/500-default-token budgets and unchanged frozen IMDb task. Actual Edit Script(AI)/Execute Script actions observed, but final full prediction and unchanged original scoring remain pending. No copied/downloaded weights, source checkbox, quality or performance claim. Historical NPU initialization failures retained; no task replacement."
     },
     "MLEBENCH": {
       "native_competition_candidate": {
