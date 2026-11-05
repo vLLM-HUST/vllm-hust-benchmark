@@ -2,13 +2,20 @@
 
 ### 最新原生运行复核（2026-11-04）
 
-现有双卡环境的替代优先级：不再为固定来源等待 x86 节点。先复用已在 ARM64 验证的官方环境；原来源的阻塞和覆盖缺口保留，替代来源独立记录，不重复计数。MiniWoB++ 已有两道固定原题的真实 NPU 证据：`click-dialog` 原奖励 1，`multi-layouts` 在单独记录的 4096-token 配置下到达原生 20 步上限、奖励 0。后者是有效的协议终态，不是任务成功；原 1024-token 配置的解析失败另保留。该候选只覆盖基础浏览器交互，不替代认证业务网站、持久站点状态或桌面系统控制；公共执行入口、证据审计及研究消费闭环核对前不打勾。
+现有双卡环境的替代优先级：不再为固定来源等待 x86 节点。先复用已在 ARM64 验证的官方环境；原来源的阻塞和覆盖缺口保留，替代来源独立记录，不重复计数。MiniWoB++ 已有两道固定原题的真实
+NPU 证据：`click-dialog` 原奖励 1，`multi-layouts` 在单独记录的 4096-token 配置下到达原生 20 步上限、奖励
+0。后者是有效的协议终态，不是任务成功；原 1024-token
+配置的解析失败另保留。该候选只覆盖基础浏览器交互，不替代认证业务网站、持久站点状态或桌面系统控制；公共执行入口、证据审计及研究消费闭环核对前不打勾。
 
 MiniWoB++ 保存证据复核：对每道题的 AgentLab 原结果目录运行
 `python scripts/run_miniwob_agentlab.py --task miniwob.click-dialog --verify-saved <RESULT_DIR>`，
 第二题将 `--task` 换成 `miniwob.multi-layouts`。命令仅核对固定摘要的字节摘要与原生终态，无需模型、浏览器或 AgentLab，不替代对完整运行记录和研究侧接入的核验。
 
-MiniWoB++ 公共运行入口：使用 [发布方源码](https://github.com/Farama-Foundation/miniwob-plusplus/tree/33c3b4ddef8c6eb67c57a29663d844b1eda7e614) 的原始网页，通过回环 HTTP 提供 `/miniwob/`。已实跑客户端使用 AgentLab 0.4.2、BrowserGym MiniWoB 0.14.2 和 ARM64 Chromium 125.0.6422.26。先让 Chromium 能在所在环境打开原网页，再按以下固定配置生成计划；确认服务资源窗口后加 `--execute --record-response-metadata`。端口是本地示例，需换成实际回环端口；输出目录必须尚不存在。
+MiniWoB++ 公共运行入口：使用
+[发布方源码](https://github.com/Farama-Foundation/miniwob-plusplus/tree/33c3b4ddef8c6eb67c57a29663d844b1eda7e614)
+的原始网页，通过回环 HTTP 提供 `/miniwob/`。已实跑客户端使用 AgentLab 0.4.2、BrowserGym MiniWoB 0.14.2 和 ARM64 Chromium
+125.0.6422.26。先让 Chromium 能在所在环境打开原网页，再按以下固定配置生成计划；确认服务资源窗口后加
+`--execute --record-response-metadata`。端口是本地示例，需换成实际回环端口；输出目录必须尚不存在。
 
 ```bash
 python scripts/run_miniwob_agentlab.py --task miniwob.click-dialog --site http://127.0.0.1:8001/miniwob/ --endpoint http://127.0.0.1:8002/v1 --model Qwen/Qwen3.5-9B --output ./miniwob-click --max-steps 20 --max-output-tokens 1024

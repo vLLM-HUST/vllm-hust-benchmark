@@ -1988,7 +1988,9 @@ python scripts/prepare_full_duplex_original_scorers.py --include-client --verify
 
 [Moshi官方服务器](https://github.com/kyutai-labs/moshi/blob/e6a55d2722a65870ef52a6c9f6ecfc0e90f38362/moshi/moshi/server.py)在该固定版本默认选择CUDA，warmup还直接调用`torch.cuda.synchronize()`；官方`NO_CUDA_GRAPH=1`和`NO_TORCH_COMPILE=1`不能消除这一调用。其项目依赖要求sphn至少0.2.0，与benchmark客户端固定0.1.12不同。现已在服务器保存并核验这三份官方软件文件，但没有修改后端、下载权重或运行神经模型；不能据此断言NPU不可部署，也不能仅改`--device`就宣称已适配。
 
-NPU双工模型、转写、原生推理及评分交接仍未完成。原始Moshi客户端需要独立语音服务：`/api/chat` 使用双向 WebSocket 传送二进制 Opus，并按原 1920 采样点帧节奏发送。替换后端时须验证原客户端的编解码、双向帧、时间顺序及输出交接，普通 OpenAI 文本接口不能只换 URL 接入。原转写脚本使用NeMo并明确调用CUDA，不能直接用文本模型或CPU神经推理替代。发布方评分样例的分数不代表本项目模型输出。
+NPU双工模型、转写、原生推理及评分交接仍未完成。原始Moshi客户端需要独立语音服务：`/api/chat` 使用双向 WebSocket 传送二进制 Opus，并按原 1920
+采样点帧节奏发送。替换后端时须验证原客户端的编解码、双向帧、时间顺序及输出交接，普通 OpenAI 文本接口不能只换 URL
+接入。原转写脚本使用NeMo并明确调用CUDA，不能直接用文本模型或CPU神经推理替代。发布方评分样例的分数不代表本项目模型输出。
 
 ## PaperBench 原始论文任务包
 

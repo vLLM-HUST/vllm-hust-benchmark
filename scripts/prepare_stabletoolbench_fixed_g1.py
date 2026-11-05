@@ -12,9 +12,9 @@ IDS = [588, 608, 1073]
 ID_MAP_HASH = "b3dae86a67ce471413df4c734034b0c729357aebb233242a444cc2b8380f2f7f"
 SUPPLEMENTS = ("kick_com_api_kick_api.json", "keyword_analysis.json")
 HASHES = (
-    "500aa0105ed451538448f6ea04f10661536b013f3e1a293840fe401688160e7c",
-    "8f5b0bccbf5cf64b937c7d1364536c2adc568cf069c523838702c7e62eec8302",
-    "a3ed72052c2dc961d8e9b71860374d90ded6d475ca6f6449c78fb248cb82a5b2",
+    "500aa0105ed451538448f6ea04f10661536b013f3e1a293840fe401688160e7c",  # pragma: allowlist secret - original asset SHA256
+    "8f5b0bccbf5cf64b937c7d1364536c2adc568cf069c523838702c7e62eec8302",  # pragma: allowlist secret - original asset SHA256
+    "a3ed72052c2dc961d8e9b71860374d90ded6d475ca6f6449c78fb248cb82a5b2",  # pragma: allowlist secret - original asset SHA256
 )
 
 

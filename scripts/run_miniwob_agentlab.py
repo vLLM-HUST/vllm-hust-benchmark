@@ -13,12 +13,12 @@ from urllib.parse import urlsplit
 TASKS = ("miniwob.click-dialog", "miniwob.multi-layouts")
 SAVED_PROFILES = {
     TASKS[0]: (
-        "d4f9370ad801820cea1f1855d8476747d7769703d9a540a8c4d5ba537724f8ea",
+        "d4f9370ad801820cea1f1855d8476747d7769703d9a540a8c4d5ba537724f8ea",  # pragma: allowlist secret - saved summary SHA256
         1024,
         (1, 1.0, True, False),
     ),
     TASKS[1]: (
-        "e2722e4ffc6bb1c0ca504010bdb95be5b607b98d58d039154544556085e58a63",
+        "e2722e4ffc6bb1c0ca504010bdb95be5b607b98d58d039154544556085e58a63",  # pragma: allowlist secret - saved summary SHA256
         4096,
         (20, 0.0, False, True),
     ),

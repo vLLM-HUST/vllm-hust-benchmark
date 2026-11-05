@@ -74,7 +74,9 @@ def main():
             p.error("saved verification cannot be combined with run options")
         raw = args.verify_saved_author_budget.read_bytes()
         digest = hashlib.sha256(raw).hexdigest()
-        if digest != "15b8bc1ec3714a97050e4b9ac2690f2674db9c4ccdd8648cbff6014d017876d3":
+        if (
+            digest != "15b8bc1ec3714a97050e4b9ac2690f2674db9c4ccdd8648cbff6014d017876d3"
+        ):  # pragma: allowlist secret - saved result SHA256
             p.error("saved output does not match the pinned author-budget run")
         rows = [json.loads(line) for line in raw.splitlines()]
         if [row["session"] for row in rows] != [0, 1, 2] or any(
