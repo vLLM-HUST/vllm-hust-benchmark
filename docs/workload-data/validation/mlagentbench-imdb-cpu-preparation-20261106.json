@@ -9,7 +9,8 @@
   "original_task_prompt_program_scoring_files_modified": false,
   "offline_assets": {
     "profile": "configs/workload-native/mlagentbench-imdb-original-assets.json",
-    "verified_files": 8,
+    "verified_files": 9,
+    "verified_bytes": 352107518,
     "fresh_port_binder": "scripts/prepare_mlagentbench_imdb_offline.py",
     "asset_getter": "scripts/prepare_mlagentbench_imdb_assets.py",
     "existing_eight_file_verification_with_public_getter_passed": true,
@@ -18,13 +19,23 @@
     "train_rows": 25000,
     "test_rows": 25000,
     "all_task_train_test_rows_equal_original_parquet": true,
-    "unsupervised_original_file_retained_but_not_loaded_by_this_short_name": true,
+    "unsupervised_rows": 50000,
+    "all100000_original_rows_equal": true,
+    "original_class_label_names": ["neg", "pos"],
+    "publisher_dataset_card_and_plain_text_layout_preserved": true,
+    "full_view_qualification_stage": "mlagentbench-imdb-full-view-qualification-20261106-001",
+    "current_full_metadata_asset_stage": "mlagentbench-imdb-full-metadata-assets-20261106-001",
+    "existing_nine_file_verification_with_public_getter_passed": true,
     "model_aliases": ["distilbert-base-uncased", "distilbert/distilbert-base-uncased"],
     "cache_label_is_explicit_local_content_not_upstream_git_revision": true
   },
   "preflight": {
-    "first_control_failure_retained": "The control incorrectly expected the short-name directory loader to expose unused unsupervised as well as train/test; it exited on KeyError after train/test equality checks. No Agent or model request ran. The corrected control checks exactly the original task-used train/test splits and retains the unused original file.",
-    "corrected_control_exit_code": 0,
+    "first_control_failure_retained": "The initial flat Parquet directory omitted publisher metadata/layout, so the short-name loader exposed train/test but not unsupervised. This was a real input-interface defect, not an invalid control expectation. The subsequent two-split control qualified only task-used train/test rows, not the full original dataset interface. No Agent or model request ran in either control.",
+    "task_used_two_split_control_exit_code": 0,
+    "separate_full_original_interface_control_exit_code": 0,
+    "full_interface_control_rows": {"train":25000,"test":25000,"unsupervised":50000},
+    "full_interface_control_all_original_rows_equal": true,
+    "full_interface_control_preserved_original_class_labels": true,
     "pip_check": "No broken requirements found",
     "classifier_class": "DistilBertForSequenceClassification",
     "classifier_control_device": "cpu",
@@ -44,7 +55,8 @@
     "hash_required_wheels_acquired": 69,
     "offline_python_install_and_pip_check_build_succeeded": true,
     "offline_build_scope": "Python dependencies installed with --no-index --no-deps --require-hashes; the base image and Debian libgomp preparation still require their declared source or local cache",
-    "native_attempt003_uses_built_hash_locked_image": true
+    "native_attempt003_and004_use_built_hash_locked_image": true,
+    "completed_wheel_download_cache_evicted_after_image_qualification": true
   },
   "native_attempts": [
     {
@@ -78,7 +90,13 @@
     },
     {
       "attempt": "003",
-      "status": "ORIGINAL_AGENT_RUNNING_FINAL_STATE_AND_SCORE_NOT_AUDITED",
+      "status": "STOPPED_FOR_VERIFIED_INPUT_INTERFACE_DEFECT_NOT_DELIVERED",
+      "container_exit_code": 137,
+      "oom_killed": false,
+      "reason": "Operator stopped this attempt only after a separate full original dataset interface was qualified. Flat input view omitted unsupervised from discovery. Original files, scientific program, partial training and all19 known responses retained; not a quality-based retry or timeout.",
+      "completed_http200_responses": 19,
+      "scientific_training_observed_before_stop": true,
+      "cpus": 8,
       "model": "Qwen/Qwen2.5-14B-Instruct",
       "llm_device": "NPU",
       "model_origin": "Existing read-only shared pool,19 files content-hashed; no copied/downloaded weights and no claim of newly verified publisher Git revision",
@@ -93,6 +111,31 @@
       "history_and_observation_steps": 3,
       "task_sample_replaced": false,
       "counted_as_delivery": false
+    },
+    {
+      "attempt": "004",
+      "stage": "mlagentbench-imdb-cpu-run-20261106-004",
+      "status": "FULL_ORIGINAL_INPUT_AGENT_RUNNING_NOT_DELIVERED",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "llm_device": "NPU",
+      "scientific_program_device": "Dedicated isolated CPU",
+      "original_dataset_interface": "Publisher README and original plain_text paths; all three splits and100000 rows qualified in separate offline control",
+      "agent_type": "ResearchAgent",
+      "max_steps": 50,
+      "agent_max_steps": 50,
+      "max_time_seconds": 18000,
+      "edit_script_max_tokens": 4000,
+      "agent_request_default_max_tokens": 500,
+      "max_retries": 5,
+      "history_and_observation_steps": 3,
+      "cpus": 32,
+      "cpu_scope": "Docker CPU quota32 and library thread limits32, within observed existing pod quota40; not reserved cores or CPU pinning",
+      "response_recovery": "Functional recovery only: reuse each fully saved prior14B response once in original order only when the entire original request body matches exactly. Other requests use the current same NPU model. Reused responses are not new inference or performance evidence. No replay of unknown responses and no manual scientific-program repair.",
+      "observed_cached_responses_reused": 14,
+      "observed_fresh_npu_responses": 5,
+      "observation_is_intermediate_not_final": true,
+      "task_sample_replaced": false,
+      "counted_as_delivery": false
     }
   ],
   "isolation": {
@@ -104,12 +147,13 @@
     "docker_socket_exposed_to_generated_program": false,
     "private_task_results_and_queue_only_writable_bind_mounts": true,
     "memory_gib": 24,
-    "cpus": 8,
+    "initial_attempt001_and003_cpus": 8,
+    "current_attempt004_cpus": 32,
     "pids_limit": 512
   },
   "saved_submission_scoring_entry": "scripts/run_mlagentbench_original_eval.py",
   "scorer_compatibility": "Original pinned eval.py misses typing.Dict; only that annotation name is supplied via runpy init_globals. Actual saved attempt001 exercised the unchanged original module, preserved empty result and exited2. Numeric IMDb scientific submission scoring still pending; no scoring rule or task change.",
-  "remaining": "Audit actual attempt003 terminal trajectory, complete scientific prediction and unchanged original scorer. Reuse valid CIFAR10/ogbn-arxiv evidence. Do not tick this source from software controls, bootstrap recovery or successful HTTP alone.",
+  "remaining": "Audit actual attempt004 terminal trajectory, complete scientific prediction and unchanged original scorer. Reuse valid CIFAR10/ogbn-arxiv evidence. Keep the stopped incomplete-input attempt003 distinct. Do not tick this source from software controls, bootstrap recovery or successful HTTP alone.",
   "performance_or_quality_success_claim": false,
   "raw_data_models_predictions_or_generated_programs_publicly_vendored": false
 }

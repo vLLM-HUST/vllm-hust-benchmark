@@ -51,7 +51,38 @@ def bind(args):
         args.container_asset_root.anchor
     ):
         raise ValueError("absolute read-only container asset mount required")
+    if (
+        not args.container_cache_root.is_absolute()
+        or args.container_cache_root == Path(args.container_cache_root.anchor)
+        or args.container_cache_root == args.container_asset_root
+    ):
+        raise ValueError("separate absolute read-only container cache mount required")
+    parquets = [
+        name
+        for name in profile["files"]
+        if name.startswith("assets/") and name.endswith(".parquet")
+    ]
+    expected_splits = {
+        f"assets/{split}-00000-of-00001.parquet"
+        for split in ["train", "test", "unsupervised"]
+    }
+    if (
+        set(parquets) != expected_splits
+        or "dataset-card/README.md" not in profile["files"]
+    ):
+        raise ValueError("original dataset card and all three original splits required")
     cache.mkdir(parents=True, mode=0o700)
+    # Retain the publisher's own metadata and layout; flattening Parquet files
+    # lets automatic discovery silently omit the unsupervised split.
+    dataset = cache / "dataset"
+    (dataset / "plain_text").mkdir(parents=True)
+    (dataset / "README.md").symlink_to(
+        args.container_asset_root / "dataset-card/README.md"
+    )
+    for name in parquets:
+        (dataset / "plain_text" / Path(name).name).symlink_to(
+            args.container_asset_root / name
+        )
     # Symlink paths name the container's declared read-only mount, not host paths.
     for alias in ["distilbert-base-uncased", "distilbert/distilbert-base-uncased"]:
         repo = cache / "hub" / ("models--" + alias.replace("/", "--"))
@@ -64,13 +95,14 @@ def bind(args):
                 (snapshot / Path(name).name).symlink_to(
                     args.container_asset_root / name
                 )
-    link.symlink_to(args.container_asset_root / "assets", target_is_directory=True)
+    link.symlink_to(args.container_cache_root / "dataset", target_is_directory=True)
     verify_port(args.port_root)
     return {
         "status": "ORIGINAL_ASSETS_BOUND_NOT_AGENT_EXECUTION",
         "asset_files_verified": len(profile["files"]),
         "original_source_files_unchanged": True,
         "cache_label_is_not_publisher_revision": True,
+        "original_dataset_card_and_three_split_layout_bound": True,
         "source_checkbox_eligible": False,
         "asset_root": str(assets),
         "container_asset_root": str(args.container_asset_root),
@@ -83,6 +115,7 @@ def main():
     parser.add_argument("--port-root", required=True, type=Path)
     parser.add_argument("--cache-root", required=True, type=Path)
     parser.add_argument("--container-asset-root", type=Path, default=Path("/assets"))
+    parser.add_argument("--container-cache-root", type=Path, default=Path("/hf"))
     print(json.dumps(bind(parser.parse_args()), indent=2))
 
 

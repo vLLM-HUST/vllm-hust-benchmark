@@ -575,17 +575,22 @@ NPU 的执行限制予以更正，历史 NPU 初始化失败记录保留，不�
 [OGBN-Arxiv 回执](validation/mlagentbench-formal-ogbn-arxiv-native-audit-20261102.json) 续跑沿用
 `scripts/run_mlagentbench_local_agent.py --task imdb`，先在专用容器内检查隔离和原源码，再用新工作及日志目录执行。 IMDb 三份分片与
 DistilBERT 权重可按机器清单的 SHA-256 回查，不需要重新下载。新环境可运行
-`python scripts/prepare_mlagentbench_imdb_assets.py --output <仓库外原资产目录> --action plan` 查看原8文件及总量； 加
-`--action acquire --max-bytes 352099709` 按固定上游URL取得并校验，断点续传另加 `--resume`； 已有文件用
-`--action verify`，不重复下载。当前服务器已复用并核验8文件；新的网络下载分支未在该服务器重跑。 新增
+`python scripts/prepare_mlagentbench_imdb_assets.py --output <仓库外原资产目录> --action plan` 查看原9文件及总量； 加
+`--action acquire --max-bytes 352107518` 按固定上游URL取得并校验，断点续传另加 `--resume`； 已有文件用
+`--action verify`，不重复下载。当前服务器已核验9文件，包括发布方原README；完整网络下载分支未在该服务器重跑。 新增
 `scripts/prepare_mlagentbench_imdb_offline.py` 将已校验的原文件绑定到新建的原 Agent 工作副本：
-`--assets-root <原数据和模型目录> --port-root <新原Agent副本> --cache-root <新缓存目录> --container-asset-root /assets`。
-容器将原资产目录只读挂载为 `/assets`、缓存只读挂载为 `HF_HOME`，并为 `HF_DATASETS_CACHE` 指定私有可写目录。原 `load_dataset("imdb")` 的
-train/test 逐行一致；原题未使用的 unsupervised 分片保留，不宣称已由该短名调用加载。模型缓存标签明确为本地内容标识，不伪造上游 Git revision。科学 CPU
+`--assets-root <原数据和模型目录> --port-root <新原Agent副本> --cache-root <新缓存目录> --container-asset-root /assets --container-cache-root /hf`。
+容器将原资产目录只读挂载为 `/assets`、缓存只读挂载为 `/hf` 并设 `HF_HOME=/hf`，为 `HF_DATASETS_CACHE` 指定私有可写目录。
+绑定保留发布方README和原 `plain_text` 路径，不把Parquet平铺后省略元数据。原 `load_dataset("imdb")` 已在断网隔离控制中加载
+train/test各25000条、unsupervised50000条，全部100000条与原Parquet一致，原ClassLabel的neg/pos名称保留。
+初始平铺视图只加载两份分片是接口缺陷，旧尝试及其失败记录保留；新视图在独立目录准备，不原地修改正在运行的输入。 模型缓存标签明确为本地内容标识，不伪造上游 Git revision。科学 CPU
 环境的完整 ARM64/Python3.11 包锁见
 `configs/workload-native/mlagentbench-imdb-cp311-arm64-requirements.txt`；配套离线 Dockerfile
-已构建，69份实际客户端版本与初始合格环境一致。环境检查不计来源完成。 原 Agent 终态后，将真实 stdout/stderr 捕获保存为 `<log-root>/log`；保留原轨迹和
-final 科学快照，不重跑 Agent。 在隔离评分容器只读挂载这些原日志，并使评分工作目录可读取相同原 `imdb` 数据，运行
+已构建，69份实际客户端版本与初始合格环境一致。环境检查不计来源完成。 当前attempt004的科学容器使用32 CPU配额及OMP/MKL/OpenBLAS线程上限32、内存24
+GiB；这是既有40 CPU配额内的运行配置，不代表独占绑核。 原ResearchAgent仍为50步、18000秒，默认输出500 token、编辑4000
+token。恢复仅对完全相同原请求逐次复用已保存14B响应，复用和新推理分别计数，不能据此报告性能；公共入口默认正常生成，不内置研究观测或恢复缓存。 原 Agent 终态后，将真实
+stdout/stderr 捕获保存为 `<log-root>/log`；保留原轨迹和 final 科学快照，不重跑 Agent。 在隔离评分容器只读挂载这些原日志，并使评分工作目录可读取相同原
+`imdb` 数据，运行
 `python scripts/run_mlagentbench_original_eval.py --port-root <原Agent副本> --log-root <原日志> --task imdb --output <新私有评分文件> --execute`。
 入口只为作者漏导入的 `typing.Dict` 注解提供执行命名空间绑定，不改作者文件或评分规则；原评分为空或不合法时退出2，不将作者静默的 `final_score=-1/score=[]`
 当作完成。
