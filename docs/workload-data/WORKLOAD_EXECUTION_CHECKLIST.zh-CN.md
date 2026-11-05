@@ -1,9 +1,9 @@
 # Workload 分类执行清单
 
-当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，102 项已勾选，11 项待完成；另有
-5 项仅分类。 下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
+当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，104 项已勾选，9 项待完成；另有 5
+项仅分类。 下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
 
-待完成：ToolBench、NatureBench、MLAgentBench、MLE-bench、WebArena、VisualWebArena、OSWorld、SWE-smith、WorkArena、PaperBench、Full-Duplex-Bench。
+待完成：NatureBench、MLAgentBench、MLE-bench、WebArena、VisualWebArena、OSWorld、WorkArena、PaperBench、Full-Duplex-Bench。
 
 ## 原40类计划的增量定义（不改变历史快照）
 
@@ -649,20 +649,27 @@ WebArena（未完成）：固定原题 ID 为 0、1、2，均只访问 `shopping
 的原题验证，浏览器本身不是这三项的共同阻塞：WebArena 缺可重置的 `shopping_admin`，VisualWebArena 缺已启动并核验的 Classifieds，WorkArena
 缺已配置的 ServiceNow 实例。
 
+2026-11-06已做独立用户态兼容控制：ARM64容器内QEMU7.2.22可执行原Debian的amd64 BusyBox，
+但PRoot5.1.0下的嵌套子进程在四组有限对照中均以signal11退出；单个ELF可运行不代表原站点可运行。
+控制未修改宿主binfmt、未增加容器特权、未接入NPU或下载大站点镜像，原始诊断留存在机器清单对应stage。 这条具体版本组合尚不具备原站点部署资格，不能按其单程序成功勾选WebArena。
+
 NatureBench（未完成）：`scripts/run_naturebench_original.py` 默认检查原 CPU3 组并输出计划； 安装 workload-data
 包后，提供固定源码、原数据、运行环境及模型端点。正式执行需 Docker、已运行的原 evaluator， 以及明确的 Agent 和裁判端点。传入实际部署上下文容量，不调整原输出预算；可用
 `--task-id` 单独定位尚缺证据的原题。 保留原任务退出、科学尝试次数、评分和有效性裁判各自的状态；正常退出但零科学尝试，不等于已验证科学评分。
 已有第二题裁判重放仅复用原材料，不替代原运行的最终评分记录。 第二题重放的留存响应已在共享盘回查：360,566 输入 tokens，`end_turn` 正常结束，响应 SHA-256 为
 `449f2d6185225df1998d1f1cec968fcf29d92b15c3cb737c0d5dbd78e4b65c74`。不需要重跑该裁判请求；第三题零科学尝试，不能从第二题借用评分。
 
-OSWorld 与 SWE-smith（未完成）：两项都需要先验收兼容的隔离 amd64 执行环境，但不能共用任务镜像或评分器。 OSWorld
-先在作者镜像内确认桌面启动、原任务初始化和重置，再接独立 NPU 模型服务；作者支持关闭 KVM 不代表 ARM64 已验证。 SWE-smith 可复用已验证的 11 个分片与固定前三题读回，通过
-`scripts/prepare_swesmith_original_assets.py` 准备原资产； 仍须运行原 Agent、在隔离环境内执行生成补丁并采集官方评分。复用的 24
-条作者轨迹不是本项目的实跑结果。 作者推理入口为
+OSWorld（未完成）：先在兼容的隔离环境内确认作者桌面镜像启动、原任务初始化和重置，再接独立NPU模型服务；
+作者支持关闭KVM不代表ARM64已验证。不能把其他代码任务的环境或评分器当作OSWorld桌面环境。
+
+SWE-smith（固定三题已交付）：原固定前三题在明确披露ARM/健康检查兼容配置下完成原Agent和官方评分，resolved0/3、errors0、timeouts0。
+这是原生执行完成，不是补丁质量成功或原amd64/GPT4o复现。见[原生回执](validation/swesmith-fixed3-native-20261106.json)。 原资产入口为
+`scripts/prepare_swesmith_original_assets.py`，执行入口为 `scripts/run_swesmith_original_agent.py`；
+已审计的结果不重跑。11个原分片的读取与24条作者轨迹复用仍是单独证据，不能替代真实Agent运行。作者推理入口为
 [SWE-agent 批处理脚本](https://github.com/SWE-bench/SWE-smith/blob/9b74ac08118a85c39c356802f7961893af73e07f/agent/_infer_model.sh)。
 固定第三题的空题面原样保留；若入口拒绝该题，保留拒绝证据，不换题或补写题面。
 
-当前执行环境为 ARM64 和两张 NPU。WebArena、VisualWebArena、OSWorld、SWE-smith 和 PaperBench 的原协议保留环境阻塞；
+当前执行环境为 ARM64 和两张 NPU。WebArena、VisualWebArena、OSWorld 和 PaperBench 的原协议保留环境阻塞；
 同类替代项可在现有环境独立验证，登记实际覆盖和差异，不把未覆盖行为标成完成。WorkArena、MLE-bench 和 ToolBench 分别依赖 ServiceNow、Kaggle 和原工具后端；
 节点就绪不等于授权或数据已取得。NatureBench、MLAgentBench、BixBench 与 Full-Duplex-Bench 应分别处理长上下文、 隔离 NPU
 微调、原评分输入恢复和双工语音/ASR，不因共用硬件合并协议。

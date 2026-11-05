@@ -78,6 +78,23 @@ def test_current_118_row_markdown_checkboxes_match_single_ledger():
     }
 
 
+def test_execution_runbook_headline_matches_single_current_ledger():
+    text = (
+        ROOT / "docs/workload-data/WORKLOAD_EXECUTION_CHECKLIST.zh-CN.md"
+    ).read_text("utf-8")
+    result = runner.summarize(ledger())["all_sources"]
+    totals = re.findall(
+        r"(\d+)\s+项应交付，(\d+)\s+项已勾选，(\d+)\s+项待完成；另有\s+(\d+)\s+项仅分类",
+        text,
+    )
+    assert totals == [
+        tuple(
+            str(result[key])
+            for key in ("required", "delivered", "pending", "classification_only")
+        )
+    ]
+
+
 def test_groups_partition_current_scope_without_double_counting():
     result = runner.summarize(ledger())
     all_sources = result["all_sources"]
