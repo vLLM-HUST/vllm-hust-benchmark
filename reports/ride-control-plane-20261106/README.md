@@ -2,7 +2,8 @@
 
 本目录按组织证据归档规范，保全 RIDE PR #2 和 #4 已公开的来源、软件验证、一键部署摘要及规划/路线图历史快照。没有新增实验，不发布私有原始日志或凭据，不进入正式榜单或网站。
 
-[manifest.json](manifest.json)记录每个文件的原仓库、完整提交、原路径、字节数和 SHA256；`source/`逐字节复制原件。规划中的目标不是已测收益，软件检查不是硬件资格；原路线图的失败、Unknown 和未验收项不因迁存改变。
+[manifest.json](manifest.json)记录每个文件的原仓库、完整提交、原路径、字节数和
+SHA256；`source/`逐字节复制原件。规划中的目标不是已测收益，软件检查不是硬件资格；原路线图的失败、Unknown 和未验收项不因迁存改变。
 
 - [SDK 来源及验证记录](source/docs/evidence/)
 - [路线图历史证据和负结果](source/docs/architecture/CONTROLLER_ROADMAP.md)
