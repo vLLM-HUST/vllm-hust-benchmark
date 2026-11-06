@@ -30,12 +30,17 @@ def save_new(path, payload, *, owner_uid=None):
 
 
 @contextmanager
-def model_proxy(queue, *, port=14001, timeout=600):
+def model_proxy(queue, *, port=14001, timeout=600, max_request_bytes=1024 * 1024):
     queue = Path(queue).resolve(strict=True)
     if not queue.is_dir() or timeout <= 0:
         raise ValueError(
             "existing dedicated private queue and positive timeout required"
         )
+    if (
+        type(max_request_bytes) is not int
+        or not 0 < max_request_bytes <= 64 * 1024 * 1024
+    ):
+        raise ValueError("request byte limit must be a positive integer up to64MiB")
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *_args):
@@ -46,7 +51,7 @@ def model_proxy(queue, *, port=14001, timeout=600):
                 self.send_error(404)
                 return
             size = int(self.headers.get("Content-Length", "0"))
-            if not 0 < size <= 1024 * 1024:
+            if not 0 < size <= max_request_bytes:
                 self.send_error(413)
                 return
             raw = self.rfile.read(size)

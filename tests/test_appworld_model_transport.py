@@ -14,6 +14,15 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from appworld_model_transport import model_proxy, process_one
+
+
+@pytest.mark.parametrize("limit", [0, -1, True, 1.5, 64 * 1024 * 1024 + 1])
+def test_request_size_bound_is_explicit_and_finite(tmp_path, limit):
+    with pytest.raises(ValueError, match="request byte limit"):
+        with model_proxy(tmp_path, port=0, max_request_bytes=limit):
+            raise AssertionError("invalid bound must fail before a listener starts")
+
+
 import appworld_model_transport as transport
 
 
@@ -69,9 +78,10 @@ def test_incompatible_worker_uid_rejected_before_api_call(tmp_path, monkeypatch)
     assert not list(tmp_path.glob("*.forwarded-request.json"))
 
 
+@pytest.mark.parametrize("large_request", [False, True])
 @pytest.mark.parametrize("disable_thinking", [False, True])
 def test_offline_queue_roundtrip_preserves_request_budget_and_no_repeat(
-    tmp_path, disable_thinking
+    tmp_path, disable_thinking, large_request
 ):
     received = []
 
@@ -109,9 +119,17 @@ def test_offline_queue_roundtrip_preserves_request_budget_and_no_repeat(
         "temperature": 0,
     }
     raw = json.dumps(body).encode()
+    if large_request:
+        body["messages"][0]["content"] += "x" * (1024 * 1024)
+        raw = json.dumps(body).encode()
     try:
         with (
-            model_proxy(tmp_path, port=0, timeout=10) as port,
+            model_proxy(
+                tmp_path,
+                port=0,
+                timeout=10,
+                max_request_bytes=2 * 1024 * 1024 if large_request else 1024 * 1024,
+            ) as port,
             ThreadPoolExecutor() as pool,
         ):
 

@@ -665,6 +665,8 @@ NatureBench（未完成）：`scripts/run_naturebench_original.py` 默认检查�
 
 OSWorld（未完成）：先在兼容的隔离环境内确认作者桌面镜像启动、原任务初始化和重置，再接独立NPU模型服务；
 作者支持关闭KVM不代表ARM64已验证。不能把其他代码任务的环境或评分器当作OSWorld桌面环境。
+现有ARM64软件模拟环境已取得完整桌面截图，并通过基线快照恢复的临时标记验证。固定第一题已进入未改的作者`DesktopEnv`和`lib_run_single`流程，原两步初始化通过；保留15步、32768-token预算，模型为现有NPU上的Qwen3.5-9B。连接虚拟机的Provider为明确披露的运行时兼容端口，不称作未修改的官方Docker环境。Agent终态、原评分、其余两题和研究侧接通仍须逐项核验。
+私有队列的`model_proxy(..., max_request_bytes=32*1024*1024)`仅放宽截图请求的字节上限；默认仍为1MiB，允许显式设置到64MiB。它不修改原消息、图像、token预算或计分，不代表已经完成视觉benchmark。
 
 2026-11-06：原始 Ubuntu 镜像已通过发布方压缩包 SHA256、完整解压 CRC 和解压后全文件 SHA256 核验。公开准备入口为
 `scripts/prepare_osworld_original_vm.py`；`verify-image` 可独立复核已解压镜像， 不要求保留重复压缩包。隔离 CPU 容器中的 ARM64
