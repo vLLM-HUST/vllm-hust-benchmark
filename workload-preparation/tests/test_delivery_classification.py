@@ -210,3 +210,19 @@ def test_videomme_v2_execution_is_discoverable_without_runtime_upgrade():
         "configs/workload-native/videomme-v2-official-full-local.json",
     ) in entries
     assert row["native_validation"] == "NOT_ESTABLISHED_BY_CLASSIFICATION"
+
+
+@pytest.mark.parametrize(
+    "source,path",
+    [
+        ("WEBARENA", "scripts/run_webarena_agentlab.py"),
+        (
+            "WORKARENA",
+            "configs/workload-native/workarena-agentlab-cpu.Dockerfile",
+        ),
+    ],
+)
+def test_browser_preparation_entries_do_not_claim_native_completion(source, path):
+    row = next(row for row in taxonomy.delivery_assets() if row["source_id"] == source)
+    assert any(entry["path"] == path for entry in row["entrypoints"])
+    assert row["native_validation"] == "NOT_ESTABLISHED_BY_CLASSIFICATION"
