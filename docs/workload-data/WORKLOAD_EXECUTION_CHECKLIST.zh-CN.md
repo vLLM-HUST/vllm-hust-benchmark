@@ -854,6 +854,26 @@ source /usr/local/Ascend/ascend-toolkit/set_env.sh
 
 双工模型运行时的可迁移绑定（仍未完成整体验证）：
 
+模型依赖的独立重建入口（ARM64/Python3.12.13，先激活CANN）：
+
+```bash
+python scripts/prepare_full_duplex_model_environment.py \
+  --lock docs/workload-data/validation/full-duplex-model-runtime-lock-20261107.json \
+  --publisher-archive-root "$PINNED_KERNEL_RELEASE_ARCHIVES" \
+  --kernel-supplement "$PINNED_PUBLISHER_FUSED_SIGMOID_MUL_PY" \
+  --output "$NEW_EXTERNAL_MODEL_ENVIRONMENT"
+```
+
+默认只计划；加`--prepare`才创建新环境并安装固定177项公开依赖及5个原官方wheel。 归档先核对外层SHA256，再核对5个wheel成员；不执行归档中的SDK installer。
+补充Python kernel必须为锁中官方固定提交和SHA，不能用自己重写的算子；只写新环境缺失文件、不覆盖原文件。
+入口在独立venv安装依赖后物理复制6个核心包，再关闭system-site-packages，避免继承共享vLLM依赖；
+下载禁用pip缓存，成功后核对并删除5个临时解出的wheel。至少预留5GiB空间，6个核心包的基座版本必须原样匹配。
+`--verify-only`核对182项私有依赖版本/位置与核心版本，不安装或下载；两份固定源码仍需按后文单独绑定， 不伪造历史editable元数据，也不称该入口执行了原生模型。
+
+服务器本次先完成182项安装，再用同入口的`--bind-kernel-only`和`--isolate-core-only`补齐分阶段操作，
+19900份核心文件/1806502988字节与基座逐文件哈希一致，8个关键模块在隔离环境和公共兼容副本组合下导入通过。 已核验vendor
+operator载荷本次复用；其独立解包/完整启动说明仍待收口。 保留13条依赖声明冲突，不称全环境pip检查干净。临时5份wheel共52305767字节已删除；原安装回执、锁和核验日志保留。
+
 完整模型运行时依赖来源见
 `docs/workload-data/validation/full-duplex-model-runtime-lock-20261107.json`：177项公开wheel/源码包按URL和SHA256固定，
 5项NPU wheel按官方2026.9.0发布归档、成员路径及双层SHA256绑定，另2项绑定源码身份。 这是原成功运行环境的来源锁，不是通用pip
