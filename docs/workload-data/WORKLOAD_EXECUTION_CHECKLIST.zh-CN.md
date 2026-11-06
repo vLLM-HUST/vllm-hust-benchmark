@@ -1,9 +1,9 @@
 # Workload 分类执行清单
 
-当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，104 项已勾选，9 项待完成；另有 5
+当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，105 项已勾选，8 项待完成；另有 5
 项仅分类。 下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
 
-待完成：NatureBench、MLAgentBench、MLE-bench、WebArena、VisualWebArena、OSWorld、WorkArena、PaperBench、Full-Duplex-Bench。
+待完成：NatureBench、MLAgentBench、MLE-bench、WebArena、VisualWebArena、WorkArena、PaperBench、Full-Duplex-Bench。
 
 ## 原40类计划的增量定义（不改变历史快照）
 
@@ -282,9 +282,9 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 - [ ] 首批来源安装、执行、核验与消费链交付
 - [ ] 已纳入来源全部完成（候选不隐藏）
 
-| 来源    | 当前已验证范围 | 全量状态   | 缺项                                |
-| ------- | -------------- | ---------- | ----------------------------------- |
-| OSWORLD | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
+| 来源    | 当前已验证范围   | 全量状态   | 缺项                                                     |
+| ------- | ---------------- | ---------- | -------------------------------------------------------- |
+| OSWORLD | 固定原前三题协议 | [x] 已交付 | 368原任务索引、3题原评分及4项CI/研究回读；兼容与恢复单列 |
 
 ## [ ] 应用API多步工作流 · application-api-workflow
 
@@ -683,7 +683,8 @@ NatureBench（未完成）：2026-11-06第一题新验证已正常结束，13次
 已有第二题裁判重放仅复用原材料，不替代原运行的最终评分记录。 第二题重放的留存响应已在共享盘回查：360,566 输入 tokens，`end_turn` 正常结束，响应 SHA-256 为
 `449f2d6185225df1998d1f1cec968fcf29d92b15c3cb737c0d5dbd78e4b65c74`。不需要重跑该裁判请求；第三题零科学尝试，不能从第二题借用评分。
 
-OSWorld（未完成）：先在兼容的隔离环境内确认作者桌面镜像启动、原任务初始化和重置，再接独立NPU模型服务；
+OSWorld（固定原前三题协议已交付）：[交付回执](validation/osworld-fixed3-native-delivery-20261106.json)汇总3个原题的真实操作、原评分、分段恢复、当前CI工件及未改研究消费者回读。三个原评分均为0，不代表任务成功；368个任务只做原始包/索引核验，未称全量原生运行。
+以下早期环境检查点按当时状态保留，当前交付状态以上述回执及机器清单为准。先在兼容的隔离环境内确认作者桌面镜像启动、原任务初始化和重置，再接独立NPU模型服务；
 作者支持关闭KVM不代表ARM64已验证。不能把其他代码任务的环境或评分器当作OSWorld桌面环境。
 现有ARM64软件模拟环境已取得完整桌面截图，并通过基线快照恢复的临时标记验证。固定第一题已进入未改的作者`DesktopEnv`和`lib_run_single`流程，原两步初始化通过；保留15步、32768-token预算，模型为现有NPU上的Qwen3.5-9B。连接虚拟机的Provider为明确披露的运行时兼容端口，不称作未修改的官方Docker环境。Agent终态、原评分、其余两题和研究侧接通仍须逐项核验。
 私有队列的`model_proxy(..., max_request_bytes=32*1024*1024)`仅放宽截图请求的字节上限；默认仍为1MiB，允许显式设置到64MiB。它不修改原消息、图像、token预算或计分，不代表已经完成视觉benchmark。
@@ -694,7 +695,7 @@ OSWorld（未完成）：先在兼容的隔离环境内确认作者桌面镜像�
 - [x] 固定第一题：15步真实模型/GUI动作及原评分0分已核验；评分恢复单独披露，不称作未修改的单次运行。
 - [x] 固定第二题：15步真实模型/GUI动作及原评分0分已核验。原15秒CDP读取两次超时，延长到180秒后在保留GUI上恢复评分；无新增模型调用，兼容配置单列，不作为原时序复现。
 - [x] 固定第三题：两次原解析失败均保留。第二次保存7步操作及真实`terminate(success)`；确认作者仅在描述原生DONE时错误索引点号。对这一个描述表达式做守卫后，原解析得到DONE、原环境终止、原评分0分；保留GUI和原轨迹，无新增模型调用，分段兼容恢复单列。
-- [ ] 整项公共执行及研究接通：待完成。以上是题目级进度，OSWORLD来源整体仍不打勾。
+- [x] 固定协议交付：成功CI的软件包97项载荷已安装核验；368个原任务进入统一索引，公共与未修改研究消费者4个固定回读一致。使用独立精确依赖锁完成核验，未改研究仓默认锁；不是未经修改的单次官方运行或368题全跑。
 
 公开执行入口为`scripts/run_osworld_original.py`，默认只核验固定源码和原任务并输出计划。 默认使用作者Docker
 Provider，必须显式提供可丢弃VM路径；不会自动分配虚拟机。
@@ -711,7 +712,10 @@ ARM64兼容环境可显式选择`--provider owned-qemu --owned-qemu-profile <pro
 可用`python -m vllm_hust_workload_data.osworld --author-root <原源码> --manifest configs/workload-native/osworld-author-source.json`
 核验完整任务列表；加`--output <新外部JSONL> --write`才写原始任务包。保留原顺序、任务/初始化字段和独立评分参考，不构造请求；
 新模块已在服务器核验完整368个原任务：顺序、原初始化字段（包括本来没有config的任务）及独立评分参考均逐项原样回读，前三题与原生验证选题一致。
-这还不是新CI软件包安装或未改研究消费者接通，因此OSWORLD来源仍不加勾。
+成功CI工件`13490040825`（生产提交`63104380`）现已通过安装及原研究依赖校验，公共和未修改研究消费者固定4项回读完全一致。
+统一入口配置为`{"sources":[{"source_id":"OSWORLD","data_root":"<原作者目录>","manifest":"<固定osworld-author-source.json>"}]}`；
+运行`python -m vllm_hust_workload_data.pipeline plan --config <配置>`，再用`run --config <配置> --output <新索引目录>`。
+通过`consumer.resolve_input`读取原任务和独立评分参考，不能调用`request_body()`伪装成现成prompt。
 
 2026-11-06：原始 Ubuntu 镜像已通过发布方压缩包 SHA256、完整解压 CRC 和解压后全文件 SHA256 核验。公开准备入口为
 `scripts/prepare_osworld_original_vm.py`；`verify-image` 可独立复核已解压镜像， 不要求保留重复压缩包。隔离 CPU 容器中的 ARM64
