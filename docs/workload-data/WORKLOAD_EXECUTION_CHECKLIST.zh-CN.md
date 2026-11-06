@@ -1,9 +1,9 @@
 # Workload 分类执行清单
 
-当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，106 项已勾选，7 项待完成；另有 5
+当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，107 项已勾选，6 项待完成；另有 5
 项仅分类。 下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
 
-待完成：MLAgentBench、MLE-bench、WebArena、VisualWebArena、WorkArena、PaperBench、Full-Duplex-Bench。
+待完成：MLAgentBench、MLE-bench、WebArena、VisualWebArena、WorkArena、PaperBench。
 
 ## 原40类计划的增量定义（不改变历史快照）
 
@@ -786,7 +786,7 @@ ASR 或文本对话都不能替代该结果。 可移植路径：SGLang-Omni 分
 ASR/VAD及适用原评分链路已按固定协议核验，见[最终交付回执](validation/full-duplex-fixed27-native-delivery-20261107.json)。
 
 2026-11-06最新固定协议结果：9类共27条原题/39会话、两个版本原观察窗导出、NPU Parakeet ASR、NPU Silero VAD和全部类别评分路径已完成；本地Qwen3.5-9B
-judge的结果单独标明，不是官方GPT成绩。当前缺口是可复用公共原生入口及其验证、研究侧交接，来源总勾仍未完成。以下镜像帮助和配置解析属于较早的准备记录，完整执行以[当前证据](validation/full-duplex-model-metadata-20261106.json)为准。
+judge的结果单独标明，不是官方GPT成绩。公共原生入口、依赖/绑定核验和同批原题研究侧交接现已收口。以下镜像帮助和配置解析属于较早的准备记录，当前交付范围以[最终回执](validation/full-duplex-fixed27-native-delivery-20261107.json)为准。
 
 固定原题回放入口（先准备仓库外的原始解压数据和独立SGLang-Omni环境）：
 
@@ -853,7 +853,7 @@ source /usr/local/Ascend/ascend-toolkit/set_env.sh
 锁中的Silero6.2.1为独立可选VAD包，原wheel摘要及来源另列，使用`--no-deps`安装到独立目标目录后加入进程`PYTHONPATH`，
 不把它混入66包的ASR安装完成数。上述环境检查不等于ASR/VAD神经执行，也不能代替双工服务运行时资格核验。
 
-双工模型运行时的可迁移绑定（仍未完成整体验证）：
+双工模型运行时的可迁移绑定（已完成依赖/绑定核验并复用原生实跑证据，不重复整套服务运行）：
 
 官方vendor operator载荷可在独立外部目录准备，无需Docker或执行SDK安装器：
 
@@ -923,7 +923,7 @@ python scripts/prepare_full_duplex_model_environment.py \
 
 服务器本次先完成182项安装，再用同入口的`--bind-kernel-only`和`--isolate-core-only`补齐分阶段操作，
 19900份核心文件/1806502988字节与基座逐文件哈希一致，8个关键模块在隔离环境和公共兼容副本组合下导入通过。 已核验vendor
-operator载荷本次复用；其独立解包/完整启动说明仍待收口。 保留13条依赖声明冲突，不称全环境pip检查干净。临时5份wheel共52305767字节已删除；原安装回执、锁和核验日志保留。
+operator载荷在该阶段复用；后续公共纯解包及启动说明已在上文补齐，1126份文件/2个链接一致。保留13条依赖声明冲突，不称全环境pip检查干净。临时5份wheel共52305767字节已删除；原安装回执、锁和核验日志保留。
 
 完整模型运行时依赖来源见
 `docs/workload-data/validation/full-duplex-model-runtime-lock-20261107.json`：177项公开wheel/源码包按URL和SHA256固定，
@@ -981,7 +981,7 @@ speaker绑定， 没有改任务、采样预算或参考评分器，也未安装
 并设置`FULL_DUPLEX_NPU_SPEAKER_PROFILE`指向独立的已核验工件配置。
 启动模板为`configs/workload-native/full-duplex-minicpmo-npu.yaml`，按`/models`只读模型挂载布局编写；
 它与已成功服务配置在模型根路径重定位后逐字一致，保留原参考音色、单会话及Ascend后端设置，不改原采样预算。 非该挂载布局须一致指定模型根路径及其原参考音色路径，不能替换音色或任务音频。
-该准备入口不提供或替代SGLang/算子依赖安装；完整运行时依赖工件说明及导入/组合资格核验仍待收口，不能把源码和配置准备通过称为整个服务已可部署。
+该源码准备入口不替代SGLang/算子依赖安装；完整依赖准备、导入/组合控制及固定原生执行证据已分别列明，不能把单独源码或配置准备冒称为神经执行。
 
 保存的原生回放应先用`export_full_duplex_original_capture.py`导出原观察窗，再进行ASR和评分：
 
