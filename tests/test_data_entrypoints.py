@@ -172,6 +172,29 @@ def test_completed_archive_has_evidence_and_an_active_successor():
     assert successor["public_surface"] is True
 
 
+def test_upstream_forks_share_the_foundation_repository_domain():
+    portfolio = json.loads(
+        (index.ROOT / "website-publication/data/repository-portfolio.json").read_text()
+    )
+    upstream_forks = [
+        repository
+        for repository in portfolio["repositories"]
+        if repository["repository_role"] == "upstream_sync_fork"
+    ]
+
+    assert {repository["name"] for repository in upstream_forks} == {
+        "mooncake-hust",
+        "production-stack-hust",
+        "sglang-hust",
+        "triton-ascend-hust",
+        "vllm-ascend-hust",
+        "vllm-hust",
+        "vllm-metal-hust",
+    }
+    assert {repository["portfolio_domain"] for repository in upstream_forks} == {
+        "foundation_repositories"
+    }
+
 def test_state_scheduler_is_delisted_from_public_catalogs():
     publication = index.ROOT / "website-publication/data"
     ecosystem = json.loads((publication / "ecosystem.json").read_text())
