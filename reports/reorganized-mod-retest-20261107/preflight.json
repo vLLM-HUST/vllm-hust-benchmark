@@ -1,0 +1,83 @@
+{
+  "schema_version": "reorganized-mod-retest/v1",
+  "date": "2026-11-07",
+  "status": "port_required_before_formal_npu_measurement",
+  "families": [
+    "vLLM-HUST/vllm-hust-gdn-optimizations",
+    "vLLM-HUST/vllm-hust-runtime-micro-optimizations",
+    "vLLM-HUST/vllm-ascend-attention-optimizations"
+  ],
+  "environment": {
+    "hardware": "Ascend 910B2 x4 assigned; devices 4,5,6,7 healthy and idle",
+    "installed_vllm_version": "0.23.0",
+    "installed_vllm_commit": "0fc695f",
+    "installed_vllm_ascend_commit": "1cdb8c4db",
+    "target_vllm_hust_main": "dea92f6f98260fb7a7ca359c3fb637c5d4c8082d",
+    "target_vllm_ascend_hust_main": "591d40bfad246a1154b5e61e49d01278abb009d8"
+  },
+  "source": {
+    "repository": "GenNova-HUST/inference-engine-project",
+    "commit": "c8416aad2c9e161abe2dde5e01690edc48e756e3",
+    "use": "candidate recovery only; new qualification must use canonical reorganized repository commits"
+  },
+  "package_build": {
+    "status": "passed",
+    "built_wheels": 8
+  },
+  "checks": [
+    {
+      "candidate": "gdn-static-decay 0.2.2",
+      "result": "unit_pass_port_pending",
+      "tests": "21 passed",
+      "blocking_condition": "no current-host source contract"
+    },
+    {
+      "candidate": "native-gdn-delayed 0.2.4",
+      "result": "base_contract_pass_host_abi_rejected",
+      "tests": "22 passed; current-host copy compatibility collection rejected",
+      "blocking_condition": "current Core removed _get_mamba_spec_for_layer"
+    },
+    {
+      "candidate": "attention-runtime-adapters 0.1.4",
+      "result": "host_source_rejected",
+      "tests": "4 passed before fail-closed hash check",
+      "blocking_condition": "graph_fusion_pass_manager.py source hash mismatch"
+    },
+    {
+      "candidate": "empty-padding 0.1.0",
+      "result": "port_required",
+      "blocking_condition": "host module renamed and source identity changed"
+    },
+    {
+      "candidate": "query-start-location reuse 0.1.0",
+      "result": "port_required",
+      "blocking_condition": "attention builder and runner source identities changed"
+    },
+    {
+      "candidate": "residual-scale 0.1.0",
+      "result": "port_required",
+      "blocking_condition": "layer-norm implementation and operation path changed"
+    },
+    {
+      "candidate": "RoPE argument repair 0.1.0",
+      "result": "absorbed_by_current_host_not_independent",
+      "blocking_condition": "old missing-argument seam no longer exists"
+    }
+  ],
+  "formal_measurement": {
+    "started": false,
+    "reason": "candidate admission failed before NPU performance execution",
+    "required_pairs": 3,
+    "order": "alternating Native/candidate with fresh processes",
+    "quality_gate": "MMLU-Pro overlap with complete output comparison and no regression",
+    "custody": [
+      "resolved_same_spec.json",
+      "env-manifest.json",
+      "activation receipts for both ranks",
+      "raw outputs and process logs",
+      "run_leaderboard.json",
+      "leaderboard_manifest.json",
+      "checksums.sha256"
+    ]
+  }
+}
