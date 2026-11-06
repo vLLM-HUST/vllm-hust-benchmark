@@ -64,7 +64,7 @@ def test_output_overlap_rejected(args):
 
 
 def test_credential_url_rejected(args):
-    args.endpoint = "http://user:fixture@localhost:12345"
+    args.endpoint = "http://user:fixture@localhost:12345"  # pragma: allowlist secret - rejected credential URL fixture
     with pytest.raises(ValueError, match="credentials"):
         runner.plan(args)
 
@@ -79,8 +79,9 @@ def test_execute_keeps_budget_and_blocks_oversize(
         __file__=str(args.runtime / "judge_core/runner.py"),
         collect_judge_inputs_with_context=lambda *a, **k: inputs,
         build_user_prompt_with_context=lambda value: json.dumps(value),
-        judge_task=lambda *a, **k: calls.append(k)
-        or {"is_valid": False, "reason": "valid negative verdict"},
+        judge_task=lambda *a, **k: (
+            calls.append(k) or {"is_valid": False, "reason": "valid negative verdict"}
+        ),
     )
     policy = SimpleNamespace(
         __file__=str(args.runtime / "judge_core/policy.py"),
