@@ -1,0 +1,151 @@
+{
+  "schema": "ride.machine-deployment-evidence/v1",
+  "date": "2026-11-06",
+  "status": "functional acceptance at fixed revisions; latest integration software only",
+  "software": {
+    "revision": "364ab39caacc8b4ef731dc6158d07076e1f5acc4",
+    "upstream_base": "498fa8b44a445b104c4a0f0eef96f206c4fd5722",
+    "package_version": "0.3.3",
+    "platform": "macOS arm64 Python3.12.14",
+    "standard_check": {
+      "tests_passed": 103,
+      "failed": 0,
+      "cli": "PASS",
+      "installed_cli": "PASS",
+      "build": "PASS",
+      "bootstrap_deadline": "PASS; timeout preserves UNKNOWN and prevents Job submission",
+      "offline_management_status": "PASS; durable UNKNOWN remains observable"
+    },
+    "request_controller_sdk_compatibility": {
+      "source": "00f2f39",
+      "tests_passed": 16,
+      "warnings": 4,
+      "warning_kind": "upstream FastAPI on_event deprecation"
+    },
+    "latest_linux": {
+      "status": "PASS",
+      "tests_passed": 103,
+      "head_revision": "16ecc204b0ebd631e091b5988ddde9b642db79c5",
+      "code_revision": "364ab39caacc8b4ef731dc6158d07076e1f5acc4",
+      "run_url": "https://github.com/vLLM-HUST/ride/actions/runs/42152230884",
+      "cli_installed_cli_build_and_lightweight_sdk": "PASS"
+    },
+    "latest_npu": "NOT_RUN",
+    "remote_ci": {
+      "software": "PASS",
+      "organization_evidence_custody": "REVIEW_REQUIRED",
+      "review_path": "evidence/machine-deployment-20261106/summary.json",
+      "run_url": "https://github.com/vLLM-HUST/ride/actions/runs/42152228243",
+      "observed_message": "Evidence custody review required: evidence/machine-deployment-20261106/summary.json",
+      "policy_bypassed": false
+    }
+  },
+  "qualified_hardware": {
+    "cold_start_revision": "30ec6a4bcf247cba331d2a5b7a1e2530beac2dfb",
+    "controlled_restart_deployer_revision": "3a4adde133c4c84e59f47b10c9cb591caabdaeb0",
+    "runtime_revision_during_restart": "30ec6a4bcf247cba331d2a5b7a1e2530beac2dfb",
+    "linux_software_tests": {
+      "cold_start": 93,
+      "controlled_restart": 95
+    },
+    "devboxes": 2,
+    "physical_hosts": 1,
+    "npu_count": 2,
+    "tensor_parallel_size_each": 1,
+    "ray": "2.48.0",
+    "vllm": "0.23.0",
+    "torch": "2.10.0+cpu",
+    "torch_npu": "2.10.0.post4",
+    "model": "Qwen3-0.6B",
+    "placement": {
+      "model_a": "head devbox",
+      "model_b": "worker devbox",
+      "actual_ray_driver_nodes_distinct": true
+    },
+    "requests": {
+      "completed_generations": 9,
+      "failed_generations": 0,
+      "multi_round_programs": 3,
+      "actual_previous_output_in_followup": true,
+      "streaming": "NOT_RUN",
+      "business_timeout_seconds": -1
+    },
+    "control": {
+      "drain_activate_wait_resume": "PASS; explicit membership gate, no capacity-throttle gain claim",
+      "release": "PASS",
+      "foreign_job_stop_rejected": 409,
+      "management_pid_changed": true,
+      "persistent_run_id_preserved": true,
+      "service_job_ids_preserved": true,
+      "program_backend_preserved": true,
+      "repeated_restart_idempotent": true,
+      "repeated_up_no_new_services": true,
+      "controller_stop_model_isolation": true
+    },
+    "request_controller": {
+      "source": "00f2f39",
+      "scheduler_source": "7ddc8610270e56d3b109eed8796b3a4360fc67c9",
+      "verified_upstream_files": 17,
+      "scope": "original scheduler plus explicit managed membership and infinite-wait adaptation"
+    },
+    "performance": "NOT_RUN"
+  },
+  "preserved_failures": [
+    {
+      "run": "r2",
+      "reason": "Incomplete test source payload; acceptance scripts missing; no Ray/model started"
+    },
+    {
+      "run": "r3",
+      "reason": "Venv could import Ray but had no Ray console script; no model started"
+    },
+    {
+      "run": "r4",
+      "reason": "Minimal Ray lacked Jobs API dependencies; empty Ray cluster stopped; no model started"
+    },
+    {
+      "stage": "first archive attempt",
+      "reason": "Ray JobDetails was not a dataclass; corrected serialization and verified replacement archive"
+    },
+    {
+      "stage": "upstream integration",
+      "reason": "HTTP test attempted two management writers; fixture now closes old Runtime"
+    },
+    {
+      "stage": "standard pytest collection",
+      "reason": "Archived source copies were collected; testpaths now selects complete active tests directory"
+    },
+    {
+      "stage": "final operational regression",
+      "reason": "Default launcher had no finite operational timeout and offline management hid durable operations; both failure regressions now pass"
+    }
+  ],
+  "cleanup": {
+    "status": "PASS",
+    "terminal_jobs": 7,
+    "workspaces_deleted": 2,
+    "pods_deployments_services_pvc_pv_absent": true,
+    "npu_requests_released": 2,
+    "physical_processes_absent": true,
+    "shared_weights_retained": true
+  },
+  "private_artifacts": {
+    "primary": {
+      "file": "final-evidence-r2.tar.gz",
+      "sha256": "f0cc073b458530d5617422fe25d5bda9350d391a1d2ec02c458f57f2af65336e",
+      "verified_files": 54
+    },
+    "closeout": {
+      "file": "closeout.tar.gz",
+      "sha256": "5a62328d1ea8754a4ebcf4cb5da4a6a30d1aa744066a2052f2e42003cde50833",
+      "verified_files": 13
+    }
+  },
+  "limits": [
+    "Latest upstream0.3.3 single-writer integration, default Job prefixes and endpoint receipts have software coverage; old hardware evidence is not relabeled",
+    "Cross-physical-host, single-model multi-node TP/PP, streaming, browser UI, long-running stability, automatic failure recovery and performance are not qualified",
+    "UNKNOWN automatic reconciliation and first recovery of an already-offline management API without a prior snapshot are unsupported",
+    "Coder machine provisioning, host drivers and weight downloads remain external prerequisites",
+    "GenNova integration has not started in this deployment milestone"
+  ]
+}
