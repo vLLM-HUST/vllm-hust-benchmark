@@ -852,6 +852,17 @@ source /usr/local/Ascend/ascend-toolkit/set_env.sh
 锁中的Silero6.2.1为独立可选VAD包，原wheel摘要及来源另列，使用`--no-deps`安装到独立目标目录后加入进程`PYTHONPATH`，
 不把它混入66包的ASR安装完成数。上述环境检查不等于ASR/VAD神经执行，也不能代替双工服务运行时资格核验。
 
+双工模型运行时的可迁移绑定（仍未完成整体验证）：
+
+- `full_duplex_reference_audio.py`替代本机路径绑定，只接受固定发布方参考WAV哈希；PCM16转float32不改声道、样本或调用者流位置。
+  原269494个样本已与原SoundFile读取逐值核对。它只处理模型固定参考音色，不接管或改写任务音频。
+- `full_duplex_npu_speaker.py`通过`FULL_DUPLEX_NPU_SPEAKER_PROFILE`指定独立工件目录，
+  配置样例为`configs/workload-native/full-duplex-npu-speaker-profile.example.json`。
+  工件目录需含声明的派生图、编译OM和真实NPU控制回执；入口核验三者哈希、原固定输入/输出形状及特征摘要，
+  仅接受原参考特征，拒绝CPU回退或其他音频。实际复核已保留的图、OM和旧NPU回执通过，未重新执行神经网络。
+- 新ACL调用及资源释放路径通过夹具测试；尚需公开上游模型源代码补丁接入，并在获准的空闲NPU窗口验证新绑定。
+  旧NPU实跑和当前非神经工件核验分开记录，不能把工件可读或夹具通过称为新绑定已实跑，也不称全原网络数值等价。
+
 保存的原生回放应先用`export_full_duplex_original_capture.py`导出原观察窗，再进行ASR和评分：
 
 ```bash
