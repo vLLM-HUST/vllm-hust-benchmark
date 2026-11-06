@@ -2886,6 +2886,10 @@ PYTHONPATH=workload-preparation/src python scripts/prepare_reused_source_records
 
 #### Full-Duplex-Bench原生准备
 
+- [x] 已核验官方SGLang-Omni镜像内`python -m benchmarks.duplex.fdb --help`正常退出。优先复用其原生录制、音频导出及reference评分入口，不自行构造输入或改写评分。镜像按不可变digest固定；帮助命令通过仅为软件证据，不是NPU推理或benchmark完成。
+
+- [ ] 原框架`asr.py`仍硬编码CUDA；必须先验证同一Parakeet模型的NPU设备绑定，才可串起完整评分。不能直接执行`generate --all-stages`后宣称NPU链路通过。上游另有unified/listening评价，不能将其冒充数据集发布方的原评分。[环境和模型核验记录](validation/full-duplex-model-metadata-20261106.json)
+
 - [x] 原Moshi客户端CPU环境已核验：Python3.11、Torch/torchaudio2.6.0、NumPy1.26.4复用现有科学环境，官方固定`sphn==0.1.12`在ARM64按原版本源码编译；Rust1.90官方归档校验、CMake3.22.1及maturin1.16.0记录保留。初次128MB临时目录不足、后续子环境继承到错误系统路径的失败均保留；仅修本任务环境路径，`pip check`及未改原客户端`--help`均exit0，没有更改全局镜像或原科学任务环境。
 
 - [x] 未改原客户端的编解码控制实际解码30包、51840个PCM样本；本地WebSocket回声控制31包往返，57600采样点输出含53712个非零采样，源文件哈希未变。使用的是明确标注的软件控制音频，不是原benchmark请求或模型输出；0模型调用，0原题执行，不能据此补来源总勾。服务器证据：任务自有`full-duplex-moshi-client-recovery-20261103-002`的`path-repair-public.json`、`codec-control-public.json`及`websocket-fixture/qualification-public.json`。

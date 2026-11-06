@@ -48,5 +48,19 @@
   "model_weights_downloaded": false,
   "remote_code_executed": false,
   "npu_initialized": false,
+  "framework_integration_review": {
+    "official_guide": "https://github.com/sgl-project/sglang-omni/blob/main/docs/developer_reference/full_duplex_guide.md",
+    "immutable_image": "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang-omni@sha256:265387f87a6a97ad170a2c2a51f0ce3209e24e143d3048c97fe172b70f273938",
+    "original_fdb_cli": "python -m benchmarks.duplex.fdb --help",
+    "original_fdb_cli_help_exit_code": 0,
+    "qualification_scope": "Original image entrypoint with read-only driver libraries, no device mapping, no network or neural execution. Initial bypassed-entrypoint attempt failed to find libascend_hal.so and is not model incompatibility evidence.",
+    "existing_framework_capture_and_export_should_be_reused": true,
+    "asr_wrapper_device": "cuda hardcoded in benchmarks/duplex/fdb/asr.py",
+    "npu_asr_execution_verified": false,
+    "protocol_boundary": "Do not run the unmodified all-stages wrapper as if NPU-qualified. Qualify a disclosed device-only binding of the same Parakeet ASR, and preserve original task capture and original reference scorers. Framework unified/listening metrics are not the publisher's original scores.",
+    "model_download_started_single_copy": true,
+    "model_acquisition_complete": false,
+    "native_cases_run": 0
+  },
   "source_checkbox_eligible": false
 }
