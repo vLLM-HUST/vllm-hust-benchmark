@@ -676,6 +676,26 @@ GNOME 会话超时，不能宣布桌面稳定。 修正作者要求的 Pillow、
 DesktopEnv、SetupController、Agent 和固定三题评分器的离线隔离导入检查通过；未实例化桌面环境、
 未执行神经模型或原题。环境导入通过、桌面服务就绪和原生任务交付是三个不同检查层次。
 
+客户端软件已新增 `osworld-client-requirements.lock`，记录实际通过导入检查的 ARM64 CPython3.11 环境中 179
+个包的版本。`check_osworld_author_client.py` 先校验完整作者源码身份，再检查全部锁定版本和 原始导入；默认仅输出计划，不启动桌面或模型。独立 Dockerfile
+已在服务器从零重建成功，并在新镜像内通过公开入口校验全部 179 个版本、完整原始源码和客户端/评分器 导入。实测平台为
+aarch64、Python3.11.18；该结果仍不证明桌面重置或原题执行通过。
+
+```bash
+docker build -f configs/workload-native/osworld-cpu-client.Dockerfile -t osworld-client:locked configs/workload-native
+docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges \
+  --read-only --cpus 2 --memory 3g --pids-limit 128 --tmpfs /tmp:rw,nosuid,nodev,size=128m \
+  -e HOME=/tmp \
+  --mount "type=bind,src=$PWD/scripts,dst=/benchmark/scripts,readonly" \
+  --mount "type=bind,src=$PWD/configs/workload-native,dst=/benchmark/configs/workload-native,readonly" \
+  --mount type=bind,src=/srv/osworld/author,dst=/author,readonly \
+  osworld-client:locked python /benchmark/scripts/check_osworld_author_client.py \
+  --author-root /author --action check-imports
+```
+
+上述路径指向已按 `osworld` profile 准备的完整作者源码，不是数据集目录；缺文件、源码身份不符或依赖 版本漂移均停止检查。仅导入 CPU 客户端及评分器定义，不在此执行模型或评分。CI
+只运行该入口的离线夹具， 不构建这套可选环境、不启动虚拟机、不占 NPU。
+
 原始 VM 准备命令如下；目录必须位于仓库外。预算分别覆盖完整压缩包和解压内容，不是抽样下载。 下载和解压峰值还需要预留磁盘空间，`verify-image` 不会启动虚拟机或运行原题。
 
 ```bash
