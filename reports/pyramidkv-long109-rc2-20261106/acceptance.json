@@ -1,0 +1,68 @@
+{
+  "status": "PASSED_FUNCTIONAL_CANDIDATE_ACCEPTANCE",
+  "version": "0.4.0rc2.dev0",
+  "source_commit": "77b5c7fd8817b14c9800f6369bd4db622f53f43e",
+  "branch": "fix/qwen35-long109-rc2",
+  "created_at": "2026-11-06T15:19:56.722997+08:00",
+  "publication": "Not published; local source branch and candidate artifacts retained",
+  "transaction_gate": {
+    "accepted": true,
+    "target_commits": 128,
+    "total_commits": 129,
+    "worker_acknowledgements": 258,
+    "completed_requests": 178,
+    "long109": "committed on scheduler and both TP ranks",
+    "final_active_requests": 0
+  },
+  "raw_stream_gate": {
+    "raw_streams_verified": 178,
+    "peak_running_plus_waiting": 128.0,
+    "all_admitted_before_first_completed": true,
+    "telemetry_errors": 0,
+    "requests_sha256": "cff89e9ce8fb72911b4f35ad3ecd3c821e2f5dbf4395dd367bc7af2a5ad38d4e"
+  },
+  "tests": {
+    "generic_passed": 303,
+    "generic_skipped": 5,
+    "npu_opt_in_passed": 4,
+    "host_plugin_bootstrap_passed": 1,
+    "all_skipped_cases_covered_separately": true
+  },
+  "serving_errors": 0,
+  "shutdown_returncode": 0,
+  "devices_released": [
+    4,
+    6
+  ],
+  "preemptions": 97,
+  "replay_boundary_attempts": 90,
+  "historical_originals": {
+    "historical_frozen_file_count": 43,
+    "historical_changed_files": [],
+    "wheel_sha256": "5392b2a8afa971cf0af1b9928d693ab80a71976256de87e7f85b5f9c3a4819be",
+    "scheduler_source_matches_wheel": true,
+    "host_heads": {
+      "vllm": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+      "vllm-ascend": "03766ac696fde5ab1980d80ca0b8543d3580c989"
+    },
+    "metadata_requires_dist": [
+      "Requires-Dist: torch>=2.5; extra == 'provider'",
+      "Requires-Dist: aiohttp>=3.9; extra == 'test'",
+      "Requires-Dist: pytest>=8; extra == 'test'",
+      "Requires-Dist: ruff>=0.12; extra == 'test'",
+      "Requires-Dist: torch>=2.5; extra == 'test'",
+      "Requires-Dist: vllm-hust-ext<0.4,>=0.2.0.dev0; extra == 'test'"
+    ]
+  },
+  "scope": "One fresh functional ON lifecycle. Hardware differs from historical physical1/5. No paired performance or quality claim.",
+  "long109_trace": [
+    "(EngineCore pid=34551) INFO 11-06 07:14:53 [scheduler.py:351] KV compression scheduler commit request_id=cmpl-long-109-0-8a7577db semantic_tokens=7168 physical_tokens=2048 source_blocks=4 destination_blocks=1 released_blocks=4",
+    "(Worker_TP1 pid=35670) INFO 11-06 07:14:54 [worker.py:285] KV compression worker commit acknowledged request_id=cmpl-long-109-0-8a7577db semantic_tokens=7168 physical_tokens=2048 destination_blocks=1 worker_rank=1",
+    "(Worker_TP0 pid=35669) INFO 11-06 07:14:54 [worker.py:285] KV compression worker commit acknowledged request_id=cmpl-long-109-0-8a7577db semantic_tokens=7168 physical_tokens=2048 destination_blocks=1 worker_rank=0"
+  ],
+  "long109_first_boundary": "(EngineCore pid=34551) INFO 11-06 07:13:37 [scheduler.py:191] KV compression replay boundary request_id=cmpl-long-109-0-8a7577db computed_tokens=6144 scheduled_tokens=1025 capped_tokens=1024 prompt_tokens=7168",
+  "final_artifacts": {
+    "vllm_ascend_pyramidkv_hust-0.4.0rc2.dev0-py3-none-any.whl": "5392b2a8afa971cf0af1b9928d693ab80a71976256de87e7f85b5f9c3a4819be",
+    "vllm_ascend_pyramidkv_hust-0.4.0rc2.dev0.tar.gz": "0463ea98ffbc2082615f4db357956185dd95c9c6710d5b3a5935e4eedf2bc931"
+  }
+}
