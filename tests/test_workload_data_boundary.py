@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "osworld",  # Original task/setup/reference packages only; no GUI or Agent execution.
     "gaia",  # Original tasks/attachments and separate references only; no Agent, network or observation.
     "msmarco",  # Original candidate/query/qrel aggregation only; no model, network or observation.
     "discoverybench",  # Original task/reference/data relations only; no Agent or models.
