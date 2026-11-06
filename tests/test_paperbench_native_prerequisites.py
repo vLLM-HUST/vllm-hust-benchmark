@@ -21,7 +21,9 @@ def fixture(tmp_path):
         "Miniconda3-py313_25.5.1-0-Linux-x86_64.sh\nconda tos accept\n",
         "FROM invented-control-only\n",
         "--platform=linux/amd64\n--platform=linux/amd64\n",
-        "time_limit: int | None = chz.field(default=5 * 60\n",
+        "time_limit: int | None = chz.field(default=5 * 60\n"
+        "OpenAIResponsesTurnCompleterConfig(\n"
+        'tools=[WebSearchToolParam(type="web_search_preview")]\n',
         "paperbench.reproduction.timeout=60\n",
     ]
     entries = []
@@ -77,6 +79,10 @@ def test_architecture_never_promotes_preflight_to_execution(
     )
     assert result["publisher_scoring_entry"] == "project/paperbench/paperbench/grade.py"
     assert not result["native_agent_reproduction_or_scoring_executed"]
+    assert result["original_basicagent_default_model_api"] == "OpenAI Responses"
+    assert result["original_basicagent_default_builtin_tools"] == ["web_search_preview"]
+    assert not result["model_endpoint_and_tool_execution_qualified"]
+    assert not result["chat_completions_health_check_is_sufficient"]
 
 
 def test_modified_source_is_rejected_before_recipe_inspection(tmp_path):
@@ -92,4 +98,26 @@ def test_missing_required_recipe_is_rejected(tmp_path):
     value["files"].pop()
     pins.write_text(json.dumps(value))
     with pytest.raises(ValueError, match="pins required"):
+        runner.inspect_original(tmp_path, pins_path=pins)
+
+
+@pytest.mark.parametrize(
+    "missing", ["OpenAIResponsesTurnCompleterConfig(", "web_search_preview"]
+)
+def test_changed_model_contract_requires_review(tmp_path, missing):
+    pins = fixture(tmp_path)
+    target = tmp_path / runner.RECIPES[3]
+    raw = target.read_bytes().replace(missing.encode(), b"invented-control")
+    target.write_bytes(raw)
+    value = json.loads(pins.read_text())
+    item = next(x for x in value["files"] if x["path"] == runner.RECIPES[3])
+    item.update(
+        bytes=len(raw),
+        sha256=hashlib.sha256(raw).hexdigest(),
+        git_blob=hashlib.sha1(
+            b"blob " + str(len(raw)).encode() + b"\0" + raw
+        ).hexdigest(),
+    )
+    pins.write_text(json.dumps(value))
+    with pytest.raises(ValueError, match="model/tool contract"):
         runner.inspect_original(tmp_path, pins_path=pins)

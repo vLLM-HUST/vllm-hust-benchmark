@@ -57,6 +57,12 @@ def inspect_original(author_root, *, pins_path=PINS, host_architecture=None):
         raise ValueError("review changed original vendor-terms behavior")
     if "time_limit: int | None = chz.field(default=5 * 60" not in originals[RECIPES[3]]:
         raise ValueError("review changed original BasicAgent time budget")
+    solver = originals[RECIPES[3]]
+    if (
+        "OpenAIResponsesTurnCompleterConfig(" not in solver
+        or 'tools=[WebSearchToolParam(type="web_search_preview")]' not in solver
+    ):
+        raise ValueError("review changed original BasicAgent model/tool contract")
     if "paperbench.reproduction.timeout=60" not in originals[RECIPES[4]]:
         raise ValueError("review changed author development protocol")
     architecture = host_architecture or platform.machine()
@@ -72,6 +78,10 @@ def inspect_original(author_root, *, pins_path=PINS, host_architecture=None):
         "original_recipe_auto_accepts_anaconda_terms": True,
         "vendor_terms_accepted_by_this_check": False,
         "original_basicagent_default_time_seconds": 300,
+        "original_basicagent_default_model_api": "OpenAI Responses",
+        "original_basicagent_default_builtin_tools": ["web_search_preview"],
+        "model_endpoint_and_tool_execution_qualified": False,
+        "chat_completions_health_check_is_sufficient": False,
         "author_documented_dev_reproduction_timeout_seconds": 60,
         "default_and_dev_are_not_canonical_24h_protocol": True,
         "docker_built_or_run": False,
@@ -85,6 +95,7 @@ def inspect_original(author_root, *, pins_path=PINS, host_architecture=None):
             "Qualify actual isolated images and execution architecture; matching host alone is insufficient",
             "Resolve vendor terms before invoking the original build recipe",
             "Bind suitable models and preserve the complete declared Agent/reproduction/judge protocol",
+            "Qualify Responses API and original tool execution; a chat-completions endpoint alone is insufficient",
             "Validate original tasks and official scoring; debug dummy runs are not delivery evidence",
         ],
     }
