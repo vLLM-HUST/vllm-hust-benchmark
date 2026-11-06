@@ -854,6 +854,23 @@ source /usr/local/Ascend/ascend-toolkit/set_env.sh
 
 双工模型运行时的可迁移绑定（仍未完成整体验证）：
 
+完整模型运行时依赖来源见
+`docs/workload-data/validation/full-duplex-model-runtime-lock-20261107.json`：177项公开wheel/源码包按URL和SHA256固定，
+5项NPU wheel按官方2026.9.0发布归档、成员路径及双层SHA256绑定，另2项绑定源码身份。 这是原成功运行环境的来源锁，不是通用pip
+requirements，也不是从零重建通过的声明。
+基座是记录digest的站点镜像，外部使用者须先取得匹配ARM64/Python3.12.13/CANN9.1.0环境；不能假设私有镜像地址可公网拉取。
+`sglang`安装元数据为`0.5.20+nativecompat1`，实际导入源码固定为`baa9befa381511cd4d56f83980951e5a45fffc6d`，
+不能仅按元数据版本重新安装PyPI包替代该源码。官方kernel补充文件的固定提交及SHA也在锁中，不修改二进制扩展。
+
+```bash
+python scripts/verify_full_duplex_model_runtime.py
+"$MODEL_ENV_PYTHON" scripts/verify_full_duplex_model_runtime.py --verify-installed
+```
+
+第一条只核验锁；第二条必须由目标模型环境Python运行，比较184项运行依赖及6项核心包版本，不导入Torch/ACL、不调用模型。
+原环境190项版本核对通过，公共兼容源码与这些依赖的8个关键模块导入通过，且Omni路径确认为新副本；
+来源仍等待完整模型环境的新建重装及剩余公共神经绑定核验。不要使用可写核心包符号链接后再执行pip安装； 不在现有共享服务环境升级核心包，也不在系统CANN目录安装或覆盖这些私有operator载荷。
+
 - `full_duplex_reference_audio.py`替代本机路径绑定，只接受固定发布方参考WAV哈希；PCM16转float32不改声道、样本或调用者流位置。
   原269494个样本已与原SoundFile读取逐值核对。它只处理模型固定参考音色，不接管或改写任务音频。
 - `full_duplex_npu_speaker.py`通过`FULL_DUPLEX_NPU_SPEAKER_PROFILE`指定独立工件目录，

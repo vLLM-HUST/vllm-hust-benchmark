@@ -2,6 +2,8 @@
 
 ### 本次实际推进（2026-11-06—2026-11-07）
 
+- [x] Full-Duplex完整模型依赖来源已公开绑定：177个公开包、5个官方归档wheel和2份源码共184项，3份原发布归档及其wheel/run成员哈希核验通过；公共版本核验入口在服务器对184项及6个核心包共190项版本全部匹配。新公共兼容源码的8个关键模块导入通过，Omni模块路径确认为新副本，未触发设备初始化控制、未加载模型。其他可选模型的导入警告原样保留，不能称SGLang所有模型可用；完整模型环境新建重装仍未验证。[依赖锁](validation/full-duplex-model-runtime-lock-20261107.json)及[核验记录](validation/full-duplex-model-metadata-20261106.json)。
+
 - [x] Full-Duplex固定参考speaker派生图新增公共准备入口：服务器用固定作者ONNX重建，52处池化替换、原始参数不变，派生图SHA256与已验证部署图一致；不执行神经网络。回执：`full-duplex-public-graph-preparation-20261107-001/qualification-public.json`。本次未重跑ATC或NPU控制，编译/推理证据沿用原独立记录；临时原图和派生图两文件共57281671字节已清理。
 
 - [x] Full-Duplex原生本地judge保存结果的公共复用入口已在服务器验证：`v15-localjudge --reuse-completed`调用原`run_custom`，12条结果均为valid，原目录与独立副本的24份request/result文件哈希不变；缺失缓存时禁止发送新模型请求，invalid_label和not_judged不算成功。回执：`full-duplex-public-saved-judge-reuse-20261107-001/qualification-public.json`。本地judge仍为非官方评分；新增模型调用0，不替代其他神经阶段验证。
