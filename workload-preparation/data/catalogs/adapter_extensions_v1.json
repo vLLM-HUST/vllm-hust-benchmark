@@ -2,6 +2,14 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "OSWORLD": {
+      "kind":"task_dataset", "mapping":"osworld_original_packages",
+      "input_fields":["input"], "required_fields":["task_id","domain","source","input","outcome","original_asset","native_execution_complete"],
+      "outcome_fields":["outcome"], "annotation_fields":[], "id_field":"task_id",
+      "code_revision":"0e4318d5d0af2135e71fb7aec6bf08d8fbd89cd9", "identity_note":"pragma: allowlist secret - pinned original public source",
+      "requirements":["Original GUI task list/setup/evaluator references only; native environment/Agent/scoring separate, no prompt renderer"],
+      "status":"ORIGINAL_GUI_TASK_READER_NATIVE_VALIDATION_SEPARATE"
+    },
     "MINIWOB_PLUSPLUS": {
       "kind": "task_dataset",
       "mapping": "miniwob_original_html_definitions",

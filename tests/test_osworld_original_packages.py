@@ -11,6 +11,10 @@ sys.path.insert(
     0, str(Path(__file__).resolve().parents[1] / "workload-preparation/src")
 )
 from vllm_hust_workload_data.osworld import original_task_packages
+from vllm_hust_workload_data.osworld import pipeline_manifest
+from vllm_hust_workload_data.pipeline import plan, run, prepared_rows
+from vllm_hust_workload_data.consumer import resolve_input
+from vllm_hust_workload_data.registry import adapter_spec
 
 
 @pytest.fixture
@@ -80,3 +84,36 @@ def test_modified_catalog_rejected_when_iterator_closes(data):
     (root / "evaluation_examples/test_all.json").write_text("{}")
     with pytest.raises(ValueError, match="identity mismatch"):
         rows.close()
+
+
+def test_unified_pipeline_and_unchanged_consumer_preserve_native_package(data):
+    root, pins, originals = data
+    pins["revision"] = adapter_spec("OSWORLD")["code_revision"]
+    binding = root.parent / (root.name + "-binding.json")
+    binding.write_text(json.dumps(pipeline_manifest(pins)))
+    config = {
+        "sources": [
+            dict(source_id="OSWORLD", data_root=str(root), manifest=str(binding))
+        ]
+    }
+    assert plan(config)["sources"][0]["ready_to_attempt"] is True
+    output = root.parent / (root.name + "-index")
+    report = run(config, output=output)
+    assert report["model_calls"] == 0 and report["scoring"] == "NOT_RUN"
+    database = output / "workload.sqlite"
+    rows = list(prepared_rows(database))
+    assert len(rows) == 2
+    for index, row in enumerate(rows):
+        record = resolve_input(database, row["record_id"], data_root=root)
+        name = ["case-b", "case-a"][index]
+        expected = originals[f"evaluation_examples/examples/chrome/{name}.json"]
+        assert {
+            **record.task["input"],
+            "evaluator": record.outcome_record()["evaluator"],
+        } == expected
+        assert "evaluator" not in record.task["input"]
+        with pytest.raises(ValueError, match="not a ready model request"):
+            record.request_body()
+    (root / "evaluation_examples/examples/chrome/case-b.json").write_text("{}")
+    with pytest.raises(ValueError, match="identity mismatch"):
+        resolve_input(database, rows[0]["record_id"], data_root=root)

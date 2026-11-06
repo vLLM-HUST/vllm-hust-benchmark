@@ -8,6 +8,87 @@ from pathlib import Path
 import re
 
 from .assets import asset_path, verify_file
+from .records import WorkloadRecord
+
+
+def pipeline_manifest(source):
+    """Reference-only binding of original task list and its pinned task graph."""
+    assets = deepcopy(source.get("native_task_assets", source.get("files", [])))
+    catalogs = [
+        row for row in assets if row["path"] == "evaluation_examples/test_all.json"
+    ]
+    if (
+        source.get("source_id") != "OSWORLD"
+        or len(catalogs) != 1
+        or not source.get("revision")
+    ):
+        raise ValueError("complete pinned original OSWorld task-list asset required")
+    return {
+        **deepcopy(source),
+        "schema_version": "source-file-manifest/v1",
+        "repo_id": source.get("repo_id", source.get("repository")),
+        "repository": source.get("repository", source.get("repo_id")),
+        "unit": "original_gui_task_package",
+        "provenance_kind": "publisher_original_task_definition",
+        "files": [{**catalogs[0], "role": "data"}],
+        "native_task_assets": assets,
+    }
+
+
+def relation_spec(source, spec):
+    bound = pipeline_manifest(source)
+    if bound["revision"] != spec["code_revision"]:
+        raise ValueError("OSWorld original source revision mismatch")
+    return {
+        **spec,
+        "original_package_source": dict(
+            source_id="OSWORLD",
+            repository=bound["repository"],
+            revision=bound["revision"],
+            files=bound["native_task_assets"],
+        ),
+    }
+
+
+def original_rows(path, spec):
+    path = Path(path)
+    if path.name != "test_all.json" or path.parent.name != "evaluation_examples":
+        raise ValueError("registered original OSWorld task list required")
+    yield from original_task_packages(
+        path.parents[1], manifest=spec["original_package_source"]
+    )
+
+
+def adapt_case(row, *, source, index):
+    return WorkloadRecord(
+        source={**deepcopy(source), **deepcopy(row["source"])},
+        task=dict(
+            task_id=row["task_id"],
+            identity_kind="original_gui_task_id",
+            native_unit="original_gui_task_package",
+            input=deepcopy(row["input"]),
+        ),
+        runtime=dict(
+            kind="interactive_task_package",
+            execution="not_executed",
+            original_task_asset=deepcopy(row["original_asset"]),
+            requirements=[
+                "Original disposable GUI environment, native Agent and evaluator required; not a ready model request"
+            ],
+        ),
+        replay=dict(
+            adapter_version="source-adapter/v1",
+            mapping="osworld_original_packages",
+            source_row_index=index,
+            order="original_task_list_not_request_arrival",
+            synthetic_fallback=False,
+            unmapped_field_names=[],
+        ),
+        outcome={
+            **deepcopy(row["outcome"]),
+            "reference_kind": "original_task_evaluator_not_observed_result",
+        },
+    )
 
 
 def original_task_packages(author_root, *, manifest):
