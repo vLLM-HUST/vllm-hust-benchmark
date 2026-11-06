@@ -2,6 +2,9 @@
 
 ### 本次实际推进（2026-11-06—2026-11-07）
 
+- [x] MLAgentBench
+  IMDb原评价器已在隔离离线CPU容器完成控制：原100000行三split接口和原评分文件未改，对完整25000行测试标签构造的正确/反向控制分别得1.0/0.0，缺少CSV时原函数抛FileNotFoundError。控制输入不是模型预测，不计原生Agent或来源完成；两份控制CSV已删除。原题明确要求微调DistilBERT并保存全部测试行类别概率，不能用参考标签或其他分类器替代。此结果排除了当前原评价器/数据接口缺陷，剩余是Agent在原预算内完成科学程序并产出自身提交。回执：`mlagentbench-imdb-original-evaluator-controls-20261107-001/qualification-public.json`。
+
 - [x] Full-Duplex保存结果与ASR/VAD入口绑定核验完成：22份原作者文件身份通过；15份v1.0转录、48份v1.5原音频/转录及24份时序/区间回执的哈希全部一致。公共VAD的原模型加载、前向、状态复位和返回操作与原实跑适配器AST相同，额外设备检查更严格；ASR两版本完整调用的14项Linux夹具测试通过，并修复未知失败状态被误当成功的问题。新推理0；夹具与历史真实神经证据分别记录。[来源审计回执](validation/full-duplex-fixed27-native-delivery-20261107.json)等待当前软件检查后再升级来源总勾。
 
 - [x] Full-Duplex首次speaker资格入口已完成真实NPU控制：无需旧回执，固定原图/派生图和参考特征身份不变，一次encoder执行输出SHA与原控制一致；释放成功后才生成可供正式服务入口接受的profile。实际使用隔离重建环境、获准空闲物理1，退出后无进程/HBM3455MiB，物理0原9B服务未改。原图、OM副本、派生图三份临时模型共78564754字节已清理，回执和布局留档，留档布局不是仍可使用的安装bundle。回执：`full-duplex-first-time-public-speaker-qualification-20261107-001/qualification-public.json`及`handoff-and-cleanup.json`；非原生benchmark重跑或全网络CPU数值等价证明。
