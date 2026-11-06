@@ -668,6 +668,7 @@ OSWorld（未完成）：先在兼容的隔离环境内确认作者桌面镜像�
 现有ARM64软件模拟环境已取得完整桌面截图，并通过基线快照恢复的临时标记验证。固定第一题已进入未改的作者`DesktopEnv`和`lib_run_single`流程，原两步初始化通过；保留15步、32768-token预算，模型为现有NPU上的Qwen3.5-9B。连接虚拟机的Provider为明确披露的运行时兼容端口，不称作未修改的官方Docker环境。Agent终态、原评分、其余两题和研究侧接通仍须逐项核验。
 私有队列的`model_proxy(..., max_request_bytes=32*1024*1024)`仅放宽截图请求的字节上限；默认仍为1MiB，允许显式设置到64MiB。它不修改原消息、图像、token预算或计分，不代表已经完成视觉benchmark。
 首次原生尝试在初始化后因作者运行器向`Qwen3VLAgent.reset(_logger=None)`传入未支持的`vm_ip`而退出，尚未调用模型或计分。保留该失败后，使用`scripts/osworld_qwen3vl_reset_compat.py`的`reset_compatible_agent(Qwen3VLAgent)`创建兼容子类，再验证同一原题：只将原logger交给原reset，忽略该模型Agent未使用的vm_ip；其余Agent方法、题目、预算和评分器不改。兼容运行与未经修改的官方运行分开标注。
+第二次尝试因原10秒截图读取超时而未取得有效图像，仍未调用模型。失败后测得同一原接口可返回完整PNG，但耗时约118秒。第三次同题验证显式采用`scripts/osworld_screenshot_wait_compat.py`，仅把该回环截图接口的读取等待设为300秒；原图、重试次数、15步和32768-token预算均保留，不作为原始时序或性能成绩。现已观察到真实模型输出及GUI动作，终态与原评分仍待核验。
 
 2026-11-06：原始 Ubuntu 镜像已通过发布方压缩包 SHA256、完整解压 CRC 和解压后全文件 SHA256 核验。公开准备入口为
 `scripts/prepare_osworld_original_vm.py`；`verify-image` 可独立复核已解压镜像， 不要求保留重复压缩包。隔离 CPU 容器中的 ARM64

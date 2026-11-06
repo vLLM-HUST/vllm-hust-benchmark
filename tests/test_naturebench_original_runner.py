@@ -65,6 +65,28 @@ def test_plan_preserves_original_cpu_group_and_full_flow(args):
     assert not args.output.exists()
 
 
+def test_prestarted_evaluator_token_path_forwarded_without_content(args, tmp_path):
+    token_file = tmp_path / "operator-control-file"
+    token_file.write_text("fixture-private-control-content", encoding="utf-8")
+    args.eval_control_token_file = token_file
+    result = runner.plan(args)
+    assert result["native_command"][-3:] == [
+        "--",
+        "--eval-control-token-file",
+        str(token_file.resolve()),
+    ]
+    assert "fixture-private-control-content" not in json.dumps(result)
+    assert result["task_budget_seconds"] == 14400
+
+
+def test_empty_evaluator_token_file_rejected(args, tmp_path):
+    token_file = tmp_path / "empty-control-file"
+    token_file.touch()
+    args.eval_control_token_file = token_file
+    with pytest.raises(ValueError, match="nonempty"):
+        runner.plan(args)
+
+
 @pytest.mark.parametrize("tasks", [[TASKS[0], TASKS[0]], ["invented-task"]])
 def test_no_duplicate_or_replacement_tasks(args, tasks):
     args.task_id = tasks

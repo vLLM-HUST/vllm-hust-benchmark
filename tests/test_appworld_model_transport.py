@@ -14,6 +14,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from appworld_model_transport import model_proxy, process_one
+import appworld_model_transport as transport
 
 
 @pytest.mark.parametrize("limit", [0, -1, True, 1.5, 64 * 1024 * 1024 + 1])
@@ -21,9 +22,6 @@ def test_request_size_bound_is_explicit_and_finite(tmp_path, limit):
     with pytest.raises(ValueError, match="request byte limit"):
         with model_proxy(tmp_path, port=0, max_request_bytes=limit):
             raise AssertionError("invalid bound must fail before a listener starts")
-
-
-import appworld_model_transport as transport
 
 
 def test_response_ownership_is_set_before_atomic_publication(tmp_path, monkeypatch):

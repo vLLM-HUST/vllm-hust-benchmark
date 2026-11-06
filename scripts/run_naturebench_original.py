@@ -104,6 +104,18 @@ def plan(args):
         "--out-dir",
         str(output / "native"),
     ]
+    control_token_file = getattr(args, "eval_control_token_file", None)
+    if control_token_file is not None:
+        if control_token_file.is_symlink() or not control_token_file.is_file():
+            raise ValueError(
+                "existing regular private evaluator control-token file required"
+            )
+        control_token_file = control_token_file.resolve(strict=True)
+        if control_token_file.stat().st_size == 0:
+            raise ValueError("nonempty evaluator control-token file required")
+        # The author explicitly supports forwarding solve.py options after --.
+        # Pass only the file path, never its credential content, in the command.
+        command.extend(["--", "--eval-control-token-file", str(control_token_file)])
     return {
         "source_id": "NATUREBENCH",
         "status": "VERIFIED_ORIGINAL_CPU_NATIVE_PLAN_NOT_EXECUTED",
@@ -125,6 +137,9 @@ def plan(args):
         "setup_budget_seconds": 14400,
         "skip_judge": False,
         "native_command": command,
+        "eval_control_token_file": (
+            str(control_token_file) if control_token_file else None
+        ),
         "model_calls_by_plan": 0,
         "source_checkbox_eligible": False,
     }
@@ -236,6 +251,11 @@ def main():
     )
     parser.add_argument("--eval-port", type=int, default=8321)
     parser.add_argument("--eval-mapping", type=Path)
+    parser.add_argument(
+        "--eval-control-token-file",
+        type=Path,
+        help="Existing private token file matching the already running original evaluator; contents are never printed",
+    )
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
     prepared = plan(args)
