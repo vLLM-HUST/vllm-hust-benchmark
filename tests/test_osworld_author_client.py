@@ -6,6 +6,7 @@ import sys
 from types import SimpleNamespace
 
 import pytest
+import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import check_osworld_author_client as module
@@ -117,3 +118,18 @@ def test_real_lock_preserves_qualified_author_versions():
     assert packages["pymupdf"] == "1.27.1"
     assert packages["pdfplumber"] == "0.11.9"
     assert packages["torch"] == "2.5.1"
+
+
+def test_smoke_workflow_parses_and_registers_only_offline_client_test():
+    path = module.ROOT / ".github/workflows/workload-data-smoke.yml"
+    workflow = yaml.safe_load(path.read_text("utf-8"))
+    events = workflow.get("on", workflow.get(True, {}))
+    assert "workflow_dispatch" in events
+    steps = workflow["jobs"]["cpu-correctness"]["steps"]
+    matching = [
+        step for step in steps if "test_osworld_author_client.py" in step.get("run", "")
+    ]
+    assert len(matching) == 1
+    assert (
+        matching[0]["run"] == "python -m pytest -q tests/test_osworld_author_client.py"
+    )
