@@ -787,6 +787,27 @@ ASR 或文本对话都不能替代该结果。 可移植路径：SGLang-Omni 分
 2026-11-06最新固定协议结果：9类共27条原题/39会话、两个版本原观察窗导出、NPU Parakeet ASR、NPU Silero VAD和全部类别评分路径已完成；本地Qwen3.5-9B
 judge的结果单独标明，不是官方GPT成绩。当前缺口是可复用公共原生入口及其验证、研究侧交接，来源总勾仍未完成。以下镜像帮助和配置解析属于较早的准备记录，完整执行以[当前证据](validation/full-duplex-model-metadata-20261106.json)为准。
 
+固定原题回放入口（先准备仓库外的原始解压数据和独立SGLang-Omni环境）：
+
+```bash
+python scripts/run_full_duplex_original_capture.py \
+  --omni-root "$OMNI_SOURCE" --dataset-root "$ORIGINAL_TREE" \
+  --python "$OMNI_PYTHON" --output "$NEW_EXTERNAL_CAPTURE" \
+  --url ws://127.0.0.1:19480/v1/realtime \
+  --dataset-revision-v10 archive-set-sha256:103256ceb6f81b5f39052a357cdc801ceb3352a99819e0a53efd439077d2e3a2 \
+  --dataset-revision-v15 archive-set-sha256:a1a3cd0dad6d59b7959547008b8d9764fee7df4e2ab139276ae15ccb78e2e840 \
+  --model openbmb/MiniCPM-o-4_5 \
+  --model-revision eb4141de24550a3a1a4082f718be58f46b761728 \
+  --runtime "$ACTUAL_DISCLOSED_RUNTIME"
+```
+
+默认仅输出计划；`--verify-only`核验两个固定版本的原生CLI及27个原始输入路径，不访问模型。
+原始ZIP的SHA256/CRC应先由`prepare_full_duplex_original_assets.py --action verify`核验，路径检查不能替代内容核验。
+确认模型服务与资源就绪后加`--execute`，串行调用未改动的原生record CLI，保留v1.0单会话及v1.5的clean/overlap双会话。
+输出必须为仓库外新目录；首个失败保留日志并返回原错误码，不自动换题、重试或覆盖旧结果。
+SGLang-Omni源码固定到`272845a9caadb82f220d7f3d0b64fdd1098fbbca`，入口不安装环境、不启动服务、不执行ASR或评分。
+服务器已核验该入口生成的27条命令与已完成原生运行逐项完全相同，未重新推理；这不等于公共环境、评分和研究交接已全部完成。
+
 2026-11-06 的独立环境准备已锁定官方 910B ARM64 镜像
 `swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang-omni@sha256:265387f87a6a97ad170a2c2a51f0ce3209e24e143d3048c97fe172b70f273938`。
 该镜像已下载，使用原镜像入口、只读驱动库且不映射设备、不联网时，原CLI帮助和原生双工配置解析均已通过。
@@ -840,10 +861,11 @@ NPU 任务共享目录未发现同名副本，不把历史取得视为当前容�
 
 - [x] OVOBENCH：streaming-video-interaction；按机器清单所列交付口径核验，具体范围见[回执](validation/ovobench-offline-native-delivery-20261031.json)。
 
-- [ ] FULL_DUPLEX_BENCH：9 份原始 ZIP 已取得并核验，公共入口和研究侧回读已验证；原生双工语音推理与原评分仍待完成。官方 ASR 路径显式依赖 CUDA，当前 NPU
-  路径尚未验证。 `scripts/prepare_full_duplex_original_scorers.py --include-client` 可离线列出固定版本的 Moshi
-  客户端、ASR 和评分文件； 加 `--verify-only --output <既有源码目录>` 核验已取得的文件。正式验证需保留原始音频、双工输出时序及转录，
-  分别交给原场景评分器。发布方示例和 WebSocket 夹具仅用于检查接口，不替代原音频的端到端结果。
+- [ ] FULL_DUPLEX_BENCH：9份原始ZIP及原始关系读取已验证；27条固定原题、39个原生会话、NPU ASR/VAD和各类别评分路径已完成。 本地9B
+  judge结果单独披露，不是官方GPT成绩。尚缺公共执行链路验证与这批原题的研究侧接入核验，不提前勾选。
+  `scripts/run_full_duplex_original_capture.py`提供同一固定原题的原生回放计划及显式执行入口；默认不调用模型，
+  不缩短原超时、不改题、不替换失败题。原始软件使用`prepare_full_duplex_original_scorers.py --include-reference`准备。
+  音频输出、时序、ASR、评分和失败记录仍须分别保存；读取测试和计划输出不能代替真实执行。
 
 - [x] LIBRITTS：text-to-speech-generation；按机器清单所列交付口径核验，具体范围见[回执](validation/libritts-original-native-delivery-20261102.json)。
 
