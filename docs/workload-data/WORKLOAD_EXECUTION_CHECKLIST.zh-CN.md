@@ -866,6 +866,22 @@ source /usr/local/Ascend/ascend-toolkit/set_env.sh
 
 上游模型源码兼容副本可按以下方式准备：
 
+固定参考speaker的派生ONNX可用`prepare_full_duplex_speaker_graph.py`生成。 在独立转换环境使用`onnx==1.19.1`及NumPy，原始输入为
+`openbmb/MiniCPM-o-4_5@eb4141de24550a3a1a4082f718be58f46b761728/assets/token2wav/campplus.onnx`；
+必须匹配入口固定的原始SHA256，不接受其他模型或更改的参考形状。
+
+```bash
+python scripts/prepare_full_duplex_speaker_graph.py \
+  --original "$EXTERNAL_ORIGINAL_CAMPPLUS" --output "$NEW_EXTERNAL_SPEAKER_GRAPH"
+```
+
+默认只计划；`--execute`生成固定`[1,1682,80]`图，逐字节保留原参数并核对派生图摘要。
+额外加`--compile`才调用已激活CANN的ATC，目标固定Ascend910B2；不安装SDK、不执行神经推理。
+生成或编译图不等于NPU资格回执，不能直接替代`FULL_DUPLEX_NPU_SPEAKER_PROFILE`中的真实控制记录。
+服务器公共入口实际生成的图与原部署图SHA256一致；本次未重复编译或推理。 保存回执后已删除本次两份临时模型文件，原共享OM、派生图及NPU控制证据仍保留。
+
+模型源码副本准备命令：
+
 ```bash
 python scripts/prepare_full_duplex_model_compat.py \
   --omni-root "$ORIGINAL_OMNI_SOURCE" --output "$NEW_EXTERNAL_COMPAT"
