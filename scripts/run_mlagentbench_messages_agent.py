@@ -9,6 +9,17 @@ import sys
 
 from prepare_mlagentbench_messages_agent import PROFILE, verify_messages_port
 from run_mlagentbench_local_agent import check_isolation, original_arguments
+import run_mlagentbench_original_eval as original_eval
+
+
+def score(args):
+    """Reuse original saved-submission grading, changing only port verification."""
+    previous = original_eval.verify_port
+    try:
+        original_eval.verify_port = verify_messages_port
+        return original_eval.run(args)
+    finally:
+        original_eval.verify_port = previous
 
 
 def run(args):
@@ -21,6 +32,10 @@ def run(args):
     )
     if not args.execute:
         return report
+    if not args.model or args.queue is None or args.work_root is None:
+        raise ValueError(
+            "model, queue and fresh work root required for Agent execution"
+        )
     if not Path("/.dockerenv").is_file():
         raise ValueError("dedicated isolated container required")
     check_isolation(Path("/proc/self/status").read_text())
@@ -73,13 +88,26 @@ def run(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port-root", type=Path, required=True)
-    parser.add_argument("--work-root", type=Path, required=True)
+    parser.add_argument("--work-root", type=Path)
     parser.add_argument("--log-root", type=Path, required=True)
-    parser.add_argument("--model", required=True)
-    parser.add_argument("--queue", type=Path, required=True)
+    parser.add_argument("--model")
+    parser.add_argument("--queue", type=Path)
+    parser.add_argument(
+        "--score-output",
+        type=Path,
+        help="Grade saved original final snapshot without new model calls",
+    )
     parser.add_argument("--task", default="debug")
     parser.add_argument("--execute", action="store_true")
-    print(json.dumps(run(parser.parse_args()), indent=2))
+    args = parser.parse_args()
+    if args.score_output is not None:
+        args.output = args.score_output
+        result = score(args)
+    else:
+        result = run(args)
+    print(json.dumps(result, indent=2))
+    if result.get("scored_outputs_valid") is False:
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":

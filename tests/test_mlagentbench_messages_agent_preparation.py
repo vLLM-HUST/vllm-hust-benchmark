@@ -54,6 +54,34 @@ def test_plan_and_runner_do_not_read_or_execute():
     assert runner.run(SimpleNamespace(execute=False))["native_agent_tasks_run"] == 0
 
 
+def test_scoring_reuses_original_and_restores_verifier(monkeypatch):
+    previous = runner.original_eval.verify_port
+    marker = object()
+
+    def original(args):
+        assert args is marker
+        assert runner.original_eval.verify_port is runner.verify_messages_port
+        return dict(
+            scored_outputs_valid=True, model_calls=0, source_checkbox_eligible=False
+        )
+
+    monkeypatch.setattr(runner.original_eval, "run", original)
+    assert runner.score(marker)["model_calls"] == 0
+    assert runner.original_eval.verify_port is previous
+
+
+def test_scoring_failure_does_not_leave_runtime_patched(monkeypatch):
+    previous = runner.original_eval.verify_port
+
+    def original(_):
+        raise ValueError("retained original grading failure")
+
+    monkeypatch.setattr(runner.original_eval, "run", original)
+    with pytest.raises(ValueError, match="retained original"):
+        runner.score(object())
+    assert runner.original_eval.verify_port is previous
+
+
 def test_new_port_keeps_originals_and_historical_protocol(args):
     before = (args.author_root / "MLAgentBench/LLM.py").read_bytes()
     result = prepare.prepare(args)

@@ -609,7 +609,10 @@ Agent容器断网，无NPU设备或Docker socket；只挂私有队列和原资�
 `scripts/mlagentbench_local_messages.py --queue <同一私有队列> --api-base <回环模型服务/v1> --model <同一实际模型ID> --watch`，
 先检查实际模型ID，再逐字节转发原Messages请求，不更改题目、输出预算或生成参数。Agent终态后由运行方写入队列STOP标记并保留证据。
 首个Messages尝试因本地API在text前返回独立thinking块而退出，失败和原响应保留。 独立兼容配置只选择真实返回的第一个text块，跳过独立reasoning块，不修补动作或补造文本；
-第二次尝试已在服务器启动，尚未取得完整科学评分，整项仍不加勾。13项新协议/准备/队列夹具通过不等于原生任务完成。
+第二次尝试已在服务器启动，尚未取得完整科学评分，整项仍不加勾。结束后用同一入口的评分模式：
+`scripts/run_mlagentbench_messages_agent.py --port-root /agent --log-root /results/logs --task imdb --score-output /grade/original-score.json --execute`。
+评分容器断网、原日志及Agent/资产只读，保留实际控制台到原日志`log`；该模式复用既有原评分器，
+不重跑Agent、训练或模型调用，空评分仍返回退出码2。15项新协议/准备/队列/评分委派夹具通过不等于原生任务完成。
 
 WorkArena（未完成）：使用
 `scripts/prepare_workarena_author_source.py --action prepare --archive <官方源码包> --author-root <新目录>`
@@ -669,7 +672,7 @@ WebArena（未完成）：固定原题 ID 为 0、1、2，均只访问 `shopping
 但PRoot5.1.0下的嵌套子进程在四组有限对照中均以signal11退出；单个ELF可运行不代表原站点可运行。
 控制未修改宿主binfmt、未增加容器特权、未接入NPU或下载大站点镜像，原始诊断留存在机器清单对应stage。 这条具体版本组合尚不具备原站点部署资格，不能按其单程序成功勾选WebArena。
 
-NatureBench（未完成）：2026-11-06第一题新验证已正常结束，13次原科学评分均无提交错误，原有效性裁判返回`is_valid=true`；负改进结果如实保留，不代表科学质量提升。固定第二题已复用现有合格环境启动，保持原4小时任务及准备上限；第三题仍需有效科学尝试与完整评分，整项不加勾。
+NatureBench（未完成）：2026-11-06第一题新验证已正常结束，13次原科学评分均无提交错误，原有效性裁判返回`is_valid=true`；负改进结果如实保留，不代表科学质量提升。固定第二、第三题已复用现有合格环境启动，保持原4小时任务及准备上限；两题仍需有效科学尝试、终态与完整评分，整项不加勾。
 `scripts/run_naturebench_original.py` 默认检查原 CPU3 组并输出计划； 安装 workload-data
 包后，提供固定源码、原数据、运行环境及模型端点。正式执行需 Docker、已运行的原 evaluator， 以及明确的 Agent 和裁判端点。传入实际部署上下文容量，不调整原输出预算；可用
 `--task-id` 单独定位尚缺证据的原题。 保留原任务退出、科学尝试次数、评分和有效性裁判各自的状态；正常退出但零科学尝试，不等于已验证科学评分。
