@@ -1,0 +1,548 @@
+{
+  "schema_version": "mod-result-bindings/v1",
+  "canonical_owner": "vLLM-HUST/vllm-hust-benchmark",
+  "description_en": "Binds each published single-MOD, composition, and compatibility result to one or more canonical MOD catalog entries.",
+  "description_zh": "将公开的单 MOD、组合与兼容性结果绑定到一个或多个规范 MOD 目录项。",
+  "integration_records": {
+    "gdn-norm-weight-fp32-cache": [
+      "gdn-optimizations"
+    ],
+    "gdn-norm-stat-elision": [
+      "gdn-optimizations"
+    ],
+    "gdn-static-decay-precompute": [
+      "gdn-optimizations"
+    ],
+    "betterscale": [
+      "betterscale"
+    ],
+    "bidkv": [
+      "bidkv"
+    ],
+    "dla": [
+      "dla"
+    ],
+    "kv-materialization-arrival-control": [
+      "kv-materialization-arrival-control"
+    ],
+    "kvcompress-ascend": [
+      "kvcompress-ascend"
+    ],
+    "quantized-kv-cache-migration": [
+      "quantized-kv-cache-migration"
+    ],
+    "kv-tiering-migration": [
+      "kv-tiering-migration"
+    ],
+    "knorm-migration": [
+      "knorm-migration"
+    ],
+    "pyramidkv-ascend-migration": [
+      "pyramidkv-ascend-migration"
+    ],
+    "vllm-hust-opset": [
+      "vllm-hust-opset"
+    ],
+    "core-attention-boundary": [
+      "core-attention-boundary"
+    ],
+    "simllm-migration": [
+      "simllm-migration"
+    ],
+    "betterscale-balanced-attention": [
+      "betterscale"
+    ],
+    "betterscale-host-prepare": [
+      "betterscale"
+    ],
+    "rope-fix": [
+      "ascend-attention-optimizations"
+    ],
+    "fi-sampling": [
+      "ascend-attention-optimizations"
+    ],
+    "fi-gelu": [
+      "ascend-attention-optimizations"
+    ],
+    "mlp-chunk": [
+      "vllm-hust-opset"
+    ],
+    "gate-fp32": [
+      "betterscale"
+    ],
+    "zerocost-wiring": [
+      "betterscale"
+    ],
+    "fia-demask": [
+      "ascend-attention-optimizations"
+    ],
+    "request-lifecycle-profiler": [
+      "request-lifecycle-profiler"
+    ],
+    "request-throttling-controller": [
+      "request-throttling-controller"
+    ],
+    "gdn-static-conv-prelayout": [
+      "gdn-optimizations"
+    ],
+    "gdn-compact-hybrid-cache": [
+      "gdn-optimizations"
+    ],
+    "gdn-single-token-qkv-view": [
+      "gdn-optimizations"
+    ],
+    "hybrid-spec": [
+      "hybrid-spec"
+    ],
+    "prefill-microflow": [
+      "prefill-microflow"
+    ],
+    "moe-single-token-routing": [
+      "vllm-hust-opset"
+    ],
+    "logits-cast-elision": [
+      "runtime-micro-optimizations"
+    ],
+    "sampling-index-copy-elision": [
+      "runtime-micro-optimizations"
+    ],
+    "decode-metadata-packed-transfer": [
+      "runtime-micro-optimizations"
+    ],
+    "gdn-qkv-value-owner": [
+      "gdn-optimizations"
+    ],
+    "block-table-copy-reuse": [
+      "runtime-micro-optimizations"
+    ],
+    "native-apc-composition": [
+      "runtime-micro-optimizations"
+    ],
+    "gdn-int8-qdq": [
+      "gdn-optimizations"
+    ],
+    "decode-metadata-copy-reuse": [
+      "runtime-micro-optimizations"
+    ],
+    "final-only-fragment-assembly": [
+      "runtime-micro-optimizations"
+    ],
+    "graph-expert-sparsity": [
+      "vllm-hust-opset"
+    ],
+    "gdn-qk-l2norm-pair": [
+      "gdn-optimizations"
+    ],
+    "empty-metadata-padding-guard": [
+      "runtime-micro-optimizations"
+    ],
+    "moe-single-token-combine": [
+      "vllm-hust-opset"
+    ],
+    "gdn-gating-small-batch": [
+      "gdn-optimizations"
+    ],
+    "gdn-gating-strided-input": [
+      "gdn-optimizations"
+    ],
+    "gdn-small-decode-gating": [
+      "gdn-optimizations"
+    ],
+    "gdn-output-zero-elision": [
+      "gdn-optimizations"
+    ],
+    "router-fp32-gemv": [
+      "vllm-hust-opset"
+    ],
+    "moe-bf16-static-nz-layout": [
+      "vllm-hust-opset"
+    ],
+    "gdn-recurrent-value-row-parallel": [
+      "gdn-optimizations"
+    ],
+    "ascend-native-shared-prefix-attention": [
+      "ascend-attention-optimizations"
+    ],
+    "shared-expert-bf16-gate-lut": [
+      "vllm-hust-opset"
+    ],
+    "ascend-lm-head-vocabulary-shortlist": [
+      "vllm-hust-opset"
+    ]
+  },
+  "combination_effects": {
+    "gz-quality-r4": [
+      "betterscale"
+    ],
+    "gzq-three-pairs": [
+      "betterscale"
+    ],
+    "gzq-prelayout-rc12": [
+      "betterscale"
+    ],
+    "s-fia-bounded": [
+      "betterscale",
+      "ascend-attention-optimizations"
+    ],
+    "s-fia-formal": [
+      "betterscale",
+      "ascend-attention-optimizations"
+    ],
+    "s-kv-arrival": [
+      "betterscale",
+      "kv-materialization-arrival-control"
+    ],
+    "bs-kv-recompute": [
+      "betterscale"
+    ],
+    "microflow-a5": [
+      "prefill-microflow",
+      "gdn-optimizations",
+      "ascend-attention-optimizations"
+    ],
+    "mmlu-school028-fa-microflow-20261019": [
+      "prefill-microflow",
+      "ascend-attention-optimizations"
+    ],
+    "compact-qkv": [
+      "gdn-optimizations"
+    ],
+    "apc-gz": [
+      "runtime-micro-optimizations",
+      "betterscale"
+    ],
+    "attention-three": [
+      "core-attention-boundary",
+      "pyramidkv-ascend-migration",
+      "vllm-hust-opset"
+    ],
+    "opset-both": [
+      "vllm-hust-opset"
+    ],
+    "g5-native23-apc-history": [
+      "runtime-micro-optimizations",
+      "betterscale"
+    ],
+    "g5-native28-alloff-control": [
+      "betterscale"
+    ],
+    "g7-compact-qkv-unwarmed": [
+      "gdn-optimizations"
+    ],
+    "g7-qkv-independent": [
+      "betterscale"
+    ],
+    "g7-gzq-screen": [
+      "betterscale"
+    ],
+    "g7-gzq-expand": [
+      "betterscale"
+    ],
+    "g7-fia-qkv-interaction": [
+      "betterscale",
+      "ascend-attention-optimizations"
+    ],
+    "g1-rc6-historical-eager": [
+      "betterscale"
+    ],
+    "g1-rc8-historical-eager": [
+      "betterscale"
+    ],
+    "g1-rc9-shared-graph": [
+      "betterscale"
+    ],
+    "g1-rc11-qkv": [
+      "betterscale"
+    ],
+    "g1-rc12-prelayout": [
+      "betterscale"
+    ],
+    "g1-full-bs-health": [
+      "betterscale"
+    ],
+    "g1-full-bs-arrival": [
+      "betterscale",
+      "kv-materialization-arrival-control"
+    ],
+    "full-betterscale-gate-pair-r1": [
+      "betterscale"
+    ],
+    "gennova-rc23-native-s-metadata-r2": [
+      "betterscale",
+      "runtime-micro-optimizations"
+    ]
+  },
+  "negative_results": {
+    "vspec-mtp-local-argmax-three-pairs": [
+      "vspec"
+    ],
+    "kvcompress-long-hle": [
+      "kvcompress-ascend"
+    ],
+    "output-gate-r3": [
+      "betterscale"
+    ],
+    "qkv-observer-r2": [
+      "betterscale"
+    ],
+    "rc12-three-arm": [
+      "betterscale"
+    ],
+    "microflow-a1": [
+      "prefill-microflow"
+    ],
+    "compact-short-prefix": [
+      "gdn-optimizations"
+    ],
+    "gate-zero-formal-r4-stability": [
+      "betterscale"
+    ],
+    "route-single-011-confirmation": [
+      "vllm-hust-opset"
+    ],
+    "logits-pair-r1": [
+      "runtime-micro-optimizations"
+    ],
+    "microflow-parent-a5": [
+      "prefill-microflow"
+    ],
+    "kv-arrival-c8-fixed-prefix-rc16": [
+      "kv-materialization-arrival-control"
+    ],
+    "output-gate-tiling-r1": [
+      "gdn-optimizations"
+    ],
+    "apc-healthy-gate-zero-r11": [
+      "betterscale"
+    ],
+    "decode-metadata-copy-reuse-v010-r12": [
+      "runtime-micro-optimizations"
+    ],
+    "decode-metadata-batch-check-v020-r13": [
+      "runtime-micro-optimizations"
+    ],
+    "opset-shared-expert-n-tiling-r1": [
+      "vllm-hust-opset"
+    ],
+    "empty-padding-end-to-end": [
+      "runtime-micro-optimizations"
+    ],
+    "block-table-event-reuse-r2": [
+      "runtime-micro-optimizations"
+    ],
+    "full-betterscale-v1-arrival-cold-state-rc18": [
+      "kv-materialization-arrival-control",
+      "betterscale"
+    ],
+    "moe-single-token-combine-model-r1": [
+      "vllm-hust-opset"
+    ],
+    "opset-shared-expert-fusion-paths-r1": [
+      "vllm-hust-opset"
+    ],
+    "gdn-projection-merge-components-r1-r2": [
+      "gdn-optimizations"
+    ],
+    "mlp-gated-chunk-component-r2": [
+      "vllm-hust-opset"
+    ],
+    "rope-reuse-device-r1": [
+      "ascend-attention-optimizations"
+    ],
+    "gdn-qk-l2norm-pair-component-r1": [
+      "gdn-optimizations"
+    ],
+    "moe-dynamic-mass-policy-n1-r1": [
+      "vllm-hust-opset"
+    ],
+    "gdn-strided-input-r16-device-execution": [
+      "gdn-optimizations"
+    ],
+    "moe-compact-topk-budget-n1-r1": [
+      "vllm-hust-opset"
+    ],
+    "moe-fused-post-router-n1-r2": [
+      "vllm-hust-opset"
+    ],
+    "gdn-output-zero-r1-r2": [
+      "gdn-optimizations"
+    ],
+    "moe-bf16-nz-layout-r1": [
+      "vllm-hust-opset"
+    ],
+    "gdn-strided-model-r19-no-gain-output-drift": [
+      "gdn-optimizations"
+    ],
+    "gdn-small-gating-model-r2": [
+      "gdn-optimizations"
+    ],
+    "ascend-native-shared-prefix-batched-r2": [
+      "ascend-attention-optimizations"
+    ],
+    "fi-sampling-fixed-output-stability-r1": [
+      "ascend-attention-optimizations"
+    ],
+    "gdn-norm-stat-elision-component-r1": [
+      "gdn-optimizations"
+    ],
+    "gdn-recurrent-row-parallel-fp32-r6": [
+      "gdn-optimizations"
+    ],
+    "moe-native-k6-model-r21-no-demonstrated-saving": [
+      "vllm-hust-opset"
+    ],
+    "gdn-norm-weight-fp32-component-r1": [
+      "gdn-optimizations"
+    ],
+    "lm-head-global-prefix-model-r1": [
+      "vllm-hust-opset"
+    ],
+    "moe-small-batch-topk-component-r2": [
+      "vllm-hust-opset"
+    ],
+    "lm-head-balanced-prefix-model-r1": [
+      "vllm-hust-opset"
+    ],
+    "gdn-norm-rsqrt-component-r1": [
+      "gdn-optimizations"
+    ],
+    "gdn-recurrent-serial64-model-r1": [
+      "gdn-optimizations"
+    ],
+    "gdn-serial64-r22-mixed-no-stable-benefit": [
+      "gdn-optimizations"
+    ],
+    "residual-gemma-scale-cache-model-r1": [
+      "runtime-micro-optimizations"
+    ],
+    "fullb-metadata-packed-r23-component-regression": [
+      "runtime-micro-optimizations"
+    ],
+    "hccl-host-ts-phase2-mmlu-200-70-r1": [
+      "unified-communication-migration"
+    ],
+    "fullb-metadata-cached-host-r24-component-regression": [
+      "runtime-micro-optimizations"
+    ],
+    "shared-gate-lut-model-r1-regression": [
+      "vllm-hust-opset"
+    ],
+    "gennova4-metadata-32047-three-pairs-no-stable-gain": [
+      "runtime-micro-optimizations"
+    ],
+    "opfuse-routed-gmm-vector-r2": [
+      "opfuse"
+    ],
+    "opfuse-routed-gmm-single-row-r4": [
+      "opfuse"
+    ],
+    "opfuse-routed-gmm-grouped-r5": [
+      "opfuse"
+    ],
+    "opfuse-routed-gmm-model-r1": [
+      "opfuse"
+    ],
+    "gdn-static-decay-022-unified-mmlu-r2": [
+      "gdn-optimizations"
+    ],
+    "gdn-qknorm-recurrent-model-r3": [
+      "gdn-optimizations"
+    ],
+    "gdn-gating-recurrent-model-r2": [
+      "gdn-optimizations"
+    ],
+    "gdn-conv-output-layout-model-r2": [
+      "gdn-optimizations"
+    ],
+    "prefill-matmul-allreduce-model-r1": [
+      "prefill-microflow"
+    ],
+    "prefill-matmul-allreduce-component-r2-smallrows": [
+      "prefill-microflow"
+    ],
+    "prefill-matmul-allreduce-model-r2": [
+      "prefill-microflow"
+    ],
+    "lm-head-prelayout-transposed-mm-r1": [
+      "vllm-hust-opset"
+    ],
+    "lm-head-weight-prelayout-model-r2": [
+      "vllm-hust-opset"
+    ],
+    "shared-expert-gate-projection-merge-components-r1-r2": [
+      "vllm-hust-opset"
+    ],
+    "router-shared-gate-projection-merge-component-r1": [
+      "vllm-hust-opset"
+    ],
+    "shared-gate-pushdown-addmm-fusion-components-r1-r3": [
+      "vllm-hust-opset"
+    ],
+    "postnorm-router-fp32-export-fusion-model-r1": [
+      "vllm-hust-opset"
+    ],
+    "gdn-conv-qknorm-output-fusion-strided-components-r1-r2": [
+      "gdn-optimizations"
+    ],
+    "moe-shared-output-epilogue-fusion-paired-restarts-r2": [
+      "vllm-hust-opset"
+    ],
+    "attention-output-projection-prelayout-model-r1": [
+      "ascend-attention-optimizations"
+    ],
+    "vocab-embedding-index-fusion-model-r1": [
+      "vllm-hust-opset"
+    ],
+    "fa-qkv-input-prelayout-component-r1": [
+      "ascend-attention-optimizations"
+    ],
+    "fa-rope-cache-write-fusion-model-r4": [
+      "ascend-attention-optimizations"
+    ],
+    "fa-rope-cache-write-fusion-model-r6": [
+      "ascend-attention-optimizations"
+    ],
+    "gdn-main-input-weight-prelayout-component-r1": [
+      "gdn-optimizations"
+    ],
+    "gdn-main-input-weight-prelayout-model-closeout-r1": [
+      "gdn-optimizations"
+    ],
+    "gdn-architecture-resident-bmm-0112": [
+      "gdn-optimizations"
+    ],
+    "gdn-architecture-indexed-dot-0112": [
+      "gdn-optimizations"
+    ],
+    "gdn-architecture-short-cadence-0112": [
+      "gdn-optimizations"
+    ],
+    "gdn-architecture-compact-bmm-model-0112": [
+      "gdn-optimizations"
+    ],
+    "gdn-projection-scalar-header-0113": [
+      "gdn-optimizations"
+    ],
+    "gdn-projection-mmlu70-quality-window-0114": [
+      "gdn-optimizations"
+    ],
+    "gdn-pack-zero-real-mmlu-increment-0116": [
+      "gdn-optimizations"
+    ],
+    "gdn-merge-cache-cycle-0120": [
+      "gdn-optimizations"
+    ],
+    "gdn-empty-history-cycle-0121": [
+      "gdn-optimizations"
+    ],
+    "gdn-four-history-cycle-0121": [
+      "gdn-optimizations"
+    ],
+    "native-gdn-delayed-model-v024-two-pairs": [
+      "gdn-optimizations"
+    ],
+    "gdn-writeback-gated-norm-model-r1": [
+      "gdn-optimizations"
+    ]
+  }
+}

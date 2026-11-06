@@ -197,7 +197,9 @@
       "canonical_artifacts": [
         "default-off ECPA Prefill Microflow MOD for Qwen3.5 BF16 TP2"
       ],
-      "component_ids": [],
+      "component_ids": [
+        "prefill-microflow"
+      ],
       "public_surface": true
     },
     {
@@ -952,6 +954,54 @@
       ],
       "component_ids": [
         "request-lifecycle-profiler"
+      ],
+      "public_surface": true
+    },
+    {
+      "name": "vllm-hust-gdn-optimizations",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-gdn-optimizations",
+      "portfolio_domain": "runtime_platform",
+      "repository_role": "runtime_component",
+      "relation_to_runtime": "extends_runtime_behavior",
+      "lifecycle": "experimental",
+      "canonical_artifacts": [
+        "GDN execution optimization MOD family",
+        "single, composition and compatibility evidence"
+      ],
+      "component_ids": [
+        "gdn-optimizations"
+      ],
+      "public_surface": true
+    },
+    {
+      "name": "vllm-hust-runtime-micro-optimizations",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-runtime-micro-optimizations",
+      "portfolio_domain": "runtime_platform",
+      "repository_role": "runtime_component",
+      "relation_to_runtime": "extends_runtime_behavior",
+      "lifecycle": "experimental",
+      "canonical_artifacts": [
+        "runtime metadata and micro-overhead MOD family",
+        "single, composition and compatibility evidence"
+      ],
+      "component_ids": [
+        "runtime-micro-optimizations"
+      ],
+      "public_surface": true
+    },
+    {
+      "name": "vllm-ascend-attention-optimizations",
+      "url": "https://github.com/vLLM-HUST/vllm-ascend-attention-optimizations",
+      "portfolio_domain": "compiler_runtime",
+      "repository_role": "runtime_component",
+      "relation_to_runtime": "extends_runtime_behavior",
+      "lifecycle": "experimental",
+      "canonical_artifacts": [
+        "Ascend attention execution optimization MOD family",
+        "single, composition and compatibility evidence"
+      ],
+      "component_ids": [
+        "ascend-attention-optimizations"
       ],
       "public_surface": true
     }
