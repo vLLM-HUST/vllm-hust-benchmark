@@ -1,15 +1,15 @@
-"""Explicit read-wait compatibility for the owned slow ARM/TCG screenshot API.
+"""Opt-in transport compatibility for an owned slow ARM/TCG desktop.
 
-Only the original controller's10s GET /screenshot wait changes. Preserve original
-image bytes, retries, requests to other endpoints, task budgets and scoring.
-This is a disclosed functional-validation profile, not original timing fidelity.
+One adapter extends screenshot reads; another uses a genuine platform response
+for setup's status-only probe. Task observations, retries, budgets and grading
+are preserved. This functional-validation profile has no original timing claim.
 """
 
 import math
 from urllib.parse import urlsplit
 
 
-def screenshot_wait_requests(original, *, controller_base, read_timeout=300):
+def _loopback_controller(controller_base):
     parsed = urlsplit(controller_base)
     if (
         parsed.scheme != "http"
@@ -22,6 +22,11 @@ def screenshot_wait_requests(original, *, controller_base, read_timeout=300):
         or parsed.fragment
     ):
         raise ValueError("explicit owned loopback controller base required")
+    return controller_base.rstrip("/")
+
+
+def screenshot_wait_requests(original, *, controller_base, read_timeout=300):
+    controller_base = _loopback_controller(controller_base)
     if (
         type(read_timeout) not in {int, float}
         or not math.isfinite(read_timeout)
@@ -42,3 +47,25 @@ def screenshot_wait_requests(original, *, controller_base, read_timeout=300):
             return getattr(original, name)
 
     return ScreenshotWaitRequests()
+
+
+def setup_readiness_requests(original, *, controller_base, screenshot_only=False):
+    """Use a real platform response for SetupController's status-only probe.
+
+    Install only in the setup module, not in the observation controller. No
+    terminal body is fabricated or substituted for a task observation.
+    """
+    if screenshot_only is not True:
+        raise ValueError("explicit screenshot-only validation profile required")
+    base = _loopback_controller(controller_base)
+
+    class SetupReadinessRequests:
+        def get(self, url, *args, **kwargs):
+            if url == base + "/terminal" and kwargs.get("timeout") == 60:
+                url = base + "/platform"
+            return original.get(url, *args, **kwargs)
+
+        def __getattr__(self, name):
+            return getattr(original, name)
+
+    return SetupReadinessRequests()
