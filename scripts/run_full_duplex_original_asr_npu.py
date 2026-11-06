@@ -13,6 +13,13 @@ from pathlib import Path
 import sys
 
 CHECKPOINT_SHA256 = "d99e39955c9d3d0350d8fb7c75e40c64a2b2eaeb003883d7c941fd2e8747b28c"  # pragma: allowlist secret - publisher checkpoint
+V10_ASR_SUBSETS = {
+    "synthetic_pause_handling",
+    "candor_pause_handling",
+    "candor_turn_taking",
+    "synthetic_user_interruption",
+    "icc_backchannel",
+}
 
 
 def verify_checkpoint(path):
@@ -100,7 +107,16 @@ def execute(args):
                     counts = run_asr(native, engines, paths, hashes, model=model)
                     hashes.save()
                 report["counts"] = dict(counts)
-                if not counts or not sum(counts.values()) or counts.get("failed", 0):
+                allowed = (
+                    V10_ASR_SUBSETS if args.version == "v1.0" else {"ok", "reused"}
+                )
+                if (
+                    not counts
+                    or sum(counts.values()) <= 0
+                    or any(
+                        value and key not in allowed for key, value in counts.items()
+                    )
+                ):
                     raise RuntimeError(
                         "original ASR reported failed cases; preserve them"
                     )
