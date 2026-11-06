@@ -808,6 +808,30 @@ python scripts/run_full_duplex_original_capture.py \
 SGLang-Omni源码固定到`272845a9caadb82f220d7f3d0b64fdd1098fbbca`，入口不安装环境、不启动服务、不执行ASR或评分。
 服务器已核验该入口生成的27条命令与已完成原生运行逐项完全相同，未重新推理；这不等于公共环境、评分和研究交接已全部完成。
 
+原始Parakeet ASR的NPU设备绑定入口为`run_full_duplex_original_asr_npu.py`：
+
+```bash
+ASCEND_RT_VISIBLE_DEVICES="$ALLOCATED_PHYSICAL_NPU" "$ASR_PYTHON" \
+  scripts/run_full_duplex_original_asr_npu.py --version v1.0 \
+  --omni-root "$OMNI_SOURCE" --reference-source "$AUTHOR_REFERENCE" \
+  --tree "$ORIGINAL_REFERENCE_EXPORT" --nemo "$PARAKEET_CHECKPOINT" \
+  --output "$NEW_EXTERNAL_ASR"
+```
+
+默认仅列计划；确认资源空闲后加`--execute`。v1.5使用同一入口，改`--version v1.5`并提供对应原始导出树。
+入口调用原`transcribe`或`run_asr`，固定原Parakeet权重摘要，加载后逐参数检查`npu:0`，没有CPU神经网络回退。
+v1.0原流程在导出树写入`asr.json`及各题转录；检测到已有`asr.json`即拒绝覆盖，应复用已有结果。
+v1.5在新输出目录保存原ASR缓存、词级时间戳和评分输入；不替换后续原时序/VAD或行为评分。
+该可移植包装器目前通过8项无模型夹具测试；既有NPU实跑证据来自同样的原函数及设备绑定，尚未将包装器本身计为新的模型实跑。
+
+实际已验证的ASR环境为ARM64、Python3.12.13、CANN9.1.0、910B2；独立venv通过`--system-site-packages`继承
+torch2.10.0+cpu、torch_npu2.10.0.post4、torchaudio2.10.0+cpu、torchvision0.25.0+cpu、numpy1.26.4和triton_ascend3.2.2。
+这里torch的`+cpu`是基础wheel标记，实际神经执行设备由torch_npu注册及参数检查确认，不表示执行在CPU。
+ASR私有层实际使用NeMo3.0.0、pyarrow21.0.0、datasets4.4.1、fsspec2025.10.0、multiprocess0.70.18、dill0.4.0、
+setuptools-scm9.2.2和vcs-versioning2.1.0。不要直接用最新依赖替换这些ABI相关版本，也不要向正在服务的vLLM环境安装。
+独立环境曾存在继承SDK、OpenCV等依赖声明冲突，实际原ASR执行已通过，但不能据此称全环境`pip check`通过；
+完全可重建的安装锁及公共VAD/评分绑定仍是未完成交付项，不把这些版本记录冒充干净的一键安装方案。
+
 2026-11-06 的独立环境准备已锁定官方 910B ARM64 镜像
 `swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang-omni@sha256:265387f87a6a97ad170a2c2a51f0ce3209e24e143d3048c97fe172b70f273938`。
 该镜像已下载，使用原镜像入口、只读驱动库且不映射设备、不联网时，原CLI帮助和原生双工配置解析均已通过。
