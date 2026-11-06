@@ -854,6 +854,38 @@ source /usr/local/Ascend/ascend-toolkit/set_env.sh
 
 双工模型运行时的可迁移绑定（仍未完成整体验证）：
 
+官方vendor operator载荷可在独立外部目录准备，无需Docker或执行SDK安装器：
+
+```bash
+python scripts/prepare_full_duplex_operator_payloads.py \
+  --lock docs/workload-data/validation/full-duplex-model-runtime-lock-20261107.json \
+  --publisher-archive-root "$PINNED_KERNEL_RELEASE_ARCHIVES" \
+  --output "$NEW_EXTERNAL_OPERATORS"
+```
+
+默认只计划；加`--prepare`后核验ZIP、两个run成员和内嵌gzip的SHA，再直接读取固定Makeself封装中的tar。
+不执行shell、不接受安装条款、不运行`install.sh`，不写系统CANN；仅允许普通文件、目录和指向包内普通文件的库链接，拒绝路径穿越及其他链接类型。
+实际1126份普通文件与2个库链接均与原成功运行的载荷一致，新载荷组合导入8个关键模块通过。
+两份vendor根目录分别为`payload-0/packages/vendors/customize`、`payload-1/packages/vendors/custom_transformer`。
+
+部署时先激活CANN，按实际设备分配设置`ALLOCATED_NPU_ID`，然后在当前进程设置：
+
+```bash
+export ASCEND_RT_VISIBLE_DEVICES="$ALLOCATED_NPU_ID"
+export ASCEND_CUSTOM_OPP_PATH="$NEW_EXTERNAL_OPERATORS/payload-0/packages/vendors/customize:$NEW_EXTERNAL_OPERATORS/payload-1/packages/vendors/custom_transformer"
+export LD_LIBRARY_PATH="/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/lib:$NEW_EXTERNAL_OPERATORS/payload-0/packages/vendors/customize/op_api/lib:$NEW_EXTERNAL_OPERATORS/payload-1/packages/vendors/custom_transformer/op_api/lib:$LD_LIBRARY_PATH"
+export PYTHONPATH="$NEW_EXTERNAL_COMPAT/source:$NEW_EXTERNAL_COMPAT/runtime-helpers:$PINNED_SGLANG_SOURCE/python:$PYTHONPATH"
+export FULL_DUPLEX_NPU_SPEAKER_PROFILE="$QUALIFIED_SPEAKER_BUNDLE/profile.json"
+"$NEW_EXTERNAL_MODEL_ENVIRONMENT/env/bin/python" -m sglang_omni.cli serve \
+  --config "$EXTERNAL_DEPLOYMENT_YAML" --enable-realtime \
+  --host 127.0.0.1 --port 19480
+```
+
+`EXTERNAL_DEPLOYMENT_YAML`基于下文固定模板，并一致设置原MiniCPM模型和参考音色路径；不能让服务误用其他模型。
+`QUALIFIED_SPEAKER_BUNDLE`须包含匹配的OM、派生图和真实NPU资格回执，不能仅以图编译成功代替。
+MiniCPM原模型固定为`openbmb/MiniCPM-o-4_5@eb4141de24550a3a1a4082f718be58f46b761728`；
+参考音色、图和原27份模型资产身份见模型回执，按原发布方权限在服务器取得，不入Git。 上述启动命令沿用已成功39会话的启动选项；新依赖/新载荷本次只检查导入，未重新启动服务或跑模型。
+
 模型依赖的独立重建入口（ARM64/Python3.12.13，先激活CANN）：
 
 ```bash

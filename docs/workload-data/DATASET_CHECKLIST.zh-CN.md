@@ -2,6 +2,8 @@
 
 ### 本次实际推进（2026-11-06—2026-11-07）
 
+- [x] Full-Duplex官方operator载荷的公共纯解包入口已在服务器验证：核验原ZIP、run成员及内嵌gzip三层身份，直接解包、不执行shell或installer。1126份普通文件哈希和2个包内库链接与原已验证载荷一致；新载荷与隔离环境/公共源码组合的8个关键模块导入通过。初次拒绝符号链接的失败保留，现仅允许包内指向普通文件的链接。Linux服务器12项测试通过；临时两棵载荷树共75033550字节已清理，原载荷和证据保留。回执：`full-duplex-public-operator-extraction-20261107-001/qualification-public.json`。
+
 - [x] Full-Duplex模型依赖独立重建与公共源码组合导入通过：182项依赖按固定来源安装并核对私有位置，6个核心包共19900份文件/1806502988字节物理复制后逐文件SHA相同，关闭system-site-packages，未创建可写核心符号链接。官方3856字节Python
   kernel补充按哈希绑定，8个关键模块从新环境/公共副本导入通过；没有加载模型或重启9B服务。原已核验vendor载荷复用，未重新解包；13项SDK/测试工具等声明冲突原样保留，不称全环境pip检查通过。5份临时wheel共52305767字节已清理。回执：`full-duplex-isolated-model-rebuild-20261107-001/qualification-public.json`。
 
