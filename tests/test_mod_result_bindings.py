@@ -52,4 +52,6 @@ def test_new_family_repositories_have_requested_ownership():
         assert component["maintainers"] == ["ShuhaoZhangTony"]
         assert component["advisors"] == []
         assert component["repository_visibility"] == "public"
-        assert component["canonical_repository"].startswith("https://github.com/vLLM-HUST/")
+        assert component["canonical_repository"].startswith(
+            "https://github.com/vLLM-HUST/"
+        )
