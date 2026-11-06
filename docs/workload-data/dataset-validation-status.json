@@ -5428,8 +5428,10 @@
         "disclosed_response_compatibility": "Use first actually returned text block, skip separately typed reasoning; request bytes and actual text unchanged, no action repair",
         "attempt002_terminal_failure": "Original fast summary used full2000 output tokens and returned only thinking, no text; Agent exited1, final snapshot absent, original grading correctly not run",
         "attempt002_terminal_receipt": "mlagentbench-imdb-messages-native-20261106-002/original-terminal-scoring-001/terminal-audit-public.json",
-        "current_receipt": "mlagentbench-imdb-messages-native-20261106-003/start-public.json",
-        "current_model_profile": "Attempt003 requested standard thinking.type=disabled but this service ignores that unknown field; real responses still include reasoning. Preserve attempt and do not label its results as nonthinking",
+        "attempt003_terminal_receipt": "mlagentbench-imdb-messages-native-20261106-003/original-terminal-scoring-001/terminal-audit-public.json",
+        "attempt003_terminal_status": "Exit0 with final snapshot but no submission; original score empty/-1, public scoring exit2. Requested standard thinking.type=disabled was ignored; not a nonthinking result",
+        "current_receipt": "mlagentbench-imdb-messages-native-20261106-004/start-public.json",
+        "current_model_profile": "Attempt004 uses schema-supported chat_template_kwargs.enable_thinking=false with original2000-token Messages protocol. Container confirmed live; scientific CPU training child active after6 model responses. No submission or terminal score yet; not complete",
         "corrected_native_nonthinking_control": "Explicit worker --disable-thinking now uses schema-supported chat_template_kwargs.enable_thinking=false; original prompt/stops/temperature/2000-token budget preserved. Worker checks API schema first",
         "corrected_control_qualification": {"receipt": "mlagentbench-native-template-nonthinking-qualification-20261106-001/qualification-public.json", "fixed_saved_original_request_only": true, "http_status": 200, "response_block_types": ["text"], "output_tokens": 430, "whole_agent_task_run": false},
         "current_public_tooling_frozen_per_attempt": true,
@@ -5682,7 +5684,7 @@
         "uncertain_or_saved_inference_resubmitted": false
       },
       "original_default_task_assets_profile": "configs/workload-native/mlagentbench-cifar10-original-assets.json",
-  "blocker": "CIFAR10 and ogbn-arxiv valid original-scoring evidence reused. Full100000-row IMDb, original scientific assets and isolated CPU environment qualified. Historical Chat attempts004-006 ended without submission. Independent original Messages2000-token profile runs with actual9B: attempts001/002 transport/thinking-only failures retained;003 still active and actually reasoning because unknown standard thinking field was ignored. Corrected native chat_template_kwargs.enable_thinking=false verified on one fixed original request, not a full task. Final scientific submission/snapshot and original grading still pending; no completion claim."
+  "blocker": "CIFAR10 and ogbn-arxiv valid original-scoring evidence reused. Full100000-row IMDb, original scientific assets and isolated CPU environment qualified. Historical Chat attempts004-006 and Messages003 ended without submission; original empty scores retained. Messages004 uses schema-supported nonthinking control and original2000-token protocol; authoritative container and scientific CPU training child confirmed live,6 actual model responses at checkpoint. Final submission/snapshot and original grading pending; no completion claim."
     },
     "MLEBENCH": {
       "native_competition_candidate": {

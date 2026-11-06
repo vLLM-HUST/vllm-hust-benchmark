@@ -34,7 +34,19 @@ def test_saved_validity_verdict_is_not_scientific_completion():
     assert verdict["author_verdict_schema_valid"] and verdict["is_valid"] is False
     assert not verdict["original_agent_rerun"]
     assert item["third_original_terminal_20261103"]["scored_tasks"] == 0
-    assert not item["checked"]
+    assert not item["third_original_terminal_20261103"]["source_checkbox_eligible"]
+    # The historical zero-attempt run stays ineligible. Later delivery needs
+    # independent native evidence, never an upgrade of this saved verdict.
+    if item["checked"]:
+        receipt = json.loads((ROOT / item["delivery_receipt"]).read_text("utf-8"))
+        assert receipt["source_checkbox_eligible"]
+        assert len(receipt["tasks"]) == 3
+        assert all(task["scientific_attempts"] > 0 for task in receipt["tasks"])
+        second = receipt["tasks"][1]
+        assert second["original_submission_group_failures_retained"]
+        assert second["final_correlation_and_accuracy_null"]
+        assert second["judge_recovery"] and second["saved_prediction_scoring"]
+        assert receipt["research_handoff"]
 
 
 def test_original_cpu_assets_are_not_native_scientific_delivery():
