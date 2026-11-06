@@ -75,7 +75,7 @@ def test_invalid_site_map_rejected(runner, tmp_path, value):
     [
         "https://example.com",
         "http://127.0.0.1:1000/?secret=x",
-        "http://user:password@127.0.0.1:1000",
+        "http://user:password@127.0.0.1:1000",  # pragma: allowlist secret - deliberately invalid loopback test fixture
         "http://127.0.0.1:1000/#fragment",
     ],
 )
