@@ -691,6 +691,32 @@ python scripts/run_webarena_agentlab.py --task-id 0 \
 终态和原评分。默认30步、随机种子42，输出预算未指定时保留作者模型参数默认值；显式调整须分配置记录。支持用 `--queue` 替代
 `--endpoint`，复用现有私有文件模型传输接口，不改题目、参考答案或评分代码。一个任务正常返回不自动勾选整项来源。
 
+可复现的客户端配方为 `configs/workload-native/webarena-agentlab-cpu.Dockerfile`，构建上下文仅为配置目录；它构建浏览器和 Agent
+客户端，站点独立部署，LLM 通过 NPU 端点调用。固定官方约束和 NLTK 资源摘要已在 ARM64 服务器重建并通过断网检查；其他架构尚未验证。
+
+```bash
+docker build -f configs/workload-native/webarena-agentlab-cpu.Dockerfile \
+  -t local/webarena-client:0.4.2 configs/workload-native
+```
+
+`AUTHOR_ROOT`、`SITE_MAP`、`RESULT_ROOT` 均指向仓库外已准备的路径。使用同一入口的容器调用方式如下；`task-0`
+必须尚不存在，模型及原站点须已通过准备核验。该调用尚待原站点端到端验证，不能据构建或断网检查给来源打勾。
+
+```bash
+docker run --rm --network host --read-only --cap-drop ALL \
+  --security-opt no-new-privileges --memory 4g --cpus 4 \
+  --tmpfs /tmp:rw,nosuid,nodev,size=512m --shm-size 256m \
+  --mount type=bind,src="$PWD/scripts",dst=/delivery/scripts,readonly \
+  --mount type=bind,src="$PWD/configs/workload-native",dst=/delivery/configs/workload-native,readonly \
+  --mount type=bind,src="$AUTHOR_ROOT",dst=/author,readonly \
+  --mount type=bind,src="$SITE_MAP",dst=/sites.json,readonly \
+  --mount type=bind,src="$RESULT_ROOT",dst=/results --workdir /results \
+  local/webarena-client:0.4.2 python /delivery/scripts/run_webarena_agentlab.py \
+  --task-id 0 --author-root /author --sites /sites.json \
+  --endpoint http://127.0.0.1:19476/v1 --model Qwen/Qwen3.5-9B \
+  --output /results/task-0 --execute
+```
+
 2026-11-06已做独立用户态兼容控制：ARM64容器内QEMU7.2.22可执行原Debian的amd64 BusyBox，
 但PRoot5.1.0下的嵌套子进程在四组有限对照中均以signal11退出；单个ELF可运行不代表原站点可运行。
 控制未修改宿主binfmt、未增加容器特权、未接入NPU或下载大站点镜像，原始诊断留存在机器清单对应stage。 这条具体版本组合尚不具备原站点部署资格，不能按其单程序成功勾选WebArena。
