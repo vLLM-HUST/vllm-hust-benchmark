@@ -53,6 +53,11 @@ jobs:
           python scripts/data_entrypoints.py --check
           python scripts/build_website_evidence_links.py --check
 
+      - name: Verify PyramidKV rc2 functional acceptance capsule
+        run: |
+          python reports/pyramidkv-long109-rc2-20261106/verify.py
+          python reports/pyramidkv-long109-rc2-20261106/test_verify.py
+
       - name: Verify frozen PegaFlow calibration capsules
         run: python scripts/verify_pegaflow_calibration_capsules.py
 
