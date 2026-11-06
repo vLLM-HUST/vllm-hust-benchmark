@@ -883,6 +883,24 @@ export FULL_DUPLEX_NPU_SPEAKER_PROFILE="$QUALIFIED_SPEAKER_BUNDLE/profile.json"
 
 `EXTERNAL_DEPLOYMENT_YAML`基于下文固定模板，并一致设置原MiniCPM模型和参考音色路径；不能让服务误用其他模型。
 `QUALIFIED_SPEAKER_BUNDLE`须包含匹配的OM、派生图和真实NPU资格回执，不能仅以图编译成功代替。
+
+首次部署无需借用旧回执；先用公开图准备入口生成并编译固定派生图，再按下列入口生成独立bundle：
+
+```bash
+python scripts/qualify_full_duplex_npu_speaker.py \
+  --original-model "$EXTERNAL_ORIGINAL_CAMPPLUS" \
+  --derived-graph "$EXTERNAL_COMPILED_GRAPH/campplus.reference-shape.pool-lowered.onnx" \
+  --model-om "$EXTERNAL_COMPILED_GRAPH/campplus.om" \
+  --reference-audio "$ORIGINAL_MINICPM_MODEL/assets/system_ref_audio.wav" \
+  --output "$NEW_QUALIFIED_SPEAKER_BUNDLE"
+```
+
+默认只计划；确认获分配的单张NPU空闲、激活CANN并设置`ASCEND_RT_VISIBLE_DEVICES`后，加`--execute`才执行一次小encoder控制。
+入口先核对原图、派生图、固定参考音色/特征，再使用与正式服务相同的ACL实现；固定输出SHA不符或资源释放失败都不产生合格profile。
+成功输出的`profile.json`可作为`FULL_DUPLEX_NPU_SPEAKER_PROFILE`；原服务构造器仍拒绝缺失/失败回执，没有放松检查。
+本次隔离环境下的真实控制通过，新回执被正式profile加载器接受。该控制不重跑39会话、不请求LLM，也不证明原全网络CPU数值等价。
+测试用临时bundle已在保留回执后清理；实际部署请保留服务正在使用的一份bundle，不反复复制。
+
 MiniCPM原模型固定为`openbmb/MiniCPM-o-4_5@eb4141de24550a3a1a4082f718be58f46b761728`；
 参考音色、图和原27份模型资产身份见模型回执，按原发布方权限在服务器取得，不入Git。 上述启动命令沿用已成功39会话的启动选项；新依赖/新载荷本次只检查导入，未重新启动服务或跑模型。
 

@@ -2,6 +2,8 @@
 
 ### 本次实际推进（2026-11-06—2026-11-07）
 
+- [x] Full-Duplex首次speaker资格入口已完成真实NPU控制：无需旧回执，固定原图/派生图和参考特征身份不变，一次encoder执行输出SHA与原控制一致；释放成功后才生成可供正式服务入口接受的profile。实际使用隔离重建环境、获准空闲物理1，退出后无进程/HBM3455MiB，物理0原9B服务未改。原图、OM副本、派生图三份临时模型共78564754字节已清理，回执和布局留档，留档布局不是仍可使用的安装bundle。回执：`full-duplex-first-time-public-speaker-qualification-20261107-001/qualification-public.json`及`handoff-and-cleanup.json`；非原生benchmark重跑或全网络CPU数值等价证明。
+
 - [x] Full-Duplex官方operator载荷的公共纯解包入口已在服务器验证：核验原ZIP、run成员及内嵌gzip三层身份，直接解包、不执行shell或installer。1126份普通文件哈希和2个包内库链接与原已验证载荷一致；新载荷与隔离环境/公共源码组合的8个关键模块导入通过。初次拒绝符号链接的失败保留，现仅允许包内指向普通文件的链接。Linux服务器12项测试通过；临时两棵载荷树共75033550字节已清理，原载荷和证据保留。回执：`full-duplex-public-operator-extraction-20261107-001/qualification-public.json`。
 
 - [x] Full-Duplex模型依赖独立重建与公共源码组合导入通过：182项依赖按固定来源安装并核对私有位置，6个核心包共19900份文件/1806502988字节物理复制后逐文件SHA相同，关闭system-site-packages，未创建可写核心符号链接。官方3856字节Python

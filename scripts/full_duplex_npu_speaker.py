@@ -71,6 +71,29 @@ class NpuSpeakerSession:
                 "FULL_DUPLEX_NPU_SPEAKER_PROFILE must name a qualified bundle"
             )
         files, self.qualification = load_profile(profile)
+        self._initialize(original_path, files, self.qualification)
+
+    @classmethod
+    def for_reference_qualification(cls, original_path, model_om, derived_graph):
+        """Bootstrap only a fixed-reference control, without a prior receipt.
+
+        run() still enforces the exact original input and qualified output hash.
+        The serving constructor continues to require a passed NPU receipt.
+        """
+        files = {
+            "model_om": Path(model_om).resolve(strict=True),
+            "derived_graph": Path(derived_graph).resolve(strict=True),
+        }
+        if digest(files["derived_graph"]) != DERIVED_GRAPH_SHA256:
+            raise ValueError("qualified fixed-reference derived graph required")
+        instance = cls.__new__(cls)
+        instance._initialize(
+            original_path, files, {"passed": False, "qualification_in_progress": True}
+        )
+        return instance
+
+    def _initialize(self, original_path, files, qualification):
+        self.qualification = qualification
         if digest(Path(original_path)) != ORIGINAL_ONNX_SHA256:
             raise ValueError("original published speaker ONNX differs")
         import acl
