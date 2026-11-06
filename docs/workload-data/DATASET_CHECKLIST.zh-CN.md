@@ -1191,6 +1191,8 @@ NPU；实跑前还须核对输出预算、服务上下文和多图接收上限�
 
   GUDHI配方的构建上下文需提供[官方3.10.1源码](https://github.com/GUDHI/gudhi-devel/releases/download/tags/gudhi-release-3.10.1/gudhi.3.10.1.tar.gz)，先核验SHA256为`24f9743c579c9e01696cb2cbc564248d6e038e4bf23e7484073283e57495d80d`。配方不自动下载任务数据。构建前核对`naturebench-base:v3`为本次合格基础环境；不能将任意同名镜像当作已验证环境。第三题兼容层依赖未改的原第三题镜像，不能代替原Dockerfile构建。两个配方都只做软件构建与导入，不进行模型前向；公共入口生成的配方尚未独立重建，不冒充第二次构建通过。
 
+  复用已验证任务镜像时，作者实际读取的标签是`naturebench-task-<原题号>:base`，不是`naturebench-task:<原题号>`。在私有JSON中将原题号映射到已验证的完整`sha256:`镜像ID，先运行`python scripts/bind_naturebench_task_images.py --manifest /path/to/qualified-image-ids.json`检查计划，再加`--execute`绑定。入口拒绝覆盖已有的不同镜像；绑定只建立别名，不证明环境合格或原生题目完成。保持原运行入口的`--build-task-images`路径，作者会优先复用这些已有镜像；不要改用`--skip-build`，该参数会回到基础镜像并重新运行任务安装命令。兼容环境的差异仍须随结果披露。
+
   基础科学配方也可从已核验原源码准备，默认只打印计划；它不安装依赖、不启动Docker，不下载数据或模型。服务器已通过真实固定源码的计划与准备核验；缓存模式生成配方除不可变基础镜像引用外，与实际已构建配方逐字节一致。5项软件夹具不等于重建镜像或原生题目验证。
 
   ```bash

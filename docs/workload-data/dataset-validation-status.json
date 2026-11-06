@@ -5071,7 +5071,7 @@
     },
     "NATUREBENCH": {
       "current_original_base_recovery_20261106": {
-        "status": "BASE_FIRST_TASK_AND_DISCLOSED_THIRD_TASK_COMPATIBILITY_ENVIRONMENT_QUALIFIED_NOT_NATIVE_EXECUTION",
+        "status": "BASE_AND_THREE_TASK_ENVIRONMENTS_QUALIFIED_ORIGINAL_IMAGE_TAGS_BOUND_NOT_NATIVE_EXECUTION",
         "publisher_base_index": "sha256:8f9dd0d09d3ad3900357a1cf7f887888b5b74056636cd6ef03c160c3cd4b1d95",
         "publisher_arm64_manifest": "sha256:3fbac875b9fd3059d554226246c1ade676fad88aee1ac2cb2deaa6e77e4606a5",
         "publisher_config_sha256": "b7c0db9014a932deb8733f76051ee35ab82cf1aa5ffc9cd63490bbd466b2b354",
@@ -5082,6 +5082,10 @@
         "base_import_receipt": "naturebench-original-base-egress-preflight-20261106-001/original-base-import-public.json",
         "scientific_build_profile": "naturebench-scientific-base-rebuild-20261106-001/build-profile-public.json",
         "fixed_original_base_package_version_pins": 43,
+        "second_task_environment_build_including_pip_check_and_scientific_imports_exit_code": 0,
+        "qualified_original_task_image_binding_receipt": "naturebench-qualified-original-image-bindings-20261106-001/execute.stdout.public.json",
+        "qualified_original_task_image_binding_entry": "scripts/bind_naturebench_task_images.py",
+        "original_harness_image_reuse": "Author solve._ensure_task_image first reuses naturebench-task-<task>:base. All three qualified image IDs bound to previously absent original tags, without image or source replacement. Do not use --skip-build: original mode would install task RUN commands again on the base image.",
         "scientific_build_or_version_checks_passed": true,
         "build_version_constraints_cleared_before_original_task_image_derivation": true,
         "qualified_base_image_id": "sha256:59c8d6957f9af8e5c2fdd7bfe93db238f334fc7ad50ff011adb469ff81f25ef9",
@@ -5089,12 +5093,12 @@
         "first_original_task_environment": {"build_exit_code": 0, "pip_check_exit_code": 0, "scientific_imports_exit_code": 0, "receipt": "naturebench-first-original-task-env-rebuild-20261106-001/qualification-public.json"},
         "third_original_task_environment": {"build_exit_code": 0, "pip_check_exit_code": 1, "scientific_imports_exit_code": 0, "failure": "Original task dependency resolution installed protobuf7.36.2 against wandb<6 and numpy2.2.6 against catboost<2.0; original image and failure retained", "receipt": "naturebench-third-original-task-env-rebuild-20261106-001/qualification-public.json"},
         "third_disclosed_compatibility_environment": {"build_including_pip_check_and_scientific_imports_exit_code": 0, "recipe": "configs/workload-native/naturebench-arm64/third-task-constraints.Dockerfile", "receipt": "naturebench-third-original-task-compatibility-20261106-001/qualification-public.json", "not_unmodified_official_environment": true},
-        "second_task_gudhi_rebuild": {"status": "ORIGINAL_SOURCE_BUILD_AND_VERSION_IMPORT_CHECK_PASSED_SECOND_TASK_ENVIRONMENT_BUILD_RUNNING_NOT_NATIVE_EXECUTION", "build_exit_code": 0, "version": "3.10.1", "archive_bytes": 17397863, "archive_sha256": "24f9743c579c9e01696cb2cbc564248d6e038e4bf23e7484073283e57495d80d", "source_url": "https://github.com/GUDHI/gudhi-devel/releases/download/tags/gudhi-release-3.10.1/gudhi.3.10.1.tar.gz", "recipe": "configs/workload-native/naturebench-arm64/gudhi-3.10.1.Dockerfile", "receipt": "naturebench-gudhi-original-source-rebuild-20261106-001/qualification-public.json", "second_task_build_receipt": "naturebench-second-original-task-env-rebuild-20261106-001/qualification-public.json", "source_checkbox_eligible": false},
+        "second_task_gudhi_rebuild": {"status": "ORIGINAL_SOURCE_AND_SECOND_TASK_ENVIRONMENT_BUILD_IMPORTS_PASSED_NOT_NATIVE_EXECUTION", "build_exit_code": 0, "version": "3.10.1", "archive_bytes": 17397863, "archive_sha256": "24f9743c579c9e01696cb2cbc564248d6e038e4bf23e7484073283e57495d80d", "source_url": "https://github.com/GUDHI/gudhi-devel/releases/download/tags/gudhi-release-3.10.1/gudhi.3.10.1.tar.gz", "recipe": "configs/workload-native/naturebench-arm64/gudhi-3.10.1.Dockerfile", "receipt": "naturebench-gudhi-original-source-rebuild-20261106-001/qualification-public.json", "second_task_build_receipt": "naturebench-second-original-task-env-rebuild-20261106-001/qualification-public.json", "source_checkbox_eligible": false},
         "native_tasks": 0,
         "source_checkbox_eligible": false
       },
       "current_server_scientific_recipe_recovery_20261106": {
-        "status": "PUBLIC_PREPARER_VERIFIED_ORIGINAL_SOURCE_AND_THREE_TASK_PACKAGES_BASE_FIRST_TASK_AND_THIRD_COMPATIBILITY_BUILT_SECOND_TASK_PENDING",
+        "status": "PUBLIC_PREPARER_VERIFIED_ORIGINAL_SOURCE_AND_THREE_TASK_PACKAGES_BASE_AND_ALL_THREE_DISCLOSED_ENVIRONMENTS_BUILT",
         "public_entry": "scripts/prepare_naturebench_scientific_base.py --write --data-root <existing original CPU packages>",
         "existing_ci_provider_reused": "naturebench-actual-ci-0841ec8b-install-32028-001/site-packages",
         "new_task_data_downloaded_or_copied": false,
