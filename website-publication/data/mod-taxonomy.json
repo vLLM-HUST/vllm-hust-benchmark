@@ -3,6 +3,16 @@
   "description_en": "Canonical identity, capability, execution-phase, lifecycle, and evidence classification for every public MOD and adjacent catalog component.",
   "description_zh": "全部公开 MOD 及相邻目录组件的规范分类：身份、能力域、作用阶段、生命周期与证据相互独立。",
   "components": {
+    "state-scheduler": {
+      "kind": "tool_mod",
+      "capability": "observability_evaluation",
+      "phases": [
+        "offline_preparation",
+        "observability"
+      ],
+      "lifecycle": "retired",
+      "evidence": "no_performance_claim"
+    },
     "betterscale": {
       "kind": "runtime_mod",
       "capability": "execution_optimization",
@@ -408,17 +418,17 @@
         "state_lifecycle"
       ],
       "lifecycle": "implemented_restricted",
-      "evidence": "measured_not_beneficial"
+      "evidence": "measured_beneficial"
     },
     "unified-communication-migration": {
-      "kind": "runtime_mod",
+      "kind": "retired",
       "capability": "parallel_communication",
       "phases": [
         "prefill",
         "decode"
       ],
-      "lifecycle": "implemented_restricted",
-      "evidence": "host_integrated_hardware_validation_pending"
+      "lifecycle": "retired",
+      "evidence": "host_integration_missing"
     },
     "layered-prefill-migration": {
       "kind": "retired",
@@ -447,16 +457,6 @@
       ],
       "lifecycle": "retired",
       "evidence": "host_integration_missing"
-    },
-    "muxpd": {
-      "kind": "runtime_mod",
-      "capability": "execution_optimization",
-      "phases": [
-        "prefill",
-        "decode"
-      ],
-      "lifecycle": "implemented_restricted",
-      "evidence": "functionally_validated"
     },
     "gdn-optimizations": {
       "kind": "runtime_mod",
