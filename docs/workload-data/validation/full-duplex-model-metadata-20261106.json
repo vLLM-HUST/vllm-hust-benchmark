@@ -68,6 +68,25 @@
     "driver_diagnostic": {"return_code": 87, "enum_name": "DRV_ERROR_RESOURCE_OCCUPIED", "definition": "/usr/local/Ascend/driver/include/ascend_hal_error.h:112", "retained_log_stage": "full-duplex-device-driver-diagnostic-20261106-001", "torch_npu_post4_only_control_also_unavailable": true},
     "allocated_workspace_control": {"physical_npu_binding": 1, "actual_tensor_device": "npu:0", "scalar_add_result": 2.0, "neural_execution": false, "boundary": "Real placement/control succeeds within the existing allocated workspace; it is not a benchmark or full model run"},
     "next_hardware_control": "Stop independent Docker allocation retries. Prepare publisher NPU software in a private system-site venv inside the existing allocated workspace. Preserve working core packages; use publisher-hashed Python3.12/CANN9.1/910B kernel assets. Do not infer model incompatibility or a torch_npu version cause from the separate Docker failure.",
+    "managed_environment_followup": {
+      "stage": "full-duplex-managed-npu-environment-20261106-001",
+      "model_or_scorer_changes": false,
+      "private_environment_core_binding": "Existing allocated workspace; protected Torch/NPU packages retained. NumPy now has an independent private payload rather than a writable symlink.",
+      "additional_import_dependencies": {"onnx": "1.19.1", "ml_dtypes": "0.5.3", "numpy": "1.26.4"},
+      "dependency_incident": "An unconstrained ONNX dependency installation wrote NumPy 2.5.4 payload through the private core symlink. Restored the original 1.26.4 package from a RECORD-hash-verified wheel, verified global and private imports, and detached private NumPy payload links. Existing services were not restarted.",
+      "restoration_receipt": "core-restore/restoration-public.json",
+      "latest_native_module_import": "FAILED: omni_scheduler imports get_dp_tp_group from sglang.srt.layers.dp_attention, but this immutable-image-derived SGLang source does not export it. Missing onnx dependency was resolved; native model launch is still unqualified.",
+      "speaker_backend_review": {
+        "original_source": "sglang_omni/models/minicpm_o/components/token2wav/vocoder.py",
+        "original_provider": "CPUExecutionProvider",
+        "scope": "Reference-voice CAMPPlus neural embedding in prepare_prompt; not merely audio feature extraction",
+        "onnx_sha256": "a6ac6a63997761ae2997373e2ee1c47040854b4b759ea41ec48e4e42df0f4d73",
+        "onnx_graph_checker_passed": true,
+        "npu_execution_qualified": false,
+        "next_action": "Qualify a faithful NPU backend for the unchanged speaker graph and resolve the publisher framework dependency pairing before another model launch. Do not silently execute auxiliary neural inference on CPU."
+      },
+      "native_cases": 0
+    },
     "native_cases_run": 0
   },
   "source_checkbox_eligible": false
