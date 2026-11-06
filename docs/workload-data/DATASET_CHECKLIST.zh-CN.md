@@ -2886,6 +2886,10 @@ PYTHONPATH=workload-preparation/src python scripts/prepare_reused_source_records
 
 #### Full-Duplex-Bench原生准备
 
+- [x] 2026-11-06当前服务器重新取得并核验全部9个原数据包705372348字节，2576条原JSON及冻结哈希一致；固定模型27文件均通过发布方Git/LFS身份校验，仅保留单份权重。
+
+- [ ] 首次NPU服务启动退出1，未就绪、0个benchmark请求：独立Docker环境设备枚举为0，现有托管NPU环境仍可用。正在对照运行时版本；不得将软件安装、依赖解析或此失败尝试算成原生语音验证通过。
+
 - [x] 已核验官方SGLang-Omni镜像内`python -m benchmarks.duplex.fdb --help`正常退出。优先复用其原生录制、音频导出及reference评分入口，不自行构造输入或改写评分。镜像按不可变digest固定；帮助命令通过仅为软件证据，不是NPU推理或benchmark完成。
 
 - [ ] 原框架`asr.py`仍硬编码CUDA；必须先验证同一Parakeet模型的NPU设备绑定，才可串起完整评分。不能直接执行`generate --all-stages`后宣称NPU链路通过。上游另有unified/listening评价，不能将其冒充数据集发布方的原评分。[环境和模型核验记录](validation/full-duplex-model-metadata-20261106.json)
