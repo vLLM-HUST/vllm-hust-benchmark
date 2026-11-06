@@ -860,8 +860,24 @@ source /usr/local/Ascend/ascend-toolkit/set_env.sh
   配置样例为`configs/workload-native/full-duplex-npu-speaker-profile.example.json`。
   工件目录需含声明的派生图、编译OM和真实NPU控制回执；入口核验三者哈希、原固定输入/输出形状及特征摘要，
   仅接受原参考特征，拒绝CPU回退或其他音频。实际复核已保留的图、OM和旧NPU回执通过，未重新执行神经网络。
-- 新ACL调用及资源释放路径通过夹具测试；尚需公开上游模型源代码补丁接入，并在获准的空闲NPU窗口验证新绑定。
-  旧NPU实跑和当前非神经工件核验分开记录，不能把工件可读或夹具通过称为新绑定已实跑，也不称全原网络数值等价。
+- 新ACL绑定已在获准空闲的物理1上完成一次真实小encoder控制：固定输入/输出哈希与旧NPU控制一致，
+  修改输入被执行前拒绝，显式释放成功，退出后物理1无进程且HBM恢复基线；物理0原服务未改。
+  没有回放旧benchmark或请求LLM。这只是派生图新绑定的验证，不称全原网络数值等价或完整模型服务重验。
+
+上游模型源码兼容副本可按以下方式准备：
+
+```bash
+python scripts/prepare_full_duplex_model_compat.py \
+  --omni-root "$ORIGINAL_OMNI_SOURCE" --output "$NEW_EXTERNAL_COMPAT"
+```
+
+默认仅核对原文件并列计划；加`--prepare`才创建新副本，不在原源码上补丁。 输入须为固定版本的未改原文件，不能把此前已改过的运行目录当作原版本； 入口核验MiniCPM
+code2wav、通信router、vocoder三文件的固定SHA256，其他复制文件逐一核对不变。 实际已用保留的原文件准备1029份源码，修改只涉及NPU设备识别、原固定参考音色读取及NPU
+speaker绑定， 没有改任务、采样预算或参考评分器，也未安装包、启动服务或下载LLM模型。 运行时将副本的`source`、`runtime-helpers`加入该进程`PYTHONPATH`，
+并设置`FULL_DUPLEX_NPU_SPEAKER_PROFILE`指向独立的已核验工件配置。
+启动模板为`configs/workload-native/full-duplex-minicpmo-npu.yaml`，按`/models`只读模型挂载布局编写；
+它与已成功服务配置在模型根路径重定位后逐字一致，保留原参考音色、单会话及Ascend后端设置，不改原采样预算。 非该挂载布局须一致指定模型根路径及其原参考音色路径，不能替换音色或任务音频。
+该准备入口不提供或替代SGLang/算子依赖安装；完整运行时依赖工件说明及导入/组合资格核验仍待收口，不能把源码和配置准备通过称为整个服务已可部署。
 
 保存的原生回放应先用`export_full_duplex_original_capture.py`导出原观察窗，再进行ASR和评分：
 

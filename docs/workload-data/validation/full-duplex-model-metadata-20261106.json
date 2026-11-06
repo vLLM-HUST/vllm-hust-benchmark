@@ -145,6 +145,36 @@
     "native_cases_run": 0
   },
   "native_integration_followup_20261106": {
+    "public_model_preparation_and_encoder_control_20261107": {
+      "prepare_entry": "scripts/prepare_full_duplex_model_compat.py",
+      "startup_config": "configs/workload-native/full-duplex-minicpmo-npu.yaml",
+      "startup_config_equal_prior_successful_service_after_mount_relocation": true,
+      "startup_config_receipt": "full-duplex-public-model-compat-20261107-001/startup-config-qualification-public.json",
+      "preparation_receipt": "full-duplex-public-model-compat-20261107-001/qualification-public.json",
+      "copied_source_files": 1029,
+      "pinned_affected_original_files_verified": 3,
+      "original_source_unchanged": true,
+      "other_copied_source_files_unchanged": true,
+      "private_absolute_paths_removed_from_bindings": true,
+      "encoder_control_receipt": "full-duplex-public-model-compat-20261107-001/duplex-public-speaker-npu-qualification.json",
+      "new_public_encoder_npu_calls": 1,
+      "physical_npu": 1,
+      "fixed_input_and_output_hashes_equal_prior_npu_control": true,
+      "altered_reference_features_rejected_before_execution": true,
+      "cpu_neural_fallback": false,
+      "native_benchmark_cases_replayed": 0,
+      "llm_requests": 0,
+      "original_speaker_file_reacquired_bytes": 28303423,
+      "large_llm_weights_downloaded": false,
+      "encoder_explicit_close_and_post_run_device_release_verified": true,
+      "protected_npu0_service_pid_unchanged": true,
+      "temporary_model_copies_removed": 3,
+      "temporary_model_copy_bytes_removed": 78564754,
+      "cleanup_receipt": "full-duplex-public-model-compat-20261107-001/duplex-public-speaker-control-cleanup.json",
+      "whole_model_service_restarted_or_requalified": false,
+      "full_original_network_numeric_parity_verified": false,
+      "source_checkbox_eligible": false
+    },
     "portable_model_runtime_followup_20261107": {
       "reference_loader": "scripts/full_duplex_reference_audio.py",
       "speaker_session": "scripts/full_duplex_npu_speaker.py",
@@ -157,14 +187,15 @@
       "reference_sample_rate": 16000,
       "caller_bytesio_position_preserved": true,
       "qualified_derived_graph_and_om_hashes_reverified": true,
-      "new_model_weights_downloaded": false,
-      "new_neural_execution": false,
+      "artifact_readback_new_model_weights_downloaded": false,
+      "artifact_readback_new_neural_execution": false,
       "profile_and_resource_cleanup_fixture_tests": 12,
       "actual_acl_host_descriptor_cleanup_return_codes": [0, 0, 0],
       "actual_acl_control_device_memory_allocations": 0,
       "actual_acl_control_model_loads": 0,
       "reference_fixture_tests": 5,
-      "portable_acl_session_neural_execution_qualified": false,
+      "portable_acl_session_neural_execution_qualified": true,
+      "public_upstream_model_source_patch_preparation_verified": true,
       "public_upstream_model_source_patch_integration_completed": false,
       "full_original_network_numeric_parity_verified": false,
       "source_checkbox_eligible": false
@@ -279,7 +310,7 @@
       "execution_wrapper_itself_rerun_against_model": false,
       "remaining_public_environment_scoring_and_research_handoff": true
     },
-    "remaining": "Finish portable rebuildable environment and qualify neural ASR/VAD/judge wrappers against saved native execution. Public export and six scoring phases now exist; both original exports, three non-neural category scores and original summary have actual public-entry execution evidence, with all63 reexported wave files and sample metadata matching saved references. Fixed27 unchanged research readback and public capture command equivalence passed. Reuse completed neural results rather than rerunning them solely for a new wrapper. Model weights intentionally cleaned; reproduction requires reacquisition. Do not promote checkbox before remaining gates or claim full-dataset/engine-performance/official-GPT quality results."
+    "remaining": "Finish complete model-runtime dependency/startup artifact profile and source-integration import checks; qualify public ASR/VAD/local-judge wrappers against saved native results. Fresh66-package ASR overlay rebuild,1029-file model-source compatibility preparation and one public NPU speaker binding control passed. Both exports, non-neural category scoring and summary have actual public-entry evidence; all63 reexported wave files match. Fixed27 research readback and capture-command equivalence passed. Do not replay completed39 native sessions solely for wrappers. Temporary encoder copies cleaned after control. Keep source unchecked until remaining gates close; no full-dataset/engine-performance/official-GPT quality claim."
   },
   "source_checkbox_eligible": false
 }
