@@ -830,7 +830,26 @@ torch2.10.0+cpu、torch_npu2.10.0.post4、torchaudio2.10.0+cpu、torchvision0.25
 ASR私有层实际使用NeMo3.0.0、pyarrow21.0.0、datasets4.4.1、fsspec2025.10.0、multiprocess0.70.18、dill0.4.0、
 setuptools-scm9.2.2和vcs-versioning2.1.0。不要直接用最新依赖替换这些ABI相关版本，也不要向正在服务的vLLM环境安装。
 独立环境曾存在继承SDK、OpenCV等依赖声明冲突，实际原ASR执行已通过，但不能据此称全环境`pip check`通过；
-完全可重建的安装锁及公共VAD/评分绑定仍是未完成交付项，不把这些版本记录冒充干净的一键安装方案。
+ASR私有层的66工件安装锁及公共准备入口已补充，重建验证与神经阶段公共绑定资格核验继续单列；不把依赖版本记录或全环境有冲突的安装称为干净通用镜像。
+
+ASR重建锁见[固定工件及安装来源](validation/full-duplex-asr-overlay-lock-20261106.json)。
+其65个wheel和1个源码包均绑定原下载地址及SHA256，原安装的8508个RECORD文件摘要已核验。 它依赖现场分配镜像`vllm-ascend:v0.23.0-openeuler`的固定摘要
+`sha256:accc7dfc87b07670e9cadf0747cd9e3c5cbdf55cae4888b83ee06c38683fc09a`，
+并非宣称该现场镜像可在公网下载。运行前由平台核对镜像摘要；脚本检查ARM64、Python3.12.13和六个核心包版本，
+继承这些核心包、只在新venv安装私有层，不改服务环境。源码包构建使用原setuptools80.10.2及wheel0.48.0，不临时解析最新版构建依赖。
+
+```bash
+source /usr/local/Ascend/ascend-toolkit/set_env.sh
+"$BASE_PYTHON" scripts/prepare_full_duplex_asr_environment.py \
+  --lock docs/workload-data/validation/full-duplex-asr-overlay-lock-20261106.json \
+  --output "$NEW_EXTERNAL_ASR_ENVIRONMENT"
+```
+
+默认仅校验锁并列计划。加`--prepare`才按哈希安装66个私有工件，禁用依赖重新解析、全局卸载和核心包替换； 安装后检查NeMo导入、私有包版本/位置及核心包未变，不加载模型。
+已有环境可改用`--verify-only`复核，不下载、不重新安装、不覆盖原安装回执。
+调用前必须激活CANN动态库；公共入口现会在下载前检查`libhccl.so`，首个缺失库路径的重建检查失败保留，不能掩盖为依赖成功。
+锁中的Silero6.2.1为独立可选VAD包，原wheel摘要及来源另列，使用`--no-deps`安装到独立目标目录后加入进程`PYTHONPATH`，
+不把它混入66包的ASR安装完成数。上述环境检查不等于ASR/VAD神经执行，也不能代替双工服务运行时资格核验。
 
 保存的原生回放应先用`export_full_duplex_original_capture.py`导出原观察窗，再进行ASR和评分：
 
