@@ -830,7 +830,8 @@ torch2.10.0+cpu、torch_npu2.10.0.post4、torchaudio2.10.0+cpu、torchvision0.25
 ASR私有层实际使用NeMo3.0.0、pyarrow21.0.0、datasets4.4.1、fsspec2025.10.0、multiprocess0.70.18、dill0.4.0、
 setuptools-scm9.2.2和vcs-versioning2.1.0。不要直接用最新依赖替换这些ABI相关版本，也不要向正在服务的vLLM环境安装。
 独立环境曾存在继承SDK、OpenCV等依赖声明冲突，实际原ASR执行已通过，但不能据此称全环境`pip check`通过；
-ASR私有层的66工件安装锁及公共准备入口已补充，重建验证与神经阶段公共绑定资格核验继续单列；不把依赖版本记录或全环境有冲突的安装称为干净通用镜像。
+ASR私有层的66工件安装锁及公共准备入口已补充，服务器本地新环境的66包版本/位置、NeMo导入和六个核心包未变已核验。
+全环境11项依赖声明冲突与原基线逐项相同，无新增；不把ASR功能环境称为全局pip检查干净的通用镜像。神经阶段公共绑定资格核验继续单列。
 
 ASR重建锁见[固定工件及安装来源](validation/full-duplex-asr-overlay-lock-20261106.json)。
 其65个wheel和1个源码包均绑定原下载地址及SHA256，原安装的8508个RECORD文件摘要已核验。 它依赖现场分配镜像`vllm-ascend:v0.23.0-openeuler`的固定摘要
