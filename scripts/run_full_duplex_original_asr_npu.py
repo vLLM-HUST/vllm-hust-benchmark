@@ -105,7 +105,7 @@ def execute(args):
                         "original ASR reported failed cases; preserve them"
                     )
                 report["status"] = "ORIGINAL_ASR_COMPLETED_NOT_WHOLE_BENCHMARK"
-    except Exception as error:
+    except (Exception, SystemExit) as error:
         report.update(
             status="FAILED", error_type=type(error).__name__, error=str(error)
         )

@@ -832,6 +832,38 @@ setuptools-scm9.2.2和vcs-versioning2.1.0。不要直接用最新依赖替换这
 独立环境曾存在继承SDK、OpenCV等依赖声明冲突，实际原ASR执行已通过，但不能据此称全环境`pip check`通过；
 完全可重建的安装锁及公共VAD/评分绑定仍是未完成交付项，不把这些版本记录冒充干净的一键安装方案。
 
+保存的原生回放应先用`export_full_duplex_original_capture.py`导出原观察窗，再进行ASR和评分：
+
+```bash
+"$ASR_PYTHON" scripts/export_full_duplex_original_capture.py --version v1.0 \
+  --omni-root "$OMNI_SOURCE" --capture-root "$COMPLETED_CAPTURE" \
+  --dataset-root "$ORIGINAL_TREE" --python "$ASR_PYTHON" \
+  --output "$NEW_EXTERNAL_EXPORT"
+```
+
+默认仅计划，加`--execute`调用未改原导出器；v1.5改版本参数即可，并显式锁定原12组clean/overlap，避免原工具默认扩大到全部任务。
+入口要求同一27条原题的`fixed-plan-public.json`与对应case目录；不更换回放、不平移观察窗、不补造迟到音频。
+导出CLI会导入Silero，即便导出本身不做神经推理。实测使用独立`silero-vad==6.2.1`包目录加入进程`PYTHONPATH`；
+不是在共享vLLM环境直接安装。缺包的第一次公共导出失败已保留，不能把退出码1当成功。
+
+评分入口为`run_full_duplex_original_scores.py`，仍默认只计划，显式加`--execute`才执行。公共参数为
+`--omni-root`、`--reference-source`、`--tree`及新的仓库外`--output`；各阶段参数如下：
+
+| `--phase`                     | 原始处理及所需附加参数                                                                    | 神经执行      |
+| ----------------------------- | ----------------------------------------------------------------------------------------- | ------------- |
+| `v10-nonjudge`                | 原pause、smooth turn三类评分，消费原ASR导出树                                             | 无            |
+| `v10-backchannel-npu`         | 原backchannel函数；PCM16无损解码桥与固定Silero设备绑定                                    | NPU VAD       |
+| `v10-interruption-localjudge` | 原中断相关性提示与计分；显式`--base-url`、`--served-model`                                | 外部NPU judge |
+| `v15-timing-npu`              | 原时序公式与阈值；`--scores`为原ASR结果目录                                               | NPU VAD       |
+| `v15-localjudge`              | 原自定义judge协议；`--scores`、`--judge-config`、`--base-url`和新的`--local-judge-output` | 外部NPU judge |
+| `v15-summary`                 | 原ASR/时序汇总；`--scores`，bootstrap=2000、seed=20260925                                 | 无            |
+
+本地judge凭据只从`--api-key-env`指定的环境变量读取，默认名为`FULL_DUPLEX_LOCAL_JUDGE_API_KEY`，不要写入命令或配置。
+v1.5配置沿用上游custom-judge schema，需真实模型/分词器版本、精度、解码参数、seeds及启动回执摘要；不能用GPT别名替代本地模型身份。
+自定义judge输出目录必须独立于原ASR/时序结果，原GPT行为项保持未评状态，不将本地评分合并冒充GPT评分。
+VAD绑定只改变模型和输入张量的设备，核验6.2.1原TorchScript摘要；不改变原阈值、重采样及状态重置。
+上述公共评分入口已实际复用保存结果完成v1.0三类非神经评分及v1.5汇总，未调用模型； 神经阶段的公共包装器仍须与既有NPU实跑证据完成逐项资格核验，不能把默认计划或夹具测试当真实评分。
+
 2026-11-06 的独立环境准备已锁定官方 910B ARM64 镜像
 `swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang-omni@sha256:265387f87a6a97ad170a2c2a51f0ce3209e24e143d3048c97fe172b70f273938`。
 该镜像已下载，使用原镜像入口、只读驱动库且不映射设备、不联网时，原CLI帮助和原生双工配置解析均已通过。

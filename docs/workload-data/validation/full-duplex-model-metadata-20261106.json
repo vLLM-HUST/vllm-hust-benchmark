@@ -189,6 +189,25 @@
       "model_calls": 0,
       "observation_or_features_executed": false
     },
+    "public_export_and_scoring_entries": {
+      "export_entry": "scripts/export_full_duplex_original_capture.py",
+      "scoring_entry": "scripts/run_full_duplex_original_scores.py",
+      "device_binding": "scripts/full_duplex_npu_vad.py",
+      "scoring_phases": ["v10-nonjudge", "v10-backchannel-npu", "v10-interruption-localjudge", "v15-timing-npu", "v15-localjudge", "v15-summary"],
+      "actual_public_offline_audit": "full-duplex-public-offline-entry-audit-20261106-001/qualification-public.json",
+      "v10_export_original_cases": 15,
+      "v15_export_original_pairs": 12,
+      "all_reexported_wave_files_byte_equal": 63,
+      "all_reexported_sample_metadata_equal": true,
+      "public_nonjudge_results_equal_saved_original_results": true,
+      "public_summary_equal_except_generation_timestamp": true,
+      "model_calls_for_public_offline_qualification": 0,
+      "initial_v10_export_missing_silero_failure_preserved": true,
+      "initial_nonjudge_missing_copied_manifest_failure_preserved": true,
+      "neural_scoring_wrapper_execution_qualified": false,
+      "export_fixture_tests": 4,
+      "score_fixture_tests": 12
+    },
     "public_asr_entry": {
       "entry": "scripts/run_full_duplex_original_asr_npu.py",
       "versions": ["v1.0", "v1.5"],
@@ -214,7 +233,7 @@
       "execution_wrapper_itself_rerun_against_model": false,
       "remaining_public_environment_scoring_and_research_handoff": true
     },
-    "remaining": "Finish portable rebuildable environment and complete public scoring/device bindings. Fixed27 research readback against the audited CI wheel now passed for original audio bytes, all annotations and control roles; default research lock unchanged. Public capture commands exactly match saved runs; NPU ASR wrapper has fixture coverage but was not newly executed against weights. Reuse completed captures/transcripts/scoring. Completed model weights were intentionally cleaned; reproduction requires reacquisition. Do not promote source checkbox before remaining gates or claim full-dataset/engine-performance/official-GPT quality results."
+    "remaining": "Finish portable rebuildable environment and qualify neural ASR/VAD/judge wrappers against saved native execution. Public export and six scoring phases now exist; both original exports, three non-neural category scores and original summary have actual public-entry execution evidence, with all63 reexported wave files and sample metadata matching saved references. Fixed27 unchanged research readback and public capture command equivalence passed. Reuse completed neural results rather than rerunning them solely for a new wrapper. Model weights intentionally cleaned; reproduction requires reacquisition. Do not promote checkbox before remaining gates or claim full-dataset/engine-performance/official-GPT quality results."
   },
   "source_checkbox_eligible": false
 }
