@@ -588,7 +588,8 @@ train/test各25000条、unsupervised50000条，全部100000条与原Parquet一�
 `configs/workload-native/mlagentbench-imdb-cp311-arm64-requirements.txt`；配套离线 Dockerfile
 已构建，69份实际客户端版本与初始合格环境一致。环境检查不计来源完成。 attempt004已用满原18000秒预算并正常退出，但没有生成提交；原评分为
 `score=[]/final_score=-1`，仍未完成。attempt005改用现有Qwen3.5-9B非思考配置，独立运行同一原题，CPU配额32、线程环境上限8、内存24 GiB；
-不混用14B响应，也不改变原数据、提示、步数或预算。CPU配额不代表独占绑核。原ResearchAgent仍为50步、18000秒，默认输出500 token、编辑4000
+不混用14B响应，也不改变原数据、提示、步数或预算。该9B尝试随后在约197秒正常结束，同样没有提交，原评分仍为空，不计完成。
+下一次模型配置待研究窗口协调后再启用，不因两次失败更换原题或手工补写提交。 CPU配额不代表独占绑核。原ResearchAgent仍为50步、18000秒，默认输出500 token、编辑4000
 token。历史attempt004仅对完全相同原请求逐次复用已保存14B响应，复用和新推理分别计数，不能据此报告性能；公共入口默认正常生成，不内置研究观测或恢复缓存。 原 Agent 终态后，将真实
 stdout/stderr 捕获保存为 `<log-root>/log`；保留原轨迹和 final 科学快照，不重跑 Agent。 在隔离评分容器只读挂载这些原日志，并使评分工作目录可读取相同原
 `imdb` 数据，运行
