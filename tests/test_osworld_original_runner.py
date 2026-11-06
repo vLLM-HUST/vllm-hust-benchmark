@@ -95,9 +95,8 @@ def test_execution_delegates_original_task_and_restores_runtime(
 
     monkeypatch.setattr(runner, "urlopen", lambda *_, **__: Response())
     monkeypatch.setenv("OPENAI_BASE_URL", "retained-original-endpoint")
-    monkeypatch.setenv(
-        "OPENAI_API_KEY", "fixture-original-key"
-    )  # pragma: allowlist secret - fixture only
+    fixture_value = "fixture-original-value"
+    monkeypatch.setenv("OPENAI_API_KEY", fixture_value)
     prepared = runner.plan(args)
     if emit_score:
         result = runner.execute(args, prepared)
@@ -108,9 +107,7 @@ def test_execution_delegates_original_task_and_restores_runtime(
     import os
 
     assert os.environ["OPENAI_BASE_URL"] == "retained-original-endpoint"
-    assert (
-        os.environ["OPENAI_API_KEY"] == "fixture-original-key"
-    )  # pragma: allowlist secret - fixture only
+    assert os.environ["OPENAI_API_KEY"] == fixture_value
     assert calls[-1] == "closed"
     assert environment.create_vm_manager_and_provider is factory
     assert (
