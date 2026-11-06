@@ -5099,12 +5099,12 @@
           "validity_judge_recovery": {"receipt": "naturebench-second-original-judge-recovery-20261106-002/recovery-public.json", "is_valid": true, "input_tokens": 336129, "original_output_budget": 4096, "served_max_context": 1010000, "new_agent_calls": 0, "materials_truncated": false},
           "observed_submission_errors_at_checkpoint": 0,
           "observed_aggregate_improvements_at_checkpoint": [-1.0, -1.0, -1.0, -1.0, -1.0],
-          "terminal_and_validity_judge_verified": false,
+          "terminal_and_validity_judge_verified": true,
           "model": "Qwen/Qwen3.5-9B",
           "historical_failed_or_empty_results_retained": true
         },
         "third_task": {"task_id": "s43588-024-00689-2", "status": "ORIGINAL_AGENT_SCIENTIFIC_EVALUATIONS_AND_VALIDITY_JUDGE_RETURNED", "controller_exit_code": 0, "scientific_attempts": 20, "best_aggregate_improvement": 0.03601942018477061, "validity_judge_is_valid": true, "receipt": "naturebench-current-native-evaluators-20261106-001/third-native-output-20261106-001/native/run_summary.json", "original_task_and_setup_budget_seconds": 14400, "model": "Qwen/Qwen3.5-9B", "historical_zero_scientific_attempt_run_retained": true},
-        "source_checkbox_eligible": false
+        "source_checkbox_eligible": true
       },
       "current_original_base_recovery_20261106": {
         "status": "BASE_AND_THREE_TASK_ENVIRONMENTS_QUALIFIED_ORIGINAL_IMAGE_TAGS_BOUND_NOT_NATIVE_EXECUTION",
@@ -5197,11 +5197,11 @@
       },
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/naturebench-fixed3-native-delivery-20261106.json",
       "second_original_validity_judge_extended_context_preflight": {
         "date": "2026-11-04",
         "model": "Qwen/Qwen3.5-9B",
@@ -5252,7 +5252,8 @@
         "current_workspace_evaluator_health_reachable": false,
         "scope": "The retained second-case judge response hash and response metadata were reverified. Resume only missing original cases once an isolated runtime and evaluator are available."
       },
-      "blocker": "All3 fixed original Agent controllers terminal. First13 and third20 scientific attempts completed with original validity judge true. Second25 attempts retained earlier best-score group failures; original judge recovered on unchanged336129-token evidence using separate1010000-context NPU profile. Read-only original evaluator on final saved predictions computes32 dataset metrics and rejects11 missing/malformed predictions; this is distinct from earlier submissions. Final-output native scoring, reusable recovery protocol and public/research output handoff remain under audit; source unchecked, no full90-task claim.",
+      "blocker": null,
+      "current_research_handoff_receipt": "docs/workload-data/validation/naturebench-ci-research-handoff-20261106.json",
       "preparation_receipt": "docs/workload-data/validation/naturebench-original-readiness-20261028.json",
       "native_progress_receipt": "docs/workload-data/validation/naturebench-original-fixed3-native-progress-20261102.json",
       "public_asset_preparer": "scripts/prepare_jsonschemabench_author_source.py",
