@@ -2,6 +2,8 @@
 
 ### 本次实际推进（2026-11-06—2026-11-07）
 
+- [x] Full-Duplex原生本地judge保存结果的公共复用入口已在服务器验证：`v15-localjudge --reuse-completed`调用原`run_custom`，12条结果均为valid，原目录与独立副本的24份request/result文件哈希不变；缺失缓存时禁止发送新模型请求，invalid_label和not_judged不算成功。回执：`full-duplex-public-saved-judge-reuse-20261107-001/qualification-public.json`。本地judge仍为非官方评分；新增模型调用0，不替代其他神经阶段验证。
+
 - [x] Full-Duplex公共模型源码准备与新speaker绑定控制：核对三份固定原文件后准备1029份源码副本，原源码未改，其他复制文件不变。物理1上的一次新ACL
   encoder控制通过，固定输入/输出哈希与旧NPU控制相同，改动输入被拒绝，退出后设备释放；未回放benchmark或请求LLM，物理0服务未改。临时三份小模型副本共78564754字节已清理，回执保留。
 

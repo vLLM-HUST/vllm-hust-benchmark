@@ -136,12 +136,31 @@ def score(args):
     if args.phase == "v15-localjudge":
         from benchmarks.duplex.reference_custom_judge import run_custom
 
-        if args.local_judge_output.exists():
+        reuse = getattr(args, "reuse_completed", False)
+        if args.local_judge_output.exists() and not reuse:
             raise FileExistsError(
                 "local judge output must be new; reuse completed judgments"
             )
+        if reuse and not args.local_judge_output.is_dir():
+            raise FileNotFoundError("completed native custom-judge directory required")
         native.out = args.local_judge_output
-        counts = run_custom(native, engines, paths)
+        blocked = []
+
+        def deny_new_judge_requests(*unused_args, **unused_kwargs):
+            blocked.append(True)
+            raise RuntimeError(
+                "reuse-completed forbids new model requests; cache is incomplete"
+            )
+
+        counts = (
+            run_custom(native, engines, paths, transport=deny_new_judge_requests)
+            if reuse
+            else run_custom(native, engines, paths)
+        )
+        if blocked:
+            raise RuntimeError(
+                "reuse-completed encountered unresolved native judge requests"
+            )
     else:
         import torch
         import torch_npu  # noqa: F401 - registers the NPU backend
@@ -155,7 +174,8 @@ def score(args):
             native, engines, paths, hashes, silero_loader=load_npu_silero
         )
         hashes.save()
-    if not counts or counts.get("failed", 0) or counts.get("invalid", 0):
+    successful = {"valid"} if args.phase == "v15-localjudge" else {"ok", "reused"}
+    if not counts or sum(counts.values()) <= 0 or set(counts) - successful:
         raise RuntimeError(
             "original phase returned empty/failed/invalid results: " + str(counts)
         )
@@ -163,6 +183,10 @@ def score(args):
 
 
 def validate(args):
+    if getattr(args, "reuse_completed", False) and args.phase != "v15-localjudge":
+        raise ValueError(
+            "reuse-completed supports only the native v1.5 custom judge cache"
+        )
     if not args.engine or "=" in args.engine:
         raise ValueError("engine must be a nonempty label without '='")
     if args.phase.startswith("v15-") and args.scores is None:
@@ -207,6 +231,11 @@ def main():
     parser.add_argument("--served-model")
     parser.add_argument("--api-key-env", default="FULL_DUPLEX_LOCAL_JUDGE_API_KEY")
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument(
+        "--reuse-completed",
+        action="store_true",
+        help="Verify and reuse native v1.5 completed judge cache; fail closed on any new request",
+    )
     args = parser.parse_args()
     for key in [
         "omni_root",
@@ -227,6 +256,8 @@ def main():
         "source_checkbox_eligible": False,
         "official_gpt_judge_executed": False,
         "local_judge_results_are_non_official": "localjudge" in args.phase,
+        "reuse_completed_native_judgments": args.reuse_completed,
+        "new_judge_requests_allowed": not args.reuse_completed,
     }
     if not args.execute:
         print(json.dumps(report))

@@ -896,6 +896,12 @@ speaker绑定， 没有改任务、采样预算或参考评分器，也未安装
 评分入口为`run_full_duplex_original_scores.py`，仍默认只计划，显式加`--execute`才执行。公共参数为
 `--omni-root`、`--reference-source`、`--tree`及新的仓库外`--output`；各阶段参数如下：
 
+已有v1.5本地judge结果可先复制到独立目录，再传`--reuse-completed`与`--local-judge-output <副本>`。
+该模式仅适用于`v15-localjudge`，由原`run_custom`校验实验、请求及结果身份；任何缓存缺失均禁止发起新模型请求并使验证失败。
+原`--tree`、`--scores`及`--judge-config`须保持原运行身份，不得改写实验文件凑匹配。
+服务器实际复用12条valid结果，原目录和副本共24份请求/结果文件哈希不变；回执为
+`full-duplex-public-saved-judge-reuse-20261107-001/qualification-public.json`。新增模型调用0，本地judge结果不属于官方GPT成绩。
+
 | `--phase`                     | 原始处理及所需附加参数                                                                    | 神经执行      |
 | ----------------------------- | ----------------------------------------------------------------------------------------- | ------------- |
 | `v10-nonjudge`                | 原pause、smooth turn三类评分，消费原ASR导出树                                             | 无            |

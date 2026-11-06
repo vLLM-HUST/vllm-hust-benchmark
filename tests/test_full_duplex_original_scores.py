@@ -142,3 +142,55 @@ def test_vad_binding_passes_state_reset_and_requires_npu_output():
     with pytest.raises(ValueError, match="remain on NPU"):
         binding(wave, 16000)
     assert calls[-1] == "npu:0"
+
+
+@pytest.mark.parametrize(
+    "state", ["valid", "invalid_label", "not_judged", "cache_miss"]
+)
+def test_reuse_completed_is_fail_closed_and_does_not_accept_unjudged_results(
+    tmp_path, monkeypatch, state
+):
+    args = arguments()
+    args.phase = "v15-localjudge"
+    args.reuse_completed = True
+    args.local_judge_output = tmp_path / "copied-native-cache"
+    args.local_judge_output.mkdir()
+
+    def run_custom(native, engines, paths, transport):
+        assert native.limit is None and native.retry_failed is False
+        assert native.out == args.local_judge_output
+        if state == "cache_miss":
+            # No SDK or network transport can be created through this path.
+            with pytest.raises(RuntimeError, match="forbids new model"):
+                transport({}, [])
+            return {"valid": 1}  # Even an upstream fallback cannot hide a miss.
+        return {state: 12}
+
+    modules = {
+        "benchmarks": types.ModuleType("benchmarks"),
+        "benchmarks.duplex": types.ModuleType("duplex"),
+        "benchmarks.eval": types.ModuleType("eval"),
+        "benchmarks.duplex.reference_source": types.SimpleNamespace(
+            verify_reference=lambda *a: "verified"
+        ),
+        "benchmarks.eval.benchmark_duplex_reference": types.SimpleNamespace(
+            open_engines=lambda args: []
+        ),
+        "benchmarks.duplex.reference_custom_judge": types.SimpleNamespace(
+            run_custom=run_custom
+        ),
+    }
+    for name, module in modules.items():
+        monkeypatch.setitem(sys.modules, name, module)
+    if state == "valid":
+        assert ENTRY.score(args) == {"valid": 12}
+    else:
+        with pytest.raises(RuntimeError):
+            ENTRY.score(args)
+
+
+def test_reuse_flag_cannot_change_other_phase_semantics():
+    args = arguments()
+    args.reuse_completed = True
+    with pytest.raises(ValueError, match="only the native"):
+        ENTRY.validate(args)
