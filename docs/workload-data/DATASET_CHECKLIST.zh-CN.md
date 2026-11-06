@@ -1179,6 +1179,21 @@ NPU；实跑前还须核对输出预算、服务上下文和多图接收上限�
     --image sha256:QUALIFIED_64_HEX_CPU_IMAGE_ID \
     --output /path/to/fresh-final-prediction-score
   ```
+
+  原有效性裁判因上下文或连接问题失败后，可在合格可信控制环境使用以下恢复入口。它拒绝重跑已有布尔判决，只复用保存输出和原问题材料，默认不调用模型；加`--execute`才调用原collector、prompt、4096-token输出策略及parser。服务需提供`/v1/messages/count_tokens`和含真实`max_model_len`的`/v1/models`，完整材料放不下时直接报错，不截断。保存输出及原数据应只读挂载，新恢复目录单独可写；凭据通过私有环境`JUDGE_API_KEY`或`ANTHROPIC_API_KEY`注入，不写命令。
+
+  ```bash
+  python scripts/recover_naturebench_original_judge.py \
+    --author-root /path/to/pinned-naturebench-code \
+    --runtime /path/to/verified-runtime \
+    --data-root /path/to/original-naturebench-data \
+    --saved-task /path/to/saved-native/s41592-025-02870-5 \
+    --task-id s41592-025-02870-5 --model YOUR_ACTUAL_JUDGE_MODEL \
+    --endpoint http://127.0.0.1:YOUR_JUDGE_PORT \
+    --output /path/to/fresh-judge-recovery
+  ```
+
+  2026-11-06服务器真实原包已通过此公共入口离线计划核验，未产生新模型调用；已有成功裁判结果复用，不为验证新包装器重复调用。独立长上下文配置的完整材料裁判实跑证据另见终态回执，两种证据不混称。
   连接已启动的原评分服务时，可加`--eval-control-token-file /path/to/private/control-file`，使作者脚本读取与服务匹配的控制文件；只转交文件路径，不打印凭据内容，不改题目或预算。控制环境须满足作者Python3.11及依赖要求；服务器已复用合格科学镜像作为可信编排环境，实际科学任务另起原任务容器，后者不挂载Docker控制接口或NPU设备。第一题现已进入原Agent流程并实际调用现有NPU模型，尚不能当作执行、科学评分和validity
   judge全部完成。
 
