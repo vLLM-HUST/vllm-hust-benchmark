@@ -672,8 +672,17 @@ OSWorld（未完成）：先在兼容的隔离环境内确认作者桌面镜像�
 第三次尝试完成15步后，原评分前置探活仍因终端接口失败退出。现已在保留的同一GUI状态上补跑原`evaluate()`：getter实际返回Google，按原参考答案得到0分；没有重置GUI或重跑模型。恢复时仅将截图模式下SetupController的状态探测改到真正返回HTTP200/Linux的`/platform`，不替换终端观测内容，也不修改postconfig、getter、参考答案或metric。录屏停止存在ffmpeg告警，未宣称完整录屏验证。
 
 - [x] 固定第一题：15步真实模型/GUI动作及原评分0分已核验；评分恢复单独披露，不称作未修改的单次运行。
-- [ ] 固定第二题：原题、原15步和32768-token预算，已启动验证。
+- [ ] 固定第二题：已完成原15步模型/GUI操作，原评分器读取实时Chrome cookies时15秒超时；保留原GUI和轨迹，正在恢复评分，不重跑模型。
 - [ ] 固定第三题及整项公共执行/研究接通：待完成。以上是题目级进度，OSWORLD来源整体仍不打勾。
+
+公开执行入口为`scripts/run_osworld_original.py`，默认只核验固定源码和原任务并输出计划。 默认使用作者Docker
+Provider，必须显式提供可丢弃VM路径；不会自动分配虚拟机。
+ARM64兼容环境可显式选择`--provider owned-qemu --owned-qemu-profile <profile.json> --slow-arm-tcg`，
+仅支持预先核验的前三个固定原题；profile须声明专用QEMU monitor、基线快照和回环端口。
+入口调用原Agent、`lib_run_single`和评分器，保留15步及32768-token预算； 兼容层不改题、图像或计分，不能用于宣称官方原始时序或性能复现。
+慢速兼容层还可将该回环Chrome CDP连接的15秒等待延长到180秒；只修改明确匹配的连接超时，
+仍由原getter读取实时cookies，不回退到磁盘快照或伪造状态；其他URL和显式不同超时不变。
+新入口及CDP兼容层18项夹具测试、相关66项回归通过；服务器断网计划验证已通过，真实执行和接通仍待验证。
 
 2026-11-06：原始 Ubuntu 镜像已通过发布方压缩包 SHA256、完整解压 CRC 和解压后全文件 SHA256 核验。公开准备入口为
 `scripts/prepare_osworld_original_vm.py`；`verify-image` 可独立复核已解压镜像， 不要求保留重复压缩包。隔离 CPU 容器中的 ARM64
