@@ -95,7 +95,9 @@ def test_execution_delegates_original_task_and_restores_runtime(
 
     monkeypatch.setattr(runner, "urlopen", lambda *_, **__: Response())
     monkeypatch.setenv("OPENAI_BASE_URL", "retained-original-endpoint")
-    monkeypatch.setenv("OPENAI_API_KEY", "fixture-original-key")
+    monkeypatch.setenv(
+        "OPENAI_API_KEY", "fixture-original-key"
+    )  # pragma: allowlist secret - fixture only
     prepared = runner.plan(args)
     if emit_score:
         result = runner.execute(args, prepared)
@@ -106,7 +108,9 @@ def test_execution_delegates_original_task_and_restores_runtime(
     import os
 
     assert os.environ["OPENAI_BASE_URL"] == "retained-original-endpoint"
-    assert os.environ["OPENAI_API_KEY"] == "fixture-original-key"
+    assert (
+        os.environ["OPENAI_API_KEY"] == "fixture-original-key"
+    )  # pragma: allowlist secret - fixture only
     assert calls[-1] == "closed"
     assert environment.create_vm_manager_and_provider is factory
     assert (
@@ -191,7 +195,7 @@ def test_explicit_all_and_single_fixed_case(args):
 @pytest.mark.parametrize(
     "base",
     [
-        "https://name:password@example.org/v1",
+        "https://name:password@example.org/v1",  # pragma: allowlist secret - rejected fixture URL
         "http://localhost/v1?x=1",
         "http://localhost/not-v1",
     ],

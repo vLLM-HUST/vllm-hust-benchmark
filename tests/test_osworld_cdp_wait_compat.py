@@ -47,7 +47,7 @@ def test_only_exact_original_cdp_wait_changes():
         "http://example.com:9222",
         "http://127.0.0.1:9222/path",
         "https://127.0.0.1:9222",
-        "http://u:p@127.0.0.1:9222",
+        "http://u:p@127.0.0.1:9222",  # pragma: allowlist secret - rejected fixture URL
     ],
 )
 def test_reject_nonlocal_or_ambiguous_endpoint(endpoint):
