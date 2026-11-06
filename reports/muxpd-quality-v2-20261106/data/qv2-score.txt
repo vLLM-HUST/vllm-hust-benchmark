@@ -1,0 +1,32 @@
+qv2-c1         {'gate': 150, 'scorer': 156, 'trunc': 19, 'invalid': 0, 'transport_fail': 0}
+qv2-c2         {'gate': 151, 'scorer': 158, 'trunc': 18, 'invalid': 1, 'transport_fail': 0}
+qv2-c3         {'gate': 152, 'scorer': 157, 'trunc': 17, 'invalid': 0, 'transport_fail': 0}
+qv2-c4         {'gate': 151, 'scorer': 156, 'trunc': 18, 'invalid': 0, 'transport_fail': 0}
+qv2-n1         {'gate': 153, 'scorer': 157, 'trunc': 18, 'invalid': 0, 'transport_fail': 0}
+qv2-n2         {'gate': 154, 'scorer': 157, 'trunc': 17, 'invalid': 1, 'transport_fail': 0}
+native-q1      {'gate': 156, 'scorer': 159, 'trunc': 15, 'invalid': 1, 'transport_fail': 0}
+native-q2      {'gate': 150, 'scorer': 157, 'trunc': 21, 'invalid': 1, 'transport_fail': 0}
+native-q3      {'gate': 150, 'scorer': 156, 'trunc': 22, 'invalid': 1, 'transport_fail': 0}
+native-det-q1  {'gate': 156, 'scorer': 159, 'trunc': 18, 'invalid': 0, 'transport_fail': 0}   [context only]
+native-det-q2  {'gate': 151, 'scorer': 157, 'trunc': 21, 'invalid': 0, 'transport_fail': 0}   [context only]
+muxopt-q1      {'gate': 151, 'scorer': 156, 'trunc': 18, 'invalid': 0, 'transport_fail': 0}   [context only]
+muxopt-q2      {'gate': 150, 'scorer': 155, 'trunc': 18, 'invalid': 0, 'transport_fail': 0}   [context only]
+bsh-q1         {'gate': 150, 'scorer': 155, 'trunc': 21, 'invalid': 2, 'transport_fail': 0}   [context only]
+bsh-q2         {'gate': 151, 'scorer': 154, 'trunc': 19, 'invalid': 1, 'transport_fail': 0}   [context only]
+row-q1         {'gate': 154, 'scorer': 157, 'trunc': 18, 'invalid': 1, 'transport_fail': 0}   [context only]
+row-q2         {'gate': 154, 'scorer': 157, 'trunc': 18, 'invalid': 1, 'transport_fail': 0}   [context only]
+
+1_accuracy (75.5, 76.3, -0.8, True) PASS
+2_truncation (9.0, 9.3, -0.3, True) PASS
+3_transport (0, True) PASS
+4_systematic (['mmlu-pro-04748'], True) PASS
+bootstrap 95% CI of acc(C)-acc(N) pp: -2.75 1.05
+majority right->wrong 2 ['mmlu-pro-04748', 'mmlu-pro-04966']
+majority wrong->right 2 ['mmlu-pro-07288', 'mmlu-pro-11251']
+reverse systematic (all C right, all N wrong) []
+shared-scorer acc C 78.38 N 78.60 delta -0.22
+mmlu-pro-04748 C 0000 N 11111
+mmlu-pro-06908 C 1111 N 11111
+mmlu-pro-11119 C 0000 N 00101
+mmlu-pro-00168 C 0000 N 00100
+QUALITY_V2: PASS
