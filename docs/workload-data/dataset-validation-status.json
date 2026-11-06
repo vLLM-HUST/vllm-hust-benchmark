@@ -5746,7 +5746,27 @@
     },
     "OSWORLD": {
     "original_vm_runtime_progress_20261106": {
-      "status": "ORIGINAL_VM_SCREENSHOT_HTTP200_NATIVE_TASK_PENDING",
+      "status": "SINGLETHREAD_TCG_API_RECOVERED_AFTER_OWN_FD_LIMIT_REPAIR_NATIVE_PENDING",
+      "desktop_runtime_failures_and_followup": {
+        "attempt001": "Original controller works, but screenshot is black with cursor; journal confirms two GNOME Shell signal-11 crashes and automatic restarts. Failed boot retained, not native completion.",
+        "attempt001_stopped_after_confirmed_repeated_gnome_crashes": true,
+        "attempt002": "Fresh overlay, original base/firmware and same guest four-vCPU/4096MiB configuration; TCG thread=single to test cross-architecture runtime compatibility. No task or model request yet.",
+        "cause_confirmed": false,
+        "gnome_journal_receipt": "osworld-original-tcg-boot-20261106-001/guest-gnome-journal.private.json",
+        "new_boot_stage": "osworld-original-tcg-boot-20261106-002"
+      },
+      "singlethread_fd_budget_repair": {
+        "fd_count_at_failure": 1024,
+        "old_soft_limit": 1024,
+        "new_soft_limit": 16384,
+        "hard_limit_unchanged": 524288,
+        "scope": "Only confirmed owned live QEMU process; no daemon or host-wide policy change",
+        "screenshot_http200_after_repair": true,
+        "desktop_stability_proven": false,
+        "fd_growth_cause_confirmed": false,
+        "later_observation": "Owned process1901 FDs:1870 sockets, including1863 IPv4 UDP sockets in state07. Socket addresses and payloads not collected; specific traffic origin not established.",
+        "receipt": "osworld-original-tcg-boot-20261106-002/fd-budget-repair.private.json"
+      },
       "desktop_screenshot_readiness": {
         "http_status": 200,
         "content_type": "image/png",
@@ -5754,6 +5774,87 @@
         "server_receipt": "osworld-original-tcg-boot-20261106-001/latest-readiness.private.json",
         "original_guest_screenshot_endpoint": true,
         "initial_timeout_and_connection_reset_retained": true
+      },
+      "original_controller_control": {
+        "status": "SCREENSHOT_AND_TRUSTED_GUEST_COMMANDS_PASSED_NOT_TASK_EXECUTION",
+        "controller_modified": false,
+        "guest_platform": "Linux",
+        "guest_machine": "x86_64",
+        "screen_width": 1920,
+        "screen_height": 1080,
+        "initial_screenshot_visual_inspection": "Black background with mouse pointer; usable GNOME desktop not yet established",
+        "guest_diagnostic": "GNOME shell and Xorg processes present; systemctl --failed lists zero failed units; this does not prove native task readiness",
+        "receipt": "osworld-original-tcg-boot-20261106-001/original-controller-qualification-public.json"
+      },
+      "author_local_model_transport_review": {
+        "agent": "mm_agents/qwen3vl_agent.py:Qwen3VLAgent",
+        "supported_api_backend": "openai",
+        "endpoint_env": "OPENAI_BASE_URL",
+        "model_identity_preserved": true,
+        "author_runner": "scripts/python/run_multienv_qwen3vl.py",
+        "author_runner_default_max_steps": 15,
+        "author_runner_default_max_tokens": 32768,
+        "integration_executed": false,
+        "client_dependency_qualification": {
+          "status": "AUTHOR_AGENT_IMPORT_AND_ORIGINAL_IMAGE_PREPROCESS_PASSED",
+          "image_id": "sha256:9fdbc89217ddb2b8e35920d859eb05fc3b005fbbbd46b7951906b026642048af",
+          "actual_model_identity_configured_not_invoked": "Qwen/Qwen3.5-9B",
+          "author_default_history_n": 4,
+          "author_default_max_tokens": 32768,
+          "original_image_preprocess_output_width": 1920,
+          "original_image_preprocess_output_height": 1088,
+          "original_agent_modified": false,
+          "network": "none",
+          "model_calls": 0,
+          "native_tasks": 0,
+          "full_desktop_environment_dependencies_qualified": false,
+          "server_build_stage": "osworld-original-agent-client-build-20261106-001"
+        },
+        "note": "The agent supports an explicit OpenAI-compatible backend; the original runner does not expose that constructor option, so an explicit adapter is still needed. No model invocation or task completion is claimed."
+      },
+      "fixed_original_native_sample_20261106": {
+        "selection": "First three entries in pinned author test_all.json insertion order, frozen before task/model execution",
+        "domain": "chrome",
+        "task_ids": [
+          "bb5e4c0d-f964-439c-97b6-bdb9747de3f4",
+          "7b6c7e24-c58a-49fc-a5bb-d57b80e5b4c3",
+          "06fe7178-4491-4589-810f-2e2bc9502122"
+        ],
+        "original_evaluators": ["match_in_list", "is_cookie_deleted", "is_expected_tabs"],
+        "author_default_max_steps": 15,
+        "author_default_max_tokens": 32768,
+        "receipt": "osworld-original-fixed-native-sample-20261106-001/fixed-sample-public.json",
+        "native_tasks_executed": 0,
+        "source_checkbox_eligible": false
+      },
+      "desktop_client_import_qualification_20261106": {
+        "status": "AUTHOR_DESKTOP_ENV_SETUP_AGENT_AND_FIXED_THREE_GRADER_IMPORTS_PASSED",
+        "image_id": "sha256:13df2095d409fb904c7871994e7b7b897cbbf04d9f90649885606a91a0609cd5",
+        "image_tag": "workload-osworld-original-desktop-client:20261106-006",
+        "versions": {
+          "Pillow": "11.0.0",
+          "numpy": "1.26.4",
+          "torch": "2.5.1",
+          "transformers": "4.35.2",
+          "psutil": "5.9.8",
+          "pytz": "2024.2",
+          "tqdm": "4.65.2",
+          "PyMuPDF": "1.27.1",
+          "pdfplumber": "0.11.9"
+        },
+        "version_basis": "Declared author requirements constraints; PyMuPDF and pdfplumber pinned to author uv.lock",
+        "pip_check_passed": true,
+        "network": "none",
+        "root_filesystem": "readonly",
+        "capabilities": "all dropped",
+        "host_devices_exposed": false,
+        "desktop_env_instantiated": false,
+        "model_instantiated_or_invoked": false,
+        "native_tasks": 0,
+        "source_checkbox_eligible": false,
+        "earlier_failures_retained": "Constraint-file extras rejected, missing compiler for psutil, newer pdfplumber/Pillow conflict, and missing eager-import pyacoustid",
+        "nonfatal_warning": "Proxy settings relative path absent in isolated import working directory; no instance, paid proxy or network use attempted",
+        "server_stage": "osworld-original-desktop-client-build-20261106-006"
       },
       "archive_publisher_sha256_verified": true,
       "all_archive_member_crc_verified": true,
@@ -5805,7 +5906,8 @@
         "generated_code_executed": false,
         "source_checkbox_eligible": false
       },
-      "blocker": "2026-11-03: fixed original main repository verified. Dedicated CPU is aarch64; original Docker supports KVM=N but official registry manifest/config now verified only linux/amd64. No registered cross-architecture execution qualified. Remaining gaps are isolated compatible runtime, original desktop image/task initialization, selected Agent dependencies/submodules and native evaluation. Earlier direct-network metadata failure retained, superseded by authenticated anonymous registry metadata verification; no image layers, paid provider or model calls started.",
+      "historical_blocker_20261103": "2026-11-03: fixed original main repository verified. Dedicated CPU is aarch64; original Docker supports KVM=N but official registry manifest/config now verified only linux/amd64. No registered cross-architecture execution qualified. Remaining gaps are isolated compatible runtime, original desktop image/task initialization, selected Agent dependencies/submodules and native evaluation. Earlier direct-network metadata failure retained, superseded by authenticated anonymous registry metadata verification; no image layers, paid provider or model calls started.",
+      "blocker": "2026-11-06: original Ubuntu image and author layers acquired and verified; isolated ARM64 QEMU TCG boots the original guest and author controller executes trusted guest commands. Multi-thread guest GNOME crashes confirmed. Fresh single-thread boot reached screenshot API after raising only owned QEMU FD soft limit from1024 to16384; GUI stability remains unverified and guest logs show repeated session startup/timeouts. Author DesktopEnv, SetupController, Qwen3VLAgent and fixed-three grader imports passed offline with corrected author version constraints. Remaining gaps are usable desktop/networking, original reset/init, first3 fixed native tasks, native scoring and research output handoff. No source checkbox increment.",
       "official_protocol_url": "https://github.com/xlang-ai/OSWorld#installation",
       "original_source_preparation": {
         "revision": "0e4318d5d0af2135e71fb7aec6bf08d8fbd89cd9",
