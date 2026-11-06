@@ -22,6 +22,7 @@ from check_osworld_author_client import PROFILE, run as check_client
 from osworld_cdp_wait_compat import cdp_wait_playwright
 from osworld_owned_qemu_provider import OwnedQemuProvider, validate_profile
 from osworld_qwen3vl_reset_compat import reset_compatible_agent
+from osworld_sentinel_description_compat import sentinel_description_compatible_agent
 from osworld_screenshot_wait_compat import (
     screenshot_wait_requests,
     setup_readiness_requests,
@@ -133,6 +134,7 @@ def plan(args):
         "max_steps": 15,
         "max_tokens": 32768,
         "reset_signature_compatibility": True,
+        "native_sentinel_description_compatibility": True,
         "native_tasks": 0,
         "source_checkbox_eligible": False,
     }
@@ -224,7 +226,9 @@ def execute(args, prepared):
             os_type="Ubuntu",
         )
         try:
-            agent = reset_compatible_agent(Qwen3VLAgent)(
+            agent = reset_compatible_agent(
+                sentinel_description_compatible_agent(Qwen3VLAgent)
+            )(
                 model=args.model,
                 max_tokens=32768,
                 action_space="pyautogui",

@@ -82,6 +82,9 @@ def test_execution_delegates_original_task_and_restores_runtime(
 
     modules["lib_run_single"].run_single_example = original_run
     monkeypatch.setattr(runner, "check_client", lambda *_: None)
+    monkeypatch.setattr(
+        runner, "sentinel_description_compatible_agent", lambda original: original
+    )
 
     class Response:
         def __enter__(self):

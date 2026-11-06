@@ -52,7 +52,9 @@ def queue_opener(queue):
     return open_request
 
 
-def process_messages_one(queue, api_base, *, model, timeout=600):
+def process_messages_one(
+    queue, api_base, *, model, timeout=600, disable_thinking=False
+):
     api_base = local_endpoint(api_base)
     queue = Path(queue).resolve(strict=True)
     for path in sorted(
@@ -77,12 +79,29 @@ def process_messages_one(queue, api_base, *, model, timeout=600):
             if os.fstat(claim.fileno()).st_uid not in {0, uid}:
                 raise ValueError("queue worker ownership differs")
             raw = path.read_bytes()
-            if json.loads(raw).get("model") != model:
+            body = json.loads(raw)
+            if body.get("model") != model:
                 raise ValueError("actual selected model differs")
-            save_new(queue / (identity + ".forwarded-request.json"), raw)
+            if disable_thinking:
+                if body.get("thinking") not in (None, {"type": "disabled"}):
+                    raise ValueError(
+                        "do not override conflicting original thinking setting"
+                    )
+                options = body.setdefault("chat_template_kwargs", {})
+                if not isinstance(options, dict) or options.get(
+                    "enable_thinking"
+                ) not in (None, False):
+                    raise ValueError(
+                        "do not override conflicting original template thinking setting"
+                    )
+                options["enable_thinking"] = False
+                forwarded = json.dumps(body).encode()
+            else:
+                forwarded = raw
+            save_new(queue / (identity + ".forwarded-request.json"), forwarded)
             request = Request(
                 api_base + "/messages",
-                data=raw,
+                data=forwarded,
                 headers={
                     "Content-Type": "application/json",
                     "anthropic-version": "2023-06-01",
@@ -226,6 +245,11 @@ def main():
     parser.add_argument("--api-base", required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--watch", action="store_true")
+    parser.add_argument(
+        "--disable-thinking",
+        action="store_true",
+        help="Disclosed independent local-model nonthinking profile; original prompt/budgets unchanged",
+    )
     parser.add_argument("--idle-timeout", type=int, default=21600)
     args = parser.parse_args()
     if not 0 < args.idle_timeout <= 86400:
@@ -235,10 +259,27 @@ def main():
         models = json.load(response)["data"]
     if not any(row["id"] == args.model for row in models):
         raise ValueError("actual served model absent")
+    if args.disable_thinking:
+        with urlopen(
+            endpoint.removesuffix("/v1") + "/openapi.json", timeout=30
+        ) as response:
+            schema = json.load(response)
+        fields = schema["components"]["schemas"]["AnthropicMessagesRequest"][
+            "properties"
+        ]
+        if "chat_template_kwargs" not in fields:
+            raise ValueError(
+                "native Messages template control absent; no silently ignored thinking option"
+            )
     last = time.monotonic()
     jobs = 0
     while not (args.queue / "STOP").exists():
-        if process_messages_one(args.queue, endpoint, model=args.model):
+        if process_messages_one(
+            args.queue,
+            endpoint,
+            model=args.model,
+            disable_thinking=args.disable_thinking,
+        ):
             jobs += 1
             last = time.monotonic()
         elif not args.watch or time.monotonic() - last >= args.idle_timeout:

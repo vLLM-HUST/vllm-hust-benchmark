@@ -17,6 +17,46 @@ from mlagentbench_local_messages import (
 import mlagentbench_local_messages as messages_transport
 
 
+@pytest.mark.parametrize("disable", [False, True])
+def test_explicit_nonthinking_profile_does_not_change_original_prompt_or_budget(
+    tmp_path, monkeypatch, disable
+):
+    raw = json.dumps(
+        original_messages_request("original prompt", "Qwen/actual")
+    ).encode()
+    original = tmp_path / ("a" * 32 + ".request.json")
+    original.write_bytes(raw)
+    forwarded = []
+
+    class Response:
+        code = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            pass
+
+        def read(self):
+            return b'{"content":[{"type":"text","text":"actual text"}]}'
+
+    def opener(request, timeout):
+        forwarded.append(json.loads(request.data))
+        return Response()
+
+    monkeypatch.setattr(messages_transport, "urlopen", opener)
+    assert messages_transport.process_messages_one(
+        tmp_path,
+        "http://localhost:19476/v1",
+        model="Qwen/actual",
+        disable_thinking=disable,
+    )
+    expected = json.loads(raw)
+    if disable:
+        expected["chat_template_kwargs"] = {"enable_thinking": False}
+    assert forwarded == [expected] and original.read_bytes() == raw
+
+
 def test_isolated_file_queue_preserves_messages_bytes(tmp_path, monkeypatch):
     calls = []
 

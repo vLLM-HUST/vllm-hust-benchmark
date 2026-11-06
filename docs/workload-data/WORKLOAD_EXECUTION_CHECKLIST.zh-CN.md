@@ -607,12 +607,16 @@ token、fast温度0.01以及原50步和18000秒。它不是把历史Chat的500-t
 `scripts/run_mlagentbench_messages_agent.py --port-root /agent --queue /queue --work-root /results/work --log-root /results/logs --model <实际模型ID> --task imdb --execute`。
 Agent容器断网，无NPU设备或Docker socket；只挂私有队列和原资产。受信NPU请求侧另运行
 `scripts/mlagentbench_local_messages.py --queue <同一私有队列> --api-base <回环模型服务/v1> --model <同一实际模型ID> --watch`，
-先检查实际模型ID，再逐字节转发原Messages请求，不更改题目、输出预算或生成参数。Agent终态后由运行方写入队列STOP标记并保留证据。
+先检查实际模型ID，默认逐字节转发原Messages请求。Qwen独立非思考配置可显式加`--disable-thinking`，先核验接口schema，再增加实际支持的`chat_template_kwargs.enable_thinking=false`；
+原始与转发请求均留存，题目、停止串、温度和2000/4000预算不变，不与思考配置混报。Agent终态后由运行方写入队列STOP标记并保留证据。
 首个Messages尝试因本地API在text前返回独立thinking块而退出，失败和原响应保留。 独立兼容配置只选择真实返回的第一个text块，跳过独立reasoning块，不修补动作或补造文本；
-第二次尝试已在服务器启动，尚未取得完整科学评分，整项仍不加勾。结束后用同一入口的评分模式：
+第二次尝试在原摘要调用中耗尽2000-token预算，只返回thinking，原Agent退出1且没有final快照，不能评分。
+保留该失败后，第三次完整重开同一原题并冻结公共工具副本，但实查该服务忽略标准`thinking`字段，故第三次仍是思考配置，不能称作非思考结果。
+已按实际schema修正后续控制字段，并用一条固定保存的原题请求验证：HTTP200、只返回text、实际输出430 token；原2000-token上限、提示及其他参数保持，
+这只是模型配置核验，不是整题完成。第三次仍按实际配置保留运行，尚未取得完整科学评分，整项不加勾。结束后用同一入口的评分模式：
 `scripts/run_mlagentbench_messages_agent.py --port-root /agent --log-root /results/logs --task imdb --score-output /grade/original-score.json --execute`。
 评分容器断网、原日志及Agent/资产只读，保留实际控制台到原日志`log`；该模式复用既有原评分器，
-不重跑Agent、训练或模型调用，空评分仍返回退出码2。15项新协议/准备/队列/评分委派夹具通过不等于原生任务完成。
+不重跑Agent、训练或模型调用，空评分仍返回退出码2。17项新协议/准备/队列/评分委派及独立模型配置夹具通过不等于原生任务完成。
 
 WorkArena（未完成）：使用
 `scripts/prepare_workarena_author_source.py --action prepare --archive <官方源码包> --author-root <新目录>`
@@ -689,7 +693,7 @@ OSWorld（未完成）：先在兼容的隔离环境内确认作者桌面镜像�
 
 - [x] 固定第一题：15步真实模型/GUI动作及原评分0分已核验；评分恢复单独披露，不称作未修改的单次运行。
 - [x] 固定第二题：15步真实模型/GUI动作及原评分0分已核验。原15秒CDP读取两次超时，延长到180秒后在保留GUI上恢复评分；无新增模型调用，兼容配置单列，不作为原时序复现。
-- [ ] 固定第三题：公共入口首次尝试保存11步真实操作后，作者动作解析器抛出IndexError，未取得原评分；失败保留。同一原题及预算已独立重试，未修改解析器或补造动作，最终评分待返回。
+- [x] 固定第三题：两次原解析失败均保留。第二次保存7步操作及真实`terminate(success)`；确认作者仅在描述原生DONE时错误索引点号。对这一个描述表达式做守卫后，原解析得到DONE、原环境终止、原评分0分；保留GUI和原轨迹，无新增模型调用，分段兼容恢复单列。
 - [ ] 整项公共执行及研究接通：待完成。以上是题目级进度，OSWORLD来源整体仍不打勾。
 
 公开执行入口为`scripts/run_osworld_original.py`，默认只核验固定源码和原任务并输出计划。 默认使用作者Docker
@@ -700,6 +704,14 @@ ARM64兼容环境可显式选择`--provider owned-qemu --owned-qemu-profile <pro
 慢速兼容层还可将该回环Chrome CDP连接的15秒等待延长到180秒；只修改明确匹配的连接超时，
 仍由原getter读取实时cookies，不回退到磁盘快照或伪造状态；其他URL和显式不同超时不变。
 新入口及CDP兼容层20项夹具测试、相关68项回归通过；包括委派原任务、拒绝无评分终态及恢复环境的执行夹具。服务器断网计划验证已通过，真实执行和接通仍待验证。
+
+`scripts/osworld_sentinel_description_compat.py`仅复制已核验的原解析方法，守卫末尾动作文字描述的点号索引；
+原DONE/FAIL/WAIT和pyautogui代码均不变，不修补模型动作。该兼容层6项夹具通过，已用于真实第三题终止及评分恢复。
+原始任务读取API为`vllm_hust_workload_data.osworld.original_task_packages(author_root, manifest=...)`；
+可用`python -m vllm_hust_workload_data.osworld --author-root <原源码> --manifest configs/workload-native/osworld-author-source.json`
+核验完整任务列表；加`--output <新外部JSONL> --write`才写原始任务包。保留原顺序、任务/初始化字段和独立评分参考，不构造请求；
+新模块已在服务器核验完整368个原任务：顺序、原初始化字段（包括本来没有config的任务）及独立评分参考均逐项原样回读，前三题与原生验证选题一致。
+这还不是新CI软件包安装或未改研究消费者接通，因此OSWORLD来源仍不加勾。
 
 2026-11-06：原始 Ubuntu 镜像已通过发布方压缩包 SHA256、完整解压 CRC 和解压后全文件 SHA256 核验。公开准备入口为
 `scripts/prepare_osworld_original_vm.py`；`verify-image` 可独立复核已解压镜像， 不要求保留重复压缩包。隔离 CPU 容器中的 ARM64
