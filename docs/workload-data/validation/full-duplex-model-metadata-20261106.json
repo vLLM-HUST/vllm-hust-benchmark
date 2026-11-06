@@ -87,6 +87,23 @@
       },
       "native_cases": 0
     },
+    "publisher_pairing_and_speaker_compile_followup": {
+      "image_omni_revision": "272845a9caadb82f220d7f3d0b64fdd1098fbbca",
+      "historical_omni_sglang0520_pair": "bfa856d917a574d319740bd69a57b603193e9445",
+      "historical_pair_limitation": "This original source has no minicpm_o.native_stages module; it is not a qualified replacement for the required native-duplex runtime.",
+      "sglang0522_original_revision": "baa9befa381511cd4d56f83980951e5a45fffc6d",
+      "sglang0522_native_stages_import_exit_code": 0,
+      "sglang0522_import_boundary": "Top-level native_stages import succeeds, but registry warnings include a missing sgl_kernel_npu.activation.fused_sigmoid_mul for MiniCPM models. This does not qualify model loading or NPU inference. Test changed only the per-process source path; no core dependencies were installed.",
+      "speaker_compile_attempts": [
+        {"stage": "full-duplex-speaker-atc-original-20261106-001", "compiler_exit_code": 255, "compiled_om_exists": false, "configuration": "Original ONNX, Ascend910B2, original reference audio 269494 samples at 16000Hz, original fbank input [1,1682,80]"},
+        {"stage": "full-duplex-speaker-atc-original-20261106-002", "compiler_exit_code": 255, "compiled_om_exists": false, "configuration": "Same original graph and input, documented ATC fusion_switch_file disabling only AvgPoolV2FusionPass"}
+      ],
+      "compiler_failure": "E20007: AvgPoolV2FusionPass reports strides only supports [1,63]; both attempts failed before generating an OM file.",
+      "compiler_reference": "https://www.hiascend.com/doc_center/source/en/CANNCommunityEdition/910/devaids/atctool/atlasatcparam_16_0053.html",
+      "original_graph_or_reference_audio_modified": false,
+      "neural_execution": false,
+      "source_checkbox_eligible": false
+    },
     "native_cases_run": 0
   },
   "source_checkbox_eligible": false
