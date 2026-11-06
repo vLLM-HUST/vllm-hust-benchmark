@@ -144,5 +144,26 @@
     },
     "native_cases_run": 0
   },
+  "native_integration_followup_20261106": {
+    "completed_source": false,
+    "original_dataset_tree": {"archives": 9, "members": 7230, "bytes": 1446145667, "member_crc_verified": true, "tasks_modified": false, "receipt": "full-duplex-original-tree-20261106-001/preparation-public.json"},
+    "fixed_selection": {"rule": "Unchanged upstream discover_samples(max_per_subset=3), all nine categories", "samples": 27, "receipt": "full-duplex-original-tree-20261106-001/fixed27-original-selection-public.json", "v15_user_backchannel_observed": 98, "v15_user_backchannel_declared": 99},
+    "complete_reference_source": {"public_entry": "scripts/prepare_full_duplex_original_scorers.py --include-reference", "original_files_verified": 22, "all_framework_reference_sha256_bindings_verified": true, "receipt": "full-duplex-complete-reference-source-20261106-001/qualification-public.json", "verification_reused_files": 22, "verification_downloads": 0, "whole_repository_claim": false},
+    "private_runtime_compatibility": [
+      "Use disclosed ACL NPU session for the fixed reference speaker encoder; reject changed original reference features and artifacts. Actual session output matches the prior NPU control exactly; altered features rejected.",
+      "Decode only the published PCM16 reference WAV, checking every sample against integer PCM/32768. File and BytesIO inputs are identical and caller stream position is preserved; altered bytes refused. No general task audio rewrite.",
+      "Add npu to Code2Wav's device allowlist while retaining all other CUDA-only compilation guards and original streaming settings.",
+      "Classify concrete npu device.type before the transfer_to_npu is_cuda compatibility property. Actual NPU tensor control passed, mixed CPU/NPU identity preserved; do not force CUDA or CPU neural fallback.",
+      "Add the already installed matching ATB cxx_abi_1 library path to this service process only; actual libop_plugin_atb.so load control passed. No driver/library installation or unrelated service restart."
+    ],
+    "failed_native_attempts_retained": [
+      {"stage": "full-duplex-fixed27-native-capture-20261106-001", "sample_id": "synthetic_pause_handling/1", "exit_code": 1, "reason": "NPU tensor classified as cuda; perception process exited before native input units completed"},
+      {"stage": "full-duplex-fixed27-native-capture-20261106-002", "sample_id": "synthetic_pause_handling/1", "exit_code": 1, "reason": "Missing ATB dynamic library search path at first actual model batch; session aborted"}
+    ],
+    "current_service": {"stage": "full-duplex-minicpmo45-managed-service-20261106-006", "physical_npu": 1, "four_original_stages_ready": true, "original_realtime_interface": true, "other_npu0_service_restarted": false},
+    "current_capture": {"stage": "full-duplex-fixed27-native-capture-20261106-003", "selected_samples": 27, "verified_successful_sample_ids_at_snapshot": ["synthetic_pause_handling/1", "synthetic_pause_handling/2", "synthetic_pause_handling/3"], "original_recorder_exit_code_each": 0, "first_sample_real_output_audio_present": true, "first_sample_output_media_seconds": 0.48, "original_timeout_and_protocol_defaults_preserved": true, "asr_or_scoring_complete": false, "source_checkbox_eligible": false},
+    "reference_asr_preparation": {"checkpoint": "nvidia/parakeet-tdt-0.6b-v2", "revision": "ae9ad07059c7c739ffaf932226a8fe64ae2620b0", "bytes": 2472222720, "sha256": "d99e39955c9d3d0350d8fb7c75e40c64a2b2eaeb003883d7c941fd2e8747b28c", "publisher_identity_verified": true, "nemo": "3.0.0", "separate_environment": true, "core_payload_symlinks_created": false, "core_versions_unchanged": true, "asr_module_import_passed": true, "asr_neural_execution": false, "numpy1_compatible_pins": {"pyarrow": "21.0.0", "datasets": "4.4.1", "setuptools-scm": "9.2.2", "vcs-versioning": "2.1.0"}, "unrelated_inherited_sdk_pip_check_errors_remain": true, "import_receipt": "full-duplex-asr-managed-environment-20261106-001/import-qualification-002-public.json"},
+    "remaining": "Finish all fixed native sessions without replacing failures, export complete original reference windows, run NPU Parakeet and VAD, execute original scoring/judge, package reusable public entry and validate research consumption. Successful capture is not complete source delivery or a performance/quality claim."
+  },
   "source_checkbox_eligible": false
 }

@@ -43,6 +43,55 @@ def test_optional_client_plan_adds_only_four_pinned_software_files():
     assert plan["model_calls"] == 0
 
 
+def test_full_reference_plan_covers_both_versions_without_execution():
+    result = subprocess.run(
+        [sys.executable, str(SPEC.origin), "--include-reference"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    plan = json.loads(result.stdout)
+    assert len(plan["selected_files"]) == 22
+    assert plan["client_sources_included"]
+    assert plan["complete_reference_sources_included"]
+    assert plan["model_calls"] == 0
+    assert set(plan["selected_files"]) == set(
+        ENTRY.FILES | ENTRY.CLIENT_FILES | ENTRY.REFERENCE_FILES
+    )
+
+
+def test_full_reference_acquisition_verifies_every_added_file(tmp_path, monkeypatch):
+    raw = b"invented reference software fixture, not benchmark evidence"
+    identity = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
+    monkeypatch.setattr(ENTRY, "FILES", {"scorer.py": identity})
+    monkeypatch.setattr(ENTRY, "CLIENT_FILES", {"client.py": identity})
+    monkeypatch.setattr(ENTRY, "REFERENCE_FILES", {"timing.py": identity})
+    output = tmp_path / "source"
+    checked = ENTRY.acquire(
+        output, opener=lambda *a, **k: io.BytesIO(raw), include_reference=True
+    )
+    assert checked["selected_original_files_verified"] == 3
+    assert checked["complete_reference_sources_included"]
+    assert checked["source_checkbox_eligible"] is False
+    (output / "timing.py").write_bytes(b"changed")
+    with pytest.raises(ValueError, match="Git blob mismatch"):
+        ENTRY.verify(output, include_reference=True)
+
+
+def test_distribution_byte_limit_is_not_applied_to_other_files(monkeypatch):
+    name = ENTRY.PREFIX + "icc_gt_distribution.json"
+    raw = b"x" * ENTRY.FILE_BYTE_LIMITS[name]
+    identity = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
+    monkeypatch.setattr(
+        ENTRY, "REFERENCE_FILES", {name: identity, "other.py": identity}
+    )
+    ENTRY.check_bytes(name, raw)
+    with pytest.raises(ValueError, match="Git blob mismatch"):
+        ENTRY.check_bytes("other.py", raw)
+    with pytest.raises(ValueError, match="Git blob mismatch"):
+        ENTRY.check_bytes(name, raw + b"x")
+
+
 def test_optional_client_verification_requires_unchanged_complete_sources(
     tmp_path, monkeypatch
 ):

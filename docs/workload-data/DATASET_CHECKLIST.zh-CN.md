@@ -2,6 +2,10 @@
 
 ### 本次实际推进（2026-11-06）
 
+- [ ] Full-Duplex-Bench：9份原档案共7230成员已解包校验，按上游原排序固定9类各3条、共27条；v1.5的user_backchannel实际98条与文档99条差异保留。MiniCPM原生四阶段已在单NPU启动；首题两次分别因NPU设备分类及ATB动态库路径失败，证据保留。修复后同一原首题及后两题的原录制协议均返回成功，第一题有真实输出音频，继续剩余固定任务，不换题、未打总勾。参考Parakeet原权重固定哈希通过，独立NeMo环境导入通过；尚未完成全部原生音频、ASR、VAD及评分链路。[当前证据](validation/full-duplex-model-metadata-20261106.json)。
+
+- [x] Full-Duplex公共源码准备入口补齐可选`--include-reference`：覆盖v1.0/v1.5所需参考时序、行为、各类别评分器及原分布文件，共22份固定作者文件。服务器完成获取与全部22文件校验，并与上游框架引用的SHA256逐一对照；本次核验复用已有文件，不宣称22文件全新下载。默认11文件与`--include-client`的15文件行为保持不变；源码准备不计来源完成。
+
 - [x] OSWorld
   固定原前三题协议已交付：3题真实NPU/GUI操作及原评分（均0），368个原任务完整包与统一索引、当前成功CI软件包安装及未改研究消费者4项回读通过。终止/评分分段恢复与运行时兼容明确披露；不是全368题原生执行或未经修改的官方成绩。研究默认锁未改，使用独立精确锁核验。[交付回执](validation/osworld-fixed3-native-delivery-20261106.json)。当前总进度106/113，另5项仅分类。
 
@@ -2933,6 +2937,9 @@ python scripts/prepare_full_duplex_original_scorers.py --verify-only --output /s
 python scripts/prepare_full_duplex_original_scorers.py --include-client
 python scripts/prepare_full_duplex_original_scorers.py --include-client --download --output /srv/workloads/fdb-scorer-and-client-subset
 python scripts/prepare_full_duplex_original_scorers.py --include-client --verify-only --output /srv/workloads/fdb-scorer-and-client-subset
+python scripts/prepare_full_duplex_original_scorers.py --include-reference
+python scripts/prepare_full_duplex_original_scorers.py --include-reference --download --output /srv/workloads/fdb-complete-reference
+python scripts/prepare_full_duplex_original_scorers.py --include-reference --verify-only --output /srv/workloads/fdb-complete-reference
 python /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/eval_pause_handling.py --root_dir /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/example_data/pause_handling_example
 python /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/eval_smooth_turn_taking.py --root_dir /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/example_data/smooth_turn_taking_example
 ```

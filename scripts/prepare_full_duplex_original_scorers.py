@@ -45,31 +45,65 @@ CLIENT_FILES = {
     CLIENT_PREFIX
     + "get_transcript/asr.py": "822bc204e372606545845396416d05d9ab99ba8e",  # pragma: allowlist secret - public original Git blob
 }
+REFERENCE_FILES = {
+    PREFIX
+    + "get_timing.py": "64b28dae8c52d6a33429f455eaa7318c91fead7e",  # pragma: allowlist secret - publisher Git blob
+    PREFIX
+    + "eval_behavior.py": "f00ae67d8a5ae946a56872e40cb8e88d5e24f850",  # pragma: allowlist secret - publisher Git blob
+    PREFIX
+    + "instruction/behavior.txt": "59bdddd128263376d2eafa6aabcd7b9c8c2b1026",  # pragma: allowlist secret - publisher Git blob
+    PREFIX
+    + "evaluate.py": "c3947fcd65b6d74f14b05dae0f032096a9f1ec84",  # pragma: allowlist secret - publisher Git blob
+    PREFIX
+    + "eval_user_interruption.py": "2a53bda332f80c8e884561096a544603b0315897",  # pragma: allowlist secret - publisher Git blob
+    PREFIX
+    + "eval_backchannel.py": "7398ba2409e5beb8365eb1324348bc413dbb1fcf",  # pragma: allowlist secret - publisher Git blob
+    PREFIX
+    + "icc_gt_distribution.json": "acf606f2d1069a230138cb3fb916cdd8cb9a034c",  # pragma: allowlist secret - publisher Git blob
+}
+FILE_BYTE_LIMITS = {PREFIX + "icc_gt_distribution.json": 207576}
+
+
+def selected_files(*, include_client=False, include_reference=False):
+    selected = dict(FILES)
+    if include_client or include_reference:
+        selected.update(CLIENT_FILES)
+    if include_reference:
+        selected.update(REFERENCE_FILES)
+    return selected
 
 
 def check_bytes(name, raw):
     identity = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
-    if len(raw) > MAX_FILE_BYTES or identity != (FILES | CLIENT_FILES)[name]:
+    if (
+        len(raw) > FILE_BYTE_LIMITS.get(name, MAX_FILE_BYTES)
+        or identity != (FILES | CLIENT_FILES | REFERENCE_FILES)[name]
+    ):
         raise ValueError("pinned original Git blob mismatch: " + name)
 
 
-def verify(root, *, include_client=False):
+def verify(root, *, include_client=False, include_reference=False):
     root = Path(root).resolve(strict=True)
-    selected = FILES | CLIENT_FILES if include_client else FILES
+    selected = selected_files(
+        include_client=include_client, include_reference=include_reference
+    )
     for name in selected:
         path = root / name
         if path.is_symlink() or not path.resolve().is_relative_to(root):
             raise ValueError("original file escapes selected root")
         with path.open("rb") as stream:
-            check_bytes(name, stream.read(MAX_FILE_BYTES + 1))
+            check_bytes(
+                name, stream.read(FILE_BYTE_LIMITS.get(name, MAX_FILE_BYTES) + 1)
+            )
     return {
         "source_id": "FULL_DUPLEX_BENCH",
         "revision": REVISION,
         "status": "PINNED_SCORER_AND_CLIENT_SUBSET_VERIFIED_NOT_NATIVE_EXECUTION"
-        if include_client
+        if include_client or include_reference
         else "PINNED_SCORER_SUBSET_VERIFIED_NOT_NATIVE_EXECUTION",
         "selected_original_files_verified": len(selected),
-        "client_sources_included": include_client,
+        "client_sources_included": include_client or include_reference,
+        "complete_reference_sources_included": include_reference,
         "whole_repository_verified": False,
         "audio_acquired": False,
         "model_calls": 0,
@@ -77,22 +111,26 @@ def verify(root, *, include_client=False):
     }
 
 
-def acquire(root, *, opener=urlopen, include_client=False):
+def acquire(root, *, opener=urlopen, include_client=False, include_reference=False):
     root = Path(root).resolve()
     if root.is_relative_to(Path(__file__).resolve().parents[1]):
         raise ValueError("use external server storage, not the benchmark repository")
     root.mkdir(parents=True, exist_ok=False)
-    selected = FILES | CLIENT_FILES if include_client else FILES
+    selected = selected_files(
+        include_client=include_client, include_reference=include_reference
+    )
     for name in selected:
         url = f"https://raw.githubusercontent.com/{REPOSITORY}/{REVISION}/{name}"
         with opener(url, timeout=30) as response:
-            raw = response.read(MAX_FILE_BYTES + 1)
+            raw = response.read(FILE_BYTE_LIMITS.get(name, MAX_FILE_BYTES) + 1)
         check_bytes(name, raw)
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("xb") as stream:
             stream.write(raw)
-    return verify(root, include_client=include_client)
+    return verify(
+        root, include_client=include_client, include_reference=include_reference
+    )
 
 
 def main():
@@ -103,6 +141,11 @@ def main():
         action="store_true",
         help="include four original Moshi/ASR software files; no model execution",
     )
+    parser.add_argument(
+        "--include-reference",
+        action="store_true",
+        help="include all v1.0/v1.5 reference timing/behavior/category scorers and client source; no models or scoring execution",
+    )
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--download", action="store_true")
     mode.add_argument("--verify-only", action="store_true")
@@ -111,9 +154,17 @@ def main():
         if args.output is None:
             parser.error("--output is required for acquisition/verification")
         result = (
-            acquire(args.output, include_client=args.include_client)
+            acquire(
+                args.output,
+                include_client=args.include_client,
+                include_reference=args.include_reference,
+            )
             if args.download
-            else verify(args.output, include_client=args.include_client)
+            else verify(
+                args.output,
+                include_client=args.include_client,
+                include_reference=args.include_reference,
+            )
         )
     else:
         result = {
@@ -121,9 +172,13 @@ def main():
             "repository": REPOSITORY,
             "revision": REVISION,
             "selected_files": list(
-                FILES | CLIENT_FILES if args.include_client else FILES
+                selected_files(
+                    include_client=args.include_client,
+                    include_reference=args.include_reference,
+                )
             ),
-            "client_sources_included": args.include_client,
+            "client_sources_included": args.include_client or args.include_reference,
+            "complete_reference_sources_included": args.include_reference,
             "model_calls": 0,
         }
     print(json.dumps(result, indent=2))

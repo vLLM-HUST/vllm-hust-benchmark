@@ -776,9 +776,9 @@ SWE-smith（固定三题已交付）：原固定前三题在明确披露ARM/健�
 微调、原评分输入恢复和双工语音/ASR，不因共用硬件合并协议。
 
 Full-Duplex-Bench（未完成）：用
-`scripts/prepare_full_duplex_original_scorers.py --include-client --output <新目录> --download`
-获取固定作者评分及 Moshi/ASR 源码；已有目录改用 `--verify-only` 核对。两个入口只准备软件，不下载模型、不执行推理。 评分应消费原双工服务生成的结果；作者样例、离线 ASR
-或文本对话都不能替代该结果。 可移植路径：SGLang-Omni 分别提供
+`scripts/prepare_full_duplex_original_scorers.py --include-reference --output <新目录> --download`
+获取固定作者v1.0/v1.5完整参考评分及Moshi/ASR源码共22文件；已有完整目录使用同一选项加`--verify-only`核对。默认11文件及`--include-client`的15文件入口保留，但不是完整原生评分链路的全部源码。上述入口只准备软件，不下载模型、不执行推理。评分应消费原双工服务生成的结果；作者样例、离线
+ASR 或文本对话都不能替代该结果。 可移植路径：SGLang-Omni 分别提供
 [MiniCPM-o 的 Ascend 配置](https://sgl-project.github.io/sglang-omni/get_started/installation_npu.html#minicpm-o)
 及
 [原 Full-Duplex-Bench 双工回放指南](https://sgl-project.github.io/sglang-omni/developer_reference/full_duplex_guide.html)。
