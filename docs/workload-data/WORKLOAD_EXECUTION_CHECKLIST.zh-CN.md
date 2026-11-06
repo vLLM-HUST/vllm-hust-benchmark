@@ -586,9 +586,10 @@ train/test各25000条、unsupervised50000条，全部100000条与原Parquet一�
 初始平铺视图只加载两份分片是接口缺陷，旧尝试及其失败记录保留；新视图在独立目录准备，不原地修改正在运行的输入。 模型缓存标签明确为本地内容标识，不伪造上游 Git revision。科学 CPU
 环境的完整 ARM64/Python3.11 包锁见
 `configs/workload-native/mlagentbench-imdb-cp311-arm64-requirements.txt`；配套离线 Dockerfile
-已构建，69份实际客户端版本与初始合格环境一致。环境检查不计来源完成。 当前attempt004的科学容器使用32 CPU配额及OMP/MKL/OpenBLAS线程上限32、内存24
-GiB；这是既有40 CPU配额内的运行配置，不代表独占绑核。 原ResearchAgent仍为50步、18000秒，默认输出500 token、编辑4000
-token。恢复仅对完全相同原请求逐次复用已保存14B响应，复用和新推理分别计数，不能据此报告性能；公共入口默认正常生成，不内置研究观测或恢复缓存。 原 Agent 终态后，将真实
+已构建，69份实际客户端版本与初始合格环境一致。环境检查不计来源完成。 attempt004已用满原18000秒预算并正常退出，但没有生成提交；原评分为
+`score=[]/final_score=-1`，仍未完成。attempt005改用现有Qwen3.5-9B非思考配置，独立运行同一原题，CPU配额32、线程环境上限8、内存24 GiB；
+不混用14B响应，也不改变原数据、提示、步数或预算。CPU配额不代表独占绑核。原ResearchAgent仍为50步、18000秒，默认输出500 token、编辑4000
+token。历史attempt004仅对完全相同原请求逐次复用已保存14B响应，复用和新推理分别计数，不能据此报告性能；公共入口默认正常生成，不内置研究观测或恢复缓存。 原 Agent 终态后，将真实
 stdout/stderr 捕获保存为 `<log-root>/log`；保留原轨迹和 final 科学快照，不重跑 Agent。 在隔离评分容器只读挂载这些原日志，并使评分工作目录可读取相同原
 `imdb` 数据，运行
 `python scripts/run_mlagentbench_original_eval.py --port-root <原Agent副本> --log-root <原日志> --task imdb --output <新私有评分文件> --execute`。
@@ -730,9 +731,12 @@ Full-Duplex-Bench（未完成）：用
 
 2026-11-06 的独立环境准备已锁定官方 910B ARM64 镜像
 `swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang-omni@sha256:265387f87a6a97ad170a2c2a51f0ce3209e24e143d3048c97fe172b70f273938`。
-此处仅是软件环境候选，不是已通过的模型服务。先在无设备映射、无网络的独立容器检查版本和原 CLI，再核验 NPU 服务。 不要在正在运行的 vLLM
-环境直接升级依赖，也不要直接执行会下载模型和启动多套服务的 `fdb setup`。 官方普通语音 NPU 配置的 `config_cls` 为
-`MiniCPMOSpeechPipelineConfig`，不能据此认定已支持双工 `session`。 原 Moshi/NeMo 路径与 SGLang-Omni
+该镜像已下载，使用原镜像入口、只读驱动库且不映射设备、不联网时，原CLI帮助和原生双工配置解析均已通过。
+实际环境为Python3.11.15、torch/torch_npu2.10.0、SGLang0.5.20、sglang-omni0.1.9、Transformers5.12.1；
+不与当前上游main的另一套依赖混用。候选配置使用实际原类`MiniCPMODuplexPipelineConfig`，只为thinker和talker显式指定`ascend`注意力后端；
+解析后保留perception、thinker、talker、speech四阶段及原双工采样默认值。上述检查没有加载模型、处理音频或执行评分，仍不能作为来源完成证据。
+下一步核验NPU服务、原音频生成及原ASR/评分。不要在正在运行的 vLLM 环境直接升级依赖，也不要直接执行会下载模型和启动多套服务的 `fdb setup`。 官方普通语音 NPU 配置的
+`config_cls` 为 `MiniCPMOSpeechPipelineConfig`，不能据此认定已支持双工 `session`。 原 Moshi/NeMo 路径与 SGLang-Omni
 路径须分别记录软件版本、实际执行阶段及评分差异，不能混称未经修改的原实现。
 
 MLE-bench（未完成）：用
