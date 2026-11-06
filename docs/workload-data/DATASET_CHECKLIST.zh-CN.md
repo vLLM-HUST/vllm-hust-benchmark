@@ -1168,6 +1168,17 @@ NPU；实跑前还须核对输出预算、服务上下文和多图接收上限�
   ```
 
 - [x] 公共原生委托入口`run_naturebench_original.py`已接好：复用原包读取器核验输入、隐藏评估、环境与许可证，直接委托原版harness，默认原CPU3、单worker、原4小时预算，不提供`skip-judge`或宿主机生成代码回退。服务器在实际挂载命名空间通过第二题完整原包的离线计划核验，0模型调用、未创建实验输出目录；这不是第二题执行或来源交付。
+
+  已保存预测可用独立入口复核原评分，默认仅打印计划，确认合格的不可变科学CPU镜像后加`--execute`。它只运行原`evaluation/evaluator.py`，不运行生成程序，不重跑Agent；评分目录必须全新，不覆盖早先提交结果。第二题已真实验证；原null指标和11项预测校验错误均保留，评分器正常退出不代表预测质量通过。
+
+  ```bash
+  python scripts/score_naturebench_saved_predictions.py \
+    --data-root /path/to/original-naturebench-data \
+    --task-id s41592-025-02870-5 \
+    --predictions /path/to/saved-task/workspace/output \
+    --image sha256:QUALIFIED_64_HEX_CPU_IMAGE_ID \
+    --output /path/to/fresh-final-prediction-score
+  ```
   连接已启动的原评分服务时，可加`--eval-control-token-file /path/to/private/control-file`，使作者脚本读取与服务匹配的控制文件；只转交文件路径，不打印凭据内容，不改题目或预算。控制环境须满足作者Python3.11及依赖要求；服务器已复用合格科学镜像作为可信编排环境，实际科学任务另起原任务容器，后者不挂载Docker控制接口或NPU设备。第一题现已进入原Agent流程并实际调用现有NPU模型，尚不能当作执行、科学评分和validity
   judge全部完成。
 
