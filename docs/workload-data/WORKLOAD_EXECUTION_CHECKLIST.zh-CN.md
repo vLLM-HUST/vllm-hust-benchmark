@@ -670,7 +670,9 @@ WebArena（未完成）：固定原题 ID 为 0、1、2，均只访问 `shopping
 已就绪，候选镜像31层的压缩摘要和解压内容摘要均已核验，正在流式导入；原始作者归档仍受配额限制，不宣称取得完整原归档。原站点启动、登录、重置、Agent、计分及研究消费仍未完成。
 公开演示站点不能替代可重置环境。站点与浏览器可在 CPU 节点运行，模型推理仍走独立 NPU 服务。 ARM64 Chromium 已通过 MiniWoB++
 的原题验证，浏览器本身不是这三项的共同阻塞：WebArena 缺可重置的 `shopping_admin`，VisualWebArena 缺已启动并核验的 Classifieds，WorkArena
-缺已配置的 ServiceNow 实例。
+缺已授权的 ServiceNow 实例。固定版本优先使用官方 `ServiceNow/WorkArena-Instances` Hugging Face
+实例池；运行账号须自行申请并获批，随后在服务器登录 HF。作者仍支持自有实例配置，但不能把未设置旧版 `SNOW_*` 变量直接判为缺少实例访问权。2026-11-07
+已用服务器现有账号检查官方实例池访问权，返回403；未下载实例池或接受条款。
 
 候选公共运行入口为
 `scripts/run_webarena_agentlab.py`，当前只通过软件检查及实际客户端离线准备检查，尚未完成该入口的原站点端到端验证。先用现有作者源码准备入口取得并核验固定
