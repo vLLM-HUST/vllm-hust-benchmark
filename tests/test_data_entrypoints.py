@@ -172,6 +172,23 @@ def test_completed_archive_has_evidence_and_an_active_successor():
     assert successor["public_surface"] is True
 
 
+def test_state_scheduler_is_delisted_from_public_catalogs():
+    publication = index.ROOT / "website-publication/data"
+    ecosystem = json.loads((publication / "ecosystem.json").read_text())
+    taxonomy = json.loads((publication / "mod-taxonomy.json").read_text())
+    navigation = json.loads(
+        (publication / "plugin-workload-navigation.json").read_text()
+    )
+    workshop = json.loads((publication / "plugin-workshop-metadata.json").read_text())
+
+    assert "state-scheduler" not in {
+        component["id"] for component in ecosystem["components"]
+    }
+    assert "state-scheduler" not in taxonomy["components"]
+    assert "state-scheduler" not in navigation["plugins"]
+    assert "state-scheduler" not in workshop["plugins"]
+
+
 def test_offline_check_detects_stale_output(tmp_path, monkeypatch):
     (tmp_path / "docs").mkdir()
     (tmp_path / index.SOURCES).write_text(json.dumps(source_snapshot()))
