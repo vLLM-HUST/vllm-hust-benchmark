@@ -163,7 +163,22 @@
     "current_service": {"stage": "full-duplex-minicpmo45-managed-service-20261106-006", "physical_npu": 1, "four_original_stages_ready": true, "original_realtime_interface": true, "other_npu0_service_restarted": false},
     "current_capture": {"stage": "full-duplex-fixed27-native-capture-20261106-003", "selected_samples": 27, "verified_successful_sample_ids_at_snapshot": ["synthetic_pause_handling/1", "synthetic_pause_handling/2", "synthetic_pause_handling/3"], "original_recorder_exit_code_each": 0, "first_sample_real_output_audio_present": true, "first_sample_output_media_seconds": 0.48, "original_timeout_and_protocol_defaults_preserved": true, "asr_or_scoring_complete": false, "source_checkbox_eligible": false},
     "reference_asr_preparation": {"checkpoint": "nvidia/parakeet-tdt-0.6b-v2", "revision": "ae9ad07059c7c739ffaf932226a8fe64ae2620b0", "bytes": 2472222720, "sha256": "d99e39955c9d3d0350d8fb7c75e40c64a2b2eaeb003883d7c941fd2e8747b28c", "publisher_identity_verified": true, "nemo": "3.0.0", "separate_environment": true, "core_payload_symlinks_created": false, "core_versions_unchanged": true, "asr_module_import_passed": true, "asr_neural_execution": false, "numpy1_compatible_pins": {"pyarrow": "21.0.0", "datasets": "4.4.1", "setuptools-scm": "9.2.2", "vcs-versioning": "2.1.0"}, "unrelated_inherited_sdk_pip_check_errors_remain": true, "import_receipt": "full-duplex-asr-managed-environment-20261106-001/import-qualification-002-public.json"},
-    "remaining": "Finish all fixed native sessions without replacing failures, export complete original reference windows, run NPU Parakeet and VAD, execute original scoring/judge, package reusable public entry and validate research consumption. Successful capture is not complete source delivery or a performance/quality claim."
+    "completed_native_protocol": {
+      "audit": "full-duplex-fixed27-protocol-audit-20261106-001/qualification-public.json",
+      "fixed_original_cases": 27,
+      "original_categories": 9,
+      "native_sessions_passed": 39,
+      "selected_original_files_unchanged_after_execution": true,
+      "reference_exports": {"v10_original_cases": 15, "v15_original_pairs": 12, "v15_variants": 24, "time_windows_modified": false},
+      "parakeet_npu_transcripts": {"v10": 15, "v15": 48, "all_model_parameter_devices": "npu:0 within physical NPU1 visibility"},
+      "silero_vad_npu": {"package": "6.2.1", "original_model_sha256": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720", "v15_original_timing_variants": 24, "original_thresholds_and_merging_constants_changed": false, "v10_backchannel_cases": 3},
+      "v10_original_scorer_results": {"synthetic_pause_handling": {"Average take turn": 0.0}, "candor_pause_handling": {"Average take turn": 0.0}, "candor_turn_taking": {"Average take turn": 0.3333333333333333, "Average latency": 3.090000000000119}, "icc_backchannel": {"JSD mean": 1.0, "JSD std": 0.0, "TOR mean": 0.0, "TOR std": 0.0, "Frequency mean": 0.0, "Frequency std": 0.0, "Number of samples": 3.0}, "synthetic_user_interruption": {"Average rating": 4.0, "Average take turn": 1.0, "Average latency": 1.1200000000000003}},
+      "judge_boundary": {"actual_model": "Qwen/Qwen3.5-9B", "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a", "precision": "bf16", "physical_npu": 0, "original_prompt_and_label_parser_preserved": true, "v10_original_judge_requests": 3, "v10_retries": 0, "v15_valid_local_labels": 12, "upstream_local_judge_options_preserved": true, "official_gpt_quality_reproduction": false, "v15_original_time_asr_summary_and_local_behavior_summary_kept_separate": true},
+      "public_entry_and_research_handoff_completed": false,
+      "source_checkbox_eligible": false
+    },
+    "completed_weight_cleanup": {"native_service_safely_stopped": true, "pid_birth_and_no_clients_verified": true, "three_host_active_reference_guards_clear": true, "redownloadable_weight_files_removed": 9, "logical_GiB_removed": 20.91, "guarded_receipt": "/data/shared_upload/hust-phr/storage-cleanup-20261106/completed-duplex-weights-removal.json", "original_datasets_native_results_configs_and_code_retained": true, "npu0_9b_service_and_imdb_training_untouched": true},
+    "remaining": "Package and qualify reusable public native execution against these saved real runs; validate research consumption for the declared protocol. Reuse completed captures/transcripts/scoring instead of rerunning them. NPU model weights were intentionally cleaned after execution; reproduction requires reacquisition. Do not promote the source checkbox before the remaining delivery gates, or claim full-dataset/engine-performance/official-GPT quality results."
   },
   "source_checkbox_eligible": false
 }

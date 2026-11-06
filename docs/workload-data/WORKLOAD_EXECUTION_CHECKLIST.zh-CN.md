@@ -784,6 +784,9 @@ ASR 或文本对话都不能替代该结果。 可移植路径：SGLang-Omni 分
 [原 Full-Duplex-Bench 双工回放指南](https://sgl-project.github.io/sglang-omni/developer_reference/full_duplex_guide.html)。
 这两份文档不能合并解读为 910B2 已验证双工：还须验证 `session` 变体、实时音频输出及原 ASR/评分在现有设备上的完整链路。
 
+2026-11-06最新固定协议结果：9类共27条原题/39会话、两个版本原观察窗导出、NPU Parakeet ASR、NPU Silero VAD和全部类别评分路径已完成；本地Qwen3.5-9B
+judge的结果单独标明，不是官方GPT成绩。当前缺口是可复用公共原生入口及其验证、研究侧交接，来源总勾仍未完成。以下镜像帮助和配置解析属于较早的准备记录，完整执行以[当前证据](validation/full-duplex-model-metadata-20261106.json)为准。
+
 2026-11-06 的独立环境准备已锁定官方 910B ARM64 镜像
 `swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang-omni@sha256:265387f87a6a97ad170a2c2a51f0ce3209e24e143d3048c97fe172b70f273938`。
 该镜像已下载，使用原镜像入口、只读驱动库且不映射设备、不联网时，原CLI帮助和原生双工配置解析均已通过。
