@@ -8,6 +8,7 @@ author-supported OpenAI backend with the actual explicitly served model name.
 import argparse
 import hashlib
 import json
+import logging
 import math
 import os
 from pathlib import Path
@@ -298,6 +299,7 @@ def execute(args, prepared):
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--author-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)

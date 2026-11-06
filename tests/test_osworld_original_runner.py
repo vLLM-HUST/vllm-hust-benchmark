@@ -5,11 +5,115 @@ import json
 from pathlib import Path
 import sys
 from types import SimpleNamespace
+from types import ModuleType
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import run_osworld_original as runner
+
+
+@pytest.mark.parametrize("emit_score", [True, False])
+def test_execution_delegates_original_task_and_restores_runtime(
+    args, monkeypatch, emit_score
+):
+    """Execution fixture only: no VM, HTTP, model or scientific evidence."""
+    calls = []
+    for name in [
+        "desktop_env",
+        "desktop_env.controllers",
+        "desktop_env.evaluators",
+        "desktop_env.evaluators.getters",
+        "mm_agents",
+    ]:
+        module = ModuleType(name)
+        module.__path__ = []
+        monkeypatch.setitem(sys.modules, name, module)
+    modules = {}
+    for name in [
+        "desktop_env.desktop_env",
+        "desktop_env.controllers.python",
+        "desktop_env.controllers.setup",
+        "desktop_env.evaluators.getters.chrome",
+        "mm_agents.qwen3vl_agent",
+        "lib_run_single",
+    ]:
+        module = ModuleType(name)
+        modules[name] = module
+        monkeypatch.setitem(sys.modules, name, module)
+        parent, _, child = name.rpartition(".")
+        if parent:
+            setattr(sys.modules[parent], child, module)
+    environment = modules["desktop_env.desktop_env"]
+    factory = object()
+    environment.create_vm_manager_and_provider = factory
+    env = SimpleNamespace(close=lambda: calls.append("closed"))
+    environment.DesktopEnv = lambda **kwargs: env
+    for name in ["desktop_env.controllers.python", "desktop_env.controllers.setup"]:
+        modules[name].requests = object()
+    playwright = object()
+    modules["desktop_env.evaluators.getters.chrome"].sync_playwright = playwright
+
+    class Agent:
+        def __init__(self, **kwargs):
+            calls.append(kwargs)
+
+        def reset(self, _logger=None):
+            pass
+
+    modules["mm_agents.qwen3vl_agent"].Qwen3VLAgent = Agent
+
+    def original_run(
+        agent,
+        actual_env,
+        example,
+        steps,
+        instruction,
+        original_args,
+        destination,
+        scores,
+    ):
+        assert actual_env is env and steps == 15 and original_args.max_tokens == 32768
+        assert instruction == example["instruction"] == "original fixture"
+        assert example["evaluator"]["expected"] == ["original-reference"]
+        calls.append(example["id"])
+        if emit_score:
+            scores.append(0.0)
+
+    modules["lib_run_single"].run_single_example = original_run
+    monkeypatch.setattr(runner, "check_client", lambda *_: None)
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            pass
+
+        def read(self):
+            return json.dumps({"data": [{"id": args.model}]}).encode()
+
+    monkeypatch.setattr(runner, "urlopen", lambda *_, **__: Response())
+    monkeypatch.setenv("OPENAI_BASE_URL", "retained-original-endpoint")
+    monkeypatch.setenv("OPENAI_API_KEY", "fixture-original-key")
+    prepared = runner.plan(args)
+    if emit_score:
+        result = runner.execute(args, prepared)
+        assert result["native_tasks"] == 3 and not result["source_checkbox_eligible"]
+    else:
+        with pytest.raises(ValueError, match="original finite task score"):
+            runner.execute(args, prepared)
+    import os
+
+    assert os.environ["OPENAI_BASE_URL"] == "retained-original-endpoint"
+    assert os.environ["OPENAI_API_KEY"] == "fixture-original-key"
+    assert calls[-1] == "closed"
+    assert environment.create_vm_manager_and_provider is factory
+    assert (
+        modules["desktop_env.evaluators.getters.chrome"].sync_playwright is playwright
+    )
+    saved = json.loads((args.output / "execution-public.json").read_text())
+    assert saved["source_checkbox_eligible"] is False
 
 
 @pytest.fixture
