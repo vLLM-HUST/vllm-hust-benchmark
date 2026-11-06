@@ -1,7 +1,7 @@
 {
   "source_id": "FULL_DUPLEX_BENCH",
-  "status": "AWAITING_FINAL_SOFTWARE_CHECK",
-  "source_checkbox_eligible": false,
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "source_checkbox_eligible": true,
   "qualified_scope": "Original v1.0/v1.5 offline duplex protocol; nine categories with three fixed original cases each, including both clean/overlap sessions for v1.5. Not v2/v3 or full-corpus evaluation.",
   "selected_samples": [
     "v1.0/synthetic_pause_handling/1",
@@ -98,14 +98,20 @@
     "full_original_network_numeric_parity_verified": false
   },
   "software_gate": {
-    "status": "PENDING_CURRENT_COMMIT_CI",
+    "status": "PASSED",
+    "validated_code_commit": "0dc63585c7bea983c2feaec4c9fe18224ca2fe2b",
+    "ci_run": 42269966464,
+    "cpu_smoke_run": 42269972504,
+    "ci_tests_lint_and_smoke": "success",
+    "docs_only_successor_commit": "31305aac09b881c5e713bf9ef45dc961b62b5da7",
+    "docs_only_successor_regressions_passed": 46,
     "latest_preceding_ci": {
       "commit": "1c9a0f86e1a99c13d409ec7d5adfc97b7b2b1d7e",
       "ci_run": 42268048302,
       "smoke_run": 42268055661,
       "result": "success"
     },
-    "current_asr_guard_and_delegation_tests_require_new_ci": true
+    "current_asr_guard_and_delegation_tests_require_new_ci": false
   },
   "limitations": [
     "Fixed27 sampling, not all1225 tasks or all benchmark versions/modalities.",
@@ -113,7 +119,7 @@
     "Disclosed NPU device, PCM I/O and fixed-reference speaker graph adaptations; not an untouched publisher runtime.",
     "Whole-environment13 dependency declaration conflicts remain recorded; protected core versions and relevant runtime imports verified.",
     "Model weights and temporary copies were cleaned after qualification; future users obtain originals and construct their own bundle.",
-    "Source-level completion remains pending the current software gate; no new native model run is inferred from fixtures."
+    "Completion applies only to the declared fixed native protocol; no new native model run is inferred from fixtures."
   ],
   "runbook": "docs/workload-data/WORKLOAD_EXECUTION_CHECKLIST.zh-CN.md"
 }

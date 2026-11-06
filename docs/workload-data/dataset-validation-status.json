@@ -1,6 +1,6 @@
 {
   "schema_version": "workload-validation-checklist/v1",
-  "updated_at": "2026-11-06",
+  "updated_at": "2026-11-07",
   "server_32080_recovery": {
     "verified_host_fingerprint": "SHA256:OWM9Z+WsBq8M0cTJzqBnA/Z58UCXb0zkuNnBdIDKQOY",
     "model": "Qwen/Qwen3.5-9B",
@@ -22,10 +22,10 @@
     "scope": "Original saved model command reused after both NPUs were observed without running processes. Health and bounded generation now pass; historical result environment equivalence and benchmark execution are not implied."
   },
   "checked_receipt_reference_audit": {
-    "checked_sources": 104,
-    "public_sources": 96,
+    "checked_sources": 107,
+    "public_sources": 99,
     "enterprise_private_sources": 8,
-    "distinct_tracked_receipt_paths": 96,
+    "distinct_tracked_receipt_paths": 99,
     "scope": "Each checked source references an existing Git-tracked receipt; JSON receipts parse. Shared receipts are counted once. This is a reference integrity check, not a new execution, score, or independent requalification of each receipt."
   },
   "replacement_candidate_audits": {
@@ -9177,8 +9177,8 @@
         "public_vad_core_operations_equal_original_executed_adapter": true,
         "public_asr_full_delegation_fixtures_linux_server_passed": 14,
         "new_native_or_asr_model_runs": 0,
-        "current_gate": "Final software checks for stricter ASR failure-state handling; no native workflow rerun required",
-        "source_checkbox_eligible": false
+        "current_gate": "PASSED: code0dc63585 CI42269966464 tests/lint and CPU smoke42269972504; later31305aac changes documentation only and46 targeted regressions pass",
+        "source_checkbox_eligible": true
       },
       "public_deployment_chain_20261107": {
         "evidence_summary": "docs/workload-data/validation/full-duplex-model-metadata-20261106.json",
@@ -9446,7 +9446,7 @@
       },
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
+      "status": "AVAILABLE",
       "original_scorer_preparation": {
         "repository": "DanielLin94144/Full-Duplex-Bench",
         "revision": "3e799c45a045256f47d5f1c9cda90157e2d2ec9e", "revision_note": "pragma: allowlist secret - pinned public publisher revision",
@@ -9465,11 +9465,12 @@
         "model_calls": 0,
         "source_checkbox_eligible": false
       },
-      "checked": false,
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
-      "blocker": "Native fixed27/39, original NPU ASR/VAD/local9B scoring, public deployment and exact research handoff evidence have been audited. Saved15+48 transcript and24 timing receipts retain their original audio/output hashes; public VAD core operations match the executed adapter and14 public ASR orchestration fixtures pass on Linux. Final software checks for stricter ASR failure-state handling remain before source checkbox promotion. No completed native workflow needs rerunning.13 declaration conflicts and non-official/local-judge/numeric-parity limits remain explicit.",
+      "delivery_receipt": "docs/workload-data/validation/full-duplex-fixed27-native-delivery-20261107.json",
+      "blocker": null,
+      "remaining_optional_modes": "Declared v1.0/v1.5 fixed9categories/27originalcases/39sessions delivered with original NPU ASR/VAD, non-neural scorers and separately disclosed local9B behavior judge. Full1225 model runs, v2/v3, original GPT judge and engine performance are not claimed.13 dependency declarations and full-original-network numeric-parity limits remain explicit. Public deployment preparation and exact research input handoff verified; completed native cases were not replayed for packaging.",
       "original_archive_acquisition": {
         "status": "ALL9_PUBLISHER_ORIGINAL_ARCHIVES_INTEGRITY_VERIFIED_NOT_NATIVE_EXECUTION",
         "archives": 9,

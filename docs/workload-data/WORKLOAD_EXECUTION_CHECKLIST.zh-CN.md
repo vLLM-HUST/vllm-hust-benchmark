@@ -775,14 +775,15 @@ SWE-smith（固定三题已交付）：原固定前三题在明确披露ARM/健�
 节点就绪不等于授权或数据已取得。NatureBench、MLAgentBench、BixBench 与 Full-Duplex-Bench 应分别处理长上下文、 隔离 NPU
 微调、原评分输入恢复和双工语音/ASR，不因共用硬件合并协议。
 
-Full-Duplex-Bench（未完成）：用
+Full-Duplex-Bench（已交付v1.0/v1.5固定27题/39会话）：用
 `scripts/prepare_full_duplex_original_scorers.py --include-reference --output <新目录> --download`
 获取固定作者v1.0/v1.5完整参考评分及Moshi/ASR源码共22文件；已有完整目录使用同一选项加`--verify-only`核对。默认11文件及`--include-client`的15文件入口保留，但不是完整原生评分链路的全部源码。上述入口只准备软件，不下载模型、不执行推理。评分应消费原双工服务生成的结果；作者样例、离线
 ASR 或文本对话都不能替代该结果。 可移植路径：SGLang-Omni 分别提供
 [MiniCPM-o 的 Ascend 配置](https://sgl-project.github.io/sglang-omni/get_started/installation_npu.html#minicpm-o)
 及
 [原 Full-Duplex-Bench 双工回放指南](https://sgl-project.github.io/sglang-omni/developer_reference/full_duplex_guide.html)。
-这两份文档不能合并解读为 910B2 已验证双工：还须验证 `session` 变体、实时音频输出及原 ASR/评分在现有设备上的完整链路。
+上述外部文档本身不是910B2实跑证据；本项目的`session`、真实音频、NPU
+ASR/VAD及适用原评分链路已按固定协议核验，见[最终交付回执](validation/full-duplex-fixed27-native-delivery-20261107.json)。
 
 2026-11-06最新固定协议结果：9类共27条原题/39会话、两个版本原观察窗导出、NPU Parakeet ASR、NPU Silero VAD和全部类别评分路径已完成；本地Qwen3.5-9B
 judge的结果单独标明，不是官方GPT成绩。当前缺口是可复用公共原生入口及其验证、研究侧交接，来源总勾仍未完成。以下镜像帮助和配置解析属于较早的准备记录，完整执行以[当前证据](validation/full-duplex-model-metadata-20261106.json)为准。
@@ -1073,8 +1074,8 @@ NPU 任务共享目录未发现同名副本，不把历史取得视为当前容�
 
 - [x] OVOBENCH：streaming-video-interaction；按机器清单所列交付口径核验，具体范围见[回执](validation/ovobench-offline-native-delivery-20261031.json)。
 
-- [ ] FULL_DUPLEX_BENCH：9份原始ZIP及原始关系读取已验证；27条固定原题、39个原生会话、NPU ASR/VAD和各类别评分路径已完成。 本地9B
-  judge结果单独披露，不是官方GPT成绩。尚缺公共执行链路验证与这批原题的研究侧接入核验，不提前勾选。
+- [x] FULL_DUPLEX_BENCH：9份原始ZIP及原始关系读取已验证；27条固定原题、39个原生会话、NPU ASR/VAD和各类别评分路径已完成。本地9B
+  judge结果单独披露，不是官方GPT成绩；公共部署准备、完整所选协议入口、原结果复核和同27题研究接通已核验，代码CI通过。[交付回执](validation/full-duplex-fixed27-native-delivery-20261107.json)。
   `scripts/run_full_duplex_original_capture.py`提供同一固定原题的原生回放计划及显式执行入口；默认不调用模型，
   不缩短原超时、不改题、不替换失败题。原始软件使用`prepare_full_duplex_original_scorers.py --include-reference`准备。
   音频输出、时序、ASR、评分和失败记录仍须分别保存；读取测试和计划输出不能代替真实执行。

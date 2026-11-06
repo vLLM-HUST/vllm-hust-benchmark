@@ -307,7 +307,18 @@ def test_full_duplex_publisher_examples_are_not_native_delivery():
     assert evidence["publisher_example_output_not_our_model_output"] is True
     assert evidence["audio_acquired"] is False
     assert evidence["model_calls"] == 0
-    assert row["status"] == "IN_PROGRESS" and row["checked"] is False
+    assert evidence["source_checkbox_eligible"] is False
+    if row["checked"]:
+        # Publisher examples still do not qualify the source: independent real
+        # native execution, scoring and public/research handoff are required.
+        native = json.loads((ROOT / row["delivery_receipt"]).read_text("utf-8"))
+        assert row["status"] == "AVAILABLE"
+        assert native["status"] == "END_TO_END_EXECUTED_AND_SCORED"
+        assert native["native_cases"] == 27 and native["native_sessions"] == 39
+        assert native["model"]["execution_device"] == "NPU"
+        assert native["input_handoff"]["selected_native_cases_read_back"] == 27
+    else:
+        assert row["status"] == "IN_PROGRESS"
 
 
 def test_wavcaps_native_delivery_requires_execution_and_actual_ci_handoff():
