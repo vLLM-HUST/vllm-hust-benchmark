@@ -65,7 +65,9 @@
     "current_server_original_archives": {"count": 9, "bytes": 705372348, "fixed_observed_hashes_reverified": true, "original_json_decoded": 2576},
     "first_npu_service_attempt": {"container_id": "85c2ec7567657192bad6a5a0c69c17b8cf06864b630bbd4aa44f030dd3b9869f", "exit_code": 1, "ready": false, "benchmark_requests": 0, "failure": "torch_npu reports device_count0, so SGLang selects base SRTPlatform and set_device raises NotImplementedError"},
     "asr_package_preparation": {"second_image": "sha256:301d22bfd5cf83ce29c23b4d6449245469071760b25d1ebbff4b2c70fbaed216", "build_exit_code": 0, "new_pip_conflicts_against_original_image": 0, "original_image_pip_conflicts_remain": true, "npu_asr_or_import_qualified": false},
-    "next_hardware_control": "Known-working managed runtime reports torch2.10.0+cpu, torch_npu2.10.0.post4 and2 available devices. Test a separate publisher-wheel-hashed post4 compatibility image before retrying model service; the version difference is not proven causal.",
+    "driver_diagnostic": {"return_code": 87, "enum_name": "DRV_ERROR_RESOURCE_OCCUPIED", "definition": "/usr/local/Ascend/driver/include/ascend_hal_error.h:112", "retained_log_stage": "full-duplex-device-driver-diagnostic-20261106-001", "torch_npu_post4_only_control_also_unavailable": true},
+    "allocated_workspace_control": {"physical_npu_binding": 1, "actual_tensor_device": "npu:0", "scalar_add_result": 2.0, "neural_execution": false, "boundary": "Real placement/control succeeds within the existing allocated workspace; it is not a benchmark or full model run"},
+    "next_hardware_control": "Stop independent Docker allocation retries. Prepare publisher NPU software in a private system-site venv inside the existing allocated workspace. Preserve working core packages; use publisher-hashed Python3.12/CANN9.1/910B kernel assets. Do not infer model incompatibility or a torch_npu version cause from the separate Docker failure.",
     "native_cases_run": 0
   },
   "source_checkbox_eligible": false

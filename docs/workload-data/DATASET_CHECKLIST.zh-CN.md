@@ -2888,7 +2888,7 @@ PYTHONPATH=workload-preparation/src python scripts/prepare_reused_source_records
 
 - [x] 2026-11-06当前服务器重新取得并核验全部9个原数据包705372348字节，2576条原JSON及冻结哈希一致；固定模型27文件均通过发布方Git/LFS身份校验，仅保留单份权重。
 
-- [ ] 首次NPU服务启动退出1，未就绪、0个benchmark请求：独立Docker环境设备枚举为0，现有托管NPU环境仍可用。正在对照运行时版本；不得将软件安装、依赖解析或此失败尝试算成原生语音验证通过。
+- [ ] 首次NPU服务启动退出1，未就绪、0个benchmark请求。驱动日志`drvGetDevNum=87`，本机头文件定义为`DRV_ERROR_RESOURCE_OCCUPIED`；单换torch_npu补丁版本仍失败。在现有获分配工作区内，绑定物理卡1的真实NPU张量运算已成功。后续使用该工作区内的独立环境，不再反复另起Docker申请设备；不将设备控制、软件安装或依赖解析计作原生语音验证。
 
 - [x] 已核验官方SGLang-Omni镜像内`python -m benchmarks.duplex.fdb --help`正常退出。优先复用其原生录制、音频导出及reference评分入口，不自行构造输入或改写评分。镜像按不可变digest固定；帮助命令通过仅为软件证据，不是NPU推理或benchmark完成。
 
