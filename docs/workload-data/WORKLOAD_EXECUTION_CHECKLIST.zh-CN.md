@@ -599,6 +599,18 @@ stdout/stderr 捕获保存为 `<log-root>/log`；保留原轨迹和 final 科学
 入口只为作者漏导入的 `typing.Dict` 注解提供执行命名空间绑定，不改作者文件或评分规则；原评分为空或不合法时退出2，不将作者静默的 `final_score=-1/score=[]`
 当作完成。
 
+IMDb另有独立的作者Anthropic Messages配置：默认输出2000 token、温度0.5，保留Human/Observation停止串、 编辑4000
+token、fast温度0.01以及原50步和18000秒。它不是把历史Chat的500-token预算原地调大，结果分开登记。
+`scripts/prepare_mlagentbench_messages_agent.py --author-root <固定作者源码> --output <新工作副本> --action prepare`
+复用已有源码准备与懒加载兼容；旧Chat入口及逐字节回执保持不变。
+`scripts/prepare_mlagentbench_messages_imdb.py`使用相同资产/缓存参数，复用原IMDb绑定逻辑。 在原隔离CPU环境中执行
+`scripts/run_mlagentbench_messages_agent.py --port-root /agent --queue /queue --work-root /results/work --log-root /results/logs --model <实际模型ID> --task imdb --execute`。
+Agent容器断网，无NPU设备或Docker socket；只挂私有队列和原资产。受信NPU请求侧另运行
+`scripts/mlagentbench_local_messages.py --queue <同一私有队列> --api-base <回环模型服务/v1> --model <同一实际模型ID> --watch`，
+先检查实际模型ID，再逐字节转发原Messages请求，不更改题目、输出预算或生成参数。Agent终态后由运行方写入队列STOP标记并保留证据。
+首个Messages尝试因本地API在text前返回独立thinking块而退出，失败和原响应保留。 独立兼容配置只选择真实返回的第一个text块，跳过独立reasoning块，不修补动作或补造文本；
+第二次尝试已在服务器启动，尚未取得完整科学评分，整项仍不加勾。13项新协议/准备/队列夹具通过不等于原生任务完成。
+
 WorkArena（未完成）：使用
 `scripts/prepare_workarena_author_source.py --action prepare --archive <官方源码包> --author-root <新目录>`
 准备固定版本，再用同一脚本的 `--action verify --author-root <源码目录>` 核验。官方源码包不是 ServiceNow 实例快照。
@@ -674,7 +686,7 @@ OSWorld（未完成）：先在兼容的隔离环境内确认作者桌面镜像�
 
 - [x] 固定第一题：15步真实模型/GUI动作及原评分0分已核验；评分恢复单独披露，不称作未修改的单次运行。
 - [x] 固定第二题：15步真实模型/GUI动作及原评分0分已核验。原15秒CDP读取两次超时，延长到180秒后在保留GUI上恢复评分；无新增模型调用，兼容配置单列，不作为原时序复现。
-- [ ] 固定第三题：已通过公共入口启动，原题和预算不变；入口已核验完整源码、锁定依赖、原生导入和实际模型ID，最终评分待返回。
+- [ ] 固定第三题：公共入口首次尝试保存11步真实操作后，作者动作解析器抛出IndexError，未取得原评分；失败保留。同一原题及预算已独立重试，未修改解析器或补造动作，最终评分待返回。
 - [ ] 整项公共执行及研究接通：待完成。以上是题目级进度，OSWORLD来源整体仍不打勾。
 
 公开执行入口为`scripts/run_osworld_original.py`，默认只核验固定源码和原任务并输出计划。 默认使用作者Docker
