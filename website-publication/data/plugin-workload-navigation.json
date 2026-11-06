@@ -99,48 +99,160 @@
     }
   },
   "plugins": {
-    "vllm-hust-opset": ["decode_heavy", "prefill_heavy"],
-    "traceloom": ["profiling_analysis"],
-    "gdn-state-codec": ["decode_heavy", "repeated_prefix_agent"],
-    "ascend-quant-toolkit": ["model_preparation"],
-    "slicegpt-migration": ["model_preparation", "service_cold_start"],
-    "adm": ["distributed_pipeline"],
-    "bidkv": ["memory_kv_pressure", "high_concurrency"],
-    "diffspec": ["decode_heavy", "latency_slo"],
-    "vspec": ["decode_heavy", "latency_slo"],
-    "latchmoe": ["moe", "memory_kv_pressure"],
-    "opfuse": ["prefill_heavy", "decode_heavy"],
-    "core-attention-boundary": ["prefill_heavy", "decode_heavy"],
-    "kvcompress-ascend": ["long_context", "memory_kv_pressure"],
-    "knorm-migration": ["long_context", "memory_kv_pressure"],
-    "kv-tiering-migration": ["long_context", "memory_kv_pressure", "request_state_recovery"],
-    "mooncake-vllm-connectors": ["repeated_prefix_agent", "distributed_pipeline"],
-    "pegaflow-vllm-connectors": ["repeated_prefix_agent", "memory_kv_pressure"],
-    "quantized-kv-cache-migration": ["long_context", "memory_kv_pressure"],
-    "pyramidkv-ascend-migration": ["long_context", "memory_kv_pressure"],
-    "split-batch-full-graph-migration": ["high_concurrency", "prefill_heavy", "decode_heavy"],
-    "pipeline-microbatch-migration": ["distributed_pipeline", "high_concurrency"],
-    "betterscale": ["distributed_pipeline"],
-    "prefix-router-migration": ["repeated_prefix_agent", "high_concurrency", "latency_slo"],
-    "simllm-migration": ["repeated_prefix_agent", "prefill_heavy", "memory_kv_pressure"],
-    "request-lifecycle-profiler": ["latency_slo", "high_concurrency"],
-    "kv-transfer-observability-migration": ["lifecycle_control", "memory_kv_pressure"],
-    "clm-lifecycle": ["lifecycle_control", "repeated_prefix_agent"],
-    "request-throttling-controller": ["high_concurrency", "latency_slo", "lifecycle_control"],
-    "tricard-clm-lifecycle": ["lifecycle_control", "repeated_prefix_agent"],
-    "ride-control-plane": ["lifecycle_control"],
-    "vllm-local-control-host": ["lifecycle_control"],
-    "ride-runtime-bridge": ["lifecycle_control"],
-    "quality-bounded-inference": ["latency_slo", "high_concurrency"],
-    "llm-serving-cost-pricing-model": ["profiling_analysis"],
-    "kv-materialization-arrival-control": ["repeated_prefix_agent", "memory_kv_pressure"],
-    "unified-communication-migration": ["distributed_pipeline"],
+    "vllm-hust-opset": [
+      "decode_heavy",
+      "prefill_heavy"
+    ],
+    "traceloom": [
+      "profiling_analysis"
+    ],
+    "gdn-state-codec": [
+      "decode_heavy",
+      "repeated_prefix_agent"
+    ],
+    "ascend-quant-toolkit": [
+      "model_preparation"
+    ],
+    "slicegpt-migration": [
+      "model_preparation",
+      "service_cold_start"
+    ],
+    "adm": [
+      "distributed_pipeline"
+    ],
+    "bidkv": [
+      "memory_kv_pressure",
+      "high_concurrency"
+    ],
+    "diffspec": [
+      "decode_heavy",
+      "latency_slo"
+    ],
+    "vspec": [
+      "decode_heavy",
+      "latency_slo"
+    ],
+    "latchmoe": [
+      "moe",
+      "memory_kv_pressure"
+    ],
+    "opfuse": [
+      "prefill_heavy",
+      "decode_heavy"
+    ],
+    "core-attention-boundary": [
+      "prefill_heavy",
+      "decode_heavy"
+    ],
+    "kvcompress-ascend": [
+      "long_context",
+      "memory_kv_pressure"
+    ],
+    "knorm-migration": [
+      "long_context",
+      "memory_kv_pressure"
+    ],
+    "kv-tiering-migration": [
+      "long_context",
+      "memory_kv_pressure",
+      "request_state_recovery"
+    ],
+    "mooncake-vllm-connectors": [
+      "repeated_prefix_agent",
+      "distributed_pipeline"
+    ],
+    "pegaflow-vllm-connectors": [
+      "repeated_prefix_agent",
+      "memory_kv_pressure"
+    ],
+    "quantized-kv-cache-migration": [
+      "long_context",
+      "memory_kv_pressure"
+    ],
+    "pyramidkv-ascend-migration": [
+      "long_context",
+      "memory_kv_pressure"
+    ],
+    "split-batch-full-graph-migration": [
+      "high_concurrency",
+      "prefill_heavy",
+      "decode_heavy"
+    ],
+    "pipeline-microbatch-migration": [
+      "distributed_pipeline",
+      "high_concurrency"
+    ],
+    "betterscale": [
+      "distributed_pipeline"
+    ],
+    "prefix-router-migration": [
+      "repeated_prefix_agent",
+      "high_concurrency",
+      "latency_slo"
+    ],
+    "simllm-migration": [
+      "repeated_prefix_agent",
+      "prefill_heavy",
+      "memory_kv_pressure"
+    ],
+    "request-lifecycle-profiler": [
+      "latency_slo",
+      "high_concurrency"
+    ],
+    "kv-transfer-observability-migration": [
+      "lifecycle_control",
+      "memory_kv_pressure"
+    ],
+    "clm-lifecycle": [
+      "lifecycle_control",
+      "repeated_prefix_agent"
+    ],
+    "request-throttling-controller": [
+      "high_concurrency",
+      "latency_slo",
+      "lifecycle_control"
+    ],
+    "tricard-clm-lifecycle": [
+      "lifecycle_control",
+      "repeated_prefix_agent"
+    ],
+    "ride-control-plane": [
+      "lifecycle_control"
+    ],
+    "vllm-local-control-host": [
+      "lifecycle_control"
+    ],
+    "ride-runtime-bridge": [
+      "lifecycle_control"
+    ],
+    "quality-bounded-inference": [
+      "latency_slo",
+      "high_concurrency"
+    ],
+    "llm-serving-cost-pricing-model": [
+      "profiling_analysis"
+    ],
+    "kv-materialization-arrival-control": [
+      "repeated_prefix_agent",
+      "memory_kv_pressure"
+    ],
+    "unified-communication-migration": [
+      "distributed_pipeline"
+    ],
     "muxpd": [
       "latency_slo",
       "prefill_heavy",
       "decode_heavy",
       "long_context",
       "moe"
+    ],
+    "hybrid-spec": [
+      "decode_heavy",
+      "latency_slo"
+    ],
+    "prefill-microflow": [
+      "prefill_heavy",
+      "distributed_pipeline"
     ]
   }
 }

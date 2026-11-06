@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/website-publication/data/schemas/mod_result_bindings_v1.schema.json",
+  "title": "MOD result bindings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "canonical_owner",
+    "description_en",
+    "description_zh",
+    "integration_records",
+    "combination_effects",
+    "negative_results"
+  ],
+  "properties": {
+    "schema_version": { "const": "mod-result-bindings/v1" },
+    "canonical_owner": { "const": "vLLM-HUST/vllm-hust-benchmark" },
+    "description_en": { "type": "string", "minLength": 1 },
+    "description_zh": { "type": "string", "minLength": 1 },
+    "integration_records": { "$ref": "#/$defs/bindingSet" },
+    "combination_effects": { "$ref": "#/$defs/bindingSet" },
+    "negative_results": { "$ref": "#/$defs/bindingSet" }
+  },
+  "$defs": {
+    "bindingSet": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
