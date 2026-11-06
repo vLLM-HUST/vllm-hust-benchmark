@@ -195,6 +195,7 @@ def test_upstream_forks_share_the_foundation_repository_domain():
         "foundation_repositories"
     }
 
+
 def test_state_scheduler_is_delisted_from_public_catalogs():
     publication = index.ROOT / "website-publication/data"
     ecosystem = json.loads((publication / "ecosystem.json").read_text())
