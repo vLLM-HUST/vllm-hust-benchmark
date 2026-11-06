@@ -3,7 +3,6 @@
   "description_en": "Canonical identity, capability, execution-phase, lifecycle, and evidence classification for every public MOD and adjacent catalog component.",
   "description_zh": "全部公开 MOD 及相邻目录组件的规范分类：身份、能力域、作用阶段、生命周期与证据相互独立。",
   "components": {
-    "state-scheduler": {"kind":"tool_mod","capability":"observability_evaluation","phases":["offline_preparation","observability"],"lifecycle":"retired","evidence":"no_performance_claim"},
     "betterscale": {"kind":"runtime_mod","capability":"execution_optimization","phases":["prefill","decode"],"lifecycle":"implemented","evidence":"measured_beneficial"},
     "pipeline-microbatch-migration": {"kind":"runtime_mod","capability":"execution_optimization","phases":["prefill","decode"],"lifecycle":"implemented","evidence":"measured_inconclusive"},
     "split-batch-full-graph-migration": {"kind":"runtime_mod","capability":"execution_optimization","phases":["prefill","decode"],"lifecycle":"pending","evidence":"activation_pending"},
@@ -52,7 +51,7 @@
     "pegaflow": {"kind":"external_system","capability":"kv_management","phases":["state_lifecycle"],"lifecycle":"external","evidence":"integration_tested"},
 
     "simllm-migration": {"kind":"runtime_mod","capability":"kv_management","phases":["prefill","state_lifecycle"],"lifecycle":"implemented_restricted","evidence":"measured_not_beneficial"},
-    "unified-communication-migration": {"kind":"retired","capability":"parallel_communication","phases":["prefill","decode"],"lifecycle":"retired","evidence":"host_integration_missing"},
+    "unified-communication-migration": {"kind":"runtime_mod","capability":"parallel_communication","phases":["prefill","decode"],"lifecycle":"implemented_restricted","evidence":"host_integrated_hardware_validation_pending"},
     "layered-prefill-migration": {"kind":"retired","capability":"prefill_optimization","phases":["prefill"],"lifecycle":"retired","evidence":"no_activation_entry"},
     "activation-sparsity-migration": {"kind":"retired","capability":"operators_attention","phases":["prefill","decode"],"lifecycle":"retired","evidence":"operator_integration_missing"},
     "qos-scheduler-migration": {"kind":"retired","capability":"scheduling_routing","phases":["request_admission"],"lifecycle":"retired","evidence":"host_integration_missing"},
