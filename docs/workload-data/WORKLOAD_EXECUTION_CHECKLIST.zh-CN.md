@@ -788,7 +788,27 @@ ASR/VAD及适用原评分链路已按固定协议核验，见[最终交付回执
 2026-11-06最新固定协议结果：9类共27条原题/39会话、两个版本原观察窗导出、NPU Parakeet ASR、NPU Silero VAD和全部类别评分路径已完成；本地Qwen3.5-9B
 judge的结果单独标明，不是官方GPT成绩。公共原生入口、依赖/绑定核验和同批原题研究侧交接现已收口。以下镜像帮助和配置解析属于较早的准备记录，当前交付范围以[最终回执](validation/full-duplex-fixed27-native-delivery-20261107.json)为准。
 
-固定原题回放入口（先准备仓库外的原始解压数据和独立SGLang-Omni环境）：
+原始输入下载/解包到仓库外的新目录；已验证且仍保留的原包使用`--action verify`复核，不重复下载。
+以下Linux命令先按固定SHA、字节预算、路径/CRC/JSON检查取得原9份ZIP，再按版本原样解压，不改任何任务或音频：
+
+```bash
+set -e
+python scripts/prepare_full_duplex_original_assets.py \
+  --output "$ARCHIVE_ROOT" --action prepare --max-bytes 705372348
+mkdir "$ORIGINAL_TREE"
+for version in v1.0 v1.5; do
+  mkdir "$ORIGINAL_TREE/$version"
+  for archive in "$ARCHIVE_ROOT/$version/"*.zip; do
+    unzip -n "$archive" -d "$ORIGINAL_TREE/$version"
+  done
+done
+```
+
+`ARCHIVE_ROOT`和`ORIGINAL_TREE`须为仓库外的绝对路径；解压目标须全新，命令失败时停止，不合并旧任务目录。
+所需工具为Linux的`unzip`；目录按原ZIP内布局保留。临时原包和解压输入已在本次验证后按用户要求清理约2.01GiB；
+原生捕获/导出、ASR/评分、索引和回执仍保留。未来运行需先重新取得原输入，不能把历史已验证理解成服务器缓存常驻。
+
+固定原题回放入口（原始解压数据及独立SGLang-Omni环境就绪后）：
 
 ```bash
 python scripts/run_full_duplex_original_capture.py \
