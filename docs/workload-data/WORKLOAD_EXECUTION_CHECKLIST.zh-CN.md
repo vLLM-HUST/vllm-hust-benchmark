@@ -728,6 +728,13 @@ Full-Duplex-Bench（未完成）：用
 [原 Full-Duplex-Bench 双工回放指南](https://sgl-project.github.io/sglang-omni/developer_reference/full_duplex_guide.html)。
 这两份文档不能合并解读为 910B2 已验证双工：还须验证 `session` 变体、实时音频输出及原 ASR/评分在现有设备上的完整链路。
 
+2026-11-06 的独立环境准备已锁定官方 910B ARM64 镜像
+`swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang-omni@sha256:265387f87a6a97ad170a2c2a51f0ce3209e24e143d3048c97fe172b70f273938`。
+此处仅是软件环境候选，不是已通过的模型服务。先在无设备映射、无网络的独立容器检查版本和原 CLI，再核验 NPU 服务。 不要在正在运行的 vLLM
+环境直接升级依赖，也不要直接执行会下载模型和启动多套服务的 `fdb setup`。 官方普通语音 NPU 配置的 `config_cls` 为
+`MiniCPMOSpeechPipelineConfig`，不能据此认定已支持双工 `session`。 原 Moshi/NeMo 路径与 SGLang-Omni
+路径须分别记录软件版本、实际执行阶段及评分差异，不能混称未经修改的原实现。
+
 MLE-bench（未完成）：用
 `scripts/prepare_jsonschemabench_author_source.py --source mlebench --author-root <新目录> --action prepare`
 准备固定作者源码。 同一命令改用 `--action plan` 可先核对固定版本及 758 个文件（约 7.5 MB）。ARM64 Python 3.12 的 CLI 依赖见
@@ -741,10 +748,11 @@ PaperBench（未完成）：复用已核验的 23 个原始论文包。先用 `d
 NPU 任务共享目录未发现同名副本，不把历史取得视为当前容器可用。 取得该资产目录后，用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
-`project/paperbench`。两步均不占卡。原构建脚本指定 `linux/amd64`，应在经过验证的隔离执行节点上构建和运行；当前 ARM64 NPU
-容器没有可用的本地容器执行路径，不能直接执行生成代码。构建前由操作者处理 Miniconda 软件条款；模型推理仍可由独立 NPU 服务承担。 仅在旧包不可恢复时，用资产入口的
-`--action plan --output <仓库外目录>` 先核对固定版本、506 个文件和约 213 MB 的下载量，再在服务器用 `--action prepare`
-恢复原包。该包不含论文复现实验另需的外部数据。 正式验证须保留同一原题的 Agent 提交、复现归档、原 rubric 和评分产物；默认 300 秒或开发用 60 秒不等同于正式 24 小时协议。
+`project/paperbench`。两步均不占卡。原构建脚本指定 `linux/amd64`，应在经过验证的隔离执行节点上构建和运行；当前宿主机已有隔离 Docker，
+但该原始镜像和生成程序的跨架构执行仍未通过验证，Docker 可用不代表原生任务已就绪。构建前由操作者处理 Miniconda 软件条款；模型推理仍可由独立 NPU 服务承担。
+仅在旧包不可恢复时，用资产入口的 `--action plan --output <仓库外目录>` 先核对固定版本、506 个文件和约 213 MB 的下载量，再在服务器用
+`--action prepare` 恢复原包。该包不含论文复现实验另需的外部数据。 正式验证须保留同一原题的 Agent 提交、复现归档、原 rubric 和评分产物；默认 300 秒或开发用 60
+秒不等同于正式 24 小时协议。
 
 每个来源均未取得/适配/真实验证；归属仍需原生协议审查。
 
