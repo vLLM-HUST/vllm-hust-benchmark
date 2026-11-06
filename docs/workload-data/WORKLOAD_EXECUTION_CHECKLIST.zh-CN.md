@@ -666,11 +666,30 @@ WebShop（同类候选，固定三题已验证）：按机器清单锁定作者�
 个有效动作，均未完成购买，按作者规则各得 0 分。WebShop 执行与计分已验证；不据此勾选 WebArena。 镜像尚未与作者 Drive 原件独立核对；文本购物流程不覆盖 WebArena
 后台登录或跨站状态。
 
-WebArena（未完成）：固定原题 ID 为 0、1、2，均只访问 `shopping_admin`，且需要登录。 先在隔离的 amd64 执行节点核验作者的
-`shopping_admin_final_0719.tar`、站点 URL、登录及重置， 再使用作者任务入口执行这三题。当前注册表候选仅核对了配置摘要和层数，尚不能替代原始归档；
-公开演示站点也不能替代可重置环境。站点与浏览器可在 CPU 节点运行，模型推理仍走独立 NPU 服务。 ARM64 Chromium 已通过 MiniWoB++
+WebArena（未完成）：固定原题 ID 为 0、1、2，均只访问 `shopping_admin`，且需要登录。隔离 x86 系统及 Docker
+已就绪，候选镜像31层的压缩摘要和解压内容摘要均已核验，正在流式导入；原始作者归档仍受配额限制，不宣称取得完整原归档。原站点启动、登录、重置、Agent、计分及研究消费仍未完成。
+公开演示站点不能替代可重置环境。站点与浏览器可在 CPU 节点运行，模型推理仍走独立 NPU 服务。 ARM64 Chromium 已通过 MiniWoB++
 的原题验证，浏览器本身不是这三项的共同阻塞：WebArena 缺可重置的 `shopping_admin`，VisualWebArena 缺已启动并核验的 Classifieds，WorkArena
 缺已配置的 ServiceNow 实例。
+
+候选公共运行入口为
+`scripts/run_webarena_agentlab.py`，当前只通过软件检查及实际客户端离线准备检查，尚未完成该入口的原站点端到端验证。先用现有作者源码准备入口取得并核验固定
+WebArena 源码；运行环境使用 AgentLab0.4.2、BrowserGym-WebArena0.14.2、libwebarena0.0.4 和仓库中的官方依赖约束，补齐官方 NLTK
+`punkt_tab` 资源。 `--sites` 指向 JSON 文件，例如
+`{"SHOPPING_ADMIN":"http://127.0.0.1:19680/admin"}`。只允许连接操作者已部署、通过回环或 SSH
+转发访问的站点；所选原题需要的站点不得缺失。未部署的其他站点明确记为不可用，不映射成已有站点。
+
+```bash
+python scripts/run_webarena_agentlab.py --task-id 0
+python scripts/run_webarena_agentlab.py --task-id 0 \
+  --author-root "$AUTHOR_ROOT" --sites "$SITE_MAP" \
+  --endpoint http://127.0.0.1:19476/v1 --model Qwen/Qwen3.5-9B \
+  --output "$NEW_OUTPUT" --execute
+```
+
+第一条仅输出计划，不启动浏览器或模型。第二条要求新输出目录、已准备的真实站点及模型服务；原题全部字段须与发布方包内定义一致，运行后使用原 BrowserGym
+终态和原评分。默认30步、随机种子42，输出预算未指定时保留作者模型参数默认值；显式调整须分配置记录。支持用 `--queue` 替代
+`--endpoint`，复用现有私有文件模型传输接口，不改题目、参考答案或评分代码。一个任务正常返回不自动勾选整项来源。
 
 2026-11-06已做独立用户态兼容控制：ARM64容器内QEMU7.2.22可执行原Debian的amd64 BusyBox，
 但PRoot5.1.0下的嵌套子进程在四组有限对照中均以signal11退出；单个ELF可运行不代表原站点可运行。
