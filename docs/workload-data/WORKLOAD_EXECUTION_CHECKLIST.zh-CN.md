@@ -662,6 +662,22 @@ NatureBench（未完成）：`scripts/run_naturebench_original.py` 默认检查�
 OSWorld（未完成）：先在兼容的隔离环境内确认作者桌面镜像启动、原任务初始化和重置，再接独立NPU模型服务；
 作者支持关闭KVM不代表ARM64已验证。不能把其他代码任务的环境或评分器当作OSWorld桌面环境。
 
+2026-11-06：原始 Ubuntu 镜像已通过发布方压缩包 SHA256、完整解压 CRC 和解压后全文件 SHA256 核验。公开准备入口为
+`scripts/prepare_osworld_original_vm.py`；`verify-image` 可独立复核已解压镜像， 不要求保留重复压缩包。隔离 CPU 容器中的 ARM64
+QEMU/TCG 已开始启动原始镜像，基盘只读，使用 新建写时复制盘和原始固件，未开放宿主端口或设备。桌面就绪、任务初始化、重置及评分仍未验证； 多线程 TCG
+存在内存序兼容性警告，不能把进程存活当成桌面可用。本项保持未勾选。
+
+原始 VM 准备命令如下；目录必须位于仓库外。预算分别覆盖完整压缩包和解压内容，不是抽样下载。 下载和解压峰值还需要预留磁盘空间，`verify-image` 不会启动虚拟机或运行原题。
+
+```bash
+python scripts/prepare_osworld_original_vm.py --action plan --output /srv/osworld/archive
+python scripts/prepare_osworld_original_vm.py --action acquire --output /srv/osworld/archive --max-bytes 12273896463
+python scripts/prepare_osworld_original_vm.py --action extract --output /srv/osworld/archive --extract-output /srv/osworld/prepared --max-unpacked-bytes 24460197888
+python scripts/prepare_osworld_original_vm.py --action verify-image --output /srv/osworld/prepared
+```
+
+已取得且校验有效的镜像直接执行最后一条，不重复下载。压缩包可在保留来源校验记录并确认解压镜像 校验通过后清理；原题运行仍需独立准备环境、原始任务初始化、重置与评分，不由上述命令替代。
+
 SWE-smith（固定三题已交付）：原固定前三题在明确披露ARM/健康检查兼容配置下完成原Agent和官方评分，resolved0/3、errors0、timeouts0。
 这是原生执行完成，不是补丁质量成功或原amd64/GPT4o复现。见[原生回执](validation/swesmith-fixed3-native-20261106.json)。 原资产入口为
 `scripts/prepare_swesmith_original_assets.py`，执行入口为 `scripts/run_swesmith_original_agent.py`；

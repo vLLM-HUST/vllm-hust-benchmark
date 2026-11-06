@@ -159,7 +159,15 @@ def test_actual_public_software_entry_evidence_stays_separate_from_native_tasks(
         ).read_text("utf-8")
     )
     raw = (ROOT / report["entry"]).read_text("utf-8").encode()
-    assert hashlib.sha256(raw).hexdigest() == report["entry_sha256"]
+    current = report["entry_requalification_20261106"]
+    assert hashlib.sha256(raw).hexdigest() == current["entry_sha256"]
+    assert current["entry_sha256"] != report["entry_sha256"]
+    assert current["exit_codes"] == [0, 0, 0]
+    assert current["legacy_default_acquisition_marker_unchanged"]
+    assert current["verified_original_wheel_bytes"] == 13995854
+    assert current["official_pypi_sha256_verified"]
+    assert not current["dataset_or_native_task_verified"]
+    assert current["model_calls"] == 0 and not current["source_checkbox_eligible"]
     assert report["exit_codes"] == [0, 0, 0]
     assert report["verified_original_wheel_bytes"] == 13995854
     assert report["old_wheel_unchanged"] and report["official_pypi_sha256_verified"]

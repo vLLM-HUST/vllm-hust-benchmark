@@ -33,7 +33,9 @@ def verify(path, spec):
     }
 
 
-def acquire(root, spec, *, max_bytes, resume=False, opener=urlopen):
+def acquire(
+    root, spec, *, max_bytes, resume=False, opener=urlopen, source_id="MLAGENTBENCH"
+):
     root = Path(root).resolve()
     if root.is_relative_to(ROOT) or Path(spec["path"]).name != spec["path"]:
         raise ValueError("external data root and original basename required")
@@ -46,7 +48,7 @@ def acquire(root, spec, *, max_bytes, resume=False, opener=urlopen):
     if final.exists() or final.is_symlink():
         verify(final, spec)
         return final
-    identity = {"source_id": "MLAGENTBENCH", "root": str(root), "asset": spec}
+    identity = {"source_id": source_id, "root": str(root), "asset": spec}
     if resume:
         if marker.is_symlink() or json.loads(marker.read_text("utf-8")) != identity:
             raise ValueError("matching owned acquisition marker required")
