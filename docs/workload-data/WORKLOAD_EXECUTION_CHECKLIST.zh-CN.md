@@ -666,6 +666,19 @@ WebShop（同类候选，固定三题已验证）：按机器清单锁定作者�
 个有效动作，均未完成购买，按作者规则各得 0 分。WebShop 执行与计分已验证；不据此勾选 WebArena。 镜像尚未与作者 Drive 原件独立核对；文本购物流程不覆盖 WebArena
 后台登录或跨站状态。
 
+WorkArena 客户端可复用下述 WebArena/AgentLab CPU 底座。先构建 `local/webarena-client:0.4.2`，再把固定作者源码准备到仓库外专用构建目录的
+`author/`；该构建目录不得放入凭据、数据集或结果。
+
+```bash
+python scripts/prepare_workarena_author_source.py --action prepare \
+  --archive "$OFFICIAL_WORKARENA_ARCHIVE" --author-root "$WORKARENA_CONTEXT/author"
+docker build -f "$PWD/configs/workload-native/workarena-agentlab-cpu.Dockerfile" \
+  -t local/workarena-client:0.5.3 "$WORKARENA_CONTEXT"
+```
+
+配方仅将底座的 WorkArena0.4.3 替换为固定源码0.5.3，保留其余已安装包的版本约束，并执行 `pip check`。已在 ARM64 实际构建，通过断网原任务注册及 Chromium
+检查，注册716个原任务ID；没有创建实例、调用模型或执行评分。此环境准备不替代实例访问授权或原生任务验证。
+
 WebArena（未完成）：固定原题 ID 为 0、1、2，均只访问 `shopping_admin`，且需要登录。隔离 x86 系统及 Docker
 已就绪，候选镜像31层的压缩摘要和解压内容摘要均已核验，正在流式导入；原始作者归档仍受配额限制，不宣称取得完整原归档。原站点启动、登录、重置、Agent、计分及研究消费仍未完成。
 公开演示站点不能替代可重置环境。站点与浏览器可在 CPU 节点运行，模型推理仍走独立 NPU 服务。 ARM64 Chromium 已通过 MiniWoB++
