@@ -5789,19 +5789,33 @@
     },
     "WEBARENA": {
       "isolated_full_system_x86_scaffold_20261107": {
-        "status": "OFFICIAL_CPU_SCAFFOLD_ACQUIRED_VM_BOOT_STARTED_NOT_NATIVE_SITE_READY",
+        "status": "SINGLE_CPU_RECOVERY_BOOT_RUNNING_NOT_NATIVE_SITE_READY",
         "publisher_image": "https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img",
         "publisher_manifest_matched_sha256": "58be26aa7452f3005a4f7370a43928bfb33a7f35a77a8f3b264bf00266a17ca0",
         "downloaded_bytes": 728218624,
         "detached_signature_verified": false,
         "publisher_identity_receipt": "webarena-official-x86-cloud-scaffold-20261107-001/qualification-public.json",
-        "start_receipt": "webarena-official-x86-cloud-scaffold-20261107-001/vm-start-public.json",
+        "start_receipt": "webarena-official-x86-cloud-scaffold-20261107-001/singlecpu-002/vm-start-public.json",
+        "initial_smp_attempt_preserved": "Four virtual CPUs shared one default TCG execution thread and produced repeated guest watchdog/RCU stalls. Forced MTTCG explicitly warned of unsafe host/guest memory ordering; not adopted. Stopped only this task-owned preparatory VM, preserved its disk and logs, and started a fresh one-CPU overlay without changing benchmark tasks or host binfmt.",
         "purpose": "Full-system x86 CPU runtime candidate; not WebArena website image or original task data",
         "host_binfmt_or_shared_network_configuration_changed": false,
         "guest_network_restricted": true,
         "public_listener_opened": false,
         "npu_devices_or_docker_socket_exposed": false,
         "original_site_login_reset_agent_scoring_qualified": false,
+        "source_checkbox_eligible": false
+      },
+      "registry_candidate_layers_20261107": {
+        "receipt": "webarena-shopping-admin-candidate-layers-20261107-001/qualification-public.json",
+        "repository": "webarenaimages/shopping_admin_final_0719",
+        "manifest": "sha256:428cdedfc10996d7f5378299cff541c93c187d1243643e31d439a66c0156147d",
+        "config": "sha256:d0709482086f0e4931771795ae2b1e4b13fb9237c22328c8df0d074763465ad4",
+        "all_compressed_layer_digests_verified": 31,
+        "all_uncompressed_rootfs_diff_ids_verified": 31,
+        "compressed_bytes": 2156742179,
+        "publisher_archive_equivalence_verified": false,
+        "provenance_boundary": "Registry candidate config matches the prior official archive manifest observation; the full original archive has not been independently acquired. Layer integrity is not publisher authorization or site behavior proof.",
+        "site_login_reset_agent_scoring_qualified": false,
         "source_checkbox_eligible": false
       },
       "official_mirror_access_recheck_20261106": {
