@@ -111,9 +111,11 @@ def execute(args):
             or not queue.is_dir()
             or queue.is_relative_to(output)
             or output.is_relative_to(queue)
+            or queue.is_relative_to(root)
+            or root.is_relative_to(queue)
         ):
             raise ValueError(
-                "existing dedicated private queue separate from outputs required"
+                "existing dedicated private queue separate from outputs and source required"
             )
     if args.endpoint is not None and not args.endpoint.rstrip("/").endswith("/v1"):
         raise ValueError("explicit loopback endpoint ending in /v1 required")

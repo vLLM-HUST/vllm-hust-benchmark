@@ -172,6 +172,17 @@ def test_endpoint_and_queue_are_exclusive(runner, tmp_path):
         runner.execute(args)
 
 
+def test_private_queue_cannot_overlap_original_source(runner, monkeypatch, tmp_path):
+    args = args_for(tmp_path)
+    args.endpoint = None
+    args.queue = args.author_root
+    monkeypatch.setattr(
+        runner, "original_task", lambda *_: {"sites": ["shopping_admin"]}
+    )
+    with pytest.raises(ValueError, match="separate from outputs and source"):
+        runner.execute(args)
+
+
 @pytest.mark.parametrize("steps,tokens", [(0, None), (30, 0), (-1, 100)])
 def test_invalid_budgets_rejected(runner, tmp_path, steps, tokens):
     args = args_for(tmp_path)
