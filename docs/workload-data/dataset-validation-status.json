@@ -5071,7 +5071,7 @@
     },
     "NATUREBENCH": {
       "current_original_base_recovery_20261106": {
-        "status": "ORIGINAL_ARM64_BASE_VERIFIED_IMPORTED_SCIENTIFIC_SOFTWARE_REBUILD_RUNNING_NOT_NATIVE_EXECUTION",
+        "status": "BASE_FIRST_TASK_AND_DISCLOSED_THIRD_TASK_COMPATIBILITY_ENVIRONMENT_QUALIFIED_NOT_NATIVE_EXECUTION",
         "publisher_base_index": "sha256:8f9dd0d09d3ad3900357a1cf7f887888b5b74056636cd6ef03c160c3cd4b1d95",
         "publisher_arm64_manifest": "sha256:3fbac875b9fd3059d554226246c1ade676fad88aee1ac2cb2deaa6e77e4606a5",
         "publisher_config_sha256": "b7c0db9014a932deb8733f76051ee35ab82cf1aa5ffc9cd63490bbd466b2b354",
@@ -5082,18 +5082,23 @@
         "base_import_receipt": "naturebench-original-base-egress-preflight-20261106-001/original-base-import-public.json",
         "scientific_build_profile": "naturebench-scientific-base-rebuild-20261106-001/build-profile-public.json",
         "fixed_original_base_package_version_pins": 43,
-        "scientific_build_or_version_checks_passed": false,
-        "build_version_constraints_must_be_cleared_before_original_task_image_derivation": true,
+        "scientific_build_or_version_checks_passed": true,
+        "build_version_constraints_cleared_before_original_task_image_derivation": true,
+        "qualified_base_image_id": "sha256:59c8d6957f9af8e5c2fdd7bfe93db238f334fc7ad50ff011adb469ff81f25ef9",
+        "base_qualification_receipt": "naturebench-scientific-base-rebuild-20261106-001/constraint-scope-finalization-002/qualification-public.json",
+        "first_original_task_environment": {"build_exit_code": 0, "pip_check_exit_code": 0, "scientific_imports_exit_code": 0, "receipt": "naturebench-first-original-task-env-rebuild-20261106-001/qualification-public.json"},
+        "third_original_task_environment": {"build_exit_code": 0, "pip_check_exit_code": 1, "scientific_imports_exit_code": 0, "failure": "Original task dependency resolution installed protobuf7.36.2 against wandb<6 and numpy2.2.6 against catboost<2.0; original image and failure retained", "receipt": "naturebench-third-original-task-env-rebuild-20261106-001/qualification-public.json"},
+        "third_disclosed_compatibility_environment": {"build_including_pip_check_and_scientific_imports_exit_code": 0, "recipe": "configs/workload-native/naturebench-arm64/third-task-constraints.Dockerfile", "receipt": "naturebench-third-original-task-compatibility-20261106-001/qualification-public.json", "not_unmodified_official_environment": true},
         "native_tasks": 0,
         "source_checkbox_eligible": false
       },
       "current_server_scientific_recipe_recovery_20261106": {
-        "status": "PUBLIC_PREPARER_VERIFIED_ORIGINAL_SOURCE_AND_THREE_TASK_PACKAGES_RECIPES_NOT_BUILT",
+        "status": "PUBLIC_PREPARER_VERIFIED_ORIGINAL_SOURCE_AND_THREE_TASK_PACKAGES_BASE_FIRST_TASK_AND_THIRD_COMPATIBILITY_BUILT_SECOND_TASK_PENDING",
         "public_entry": "scripts/prepare_naturebench_scientific_base.py --write --data-root <existing original CPU packages>",
         "existing_ci_provider_reused": "naturebench-actual-ci-0841ec8b-install-32028-001/site-packages",
         "new_task_data_downloaded_or_copied": false,
         "fixed_original_package_versions_changed": false,
-        "new_scientific_environment_built": false,
+        "new_scientific_environment_built": true,
         "source_checkbox_eligible": false,
         "receipt": "naturebench-scientific-recipe-recovery-20261106-001/recipe-public.json"
       },
@@ -5342,7 +5347,14 @@
     },
     "MLAGENTBENCH": {
       "imdb_attempt006_shared32b_20261106": {
-        "status": "ORIGINAL_RESEARCH_AGENT_RUNNING_NEW_MODEL_CONFIGURATION_NOT_COMPLETED",
+        "status": "ORIGINAL_RESEARCH_AGENT_TERMINATED_WITHOUT_SUBMISSION_NOT_COMPLETED",
+        "container_exit_code": 0,
+        "original_total_time_seconds": 2485.6628811359406,
+        "submission_files": 0,
+        "original_score": {"score": [], "final_score": -1},
+        "public_scoring_exit_code": 2,
+        "terminal_receipt": "mlagentbench-imdb-cpu-run-20261106-006/original-terminal-scoring-001/terminal-audit-public.json",
+        "generation_failure": "Saved actions include ActionInput truncated at the OpenAI-path default500-token limit; complete output fields and a valid submission were not produced. Original parser and grading retained unchanged.",
         "model": "Qwen/Qwen2.5-32B-Instruct",
         "model_source": "Existing shared alias, nested ModelScope master snapshot; no new weight copy or download",
         "model_identity_scope": "Observed full SHA256 of17 weight files and index/header consistency; not independently matched to publisher Git revision",
