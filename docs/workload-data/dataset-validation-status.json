@@ -5071,6 +5071,7 @@
     },
     "NATUREBENCH": {
       "current_fixed_cpu3_native_progress_20261106": {
+        "terminal_audit_receipt": "docs/workload-data/validation/naturebench-fixed3-terminal-audit-20261106.json",
         "first_task": {
           "task_id": "s41592-022-01709-7",
           "status": "ORIGINAL_AGENT_SCIENTIFIC_EVALUATIONS_AND_VALIDITY_JUDGE_RETURNED",
@@ -5085,17 +5086,24 @@
         },
         "second_task": {
           "task_id": "s41592-025-02870-5",
-          "status": "PUBLIC_ENTRY_ORIGINAL_AGENT_STARTED_NOT_COMPLETED",
+          "status": "ORIGINAL_AGENT_TERMINAL_JUDGE_RECOVERED_FINAL_OUTPUT_METRICS_UNDER_AUDIT",
           "receipt": "naturebench-second-native-controller-20261106-001/controller-public.json",
           "original_task_and_setup_budget_seconds": 14400,
           "observed_scientific_submissions_at_checkpoint": 5,
+          "terminal_scientific_attempts": 25,
+          "terminal_best_aggregate_improvement": -1.0,
+          "terminal_best_raw_score_group_errors": {"simulated_dla_tree": "All 10 sub-datasets failed", "real_scrna_seq": "All 33 sub-datasets failed"},
+          "final_saved_predictions_original_validation_and_metric_passed": 32,
+          "final_saved_predictions_original_validation_failed": 11,
+          "final_output_audit_boundary": "Read-only original evaluator functions on saved final predictions; not the earlier submitted best score, no generated-program execution or prediction repair",
+          "validity_judge_recovery": {"receipt": "naturebench-second-original-judge-recovery-20261106-002/recovery-public.json", "is_valid": true, "input_tokens": 336129, "original_output_budget": 4096, "served_max_context": 1010000, "new_agent_calls": 0, "materials_truncated": false},
           "observed_submission_errors_at_checkpoint": 0,
           "observed_aggregate_improvements_at_checkpoint": [-1.0, -1.0, -1.0, -1.0, -1.0],
           "terminal_and_validity_judge_verified": false,
           "model": "Qwen/Qwen3.5-9B",
           "historical_failed_or_empty_results_retained": true
         },
-        "third_task": {"task_id": "s43588-024-00689-2", "status": "PUBLIC_ENTRY_ORIGINAL_AGENT_STARTED_NOT_COMPLETED", "receipt": "naturebench-third-native-controller-20261106-001/controller-public.json", "original_task_and_setup_budget_seconds": 14400, "model": "Qwen/Qwen3.5-9B", "historical_zero_scientific_attempt_run_retained": true},
+        "third_task": {"task_id": "s43588-024-00689-2", "status": "ORIGINAL_AGENT_SCIENTIFIC_EVALUATIONS_AND_VALIDITY_JUDGE_RETURNED", "controller_exit_code": 0, "scientific_attempts": 20, "best_aggregate_improvement": 0.03601942018477061, "validity_judge_is_valid": true, "receipt": "naturebench-current-native-evaluators-20261106-001/third-native-output-20261106-001/native/run_summary.json", "original_task_and_setup_budget_seconds": 14400, "model": "Qwen/Qwen3.5-9B", "historical_zero_scientific_attempt_run_retained": true},
         "source_checkbox_eligible": false
       },
       "current_original_base_recovery_20261106": {
@@ -5244,7 +5252,7 @@
         "current_workspace_evaluator_health_reachable": false,
         "scope": "The retained second-case judge response hash and response metadata were reverified. Resume only missing original cases once an isolated runtime and evaluator are available."
       },
-      "blocker": "Original CPU3 data/software/readback evidence retained; all3 scientific environments qualified. First new original Agent run completed13 scientific evaluations and original validity judge is_valid=true, negative improvements retained. Second and third new original tasks active at original4h setup/task budgets; second checkpoint16 real scientific scores without submission errors, final validity/termination pending. Historical timeouts/context failures/zero-submission runs remain separate. Full fixedCPU3 final native output handoff not complete; no full90-task claim.",
+      "blocker": "All3 fixed original Agent controllers terminal. First13 and third20 scientific attempts completed with original validity judge true. Second25 attempts retained earlier best-score group failures; original judge recovered on unchanged336129-token evidence using separate1010000-context NPU profile. Read-only original evaluator on final saved predictions computes32 dataset metrics and rejects11 missing/malformed predictions; this is distinct from earlier submissions. Final-output native scoring, reusable recovery protocol and public/research output handoff remain under audit; source unchecked, no full90-task claim.",
       "preparation_receipt": "docs/workload-data/validation/naturebench-original-readiness-20261028.json",
       "native_progress_receipt": "docs/workload-data/validation/naturebench-original-fixed3-native-progress-20261102.json",
       "public_asset_preparer": "scripts/prepare_jsonschemabench_author_source.py",
