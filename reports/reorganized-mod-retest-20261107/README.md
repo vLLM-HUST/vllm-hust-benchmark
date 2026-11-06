@@ -43,21 +43,20 @@ Each port must first be committed to its canonical reorganized repository and
 must remain disabled by default. The formal campaign then uses:
 
 1. exact candidate, `vllm-hust`, and `vllm-ascend-hust` commit identities;
-2. a specialty Qwen3.5-35B-A3B BF16 TP2 target on Ascend 910B2, because these
+1. a specialty Qwen3.5-35B-A3B BF16 TP2 target on Ascend 910B2, because these
    mechanisms do not apply to the public 14B fixed target;
-3. an unchanged Native arm and one independently enabled candidate arm;
-4. three alternating-order Native/candidate pairs with fresh processes;
-5. one warm-up window and three measured windows per process;
-6. exact activation receipts and mechanism counters from both ranks;
-7. MMLU-Pro 200/256 performance work plus a 70/2048 quality overlap, with
+1. an unchanged Native arm and one independently enabled candidate arm;
+1. three alternating-order Native/candidate pairs with fresh processes;
+1. one warm-up window and three measured windows per process;
+1. exact activation receipts and mechanism counters from both ranks;
+1. MMLU-Pro 200/256 performance work plus a 70/2048 quality overlap, with
    complete output comparison and no quality regression;
-8. environment manifest, resolved same-spec, raw outputs, process logs,
+1. environment manifest, resolved same-spec, raw outputs, process logs,
    per-run leaderboard artifacts, and SHA-256 custody for every retained file;
-9. separate records for single candidates and combinations; individual gains
+1. separate records for single candidates and combinations; individual gains
    are never added or transferred to a combination.
 
 Any source mismatch, inactive mechanism, output mismatch, process failure,
 graph fallback, or missing receipt rejects the run before publication.
 
 Machine-readable observations are in [`preflight.json`](preflight.json).
-
