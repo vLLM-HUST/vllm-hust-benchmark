@@ -740,6 +740,12 @@ docker run --rm --network host --read-only --cap-drop ALL \
   --output /results/task-0 --execute
 ```
 
+VisualWebArena仍未完成。先复用固定作者源码准备入口，再运行
+`python scripts/check_visualwebarena_native_prerequisites.py --author-root "$AUTHOR_ROOT"`，预检不安装模型、不访问站点或调用Agent。2026-11-07当前服务器已按固定Git与SHA256核验478份原文件、全部910个任务定义及配套参考图片；约197MiB下载归档在核验解包后删除。固定Classifieds原题0/1/2均为URL匹配且没有目标输入图片，但作者原启动器仍无条件加载`Salesforce/blip2-flan-t5-xl`评分辅助模型，其设备选项只有CPU/CUDA；因此不能据题目类型跳过该依赖，也不能将CPU辅助模型执行称为NPU-only。NPU兼容环境、原站点和真正原生Agent/评分尚待验证。
+
+原Classifieds镜像摘要已核验，单个应用COPY层压缩后约71.4GiB，全镜像压缩76,861,304,894字节；不是SQL部署ZIP的体积。没有下载这些站点层，未按截取网站文件或删图片构造替代站点。另查的BrowserGym
+VisualWebArena包是框架维护者提供的非原仓直接执行移植版，亦有提前加载BLIP-2行为，不能因为客户端注册成功就当成原生环境已就绪。
+
 2026-11-06已做独立用户态兼容控制：ARM64容器内QEMU7.2.22可执行原Debian的amd64 BusyBox，
 但PRoot5.1.0下的嵌套子进程在四组有限对照中均以signal11退出；单个ELF可运行不代表原站点可运行。
 控制未修改宿主binfmt、未增加容器特权、未接入NPU或下载大站点镜像，原始诊断留存在机器清单对应stage。 这条具体版本组合尚不具备原站点部署资格，不能按其单程序成功勾选WebArena。
