@@ -253,3 +253,21 @@ def test_author_native_prefix_selects_before_shuffle_and_disables_external_repor
         runner.author_fixed_sample_options(
             args, "\n".join(reversed(execution.splitlines()))
         )
+
+
+def test_actor_and_local_judge_paths_are_distinct_but_clients_are_default():
+    actor = "return openai.AsyncClient()\nawait self._client.responses.parse("
+    judge = "return openai.AsyncClient()\nawait self._client.chat.completions.parse("
+    profile = (
+        "class JudgeConfig(BaseModel):\n  grade_locally: bool = True\n"
+        '  scaffold: str = "simple"\n  model="o3-mini-2025-01-31"\n'
+        '  reasoning_effort="high"\n'
+    )
+    report = runner.author_model_routes(actor, judge, profile)
+    assert report["actor_api"] == "/v1/responses"
+    assert report["default_local_judge_api"] == "/v1/chat/completions"
+    assert report["runtime_model_or_tool_calls"] == 0
+    with pytest.raises(ValueError, match="routing"):
+        runner.author_model_routes(
+            actor.replace("AsyncClient()", "AsyncClient(base_url=url)"), judge, profile
+        )

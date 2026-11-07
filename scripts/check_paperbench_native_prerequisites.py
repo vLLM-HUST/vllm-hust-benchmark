@@ -28,6 +28,7 @@ PINS = (
 PROJECT = "project/paperbench/"
 ALL_SPLIT = PROJECT + "experiments/splits/all.txt"
 NANOEVAL = "project/common/nanoeval/nanoeval/"
+COMPLETERS = "project/common/preparedness_turn_completer/preparedness_turn_completer/"
 RECIPES = [
     PROJECT + "paperbench/Dockerfile.base",
     PROJECT + "paperbench/reproducer.Dockerfile",
@@ -243,6 +244,58 @@ def inspect_vllm_browser_dispatch(package_root, canonical):
     }
 
 
+def author_model_routes(responses_client, judge_client, judge_config):
+    """Identify the fixed author model API paths without instantiating clients."""
+    if (
+        "return openai.AsyncClient()" not in responses_client
+        or "return openai.AsyncClient()" not in judge_client
+        or "self._client.responses.parse(" not in responses_client
+        or "self._client.chat.completions.parse(" not in judge_client
+    ):
+        raise ValueError("review changed author model-client routing")
+    config = judge_config.split("class JudgeConfig(", 1)[-1].split("\nclass ", 1)[0]
+    if any(
+        value not in config
+        for value in (
+            "grade_locally: bool = True",
+            'scaffold: str = "simple"',
+            'model="o3-mini-2025-01-31"',
+            'reasoning_effort="high"',
+        )
+    ):
+        raise ValueError("review changed author default local judge profile")
+    return {
+        "actor_api": "/v1/responses",
+        "default_local_judge_api": "/v1/chat/completions",
+        "default_local_judge_model": "o3-mini-2025-01-31",
+        "default_local_judge_reasoning_effort": "high",
+        "default_local_judge_scaffold": "simple",
+        "clients_constructed_without_explicit_base_urls": True,
+        "actor_and_default_local_judge_need_shared_process_endpoint_binding": True,
+        "runtime_model_or_tool_calls": 0,
+    }
+
+
+def inspect_author_model_routes(author_root, *, pins_path=PINS):
+    source = json.loads(Path(pins_path).read_text("utf-8"))
+    if source["source_id"] != "PAPERBENCH":
+        raise ValueError("pinned PaperBench software profile required")
+    paths = (
+        COMPLETERS + "oai_responses_turn_completer/completer.py",
+        COMPLETERS + "oai_completions_turn_completer.py",
+        PROJECT + "paperbench/nano/structs.py",
+    )
+    text = []
+    for name in paths:
+        entries = [item for item in source["files"] if item["path"] == name]
+        if len(entries) != 1:
+            raise ValueError("unique pinned author model routing source required")
+        path = bound_path(Path(author_root), "", entries[0])
+        verify_git_blob(path, entries[0])
+        text.append(path.read_text("utf-8"))
+    return author_model_routes(*text)
+
+
 def inspect_original(author_root, *, pins_path=PINS, host_architecture=None):
     pins = json.loads(Path(pins_path).read_text("utf-8"))
     if pins.get("source_id") != "PAPERBENCH":
@@ -348,10 +401,15 @@ def main():
         action="store_true",
         help="verify the first original all-split paper and its pinned assets",
     )
+    parser.add_argument(
+        "--model-routing",
+        action="store_true",
+        help="inspect pinned BasicAgent and default local judge SDK routing",
+    )
     args = parser.parse_args()
     if args.author_root is None:
-        if args.vllm_source is not None or args.fixed_paper:
-            parser.error("--vllm-source and --fixed-paper require --author-root")
+        if args.vllm_source is not None or args.fixed_paper or args.model_routing:
+            parser.error("requested inspection requires --author-root")
         print(
             json.dumps(
                 {
@@ -372,6 +430,10 @@ def main():
         )
     if args.fixed_paper:
         result["fixed_original_sample"] = inspect_fixed_paper(args.author_root)
+    if args.model_routing:
+        result["original_actor_and_judge_routing"] = inspect_author_model_routes(
+            args.author_root
+        )
     print(json.dumps(result, indent=2))
 
 

@@ -1340,6 +1340,11 @@ PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07�
 工具提取保留原类型，而筛选只识别 `web_search_preview`；仅开启工具服务器不能证明正式命令的 `web_search` 会被分派。需用支持正式请求类型的隔离部署实测工具调用，
 不能把静态匹配或改用默认工具名当作原生验证。
 
+加 `--model-routing` 核对固定作者客户端：BasicAgent 走 `/v1/responses`，默认本地裁判走 `/v1/chat/completions`，使用
+SimpleJudge、`o3-mini-2025-01-31` 及 high reasoning。作者锁定的 OpenAI SDK 1.99.9 从 `OPENAI_BASE_URL`
+读取这两个默认客户端的地址，不读取 `GRADER_OPENAI_BASE_URL`；未设置时有外部默认地址。
+本地执行前须显式绑定受信回环端点，核验两个接口和实际模型身份。若更换裁判，须按独立配置记录，不能伪装成默认裁判成绩。当前仅做静态核对，没有发送模型或工具请求。
+
 交付抽样在产生任何 Agent 结果前锁定：从发布方 `all.txt` 的 20 篇原始论文中，按原文件顺序取首篇 `fre`。用预检的 `--fixed-paper` 核对原切分和该篇 21
 个固定文件，包括原论文、附加说明和 rubric。固定作者 NanoEval 先取任务前缀再打乱，正式命令保留 `paperbench.paper_split=all`，加
 `runner.n_tasks=1 runner.shuffle=false runner.concurrency=1`；不改切分文件，使用新运行组。另设
