@@ -1,0 +1,71 @@
+{
+  "schema_version": "reorganized-mod-current-host-port/v1",
+  "date": "2026-11-07",
+  "status": "source_qualified_npu_retest_pending",
+  "host": {
+    "core": {
+      "repository": "vLLM-HUST/vllm-hust",
+      "revision": "88ddd5c7e2c2f72c548ff1dcd2bc8040834a9207"
+    },
+    "ascend": {
+      "repository": "vLLM-HUST/vllm-ascend-hust",
+      "revision": "7602797593170da4c531f1d8882a7b82dce8a1bc"
+    }
+  },
+  "families": [
+    {
+      "repository": "vLLM-HUST/vllm-hust-runtime-micro-optimizations",
+      "revision": "b2bc63ef2e461675613cd87a20040dff2a891a34",
+      "source_qualification": {
+        "tests": {"passed": 10, "failed": 0},
+        "ruff": "passed",
+        "wheel_build": "passed",
+        "host_contract": "passed"
+      },
+      "candidates": {
+        "empty-padding": "ported_retest_pending",
+        "qsl-reuse": "ported_retest_pending",
+        "residual-scale": "ported_retest_pending",
+        "rope-argument-repair": "retired_absorbed_by_host"
+      }
+    },
+    {
+      "repository": "vLLM-HUST/vllm-hust-gdn-optimizations",
+      "revision": "8e08c5b05a9e7e38d38952400f921caf223c0ca6",
+      "source_qualification": {
+        "tests": {"passed": 11, "failed": 0},
+        "ruff": "passed",
+        "wheel_build": "passed",
+        "host_contract": "passed"
+      },
+      "candidates": {
+        "static-decay": "ported_retest_pending",
+        "native-delayed": "blocked_current_runner_rewrite_required",
+        "native-copy-compatibility": "retired_obsolete"
+      }
+    },
+    {
+      "repository": "vLLM-HUST/vllm-ascend-attention-optimizations",
+      "revision": "8f1f1f2f7cb928a1293977b80bc80066dd2234f3",
+      "source_qualification": {
+        "tests": {"passed": 8, "failed": 0},
+        "ruff": "passed",
+        "wheel_build": "passed",
+        "host_contract": "passed"
+      },
+      "candidates": {
+        "core-boundary": "retired_absorbed",
+        "persistent-matmul-empty": "retired_not_consumed",
+        "linear-swiglu-graph": "relocated_operator_family",
+        "pyramidkv": "blocked_current_runner_rewrite_required"
+      }
+    }
+  ],
+  "formal_npu_measurement": {
+    "started": false,
+    "reason": "A fresh dependency-compatible current-Host environment and two-rank activation receipts are still required.",
+    "hardware_for_future_run": "verified Ascend 910B2",
+    "publication_state": "retest_pending",
+    "legacy_metrics_transferred": false
+  }
+}
