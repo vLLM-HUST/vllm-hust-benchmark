@@ -3360,14 +3360,14 @@
         "models": [
           "Qwen3.5 GDN family; result-specific scope applies"
         ],
-        "requirements_en": "Static decay is source-bound and has emitted cache and first-candidate receipts on both TP ranks. Native delayed still requires a current-runner lifecycle rewrite; static decay still needs three alternating Native/candidate pairs and the frozen quality workload.",
-        "requirements_zh": "静态衰减已绑定当前 Host，并在两个 TP rank 上产生缓存准备与首次候选命中回执；Native delayed 仍需按当前运行器重写生命周期，静态衰减仍须完成三组 Native/候选交替测试与冻结质量工作负载。"
+        "requirements_en": "Static decay is source-bound, default-off, and formally measured on the fixed Qwen3.5-35B-A3B BF16 TP2 Ascend 910B2 cell. Native delayed still requires a current-runner lifecycle rewrite; other hosts, models and workloads require separate qualification.",
+        "requirements_zh": "静态衰减已绑定当前 Host、保持默认关闭，并在固定 Qwen3.5-35B-A3B BF16 TP2 Ascend 910B2 单元完成正式测量；Native delayed 仍需按当前运行器重写生命周期，其他 Host、模型与工作负载须单独验收。"
       },
-      "evidence_level": "retest_pending",
-      "public_effect_status": "inconclusive",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/5c6f3496cc970f9cd85bef91ca59d40c7f06b8ac/reports/reorganized-mod-current-host-port-20261107",
-      "public_effect_en": "Static decay passed current-Host source checks and a two-rank Ascend 910B2 activation smoke: each rank prepared 18 cache entries and entered the candidate kernel, and inference returned OK. Performance and quality qualification remain pending; legacy measurements are source records only.",
-      "public_effect_zh": "静态衰减已通过当前 Host 源码检查及双 rank Ascend 910B2 激活冒烟：每个 rank 均准备 18 个缓存项并进入候选内核，推理返回 OK。性能与质量验收仍待完成，旧测量仅保留为来源记录。"
+      "evidence_level": "measured",
+      "public_effect_status": "neutral",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/gdn-static-decay-formal-retest-20261107",
+      "public_effect_en": "Formal Qwen3.5-35B-A3B BF16 TP2 testing completed three alternating fresh-process pairs. Throughput changes were +0.292%, +0.214%, and -0.516% (geometric aggregate -0.004%); TTFT/TPOT changes were also sub-percent. All 210 paired quality outputs and reasoning hashes were exact. Static decay is qualified as quality-equivalent in this cell, but no stable speedup is demonstrated.",
+      "public_effect_zh": "固定 Qwen3.5-35B-A3B BF16 TP2 正式测试完成三组新鲜进程交替配对。吞吐变化为 +0.292%、+0.214%、-0.516%（几何汇总 -0.004%），TTFT/TPOT 变化也低于 1%；210 条配对质量输出及推理哈希全部一致。静态衰减在本单元可认定质量等价，但未证明稳定加速。"
     },
     {
       "id": "runtime-micro-optimizations",
