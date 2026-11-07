@@ -3422,14 +3422,14 @@
         "models": [
           "Result-specific model and workload scope"
         ],
-        "requirements_en": "Empty-padding, query-start-location reuse and residual-scale cache are source-bound, default-off, and activation-qualified on both TP ranks. Three alternating Native/candidate pairs and the frozen quality workload are still required.",
-        "requirements_zh": "空 padding、query-start-location 复用和 residual-scale 缓存已绑定当前 Host、保持默认关闭，并已在两个 TP rank 上完成激活资格校验；仍须完成三组 Native/候选交替测试与冻结质量工作负载。"
+        "requirements_en": "Empty-padding, query-start-location reuse and residual-scale are source-bound, default-off, and formally measured on the fixed Qwen3.5-35B-A3B BF16 TP2 Ascend 910B2 cell. Other hosts, models and workloads require separate qualification.",
+        "requirements_zh": "空 padding、query-start-location 复用和 residual-scale 已绑定当前 Host、保持默认关闭，并在固定 Qwen3.5-35B-A3B BF16 TP2 Ascend 910B2 单元完成正式测量；其他 Host、模型与工作负载仍须单独验收。"
       },
-      "evidence_level": "retest_pending",
-      "public_effect_status": "inconclusive",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/5c6f3496cc970f9cd85bef91ca59d40c7f06b8ac/reports/reorganized-mod-current-host-port-20261107",
-      "public_effect_en": "All three retained mechanisms emitted install and first-exercise receipts on both Ascend 910B2 TP ranks, and inference returned OK. The old RoPE repair is retired as absorbed. Performance and quality qualification remain pending; legacy measurements are source records only.",
-      "public_effect_zh": "三个保留机制均已在两个 Ascend 910B2 TP rank 上产生安装与首次实际命中回执，推理返回 OK；旧 RoPE 修复因已被底座吸收而退役。性能与质量验收仍待完成，旧测量仅保留为来源记录。"
+      "evidence_level": "measured",
+      "public_effect_status": "neutral",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/runtime-micro-formal-retest-20261107",
+      "public_effect_en": "Formal Qwen3.5-35B-A3B BF16 TP2 testing completed three alternating fresh-process pairs. Throughput changes were +0.841%, -0.494%, and -0.213% (geometric aggregate +0.043%); TTFT/TPOT changes were also sub-percent. All 210 paired quality outputs and reasoning hashes were exact. The MOD is qualified as quality-equivalent in this cell, but no stable speedup is demonstrated.",
+      "public_effect_zh": "固定 Qwen3.5-35B-A3B BF16 TP2 正式测试完成三组新鲜进程交替配对。吞吐变化为 +0.841%、-0.494%、-0.213%（几何汇总 +0.043%），TTFT/TPOT 变化也低于 1%；210 条配对质量输出及推理哈希全部一致。本单元可认定质量等价，但未证明稳定加速。"
     },
     {
       "id": "ascend-attention-optimizations",

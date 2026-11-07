@@ -1,7 +1,7 @@
 {
   "schema_version": "reorganized-mod-retest/v1",
   "date": "2026-11-07",
-  "status": "port_required_before_formal_npu_measurement",
+  "status": "runtime_measured_gdn_and_attention_pending",
   "families": [
     "vLLM-HUST/vllm-hust-gdn-optimizations",
     "vLLM-HUST/vllm-hust-runtime-micro-optimizations",
@@ -13,7 +13,9 @@
     "installed_vllm_commit": "0fc695f",
     "installed_vllm_ascend_commit": "1cdb8c4db",
     "target_vllm_hust_main": "dea92f6f98260fb7a7ca359c3fb637c5d4c8082d",
-    "target_vllm_ascend_hust_main": "591d40bfad246a1154b5e61e49d01278abb009d8"
+    "target_vllm_ascend_hust_main": "591d40bfad246a1154b5e61e49d01278abb009d8",
+    "runtime_formal_vllm_hust": "c4df37dfcc7f72ca41cd43801a468526ecf99a2b",
+    "runtime_formal_vllm_ascend_hust": "ab05682845beb9f54a9522122f48f628c3f5b649"
   },
   "source": {
     "repository": "GenNova-HUST/inference-engine-project",
@@ -45,18 +47,18 @@
     },
     {
       "candidate": "empty-padding 0.1.0",
-      "result": "port_required",
-      "blocking_condition": "host module renamed and source identity changed"
+      "result": "ported_activated_and_formally_measured",
+      "blocking_condition": null
     },
     {
       "candidate": "query-start-location reuse 0.1.0",
-      "result": "port_required",
-      "blocking_condition": "attention builder and runner source identities changed"
+      "result": "ported_activated_and_formally_measured",
+      "blocking_condition": null
     },
     {
       "candidate": "residual-scale 0.1.0",
-      "result": "port_required",
-      "blocking_condition": "layer-norm implementation and operation path changed"
+      "result": "ported_activated_and_formally_measured",
+      "blocking_condition": null
     },
     {
       "candidate": "RoPE argument repair 0.1.0",
@@ -65,8 +67,13 @@
     }
   ],
   "formal_measurement": {
-    "started": false,
-    "reason": "candidate admission failed before NPU performance execution",
+    "started": true,
+    "runtime_family_status": "measured_no_stable_speedup",
+    "runtime_candidate_commit": "210038bc250d2558c039f6c0874f403c4d89588e",
+    "runtime_pair_throughput_delta_percent": [0.8408718732607401, -0.49415426219557856, -0.21265361984662556],
+    "runtime_geometric_pair_delta_percent": 0.04304157678833853,
+    "runtime_quality_exact_outputs": "210/210",
+    "remaining": ["gdn static-decay formal pairs", "attention candidate admission"],
     "required_pairs": 3,
     "order": "alternating Native/candidate with fresh processes",
     "quality_gate": "MMLU-Pro overlap with complete output comparison and no regression",
