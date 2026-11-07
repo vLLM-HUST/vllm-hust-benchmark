@@ -1,0 +1,31 @@
+sv2-n1         correct=165 length=9 invalid=9 incomplete=9 all_complete=False errors=0 uncovered_mixed=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+sv2-n2         correct=165 length=9 invalid=9 incomplete=9 all_complete=False errors=0 uncovered_mixed=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+sv2-n3         correct=165 length=9 invalid=9 incomplete=9 all_complete=False errors=0 uncovered_mixed=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+sv2-n4         correct=165 length=9 invalid=9 incomplete=9 all_complete=False errors=0 uncovered_mixed=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+sv2-w1         correct=166 length=9 invalid=9 incomplete=9 all_complete=False errors=0 uncovered_mixed=[]
+sv2-w2         correct=166 length=9 invalid=9 incomplete=9 all_complete=False errors=0 uncovered_mixed=[]
+token-identical to sv2-n1 {'sv2-n2': 200, 'sv2-n3': 200, 'sv2-n4': 200}
+token-identical to sv2-w1 {'sv2-w2': 200}
+raw vs native token-identical 10
+
+== raw (gating) (2 runs) vs native (4 runs)
+  1_accuracy (83.0, 82.5, 0.5, True) PASS
+  2_truncation (4.5, 4.5, 0.0, True) PASS
+  3_failures (0, True) PASS
+  4_systematic (['mmlu-pro-04069', 'mmlu-pro-06620', 'mmlu-pro-01310', 'mmlu-pro-05393', 'mmlu-pro-05579'], False) FAIL
+  case bootstrap 95% CI pp: -3.0 3.5
+  two-level bootstrap 95%: [-2.50, +4.00] pp; share < -2 pp = 8%
+  run-level Welch: undefined (zero run variance in both arms)
+  majority right->wrong ['mmlu-pro-04069', 'mmlu-pro-06620', 'mmlu-pro-01310', 'mmlu-pro-05393', 'mmlu-pro-05579']
+  majority wrong->right ['mmlu-pro-00439', 'mmlu-pro-04497', 'mmlu-pro-06741', 'mmlu-pro-00882', 'mmlu-pro-08107', 'mmlu-pro-10783']
+  info only, strict v1 veto: new wrong on all-native-correct (165): ['mmlu-pro-04069', 'mmlu-pro-06620', 'mmlu-pro-01310', 'mmlu-pro-05393', 'mmlu-pro-05579']
+   mmlu-pro-03766 C 11 N 1111
+   mmlu-pro-10672 C 11 N 1111
+   mmlu-pro-01741 C 11 N 1111
+   mmlu-pro-06074 C 00 N 0000
+   mmlu-pro-06741 C 11 N 0000
+   mmlu-pro-00882 C 11 N 0000
+   mmlu-pro-08107 C 11 N 0000
+  raw (gating) QUALITY_V2: FAIL
+
+PART_A_RAW: FAIL
