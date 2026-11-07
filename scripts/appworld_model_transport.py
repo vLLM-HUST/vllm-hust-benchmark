@@ -30,7 +30,14 @@ def save_new(path, payload, *, owner_uid=None):
 
 
 @contextmanager
-def model_proxy(queue, *, port=14001, timeout=600, max_request_bytes=1024 * 1024):
+def model_proxy(
+    queue,
+    *,
+    port=14001,
+    timeout=600,
+    max_request_bytes=1024 * 1024,
+    expected_model=None,
+):
     queue = Path(queue).resolve(strict=True)
     if not queue.is_dir() or timeout <= 0:
         raise ValueError(
@@ -55,7 +62,16 @@ def model_proxy(queue, *, port=14001, timeout=600, max_request_bytes=1024 * 1024
                 self.send_error(413)
                 return
             raw = self.rfile.read(size)
-            json.loads(raw)
+            try:
+                body = json.loads(raw)
+            except (UnicodeError, ValueError):
+                self.send_error(400, "Invalid request JSON")
+                return
+            if not isinstance(body, dict) or (
+                expected_model is not None and body.get("model") != expected_model
+            ):
+                self.send_error(400, "Request does not match the declared model")
+                return
             identity = uuid.uuid4().hex
             save_new(queue / (identity + ".request.json"), raw)
             response = queue / (identity + ".response.json")
@@ -87,7 +103,15 @@ def model_proxy(queue, *, port=14001, timeout=600, max_request_bytes=1024 * 1024
         thread.join()
 
 
-def process_one(queue, api_base, *, api_key=None, disable_thinking=False, timeout=600):
+def process_one(
+    queue,
+    api_base,
+    *,
+    api_key=None,
+    disable_thinking=False,
+    timeout=600,
+    expected_model=None,
+):
     endpoint = urlsplit(api_base)
     if (
         endpoint.scheme != "http"
@@ -125,6 +149,12 @@ def process_one(queue, api_base, *, api_key=None, disable_thinking=False, timeou
                 )
             raw = path.read_bytes()
             body = json.loads(raw)
+            if expected_model is not None and (
+                not isinstance(body, dict) or body.get("model") != expected_model
+            ):
+                payload = {"http_status": 400, "response": {"error": "Unbound model"}}
+                save_new(result, json.dumps(payload).encode(), owner_uid=owner_uid)
+                return True
             if disable_thinking:
                 options = body.setdefault("chat_template_kwargs", {})
                 if (
@@ -163,6 +193,9 @@ def main():
     parser.add_argument("--queue", required=True, type=Path)
     parser.add_argument("--api-base", required=True)
     parser.add_argument("--api-key-env")
+    parser.add_argument(
+        "--expected-model", help="Reject queued requests for another model"
+    )
     parser.add_argument("--disable-thinking", action="store_true")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument(
@@ -195,6 +228,7 @@ def main():
             args.api_base,
             api_key=os.environ[args.api_key_env] if args.api_key_env else None,
             disable_thinking=args.disable_thinking,
+            expected_model=args.expected_model,
         )
         if found:
             processed += 1

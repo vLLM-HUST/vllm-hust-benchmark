@@ -22,6 +22,7 @@
   ],
   "source_entrypoints": {
     "MLEBENCH": [
+      {"role":"native_evaluation","path":"scripts/run_mlebench_nomad_aide.py","scope":"Fixed NOMAD, original AIDE budgets with declared isolated CPU/local-model/validator bindings; startup verified with intentional offline failure, no real Agent submission yet"},
       {"role":"prepare_assets","path":"scripts/prepare_mlebench_nomad_author_data.py","scope":"Fixed NOMAD competition author's public data; unchanged MLE-bench preparer and all four published output checksums, not original Kaggle transport or an Agent score"},
       {"role":"prepare_assets","path":"scripts/prepare_swebench_author_source.py","scope":"--profile mlebench with original publisher archive; all758 software and public leaderboard files verified, not Kaggle competition inputs"},
       {"role":"original_profile","path":"configs/workload-native/mlebench-author-source.json","scope":"Pinned original source and expanded public LFS content identities; no competition or Agent completion implied"},

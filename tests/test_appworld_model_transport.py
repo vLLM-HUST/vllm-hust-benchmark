@@ -8,6 +8,7 @@ import sys
 import threading
 import time
 import subprocess
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 import pytest
@@ -15,6 +16,31 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from appworld_model_transport import model_proxy, process_one
 import appworld_model_transport as transport
+
+
+def test_bound_proxy_and_worker_reject_other_models(tmp_path, monkeypatch):
+    request_body = b'{"model":"unbound"}'
+    with model_proxy(tmp_path, port=0, expected_model="bound") as port:
+        request = Request(
+            f"http://127.0.0.1:{port}/v1/chat/completions",
+            data=request_body,
+            headers={"Content-Type": "application/json"},
+        )
+        with pytest.raises(HTTPError) as error:
+            urlopen(request, timeout=5)
+        assert error.value.code == 400
+    assert not list(tmp_path.glob("*.request.json"))
+
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("unbound queue input must not reach model")
+
+    monkeypatch.setattr(transport, "urlopen", forbidden)
+    identity = "a" * 32
+    (tmp_path / (identity + ".request.json")).write_bytes(request_body)
+    assert process_one(tmp_path, "http://127.0.0.1:1/v1", expected_model="bound")
+    response = json.loads((tmp_path / (identity + ".response.json")).read_bytes())
+    assert response["http_status"] == 400
+    assert not list(tmp_path.glob("*.forwarded-request.json"))
 
 
 @pytest.mark.parametrize("limit", [0, -1, True, 1.5, 64 * 1024 * 1024 + 1])

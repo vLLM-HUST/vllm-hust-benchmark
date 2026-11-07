@@ -5785,6 +5785,21 @@
   "blocker": "CIFAR10 and ogbn-arxiv valid original evidence reused. IMDb Messages004 ended at original18000s with no submission and original empty/-1 score, not a live task. Original evaluator now independently passes full25000-row known-label controls1.0/0.0 in an isolated offline CPU container, and rejects a missing CSV. These are controls, not model results. The original task explicitly requires DistilBERT finetuning and per-class predictions for all test rows. Remaining: obtain a practical original native Agent execution producing its own submission under the original budget; do not replace it with reference labels or another classifier. Source remains incomplete."
     },
     "MLEBENCH": {
+      "nomad_original_aide_launch_control_20261107": {
+        "status": "ORIGINAL_STARTUP_REACHED_FIRST_MODEL_REQUEST_OFFLINE_CONTROL",
+        "entry": "scripts/run_mlebench_nomad_aide.py",
+        "receipt": "mlebench-nomad-launch.qdauFz/launch-control.public.json",
+        "original_runtime_seconds": 86400,
+        "original_steps": 500,
+        "original_per_step_timeout_seconds": 32400,
+        "original_instructions_and_additional_notes_retained": true,
+        "declared_launcher_differences": ["isolated ARM64 Python replaces Conda activation", "CUDA library probes omitted for CPU profile", "original exit status propagated", "explicit local model and split validator"],
+        "first_request_captured": 1,
+        "intentional_mock_failure_exit_code": 1,
+        "submission_created": false,
+        "real_model_calls": 0,
+        "source_checkbox_eligible": false
+      },
       "nomad_aide_cpu_science_control_20261107": {
         "status": "ORIGINAL_INTERPRETER_AND_OFFICIAL_SCORER_PASSED_KNOWN_CODE_CONTROL",
         "requirements": "configs/workload-native/mlebench-aide-arm64-nomad-science.txt",

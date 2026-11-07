@@ -1268,6 +1268,13 @@ NOMAD 的 ARM64 CPU 科学执行对照补齐了 `configs/workload-native/mlebenc
 行预测； 独立容器随后以作者 `grade-sample` 和私有标签验证提交有效。该对照只证明固定赛题的 CPU 执行和评分链路，不是 Agent 生成的提交，不代表作者完整 CUDA
 镜像或其他科学包已适配。
 
+用 `scripts/run_mlebench_nomad_aide.py --author-root <固定MLE-bench源码> --model <实际模型ID>` 查看原 86,400
+秒、500 步与单步 32,400 秒配置。授权窗口内才加
+`--execute --output <空输出挂载> --queue <空私有队列> --validator-socket <评分工作容器套接字>`， 使用已核验的 AIDE
+源码与两组依赖，`python -S` 启动，并只读挂载原 `/home/instructions.txt`、公开输入及原校验脚本；ARM64 需提供 GNU `envsubst`。
+可信模型转发侧使用同一队列、实际回环端点和 `appworld_model_transport.py --expected-model <同一模型ID>`，按运行窗口设置显式等待和调用上限。
+启动脚本保留原指令拼接、时间、步数和输出链接，只替换 Conda 激活、去除 CUDA 库探测并传递原退出码。断网对照走到第一条原模型请求并在预设错误处退出； 未发真实推理、未生成提交，不能据此勾选。
+
 PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
