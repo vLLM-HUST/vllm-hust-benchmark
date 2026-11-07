@@ -28,6 +28,8 @@ RECIPES = [
     PROJECT + "paperbench/scripts/build-docker-images.sh",
     PROJECT + "paperbench/solvers/basicagent/solver.py",
     PROJECT + "README.md",
+    PROJECT + "paperbench/nano/eval.py",
+    PROJECT + "paperbench/nano/structs.py",
 ]
 
 
@@ -65,6 +67,14 @@ def inspect_original(author_root, *, pins_path=PINS, host_architecture=None):
         raise ValueError("review changed original BasicAgent model/tool contract")
     if "paperbench.reproduction.timeout=60" not in originals[RECIPES[4]]:
         raise ValueError("review changed author development protocol")
+    evaluation, structs = (originals[name] for name in RECIPES[5:])
+    if (
+        'default="pb-env:latest"' not in evaluation
+        or 'docker_image="pb-reproducer:latest"' not in structs
+        or 'docker_image="pb-env:latest"' not in structs
+        or "grade_locally: bool = True" not in structs
+    ):
+        raise ValueError("review changed original Agent, reproducer or judge image contract")
     architecture = host_architecture or platform.machine()
     return {
         "source_id": "PAPERBENCH",
@@ -76,6 +86,12 @@ def inspect_original(author_root, *, pins_path=PINS, host_architecture=None):
         "native_host_architecture_matches": architecture.lower() in {"amd64", "x86_64"},
         "cross_arch_execution_qualified": False,
         "original_recipe_auto_accepts_anaconda_terms": True,
+        "original_image_roles": {
+            "agent": "pb-env:latest",
+            "reproduction": "pb-reproducer:latest",
+            "remote_judge": "pb-env:latest",
+            "judge_defaults_to_local": True,
+        },
         "vendor_terms_accepted_by_this_check": False,
         "original_basicagent_default_time_seconds": 300,
         "original_basicagent_default_model_api": "OpenAI Responses",

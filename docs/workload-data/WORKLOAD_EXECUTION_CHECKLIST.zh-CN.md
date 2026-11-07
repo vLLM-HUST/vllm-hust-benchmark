@@ -1232,6 +1232,11 @@ PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07�
 续建外层脚本在成功标记后因尾部回车返回 127；原记录保留，同一镜像独立断网复验退出码为 0。镜像已在服务器侧导出为约 333 MB 的 Docker 归档，校验了 OCI 清单、镜像配置及 5
 层的压缩与解压摘要，尚未从归档重新加载运行。该镜像仅为复现环境，尚未执行原 Agent、论文复现与 rubric 评分。
 
+复用归档时，在授权的隔离 amd64 Docker 节点先核对机器清单中的归档 SHA-256，再用 `docker image load --input <归档>` 加载。归档按镜像 ID
+保存，不含标签；加载后用 `docker image inspect <镜像ID>` 核对镜像身份与架构，确认目标标签未被其他任务使用，再用
+`docker image tag <镜像ID> pb-reproducer:latest` 恢复作者默认标签。原入口预检会区分 `pb-reproducer:latest`（复现）与
+`pb-env:latest`（Agent 和非本地评分）；不能把前者当作后者。评分默认本地执行，仍须具备原协议的评分模型。
+
 当前两个 Qwen 服务的 OpenAPI 均注册 `POST /v1/responses`，但只读核查实际监听进程的启动参数及部署源码，确认均无工具服务器配置，未绑定作者 BasicAgent
 所需的 `web_search_preview` 浏览工具。 不能用路由健康、纯聊天或无搜索的 Agent 代替原协议。该检查仅 GET，不发送生成或搜索；原容器的架构和条款限制仍单列。
 

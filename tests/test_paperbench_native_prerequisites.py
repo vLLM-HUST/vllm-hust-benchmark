@@ -25,6 +25,10 @@ def fixture(tmp_path):
         "OpenAIResponsesTurnCompleterConfig(\n"
         'tools=[WebSearchToolParam(type="web_search_preview")]\n',
         "paperbench.reproduction.timeout=60\n",
+        'default="pb-env:latest"\n',
+        'docker_image="pb-reproducer:latest"\n'
+        'docker_image="pb-env:latest"\n'
+        "grade_locally: bool = True\n",
     ]
     entries = []
     for name, text in zip(runner.RECIPES, texts, strict=True):
@@ -66,7 +70,13 @@ def test_architecture_never_promotes_preflight_to_execution(
         tmp_path, pins_path=pins, host_architecture=architecture
     )
     assert result["native_host_architecture_matches"] is match
-    assert result["verified_original_files"] == 5
+    assert result["verified_original_files"] == 7
+    assert result["original_image_roles"] == {
+        "agent": "pb-env:latest",
+        "reproduction": "pb-reproducer:latest",
+        "remote_judge": "pb-env:latest",
+        "judge_defaults_to_local": True,
+    }
     assert result["original_recipe_auto_accepts_anaconda_terms"]
     assert not result["vendor_terms_accepted_by_this_check"]
     assert not result["cross_arch_execution_qualified"]
