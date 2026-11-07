@@ -3360,14 +3360,14 @@
         "models": [
           "Qwen3.5 GDN family; result-specific scope applies"
         ],
-        "requirements_en": "The static-decay candidate is source-bound to the current Host. Native delayed state update still requires a current-runner lifecycle rewrite. Any admitted candidate must then complete the two-rank, three-pair formal campaign.",
-        "requirements_zh": "静态衰减候选已绑定当前 Host；Native delayed 状态更新仍需按当前运行器重写生命周期。可准入候选随后仍须完成双 rank、三组配对正式测试。"
+        "requirements_en": "Static decay is source-bound and has emitted cache and first-candidate receipts on both TP ranks. Native delayed still requires a current-runner lifecycle rewrite; static decay still needs three alternating Native/candidate pairs and the frozen quality workload.",
+        "requirements_zh": "静态衰减已绑定当前 Host，并在两个 TP rank 上产生缓存准备与首次候选命中回执；Native delayed 仍需按当前运行器重写生命周期，静态衰减仍须完成三组 Native/候选交替测试与冻结质量工作负载。"
       },
       "evidence_level": "retest_pending",
       "public_effect_status": "inconclusive",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/fff0aa017c1bbadb8d827e0f71e7f2c6eb9b152f/reports/reorganized-mod-current-host-port-20261107",
-      "public_effect_en": "Current-Host source qualification is complete for static decay. Native delayed remains blocked and formal NPU performance qualification has not started; legacy measurements are source records only.",
-      "public_effect_zh": "静态衰减已完成当前 Host 源码资格校验；Native delayed 仍受阻，正式 NPU 性能验收尚未开始，旧测量仅保留为来源记录。"
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/5c6f3496cc970f9cd85bef91ca59d40c7f06b8ac/reports/reorganized-mod-current-host-port-20261107",
+      "public_effect_en": "Static decay passed current-Host source checks and a two-rank Ascend 910B2 activation smoke: each rank prepared 18 cache entries and entered the candidate kernel, and inference returned OK. Performance and quality qualification remain pending; legacy measurements are source records only.",
+      "public_effect_zh": "静态衰减已通过当前 Host 源码检查及双 rank Ascend 910B2 激活冒烟：每个 rank 均准备 18 个缓存项并进入候选内核，推理返回 OK。性能与质量验收仍待完成，旧测量仅保留为来源记录。"
     },
     {
       "id": "runtime-micro-optimizations",
@@ -3422,14 +3422,14 @@
         "models": [
           "Result-specific model and workload scope"
         ],
-        "requirements_en": "Empty-padding, query-start-location reuse and residual-scale cache are source-bound to the current Host and remain default-off. Each mechanism still requires two-rank activation receipts and the three-pair formal campaign.",
-        "requirements_zh": "空 padding、query-start-location 复用和 residual-scale 缓存已绑定当前 Host，且保持默认关闭；每项仍需双 rank 激活回执和三组配对正式测试。"
+        "requirements_en": "Empty-padding, query-start-location reuse and residual-scale cache are source-bound, default-off, and activation-qualified on both TP ranks. Three alternating Native/candidate pairs and the frozen quality workload are still required.",
+        "requirements_zh": "空 padding、query-start-location 复用和 residual-scale 缓存已绑定当前 Host、保持默认关闭，并已在两个 TP rank 上完成激活资格校验；仍须完成三组 Native/候选交替测试与冻结质量工作负载。"
       },
       "evidence_level": "retest_pending",
       "public_effect_status": "inconclusive",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/fff0aa017c1bbadb8d827e0f71e7f2c6eb9b152f/reports/reorganized-mod-current-host-port-20261107",
-      "public_effect_en": "Three retained mechanisms passed current-Host source qualification and the old RoPE repair was retired as absorbed. Formal NPU performance qualification has not started; legacy measurements are source records only.",
-      "public_effect_zh": "三个保留机制已通过当前 Host 源码资格校验，旧 RoPE 修复因已被底座吸收而退役；正式 NPU 性能验收尚未开始，旧测量仅保留为来源记录。"
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/5c6f3496cc970f9cd85bef91ca59d40c7f06b8ac/reports/reorganized-mod-current-host-port-20261107",
+      "public_effect_en": "All three retained mechanisms emitted install and first-exercise receipts on both Ascend 910B2 TP ranks, and inference returned OK. The old RoPE repair is retired as absorbed. Performance and quality qualification remain pending; legacy measurements are source records only.",
+      "public_effect_zh": "三个保留机制均已在两个 Ascend 910B2 TP rank 上产生安装与首次实际命中回执，推理返回 OK；旧 RoPE 修复因已被底座吸收而退役。性能与质量验收仍待完成，旧测量仅保留为来源记录。"
     },
     {
       "id": "ascend-attention-optimizations",
@@ -3489,7 +3489,7 @@
       },
       "evidence_level": "retest_pending",
       "public_effect_status": "inconclusive",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/fff0aa017c1bbadb8d827e0f71e7f2c6eb9b152f/reports/reorganized-mod-current-host-port-20261107",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/5c6f3496cc970f9cd85bef91ca59d40c7f06b8ac/reports/reorganized-mod-current-host-port-20261107",
       "public_effect_en": "Legacy candidate disposition is complete, but there is currently no admitted executable attention candidate. PyramidKV requires a current-runner rewrite before source and NPU qualification; no legacy metric is current.",
       "public_effect_zh": "旧候选处置已完成，但当前没有可准入执行的注意力候选；PyramidKV 须按当前运行器重写后再做源码与 NPU 验收，旧指标均非当前结论。"
     },
