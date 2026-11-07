@@ -3,7 +3,7 @@
 当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，108 项已勾选，5 项待完成；另有 5
 项仅分类。 下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
 
-待完成：MLAgentBench、MLE-bench、WebArena、VisualWebArena、WorkArena、PaperBench。
+待完成：MLAgentBench、MLE-bench、VisualWebArena、WorkArena、PaperBench。
 
 ## 原40类计划的增量定义（不改变历史快照）
 
@@ -742,6 +742,12 @@ docker run --rm --network host --read-only --cap-drop ALL \
 
 VisualWebArena仍未完成。先复用固定作者源码准备入口，再运行
 `python scripts/check_visualwebarena_native_prerequisites.py --author-root "$AUTHOR_ROOT"`，预检不安装模型、不访问站点或调用Agent。2026-11-07当前服务器已按固定Git与SHA256核验478份原文件、全部910个任务定义及配套参考图片；约197MiB下载归档在核验解包后删除。固定Classifieds原题0/1/2均为URL匹配且没有目标输入图片，但作者原启动器仍无条件加载`Salesforce/blip2-flan-t5-xl`评分辅助模型，其设备选项只有CPU/CUDA；因此不能据题目类型跳过该依赖，也不能将CPU辅助模型执行称为NPU-only。NPU兼容环境、原站点和真正原生Agent/评分尚待验证。
+
+原启动器的设备适配可离线准备：`python scripts/check_visualwebarena_native_prerequisites.py --author-root "$AUTHOR_ROOT" --prepare-npu-launcher "$NEW_OUTPUT"`。
+该命令核验固定作者树，在全新目录写入适配后的 `run.py`、可审阅补丁和摘要，不写入作者树，不加载模型或启动站点。已在服务器上以 478 份原文件通过实际生成和编译检查。
+适配后的启动器要求明确传入 `--eval_captioning_model_device npu:0`，仅暴露一张获准使用的 NPU，并设置 `VWA_BLIP2_ROOT` 指向已核验的本地
+BLIP-2 权重目录。原观察和评分辅助模型的初始化分支均用 FP32 NPU， 相同模型仍沿用原来的共享实例逻辑。后续运行须使用隔离可写的作者树副本、原站点配置和已验证的 actor
+环境；当前尚未执行生成的启动器，不计原题或评分通过。
 
 公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
 CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。

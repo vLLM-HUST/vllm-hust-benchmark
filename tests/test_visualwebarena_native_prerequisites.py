@@ -3,7 +3,10 @@
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
+import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -94,6 +97,86 @@ def test_no_duplicate_or_reselected_fixed_tasks(tmp_path, ids):
     pins = fixture(tmp_path, ids=ids)
     with pytest.raises(ValueError, match="distinct original|fixed original"):
         runner.inspect_original(tmp_path, pins_path=pins)
+
+
+@pytest.mark.parametrize(
+    "observation", ["image_som", "image", "accessibility_tree_with_captioner"]
+)
+def test_prepared_captioner_binding_on_both_original_branches(
+    tmp_path, monkeypatch, observation
+):
+    source = """def parser_stub(parser):
+    parser.add_argument("--eval_captioning_model_device", choices=["cpu", "cuda"],)
+
+def initialize(args):
+    if args.observation_type in [
+        "accessibility_tree_with_captioner",
+        "image_som",
+    ]:
+        device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
+        dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+        caption_image_fn = image_utils.get_captioning_fn(
+            device, dtype, args.captioning_model
+        )
+    else:
+        caption_image_fn = None
+    if DATASET == 'visualwebarena':
+        if caption_image_fn and args.eval_captioning_model == args.captioning_model:
+            eval_caption_image_fn = caption_image_fn
+        else:
+            eval_caption_image_fn = image_utils.get_captioning_fn(
+                args.eval_captioning_model_device,
+                torch.float16
+                if (
+                    torch.cuda.is_available()
+                    and args.eval_captioning_model_device == "cuda"
+                )
+                else torch.float32,
+                args.eval_captioning_model,
+            )
+    return caption_image_fn, eval_caption_image_fn
+"""
+    patched = runner.patch_captioner_device(source)
+    with pytest.raises(ValueError, match="binding changed"):
+        runner.patch_captioner_device(patched)
+    local = tmp_path / "blip2"
+    local.mkdir()
+    monkeypatch.setenv("VWA_BLIP2_ROOT", str(local))
+    monkeypatch.setitem(sys.modules, "torch_npu", SimpleNamespace())
+    calls = []
+    captioner = object()
+
+    def get_captioning_fn(*args):
+        calls.append(args)
+        return captioner
+
+    npu = SimpleNamespace(device_count=lambda: 1)
+    namespace = {
+        "DATASET": "visualwebarena",
+        "Path": Path,
+        "os": os,
+        "torch": SimpleNamespace(device=str, float32="fp32", npu=npu),
+        "image_utils": SimpleNamespace(get_captioning_fn=get_captioning_fn),
+    }
+    exec(compile(patched, "fixture", "exec"), namespace)
+    args = SimpleNamespace(
+        observation_type=observation,
+        captioning_model="Salesforce/blip2-flan-t5-xl",
+        eval_captioning_model="Salesforce/blip2-flan-t5-xl",
+        eval_captioning_model_device="cpu",
+    )
+    with pytest.raises(ValueError, match="requires"):
+        namespace["initialize"](args)
+    args.eval_captioning_model_device = "npu:0"
+    npu.device_count = lambda: 2
+    with pytest.raises(RuntimeError, match="exactly one"):
+        namespace["initialize"](args)
+    assert calls == []
+    npu.device_count = lambda: 1
+    observation_fn, eval_fn = namespace["initialize"](args)
+    assert eval_fn is captioner
+    assert observation_fn is (None if observation == "image" else captioner)
+    assert calls == [("npu:0", "fp32", str(local.resolve()))]
 
 
 def test_npu_captioner_component_does_not_mark_browser_source_delivered():
