@@ -29,6 +29,7 @@ OUTPUTS = {
     "public": {"train.csv", "test.csv", "sample_submission.csv"},
     "private": {"test.csv"},
 }
+PREPARED_COUNTS = {"train": 2160, "test": 240}
 
 
 def sha256(path):
@@ -144,12 +145,90 @@ def prepare(archive, output):
     }
 
 
+def verify_public_structure(public):
+    expected = OUTPUTS["public"] | {"description.md", "train", "test"}
+    if {path.name for path in public.iterdir()} != expected or any(
+        path.is_symlink() for path in public.rglob("*")
+    ):
+        raise ValueError("unexpected paths in the prepared public directory")
+
+    def read_table(name):
+        with (public / name).open(encoding="utf-8", newline="") as stream:
+            reader = csv.DictReader(stream)
+            return reader.fieldnames, [row["id"] for row in reader]
+
+    train_fields, train_ids = read_table("train.csv")
+    test_fields, test_ids = read_table("test.csv")
+    sample_fields, sample_ids = read_table("sample_submission.csv")
+    targets = set(sample_fields) - {"id"}
+    if sample_ids != test_ids or not targets or not targets <= set(train_fields):
+        raise ValueError("sample submission does not match the original public tables")
+    if targets & set(test_fields):
+        raise ValueError("public test table unexpectedly contains target columns")
+
+    for split, ids in (("train", train_ids), ("test", test_ids)):
+        root = public / split
+        if len(ids) != PREPARED_COUNTS[split] or len(set(ids)) != len(ids):
+            raise ValueError(f"unexpected prepared row count for {split}")
+        folders = {path.name: path for path in root.iterdir()}
+        if set(folders) != set(ids) or any(
+            not folder.is_dir() for folder in folders.values()
+        ):
+            raise ValueError(f"geometry folders do not match prepared IDs for {split}")
+        for folder in folders.values():
+            geometry = folder / "geometry.xyz"
+            if not geometry.is_file() or not geometry.stat().st_size:
+                raise ValueError(f"missing or empty original geometry in {split}")
+            if {path.name for path in folder.iterdir()} != {"geometry.xyz"}:
+                raise ValueError(f"unexpected file beside original geometry in {split}")
+
+    return {
+        "train_rows": len(train_ids),
+        "test_rows": len(test_ids),
+        "sample_submission_rows": len(sample_ids),
+        "geometry_references_resolved": len(train_ids) + len(test_ids),
+        "test_and_sample_submission_order_matched": True,
+        "test_target_columns_present": False,
+    }
+
+
+def verify_public(public):
+    import mlebench
+    from mlebench.data import get_checksum
+    from mlebench.utils import load_yaml
+
+    package = Path(mlebench.__file__).resolve().parent
+    verify_installed_competition(package)
+    expected = load_yaml(package / "competitions" / COMPETITION / "checksums.yaml")[
+        "public"
+    ]
+    if set(expected) != OUTPUTS["public"]:
+        raise ValueError("unexpected published public output checksum coverage")
+    readback = verify_public_structure(public)
+    for name, checksum in expected.items():
+        if get_checksum(public / name) != checksum:
+            raise ValueError(f"prepared public file does not match publisher: {name}")
+    return {
+        "status": "PREPARED_PUBLIC_INPUT_VERIFIED_NOT_AGENT_EXECUTION",
+        "competition_id": COMPETITION,
+        **readback,
+        "publisher_public_table_checksums_verified": sorted(expected),
+        "private_scoring_labels_read": False,
+        "source_checkbox_eligible": False,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--archive", type=Path)
     parser.add_argument("--data-dir", type=Path)
+    parser.add_argument("--verify-public-dir", type=Path)
     args = parser.parse_args()
-    if args.archive is None and args.data_dir is None:
+    if args.verify_public_dir is not None:
+        if args.archive is not None or args.data_dir is not None:
+            parser.error("--verify-public-dir cannot be combined with preparation")
+        result = verify_public(args.verify_public_dir.resolve(strict=True))
+    elif args.archive is None and args.data_dir is None:
         result = {
             "status": "PLAN_ONLY",
             "competition_id": COMPETITION,
