@@ -647,6 +647,11 @@ WorkArena（未完成）：使用
 `DEFAULT_BENCHMARKS["workarena_l1"]()` 复用这三个原 `EnvArgs`，保留每题 15 步、无任务参数覆盖及原 `workarena` 单动作配置；后续用同一
 ID 和种子执行原重置、动作和校验，不按结果换题。
 
+执行入口为
+`scripts/run_workarena_agentlab.py --model <实际模型ID> --inventory docs/workload-data/dataset-validation-status.json`。
+默认只组装实验，已用原 AgentLab 0.4.2 容器离线核验三个配置，没有调用模型或实例。授权后，在隔离环境用原实例环境变量注入专用实例，不自动选共享池；再加
+`--execute --confirm-dedicated-instance --endpoint <回环/v1端点> --output <私有新目录>`。该执行分支尚未验证；保留各题终态、原奖励及错误证据，不把配置成功当作原生交付。
+
 BixBench（固定三题已交付）：固定原题为 `bix-1-q1`、`bix-1-q2`、`bix-10-q1`。取得原生状态与轨迹后，用
 `scripts/prepare_bixbench_original_grade_input.py --author-root <源码> --data-root <数据> --native-output <原输出> --output <新目录> --limit 3 --execute`
 生成评分输入，核对题目身份、原参考答案与 str/str/range 模式；不丢弃空答案。共享队列仅用于恢复审计，四条合成裁判对照不用于正式评分。 在隔离环境中用

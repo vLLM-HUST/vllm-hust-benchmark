@@ -62,7 +62,7 @@ def bind_l1_environment(benchmark, selected, candidate_count):
     return bound, expected_actions
 
 
-def main():
+def original_l1_profile():
     import browsergym.workarena as workarena
     from browsergym.experiments.benchmark.configs import DEFAULT_BENCHMARKS
     import gymnasium
@@ -77,14 +77,19 @@ def main():
     )
     benchmark = DEFAULT_BENCHMARKS["workarena_l1"]()
     bound, actions = bind_l1_environment(benchmark, selected, len(sampled))
+    return workarena.__version__, len(sampled), selected, benchmark, bound, actions
+
+
+def main():
+    version, candidates, selected, benchmark, bound, actions = original_l1_profile()
     print(
         json.dumps(
             {
                 "status": "FIXED_ORIGINAL_L1_SAMPLE_PLANNED_NO_INSTANCE_OR_AGENT",
                 "source_id": "WORKARENA",
-                "workarena_version": workarena.__version__,
+                "workarena_version": version,
                 "original_sampler": {"filter": "l1", "meta_seed": 42, "n_seed_l1": 10},
-                "original_sampler_candidates": len(sampled),
+                "original_sampler_candidates": candidates,
                 "selection_rule": "first original seed in each of the first three distinct publisher categories",
                 "selected": selected,
                 "browsergym_benchmark": benchmark.name,

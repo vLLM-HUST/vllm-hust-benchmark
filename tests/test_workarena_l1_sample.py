@@ -1,6 +1,7 @@
 """Offline controls for WorkArena sample selection, not native execution."""
 
 import importlib.util
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -91,3 +92,48 @@ def test_refuses_changed_action_set():
     benchmark.high_level_action_set_args.multiaction = True
     with pytest.raises(ValueError, match="action profile changed"):
         PLANNER.bind_l1_environment(benchmark, [{"task_id": "a", "seed": 19}], 1)
+
+
+@pytest.fixture
+def agentlab_entry(monkeypatch):
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "scripts"))
+    return importlib.import_module("run_workarena_agentlab")
+
+
+def test_dedicated_instance_guard_does_not_use_pool(agentlab_entry):
+    with pytest.raises(ValueError, match="no pool fallback"):
+        agentlab_entry.require_dedicated_instance({"SNOW_INSTANCE_POOL": "pool.json"})
+    credentials = {
+        name: "fixture" for name in ("SNOW_INSTANCE_UNAME", "SNOW_INSTANCE_PWD")
+    }
+    agentlab_entry.require_dedicated_instance(
+        {**credentials, "SNOW_INSTANCE_URL": "https://fixture.service-now.com"}
+    )
+    with pytest.raises(ValueError, match="dedicated HTTPS"):
+        agentlab_entry.require_dedicated_instance(
+            {
+                **credentials,
+                "SNOW_INSTANCE_URL": "https://fixture.service-now.com.invalid",
+            }
+        )
+
+
+def test_native_runner_checks_the_existing_inventory(tmp_path, agentlab_entry):
+    row = {"task_id": "a", "seed": 19, "category": "fixture"}
+    inventory = tmp_path / "inventory.json"
+    inventory.write_text(
+        json.dumps(
+            {
+                "delivery_inventory": {
+                    "WORKARENA": {
+                        "fixed_l1_sample_preflight_20261107": {"selected": [row]}
+                    }
+                }
+            }
+        )
+    )
+    agentlab_entry.verify_selected_sample(
+        inventory, [{**row, "gym_id": "browsergym/a"}]
+    )
+    with pytest.raises(ValueError, match="differs"):
+        agentlab_entry.verify_selected_sample(inventory, [{**row, "seed": 20}])
