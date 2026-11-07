@@ -627,6 +627,11 @@ Agent容器断网，无NPU设备或Docker socket；只挂私有队列和原资�
 去掉首步后，训练步中位耗时从 29.17 秒降至 18.07 秒，单条推理从 0.327 秒降至 0.142 秒。按生成脚本的计算量外推，24 线程仍约需 16.7 小时，不能据此启动原样重跑或改变
 5 小时预算。该结果只是短时 CPU 对照，未产生提交、评分或 NPU 请求。
 
+科学 NPU 执行仍未验证。只读对比发现：正常托管容器由 containerd 注入两张已分配计算设备及管理设备，另有 `/dev/dvpp_cmdlist`； 此前四份独立 Docker
+对照只映射一张计算设备及管理设备，未映射该节点。[昇腾设备说明](https://github.com/Ascend/mind-cluster/blob/master/docs/zh/scheduling/07_references/05_appendix.md)
+将其归为视觉预处理设备，不能据此认定它导致文本张量初始化失败。两个执行环境的隔离配置也不完全相同。下一次只在取得独立设备窗口后，先用受信最小张量程序核验托管隔离执行器，
+再验证科学训练；不放宽共享节点策略，不在现有推理服务里运行 Agent 生成代码。
+
 WorkArena（未完成）：使用
 `scripts/prepare_workarena_author_source.py --action prepare --archive <官方源码包> --author-root <新目录>`
 准备固定版本，再用同一脚本的 `--action verify --author-root <源码目录>` 核验。官方源码包不是 ServiceNow 实例快照。
