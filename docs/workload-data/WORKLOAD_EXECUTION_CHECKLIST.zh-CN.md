@@ -755,6 +755,11 @@ SoM actor 另有独立接入缺口：原 `MultimodalCoTPromptConstructor` 把 3 
 还按模型名称判断多模态，OpenAI 路径用 `tiktoken.encoding_for_model`，不能只换 endpoint 和 model 参数。
 下一步须验证可保留原图文、角色、示例顺序与预算的 actor 接入；删图、改角色、冒用 GPT-4V 名称或改用纯文本结果均不能据此勾选。
 
+真实服务的预处理入口也已验证：运行原 `get_lm_api_input` 和原 PNG 编码函数，使用全部三组原图文示例及一张公开示例图充当控制用页面图，不采集浏览器。 原结构 7 条
+`system`、1 条 `user`、4 个图像 part 调用 `/v1/chat/completions/render` 返回 HTTP 400，原因是后续 `system`。 单首条文本
+`system` 加 `user` 图像的对照返回 HTTP 200，产生多模态特征及 1959 个输入 token，保留 384-token 输出预算。两次均只走预处理，无生成。
+当前部署源码在请求解析阶段保留消息名称，下一步可在独立预处理实例验证模型侧模板适配，而不是改原请求；适配不等同于原 GPT-4V actor。
+
 公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
 CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。
 
