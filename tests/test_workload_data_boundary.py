@@ -87,7 +87,7 @@ def test_webarena_reader_has_only_data_and_integrity_imports():
             imports.update(item.name for item in node.names)
         elif isinstance(node, ast.ImportFrom):
             imports.add(node.module)
-    assert imports == {"copy", "hashlib", "assets", "records"}
+    assert imports == {"copy", "hashlib", "pathlib", "assets", "records"}
     assert not any(
         isinstance(node, ast.Call)
         and isinstance(node.func, ast.Name)

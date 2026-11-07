@@ -50,7 +50,7 @@ def _binding(entry, catalog_root=None):
         else source_spec(sid, catalog_root)
     )
     spec = mapping_spec(mapping) if mapping else adapter_spec(sid, catalog_root)
-    if sid == "WEBARENA" and mapping is None:
+    if sid in {"WEBARENA", "VISUALWEBARENA"} and mapping is None:
         from .webarena import pipeline_manifest, relation_spec
 
         manifest = pipeline_manifest(manifest)

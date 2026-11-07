@@ -1,28 +1,34 @@
-"""Lossless original WebArena tasks, with evaluator data kept out of inputs."""
+"""Lossless original WebArena-family tasks; evaluator data stays out of inputs."""
 
 from copy import deepcopy
 import hashlib
+from pathlib import PurePosixPath
 
 from .assets import _json, asset_path, verify_file
 from .records import WorkloadRecord
 
 TASKS = "config_files/test.raw.json"
+SOURCE_TASKS = {
+    "WEBARENA": (TASKS,),
+    "VISUALWEBARENA": (
+        "config_files/vwa/test_classifieds.raw.json",
+        "config_files/vwa/test_reddit.raw.json",
+        "config_files/vwa/test_shopping.raw.json",
+    ),
+}
 
 
 def pipeline_manifest(source):
     assets = deepcopy(source.get("native_task_assets", source.get("files", [])))
-    tasks = [entry for entry in assets if entry["path"] == TASKS]
-    if (
-        source.get("source_id") != "WEBARENA"
-        or not source.get("revision")
-        or len(tasks) != 1
-    ):
+    paths = SOURCE_TASKS.get(source.get("source_id"), ())
+    tasks = [entry for name in paths for entry in assets if entry["path"] == name]
+    if not paths or not source.get("revision") or len(tasks) != len(paths):
         raise ValueError("pinned original WebArena task array required")
     return {
         **deepcopy(source),
         "unit": "original_web_task_package",
         "provenance_kind": "publisher_original_task_definition",
-        "files": [{**tasks[0], "role": "data"}],
+        "files": [{**entry, "role": "data"} for entry in tasks],
         "native_task_assets": assets,
     }
 
@@ -40,15 +46,25 @@ def relation_spec(source, spec):
     }
 
 
-def original_task_packages(author_root, *, manifest):
+def original_task_packages(author_root, *, manifest, task_path=None):
     bound = pipeline_manifest(manifest)
     assets = bound["native_task_assets"]
     if len({entry["path"] for entry in assets}) != len(assets):
         raise ValueError("distinct original WebArena asset paths required")
     for entry in assets:
         verify_file(author_root, entry)
-    entry = next(item for item in assets if item["path"] == TASKS)
-    raw = asset_path(author_root, TASKS).read_bytes()
+    paths = SOURCE_TASKS[bound["source_id"]]
+    if task_path is not None:
+        if task_path not in paths:
+            raise ValueError("registered original web task file required")
+        paths = (task_path,)
+    for name in paths:
+        entry = next(item for item in assets if item["path"] == name)
+        yield from _file_packages(author_root, entry, bound)
+
+
+def _file_packages(author_root, entry, bound):
+    raw = asset_path(author_root, entry["path"]).read_bytes()
     if hashlib.sha256(raw).hexdigest() != entry["sha256"]:
         raise ValueError("WebArena task bytes changed during reading")
     rows = _json(raw.decode("utf-8"))
@@ -69,8 +85,17 @@ def original_task_packages(author_root, *, manifest):
         seen.add(row["task_id"])
     try:
         for row in rows:
+            visual = bound["source_id"] == "VISUALWEBARENA"
+            split = (
+                PurePosixPath(entry["path"])
+                .name.removeprefix("test_")
+                .removesuffix(".raw.json")
+            )
             yield {
-                "task_id": str(row["task_id"]),
+                "task_id": f"{split}:{row['task_id']}"
+                if visual
+                else str(row["task_id"]),
+                **({"original_split": split} if visual else {}),
                 "input": {
                     "original_task": deepcopy(
                         {key: value for key, value in row.items() if key != "eval"}
@@ -78,17 +103,25 @@ def original_task_packages(author_root, *, manifest):
                 },
                 "original_eval": deepcopy(row["eval"]),
                 "original_asset": deepcopy(entry),
-                "source": {"source_id": "WEBARENA", "revision": bound["revision"]},
+                "source": {
+                    "source_id": bound["source_id"],
+                    "revision": bound["revision"],
+                },
             }
     finally:
         verify_file(author_root, entry)
 
 
 def original_rows(path, spec):
-    if path.name != "test.raw.json" or path.parent.name != "config_files":
+    paths = SOURCE_TASKS[spec["original_package_source"]["source_id"]]
+    matches = [name for name in paths if path.as_posix().endswith("/" + name)]
+    if len(matches) != 1:
         raise ValueError("original WebArena task file required")
+    name = matches[0]
     yield from original_task_packages(
-        path.parents[1], manifest=spec["original_package_source"]
+        path.parents[len(PurePosixPath(name).parts) - 1],
+        manifest=spec["original_package_source"],
+        task_path=name,
     )
 
 
@@ -97,9 +130,18 @@ def adapt_case(row, *, source, index):
         source={**deepcopy(source), **deepcopy(row["source"])},
         task={
             "task_id": row["task_id"],
-            "identity_kind": "original_web_task_id",
+            "identity_kind": (
+                "original_split_and_web_task_id"
+                if "original_split" in row
+                else "original_web_task_id"
+            ),
             "native_unit": "original_web_task_package",
             "input": deepcopy(row["input"]),
+            **(
+                {"original_split": row["original_split"]}
+                if "original_split" in row
+                else {}
+            ),
         },
         runtime={
             "kind": "interactive_task_package",
@@ -113,7 +155,11 @@ def adapt_case(row, *, source, index):
             "adapter_version": "source-adapter/v1",
             "mapping": "webarena_original_packages",
             "source_row_index": index,
-            "order": "original_task_array_not_request_arrival",
+            "order": (
+                "original_split_then_task_array_not_request_arrival"
+                if "original_split" in row
+                else "original_task_array_not_request_arrival"
+            ),
             "synthetic_fallback": False,
             "unmapped_field_names": [],
         },

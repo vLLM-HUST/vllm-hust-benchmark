@@ -859,7 +859,7 @@ def iter_workload(
 
         manifest = pipeline_manifest(manifest)
         spec = relation_spec(manifest, spec)
-    if source_id == "WEBARENA" and mapping is None:
+    if source_id in {"WEBARENA", "VISUALWEBARENA"} and mapping is None:
         from .webarena import pipeline_manifest, relation_spec
 
         manifest = pipeline_manifest(manifest)

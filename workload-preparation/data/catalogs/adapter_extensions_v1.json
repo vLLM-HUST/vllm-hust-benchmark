@@ -2,6 +2,14 @@
   "version": "adapter-extensions/v1",
   "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
   "adapters": {
+    "VISUALWEBARENA": {
+      "kind":"task_dataset", "mapping":"webarena_original_packages",
+      "input_fields":["input"], "required_fields":["task_id","input","original_eval","source","original_asset"],
+      "outcome_fields":["original_eval"], "annotation_fields":[], "id_field":"task_id",
+      "code_revision":"89f5af29305c3d1e9f97ce4421462060a70c9a03", "identity_note":"pragma: allowlist secret - fixed original public revision",
+      "requirements":["Original split/task fields, image references and separate evaluator; native websites/Agent/scoring separate, no prompt rendering"],
+      "status":"ORIGINAL_VISUAL_WEB_TASK_READER_NATIVE_VALIDATION_SEPARATE"
+    },
     "WEBARENA": {
       "kind":"task_dataset", "mapping":"webarena_original_packages",
       "input_fields":["input"], "required_fields":["task_id","input","original_eval","source","original_asset"],
