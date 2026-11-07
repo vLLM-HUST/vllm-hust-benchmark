@@ -1240,8 +1240,11 @@ LFS指针文本冒充展开后的原文件。 同一入口改用 `--action plan`
 另核验了一条不依赖 Kaggle 登录的作者公开数据路线：[竞赛作者论文](https://doi.org/10.1038/s41524-019-0239-3)指向的公开发布包含同一竞赛的原 CSV
 和几何数据。 固定发布版本中核对了训练 2,400 个和测试 600 个原几何文件，不解包公开发布的有标签测试 CSV。按 MLE-bench
 原准备函数要求组装四份输入归档后，断网运行未修改的原准备函数， 生成的三份公开 CSV 和一份私有标签 CSV 均匹配固定版本的作者校验值。未验证 Kaggle 外层 ZIP，不能称作
-`mlebench prepare` 官方下载路径。 官方 `grade-sample` 已对作者自带样例返回有效评分 0.21174；这是评分入口控制，不是 Agent 提交或竞赛成绩。真正的
-Agent 运行仅应挂载准备好的公开输入； 原始归档和私有标签不得暴露给 Agent。赛题仍是待锁定候选，整项未勾选。
+`mlebench prepare` 官方下载路径。官方 `grade-sample` 已对作者自带样例返回有效评分 0.21174；这是评分入口控制，不是 Agent 提交或竞赛成绩。
+现固定该原赛题为单赛题验证样本，选择发生在任何 Agent 运行之前。用 `python scripts/prepare_mlebench_nomad_author_data.py` 查看固定发布
+URL 和 SHA-256； 在已核验的 MLE-bench 环境内加 `--archive <作者发布ZIP> --data-dir <专用空目录>` 运行，脚本与对应
+`configs/workload-native/mlebench-author-source.json` 一起只读挂载。该入口已在断网 ARM64 容器实跑。Agent 只读挂载返回的
+`agent_mount_relative_to_data_dir`；原始归档和私有标签不得暴露给 Agent。整项仍未勾选。
 
 PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用

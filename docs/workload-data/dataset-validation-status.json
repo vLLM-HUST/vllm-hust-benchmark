@@ -5793,6 +5793,9 @@
         "publisher_archive_bytes": 6957213,
         "publisher_archive_sha256": "fbbc2667ff62b057d258725729f0506f48254f4c8606f44db01e587e405c89cf",
         "preparation_receipt": "mlebench-nomad-public-author-control.JncxjQ/qualification-public.jsonl",
+        "fixed_single_competition_selected_before_agent_run": true,
+        "public_preparation_entry": "scripts/prepare_mlebench_nomad_author_data.py",
+        "public_entry_isolated_execution_receipt": "mlebench-nomad-public-entry.a9TnuC/preparation-public.json",
         "original_geometry_counts": {"train": 2400, "test": 600},
         "original_preparer_exit_code": 0,
         "publisher_prepared_checksums_matched": ["public/train.csv", "public/test.csv", "public/sample_submission.csv", "private/test.csv"],
@@ -5847,7 +5850,7 @@
         "publisher_preparation": {"raw_archives": ["train.csv.zip", "test.csv.zip"], "held_out_fraction": 0.1, "random_state": 0, "held_out_labels_private": true},
         "publisher_grader": "mean-column-wise-rmsle",
         "publisher_checksum_coverage": {"archive": true, "public_files": ["sample_submission.csv", "test.csv", "train.csv"], "private_files": ["test.csv"]},
-        "scope": "Candidate from the publisher's low-complexity list, pending verification of the existing selection contract and authorized original Kaggle access. No data fetched or benchmark run; not a replacement for a frozen competition."
+        "scope": "Fixed single-competition verification selection from the publisher's low-complexity list, selected before any Agent run. The competition author's alternative public distribution and pinned original preparation outputs are verified separately; Kaggle archive transport remains unverified."
       },
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
@@ -5876,7 +5879,7 @@
         "grade_command": "mlebench grade-sample <submission-path> <competition-id>",
         "scope": "Official pinned README; a single original competition can be prepared and graded without downloading the full suite. No competition selection changed and no credentials, data, execution or grade obtained."
       },
-      "blocker": "Current server has all758 pinned original software/public leaderboard files. Isolated Python3.12.13 CLI build and offline help passed;130 pinned dependencies and680 installed original package files match,82 competition IDs register. Kaggle credential file/environment presence checks were negative and competition data remain unavailable. Authorized competition preparation, actual Agent submission and original grading still required. CLI registration is not data acquisition or native completion.",
+      "blocker": "The official Kaggle transport is still unavailable without authorized credentials. The fixed NOMAD competition author's public distribution, original preparation outputs and sample grading path have been verified independently. Actual isolated Agent execution, its submission and original grading still required; no other competition data implied.",
       "official_protocol_url": "https://github.com/openai/mle-bench#dataset",
       "original_software_preparation": {
         "revision": "507f92e1138bb6e40dac5c6ee7a6758e6424bf97",
