@@ -641,6 +641,10 @@ WorkArena（未完成）：使用
 原生验证前须由具备权限的操作者配置官方实例，在隔离浏览器中确认登录、任务初始化与重置可用；凭据不进入仓库。 通过这些前置检查后，才运行固定原题的 Agent 和作者验证器。源码校验和 oracle
 演示均不计为交付。
 
+固定 L1 样本使用 `scripts/plan_workarena_l1_sample.py` 在原 0.5.3 客户端离线生成。作者采样器 `l1`、元种子 42、每题 10 个种子给出 330
+个组合；按发布顺序，取前三个不同类别各自的首个原种子：`multi-chart-value-retrieval` / 102、`create-change-request` /
+58、`knowledge-base-search` / 1。三项均已核对原 BrowserGym 注册，在实例访问和结果产生前锁定；后续用同一 ID 和种子执行原重置、动作和校验，不按结果换题。
+
 BixBench（固定三题已交付）：固定原题为 `bix-1-q1`、`bix-1-q2`、`bix-10-q1`。取得原生状态与轨迹后，用
 `scripts/prepare_bixbench_original_grade_input.py --author-root <源码> --data-root <数据> --native-output <原输出> --output <新目录> --limit 3 --execute`
 生成评分输入，核对题目身份、原参考答案与 str/str/range 模式；不丢弃空答案。共享队列仅用于恢复审计，四条合成裁判对照不用于正式评分。 在隔离环境中用
