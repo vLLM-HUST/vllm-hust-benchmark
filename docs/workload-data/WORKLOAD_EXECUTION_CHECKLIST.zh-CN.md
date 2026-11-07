@@ -1246,6 +1246,12 @@ URL 和 SHA-256； 在已核验的 MLE-bench 环境内加 `--archive <作者发�
 `configs/workload-native/mlebench-author-source.json` 一起只读挂载。该入口已在断网 ARM64 容器实跑。Agent 只读挂载返回的
 `agent_mount_relative_to_data_dir`；原始归档和私有标签不得暴露给 Agent。整项仍未勾选。
 
+作者集成指定 [AIDE v6.3.3](https://github.com/thesofakillers/aideml/tree/v6.3.3)；已取得固定提交并逐一匹配 33 份原 Git
+对象，未将历史解题产物纳入工作区。 容器只读挂载 `prepared/public` 后实测仅能看到 2,160 条训练、240 条测试及等量几何文件，测试表不含标签，私有目录、原归档、Docker
+socket 和 NPU 不可见，网络仅回环。 这是输入边界检查，不是 Agent 运行。作者构建依赖 amd64、Miniconda，并默认安装 CUDA 依赖；在 ARM64 上需要单列兼容环境。
+固定 AIDE 对 Qwen 型号默认路由到 OpenRouter，不能只设置本地 OpenAI 兼容地址就认为模型已绑定；验证必须显式绑定本地模型并保留原请求和工具调用语义，不冒用 GPT
+型号或启用付费后端。
+
 PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
