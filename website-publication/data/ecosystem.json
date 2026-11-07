@@ -3360,14 +3360,14 @@
         "models": [
           "Qwen3.5 GDN family; result-specific scope applies"
         ],
-        "requirements_en": "Port and bind each candidate to the current pinned vLLM-HUST and vLLM-Ascend-HUST revisions before running the three-pair formal campaign.",
-        "requirements_zh": "须先将每个候选移植并绑定到当前固定的 vLLM-HUST 与 vLLM-Ascend-HUST 提交，再运行三组配对正式测试。"
+        "requirements_en": "The static-decay candidate is source-bound to the current Host. Native delayed state update still requires a current-runner lifecycle rewrite. Any admitted candidate must then complete the two-rank, three-pair formal campaign.",
+        "requirements_zh": "静态衰减候选已绑定当前 Host；Native delayed 状态更新仍需按当前运行器重写生命周期。可准入候选随后仍须完成双 rank、三组配对正式测试。"
       },
       "evidence_level": "retest_pending",
       "public_effect_status": "inconclusive",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/cc754b105e928a1046258892af2a8888562e563e/reports/reorganized-mod-retest-20261107",
-      "public_effect_en": "Fresh qualification is required after repository reorganization. Imported pre-reorganization measurements remain source records only and are not current performance claims.",
-      "public_effect_zh": "仓库重组后需要重新验收。重组前导入的测量仅保留为来源记录，不作为当前性能结论。"
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/fff0aa017c1bbadb8d827e0f71e7f2c6eb9b152f/reports/reorganized-mod-current-host-port-20261107",
+      "public_effect_en": "Current-Host source qualification is complete for static decay. Native delayed remains blocked and formal NPU performance qualification has not started; legacy measurements are source records only.",
+      "public_effect_zh": "静态衰减已完成当前 Host 源码资格校验；Native delayed 仍受阻，正式 NPU 性能验收尚未开始，旧测量仅保留为来源记录。"
     },
     {
       "id": "runtime-micro-optimizations",
@@ -3422,14 +3422,14 @@
         "models": [
           "Result-specific model and workload scope"
         ],
-        "requirements_en": "Port and bind each candidate to the current pinned vLLM-HUST and vLLM-Ascend-HUST revisions before running the three-pair formal campaign.",
-        "requirements_zh": "须先将每个候选移植并绑定到当前固定的 vLLM-HUST 与 vLLM-Ascend-HUST 提交，再运行三组配对正式测试。"
+        "requirements_en": "Empty-padding, query-start-location reuse and residual-scale cache are source-bound to the current Host and remain default-off. Each mechanism still requires two-rank activation receipts and the three-pair formal campaign.",
+        "requirements_zh": "空 padding、query-start-location 复用和 residual-scale 缓存已绑定当前 Host，且保持默认关闭；每项仍需双 rank 激活回执和三组配对正式测试。"
       },
       "evidence_level": "retest_pending",
       "public_effect_status": "inconclusive",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/cc754b105e928a1046258892af2a8888562e563e/reports/reorganized-mod-retest-20261107",
-      "public_effect_en": "Fresh qualification is required after repository reorganization. Imported pre-reorganization measurements remain source records only and are not current performance claims.",
-      "public_effect_zh": "仓库重组后需要重新验收。重组前导入的测量仅保留为来源记录，不作为当前性能结论。"
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/fff0aa017c1bbadb8d827e0f71e7f2c6eb9b152f/reports/reorganized-mod-current-host-port-20261107",
+      "public_effect_en": "Three retained mechanisms passed current-Host source qualification and the old RoPE repair was retired as absorbed. Formal NPU performance qualification has not started; legacy measurements are source records only.",
+      "public_effect_zh": "三个保留机制已通过当前 Host 源码资格校验，旧 RoPE 修复因已被底座吸收而退役；正式 NPU 性能验收尚未开始，旧测量仅保留为来源记录。"
     },
     {
       "id": "ascend-attention-optimizations",
@@ -3484,14 +3484,14 @@
         "models": [
           "Result-specific model and attention path"
         ],
-        "requirements_en": "Port and bind each candidate to the current pinned vLLM-HUST and vLLM-Ascend-HUST revisions before running the three-pair formal campaign.",
-        "requirements_zh": "须先将每个候选移植并绑定到当前固定的 vLLM-HUST 与 vLLM-Ascend-HUST 提交，再运行三组配对正式测试。"
+        "requirements_en": "Recovered legacy selectors are fail-closed: Core boundary was absorbed, persistent-empty was unconsumed, graph fusion moved to the operator family, and PyramidKV needs a current-runner rewrite. A new admitted mechanism is required before NPU measurement.",
+        "requirements_zh": "恢复出的旧选择器均 fail-closed：Core boundary 已被吸收，persistent-empty 未被消费，图融合归入算子优化族，PyramidKV 仍需按当前运行器重写；须先形成新的可准入机制才能进入 NPU 测试。"
       },
       "evidence_level": "retest_pending",
       "public_effect_status": "inconclusive",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/cc754b105e928a1046258892af2a8888562e563e/reports/reorganized-mod-retest-20261107",
-      "public_effect_en": "Fresh qualification is required after repository reorganization. Imported pre-reorganization measurements remain source records only and are not current performance claims.",
-      "public_effect_zh": "仓库重组后需要重新验收。重组前导入的测量仅保留为来源记录，不作为当前性能结论。"
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/fff0aa017c1bbadb8d827e0f71e7f2c6eb9b152f/reports/reorganized-mod-current-host-port-20261107",
+      "public_effect_en": "Legacy candidate disposition is complete, but there is currently no admitted executable attention candidate. PyramidKV requires a current-runner rewrite before source and NPU qualification; no legacy metric is current.",
+      "public_effect_zh": "旧候选处置已完成，但当前没有可准入执行的注意力候选；PyramidKV 须按当前运行器重写后再做源码与 NPU 验收，旧指标均非当前结论。"
     },
     {
       "id": "hybrid-spec",
