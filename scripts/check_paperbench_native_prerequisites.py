@@ -5,6 +5,7 @@ It never accepts vendor terms, downloads images or invokes author code.
 """
 
 import argparse
+import ast
 import json
 from pathlib import Path
 import platform
@@ -72,6 +73,79 @@ def canonical_protocol(readme):
         "reproduction_timeout_seconds": int(options["paperbench.reproduction.timeout"]),
         "responses_builtin_tools": ["web_search"],
         "runner_max_retries": int(options["runner.max_retries"]),
+    }
+
+
+def inspect_vllm_browser_dispatch(package_root, canonical):
+    """Compare the author tool name with vLLM's browser filter, without imports."""
+    responses = Path(package_root) / "entrypoints/openai/responses"
+    serving = ast.parse((responses / "serving.py").read_text("utf-8"))
+    helpers = ast.parse((responses / "utils.py").read_text("utf-8"))
+    recognized = set()
+    for node in ast.walk(serving):
+        if not isinstance(node, ast.If) or not isinstance(node.test, ast.BoolOp):
+            continue
+        appends_browser = any(
+            ast.unparse(child) == "builtin_tool_list.append('browser')"
+            for child in node.body
+        )
+        has_browser = any(
+            ast.unparse(part) == "self.tool_server.has_tool('browser')"
+            for part in node.test.values
+        )
+        if (
+            not appends_browser
+            or not has_browser
+            or not isinstance(node.test.op, ast.And)
+        ):
+            continue
+        for part in node.test.values:
+            if (
+                isinstance(part, ast.Compare)
+                and isinstance(part.left, ast.Constant)
+                and isinstance(part.left.value, str)
+                and len(part.ops) == 1
+                and isinstance(part.ops[0], ast.In)
+                and ast.unparse(part.comparators[0]) == "requested_tool_types"
+            ):
+                recognized.add(part.left.value)
+    binding = any(
+        isinstance(node, ast.Assign)
+        and len(node.targets) == 1
+        and ast.unparse(node.targets[0]) == "requested_tool_types"
+        and ast.unparse(node.value) == "extract_tool_types(request.tools)"
+        for node in ast.walk(serving)
+    )
+    extractor = next(
+        (
+            node
+            for node in helpers.body
+            if isinstance(node, ast.FunctionDef) and node.name == "extract_tool_types"
+        ),
+        None,
+    )
+    literal_types = extractor is not None and any(
+        isinstance(node, ast.If)
+        and ast.unparse(node.test) == "tool.type == 'mcp'"
+        and [ast.unparse(child) for child in node.orelse]
+        == ["tool_types.add(tool.type)"]
+        for node in ast.walk(extractor)
+    )
+    requested = set(canonical["responses_builtin_tools"])
+    known_filter = bool(recognized and binding and literal_types)
+    if not known_filter:
+        status = "STATIC_DISPATCH_SHAPE_UNRECOGNIZED_MANUAL_REVIEW_REQUIRED"
+    elif requested.isdisjoint(recognized):
+        status = "CANONICAL_TOOL_TYPE_ABSENT_FROM_STATIC_BROWSER_FILTER"
+    else:
+        status = "CANONICAL_TOOL_TYPE_PRESENT_STATIC_ONLY"
+    return {
+        "status": status,
+        "canonical_tool_types": sorted(requested),
+        "observed_browser_filter_types": sorted(recognized),
+        "literal_non_mcp_type_extraction_observed": literal_types,
+        "model_or_search_calls": 0,
+        "runtime_tool_execution_qualified": False,
     }
 
 
@@ -170,8 +244,15 @@ def main():
         type=Path,
         help="verified source root containing project/paperbench",
     )
+    parser.add_argument(
+        "--vllm-source",
+        type=Path,
+        help="optional vllm Python package source root for offline browser dispatch inspection",
+    )
     args = parser.parse_args()
     if args.author_root is None:
+        if args.vllm_source is not None:
+            parser.error("--vllm-source requires --author-root")
         print(
             json.dumps(
                 {
@@ -185,7 +266,12 @@ def main():
             )
         )
         return
-    print(json.dumps(inspect_original(args.author_root), indent=2))
+    result = inspect_original(args.author_root)
+    if args.vllm_source is not None:
+        result["vllm_static_browser_dispatch"] = inspect_vllm_browser_dispatch(
+            args.vllm_source, result["original_canonical_protocol"]
+        )
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

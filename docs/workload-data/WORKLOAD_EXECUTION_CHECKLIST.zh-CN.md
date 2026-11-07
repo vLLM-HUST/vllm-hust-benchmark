@@ -1325,6 +1325,10 @@ PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07�
 当前两个 Qwen 服务的 OpenAPI 均注册 `POST /v1/responses`，但只读核查实际监听进程的启动参数及部署源码，确认均无工具服务器配置，未绑定原生浏览工具。
 不能用路由健康、纯聊天或无搜索的 Agent 代替原协议。该检查仅 GET，不发送生成或搜索；原容器的架构和条款限制仍单列。
 
+可在同一预检中加 `--vllm-source <部署版本的 vllm Python 包源码目录>`，静态对照正式命令的搜索类型与响应服务的浏览工具筛选。已部署源码的非 MCP
+工具提取保留原类型，而筛选只识别 `web_search_preview`；仅开启工具服务器不能证明正式命令的 `web_search` 会被分派。需用支持正式请求类型的隔离部署实测工具调用，
+不能把静态匹配或改用默认工具名当作原生验证。
+
 [作者部署说明](https://github.com/openai/frontier-evals/blob/main/project/paperbench/README.md#build-docker-images)与固定版本构建脚本均指向本地构建
 `pb-env` 和 `pb-reproducer`；检查时当前宿主的 Docker 缓存无这两个镜像，作者仓库公开 Releases 为空。
 未核验到可直接复用的作者镜像摘要，不用第三方移植镜像代替。若提供已授权构建的镜像，先核对固定源码、构建记录和摘要，再核验隔离 amd64 执行。

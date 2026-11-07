@@ -131,6 +131,56 @@ def test_canonical_command_cannot_be_replaced_by_dev_profile(argument, replaceme
         runner.canonical_protocol(CANONICAL.replace(argument, replacement))
 
 
+@pytest.mark.parametrize(
+    "dispatch_type,extractor_body,expected",
+    [
+        (
+            "web_search_preview",
+            "tool_types.add(tool.type)",
+            "CANONICAL_TOOL_TYPE_ABSENT_FROM_STATIC_BROWSER_FILTER",
+        ),
+        (
+            "web_search",
+            "tool_types.add(tool.type)",
+            "CANONICAL_TOOL_TYPE_PRESENT_STATIC_ONLY",
+        ),
+        (
+            "web_search_preview",
+            "tool_types.add(aliases.get(tool.type, tool.type))",
+            "STATIC_DISPATCH_SHAPE_UNRECOGNIZED_MANUAL_REVIEW_REQUIRED",
+        ),
+    ],
+)
+def test_browser_dispatch_review_is_static_only(
+    tmp_path, dispatch_type, extractor_body, expected
+):
+    responses = tmp_path / "entrypoints/openai/responses"
+    responses.mkdir(parents=True)
+    (responses / "serving.py").write_text(
+        "requested_tool_types = extract_tool_types(request.tools)\n"
+        f"if self.tool_server.has_tool('browser') and {dispatch_type!r} in requested_tool_types:\n"
+        "    builtin_tool_list.append('browser')\n",
+        encoding="utf-8",
+    )
+    (responses / "utils.py").write_text(
+        "def extract_tool_types(tools):\n"
+        "    for tool in tools:\n"
+        "        if tool.type == 'mcp':\n"
+        "            pass\n"
+        "        else:\n"
+        f"            {extractor_body}\n",
+        encoding="utf-8",
+    )
+    report = runner.inspect_vllm_browser_dispatch(
+        tmp_path, runner.canonical_protocol(CANONICAL)
+    )
+    assert report["status"] == expected
+    assert report["canonical_tool_types"] == ["web_search"]
+    assert report["observed_browser_filter_types"] == [dispatch_type]
+    assert report["model_or_search_calls"] == 0
+    assert not report["runtime_tool_execution_qualified"]
+
+
 def test_modified_source_is_rejected_before_recipe_inspection(tmp_path):
     pins = fixture(tmp_path)
     (tmp_path / runner.RECIPES[0]).write_text("changed")
