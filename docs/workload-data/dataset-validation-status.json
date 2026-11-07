@@ -1,6 +1,6 @@
 {
   "schema_version": "workload-validation-checklist/v1",
-  "updated_at": "2026-11-07",
+  "updated_at": "2026-11-08",
   "server_32080_recovery": {
     "verified_host_fingerprint": "SHA256:OWM9Z+WsBq8M0cTJzqBnA/Z58UCXb0zkuNnBdIDKQOY",
     "model": "Qwen/Qwen3.5-9B",
@@ -6313,6 +6313,23 @@
       }
     },
     "VISUALWEBARENA": {
+      "official_classifieds_guestfwd_transport_20261108": {
+        "status": "OFFICIAL_LAYER_NONZERO_RANGE_OVER_GUESTFWD_MATCHES_HOST_CONTROL",
+        "receipt": "workload-vwa-classifieds-pd4otphx/transport-qualification-public.json",
+        "probe_disk_cleanup_receipt": "workload-vwa-classifieds-pd4otphx/probe-disk-cleanup-public.json",
+        "pinned_image_manifest": "sha256:a2a794da92f62a8d7ffd02314e4fab40ba6c7fc08f568371608f88f0ef605e43",
+        "official_blob_http_status": 206,
+        "official_blob_range_offset_bytes": 1073741824,
+        "official_blob_range_bytes": 8388608,
+        "official_blob_range_sha256": "d25b008998ae5f3a135dd97665e6e7fd46b27a752a177505d4a55021f846a76c",
+        "official_blob_range_payload_seconds": {"host": 1.334, "probe_guest": 3.288},
+        "blob_range_not_saved_to_disk": true,
+        "probe_guest_cpu_only": true,
+        "probe_disk_removed_after_natural_exit": true,
+        "main_guest_disk_gib": 150,
+        "main_guest_pull_changed_by_probe": false,
+        "source_checkbox_eligible": false
+      },
       "fixed_classifieds_original_config_and_scorer_control_20261107": {
         "receipt": "vwa-fixed-classifieds-Vn84D9/fixed-classifieds-control.json",
         "entrypoint": "scripts/check_visualwebarena_native_prerequisites.py --prepare-fixed-classifieds",
@@ -6634,7 +6651,7 @@
         "inspected_reddit_rows_with_explicit_images": 3,
         "scope": "Static dependency audit only, not a new execution selection. None of these splits uses WebArena shopping_admin as its site."
       },
-      "blocker": "Original software and910 task definitions verified. Original Classifieds deployment ZIP is present; amd64 site image layers, isolated login/reset and native visual Agent/scoring remain unqualified. Old shared-space shortage is not a current capacity observation: NAS now has about1.6TiB free after cleanup. The candidate image reports76861304894 compressed bytes; download/unpack peak and task-local disk/runtime budget require qualification before acquisition. Classifieds is separate from WebArena shopping_admin; no site substitution or GPT identity spoofing is permitted.",
+      "blocker": "Original software, 910 task definitions and the Classifieds deployment ZIP are verified. The pinned AMD64 site image pull started on a dedicated 150 GiB CPU guest. A separate bounded nonzero Range test qualified a faster path for the official blob. Full image acquisition and unpack, site initialization and login, and native Agent execution with original scoring for Classifieds 0/1/2 remain pending.",
       "original_source_preparation": {
         "revision": "89f5af29305c3d1e9f97ce4421462060a70c9a03",
         "files_verified": 511,
@@ -7908,7 +7925,7 @@
       "legacy_checked": false,
       "existing_receipt": null,
       "delivery_receipt": null,
-      "blocker": "Reuse historical SDK and23 original public/research readbacks. Current server now has195 pinned software files plus all506 published paper/rubric/image assets,23 original packages restored through the public preparer. Original isolated Agent,reproduction and rubric scoring remain unexecuted; external scientific resources and the NPU model/tool contract are unqualified. Original image build includes vendor-terms acceptance requiring operator decision. Material restoration and CLI/reader checks are not native completion.",
+      "blocker": "The original AMD64 pb-reproducer archive was restored in an empty isolated store and passed the offline runtime probe. For fixed fre, an authorized pb-env, the official Agent web_search_preview binding and the original o3-mini-2025-01-31 high judge remain necessary. The 24-hour Agent and 24-hour reproduction workflow and original rubric grading remain pending.",
       "relocated_public_asset_entry": {
         "actions": ["plan", "prepare", "verify"],
         "all_existing_original_files": 506,
