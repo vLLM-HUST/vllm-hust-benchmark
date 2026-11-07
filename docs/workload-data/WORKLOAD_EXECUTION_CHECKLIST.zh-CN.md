@@ -647,12 +647,13 @@ BixBench（固定三题已交付）：固定原题为 `bix-1-q1`、`bix-1-q2`、
 Agent 结果，恢复的 CSV 与历史回执逐字节一致；经兼容补丁及本地 Qwen3-14B 裁判评分，三题均为 0 分。 最终 CI 工件与未修改研究端已复验三条完整记录一致，见
 [交付回执](validation/bixbench-fixed-native-delivery-20261104.json)。
 
-StableToolBench（候选，未交付）：复用已核验的原工具定义和响应缓存，G1 固定前三题为 588、608、1073。 原 `/virtual`
-路由缓存未命中会尝试外联，先验证回环监听和出网限制；无可用作者模拟后端时保留未命中失败。 评分使用固定作者提交里的 `toolbench/tooleval/fac_eval.py`（原 shell
-包装器引用的文件缺失），传入 `--model_path`、`--evaluation_path`、`--output_path` 和固定 `--ids`。 作者评估模型的 BF16
-Transformers NPU 路径尚未验证，不能以缓存控制代替原评分。
+StableToolBench（固定三题已交付，作为 ToolBench 同类替代）：G1 固定原题 588、608、1073 使用作者缓存或官方 MirrorAPI-Cache 模拟后端，均走完
+CoT@1 与 Finish。 以原 `toolbench/tooleval/fac_eval.py` 和固定评估模型完成评分，三题分别为 0、1、1。执行时将外部真实 API
+层设为不可用，保留作者模拟回退，未验证原 ToolBench 在线 API。 已核验 163 条原数据由公共入口和固定研究消费者无损读取；不代表 163 条均实跑，也不代表研究侧已更新部署依赖锁。详见
+[固定三题交付回执](validation/stabletoolbench-fixed3-native-20261105.json)。
 
-ToolBench（未完成）：`scripts/prepare_jsonschemabench_author_source.py --source toolbench-examples --author-root <新目录> --action plan`
+ToolBench
+原在线协议（未完成，交付清单已用上面的同类替代覆盖）：`scripts/prepare_jsonschemabench_author_source.py --source toolbench-examples --author-root <新目录> --action plan`
 可查看固定作者样例的获取计划。 原仓公开样例已核验 G1/G2/G3 共 10 条，但没有完整原归档、可用原工具后端或 ToolEval 实跑结果。
 第三方归档仅有部分文件与作者字节一致，未核实的部分不作为原数据；StableToolBench 的模拟响应与 API-Bank 的本地工具也不计作 ToolBench 原后端验证。
 
@@ -664,12 +665,13 @@ API-Bank（同类候选，14 个固定位置已生成并完成兼容评分）：
 离线评分。若复现作者评分器的已知缺参中断， 可用 `--record-missing-end-time` 单独记录失败；不补造参数，不把兼容结果称为未修改的官方成绩。 现有结果中 13
 个位置由原评分器处理，另 1 个位置缺少必填参数，按兼容路径保留失败。离线重放与留存结果逐字节一致，无需重跑推理。 该协议覆盖本地工具调用与评分，不覆盖 ToolBench 的外部 API。
 
-MiniWoB++（候选，未交付）：从清单所列固定作者提交恢复网页，仅在回环地址启动静态站点，`--site` 指向其 `/miniwob/`。 在 ARM64 上复用 Playwright
-Chromium 1117，令 `PLAYWRIGHT_BROWSERS_PATH` 指向浏览器缓存， `FONTCONFIG_SYSROOT` 指向私有依赖根、`LD_LIBRARY_PATH`
-指向该根下的 `usr/lib64`。两道原题均已在 seed 42 下初始化。 使用 `scripts/run_miniwob_agentlab.py` 先验证计划；获得 NPU
-窗口后，按清单固定预算执行并保留原始奖励、终止状态及失败。 实际 NPU 验证中，`click-dialog` 在每次 1024 token 配置下 1 步完成、奖励
-1.0；`multi-layouts` 在单独的 4096 token 恢复配置下 到达 20 步上限、奖励 0.0。保留 1024 token 配置的解析失败，两个配置不汇总成同一成绩。
-它覆盖原生多步浏览器动作，不覆盖登录后业务状态或桌面操作，因此不将 WebArena 标为已完成。
+MiniWoB++（补充来源，固定原题已原生验证，不计入 113 项）：从清单所列固定作者提交恢复网页，仅在回环地址启动静态站点，`--site` 指向其 `/miniwob/`。 在 ARM64
+上复用 Playwright Chromium 1117，令 `PLAYWRIGHT_BROWSERS_PATH` 指向浏览器缓存， `FONTCONFIG_SYSROOT`
+指向私有依赖根、`LD_LIBRARY_PATH` 指向该根下的 `usr/lib64`。两道原题均已在 seed 42 下初始化。 使用
+`scripts/run_miniwob_agentlab.py` 先验证计划；获得 NPU 窗口后，按清单固定预算执行并保留原始奖励、终止状态及失败。 实际 NPU
+验证中，`click-dialog` 在每次 1024 token 配置下 1 步完成、奖励 1.0；`multi-layouts` 在单独的 4096 token 恢复配置下 到达 20
+步上限、奖励 0.0。保留 1024 token 配置的解析失败，两个配置不汇总成同一成绩。 后续还在独立视觉协议下验证了两道原题的截图、坐标动作和原终态奖励，两题均为 0 分；见
+[视觉原生回执](validation/miniwob-visual-native-20261105.json)。它覆盖原生多步浏览器动作，不覆盖登录后业务状态或桌面操作，不替代 WebArena。
 
 WebShop（同类候选，固定三题已验证）：按机器清单锁定作者提交和三份镜像语料，校验 Git 对象后接到作者 `data/`。 在任务私有环境配置 `JAVA_HOME`、Pyserini
 0.17.0 和 `en_core_web_sm` 3.7.1，再执行作者商品转换和 1k 索引命令。 已在 ARM64 验证 1,000 条索引和原生搜索—选商品—购买评分链路。模型验证用
