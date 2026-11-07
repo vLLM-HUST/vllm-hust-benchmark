@@ -41,10 +41,13 @@ def test_bind_preserves_openai_query_and_blocks_every_other_model(monkeypatch):
 
     monkeypatch.setitem(sys.modules, "httpx", SimpleNamespace(Client=sdk))
     monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=sdk))
-    BIND(backend, model="Qwen/example", api_base="http://127.0.0.1:1234/v1")
+    BIND(
+        backend, model="Qwen/example", api_base="http://127.0.0.1:1234/v1", timeout=1820
+    )
     assert backend.determine_provider("Qwen/example") == "openai"
     assert backend.provider_to_query_func["openai"] is query
     assert original._client.max_retries == 0
+    assert original._client.timeout == 1820
     assert not original._client.http_client.trust_env
     assert not original._client.http_client.follow_redirects
     with pytest.raises(ValueError, match="outside"):

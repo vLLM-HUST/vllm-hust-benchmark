@@ -210,12 +210,17 @@ def main():
     )
     parser.add_argument("--max-jobs", type=int, default=300)
     parser.add_argument("--idle-timeout", type=float, default=600)
+    parser.add_argument("--request-timeout", type=int, default=600)
     args = parser.parse_args()
     if not args.execute_one and not args.watch:
         print(json.dumps({"status": "PLAN_ONLY", "model_calls": 0}))
         return
     os.umask(0o077)
-    if args.max_jobs < 1 or args.idle_timeout <= 0:
+    if (
+        args.max_jobs < 1
+        or args.idle_timeout <= 0
+        or not 1 <= args.request_timeout <= 7200
+    ):
         raise ValueError("positive explicit worker bounds required")
     processed = 0
     idle_since = time.monotonic()
@@ -229,6 +234,7 @@ def main():
             api_key=os.environ[args.api_key_env] if args.api_key_env else None,
             disable_thinking=args.disable_thinking,
             expected_model=args.expected_model,
+            timeout=args.request_timeout,
         )
         if found:
             processed += 1

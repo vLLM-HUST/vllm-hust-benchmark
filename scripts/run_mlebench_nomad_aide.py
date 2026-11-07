@@ -162,11 +162,17 @@ def execute(args, start, notes, kwargs):
         worker = threading.Thread(target=validation.serve_forever, daemon=True)
         worker.start()
         try:
-            with model_proxy(queue, port=0, expected_model=args.model) as port:
+            with model_proxy(
+                queue,
+                port=0,
+                expected_model=args.model,
+                timeout=args.request_timeout + 15,
+            ) as port:
                 bind_and_run = (
                     "from aide import backend; from aide.run import run; import sys; "
                     "from mlebench_aide_local_model import bind_local_openai; "
-                    "bind_local_openai(backend, model=sys.argv.pop(1), api_base=sys.argv.pop(1)); run()"
+                    "bind_local_openai(backend, model=sys.argv.pop(1), api_base=sys.argv.pop(1), "
+                    "timeout=int(sys.argv.pop(1))); run()"
                 )
                 write_shim(
                     agent / "bin/aide",
@@ -176,6 +182,7 @@ def execute(args, start, notes, kwargs):
                         bind_and_run,
                         args.model,
                         f"http://127.0.0.1:{port}/v1",
+                        str(args.request_timeout + 20),
                     ],
                 )
                 return subprocess.run(
@@ -194,12 +201,20 @@ def main():
     parser.add_argument("--queue", type=Path)
     parser.add_argument("--validator-socket", type=Path)
     parser.add_argument(
+        "--request-timeout",
+        type=int,
+        default=600,
+        help="match the trusted relay's request wait",
+    )
+    parser.add_argument(
         "--convert-system-to-user",
         action="store_true",
         help="Use the author's role mapping for model templates that require a user turn",
     )
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
+    if not 1 <= args.request_timeout <= 7200:
+        parser.error("--request-timeout must be between 1 and 7200 seconds")
     kwargs = author_args(args.model, convert_system_to_user=args.convert_system_to_user)
     start, notes = author_files(args.author_root.resolve(strict=True))
     if not args.execute:
@@ -209,6 +224,7 @@ def main():
                     "status": "PLAN_ONLY",
                     "time_limit_seconds": TIME,
                     "step_limit": STEPS,
+                    "transport_request_wait_seconds": args.request_timeout,
                     "author_aide_args": kwargs,
                     "model_calls": 0,
                     "source_checkbox_eligible": False,

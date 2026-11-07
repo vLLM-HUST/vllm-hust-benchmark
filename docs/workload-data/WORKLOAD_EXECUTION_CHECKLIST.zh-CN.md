@@ -1281,6 +1281,10 @@ NOMAD 的 ARM64 CPU 科学执行对照补齐了 `configs/workload-native/mlebenc
 AIDE 作者已提供的 `agent.convert_system_to_user=True`，不改原说明、预算、模型或评分。 新尝试已发出首条 user
 请求；除作者生成的剩余时间和包名顺序外，原提示内容未改，其他请求字段一致。仍须核查真实 Agent 终态、提交及原评分；不能把启动算作通过。
 
+同一兼容尝试前两条请求成功，第三条触及转发层 600 秒读取超时，转发进程退出。确认模型已无在途请求后，仅恢复转发进程，接收原 AIDE 自行排出的逐字节相同重试， 不重启
+Agent，也不重放已有成功响应。新运行可在启动器和可信转发侧设置相同的 `--request-timeout`，前端和 SDK 依次多留 15、20 秒；
+该设置只控制传输等待，不改作者的任务时限、步数、生成参数或评分。
+
 终态核对时先冻结 `submission.csv`，使用
 `scripts/audit_mlebench_nomad_submission.py --public-test <公开test.csv> --submission <冻结提交>`
 核对发布方测试表校验值、240 条 ID 原顺序和有限数值。作者评分函数按行比较，不会按 ID 重排；发现错序时保留原提交，不替 Agent 排序。再用作者 `grade-sample`

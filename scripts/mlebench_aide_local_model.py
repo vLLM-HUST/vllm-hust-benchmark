@@ -3,7 +3,9 @@
 from urllib.parse import urlsplit
 
 
-def bind_local_openai(backend, *, model: str, api_base: str) -> None:
+def bind_local_openai(
+    backend, *, model: str, api_base: str, timeout: int = 600
+) -> None:
     endpoint = urlsplit(api_base)
     if (
         endpoint.scheme != "http"
@@ -18,6 +20,8 @@ def bind_local_openai(backend, *, model: str, api_base: str) -> None:
         raise ValueError("AIDE local endpoint must be explicit IPv4 loopback /v1")
     if not model or model != model.strip():
         raise ValueError("an exact served model ID is required")
+    if type(timeout) is not int or not 1 <= timeout <= 7220:
+        raise ValueError("finite positive OpenAI client timeout required")
 
     import httpx
     import openai
@@ -32,6 +36,7 @@ def bind_local_openai(backend, *, model: str, api_base: str) -> None:
         api_key="local-file-queue",
         base_url=api_base,
         max_retries=0,
+        timeout=timeout,
         http_client=httpx.Client(trust_env=False, follow_redirects=False),
     )
 
