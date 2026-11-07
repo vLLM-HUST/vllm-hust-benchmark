@@ -74,7 +74,9 @@ def inspect_original(author_root, *, pins_path=PINS, host_architecture=None):
         or 'docker_image="pb-env:latest"' not in structs
         or "grade_locally: bool = True" not in structs
     ):
-        raise ValueError("review changed original Agent, reproducer or judge image contract")
+        raise ValueError(
+            "review changed original Agent, reproducer or judge image contract"
+        )
     architecture = host_architecture or platform.machine()
     return {
         "source_id": "PAPERBENCH",
