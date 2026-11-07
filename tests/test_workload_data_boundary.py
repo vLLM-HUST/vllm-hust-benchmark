@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "workload-preparation"
 DATA_MODULES = {
+    "webarena",  # Original task/evaluator relations only; no browser or Agent execution.
     "osworld",  # Original task/setup/reference packages only; no GUI or Agent execution.
     "gaia",  # Original tasks/attachments and separate references only; no Agent, network or observation.
     "msmarco",  # Original candidate/query/qrel aggregation only; no model, network or observation.
@@ -72,6 +73,27 @@ DATA_MODULES = {
 def test_only_data_modules_are_included():
     actual = {path.stem for path in (ROOT / "src/vllm_hust_workload_data").glob("*.py")}
     assert actual == DATA_MODULES
+
+
+def test_webarena_reader_has_only_data_and_integrity_imports():
+    import ast
+
+    tree = ast.parse(
+        (ROOT / "src/vllm_hust_workload_data/webarena.py").read_text("utf-8")
+    )
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            imports.update(item.name for item in node.names)
+        elif isinstance(node, ast.ImportFrom):
+            imports.add(node.module)
+    assert imports == {"copy", "hashlib", "assets", "records"}
+    assert not any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id in {"eval", "exec", "compile", "__import__"}
+        for node in ast.walk(tree)
+    )
 
 
 def test_gaia_reader_has_no_agent_model_network_or_research_imports():
