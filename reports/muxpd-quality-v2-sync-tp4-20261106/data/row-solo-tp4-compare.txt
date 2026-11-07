@@ -1,0 +1,11 @@
+sv2-w1: outputs=200 complete=True shutdown=True errors=0 controller_passed=True exit=0 max_in_flight=batched muxpd=43fcaf4 vllm=d0f22d2 ascend=c182a9e HCCL_DET=true
+sv2-w2: outputs=200 complete=True shutdown=True errors=0 controller_passed=True exit=0 max_in_flight=batched muxpd=43fcaf4 vllm=d0f22d2 ascend=c182a9e HCCL_DET=true
+ns4-1: outputs=200 complete=True shutdown=True errors=0 controller_passed=True exit=0 max_in_flight=1 muxpd=43fcaf4 vllm=d0f22d2 ascend=c182a9e HCCL_DET=true
+ns4-2: outputs=200 complete=True shutdown=True errors=0 controller_passed=True exit=0 max_in_flight=1 muxpd=43fcaf4 vllm=d0f22d2 ascend=c182a9e HCCL_DET=true
+ns4-1 vs ns4-2: token 200/200 text 200/200 finish 200/200
+sv2-w1 vs sv2-w2: token 200/200 text 200/200 finish 200/200
+sv2-w1 vs ns4-1: token 200/200 text 200/200 finish 200/200
+sv2-w1 vs ns4-2: token 200/200 text 200/200 finish 200/200
+sv2-w2 vs ns4-1: token 200/200 text 200/200 finish 200/200
+sv2-w2 vs ns4-2: token 200/200 text 200/200 finish 200/200
+PART_A_TP4: PASS
