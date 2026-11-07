@@ -1233,6 +1233,11 @@ PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07�
 `pb-env` 和 `pb-reproducer`；检查时当前宿主的 Docker 缓存无这两个镜像，作者仓库公开 Releases 为空。
 未核验到可直接复用的作者镜像摘要，不用第三方移植镜像代替。若提供已授权构建的镜像，先核对固定源码、构建记录和摘要，再核验隔离 amd64 执行。
 
+独立的原 reproducer Dockerfile 不使用 Conda。已从固定配方提取全部 22 个顶层包，使用
+[Ubuntu Noble](https://packages.ubuntu.com/noble/amd64/libatlas-base-dev/filelist)及[作者指定 PPA](https://ppa.launchpad.net/deadsnakes/ppa/ubuntu/dists/)的签名索引做
+amd64 APT 模拟； 从空包状态解析成功，含 Python 3.11 和 3.12，计划 365 个安装条目。没有安装软件、构建镜像或运行复现脚本。已保留签名发布文件和解析日志，清理约 234
+MiB 可重新获取的索引与缓存。 该检查不解决 Agent 镜像的条款、amd64 执行环境、搜索工具或原任务的科学资源要求。
+
 每个来源均未取得/适配/真实验证；归属仍需原生协议审查。
 
 - [x] MULTIAGENTBENCH：Research 固定前三题已用 Qwen3-4B-Instruct-2507 的 262,144-token NPU
