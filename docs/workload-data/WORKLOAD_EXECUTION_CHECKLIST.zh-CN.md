@@ -786,6 +786,19 @@ actor 与渲染端也已串接验证：将 SDK 实际序列化的请求字节原
 token 和四个顺序图像区间，384-token 输出预算不变。 输入含触发原观察截断的控制文本，因此不与前述短控制的 5890 token
 混用。全程不发生成请求、不伪造响应或动作；固定原题仍待真实站点和推理。
 
+固定三题可从原文件准备为原启动器可读配置，不依赖全量生成目录：
+
+```bash
+python scripts/check_visualwebarena_native_prerequisites.py \
+  --author-root "$AUTHOR_ROOT" --prepare-fixed-classifieds "$NEW_TASK_OUTPUT" \
+  --classifieds-origin "$AUTHORIZED_CLASSIFIEDS_ORIGIN"
+```
+
+该命令仅绑定原 `__CLASSIFIEDS__` 占位符并生成 `0.json`、`1.json`、`2.json`，不访问站点或写入作者树。
+在隔离目录运行未修改的作者生成器，三个文件逐字节一致。实际运行仍须在作者树副本中生成原登录态 `./.auth/classifieds_state.json`，并以
+`--test_config_base_dir "$NEW_TASK_OUTPUT" --test_start_idx 0 --test_end_idx 3` 交给原启动器。
+在原评价器路由上，合成最终页 URL 对照分别给出目标 URL 1/1/1、起始 URL 0/0/0，未执行站点登录、浏览器动作或真实任务评分。
+
 公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
 CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。
 

@@ -6,7 +6,9 @@ import hashlib
 import json
 from pathlib import Path
 import platform
+import re
 import sys
+from urllib.parse import urlsplit
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -25,6 +27,64 @@ TASK_FILES = (
     "config_files/vwa/test_shopping.raw.json",
 )
 LOCAL_ACTOR_FILES = ("agent/agent.py", "llms/tokenizers.py")
+
+
+def prepare_fixed_classifieds(author_root, output, origin):
+    """Materialize fixed tasks without altering the author tree or protocol."""
+    report = inspect_original(author_root)
+    root = Path(author_root).resolve(strict=True)
+    output = Path(output).resolve()
+    if output.is_relative_to(root):
+        raise ValueError("Output must be outside the pinned author tree")
+    parsed = urlsplit(origin)
+    if (
+        parsed.scheme not in {"http", "https"}
+        or not parsed.hostname
+        or not re.fullmatch(
+            r"[A-Za-z0-9.:-]+|\[[A-Fa-f0-9:]+\](?::[0-9]+)?", parsed.netloc
+        )
+        or origin != f"{parsed.scheme}://{parsed.netloc}"
+        or parsed.port == 0
+    ):
+        raise ValueError(
+            "Classifieds requires a bare HTTP(S) origin without credentials"
+        )
+    tasks = json.loads((root / TASK_FILES[0]).read_text("utf-8"))[:3]
+    output_files = {}
+    for task_id, task in enumerate(tasks):
+        if (
+            task["task_id"] != task_id
+            or task["sites"] != ["classifieds"]
+            or task.get("require_login") is not True
+            or task.get("require_reset") is not False
+            or task.get("storage_state") != "./.auth/classifieds_state.json"
+            or task.get("start_url") != "__CLASSIFIEDS__"
+            or task["eval"].get("eval_types") != ["url_match"]
+            or task["eval"].get("url_note") != "EXACT"
+            or not re.fullmatch(
+                r"__CLASSIFIEDS__/index\.php\?page=item&id=\d+",
+                task["eval"].get("reference_url", ""),
+            )
+        ):
+            raise ValueError("Fixed original Classifieds protocol changed")
+        serialized = json.dumps(task, indent=2).replace("__CLASSIFIEDS__", origin)
+        if re.search(r"__[A-Z_]+__", serialized):
+            raise ValueError("Unresolved author site placeholder in fixed task")
+        output_files[f"{task_id}.json"] = serialized.encode("utf-8")
+    output.mkdir(parents=True, exist_ok=False)
+    for name, raw in output_files.items():
+        (output / name).write_bytes(raw)
+    report.update(
+        status="FIXED_CLASSIFIEDS_CONFIGS_PREPARED_NOT_EXECUTED",
+        prepared_configs={
+            name: hashlib.sha256(raw).hexdigest() for name, raw in output_files.items()
+        },
+        requires_original_site_login=True,
+    )
+    (output / "preparation.json").write_text(
+        json.dumps(report, indent=2), encoding="utf-8"
+    )
+    return report
 
 
 def patch_local_actor(sources):
@@ -304,11 +364,19 @@ def main():
     output = parser.add_mutually_exclusive_group()
     output.add_argument("--prepare-npu-launcher", type=Path, metavar="NEW_OUTPUT")
     output.add_argument("--prepare-qwen35-actor", type=Path, metavar="NEW_OUTPUT")
+    output.add_argument("--prepare-fixed-classifieds", type=Path, metavar="NEW_OUTPUT")
+    parser.add_argument("--classifieds-origin")
     args = parser.parse_args()
     if (
-        args.prepare_npu_launcher or args.prepare_qwen35_actor
+        args.prepare_npu_launcher
+        or args.prepare_qwen35_actor
+        or args.prepare_fixed_classifieds
     ) and args.author_root is None:
         parser.error("Preparation requires --author-root")
+    if bool(args.prepare_fixed_classifieds) != bool(args.classifieds_origin):
+        parser.error(
+            "--prepare-fixed-classifieds and --classifieds-origin are required together"
+        )
     if args.author_root is None:
         result = {
             "source_id": "VISUALWEBARENA",
@@ -321,6 +389,10 @@ def main():
         result = prepare_npu_launcher(args.author_root, args.prepare_npu_launcher)
     elif args.prepare_qwen35_actor:
         result = prepare_qwen35_actor(args.author_root, args.prepare_qwen35_actor)
+    elif args.prepare_fixed_classifieds:
+        result = prepare_fixed_classifieds(
+            args.author_root, args.prepare_fixed_classifieds, args.classifieds_origin
+        )
     else:
         result = inspect_original(args.author_root)
     print(json.dumps(result, indent=2))

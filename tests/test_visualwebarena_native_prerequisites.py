@@ -294,3 +294,52 @@ class Tokenizer:
     assert calls == [
         (tmp_path.resolve(), {"local_files_only": True, "trust_remote_code": False})
     ]
+
+
+def test_fixed_classifieds_preparation_preserves_login_and_exact_reference(
+    tmp_path, monkeypatch
+):
+    root = tmp_path / "author"
+    raw_path = root / runner.TASK_FILES[0]
+    raw_path.parent.mkdir(parents=True)
+    tasks = [
+        {
+            "task_id": i,
+            "sites": ["classifieds"],
+            "start_url": "__CLASSIFIEDS__",
+            "require_login": True,
+            "require_reset": False,
+            "storage_state": "./.auth/classifieds_state.json",
+            "eval": {
+                "eval_types": ["url_match"],
+                "url_note": "EXACT",
+                "reference_url": f"__CLASSIFIEDS__/index.php?page=item&id={i}",
+            },
+        }
+        for i in range(3)
+    ]
+    raw = json.dumps(tasks)
+    raw_path.write_text(raw, encoding="utf-8")
+    monkeypatch.setattr(
+        runner, "inspect_original", lambda _: {"source_checkbox_eligible": False}
+    )
+    output = tmp_path / "prepared"
+    for bad_origin in (
+        "http://user@site.invalid",
+        "http://site.invalid/path",
+        "http://site.invalid?",
+    ):
+        with pytest.raises(ValueError, match="bare HTTP"):
+            runner.prepare_fixed_classifieds(root, output, bad_origin)
+    assert not output.exists()
+    with pytest.raises(ValueError, match="outside"):
+        runner.prepare_fixed_classifieds(root, root / "prepared", "http://site.invalid")
+    origin = "http://site.invalid:18880"
+    result = runner.prepare_fixed_classifieds(root, output, origin)
+    assert not result["source_checkbox_eligible"]
+    for i, task in enumerate(tasks):
+        expected = json.dumps(task, indent=2).replace("__CLASSIFIEDS__", origin)
+        assert (output / f"{i}.json").read_bytes() == expected.encode("utf-8")
+    assert raw_path.read_text("utf-8") == raw
+    with pytest.raises(FileExistsError):
+        runner.prepare_fixed_classifieds(root, output, origin)
