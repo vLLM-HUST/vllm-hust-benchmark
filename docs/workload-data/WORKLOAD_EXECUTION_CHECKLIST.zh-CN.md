@@ -1252,6 +1252,11 @@ socket 和 NPU 不可见，网络仅回环。 这是输入边界检查，不是 
 固定 AIDE 对 Qwen 型号默认路由到 OpenRouter，不能只设置本地 OpenAI 兼容地址就认为模型已绑定；验证必须显式绑定本地模型并保留原请求和工具调用语义，不冒用 GPT
 型号或启用付费后端。
 
+`configs/workload-native/mlebench-aide-arm64-core.txt` 固定了导入和传输对照的 81 项依赖；它不是科学执行环境。 独立目标目录配合
+`python -S` 使用，不与评分客户端的包混用。服务器安装包装器原退出码 1 和基础包冲突日志保留；之后在断网容器独立核对全部 81 个实际安装版本并成功导入原 AIDE 入口。使用
+`scripts/mlebench_aide_local_model.py` 绑定一个实际模型标识和 IPv4 回环地址，原消息编排、预算、工具定义和结果解析保持不变。 固定版 AIDE 和
+OpenAI SDK 1.48.0 的文本、工具调用两条断网对照通过；响应由本地测试夹具提供，未发真实模型请求，也未执行科学代码、Agent 或评分。
+
 PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
