@@ -7,12 +7,12 @@
 [W1107 05:36:37.811139684 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
 Failed to import the DeepSelect extension (vllm._deepselect_C): No module named 'vllm._deepselect_C'
 VLLM_HUST_RUNTIME_MICRO_RECEIPT {"empty_padding": {"executed_block_table_fills": 0, "executed_slot_mapping_fills": 0, "skipped_block_table_fills": 0, "skipped_slot_mapping_fills": 0}, "event": "hooks-installed", "host_revision": "7602797593170da4c531f1d8882a7b82dce8a1bc", "installed": ["_build_attention_metadata", "build", "load_model"], "pid": 2032383, "qsl_reuse": {"avoided_bytes": 0, "calls": 0, "eligible": 0, "native_copies": 0, "reused": 0}, "receipt_sha256": "595a0eef0d38429570caec9e8b4c9ea8880ee1bb5874bdd4b8cd476c828a5840", "residual_scale": {"installed_modules": [], "native_calls": 0, "residual_calls": 0}, "selected": ["empty-padding", "qsl-reuse", "residual-scale"]}
-(APIServer pid=2032383) INFO 11-07 05:36:56 [api_utils.py:347] 
+(APIServer pid=2032383) INFO 11-07 05:36:56 [api_utils.py:347]
 (APIServer pid=2032383) INFO 11-07 05:36:56 [api_utils.py:347]        █     █     █▄   ▄█
 (APIServer pid=2032383) INFO 11-07 05:36:56 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.1.dev22254+gc4df37dfc
 (APIServer pid=2032383) INFO 11-07 05:36:56 [api_utils.py:347]   █▄█▀ █     █     █     █  model   /models/modelscope_cache/Qwen/Qwen3___5-0___8B
 (APIServer pid=2032383) INFO 11-07 05:36:56 [api_utils.py:347]    ▀▀  ▀▀▀▀▀ ▀▀▀▀▀ ▀     ▀
-(APIServer pid=2032383) INFO 11-07 05:36:56 [api_utils.py:347] 
+(APIServer pid=2032383) INFO 11-07 05:36:56 [api_utils.py:347]
 (APIServer pid=2032383) INFO 11-07 05:36:56 [api_utils.py:286] non-default args: {'model_tag': '/models/modelscope_cache/Qwen/Qwen3___5-0___8B', 'host': '127.0.0.1', 'port': 18083, 'model': '/models/modelscope_cache/Qwen/Qwen3___5-0___8B', 'trust_remote_code': True, 'max_model_len': 1024, 'enforce_eager': True, 'tensor_parallel_size': 2, 'gpu_memory_utilization': 0.5, 'max_num_seqs': 4}
 (APIServer pid=2032383) WARNING 11-07 05:36:56 [interface.py:1355] Unknown vLLM environment variable detected: VLLM_HUST_RUNTIME_MICRO_OPTIMIZATIONS
 (APIServer pid=2032383) INFO 11-07 05:36:56 [model.py:699] Resolved architecture: Qwen3_5ForConditionalGeneration
@@ -96,12 +96,15 @@ INFO 11-07 05:38:06 [logger.py:158] [vllm-ascend] - [ascend_log] applied level=I
 (Worker_TP0 pid=2033302) INFO 11-07 05:38:23 [platform.py:1585] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
 (Worker_TP0 pid=2033302) INFO 11-07 05:38:23 [weight_utils.py:1063] Filesystem type for checkpoints: NFS4. Checkpoint size: 1.63 GiB. Available RAM: 643.98 GiB.
 (Worker_TP0 pid=2033302) INFO 11-07 05:38:23 [weight_utils.py:1025] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
-Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
 (Worker_TP1 pid=2033303) INFO 11-07 05:38:23 [platform.py:1585] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
 (Worker_TP1 pid=2033303) INFO 11-07 05:38:23 [weight_utils.py:1025] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
 (Worker_TP1 pid=2033303) INFO 11-07 05:38:23 [weight_utils.py:1020] Prefetching checkpoint files into page cache finished in 0.00s
-Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.44s/it]
-Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.44s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.44s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.44s/it]
 
 (Worker_TP0 pid=2033302) INFO 11-07 05:38:24 [default_loader.py:484] Loading weights took 1.53 seconds
 (Worker_TP1 pid=2033303) INFO 11-07 05:38:25 [model_runner_v1.py:4803] Loading model weights took 0.9243 GB

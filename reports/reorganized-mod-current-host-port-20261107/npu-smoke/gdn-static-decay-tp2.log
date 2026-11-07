@@ -7,12 +7,12 @@
 [W1107 05:56:29.396554561 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
 Failed to import the DeepSelect extension (vllm._deepselect_C): No module named 'vllm._deepselect_C'
 VLLM_HUST_GDN_RECEIPT {"cache": null, "candidate_calls": 0, "candidate_tokens": [1, 16], "event": "hooks-installed", "expected_layers": 18, "heads_per_rank": 8, "host_revision": "7602797593170da4c531f1d8882a7b82dce8a1bc", "installed": true, "native_calls": 0, "pid": 2054045, "selector": "static-decay", "sources": [{"path": "vllm_ascend/device/device_op.py", "sha256": "0488cb2578df5075a73245a0d540ee8de93ea71972ae8b636cc7cdef83823b8e"}, {"path": "vllm_ascend/ops/gdn.py", "sha256": "0cd1fc830637a7ef3b392ffbf72221aa60a35546a7ee50611981dca3ddc2fc65"}, {"path": "vllm_ascend/ops/triton/fused_gdn_gating.py", "sha256": "5587bf3440e64eda125899f5de2d1ab609061e2b5336f847af101ada51d81058"}, {"path": "vllm_ascend/worker/worker.py", "sha256": "10ef420b01c7e0355e27c455808e84a2b0c3b2f66e50e495ad7c178cebaabdac"}], "unsupported_native_calls": 0, "worker_entries": 0}
-(APIServer pid=2054045) INFO 11-07 05:56:48 [api_utils.py:347] 
+(APIServer pid=2054045) INFO 11-07 05:56:48 [api_utils.py:347]
 (APIServer pid=2054045) INFO 11-07 05:56:48 [api_utils.py:347]        █     █     █▄   ▄█
 (APIServer pid=2054045) INFO 11-07 05:56:48 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.1.dev22254+gc4df37dfc
 (APIServer pid=2054045) INFO 11-07 05:56:48 [api_utils.py:347]   █▄█▀ █     █     █     █  model   /models/modelscope_cache/Qwen/Qwen3___5-0___8B
 (APIServer pid=2054045) INFO 11-07 05:56:48 [api_utils.py:347]    ▀▀  ▀▀▀▀▀ ▀▀▀▀▀ ▀     ▀
-(APIServer pid=2054045) INFO 11-07 05:56:48 [api_utils.py:347] 
+(APIServer pid=2054045) INFO 11-07 05:56:48 [api_utils.py:347]
 (APIServer pid=2054045) INFO 11-07 05:56:48 [api_utils.py:286] non-default args: {'model_tag': '/models/modelscope_cache/Qwen/Qwen3___5-0___8B', 'host': '127.0.0.1', 'port': 18084, 'model': '/models/modelscope_cache/Qwen/Qwen3___5-0___8B', 'trust_remote_code': True, 'max_model_len': 1024, 'enforce_eager': True, 'tensor_parallel_size': 2, 'gpu_memory_utilization': 0.5, 'max_num_seqs': 4}
 (APIServer pid=2054045) WARNING 11-07 05:56:48 [interface.py:1355] Unknown vLLM environment variable detected: VLLM_HUST_GDN_STATIC_DECAY_EXPECTED_LAYERS
 (APIServer pid=2054045) WARNING 11-07 05:56:48 [interface.py:1355] Unknown vLLM environment variable detected: VLLM_HUST_GDN_STATIC_DECAY_HEADS_PER_RANK
@@ -106,13 +106,16 @@ INFO 11-07 05:58:00 [bus_worker.py:109] [vllm-ascend] [observability] - [runtime
 (Worker_TP1 pid=2054944) INFO 11-07 05:58:02 [platform.py:1585] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
 (Worker_TP0 pid=2054943) INFO 11-07 05:58:02 [weight_utils.py:1063] Filesystem type for checkpoints: NFS4. Checkpoint size: 1.63 GiB. Available RAM: 635.23 GiB.
 (Worker_TP0 pid=2054943) INFO 11-07 05:58:02 [weight_utils.py:1025] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
-Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
 (Worker_TP1 pid=2054944) INFO 11-07 05:58:02 [weight_utils.py:1025] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
 (Worker_TP1 pid=2054944) INFO 11-07 05:58:02 [weight_utils.py:1020] Prefetching checkpoint files into page cache finished in 0.00s
 (Worker_TP0 pid=2054943) INFO 11-07 05:58:03 [weight_utils.py:997] Prefetching checkpoint files: 10% (1/1)
 (Worker_TP0 pid=2054943) INFO 11-07 05:58:03 [weight_utils.py:1020] Prefetching checkpoint files into page cache finished in 1.41s
-Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.96s/it]
-Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.96s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.96s/it]
+
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.96s/it]
 
 (Worker_TP0 pid=2054943) INFO 11-07 05:58:04 [default_loader.py:484] Loading weights took 2.05 seconds
 (Worker_TP1 pid=2054944) INFO 11-07 05:58:04 [model_runner.py:404] Model loading took 0.92 GiB memory and 4.488434 seconds
