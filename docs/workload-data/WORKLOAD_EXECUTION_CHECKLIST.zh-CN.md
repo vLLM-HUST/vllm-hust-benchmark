@@ -1257,6 +1257,12 @@ socket 和 NPU 不可见，网络仅回环。 这是输入边界检查，不是 
 `scripts/mlebench_aide_local_model.py` 绑定一个实际模型标识和 IPv4 回环地址，原消息编排、预算、工具定义和结果解析保持不变。 固定版 AIDE 和
 OpenAI SDK 1.48.0 的文本、工具调用两条断网对照通过；响应由本地测试夹具提供，未发真实模型请求，也未执行科学代码、Agent 或评分。
 
+保留作者要求的 `http://localhost:5000/validate` 及原 `validate_submission.sh`。运行
+`scripts/mlebench_nomad_validation.py worker --socket <新套接字> --data-dir <评分目录>` 时仅评分工作容器挂载私有标签；
+Agent 容器以 `frontend --socket <同一套接字>` 提供回环 HTTP，只读挂载专用套接字目录和公开输入。两边均可禁用外部网络；需使用兼容的套接字访问权限。
+工作容器调用未修改的作者 `validate_submission`，只返回有效或无效，不返回分数、标签或异常明细。隔离双容器实跑已用原 Shell 工具接受原样例并拒绝无效 CSV；
+此项不替代最终独立评分，也不计 Agent 完成。
+
 PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
