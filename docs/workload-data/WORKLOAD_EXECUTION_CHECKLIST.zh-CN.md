@@ -1226,6 +1226,9 @@ PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07�
 `--action prepare` 恢复原包。该包不含论文复现实验另需的外部数据。 正式验证须保留同一原题的 Agent 提交、复现归档、原 rubric 和评分产物；默认 300 秒或开发用 60
 秒不等同于正式 24 小时协议。
 
+当前两个 Qwen 服务的 OpenAPI 均注册 `POST /v1/responses`，但只读核查实际监听进程的启动参数及部署源码，确认均无工具服务器配置，未绑定作者 BasicAgent
+所需的 `web_search_preview` 浏览工具。 不能用路由健康、纯聊天或无搜索的 Agent 代替原协议。该检查仅 GET，不发送生成或搜索；原容器的架构和条款限制仍单列。
+
 每个来源均未取得/适配/真实验证；归属仍需原生协议审查。
 
 - [x] MULTIAGENTBENCH：Research 固定前三题已用 Qwen3-4B-Instruct-2507 的 262,144-token NPU
