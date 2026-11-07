@@ -441,16 +441,30 @@ def test_visualwebarena_source_plan_exposes_software_not_native_completion():
             / "workload-preparation/data/catalogs/source_manifests_v1.json"
         ).read_text("utf-8")
     )
-    # Catalog mapping is deliberately separate from acquired task-data receipts.
+    # Original task custody is now readable; it is not native Agent completion.
     sources = catalog.get("sources", catalog)
     source = sources["VISUALWEBARENA"]
-    assert source["files"] == [] and source["revision"] is None
     assert source["native_software_profile"]["profile"] == "visualwebarena"
     pins = json.loads(
         (SCRIPTS.parent / source["native_software_profile"]["manifest"]).read_text(
             "utf-8"
         )
     )
+    assert source["revision"] == pins["revision"]
+    expected_tasks = {
+        "LICENSE",
+        "README.md",
+        "config_files/vwa/test_classifieds.raw.json",
+        "config_files/vwa/test_reddit.raw.json",
+        "config_files/vwa/test_shopping.raw.json",
+    }
+    assert {row["path"] for row in source["files"]} == expected_tasks
+    original = {row["path"]: row for row in pins["files"]}
+    for row in source["files"]:
+        assert row["role"] == "raw_source"
+        assert row["bytes"] == original[row["path"]]["bytes"]
+        assert row["sha256"] == original[row["path"]]["sha256"]
+    assert any(row["role"] == "data_reading_only" for row in plan["entrypoints"])
     paths = {item["path"] for item in pins["files"]}
     assert {
         "run.py",
