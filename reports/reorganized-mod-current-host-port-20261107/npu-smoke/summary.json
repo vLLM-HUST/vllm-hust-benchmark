@@ -1,0 +1,84 @@
+{
+  "schema_version": "reorganized-mod-npu-smoke/v1",
+  "date": "2026-11-07",
+  "scope": "Activation and end-to-end inference qualification only; not a performance result.",
+  "hardware": {
+    "accelerator": "Ascend 910B2",
+    "physical_devices": [6, 7],
+    "visible_devices": [2, 3],
+    "tensor_parallel_size": 2
+  },
+  "model": "Qwen/Qwen3.5-0.8B",
+  "host": {
+    "core_revision": "c4df37dfcc7f72ca41cd43801a468526ecf99a2b",
+    "ascend_base_revision": "7602797593170da4c531f1d8882a7b82dce8a1bc",
+    "ascend_compatibility_pr": 76
+  },
+  "environment": {
+    "python": "3.12",
+    "torch": "2.13.0+cpu",
+    "torch_npu": "2.13.0rc1",
+    "triton": "3.6.0",
+    "triton_ascend": "3.6.0",
+    "fla_npu_release": "v26.9.1-release",
+    "fla_npu_wheel_sha256": "aefe29fe3f021db45276b289b1f9882f85a34ce1f9900ba94251bda490af4b6e"
+  },
+  "runtime_micro_optimizations": {
+    "revision": "210038bc250d2558c039f6c0874f403c4d89588e",
+    "runner": "V1 (explicit VLLM_USE_V2_MODEL_RUNNER=0)",
+    "selectors": ["empty-padding", "qsl-reuse", "residual-scale"],
+    "rank_receipts": 2,
+    "worker_pids": [2033302, 2033303],
+    "receipt_sha256": "595a0eef0d38429570caec9e8b4c9ea8880ee1bb5874bdd4b8cd476c828a5840",
+    "per_rank_first_exercise_snapshot": {
+      "empty_padding": {
+        "skipped_slot_mapping_fills": 5,
+        "skipped_block_table_fills": 5
+      },
+      "qsl_reuse": {
+        "calls": 2,
+        "eligible": 1,
+        "reused": 1,
+        "native_copies": 1,
+        "avoided_bytes": 8
+      },
+      "residual_scale": {
+        "installed_modules": 61,
+        "residual_calls": 96,
+        "native_calls": 2
+      }
+    },
+    "health_http_status": 200,
+    "response_content": "OK",
+    "log": "runtime-micro-tp2.log",
+    "response": "runtime-micro-tp2-response.json",
+    "status": "two_rank_activation_qualified_performance_pending"
+  },
+  "gdn_static_decay": {
+    "revision": "807d1b0d2295a438ec696fdfdc8c2ebd97b6b448",
+    "runner": "V2 default",
+    "selector": "static-decay",
+    "expected_layers": 18,
+    "heads_per_rank": 8,
+    "candidate_tokens": [1, 16],
+    "rank_receipts": 2,
+    "worker_pids": [2054943, 2054944],
+    "per_rank_first_exercise_snapshot": {
+      "cache": {"layers": 18, "bytes": 576, "prepared": true},
+      "candidate_calls": 1,
+      "native_calls": 0,
+      "unsupported_native_calls": 0,
+      "worker_entries": 1
+    },
+    "health_http_status": 200,
+    "response_content": "OK",
+    "log": "gdn-static-decay-tp2.log",
+    "response": "gdn-static-decay-tp2-response.json",
+    "status": "two_rank_activation_qualified_performance_pending"
+  },
+  "publication": {
+    "performance_metrics_present": false,
+    "legacy_metrics_transferred": false,
+    "website_state": "retest_pending"
+  }
+}
