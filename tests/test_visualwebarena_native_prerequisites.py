@@ -94,3 +94,23 @@ def test_no_duplicate_or_reselected_fixed_tasks(tmp_path, ids):
     pins = fixture(tmp_path, ids=ids)
     with pytest.raises(ValueError, match="distinct original|fixed original"):
         runner.inspect_original(tmp_path, pins_path=pins)
+
+
+def test_npu_captioner_component_does_not_mark_browser_source_delivered():
+    docs = ROOT / "docs/workload-data"
+    ledger = json.loads((docs / "dataset-validation-status.json").read_text("utf-8"))
+    entry = ledger["delivery_inventory"]["VISUALWEBARENA"]
+    component = entry["original_caption_helper_npu_component_20261107"]
+    receipt = json.loads((ROOT / component["receipt"]).read_text("utf-8"))
+    assert not entry["checked"]
+    assert not component["source_checkbox_eligible"]
+    assert not receipt["source_checkbox_eligible"]
+    assert receipt["native_browser_tasks_run"] == receipt["native_scores_produced"] == 0
+    assert receipt["control"]["model_calls"] == 1
+    assert receipt["control"]["original_max_new_tokens"] == 32
+    assert receipt["control"]["prompt_argument"] is None
+    assert receipt["original_helper_unmodified"]
+    assert receipt["compatibility_profile"]["all_parameter_devices"] == ["npu:0"]
+    assert not receipt["compatibility_profile"]["cpu_neural_fallback"]
+    assert len(receipt["weight_shards"]) == 2
+    assert sum(row["bytes"] for row in receipt["weight_shards"]) == 15769954544

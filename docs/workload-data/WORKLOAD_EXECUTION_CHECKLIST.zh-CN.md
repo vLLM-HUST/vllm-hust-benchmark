@@ -746,6 +746,21 @@ VisualWebArena仍未完成。先复用固定作者源码准备入口，再运行
 公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
 CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。
 
+辅助模型兼容性已单独取得真实证据：[原BLIP-2函数NPU组件验证](validation/visualwebarena-blip2-npu-component-20261107.json)。固定发布方模型revision
+`0eb0d3b46c14c1f8c7680bca2693baafdb90bb28`的两份safetensors及配套文件已逐项核验，只保留一种权重格式。原`evaluation_harness/image_utils.py:get_captioning_fn`未修改，原示例图片、`prompt=None`、默认32-token上限，在FP32
+NPU参数驻留下生成非空结果，没有CPU神经推理回退。这是单图片组件控制，不是固定原任务、站点初始化或原生评分完成；原CLI尚须明确接入NPU设备，不能拿组件结果声称原启动器已完全适配。
+
+可复现的兼容环境为现有Python3.12.13、Torch2.10.0/torch_npu2.10.0.post4、Transformers5.5.4、NumPy1.26.4、SciPy1.13.1；不等同作者原Torch2.0.1/Transformers4.34.0。额外依赖用独立目录安装，不能升级正在运行的模型服务：
+
+```bash
+python -m pip install --target "$AUX_DEPS" --no-deps \
+  scikit-image==0.22.0 imageio==2.34.1 tifffile==2024.8.30 lazy-loader==0.4
+```
+
+其中scikit-image为作者原固定版本，后三项为显式兼容版本。先按发布方固定revision获取模型并核验本回执中的两份LFS
+SHA256；不要同时下载bin副本。使用空闲的已分配NPU，令`ASCEND_RT_VISIBLE_DEVICES`只指向该卡，启动独立Python进程，在其`sys.path`加入`AUX_DEPS`后通过`importlib.util.spec_from_file_location`加载原`image_utils.py`，调用`get_captioning_fn(torch.device("npu:0"), torch.float32, model_name=MODEL_ROOT)`，再对上述原示例图片调用返回函数。先`import torch_npu`；本地`MODEL_ROOT`路径须包含`blip2`，这是原helper的字符串分支条件。保留原模型config，不为消除权重绑定提示改配置。图片处理/分词在CPU不等于模型CPU回退；验证所有模型参数在NPU并实际得到输出，才可报告该组件通过。此操作需要完整模型权重和独立显存窗口，不能在CPU
+CI中执行。
+
 只需任务定义与参考字段时，可复用
 `python scripts/prepare_reused_research_assets.py VISUALWEBARENA --mode download --data-root "$AUTHOR_ROOT" --max-bytes 2000000`，取得5份固定原文件共1,376,415字节；`--mode verify`可核验已存在的原文件。此小包不包含目标输入图片、站点图片或原生运行环境；进行视觉实验和原生任务时，仍须按完整作者源码与原站点流程取得对应资产，不能用缺图请求替代。
 
