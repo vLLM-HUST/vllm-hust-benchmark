@@ -60,10 +60,10 @@ def author_files(root):
     return source, (base / "additional_notes.txt").read_bytes()
 
 
-def author_args(model):
+def author_args(model, *, convert_system_to_user=False):
     if not re.fullmatch(r"[A-Za-z0-9_.:/-]{1,150}", model) or model.startswith("-"):
         raise ValueError("exact served model ID required")
-    return [
+    args = [
         "agent.search.max_debug_depth=20",
         "agent.search.debug_prob=1",
         f"agent.time_limit={TIME}",
@@ -73,6 +73,9 @@ def author_args(model):
         f"agent.feedback.model={model}",
         f"agent.steps={STEPS}",
     ]
+    if convert_system_to_user:
+        args.append("agent.convert_system_to_user=True")
+    return args
 
 
 def check_isolation():
@@ -190,9 +193,14 @@ def main():
     parser.add_argument("--output", type=Path)
     parser.add_argument("--queue", type=Path)
     parser.add_argument("--validator-socket", type=Path)
+    parser.add_argument(
+        "--convert-system-to-user",
+        action="store_true",
+        help="Use the author's role mapping for model templates that require a user turn",
+    )
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
-    kwargs = author_args(args.model)
+    kwargs = author_args(args.model, convert_system_to_user=args.convert_system_to_user)
     start, notes = author_files(args.author_root.resolve(strict=True))
     if not args.execute:
         print(

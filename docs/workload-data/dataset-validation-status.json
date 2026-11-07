@@ -5785,6 +5785,25 @@
   "blocker": "CIFAR10 and ogbn-arxiv valid original evidence reused. IMDb Messages004 ended at original18000s with no submission and original empty/-1 score, not a live task. Original evaluator now independently passes full25000-row known-label controls1.0/0.0 in an isolated offline CPU container, and rejects a missing CSV. These are controls, not model results. The original task explicitly requires DistilBERT finetuning and per-class predictions for all test rows. Remaining: obtain a practical original native Agent execution producing its own submission under the original budget; do not replace it with reference labels or another classifier. Source remains incomplete."
     },
     "MLEBENCH": {
+      "nomad_original_aide_real_attempts_20261107": {
+        "status": "FIRST_NATIVE_REQUEST_FAILED_ROLE_CONTRACT_SEPARATE_COMPATIBILITY_ATTEMPT_STARTED",
+        "initial_receipt": "mlebench-nomad-real.rr4AKi/native-start-public.json",
+        "initial_agent_exit_code": 1,
+        "initial_http_status": 400,
+        "initial_request_roles": ["system"],
+        "initial_error": "No user query found in messages.",
+        "initial_submission": false,
+        "compatibility_receipt": "mlebench-nomad-real.sA1khY/native-start-public.json",
+        "compatibility_author_option": "agent.convert_system_to_user=True",
+        "compatibility_first_request_roles": ["user"],
+        "compatibility_first_request_non_message_fields_equal": true,
+        "request_text_variations_from_author": ["remaining wall clock", "package list order"],
+        "agent_budget_seconds": 86400,
+        "agent_steps": 500,
+        "per_step_timeout_seconds": 32400,
+        "existing_model": "Qwen/Qwen3.8-27B",
+        "source_checkbox_eligible": false
+      },
       "nomad_original_aide_launch_control_20261107": {
         "status": "ORIGINAL_STARTUP_REACHED_FIRST_MODEL_REQUEST_OFFLINE_CONTROL",
         "entry": "scripts/run_mlebench_nomad_aide.py",

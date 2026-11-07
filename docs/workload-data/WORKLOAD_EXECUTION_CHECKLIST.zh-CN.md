@@ -1275,6 +1275,10 @@ NOMAD 的 ARM64 CPU 科学执行对照补齐了 `configs/workload-native/mlebenc
 可信模型转发侧使用同一队列、实际回环端点和 `appworld_model_transport.py --expected-model <同一模型ID>`，按运行窗口设置显式等待和调用上限。
 启动脚本保留原指令拼接、时间、步数和输出链接，只替换 Conda 激活、去除 CUDA 库探测并传递原退出码。断网对照走到第一条原模型请求并在预设错误处退出； 未发真实推理、未生成提交，不能据此勾选。
 
+首个真实 27B 尝试因只有 system 消息被模型模板以 HTTP 400 拒绝，退出码 1、无提交；保存原请求与错误。 独立兼容配置加 `--convert-system-to-user`，使用
+AIDE 作者已提供的 `agent.convert_system_to_user=True`，不改原说明、预算、模型或评分。 新尝试已发出首条 user
+请求；除作者生成的剩余时间和包名顺序外，原提示内容未改，其他请求字段一致。仍须核查真实 Agent 终态、提交及原评分；不能把启动算作通过。
+
 PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
