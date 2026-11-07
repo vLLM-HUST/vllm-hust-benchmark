@@ -829,6 +829,24 @@ python scripts/check_visualwebarena_native_prerequisites.py \
 `--test_config_base_dir "$NEW_TASK_OUTPUT" --test_start_idx 0 --test_end_idx 3` 交给原启动器。
 在原评价器路由上，合成最终页 URL 对照分别给出目标 URL 1/1/1、起始 URL 0/0/0，未执行站点登录、浏览器动作或真实任务评分。
 
+原站点就绪后，在隔离的作者树副本应用已生成的两组适配文件，按作者部署说明配置站点变量。固定三题的运行命令如下； 仅在专用、获授权的 Classifieds
+实例上执行作者重置流程，重置后重新取得登录态。确认模型地址是本地私有的兼容端点， 且结果目录为新的受控目录，不能沿用有 HTML 的目录（原启动器会据此跳过题目）。
+
+```bash
+python browser_env/auto_login.py --site_list classifieds --auth_folder ./.auth
+python run.py \
+  --instruction_path agent/prompts/jsons/p_som_cot_id_actree_3s.json \
+  --provider openai --mode chat --model Qwen/Qwen3.5-9B \
+  --test_config_base_dir "$NEW_TASK_OUTPUT" --test_start_idx 0 --test_end_idx 3 \
+  --action_set_tag som --observation_type image_som \
+  --max_steps 30 --max_obs_length 3840 --max_tokens 384 \
+  --temperature 1.0 --top_p 0.9 --repeating_action_failure_th 5 \
+  --eval_captioning_model_device npu:0 --result_dir "$NEW_PRIVATE_RESULT_DIR"
+```
+
+作者启动器可能捕获单题异常后继续，因此不能只核对进程退出码或平均分。按固定顺序核对原评价器确实对 0、1、2 三题各给出一条结果，核对实际模型请求及对应轨迹，并排除 API
+或浏览器异常。原评价器给出的 0 分是有效结果； 缺失评分不是 0 分。登录态、站点重置配置、原运行日志和轨迹留在私有目录，不提交到 PR。该命令尚未在真实站点执行。
+
 公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
 CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。
 
