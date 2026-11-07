@@ -7,6 +7,8 @@ Issue references are to `vLLM-HUST/vllm-ascend-MuxPD-hust` (#23 is its quality i
 - [REPORT-v2.md](REPORT-v2.md): QUALITY-V2, opt-in ROW on the same protocol FAIL (5 > 2).
 - [REPORT-v3.md](REPORT-v3.md): corrections to v1/v2 (checksums, intervals, coverage) and the
   redefined #23 acceptance: ROW output equal to native single-request output at TP2 and TP4.
+- [REPORT-v4.md](REPORT-v4.md): result under the redefined acceptance. TP2 relies on the existing
+  accepted text and finish-reason consistency; TP4 completed token-level verification (every ROW x
+  native single-request pair 200/200). PASS.
 
-Checksums: SHA256SUMS-v1 and -v2 describe the v1 and v2 uploads; SHA256SUMS-v3 covers the current
-tree (see REPORT-v3.md section 1).
+Checksums: SHA256SUMS-v1 to -v3 describe earlier uploads; SHA256SUMS-v4 covers the current tree.
