@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from itertools import islice
+import math
 from pathlib import Path
 
 from .assets import _json, asset_path, iter_rows, verify_file
@@ -13,6 +14,121 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "webarena_original_packages":
+        from .webarena import original_rows
+
+        yield from original_rows(path, spec)
+        return
+    if spec["mapping"] == "miniwob_original_html_definitions":
+        from .miniwob import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec["mapping"] == "gaia_original_tasks":
+        from .gaia import original_rows
+
+        yield from original_rows(path, spec)
+        return
+    if spec["mapping"] == "full_duplex_original_archives":
+        from .full_duplex import original_rows
+
+        yield from original_rows(path, spec)
+        return
+    if spec["mapping"] == "msmarco_original_dev_query_pools":
+        from .msmarco import original_rows
+
+        yield from original_rows(path, spec)
+        return
+    if spec["mapping"] == "videomme_v2_original_complete_groups":
+        from .videomme_v2 import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec["mapping"] == "discoverybench_original_real_tasks":
+        from .discoverybench import original_rows
+
+        yield from original_rows(path, spec)
+        return
+    if spec["mapping"] == "longmemeval_v2_original_relations":
+        from .longmemeval_v2 import original_rows
+
+        yield from original_rows(path, spec)
+        return
+    if spec["mapping"] == "mlagentbench_original_registry":
+        from .mlagentbench import original_rows
+
+        yield from original_rows(path, spec)
+        return
+    if spec["mapping"] == "dailytalk_original_utterances":
+        from .dailytalk import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec["mapping"] == "spokenwoz_original_dialogues":
+        from .spokenwoz import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec["mapping"] == "streamingbench_original_groups":
+        from .streamingbench import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec.get("native_format") == "libritts_original_archive":
+        from .libritts import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec.get("native_format") == "ljspeech_original_archive":
+        from .ljspeech import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec["mapping"] == "mind2web_original_tasks":
+        from .mind2web import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec["mapping"] == "appworld_original_task_bundles":
+        from .appworld import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec["mapping"] == "livecodebench_original_tasks":
+        from .livecodebench import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec["mapping"] == "videomme_original_tasks":
+        from .videomme import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec["mapping"] == "mvbench_original_video_tasks":
+        from .mvbench import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec["mapping"] == "naturebench_original_packages":
+        from .naturebench import original_rows
+
+        yield from original_rows(path, spec)
+        return
+    if spec["mapping"] == "osworld_original_packages":
+        from .osworld import original_rows
+
+        yield from original_rows(path, spec)
+        return
+    if spec["mapping"] == "paperbench_original_packages":
+        from .paperbench import original_rows
+
+        yield from original_rows(path, spec)
+        return
+    if spec["mapping"] == "dragon_original_tasks":
+        from .dragon import original_rows
+
+        yield from original_rows(path)
+        return
     if spec["mapping"] == "deepplanning_original_tasks":
         from .deepplanning import original_rows
 
@@ -75,6 +191,11 @@ def iter_source_rows(path, spec):
 
         yield from original_rows(path)
         return
+    if spec["mapping"] == "spider_original_tasks":
+        from .spider import original_rows
+
+        yield from original_rows(path)
+        return
     if spec["mapping"] == "qasper_original_questions":
         from .qasper import question_rows
 
@@ -118,12 +239,116 @@ def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
     """Projection is explicit/allowlisted; outcome fields never become task inputs."""
+    if spec["mapping"] == "webarena_original_packages":
+        from .webarena import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "gaia_original_tasks":
+        from .gaia import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "msmarco_original_dev_query_pools":
+        from .msmarco import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "videomme_v2_original_complete_groups":
+        from .videomme_v2 import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "discoverybench_original_real_tasks":
+        from .discoverybench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "longmemeval_v2_original_relations":
+        from .longmemeval_v2 import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "swesmith_original_tasks":
+        from .swesmith import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "mlagentbench_original_registry":
+        from .mlagentbench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "dailytalk_original_utterances":
+        from .dailytalk import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "spokenwoz_original_dialogues":
+        from .spokenwoz import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "streamingbench_original_groups":
+        from .streamingbench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "ovobench_original_tasks":
+        from .ovobench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "multiagentbench_original_configurations":
+        from .multiagentbench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "stabletoolbench_original_tasks":
+        from .stabletoolbench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "miniwob_original_html_definitions":
+        from .miniwob import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "full_duplex_original_archives":
+        from .full_duplex import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "bixbench_original_tasks":
+        from .bixbench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "mind2web_original_tasks":
+        from .mind2web import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "livecodebench_original_tasks":
+        from .livecodebench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "videomme_original_tasks":
+        from .videomme import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "mvbench_original_video_tasks":
+        from .mvbench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "naturebench_original_packages":
+        from .naturebench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "osworld_original_packages":
+        from .osworld import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "paperbench_original_packages":
+        from .paperbench import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "dragon_original_tasks":
+        from .dragon import adapt_case
+
+        return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "deepplanning_original_tasks":
         from .deepplanning import adapt_case
 
         return adapt_case(row, source=source, index=index)
     if spec["mapping"] == "scienceworld_original_goldpaths":
         from .scienceworld import adapt_case
+
+        return adapt_case(row, source=source, index=index)
+    if spec["mapping"] == "appworld_original_task_bundles":
+        from .appworld import adapt_case
 
         return adapt_case(row, source=source, index=index)
     if source_id == "DOCVQA":
@@ -190,6 +415,32 @@ def adapt_row(
             raise ValueError(
                 f"{source_id}: invalid text field at row {index}; payload suppressed"
             )
+    if source_id == "CODEJUDGE_EVAL":
+        if any(
+            not isinstance(row[key], str) or not row[key].strip()
+            for key in ("statement", "source", "url", "code", "input", "answer")
+        ):
+            raise ValueError("CODEJUDGE_EVAL: original text fields required")
+        if any(
+            type(row[key]) is not int or row[key] < 0 for key in ("data_id", "task_id")
+        ) or row["answer"] not in set("ABCDEFGHI"):
+            raise ValueError(
+                "CODEJUDGE_EVAL: original identifiers/answer label required"
+            )
+    if source_id == "WAVCAPS" and (
+        any(
+            not isinstance(row[key], str) or not row[key].strip()
+            for key in ("id", "audio", "caption")
+        )
+        or type(row["duration"]) not in (int, float)
+        or not math.isfinite(row["duration"])
+        or row["duration"] < 0
+        or type(row["num_captions_per_audio"]) is not int
+        or row["num_captions_per_audio"] != 1
+    ):
+        raise ValueError(
+            "WavCaps requires original audio metadata and one weak caption"
+        )
     if source_id == "QUALITY" and (
         any(
             not isinstance(row[key], str) or not row[key].strip()
@@ -585,10 +836,50 @@ def iter_workload(
             "official native runner required; no QBI fallback or prompt flattening"
         )
     manifest = source_spec(source_id, catalog_root) if manifest is None else manifest
+    if source_id == "APPWORLD":
+        assets = manifest.get("native_task_assets")
+        if not isinstance(assets, list) or not assets:
+            raise ValueError("bind original AppWorld task bundles before reading")
+        for asset in assets:
+            verify_file(Path(data_root), asset)
     if manifest.get("source_id", source_id) != source_id or not manifest.get(
         "revision"
     ):
         raise ValueError("explicit manifest requires matching source ID and revision")
+    if source_id == "GAIA" and mapping is None:
+        from .gaia import relation_spec
+
+        spec = relation_spec(manifest, spec)
+    if source_id == "NATUREBENCH" and mapping is None:
+        from .naturebench import relation_spec
+
+        spec = relation_spec(manifest, spec)
+    if source_id == "OSWORLD" and mapping is None:
+        from .osworld import pipeline_manifest, relation_spec
+
+        manifest = pipeline_manifest(manifest)
+        spec = relation_spec(manifest, spec)
+    if source_id in {"WEBARENA", "VISUALWEBARENA"} and mapping is None:
+        from .webarena import pipeline_manifest, relation_spec
+
+        manifest = pipeline_manifest(manifest)
+        spec = relation_spec(manifest, spec)
+    if source_id == "FULL_DUPLEX_BENCH" and mapping is None:
+        from .full_duplex import relation_spec
+
+        spec = relation_spec(manifest, spec)
+    if source_id == "PAPERBENCH" and mapping is None:
+        from .paperbench import relation_spec
+
+        spec = relation_spec(manifest, spec)
+    if source_id == "MSMARCO_PASSAGE" and mapping is None:
+        from .msmarco import relation_spec
+
+        spec = relation_spec(manifest, spec)
+    if source_id == "MLAGENTBENCH" and mapping is None:
+        from .mlagentbench import relation_spec
+
+        spec = relation_spec(manifest, spec)
     if source_id == "NARRATIVEQA" and mapping is None:
         from .narrativeqa import relation_spec
 
@@ -697,8 +988,13 @@ def iter_workload(
             ):
                 raise ValueError("RULER manifest must preserve generation provenance")
             source["generation"] = deepcopy(generation)
-        rows = iter_source_rows(asset_path(Path(data_root), name), spec)
         remaining = None if limit is None else limit - emitted
+        row_spec = (
+            {**spec, "diagnostic_query_limit": remaining}
+            if spec["mapping"] == "msmarco_original_dev_query_pools"
+            else spec
+        )
+        rows = iter_source_rows(asset_path(Path(data_root), name), row_spec)
         try:
             if history_targets is not None:
                 original_rows = list(rows)
@@ -733,10 +1029,20 @@ def iter_workload(
                 yield record
                 count += 1
                 emitted += 1
+            expected_records = file_spec.get("rows")
+            if (
+                spec["mapping"] == "videomme_v2_original_complete_groups"
+                and expected_records is not None
+            ):
+                if type(expected_records) is not int or expected_records % 4:
+                    raise ValueError(
+                        "original annotation count must preserve complete four-question groups"
+                    )
+                expected_records //= 4
             if (
                 remaining is None
-                and file_spec.get("rows") is not None
-                and count != file_spec["rows"]
+                and expected_records is not None
+                and count != expected_records
             ):
                 raise ValueError(f"source row count mismatch: {source_id}/{name}")
         finally:

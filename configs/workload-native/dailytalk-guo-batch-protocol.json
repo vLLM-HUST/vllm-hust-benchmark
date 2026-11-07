@@ -1,0 +1,43 @@
+{
+  "source_id": "DAILYTALK",
+  "protocol_id": "original-publisher-history-guo-batch-synthesis/v1",
+  "asset_kind": "conversational_tts_corpus_with_original_batch_inference",
+  "publisher_repository": "keonlee9420/DailyTalk",
+  "publisher_revision": "05a0173dac8e68fb2b22190cfc5c22248538a1a6", "revision_note": "pragma: allowlist secret - pinned original public publisher revision",
+  "identity_note": "pragma: allowlist secret - pinned public publisher revision",
+  "publisher_protocol": {
+    "readme_url": "https://github.com/keonlee9420/DailyTalk/blob/05a0173dac8e68fb2b22190cfc5c22248538a1a6/README.md#inference",
+    "readme_sha256": "807de39e6f9d4e94a271793e0660c89974bab0c5a4bcc3182cedb95856a6485f", "readme_identity_note": "pragma: allowlist secret - pinned original public README checksum",
+    "evaluation_source_url": "https://github.com/keonlee9420/DailyTalk/blob/05a0173dac8e68fb2b22190cfc5c22248538a1a6/evaluate.py",
+    "evaluation_source_sha256": "99166dda409acae6a5711d7d18e84707329addf6717ca81b6a203c4459cc56e2", "evaluation_identity_note": "pragma: allowlist secret - pinned original public evaluate.py checksum"
+  },
+  "native_command": ["synthesize.py", "--source", "<original whole-dialogue phoneme split or fixed complete-dialogue selection>", "--restore_step", "900000", "--mode", "batch", "--dataset", "DailyTalk"],
+  "model_profile": "configs/workload-native/dailytalk-original-model-assets.json",
+  "acoustic_history_variant": "Guo",
+  "acoustic_checkpoint_step": 900000,
+  "vocoder": "original universal HiFi-GAN",
+  "neural_dtype": "float32",
+  "seed": 1234,
+  "batch_size": 8,
+  "history_window_turns": 10,
+  "pitch_energy_duration_controls": [1.0, 1.0, 1.0],
+  "fixed_native_validation_selection": {
+    "rule": "first three complete dialogues by first appearance in original val_phone.txt",
+    "dialogue_ids": ["23", "30", "59"],
+    "utterances": 29,
+    "original_rows_and_order_unchanged": true
+  },
+  "completion_checks": ["Original complete dialogue inputs and text-history features preserved", "Original acoustic and vocoder forward batches on NPU", "Original CLI returns and produces every selected original WAV and plot", "Full PCM, declared audio format, original output identities and saved digests verified", "Actual provider artifact preserves original fields, references and dialogue relations for research consumption"],
+  "compatibility_disclosures": ["Unused DeepSpeaker and raw-English G2P imports delayed to their original branches", "Explicit NPU device and original seed instead of CPU/CUDA device selection", "Single original inference GRU uses qualified FP32 equation decomposition, unchanged parameters", "Isolated pinned Matplotlib 3.9.4 overlay preserves original plotting API; no global downgrade", "Safe weights-only deserialization with explicitly checked NumPy scalar globals"],
+  "evaluation_boundary": {
+    "protocol_output": "synthesized speech files and original plots, not automatic quality scores",
+    "publisher_evaluate_py": "Original training/validation loss loop over Dataset, not a separate required step of the README batch-inference command",
+    "human_mos_or_paper_metric_reproduction": false,
+    "quality_benchmark_score_claimed": false,
+    "full_split_synthesis_claimed": false,
+    "full_reference_audio_acquisition_claimed": false,
+    "streaming_overlap_interruption_or_arrival_timing_claimed": false,
+    "engine_performance_improvement_claimed": false
+  },
+  "dataset_license": "CC-BY-SA-4.0 per pinned publisher README; original code LICENSE retained separately"
+}

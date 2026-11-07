@@ -1,0 +1,44 @@
+{
+  "source_id": "BIXBENCH",
+  "status": "OFFICIAL_IMAGE_AND_AUTHOR_NOTEBOOK_ISOLATED_FIXTURE_PASSED_NOT_NATIVE_TASK",
+  "image": {
+    "publisher_tag": "futurehouse/bixbench:aviary-notebook-env",
+    "arm64_manifest": "sha256:ccc543479762e83276b5668e5e49933d926cee081613b23492ef01b9025304ac",
+    "image_id": "sha256:b345de18d0c70e3ec454b391d30285684448c2b56523a581ecc17c3ff06b4a9e",
+    "layers_verified": 16,
+    "compressed_layer_bytes_verified": 5662664557,
+    "all_layer_sha256_and_final_config_identity_verified": true,
+    "local_image_blob_files_created": 0
+  },
+  "execution": {
+    "author_api": "fhda.notebook_env.NBEnvironment.reset/edit_cell",
+    "fixture": "1 + 1",
+    "fixture_result": "2",
+    "use_docker_explicitly_enabled": true,
+    "nonroot_uid_gid": "65534:65534",
+    "network": "none",
+    "readonly_container_root": true,
+    "all_capabilities_dropped": true,
+    "no_new_privileges": true,
+    "memory_gib": 4,
+    "cpus": 1,
+    "pids_limit": 256,
+    "only_workspace_bind_mounted": true,
+    "docker_or_npu_devices_exposed_to_task_container": false,
+    "author_source_modified": false,
+    "container_policy_runtime_override": true
+  },
+  "retained_failure": "First fixture failed because root-created mode0600 notebook was unreadable by nonroot task. Failed container was stopped and preserved. Second private runtime workspace uses group65534/setgid2770 and controller-local umask0007; no source or shared-data permissions changed.",
+  "storage": {
+    "approved_total_budget_gib": 35,
+    "actual_independent_backing_gib": 28,
+    "offline_filesystem_checks_before_and_after_resize_passed": true,
+    "old_images_and_container_records_preserved": true,
+    "original_docker_daemon_restarted": false
+  },
+  "original_tasks_executed": 0,
+  "official_scoring_executed": false,
+  "model_calls": 0,
+  "source_checkbox_eligible": false,
+  "boundary": "Official software and isolated trusted fixture only. Native scientific tasks, public execution entry qualification, model connectivity and official scoring are not yet established. No dataset, model or image blobs were stored on the local workstation."
+}

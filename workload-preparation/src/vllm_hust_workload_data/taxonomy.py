@@ -177,6 +177,7 @@ def delivery_assets(root=None):
         "original_request_replay",
         "data_reading_only",
         "generation",
+        "native_evaluation",
         "prepare_scoring_inputs",
         "isolated_scoring",
         "prepare_assets",

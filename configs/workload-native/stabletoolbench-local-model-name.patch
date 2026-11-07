@@ -1,0 +1,18 @@
+--- a/toolbench/inference/LLM/chatgpt_function_model.py
++++ b/toolbench/inference/LLM/chatgpt_function_model.py
+@@ -1,4 +1,5 @@
+ import os
++from urllib.parse import urlsplit
+
+ from openai import OpenAI
+ import httpx
+@@ -36,7 +37,8 @@
+         json_data.update({"tool_choice": tool_choice})
+
+     try:
+-        if model.startswith("gpt"):
++        local = urlsplit(base_url or "")
++        if model.startswith("gpt") or (local.scheme == "http" and local.hostname == "127.0.0.1"):
+             client = OpenAI(base_url=base_url, api_key=key) if base_url else OpenAI(api_key=key)
+         else:
+             raise NotImplementedError("Model not supported")

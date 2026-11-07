@@ -101,8 +101,23 @@ def selection(source_id, files=None):
         ):
             raise ValueError("source file resource identity or inventory mismatch")
         source = {**source, "files": manifest["files"]}
+    profile = source.get("publisher_metadata_acquisition") or {}
+    if not isinstance(profile, dict):
+        raise ValueError("explicit publisher acquisition profile required")
+    roles = profile.get("registered_file_roles", ["raw_source"])
+    if (
+        not isinstance(roles, list)
+        or not roles
+        or any(
+            not isinstance(role, str)
+            or role not in {"raw_source", "data", "native_environment"}
+            for role in roles
+        )
+        or len(set(roles)) != len(roles)
+    ):
+        raise ValueError("explicit audited original asset roles required")
     registered = {
-        item["path"]: item for item in source["files"] if item["role"] == "raw_source"
+        item["path"]: item for item in source["files"] if item["role"] in roles
     }
     names = list(registered) if files is None else files
     if (

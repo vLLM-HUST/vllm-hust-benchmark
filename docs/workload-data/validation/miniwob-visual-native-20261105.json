@@ -1,0 +1,101 @@
+{
+  "source_id": "MINIWOB_PLUSPLUS",
+  "source_checkbox_eligible": false,
+  "status": "NATIVE_VISUAL_SAMPLE_AND_DEFINITION_PROVIDER_RESEARCH_VERIFIED",
+  "date": "2026-11-05",
+  "publisher": "https://github.com/Farama-Foundation/miniwob-plusplus",
+  "source_revision": "33c3b4ddef8c6eb67c57a29663d844b1eda7e614",
+  "source_archive_sha256": "2290178d6159bbd10a9dabcc49c6a739341bc5a16cdb5f29a3f6abf035aa362c",
+  "protocol": {
+    "tasks": ["miniwob.click-dialog", "miniwob.multi-layouts"],
+    "task_selection": "Same two original tasks fixed by the earlier candidate profile, not selected by visual run outcome.",
+    "task_seed": 42,
+    "agentlab": "0.4.2",
+    "browsergym_miniwob": "0.14.2",
+    "agent": "Author VisualAgentArgs with unmodified DEFAULT_PROMPT_FLAGS",
+    "observations": "Original page screenshots, no injected axtree or gold actions",
+    "actions": "Author coordinate action subset, single action per step",
+    "model": "Qwen/Qwen3.5-9B",
+    "inference_device": "Ascend 910B2 NPU0",
+    "max_steps": 20,
+    "max_output_tokens": 4096,
+    "budget_scope": "Explicit fixed operational validation configuration, not asserted to be a published leaderboard default or a quality comparison.",
+    "task_reward_and_termination_code_changed": false,
+    "native_scorer": "BrowserGym MiniWoB environment reward and terminated/truncated summary"
+  },
+  "environment_recovery": {
+    "python": "Existing task-scoped CPython3.11.17 runtime; old client site-packages reused without replacing its broken historical symlink",
+    "chromium_build": "1117",
+    "system_libraries": "141 RPMs downloaded from configured official openEuler24.03-LTS-SP3 repositories; rpm --root TASK_SYSROOT --checksig verified every package",
+    "library_extraction": "642 library/font/config members extracted under task root; no RPM scripts, host package transaction or glibc extraction",
+    "fontconfig": "Task FONTCONFIG_SYSROOT and FONTCONFIG_PATH",
+    "allocator": "Remove inherited LD_PRELOAD only in task process after Chromium crashed in libjemalloc; original failure retained",
+    "credentials": "Explicit local-loopback placeholder for author OpenAI client; no real API credential",
+    "old_initialization_failures_retained": true
+  },
+  "results": [
+    {
+      "task": "miniwob.click-dialog",
+      "steps": 20,
+      "reward": 0.0,
+      "terminated": false,
+      "truncated": true,
+      "framework_error": null,
+      "model_requests": 20,
+      "requests_with_one_original_image": 20,
+      "null_responses": 0,
+      "length_stops": 0,
+      "step_files": 21,
+      "screenshots": 21,
+      "summary_sha256": "98aef2932f9ec7bff3e187a027676d79c1d562c4061d8b298671811034f1db6e",
+      "request_metadata_sha256": "e3e37dd865aee407673be81347b8ae9d505b4402765fc954b2279db441c42442"
+    },
+    {
+      "task": "miniwob.multi-layouts",
+      "steps": 20,
+      "reward": 0.0,
+      "terminated": false,
+      "truncated": true,
+      "framework_error": null,
+      "model_requests": 23,
+      "requests_with_one_original_image": 23,
+      "null_responses": 0,
+      "length_stops": 0,
+      "step_files": 21,
+      "screenshots": 21,
+      "summary_sha256": "f465003e189882907fdd30a54fca32cc37bece5bf9d2c4cf35bc0352ca80ed39",
+      "request_metadata_sha256": "6c33db838a7b8bba3ac058d9c328e10273380f7e316f950a23089be4a7acfb0c"
+    }
+  ],
+  "execution_evidence": {
+    "server_stage": "miniwob-visual-native-20261105-001",
+    "runner_sha256": "5bb1c28a7f60d560ad36503849719a584a98002064ac4175ecfb9d6a87f14ccb",
+    "run_directories": ["click-dialog-003", "multi-layouts-001"],
+    "public_entry": "scripts/run_miniwob_agentlab.py --agent-profile visual",
+    "software_tests_are_not_native_evidence": true
+  },
+  "provider_and_research_readback": {
+    "public_api": "vllm_hust_workload_data.iter_workload('MINIWOB_PLUSPLUS', data_root=original_archive_directory)",
+    "native_definition_api": "vllm_hust_workload_data.miniwob.read_native_definition(record, data_root=original_archive_directory)",
+    "installed_wheel_sha256": "fa9dae7e3661cd700528841e53400cd59acbd025c268dca504e0fe2395c6139a",
+    "original_definition_rows": 130,
+    "all_original_html_bytes_resolved_exactly": true,
+    "native_site_original_source_files_byte_matched": 444,
+    "public_index_resolve_exact_rows": 130,
+    "research_pipeline_rows": 130,
+    "research_revision": "9f1f6a5ce21f486aa27cfb2482c4007d6b9d2344",
+    "research_entrypoint": "llm_serving_workloads.pipeline.analysis_from_source_index",
+    "research_source_changed": false,
+    "server_stage": "miniwob-provider-readback-20261105-001",
+    "generated_prompts": 0,
+    "new_model_calls_for_readback": 0,
+    "installed_browsergym_registered_tasks": 125,
+    "deployment_note": "Verified with the installed candidate wheel, not an update of the research dependency lock; source definitions are not instantiated model requests or a scientific analysis."
+  },
+  "limitations": [
+    "Both tasks reached configured step caps with zero reward; this establishes usable execution, not task-solving quality.",
+    "Public provider and pinned research consumption passed; accepted replacement for a required source is not established and no additional inventory checkbox is claimed.",
+    "Small browser widgets do not establish authenticated business workflows, multi-site state or desktop OS control.",
+    "Saved trajectory files were counted, not unpickled or treated as an independent reward recomputation."
+  ]
+}
