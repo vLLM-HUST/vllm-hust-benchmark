@@ -1282,7 +1282,8 @@ LFS指针文本冒充展开后的原文件。 同一入口改用 `--action plan`
 现固定该原赛题为单赛题验证样本，选择发生在任何 Agent 运行之前。用 `python scripts/prepare_mlebench_nomad_author_data.py` 查看固定发布
 URL 和 SHA-256； 在已核验的 MLE-bench 环境内加 `--archive <作者发布ZIP> --data-dir <专用空目录>` 运行，脚本与对应
 `configs/workload-native/mlebench-author-source.json` 一起只读挂载。该入口已在断网 ARM64 容器实跑。Agent 只读挂载返回的
-`agent_mount_relative_to_data_dir`；原始归档和私有标签不得暴露给 Agent。整项仍未勾选。
+`agent_mount_relative_to_data_dir`；研究侧也应只读这个公开目录，原始归档和私有标签继续与其隔离。已逐条核对准备后 2,400 个几何文件的 ID
+引用，测试表与原提交模板的 240 个 ID 顺序完全相同，且测试表不含目标列。整项仍未勾选。
 
 作者集成指定 [AIDE v6.3.3](https://github.com/thesofakillers/aideml/tree/v6.3.3)；已取得固定提交并逐一匹配 33 份原 Git
 对象，未将历史解题产物纳入工作区。 容器只读挂载 `prepared/public` 后实测仅能看到 2,160 条训练、240 条测试及等量几何文件，测试表不含标签，私有目录、原归档、Docker
