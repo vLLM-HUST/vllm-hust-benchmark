@@ -1,0 +1,29 @@
+1c1
+< """Own a finite quality process group; preserve frozen producers, failures and teardown."""
+---
+> """Solo variant of run_quality_controlled_v3.py (adds solo driver, bounds, devices). Own a finite quality process group; preserve frozen producers, failures and teardown."""
+26c26,31
+<     parser.add_argument('--timeout', type=int, default=11100)
+---
+>     parser.add_argument('--timeout', type=int, required=True)
+>     parser.add_argument('--max-steps', type=int, required=True)
+>     parser.add_argument('--max-wall-seconds', type=int, required=True)
+>     parser.add_argument('--devices', default='0,1,2,3')
+>     parser.add_argument('--admission', choices=['solo', 'batched'], default='solo')
+>     parser.add_argument('--tp-override', type=int)
+42c47
+<     for name in ('run_quality.py', 'score_quality.py'):
+---
+>     for name in ('run_quality.py', 'score_quality.py', 'run_quality_solo.py'):
+44c49
+<     command = [sys.executable, str(tool_dir / 'run_quality.py'), 'run',
+---
+>     command = [sys.executable, str(tool_dir / 'run_quality_solo.py'), 'run',
+47c52
+<                '--role', args.role, '--output', str(root / 'results')]
+---
+>                '--role', args.role, '--max-steps', str(args.max_steps), '--max-wall-seconds', str(args.max_wall_seconds), '--output', str(root / 'results'), '--admission', args.admission] + (['--tp-override', str(args.tp_override)] if args.tp_override else [])
+49c54
+<     env['ASCEND_RT_VISIBLE_DEVICES'] = '0,1,2,3'
+---
+>     env['ASCEND_RT_VISIBLE_DEVICES'] = args.devices
