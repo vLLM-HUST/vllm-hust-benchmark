@@ -1,0 +1,56 @@
+sv2-n1         correct=165 length=9 invalid=9 incomplete=9 all_complete=False errors=0 uncovered_mixed=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+sv2-n2         correct=165 length=9 invalid=9 incomplete=9 all_complete=False errors=0 uncovered_mixed=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+sv2-n3         correct=165 length=9 invalid=9 incomplete=9 all_complete=False errors=0 uncovered_mixed=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+sv2-n4         correct=165 length=9 invalid=9 incomplete=9 all_complete=False errors=0 uncovered_mixed=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
+sv2-r1         correct=166 length=7 invalid=7 incomplete=7 all_complete=False errors=0 uncovered_mixed=[]
+sv2-r2         correct=166 length=7 invalid=7 incomplete=7 all_complete=False errors=0 uncovered_mixed=[]
+sv2-r3         correct=166 length=7 invalid=7 incomplete=7 all_complete=False errors=0 uncovered_mixed=[]
+sv2-r4         correct=166 length=7 invalid=7 incomplete=7 all_complete=False errors=0 uncovered_mixed=[]
+sv2-g1         correct=166 length=7 invalid=7 incomplete=7 all_complete=False errors=0 uncovered_mixed=[]
+sv2-g2         correct=166 length=7 invalid=7 incomplete=7 all_complete=False errors=0 uncovered_mixed=[]
+token-identical to sv2-n1 {'sv2-n2': 200, 'sv2-n3': 200, 'sv2-n4': 200}
+token-identical to sv2-r1 {'sv2-r2': 200, 'sv2-r3': 200, 'sv2-r4': 200}
+token-identical to sv2-g1 {'sv2-g2': 200}
+raw vs native token-identical 11
+
+== raw (gating) (4 runs) vs native (4 runs)
+  1_accuracy (83.0, 82.5, 0.5, True) PASS
+  2_truncation (3.5, 4.5, -1.0, True) PASS
+  3_failures (0, True) PASS
+  4_systematic (['mmlu-pro-03766', 'mmlu-pro-10672', 'mmlu-pro-01741'], False) FAIL
+  case bootstrap 95% CI pp: -2.0 3.0
+  two-level bootstrap 95%: [-2.00, +3.00] pp; share < -2 pp = 3%
+  run-level Welch: undefined (zero run variance in both arms)
+  majority right->wrong ['mmlu-pro-03766', 'mmlu-pro-10672', 'mmlu-pro-01741']
+  majority wrong->right ['mmlu-pro-06074', 'mmlu-pro-06741', 'mmlu-pro-00882', 'mmlu-pro-08107']
+  info only, strict v1 veto: new wrong on all-native-correct (165): ['mmlu-pro-03766', 'mmlu-pro-10672', 'mmlu-pro-01741']
+   mmlu-pro-03766 C 0000 N 1111
+   mmlu-pro-10672 C 0000 N 1111
+   mmlu-pro-01741 C 0000 N 1111
+   mmlu-pro-06074 C 1111 N 0000
+   mmlu-pro-06741 C 1111 N 0000
+   mmlu-pro-00882 C 1111 N 0000
+   mmlu-pro-08107 C 1111 N 0000
+  raw (gating) QUALITY_V2: FAIL
+
+== group (opt-in, reported) (2 runs) vs native (4 runs)
+  1_accuracy (83.0, 82.5, 0.5, True) PASS
+  2_truncation (3.5, 4.5, -1.0, True) PASS
+  3_failures (0, True) PASS
+  4_systematic (['mmlu-pro-03766', 'mmlu-pro-10672', 'mmlu-pro-01741'], False) FAIL
+  case bootstrap 95% CI pp: -2.0 3.0
+  two-level bootstrap 95%: [-2.00, +3.00] pp; share < -2 pp = 3%
+  run-level Welch: undefined (zero run variance in both arms)
+  majority right->wrong ['mmlu-pro-03766', 'mmlu-pro-10672', 'mmlu-pro-01741']
+  majority wrong->right ['mmlu-pro-06074', 'mmlu-pro-06741', 'mmlu-pro-00882', 'mmlu-pro-08107']
+  info only, strict v1 veto: new wrong on all-native-correct (165): ['mmlu-pro-03766', 'mmlu-pro-10672', 'mmlu-pro-01741']
+   mmlu-pro-03766 C 00 N 1111
+   mmlu-pro-10672 C 00 N 1111
+   mmlu-pro-01741 C 00 N 1111
+   mmlu-pro-06074 C 11 N 0000
+   mmlu-pro-06741 C 11 N 0000
+   mmlu-pro-00882 C 11 N 0000
+   mmlu-pro-08107 C 11 N 0000
+  group (opt-in, reported) QUALITY_V2: FAIL
+
+PART_A_RAW: FAIL
