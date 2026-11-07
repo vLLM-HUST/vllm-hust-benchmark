@@ -764,8 +764,15 @@ SoM actor 另有独立接入缺口：原 `MultimodalCoTPromptConstructor` 把 3 
 `python scripts/prepare_visualwebarena_qwen35_som_template.py --source "$ORIGINAL_CHAT_TEMPLATE" --output "$NEW_SOM_TEMPLATE"`
 从已核验的模板生成；不覆盖源文件或现有输出。 只放行后续带原 `example_user` / `example_assistant` 名称的 `system` 消息，用同一 `system`
 角色标记序列化，并保留名称和内容顺序。 原三组示例经本地 `Qwen3VLProcessor` 在 CPU 上实际预处理，四图展开为 4000 个图像 token，共 5890 个输入
-token；普通支持的单图对照渲染逐字节不变，未命名的后续 `system` 仍被拒绝。 这不是候选模板的 vLLM HTTP 接入或模型输出证据：未启动候选端点、未加载模型权重。仍需独立验证端点、原
-actor 的模型名称及分词器接入，再执行原任务和评分。
+token；普通支持的单图对照渲染逐字节不变，未命名的后续 `system` 仍被拒绝。随后以同一候选模板在无网络、无设备映射的独立 vLLM 0.23.0 容器实际通过 HTTP
+`/v1/chat/completions/render`： 原结构请求和单图对照都返回 HTTP 200；原结构 5890 个输入 token、四个顺序不重叠的图像区间（长度
+1120/880/880/1120），384-token 输出预算未变。 单图对照在该独立配置下为 1961 个输入 token，不与上一服务配置的 1959 混为相同。
+
+隔离配方为 `vllm launch render`、CPU platform、模型配置及 tokenizer/processor
+文件（不含权重）、本地候选模板、`--chat-template-content-format openai`、上下文 262144、图像上限 4、关闭 thinking。 同版 Ascend
+镜像的模型类导入仍有 Triton 架构探测；复用 vLLM 按源码 hash 校验的既有模型类元数据，在隔离环境设置 `TRITON_ASCEND_ARCH=Ascend910B2`
+并指定可写的独立缓存，避免探测真实设备。 首次启动超时与第二次导入失败的记录保留。运行完成后隔离容器已退出，原服务未变。仍需原 actor 的模型名称及分词器接入、真实生成、原站点和固定原题评分；不把
+HTTP 渲染成功计为原生交付。
 
 公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
 CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。
