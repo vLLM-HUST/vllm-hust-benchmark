@@ -137,3 +137,35 @@ def test_native_runner_checks_the_existing_inventory(tmp_path, agentlab_entry):
     )
     with pytest.raises(ValueError, match="differs"):
         agentlab_entry.verify_selected_sample(inventory, [{**row, "seed": 20}])
+
+
+@pytest.mark.parametrize("steps", [15, 16])
+def test_native_terminal_result_checks_original_budget(tmp_path, agentlab_entry, steps):
+    (tmp_path / "summary_info.json").write_text(
+        json.dumps(
+            {
+                "cum_reward": 0.0,
+                "n_steps": steps,
+                "terminated": False,
+                "truncated": True,
+                "err_msg": None,
+            }
+        ),
+        encoding="utf-8",
+    )
+    row = {"task_id": "fixture", "seed": 19, "category": "fixture"}
+    run = SimpleNamespace(
+        err_msg=None, exp_dir=tmp_path, env_args=SimpleNamespace(max_steps=15)
+    )
+    if steps == 16:
+        with pytest.raises(ValueError, match="original step budget"):
+            agentlab_entry.fixed_terminal_result(row, run)
+    else:
+        result = agentlab_entry.fixed_terminal_result(row, run)
+        assert result == {
+            **row,
+            "steps": 15,
+            "reward": 0.0,
+            "terminated": False,
+            "truncated": True,
+        }

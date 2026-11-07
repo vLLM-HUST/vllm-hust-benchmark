@@ -44,6 +44,15 @@ def verify_selected_sample(inventory, selected):
         )
 
 
+def fixed_terminal_result(row, run):
+    if run.err_msg:
+        raise RuntimeError("WorkArena run failed; inspect private experiment output")
+    summary = terminal_summary(run.exp_dir)
+    if summary["steps"] > run.env_args.max_steps:
+        raise ValueError("WorkArena result exceeds the original step budget")
+    return {**row, **summary}
+
+
 def build_experiments(model):
     if importlib.metadata.version("agentlab") != "0.4.2":
         raise ValueError("requires the qualified AgentLab 0.4.2 client")
@@ -121,11 +130,7 @@ def main():
     for row, run in zip(selected, runs, strict=True):
         run.prepare(args.output)
         run.run()
-        if run.err_msg:
-            raise RuntimeError(
-                "WorkArena run failed; inspect private experiment output"
-            )
-        print(json.dumps({**row, **terminal_summary(run.exp_dir)}), flush=True)
+        print(json.dumps(fixed_terminal_result(row, run)), flush=True)
 
 
 if __name__ == "__main__":
