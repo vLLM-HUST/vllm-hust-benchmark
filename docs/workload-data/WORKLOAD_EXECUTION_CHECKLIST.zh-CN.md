@@ -643,7 +643,9 @@ WorkArena（未完成）：使用
 
 固定 L1 样本使用 `scripts/plan_workarena_l1_sample.py` 在原 0.5.3 客户端离线生成。作者采样器 `l1`、元种子 42、每题 10 个种子给出 330
 个组合；按发布顺序，取前三个不同类别各自的首个原种子：`multi-chart-value-retrieval` / 102、`create-change-request` /
-58、`knowledge-base-search` / 1。三项均已核对原 BrowserGym 注册，在实例访问和结果产生前锁定；后续用同一 ID 和种子执行原重置、动作和校验，不按结果换题。
+58、`knowledge-base-search` / 1。三项均已核对原 BrowserGym 注册，在实例访问和结果产生前锁定。执行时从
+`DEFAULT_BENCHMARKS["workarena_l1"]()` 复用这三个原 `EnvArgs`，保留每题 15 步、无任务参数覆盖及原 `workarena` 单动作配置；后续用同一
+ID 和种子执行原重置、动作和校验，不按结果换题。
 
 BixBench（固定三题已交付）：固定原题为 `bix-1-q1`、`bix-1-q2`、`bix-10-q1`。取得原生状态与轨迹后，用
 `scripts/prepare_bixbench_original_grade_input.py --author-root <源码> --data-root <数据> --native-output <原输出> --output <新目录> --limit 3 --execute`
