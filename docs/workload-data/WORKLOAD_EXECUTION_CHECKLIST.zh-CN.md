@@ -880,6 +880,8 @@ CI中执行。
 秒。对照客体自然退出后已清理对照盘并保留回执。完整拉取、解包、站点登录及固定三题的原执行和评分仍待完成。另查的 BrowserGym
 VisualWebArena包是框架维护者提供的非原仓直接执行移植版，亦有提前加载BLIP-2行为，不能因为客户端注册成功就当成原生环境已就绪。
 
+原拉取于 04:03 因回环 SSH 转发断开而退出。最大层读取 23,140,130,332 字节后提前结束，核查时已无可续传数据。站点部署尚未启动。下一次拉取需重新获得授权并恢复可用的镜像出口。
+
 [作者项目页](https://jykoh.com/vwa#try-the-environments-yourself)明确限制公共演示站仅供体验，不能用于正式评测。
 [作者部署说明](https://github.com/web-arena-x/visualwebarena/blob/main/environment_docker/README.md)
 另外提供预装环境的 AWS AMI；如团队已有授权的隔离实例，可复用其原 Classifieds 站点，但仍须核对原数据库初始化、登录及固定三题的站点状态。没有启动云资源。 2026-11-07

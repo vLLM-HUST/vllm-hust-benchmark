@@ -6313,6 +6313,17 @@
       }
     },
     "VISUALWEBARENA": {
+      "official_classifieds_original_pull_interruption_20261108": {
+        "status": "OFFICIAL_IMAGE_PULL_SHORT_READ_AFTER_REVERSE_FORWARD_LOSS",
+        "receipt": "workload-vwa-classifieds-fs7dvpw_/pull-transport-interruption-public.json",
+        "original_pull_exit_code": 1,
+        "official_layer_expected_bytes": 76642798711,
+        "official_layer_read_before_eof_bytes": 23140130332,
+        "reverse_forward_listener_present_at_audit": false,
+        "resumable_containerd_ingest_present_at_audit": false,
+        "original_site_started": false,
+        "source_checkbox_eligible": false
+      },
       "official_classifieds_guestfwd_transport_20261108": {
         "status": "OFFICIAL_LAYER_NONZERO_RANGE_OVER_GUESTFWD_MATCHES_HOST_CONTROL",
         "receipt": "workload-vwa-classifieds-pd4otphx/transport-qualification-public.json",
@@ -6651,7 +6662,7 @@
         "inspected_reddit_rows_with_explicit_images": 3,
         "scope": "Static dependency audit only, not a new execution selection. None of these splits uses WebArena shopping_admin as its site."
       },
-      "blocker": "Original software, 910 task definitions and the Classifieds deployment ZIP are verified. The pinned AMD64 site image pull started on a dedicated 150 GiB CPU guest. A separate bounded nonzero Range test qualified a faster path for the official blob. Full image acquisition and unpack, site initialization and login, and native Agent execution with original scoring for Classifieds 0/1/2 remain pending.",
+      "blocker": "The pinned AMD64 Classifieds pull on the dedicated 150 GiB CPU guest ended after reverse forwarding was lost. The largest layer stopped at 23,140,130,332 of 76,642,798,711 bytes, with no resumable ingest retained. A bounded nonzero Range test verified the direct guest-to-host path. A new bounded pull needs retry authorization and a working registry egress relay before original site initialization and native execution/scoring for Classifieds 0/1/2.",
       "original_source_preparation": {
         "revision": "89f5af29305c3d1e9f97ce4421462060a70c9a03",
         "files_verified": 511,
