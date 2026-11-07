@@ -61,6 +61,31 @@ complete 17 MiB custody bundle is attached to the
 [`runtime-micro-formal-retest-20261107` release](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/runtime-micro-formal-retest-20261107),
 with SHA-256 `9f2cb812f3d593e84b9c450510d35efa24ace44da3a7a7fd831b610a75fee972`.
 
+## GDN static-decay formal result
+
+Static decay was ported and committed in the canonical GDN repository. Candidate commit
+`807d1b0d2295a438ec696fdfdc8c2ebd97b6b448` was measured against unchanged Native on the same Core
+and Ascend Host commits used for the runtime campaign. Every candidate process emitted
+`cache-prepared` and `candidate-exercised` receipts from both TP ranks for 30 expected layers and 16
+heads per rank.
+
+The frozen Qwen3.5-35B-A3B BF16 TP2/EP Ascend 910B2 campaign completed three alternating-order
+Native/candidate pairs with fresh processes. Every measured window completed 200 requests, 282,265
+prompt tokens, and 51,200 output tokens with zero failures. Pair throughput changes were +0.292%,
++0.214%, and -0.516%. The geometric pair aggregate was -0.004% (arithmetic nine-window aggregate
+-0.0036%); geometric TTFT and TPOT changes were +0.030% and -0.053%.
+
+All three 70/2048 quality overlaps completed. All 210 candidate content and reasoning hashes were
+exactly equal to Native, with 132 correct-to-correct and 78 incorrect-to-incorrect transitions. The
+static-decay candidate is therefore **measured and quality equivalent in this cell, but it does not
+demonstrate a stable performance benefit**. The card is no longer `retest_pending`, and the mixed,
+sub-percent measurements must not be advertised as a speedup.
+
+Machine-readable aggregation is in [`gdn-formal-summary.json`](gdn-formal-summary.json). The
+complete 17 MiB custody bundle is attached to the
+[`gdn-static-decay-formal-retest-20261107` release](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/gdn-static-decay-formal-retest-20261107),
+with SHA-256 `6085e887b1f129b163f2255d2de0c349d87ffee778dc0fdfdd69b48ceb6ec74a`.
+
 ## Frozen retest protocol
 
 Each port must first be committed to its canonical reorganized repository and must remain disabled

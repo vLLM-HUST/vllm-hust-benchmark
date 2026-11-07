@@ -1,0 +1,122 @@
+{
+  "status": "measured_no_speedup",
+  "family": "vllm-hust-gdn-optimizations",
+  "candidate_commit": "807d1b0d2295a438ec696fdfdc8c2ebd97b6b448",
+  "core_commit": "c4df37dfcc7f72ca41cd43801a468526ecf99a2b",
+  "ascend_commit": "ab05682845beb9f54a9522122f48f628c3f5b649",
+  "model": "Qwen3.5-35B-A3B BF16 TP2 EP on Ascend 910B2",
+  "activation": "static-decay; expected_layers=30; heads_per_rank=16; exact two-rank cache and exercised receipts in every candidate process",
+  "pairs": [
+    {
+      "pair": 1,
+      "order": "native-candidate",
+      "native": {
+        "directory": "gdn-pair1-native",
+        "throughput_windows": [
+          269.2307567564203,
+          265.20591409162097,
+          269.50774149783996
+        ],
+        "throughput_mean": 267.9814707819604,
+        "ttft_mean_seconds": 86.4664554192281,
+        "tpot_mean_seconds_per_token": 0.05541885377634682
+      },
+      "candidate": {
+        "directory": "gdn-pair1-candidate",
+        "throughput_windows": [
+          268.58312032159023,
+          268.79259562945316,
+          268.9168343872994
+        ],
+        "throughput_mean": 268.76418344611426,
+        "ttft_mean_seconds": 86.18931291469062,
+        "tpot_mean_seconds_per_token": 0.05517786864415298
+      },
+      "throughput_delta_percent": 0.2920771581221393,
+      "quality_native_correct": 44,
+      "quality_candidate_correct": 44,
+      "quality_exact_output_hashes": 70
+    },
+    {
+      "pair": 2,
+      "order": "candidate-native",
+      "native": {
+        "directory": "gdn-pair2-native",
+        "throughput_windows": [
+          269.0169693071259,
+          269.07243683444364,
+          268.9614614822513
+        ],
+        "throughput_mean": 269.01695587460694,
+        "ttft_mean_seconds": 86.13691984843153,
+        "tpot_mean_seconds_per_token": 0.05516695037855481
+      },
+      "candidate": {
+        "directory": "gdn-pair2-candidate",
+        "throughput_windows": [
+          269.4225556007253,
+          269.8035620618969,
+          269.5492963204906
+        ],
+        "throughput_mean": 269.5918046610376,
+        "ttft_mean_seconds": 85.90195959002399,
+        "tpot_mean_seconds_per_token": 0.05501461129136433
+      },
+      "throughput_delta_percent": 0.21368496441489526,
+      "quality_native_correct": 44,
+      "quality_candidate_correct": 44,
+      "quality_exact_output_hashes": 70
+    },
+    {
+      "pair": 3,
+      "order": "native-candidate",
+      "native": {
+        "directory": "gdn-pair3-native",
+        "throughput_windows": [
+          270.18054887499665,
+          266.0244549529106,
+          269.954261175351
+        ],
+        "throughput_mean": 268.71975500108607,
+        "ttft_mean_seconds": 86.15014135990292,
+        "tpot_mean_seconds_per_token": 0.05511801769342151
+      },
+      "candidate": {
+        "directory": "gdn-pair3-candidate",
+        "throughput_windows": [
+          269.0833758957876,
+          269.3819298709712,
+          263.5339089994222
+        ],
+        "throughput_mean": 267.333071588727,
+        "ttft_mean_seconds": 86.7410548996739,
+        "tpot_mean_seconds_per_token": 0.05542409246640121
+      },
+      "throughput_delta_percent": -0.5160332973485504,
+      "quality_native_correct": 44,
+      "quality_candidate_correct": 44,
+      "quality_exact_output_hashes": 70
+    }
+  ],
+  "aggregate": {
+    "native_window_mean_tokens_per_second": 268.57272721921777,
+    "candidate_window_mean_tokens_per_second": 268.5630198986263,
+    "arithmetic_throughput_delta_percent": -0.003614410402719148,
+    "geometric_pair_throughput_delta_percent": -0.00408689085464875,
+    "pair_throughput_delta_percent": [
+      0.2920771581221393,
+      0.21368496441489526,
+      -0.5160332973485504
+    ],
+    "geometric_pair_ttft_delta_percent": 0.02979995964482729,
+    "geometric_pair_tpot_delta_percent": -0.05283385993273271,
+    "performance_requests_per_arm": 1800,
+    "performance_output_tokens_per_arm": 460800,
+    "quality_requests_per_arm": 210,
+    "quality_transition_counts": {
+      "correct_to_correct": 132,
+      "incorrect_to_incorrect": 78
+    },
+    "all_quality_output_hashes_exact": true
+  }
+}
