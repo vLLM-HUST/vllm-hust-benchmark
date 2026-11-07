@@ -9,6 +9,7 @@ import ast
 import json
 from pathlib import Path
 import platform
+import re
 import shlex
 import sys
 
@@ -16,6 +17,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from prepare_crosscodeeval_original_assets import verify_git_blob
+from prepare_paperbench_original_assets import load_pins as load_paper_asset_pins
 from prepare_xsum_original_assets import bound_path
 
 
@@ -24,6 +26,7 @@ PINS = (
     / "configs/workload-native/paperbench-author-source.json"
 )
 PROJECT = "project/paperbench/"
+ALL_SPLIT = PROJECT + "experiments/splits/all.txt"
 RECIPES = [
     PROJECT + "paperbench/Dockerfile.base",
     PROJECT + "paperbench/reproducer.Dockerfile",
@@ -33,6 +36,57 @@ RECIPES = [
     PROJECT + "paperbench/nano/eval.py",
     PROJECT + "paperbench/nano/structs.py",
 ]
+
+
+def fixed_first_paper(split_text, expected_count=20):
+    """Select the publisher's first full-split paper before any model result."""
+    ids = [line.strip() for line in split_text.splitlines() if line.strip()]
+    if (
+        len(ids) != expected_count
+        or len(set(ids)) != expected_count
+        or any(re.fullmatch(r"[a-z0-9][a-z0-9-]*", paper) is None for paper in ids)
+    ):
+        raise ValueError("invalid original PaperBench full split")
+    return ids[0], len(ids)
+
+
+def inspect_fixed_paper(author_root, *, source_pins=PINS, asset_pins=None):
+    """Verify original full-split position and all pinned files of the chosen paper."""
+    root = Path(author_root).resolve(strict=True)
+    source = json.loads(Path(source_pins).read_text("utf-8"))
+    entries = [item for item in source["files"] if item["path"] == ALL_SPLIT]
+    if source["source_id"] != "PAPERBENCH" or len(entries) != 1:
+        raise ValueError("unique pinned PaperBench full split required")
+    split = bound_path(root, "", entries[0])
+    verify_git_blob(split, entries[0])
+    selected, full_count = fixed_first_paper(split.read_text("utf-8"))
+    assets = (
+        load_paper_asset_pins()
+        if asset_pins is None
+        else load_paper_asset_pins(asset_pins)
+    )
+    if source["revision"] != assets["revision"]:
+        raise ValueError("PaperBench source and assets must use the same revision")
+    prefix = PROJECT + "data/papers/" + selected + "/"
+    files = [item for item in assets["files"] if item["path"].startswith(prefix)]
+    required = {"paper.pdf", "paper.md", "config.yaml", "rubric.json"}
+    if not required <= {item["path"][len(prefix) :] for item in files}:
+        raise ValueError(
+            "fixed paper, registry configuration and original rubric required"
+        )
+    for item in files:
+        verify_git_blob(bound_path(root, "", item), item)
+    return {
+        "status": "FIXED_ORIGINAL_FULL_SPLIT_PAPER_ASSETS_VERIFIED_NOT_RUN",
+        "publisher_split": "all",
+        "publisher_split_papers": full_count,
+        "sample_paper_id": selected,
+        "selection_rule": "first nonempty entry in the pinned original all.txt",
+        "verified_original_paper_files": len(files),
+        "verified_original_paper_bytes": sum(item["bytes"] for item in files),
+        "native_agent_reproduction_or_scoring_executed": False,
+        "source_checkbox_eligible": False,
+    }
 
 
 def canonical_protocol(readme):
@@ -249,10 +303,15 @@ def main():
         type=Path,
         help="optional vllm Python package source root for offline browser dispatch inspection",
     )
+    parser.add_argument(
+        "--fixed-paper",
+        action="store_true",
+        help="verify the first original all-split paper and its pinned assets",
+    )
     args = parser.parse_args()
     if args.author_root is None:
-        if args.vllm_source is not None:
-            parser.error("--vllm-source requires --author-root")
+        if args.vllm_source is not None or args.fixed_paper:
+            parser.error("--vllm-source and --fixed-paper require --author-root")
         print(
             json.dumps(
                 {
@@ -271,6 +330,8 @@ def main():
         result["vllm_static_browser_dispatch"] = inspect_vllm_browser_dispatch(
             args.vllm_source, result["original_canonical_protocol"]
         )
+    if args.fixed_paper:
+        result["fixed_original_sample"] = inspect_fixed_paper(args.author_root)
     print(json.dumps(result, indent=2))
 
 

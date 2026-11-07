@@ -217,3 +217,16 @@ def test_changed_model_contract_requires_review(tmp_path, missing):
     pins.write_text(json.dumps(value))
     with pytest.raises(ValueError, match="model/tool contract"):
         runner.inspect_original(tmp_path, pins_path=pins)
+
+
+def test_fixed_sample_preserves_publisher_order():
+    assert runner.fixed_first_paper("\nsecond-by-name\nfirst-by-name\n", 2) == (
+        "second-by-name",
+        2,
+    )
+
+
+@pytest.mark.parametrize("split", ["a\na", "a\n../b", "a"])
+def test_fixed_sample_rejects_invalid_split(split):
+    with pytest.raises(ValueError, match="invalid original"):
+        runner.fixed_first_paper(split, 2)
