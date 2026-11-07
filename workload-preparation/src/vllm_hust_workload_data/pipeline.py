@@ -50,6 +50,11 @@ def _binding(entry, catalog_root=None):
         else source_spec(sid, catalog_root)
     )
     spec = mapping_spec(mapping) if mapping else adapter_spec(sid, catalog_root)
+    if sid == "WEBARENA" and mapping is None:
+        from .webarena import pipeline_manifest, relation_spec
+
+        manifest = pipeline_manifest(manifest)
+        spec = relation_spec(manifest, spec)
     if sid == "OSWORLD" and mapping is None and manifest.get("files"):
         from .osworld import pipeline_manifest, relation_spec
 

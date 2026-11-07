@@ -680,15 +680,21 @@ docker build -f "$PWD/configs/workload-native/workarena-agentlab-cpu.Dockerfile"
 检查，注册716个原任务ID；没有创建实例、调用模型或执行评分。此环境准备不替代实例访问授权或原生任务验证。
 
 WebArena（未完成）：固定原题 ID 为 0、1、2，均只访问 `shopping_admin`，且需要登录。隔离 x86 系统及 Docker
-已就绪，候选镜像31层的压缩摘要和解压内容摘要均已核验，正在流式导入；原始作者归档仍受配额限制，不宣称取得完整原归档。原站点启动、登录、重置、Agent、计分及研究消费仍未完成。
+已就绪，候选镜像31层的压缩摘要和解压内容摘要均已核验，导入成功，原站点五条初始化命令均返回0；原始作者归档仍受配额限制，不宣称取得完整原归档。固定三题已使用现有9B模型完成原生Agent及未修改的官方计分：均为0分、30步耗尽（truncated=true）。公共安装包与研究消费的实数据闭环尚未完成，因此来源仍不勾选。
+
+本次为明确披露的环境兼容配置：ARM64主机以单核TCG运行x86站点，PHP
+OPcache调整为512MiB、60000文件槽并关闭不可变源码的时间戳检查；站点后台Java/cron降低优先级。浏览器等待上限显式设为180000毫秒，而非框架默认10000毫秒；模型保持Qwen3.5-9B、30步、种子42和未指定的作者默认输出上限。客户端使用4个数值计算线程及512进程上限。不得将该结果作为原默认环境成绩或引擎性能结论；首次浏览器初始化失败证据保留，未更换原题。
 公开演示站点不能替代可重置环境。站点与浏览器可在 CPU 节点运行，模型推理仍走独立 NPU 服务。 ARM64 Chromium 已通过 MiniWoB++
 的原题验证，浏览器本身不是这三项的共同阻塞：WebArena 缺可重置的 `shopping_admin`，VisualWebArena 缺已启动并核验的 Classifieds，WorkArena
 缺已授权的 ServiceNow 实例。固定版本优先使用官方 `ServiceNow/WorkArena-Instances` Hugging Face
 实例池；运行账号须自行申请并获批，随后在服务器登录 HF。作者仍支持自有实例配置，但不能把未设置旧版 `SNOW_*` 变量直接判为缺少实例访问权。2026-11-07
 已用服务器现有账号检查官方实例池访问权，返回403；未下载实例池或接受条款。
 
-候选公共运行入口为
-`scripts/run_webarena_agentlab.py`，当前只通过软件检查及实际客户端离线准备检查，尚未完成该入口的原站点端到端验证。先用现有作者源码准备入口取得并核验固定
+原始任务读取已接入 `iter_workload("WEBARENA", data_root=...)` 和共用准备/回读接口。数据根目录指向已核验的原作者源码；按原顺序读取
+`config_files/test.raw.json`，输入保留全部原任务字段，原 `eval`
+定义单独作为参考输出，二者可无损重组为原任务。原站点关系、登录/重置标记和存储状态路径不改写，不构造提示词；该读取能力不代表原生任务已经完成。
+
+候选公共运行入口为 `scripts/run_webarena_agentlab.py`，已完成固定三题的原站点端到端验证，公共安装包和研究消费核验仍待闭环。先用现有作者源码准备入口取得并核验固定
 WebArena 源码；运行环境使用 AgentLab0.4.2、BrowserGym-WebArena0.14.2、libwebarena0.0.4 和仓库中的官方依赖约束，补齐官方 NLTK
 `punkt_tab` 资源。 `--sites` 指向 JSON 文件，例如
 `{"SHOPPING_ADMIN":"http://127.0.0.1:19680/admin"}`。只允许连接操作者已部署、通过回环或 SSH
@@ -715,7 +721,7 @@ docker build -f configs/workload-native/webarena-agentlab-cpu.Dockerfile \
 ```
 
 `AUTHOR_ROOT`、`SITE_MAP`、`RESULT_ROOT` 均指向仓库外已准备的路径。使用同一入口的容器调用方式如下；`task-0`
-必须尚不存在，模型及原站点须已通过准备核验。该调用尚待原站点端到端验证，不能据构建或断网检查给来源打勾。
+必须尚不存在，模型及原站点须已通过准备核验。客户端同时设置发布方原站点变量和BrowserGym要求的`WA_*`变量。可显式传入`--browser-timeout-ms 180000`复现上述等待配置；不传则保留框架默认值。不能据构建或断网检查给来源打勾。
 
 ```bash
 docker run --rm --network host --read-only --cap-drop ALL \

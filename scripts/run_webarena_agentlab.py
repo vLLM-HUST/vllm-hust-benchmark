@@ -5,7 +5,7 @@ without --execute. A finished task is not whole-source delivery qualification.
 """
 
 import argparse
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 import importlib.metadata as metadata
 import json
@@ -72,6 +72,23 @@ def site_configuration(path, required):
     }, missing
 
 
+def environment_bindings(sites):
+    """Bind both original WebArena and official BrowserGym namespaces."""
+    return {**sites, **{f"WA_{name}": url for name, url in sites.items()}}
+
+
+@contextmanager
+def browser_timeout_profile(spec, timeout_ms):
+    """Use BrowserEnv's supported timeout option without changing task/scoring."""
+    original = spec.kwargs
+    try:
+        if timeout_ms is not None:
+            spec.kwargs = {**original, "timeout": timeout_ms}
+        yield
+    finally:
+        spec.kwargs = original
+
+
 def execute(args):
     if (
         args.author_root is None
@@ -93,6 +110,9 @@ def execute(args):
         raise ValueError(
             "positive budgets required; omitted output budget preserves author default"
         )
+    timeout_ms = getattr(args, "browser_timeout_ms", None)
+    if timeout_ms is not None and (type(timeout_ms) is not int or timeout_ms <= 0):
+        raise ValueError("positive browser timeout in milliseconds required")
     task = original_task(args.author_root, args.task_id)
     sites, unavailable = site_configuration(args.sites, task["sites"])
     root = args.author_root.resolve(strict=True)
@@ -139,7 +159,7 @@ def execute(args):
                 model_proxy(args.queue, port=0, max_request_bytes=64 * 1024 * 1024)
             )
             endpoint = f"http://127.0.0.1:{port}/v1"
-        os.environ.update(sites)
+        os.environ.update(environment_bindings(sites))
         os.environ["VLLM_API_URL"] = endpoint
         os.environ["OPENAI_API_KEY"] = (
             "local-loopback"  # pragma: allowlist secret - local placeholder
@@ -152,7 +172,8 @@ def execute(args):
         from browsergym.experiments.loop import EnvArgs, ExpArgs
 
         name = f"webarena.{args.task_id}"
-        gymnasium.spec("browsergym/" + name)
+        gym_spec = gymnasium.spec("browsergym/" + name)
+        stack.enter_context(browser_timeout_profile(gym_spec, timeout_ms))
         model_options = {"model_name": args.model, "backend": "vllm"}
         if args.max_output_tokens is not None:
             model_options["max_new_tokens"] = args.max_output_tokens
@@ -179,6 +200,7 @@ def execute(args):
             "max_steps": args.max_steps,
             "task_seed": args.seed,
             "max_output_tokens": args.max_output_tokens,
+            "browser_timeout_ms": timeout_ms,
             "unconfigured_sites": unavailable,
             "task_and_scoring_code_changed": False,
             "framework_versions": actual,
@@ -205,6 +227,11 @@ def main():
     parser.add_argument("--max-steps", type=int, default=30)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--max-output-tokens", type=int)
+    parser.add_argument(
+        "--browser-timeout-ms",
+        type=int,
+        help="Explicit BrowserEnv page/action wait profile; omitted preserves the author default. Does not change step or token budgets.",
+    )
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
     if not args.execute:

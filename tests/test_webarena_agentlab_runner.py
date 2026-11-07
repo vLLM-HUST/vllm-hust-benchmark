@@ -189,3 +189,37 @@ def test_invalid_budgets_rejected(runner, tmp_path, steps, tokens):
     args.max_steps, args.max_output_tokens = steps, tokens
     with pytest.raises(ValueError, match="positive budgets"):
         runner.execute(args)
+
+
+def test_original_and_browsergym_site_namespaces_agree(runner):
+    sites = {name: f"http://127.0.0.1:1/unconfigured/{name}" for name in runner.SITES}
+    sites["SHOPPING_ADMIN"] = "http://127.0.0.1:19680/admin"
+    bound = runner.environment_bindings(sites)
+    for name, url in sites.items():
+        assert bound[name] == bound["WA_" + name] == url
+    assert len(bound) == 2 * len(sites)
+
+
+@pytest.mark.parametrize("timeout", [None, 180000])
+def test_browser_wait_profile_restores_registered_environment(runner, timeout):
+    original = {"task_entrypoint": "invented-control", "task_kwargs": {"task_id": 0}}
+    spec = SimpleNamespace(kwargs=original)
+    with pytest.raises(RuntimeError, match="control failure"):
+        with runner.browser_timeout_profile(spec, timeout):
+            assert spec.kwargs["task_kwargs"] == {"task_id": 0}
+            if timeout is None:
+                assert "timeout" not in spec.kwargs
+            else:
+                assert spec.kwargs["timeout"] == timeout
+            raise RuntimeError("control failure")
+    assert spec.kwargs is original
+
+
+@pytest.mark.parametrize("timeout", [0, -1, True])
+def test_invalid_browser_timeout_rejected_before_framework_import(
+    runner, tmp_path, timeout
+):
+    args = args_for(tmp_path)
+    args.browser_timeout_ms = timeout
+    with pytest.raises(ValueError, match="positive browser timeout"):
+        runner.execute(args)
