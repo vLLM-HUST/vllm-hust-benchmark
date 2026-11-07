@@ -1355,6 +1355,11 @@ CPU 容器使用已与 PyPI 核对摘要的 h5py 3.12.1 复验文件并读回结
 压缩包已在服务器取得，合计约 4.84 GB。 每份原 ZIP 目录有 10,000 条轨迹；在断网 CPU 容器中各读回首个原始 NPZ，按作者定义均为 1,000
 次转换，观察、动作、奖励、折扣和物理状态均可读。没有解压整包或运行科学训练，不把数据就绪等同于原生复现或评分。
 
+另在断网 ARM64 CPU 容器中，以 dm_control 1.0.20 和 MuJoCo 3.1.6 加载两条原始轨迹的首状态；Walker 与 Cheetah 的物理状态最大绝对误差均为
+0，恢复后的观察最大绝对误差分别小于 `5e-8` 和 `6e-9`，各推进一步后输出有限。26 份离线依赖已记录摘要，基础镜像有一条未使用的 datasets/fsspec
+版本警告。该兼容性对照不等同于 [ExORL 发布时的完整环境](https://github.com/denisyarats/exorl/blob/main/conda_env.yml)，也没有执行
+PaperBench 原生复现。
+
 [作者部署说明](https://github.com/openai/frontier-evals/blob/main/project/paperbench/README.md#build-docker-images)与固定版本构建脚本均指向本地构建
 `pb-env` 和 `pb-reproducer`；检查时当前宿主的 Docker 缓存无这两个镜像，作者仓库公开 Releases 为空。
 未核验到可直接复用的作者镜像摘要，不用第三方移植镜像代替。若提供已授权构建的镜像，先核对固定源码、构建记录和摘要，再核验隔离 amd64 执行。
