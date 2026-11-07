@@ -56,6 +56,26 @@ def test_webarena_complete_original_harness_inventory():
     )
 
 
+def test_visualwebarena_original_task_acquisition_reuses_publisher_transport():
+    source, files = runner.selection("VISUALWEBARENA")
+    assert len(files) == 5
+    assert sum(row["bytes"] for row in files) == 1376415
+    prefix = (
+        f"https://raw.githubusercontent.com/{source['repo_id']}/{source['revision']}/"
+    )
+    assert all(row["url"] == prefix + row["path"] for row in files)
+    assert {row["path"] for row in files} == {
+        "LICENSE",
+        "README.md",
+        "config_files/vwa/test_classifieds.raw.json",
+        "config_files/vwa/test_reddit.raw.json",
+        "config_files/vwa/test_shopping.raw.json",
+    }
+    assert source["publisher_metadata_acquisition"]["registered_file_roles"] == [
+        "raw_source"
+    ]
+
+
 def test_webarena_framework_constraints_preserve_official_release_versions():
     path = (
         ROOT

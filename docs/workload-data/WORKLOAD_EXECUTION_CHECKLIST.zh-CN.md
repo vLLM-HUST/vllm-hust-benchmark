@@ -743,7 +743,13 @@ docker run --rm --network host --read-only --cap-drop ALL \
 VisualWebArena仍未完成。先复用固定作者源码准备入口，再运行
 `python scripts/check_visualwebarena_native_prerequisites.py --author-root "$AUTHOR_ROOT"`，预检不安装模型、不访问站点或调用Agent。2026-11-07当前服务器已按固定Git与SHA256核验478份原文件、全部910个任务定义及配套参考图片；约197MiB下载归档在核验解包后删除。固定Classifieds原题0/1/2均为URL匹配且没有目标输入图片，但作者原启动器仍无条件加载`Salesforce/blip2-flan-t5-xl`评分辅助模型，其设备选项只有CPU/CUDA；因此不能据题目类型跳过该依赖，也不能将CPU辅助模型执行称为NPU-only。NPU兼容环境、原站点和真正原生Agent/评分尚待验证。
 
-公共读取入口为
+公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
+CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。
+
+只需任务定义与参考字段时，可复用
+`python scripts/prepare_reused_research_assets.py VISUALWEBARENA --mode download --data-root "$AUTHOR_ROOT" --max-bytes 2000000`，取得5份固定原文件共1,376,415字节；`--mode verify`可核验已存在的原文件。此小包不包含目标输入图片、站点图片或原生运行环境；进行视觉实验和原生任务时，仍须按完整作者源码与原站点流程取得对应资产，不能用缺图请求替代。
+
+读取关系约定为
 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`，亦可使用共用准备/回读接口。顺序为Classifieds、Reddit、Shopping各原文件内的任务顺序；包装标识为`classifieds:0`等“原split:原ID”，原整数ID仍完整保留在原任务对象内，避免不同任务集的同名ID冲突。全部原字段、图片路径/URL、站点占位符、登录/重置字段均不改写，原eval独立保存，可无损重组；交互任务不渲染成模型prompt。夹具测试不等于910题实数据交接，更不等于原生浏览器完成。
 
 原Classifieds镜像摘要已核验，单个应用COPY层压缩后约71.4GiB，全镜像压缩76,861,304,894字节；不是SQL部署ZIP的体积。没有下载这些站点层，未按截取网站文件或删图片构造替代站点。另查的BrowserGym
