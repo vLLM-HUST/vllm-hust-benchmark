@@ -6,7 +6,8 @@ import json
 from pathlib import Path
 
 
-SOURCE_SHA256 = "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"
+# Public Qwen3.5 tokenizer chat-template file digest, not a credential.
+SOURCE_SHA256 = "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"  # pragma: allowlist secret
 OLD = """        {%- if not loop.first %}
             {{- raise_exception('System message must be at the beginning.') }}
         {%- endif %}"""

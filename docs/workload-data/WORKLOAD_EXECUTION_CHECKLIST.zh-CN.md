@@ -782,6 +782,10 @@ GPT-4V，不修改原提示构造或发送函数。原 actor 的选定方法在 
 OpenAI SDK 的本地捕获保留 7 条 `system`、1 条 `user`、四图、temperature=1.0、top_p=0.9、384-token 输出预算。传输为
 MockTransport，没有浏览器、生成响应或评分。
 
+actor 与渲染端也已串接验证：将 SDK 实际序列化的请求字节原样转发给同配置的独立 CPU `/v1/chat/completions/render`，HTTP 200，得到 9759 个输入
+token 和四个顺序图像区间，384-token 输出预算不变。 输入含触发原观察截断的控制文本，因此不与前述短控制的 5890 token
+混用。全程不发生成请求、不伪造响应或动作；固定原题仍待真实站点和推理。
+
 公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
 CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。
 
