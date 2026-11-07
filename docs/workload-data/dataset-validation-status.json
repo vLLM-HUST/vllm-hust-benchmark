@@ -5463,6 +5463,23 @@
         "npu_model_calls": 0,
         "source_checkbox_eligible": false
       },
+      "imdb_original_cpu_batch_shape_control_20261107": {
+        "status": "TOKENIZATION_ONLY_ORIGINAL_ORDER_DYNAMIC_PADDING_RETAINS_NEARLY_ALL_FIXED_WIDTH_WORK",
+        "receipt": "mlagentbench-imdb-batch-shapes.VCUb64/qualification-public.json",
+        "original_split_order": ["train", "test"],
+        "original_rows_per_split": [25000, 25000],
+        "distilbert_max_length": 512,
+        "batch_size": 16,
+        "median_token_lengths": [233, 230],
+        "rows_at_limit": [3715, 3537],
+        "original_order_padded_positions_fraction_of_fixed_512": [0.98307125, 0.97688125],
+        "length_sorted_counterfactual_fraction_of_fixed_512": [0.53798625, 0.52999125],
+        "length_sorting_counterfactual_only_not_applied_to_agent": true,
+        "runtime_speedup_measured": false,
+        "training_steps": 0,
+        "npu_model_calls": 0,
+        "source_checkbox_eligible": false
+      },
       "imdb_messages_27b_attempt005_20261107": {
         "status": "ORIGINAL_18000_SECOND_LIMIT_NO_SUBMISSION_OR_VALID_SCORE",
         "terminal_receipt": "mlagentbench-imdb-messages-native-20261107-005/original-terminal-scoring-001/terminal-audit-public.json",
@@ -5785,6 +5802,20 @@
   "blocker": "CIFAR10 and ogbn-arxiv valid original evidence reused. IMDb Messages004 ended at original18000s with no submission and original empty/-1 score, not a live task. Original evaluator now independently passes full25000-row known-label controls1.0/0.0 in an isolated offline CPU container, and rejects a missing CSV. These are controls, not model results. The original task explicitly requires DistilBERT finetuning and per-class predictions for all test rows. Remaining: obtain a practical original native Agent execution producing its own submission under the original budget; do not replace it with reference labels or another classifier. Source remains incomplete."
     },
     "MLEBENCH": {
+      "nomad_original_aide_long_transport_20261107": {
+        "status": "LIVE_ORIGINAL_AGENT_NEW_ATTEMPT_PASSED_PRIOR_TRANSPORT_FAILURE_POINT",
+        "start_receipt": "mlebench-nomad-real.MgBAxT/native-start-public.json",
+        "model": "Qwen/Qwen3.8-27B",
+        "author_option": "agent.convert_system_to_user=True",
+        "transport_request_wait_seconds": 3600,
+        "original_agent_budget_seconds": 86400,
+        "original_agent_steps": 500,
+        "original_per_step_timeout_seconds": 32400,
+        "successful_http_200_responses_at_snapshot": 4,
+        "agent_candidate_submission_and_journal_present_at_snapshot": true,
+        "terminal_grade_verified": false,
+        "source_checkbox_eligible": false
+      },
       "nomad_original_aide_real_attempts_20261107": {
         "status": "COMPATIBILITY_ATTEMPT_INTERRUPTED_AFTER_REPEATED_TRANSPORT_TIMEOUT_VALID_PARTIAL_SUBMISSION",
         "initial_receipt": "mlebench-nomad-real.rr4AKi/native-start-public.json",
