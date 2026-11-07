@@ -27,6 +27,7 @@ PINS = (
 )
 PROJECT = "project/paperbench/"
 ALL_SPLIT = PROJECT + "experiments/splits/all.txt"
+NANOEVAL = "project/common/nanoeval/nanoeval/"
 RECIPES = [
     PROJECT + "paperbench/Dockerfile.base",
     PROJECT + "paperbench/reproducer.Dockerfile",
@@ -48,6 +49,34 @@ def fixed_first_paper(split_text, expected_count=20):
     ):
         raise ValueError("invalid original PaperBench full split")
     return ids[0], len(ids)
+
+
+def author_fixed_sample_options(runner_args, runner_execution):
+    """Require native prefix selection; never rewrite the publisher's split file."""
+    slice_statement = "tasks = tasks[: spec.runner.n_tasks]"
+    ordered_statements = (
+        "tasks = list(await spec.eval.get_tasks())",
+        slice_statement,
+        "random.shuffle(tasks)",
+    )
+    if (
+        "n_tasks: int | None = chz.field(" not in runner_args
+        or "shuffle: bool = False" not in runner_args
+        or any(
+            runner_execution.count(statement) != 1 for statement in ordered_statements
+        )
+        or sorted(runner_execution.index(statement) for statement in ordered_statements)
+        != [runner_execution.index(statement) for statement in ordered_statements]
+    ):
+        raise ValueError("review changed author NanoEval prefix-selection contract")
+    return {
+        "paperbench.paper_split": "all",
+        "runner.n_tasks": 1,
+        "runner.shuffle": False,
+        "runner.concurrency": 1,
+        "runner.should_backup": False,
+        "runner.enable_slackbot": False,
+    }
 
 
 def inspect_fixed_paper(author_root, *, source_pins=PINS, asset_pins=None):
@@ -76,6 +105,14 @@ def inspect_fixed_paper(author_root, *, source_pins=PINS, asset_pins=None):
         )
     for item in files:
         verify_git_blob(bound_path(root, "", item), item)
+    runner_sources = []
+    for name in ("eval.py", "evaluation.py"):
+        pinned = [item for item in source["files"] if item["path"] == NANOEVAL + name]
+        if len(pinned) != 1:
+            raise ValueError("unique fixed NanoEval runner source required")
+        path = bound_path(root, "", pinned[0])
+        verify_git_blob(path, pinned[0])
+        runner_sources.append(path.read_text("utf-8"))
     return {
         "status": "FIXED_ORIGINAL_FULL_SPLIT_PAPER_ASSETS_VERIFIED_NOT_RUN",
         "publisher_split": "all",
@@ -84,6 +121,9 @@ def inspect_fixed_paper(author_root, *, source_pins=PINS, asset_pins=None):
         "selection_rule": "first nonempty entry in the pinned original all.txt",
         "verified_original_paper_files": len(files),
         "verified_original_paper_bytes": sum(item["bytes"] for item in files),
+        "author_sample_runner_overrides": author_fixed_sample_options(*runner_sources),
+        "publisher_split_unchanged": True,
+        "full_split_aggregate_eligible": False,
         "native_agent_reproduction_or_scoring_executed": False,
         "source_checkbox_eligible": False,
     }

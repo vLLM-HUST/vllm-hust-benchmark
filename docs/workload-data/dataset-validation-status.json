@@ -7560,7 +7560,7 @@
     },
     "PAPERBENCH": {
       "fixed_fre_external_scientific_data_20261107": {
-        "status": "TWO_ORIGINAL_D4RL_FILES_ACQUIRED_EXORL_METADATA_ONLY",
+        "status": "ORIGINAL_D4RL_FILES_AND_EXORL_RND_ARCHIVES_ACQUIRED",
         "receipt": "paperbench-fre-d4rl.MN1Iry/qualification-public.json",
         "publisher_data_map": "https://github.com/Farama-Foundation/D4RL/blob/master/d4rl/infos.py",
         "d4rl_data": [
@@ -7583,13 +7583,30 @@
         "exorl_download_recipe": "https://github.com/denisyarats/exorl/blob/main/download.sh",
         "exorl_rnd_head_http_status": 200,
         "exorl_rnd_compressed_bytes": {"walker": 2585461986, "cheetah": 2258578051},
-        "exorl_rnd_archives_downloaded": false,
+        "exorl_rnd_archives_downloaded": true,
+        "exorl_rnd_acquisition_receipt": "paperbench-fre-exorl.1JD4gs/qualification-public.json",
+        "exorl_rnd_observed_sha256": {
+          "walker": "384bc064ea62ccea19e5be22646d2af7eb5d1c2b19bf3dbb23b7bb5641b63b1c",
+          "cheetah": "a0dd31f10e36e895f8fc6a089b17430a9fe3fb330bdefce9d4e60c8471d45c4c"
+        },
+        "exorl_rnd_original_episode_members_per_archive": {"walker": 10000, "cheetah": 10000},
+        "exorl_rnd_archives_extracted": false,
+        "exorl_rnd_offline_sample_readback": {
+          "receipt": "paperbench-fre-exorl.1JD4gs/episode-readback-driver.private.log",
+          "fixed_member_per_archive": "buffer/episode_000000_1000.npz",
+          "archives_read": ["walker", "cheetah"],
+          "original_episodes_read": 2,
+          "transitions_per_episode": 1000,
+          "fields": ["observation", "action", "reward", "discount", "physics"],
+          "whole_archives_decompressed": false
+        },
         "scientific_environment_or_agent_executed": false,
         "source_checkbox_eligible": false
       },
       "fixed_first_original_paper_preflight_20261107": {
         "status": "FIXED_ORIGINAL_FULL_SPLIT_PAPER_ASSETS_VERIFIED_NOT_RUN",
         "receipt": "paperbench-fixed-first.st0Xbu/qualification-public.json",
+        "native_runner_sample_option_receipt": "paperbench-native-sample-options.ALOgex/qualification-public.json",
         "public_entry": "scripts/check_paperbench_native_prerequisites.py --author-root <original-source> --fixed-paper",
         "publisher_split": "all",
         "publisher_split_papers": 20,
@@ -7597,6 +7614,9 @@
         "sample_paper_id": "fre",
         "verified_original_paper_files": 21,
         "verified_original_paper_bytes": 15375392,
+        "author_sample_runner_overrides": {"paperbench.paper_split": "all", "runner.n_tasks": 1, "runner.shuffle": false, "runner.concurrency": 1, "runner.should_backup": false, "runner.enable_slackbot": false},
+        "publisher_split_unchanged": true,
+        "full_split_aggregate_eligible": false,
         "native_agent_reproduction_or_scoring_executed": false,
         "source_checkbox_eligible": false
       },

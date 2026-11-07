@@ -230,3 +230,26 @@ def test_fixed_sample_preserves_publisher_order():
 def test_fixed_sample_rejects_invalid_split(split):
     with pytest.raises(ValueError, match="invalid original"):
         runner.fixed_first_paper(split, 2)
+
+
+def test_author_native_prefix_selects_before_shuffle_and_disables_external_reporting():
+    args = "shuffle: bool = False\nn_tasks: int | None = chz.field(\n"
+    execution = "\n".join(
+        [
+            "tasks = list(await spec.eval.get_tasks())",
+            "tasks = tasks[: spec.runner.n_tasks]",
+            "random.shuffle(tasks)",
+        ]
+    )
+    assert runner.author_fixed_sample_options(args, execution) == {
+        "paperbench.paper_split": "all",
+        "runner.n_tasks": 1,
+        "runner.shuffle": False,
+        "runner.concurrency": 1,
+        "runner.should_backup": False,
+        "runner.enable_slackbot": False,
+    }
+    with pytest.raises(ValueError, match="prefix-selection"):
+        runner.author_fixed_sample_options(
+            args, "\n".join(reversed(execution.splitlines()))
+        )

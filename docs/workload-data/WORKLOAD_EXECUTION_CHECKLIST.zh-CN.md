@@ -1341,7 +1341,10 @@ PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07�
 不能把静态匹配或改用默认工具名当作原生验证。
 
 交付抽样在产生任何 Agent 结果前锁定：从发布方 `all.txt` 的 20 篇原始论文中，按原文件顺序取首篇 `fre`。用预检的 `--fixed-paper` 核对原切分和该篇 21
-个固定文件，包括原论文、附加说明和 rubric。这个单篇样本不等同于整套 `all` 成绩；实际运行仍须保留正式时限、原指令、复现和评分，并核验论文依赖的外部科学环境。
+个固定文件，包括原论文、附加说明和 rubric。固定作者 NanoEval 先取任务前缀再打乱，正式命令保留 `paperbench.paper_split=all`，加
+`runner.n_tasks=1 runner.shuffle=false runner.concurrency=1`；不改切分文件，使用新运行组。另设
+`runner.should_backup=false runner.enable_slackbot=false` 关闭外部报告。这个单篇样本不等同于整套 `all`
+成绩；实际运行仍须保留正式时限、原指令、复现和评分，并核验论文依赖的外部科学环境。
 
 `fre` 的外部数据与论文包分开。服务器已从
 [D4RL 发布方数据映射](https://github.com/Farama-Foundation/D4RL/blob/master/d4rl/infos.py) 对应的 Berkeley
@@ -1349,7 +1352,8 @@ PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07�
 CPU 容器使用已与 PyPI 核对摘要的 h5py 3.12.1 复验文件并读回结构：两份数据分别为 1,000,000 和 3,680
 条，观察、动作、奖励和终止标记行数一致，首尾记录可读且有限；未逐行解码。
 [ExORL 原下载脚本](https://github.com/denisyarats/exorl/blob/main/download.sh)对应的 Walker、Cheetah RND
-压缩包只核对了 HEAD，合计约 4.84 GB，尚未下载。 未运行科学训练，不把外部数据就绪等同于原生复现或评分。
+压缩包已在服务器取得，合计约 4.84 GB。 每份原 ZIP 目录有 10,000 条轨迹；在断网 CPU 容器中各读回首个原始 NPZ，按作者定义均为 1,000
+次转换，观察、动作、奖励、折扣和物理状态均可读。没有解压整包或运行科学训练，不把数据就绪等同于原生复现或评分。
 
 [作者部署说明](https://github.com/openai/frontier-evals/blob/main/project/paperbench/README.md#build-docker-images)与固定版本构建脚本均指向本地构建
 `pb-env` 和 `pb-reproducer`；检查时当前宿主的 Docker 缓存无这两个镜像，作者仓库公开 Releases 为空。
