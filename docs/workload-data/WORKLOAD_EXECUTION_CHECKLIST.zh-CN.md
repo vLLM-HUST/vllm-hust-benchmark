@@ -774,6 +774,14 @@ token；普通支持的单图对照渲染逐字节不变，未命名的后续 `s
 并指定可写的独立缓存，避免探测真实设备。 首次启动超时与第二次导入失败的记录保留。运行完成后隔离容器已退出，原服务未变。仍需原 actor 的模型名称及分词器接入、真实生成、原站点和固定原题评分；不把
 HTTP 渲染成功计为原生交付。
 
+原 actor 接入可用
+`python scripts/check_visualwebarena_native_prerequisites.py --author-root "$AUTHOR_ROOT" --prepare-qwen35-actor "$NEW_ACTOR_OUTPUT"`
+生成两份适配文件和补丁； 只应用到隔离可写的作者树副本。以 `--provider openai --mode chat --model Qwen/Qwen3.5-9B`
+选择真实模型名，`VWA_QWEN35_TOKENIZER_ROOT` 指向该模型的已核验本地分词器目录，`OPENAI_BASE_URL` 指向已部署候选模板的私有兼容端点。 不把 Qwen 冒称
+GPT-4V，不修改原提示构造或发送函数。原 actor 的选定方法在 CPU 控制中使用真实本地 tokenizer，原始 4507-token 观察触发原 3840-token 上限；
+OpenAI SDK 的本地捕获保留 7 条 `system`、1 条 `user`、四图、temperature=1.0、top_p=0.9、384-token 输出预算。传输为
+MockTransport，没有浏览器、生成响应或评分。
+
 公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
 CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。
 

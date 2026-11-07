@@ -24,6 +24,112 @@ TASK_FILES = (
     "config_files/vwa/test_reddit.raw.json",
     "config_files/vwa/test_shopping.raw.json",
 )
+LOCAL_ACTOR_FILES = ("agent/agent.py", "llms/tokenizers.py")
+
+
+def patch_local_actor(sources):
+    original = (
+        '("gemini" in lm_config.model or "gpt-4" in lm_config.model and '
+        '"vision" in lm_config.model)'
+    )
+    actor = sources["agent/agent.py"]
+    if actor.count(original) != 1:
+        raise ValueError("Pinned original multimodal actor check changed")
+    actor = actor.replace(
+        original,
+        "(\n"
+        "            (lm_config.provider == 'openai' and lm_config.mode == 'chat'\n"
+        "             and lm_config.model == 'Qwen/Qwen3.5-9B')\n"
+        f"            or {original}\n"
+        "        )",
+        1,
+    )
+    tokenizer = sources["llms/tokenizers.py"]
+    edits = (
+        (
+            "from typing import Any\n",
+            "from typing import Any\nimport json\nimport os\nfrom pathlib import Path\n",
+        ),
+        (
+            '        if provider == "openai":\n',
+            """        self._local_qwen35 = provider == "openai" and model_name == "Qwen/Qwen3.5-9B"
+        if self._local_qwen35:
+            from transformers import AutoTokenizer
+
+            root = Path(os.environ["VWA_QWEN35_TOKENIZER_ROOT"]).resolve(strict=True)
+            config = json.loads((root / "config.json").read_text(encoding="utf-8"))
+            if config.get("model_type") != "qwen3_5":
+                raise ValueError("Expected local Qwen3.5 tokenizer metadata")
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                root, local_files_only=True, trust_remote_code=False
+            )
+        elif provider == "openai":
+""",
+        ),
+        (
+            "        return self.tokenizer.encode(text)\n\n    def decode",
+            "        if self._local_qwen35:\n"
+            "            return self.tokenizer.encode(text, add_special_tokens=False)\n"
+            "        return self.tokenizer.encode(text)\n\n    def decode",
+        ),
+        (
+            "    def __call__(self, text: str) -> list[int]:\n"
+            "        return self.tokenizer.encode(text)",
+            "    def __call__(self, text: str) -> list[int]:\n"
+            "        return self.encode(text)",
+        ),
+    )
+    for old, new in edits:
+        if tokenizer.count(old) != 1:
+            raise ValueError("Pinned original tokenizer binding changed")
+        tokenizer = tokenizer.replace(old, new, 1)
+    patched = dict(zip(LOCAL_ACTOR_FILES, (actor, tokenizer)))
+    for name, source in patched.items():
+        compile(source, name, "exec")
+    return patched
+
+
+def prepare_qwen35_actor(author_root, output):
+    report = inspect_original(author_root)
+    root = Path(author_root).resolve(strict=True)
+    output = Path(output).resolve()
+    if output.is_relative_to(root):
+        raise ValueError("Output must be outside the pinned author tree")
+    pins = json.loads(PINS.read_text("utf-8"))
+    if not set(LOCAL_ACTOR_FILES).issubset(row["path"] for row in pins["files"]):
+        raise ValueError("Original actor and tokenizer must be verified by source pins")
+    sources = {
+        name: (root / name).read_bytes().decode("utf-8") for name in LOCAL_ACTOR_FILES
+    }
+    patched = patch_local_actor(sources)
+    output.mkdir(parents=True, exist_ok=False)
+    for name, source in patched.items():
+        path = output / name
+        path.parent.mkdir()
+        path.write_bytes(source.encode("utf-8"))
+    diff = "".join(
+        line
+        for name in LOCAL_ACTOR_FILES
+        for line in difflib.unified_diff(
+            sources[name].splitlines(keepends=True),
+            patched[name].splitlines(keepends=True),
+            fromfile=f"author/{name}",
+            tofile=f"prepared/{name}",
+        )
+    )
+    (output / "local-qwen35-actor.patch").write_bytes(diff.encode("utf-8"))
+    report.update(
+        status="LOCAL_QWEN35_SOM_ACTOR_PREPARED_NOT_EXECUTED",
+        prepared_actor_model="Qwen/Qwen3.5-9B",
+        prepared_actor_files={
+            name: hashlib.sha256(source.encode("utf-8")).hexdigest()
+            for name, source in patched.items()
+        },
+    )
+    (output / "preparation.json").write_text(
+        json.dumps(report, indent=2), encoding="utf-8"
+    )
+    return report
 
 
 def patch_captioner_device(source):
@@ -195,10 +301,14 @@ def inspect_original(author_root, *, pins_path=PINS):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--author-root", type=Path)
-    parser.add_argument("--prepare-npu-launcher", type=Path, metavar="NEW_OUTPUT")
+    output = parser.add_mutually_exclusive_group()
+    output.add_argument("--prepare-npu-launcher", type=Path, metavar="NEW_OUTPUT")
+    output.add_argument("--prepare-qwen35-actor", type=Path, metavar="NEW_OUTPUT")
     args = parser.parse_args()
-    if args.prepare_npu_launcher and args.author_root is None:
-        parser.error("--prepare-npu-launcher requires --author-root")
+    if (
+        args.prepare_npu_launcher or args.prepare_qwen35_actor
+    ) and args.author_root is None:
+        parser.error("Preparation requires --author-root")
     if args.author_root is None:
         result = {
             "source_id": "VISUALWEBARENA",
@@ -209,6 +319,8 @@ def main():
         }
     elif args.prepare_npu_launcher:
         result = prepare_npu_launcher(args.author_root, args.prepare_npu_launcher)
+    elif args.prepare_qwen35_actor:
+        result = prepare_qwen35_actor(args.author_root, args.prepare_qwen35_actor)
     else:
         result = inspect_original(args.author_root)
     print(json.dumps(result, indent=2))

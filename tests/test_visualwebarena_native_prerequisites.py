@@ -224,3 +224,73 @@ def test_som_template_preparation_requires_audited_input_and_new_output(
     assert not result["source_checkbox_eligible"]
     with pytest.raises(FileExistsError):
         template.prepare(source, output)
+
+
+def test_local_som_actor_adaptation_is_explicit_and_preserves_original_actors(
+    tmp_path, monkeypatch
+):
+    actor = (
+        "def is_multimodal(lm_config):\n"
+        '    return ("gemini" in lm_config.model or "gpt-4" in lm_config.model and '
+        '"vision" in lm_config.model)\n'
+    )
+    tokenizer = """from typing import Any
+import tiktoken
+
+class Tokenizer:
+    def __init__(self, provider, model_name):
+        if provider == "openai":
+            self.tokenizer = tiktoken.encoding_for_model(model_name)
+    def encode(self, text: str) -> list[int]:
+        return self.tokenizer.encode(text)
+
+    def decode(self, ids):
+        return self.tokenizer.decode(ids)
+
+    def __call__(self, text: str) -> list[int]:
+        return self.tokenizer.encode(text)
+"""
+    original = dict(zip(runner.LOCAL_ACTOR_FILES, (actor, tokenizer)))
+    patched = runner.patch_local_actor(original)
+    with pytest.raises(ValueError, match="multimodal actor check changed"):
+        runner.patch_local_actor({**original, "agent/agent.py": "pass"})
+    namespace = {}
+    exec(patched["agent/agent.py"], namespace)
+    is_multimodal = namespace["is_multimodal"]
+    assert is_multimodal(
+        SimpleNamespace(provider="openai", mode="chat", model="Qwen/Qwen3.5-9B")
+    )
+    assert not is_multimodal(
+        SimpleNamespace(provider="openai", mode="completion", model="Qwen/Qwen3.5-9B")
+    )
+    assert is_multimodal(
+        SimpleNamespace(provider="openai", mode="chat", model="gpt-4-vision")
+    )
+    standard = SimpleNamespace(encode=lambda text: [1])
+    monkeypatch.setitem(
+        sys.modules, "tiktoken", SimpleNamespace(encoding_for_model=lambda _: standard)
+    )
+    calls = []
+
+    def load(root, **kwargs):
+        calls.append((root, kwargs))
+        return SimpleNamespace(
+            encode=lambda text, *, add_special_tokens: [int(add_special_tokens)]
+        )
+
+    monkeypatch.setitem(
+        sys.modules,
+        "transformers",
+        SimpleNamespace(AutoTokenizer=SimpleNamespace(from_pretrained=load)),
+    )
+    (tmp_path / "config.json").write_text('{"model_type":"qwen3_5"}', encoding="utf-8")
+    monkeypatch.setenv("VWA_QWEN35_TOKENIZER_ROOT", str(tmp_path))
+    exec(patched["llms/tokenizers.py"], namespace)
+    cls = namespace["Tokenizer"]
+    assert cls("openai", "gpt-4-vision")("example") == [1]
+    assert calls == []
+    local = cls("openai", "Qwen/Qwen3.5-9B")
+    assert local.encode("example") == local("example") == [0]
+    assert calls == [
+        (tmp_path.resolve(), {"local_files_only": True, "trust_remote_code": False})
+    ]
