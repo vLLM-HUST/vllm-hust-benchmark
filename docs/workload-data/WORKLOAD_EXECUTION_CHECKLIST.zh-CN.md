@@ -1313,8 +1313,11 @@ PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07�
 `docker image tag <镜像ID> pb-reproducer:latest` 恢复作者默认标签。原入口预检会区分 `pb-reproducer:latest`（复现）与
 `pb-env:latest`（Agent 和非本地评分）；不能把前者当作后者。评分默认本地执行，仍须具备原协议的评分模型。
 
-当前两个 Qwen 服务的 OpenAPI 均注册 `POST /v1/responses`，但只读核查实际监听进程的启动参数及部署源码，确认均无工具服务器配置，未绑定作者 BasicAgent
-所需的 `web_search_preview` 浏览工具。 不能用路由健康、纯聊天或无搜索的 Agent 代替原协议。该检查仅 GET，不发送生成或搜索；原容器的架构和条款限制仍单列。
+预检重新核验了 195 份原软件，从固定 README 读取正式命令：发布方使用 `all` 切分、Agent 和复现各 86,400 秒、`web_search`、运行器零重试。BasicAgent
+的默认工具名是 `web_search_preview`；不能将默认 5 分钟配置当作正式命令，也不能用它的工具名代替正式命令中的配置。
+
+当前两个 Qwen 服务的 OpenAPI 均注册 `POST /v1/responses`，但只读核查实际监听进程的启动参数及部署源码，确认均无工具服务器配置，未绑定原生浏览工具。
+不能用路由健康、纯聊天或无搜索的 Agent 代替原协议。该检查仅 GET，不发送生成或搜索；原容器的架构和条款限制仍单列。
 
 [作者部署说明](https://github.com/openai/frontier-evals/blob/main/project/paperbench/README.md#build-docker-images)与固定版本构建脚本均指向本地构建
 `pb-env` 和 `pb-reproducer`；检查时当前宿主的 Docker 缓存无这两个镜像，作者仓库公开 Releases 为空。

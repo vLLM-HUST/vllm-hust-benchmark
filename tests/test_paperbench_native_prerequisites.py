@@ -16,6 +16,21 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+CANONICAL = """### Canonical command
+
+```bash
+uv run python -m paperbench.nano.entrypoint \
+  paperbench.paper_split=all \
+  paperbench.solver=paperbench.solvers.basicagent.solver:BasicAgentSolver \
+  paperbench.solver.completer_config=paperbench.solvers.basicagent.completer:OpenAIResponsesTurnCompleterConfig \
+  paperbench.solver.completer_config.tools="[{'type':'web_search'}]" \
+  paperbench.solver.time_limit=86400 \
+  paperbench.reproduction.timeout=86400 \
+  runner.max_retries=0
+```
+"""
+
+
 def fixture(tmp_path):
     texts = [
         "Miniconda3-py313_25.5.1-0-Linux-x86_64.sh\nconda tos accept\n",
@@ -24,7 +39,7 @@ def fixture(tmp_path):
         "time_limit: int | None = chz.field(default=5 * 60\n"
         "OpenAIResponsesTurnCompleterConfig(\n"
         'tools=[WebSearchToolParam(type="web_search_preview")]\n',
-        "paperbench.reproduction.timeout=60\n",
+        "paperbench.reproduction.timeout=60\n\n" + CANONICAL,
         'default="pb-env:latest"\n',
         'docker_image="pb-reproducer:latest"\n'
         'docker_image="pb-env:latest"\n'
@@ -93,6 +108,27 @@ def test_architecture_never_promotes_preflight_to_execution(
     assert result["original_basicagent_default_builtin_tools"] == ["web_search_preview"]
     assert not result["model_endpoint_and_tool_execution_qualified"]
     assert not result["chat_completions_health_check_is_sufficient"]
+    assert result["original_canonical_protocol"] == {
+        "paper_split": "all",
+        "agent_time_limit_seconds": 86400,
+        "reproduction_timeout_seconds": 86400,
+        "responses_builtin_tools": ["web_search"],
+        "runner_max_retries": 0,
+    }
+
+
+@pytest.mark.parametrize(
+    "argument,replacement",
+    [
+        ("paperbench.solver.time_limit=86400", "paperbench.solver.time_limit=300"),
+        ("paperbench.reproduction.timeout=86400", "paperbench.reproduction.timeout=60"),
+        ("web_search", "no_tools"),
+        ("runner.max_retries=0", "runner.max_retries=0 runner.max_retries=1"),
+    ],
+)
+def test_canonical_command_cannot_be_replaced_by_dev_profile(argument, replacement):
+    with pytest.raises(ValueError, match="canonical"):
+        runner.canonical_protocol(CANONICAL.replace(argument, replacement))
 
 
 def test_modified_source_is_rejected_before_recipe_inspection(tmp_path):

@@ -8,6 +8,7 @@ import argparse
 import json
 from pathlib import Path
 import platform
+import shlex
 import sys
 
 if __package__ in {None, ""}:
@@ -31,6 +32,47 @@ RECIPES = [
     PROJECT + "paperbench/nano/eval.py",
     PROJECT + "paperbench/nano/structs.py",
 ]
+
+
+def canonical_protocol(readme):
+    """Read, but never run, the publisher's fixed canonical command."""
+    section = "### Canonical command\n"
+    if readme.count(section) != 1:
+        raise ValueError("review changed author canonical protocol section")
+    command = readme.split(section, 1)[1].split("### ", 1)[0].split("```")
+    if len(command) != 3 or not command[1].startswith("bash\n"):
+        raise ValueError("review changed author canonical command block")
+    tokens = shlex.split(command[1][5:].replace("\\\n", " "))
+    if tokens[:4] != ["uv", "run", "python", "-m"] or tokens[4:5] != [
+        "paperbench.nano.entrypoint"
+    ]:
+        raise ValueError("review changed author canonical entrypoint")
+    options = {}
+    for token in tokens[5:]:
+        key, equals, value = token.partition("=")
+        if not equals or key in options:
+            raise ValueError("invalid author canonical argument")
+        options[key] = value
+    required = {
+        "paperbench.paper_split": "all",
+        "paperbench.solver": "paperbench.solvers.basicagent.solver:BasicAgentSolver",
+        "paperbench.solver.completer_config": (
+            "paperbench.solvers.basicagent.completer:OpenAIResponsesTurnCompleterConfig"
+        ),
+        "paperbench.solver.completer_config.tools": "[{'type':'web_search'}]",
+        "paperbench.solver.time_limit": "86400",
+        "paperbench.reproduction.timeout": "86400",
+        "runner.max_retries": "0",
+    }
+    if any(options.get(key) != value for key, value in required.items()):
+        raise ValueError("review changed author canonical protocol options")
+    return {
+        "paper_split": options["paperbench.paper_split"],
+        "agent_time_limit_seconds": int(options["paperbench.solver.time_limit"]),
+        "reproduction_timeout_seconds": int(options["paperbench.reproduction.timeout"]),
+        "responses_builtin_tools": ["web_search"],
+        "runner_max_retries": int(options["runner.max_retries"]),
+    }
 
 
 def inspect_original(author_root, *, pins_path=PINS, host_architecture=None):
@@ -67,6 +109,7 @@ def inspect_original(author_root, *, pins_path=PINS, host_architecture=None):
         raise ValueError("review changed original BasicAgent model/tool contract")
     if "paperbench.reproduction.timeout=60" not in originals[RECIPES[4]]:
         raise ValueError("review changed author development protocol")
+    canonical = canonical_protocol(originals[RECIPES[4]])
     evaluation, structs = (originals[name] for name in RECIPES[5:])
     if (
         'default="pb-env:latest"' not in evaluation
@@ -101,6 +144,7 @@ def inspect_original(author_root, *, pins_path=PINS, host_architecture=None):
         "model_endpoint_and_tool_execution_qualified": False,
         "chat_completions_health_check_is_sufficient": False,
         "author_documented_dev_reproduction_timeout_seconds": 60,
+        "original_canonical_protocol": canonical,
         "default_and_dev_are_not_canonical_24h_protocol": True,
         "docker_built_or_run": False,
         "model_calls": 0,
