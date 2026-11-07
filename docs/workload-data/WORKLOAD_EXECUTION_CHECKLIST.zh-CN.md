@@ -1281,6 +1281,11 @@ NOMAD 的 ARM64 CPU 科学执行对照补齐了 `configs/workload-native/mlebenc
 AIDE 作者已提供的 `agent.convert_system_to_user=True`，不改原说明、预算、模型或评分。 新尝试已发出首条 user
 请求；除作者生成的剩余时间和包名顺序外，原提示内容未改，其他请求字段一致。仍须核查真实 Agent 终态、提交及原评分；不能把启动算作通过。
 
+终态核对时先冻结 `submission.csv`，使用
+`scripts/audit_mlebench_nomad_submission.py --public-test <公开test.csv> --submission <冻结提交>`
+核对发布方测试表校验值、240 条 ID 原顺序和有限数值。作者评分函数按行比较，不会按 ID 重排；发现错序时保留原提交，不替 Agent 排序。再用作者 `grade-sample`
+评分，并核对评分文件与冻结提交摘要一致。运行中的候选提交即使通过结构检查，也不是终态验收。
+
 PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
