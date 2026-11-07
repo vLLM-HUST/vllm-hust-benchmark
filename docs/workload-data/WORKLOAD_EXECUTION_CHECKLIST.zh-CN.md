@@ -826,6 +826,12 @@ CI中执行。
 原Classifieds镜像摘要已核验，单个应用COPY层压缩后约71.4GiB，全镜像压缩76,861,304,894字节；不是SQL部署ZIP的体积。没有下载这些站点层，未按截取网站文件或删图片构造替代站点。另查的BrowserGym
 VisualWebArena包是框架维护者提供的非原仓直接执行移植版，亦有提前加载BLIP-2行为，不能因为客户端注册成功就当成原生环境已就绪。
 
+[作者项目页](https://jykoh.com/vwa#try-the-environments-yourself)明确限制公共演示站仅供体验，不能用于正式评测。
+[作者部署说明](https://github.com/web-arena-x/visualwebarena/blob/main/environment_docker/README.md)
+另外提供预装环境的 AWS AMI；如团队已有授权的隔离实例，可复用其原 Classifieds 站点，但仍须核对原数据库初始化、登录及固定三题的站点状态。没有启动云资源。 2026-11-07
+只读检查三个可访问节点的 Docker 镜像列表和可读的 containerd 镜像名，未找到已登记的固定 Classifieds 镜像； 这不排除其他授权实例。部署 ZIP 的发布元数据为
+25,366,023 字节，该数值不包含镜像层，不可作为部署磁盘预算。
+
 2026-11-06已做独立用户态兼容控制：ARM64容器内QEMU7.2.22可执行原Debian的amd64 BusyBox，
 但PRoot5.1.0下的嵌套子进程在四组有限对照中均以signal11退出；单个ELF可运行不代表原站点可运行。
 控制未修改宿主binfmt、未增加容器特权、未接入NPU或下载大站点镜像，原始诊断留存在机器清单对应stage。 这条具体版本组合尚不具备原站点部署资格，不能按其单程序成功勾选WebArena。
