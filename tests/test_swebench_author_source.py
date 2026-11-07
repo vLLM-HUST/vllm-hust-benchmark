@@ -478,6 +478,26 @@ def test_visualwebarena_source_plan_exposes_software_not_native_completion():
     assert not any(path.startswith(("media/", "tests/")) for path in paths)
 
 
+def test_mlebench_cli_recipe_keeps_installation_separate_from_native_tasks():
+    recipe = (
+        SCRIPTS.parent / "configs/workload-native/mlebench-arm64-cli.Dockerfile"
+    ).read_text("utf-8")
+    assert "FROM quay.io/ascend/vllm-ascend@sha256:" in recipe
+    assert "python3 -m venv /opt/mlebench-client" in recipe
+    assert "--system-site-packages" not in recipe
+    assert 'PYTHONPATH=""' in recipe and "PYTHONNOUSERSITE=1" in recipe
+    assert "mlebench-arm64-client-py312.txt" in recipe
+    assert "--no-deps --no-build-isolation /opt/mlebench-author" in recipe
+    assert recipe.count("python -m pip check") == 2
+    assert "mlebench --help" in recipe
+    assert 'CMD ["--help"]' in recipe
+    assert "WORKDIR /tmp" in recipe
+    assert all(
+        term not in recipe
+        for term in ("kaggle.json", "KAGGLE_KEY", "grade-sample", "--all")
+    )
+
+
 def test_osworld_source_plan_does_not_hide_submodule_and_vm_gaps():
     from vllm_hust_workload_data.provider import delivery_source_plan
 

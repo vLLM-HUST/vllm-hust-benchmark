@@ -1134,17 +1134,19 @@ VAD绑定只改变模型和输入张量的设备，核验6.2.1原TorchScript摘�
 `config_cls` 为 `MiniCPMOSpeechPipelineConfig`，不能据此认定已支持双工 `session`。 原 Moshi/NeMo 路径与 SGLang-Omni
 路径须分别记录软件版本、实际执行阶段及评分差异，不能混称未经修改的原实现。
 
-MLE-bench（未完成）：用
-`scripts/prepare_jsonschemabench_author_source.py --source mlebench --author-root <新目录> --action prepare`
-准备固定作者源码。 同一命令改用 `--action plan` 可先核对固定版本及 758 个文件（约 7.5 MB）。ARM64 Python 3.12 的 CLI 依赖见
-`configs/workload-native/mlebench-arm64-client-py312.txt`，该环境只验证到 CLI 启动。
-在隔离执行环境安装作者客户端后，由具备权限的操作者配置 Kaggle，并自行处理对应竞赛规则；凭据不进入仓库。 用 `mlebench prepare -c <已确认的原竞赛 ID>`
+MLE-bench（未完成）：固定作者源码推荐使用
+`scripts/prepare_swebench_author_source.py --profile mlebench --author-root <新目录> --action prepare --archive <原作者源码归档>`。2026-11-07已从固定提交的原codeload归档取得并逐文件核验758份原软件/公开leaderboard，prepare和verify均返回0；5,179,900字节临时归档已删除。这不包含Kaggle竞赛数据。归档入口保留原Git/LFS身份检查，不能用Git
+LFS指针文本冒充展开后的原文件。 同一入口改用 `--action plan` 可先核对固定版本及758个文件（约7.5MB）。ARM64 Python 3.12 的 CLI 依赖见
+`configs/workload-native/mlebench-arm64-client-py312.txt`。公开隔离CLI配方为
+`configs/workload-native/mlebench-arm64-cli.Dockerfile`，构建上下文仅含已核验的`author/`、依赖清单和配方本身。该配方复用已缓存的固定Ascend基础镜像，不是最小镜像，CLI本身不使用NPU。已在当前ARM64服务器重新构建并断网验证：Python3.12.13、MLE-bench1.0.0，130项依赖版本与原锁一致，680份安装包内原文件逐一匹配，82个原竞赛ID可注册；这不是82份竞赛数据已取得，也不是Agent/科学程序环境已验证。原CLI即使`--help`也会建立相对路径缓存，因此只读根运行时须提供可写临时工作目录。初次CANN路径污染venv及只读缓存失败均保留，最终配方清空继承PYTHONPATH并使用`/tmp`工作目录，原benchmark源码未改。
+在仓库外构建上下文放入已核验的`author/`、上述Dockerfile和依赖清单后，可用`docker build -f mlebench-arm64-cli.Dockerfile -t local/mlebench-cli .`构建。`docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp:rw,nosuid,nodev,size=128m local/mlebench-cli --help`只做软件检查。真实竞赛输入应保存在显式挂载的外部目录，并用作者的`--data-dir`参数指向该目录，不存入临时目录或镜像。
+
+在隔离执行环境安装作者客户端后，由具备权限的操作者配置 Kaggle，并自行处理对应竞赛规则；凭据不进入仓库或镜像。 用 `mlebench prepare -c <已确认的原竞赛 ID>`
 获取和校验原始数据。即使已有 ZIP，原准备入口仍会检查授权； 不跳过作者校验，也不临时替换竞赛。准备成功后仍须运行 Agent、保留原提交并执行作者评分。 已核验低复杂度候选
 `nomad2018-predict-transparent-conductors` 的作者准备、校验和 RMSLE 评分定义；它尚未锁定为原验证样本，也未取得竞赛数据。 生成提交后，单赛道评分入口为
 `mlebench grade-sample <submission-path> <competition-id>`，使用作者准备出的私有评测标签。
 
-PaperBench（未完成）：复用已核验的 23 个原始论文包。先用 `dataset-validation-status.json` 中 PaperBench 的 CPU 资产回执定位既有包；当前
-NPU 任务共享目录未发现同名副本，不把历史取得视为当前容器可用。 取得该资产目录后，用
+PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
 `project/paperbench`。两步均不占卡。原构建脚本指定 `linux/amd64`，应在经过验证的隔离执行节点上构建和运行；当前宿主机已有隔离 Docker，

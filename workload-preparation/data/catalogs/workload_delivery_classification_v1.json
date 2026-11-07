@@ -21,6 +21,11 @@
     {"source_id": "PAIO-SEMANTIC-SIMILAR-5000", "asset_group": "enterprise-private-requests", "related_workload_ids": [], "boundary": "Semantic similarity is not exact-prefix or KV reuse; preserve original private requests without rewriting."}
   ],
   "source_entrypoints": {
+    "MLEBENCH": [
+      {"role":"prepare_assets","path":"scripts/prepare_swebench_author_source.py","scope":"--profile mlebench with original publisher archive; all758 software and public leaderboard files verified, not Kaggle competition inputs"},
+      {"role":"original_profile","path":"configs/workload-native/mlebench-author-source.json","scope":"Pinned original source and expanded public LFS content identities; no competition or Agent completion implied"},
+      {"role":"original_profile","path":"configs/workload-native/mlebench-arm64-cli.Dockerfile","scope":"ARM64 Python3.12.13 CLI-only profile:130 pinned dependencies,680 installed original package files and offline help qualified; no credentials,NPU,competition data,Agent or scoring"}
+    ],
     "BIXBENCH": [
       {"role": "prepare_assets", "path": "scripts/prepare_bixbench_original_tasks.py"},
       {"role": "generation", "path": "scripts/run_bixbench_original_agent.py"},
