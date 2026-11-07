@@ -197,3 +197,30 @@ def test_npu_captioner_component_does_not_mark_browser_source_delivered():
     assert not receipt["compatibility_profile"]["cpu_neural_fallback"]
     assert len(receipt["weight_shards"]) == 2
     assert sum(row["bytes"] for row in receipt["weight_shards"]) == 15769954544
+
+
+def test_som_template_preparation_requires_audited_input_and_new_output(
+    tmp_path, monkeypatch
+):
+    import prepare_visualwebarena_qwen35_som_template as template
+
+    source = tmp_path / "source.jinja"
+    output = tmp_path / "output.jinja"
+    raw = ("unchanged before\n" + template.OLD + "\nunchanged after").encode()
+    source.write_bytes(raw)
+    with pytest.raises(ValueError, match="Unverified"):
+        template.prepare(source, output)
+    assert not output.exists()
+    monkeypatch.setattr(template, "SOURCE_SHA256", hashlib.sha256(raw).hexdigest())
+    result = template.prepare(source, output)
+    assert source.read_bytes() == raw
+    assert output.read_bytes() == raw.replace(
+        template.OLD.encode(), template.NEW.encode(), 1
+    )
+    assert (
+        result["output_template_sha256"]
+        == hashlib.sha256(output.read_bytes()).hexdigest()
+    )
+    assert not result["source_checkbox_eligible"]
+    with pytest.raises(FileExistsError):
+        template.prepare(source, output)

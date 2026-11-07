@@ -760,6 +760,13 @@ SoM actor 另有独立接入缺口：原 `MultimodalCoTPromptConstructor` 把 3 
 `system` 加 `user` 图像的对照返回 HTTP 200，产生多模态特征及 1959 个输入 token，保留 384-token 输出预算。两次均只走预处理，无生成。
 当前部署源码在请求解析阶段保留消息名称，下一步可在独立预处理实例验证模型侧模板适配，而不是改原请求；适配不等同于原 GPT-4V actor。
 
+候选模型侧模板可用
+`python scripts/prepare_visualwebarena_qwen35_som_template.py --source "$ORIGINAL_CHAT_TEMPLATE" --output "$NEW_SOM_TEMPLATE"`
+从已核验的模板生成；不覆盖源文件或现有输出。 只放行后续带原 `example_user` / `example_assistant` 名称的 `system` 消息，用同一 `system`
+角色标记序列化，并保留名称和内容顺序。 原三组示例经本地 `Qwen3VLProcessor` 在 CPU 上实际预处理，四图展开为 4000 个图像 token，共 5890 个输入
+token；普通支持的单图对照渲染逐字节不变，未命名的后续 `system` 仍被拒绝。 这不是候选模板的 vLLM HTTP 接入或模型输出证据：未启动候选端点、未加载模型权重。仍需独立验证端点、原
+actor 的模型名称及分词器接入，再执行原任务和评分。
+
 公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
 CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。
 
