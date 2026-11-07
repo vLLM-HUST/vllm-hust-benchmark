@@ -9,6 +9,7 @@ import platform
 import re
 import sys
 from urllib.parse import urlsplit
+from zipfile import is_zipfile
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -358,6 +359,39 @@ def inspect_original(author_root, *, pins_path=PINS):
     }
 
 
+def audit_classifieds_results(author_log, result_dir):
+    """Check fixed-task result coverage, not model provenance or site setup."""
+    log_format = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} - INFO - "
+    result_line = re.compile(log_format + r"\[Result\] \((PASS|FAIL)\) (.+)")
+    rows = []
+    for line in author_log.read_text("utf-8").splitlines():
+        match = result_line.fullmatch(line)
+        if match:
+            score, config_file = match.groups()
+            rows.append((Path(config_file).name, score == "PASS"))
+        elif re.match(log_format + r"\[(?:OpenAI|Unhandled) Error\]", line):
+            raise ValueError("original launcher logged a per-task error")
+    if [name for name, _ in rows] != ["0.json", "1.json", "2.json"]:
+        raise ValueError("expected exactly one ordered original result for IDs 0, 1, 2")
+    error_file = result_dir / "error.txt"
+    if error_file.exists() and error_file.stat().st_size:
+        raise ValueError("original launcher wrote per-task errors")
+    for task_id in range(3):
+        trace = result_dir / "traces" / f"{task_id}.zip"
+        if trace.is_symlink() or not trace.is_file() or not is_zipfile(trace):
+            raise ValueError("missing original browser trace archive")
+    return {
+        "source_id": "VISUALWEBARENA",
+        "status": "FIXED_CLASSIFIEDS_RESULT_COVERAGE_AUDITED",
+        "tasks": [
+            {"task_id": task_id, "original_binary_score": int(passed)}
+            for task_id, (_, passed) in enumerate(rows)
+        ],
+        "manual_model_and_site_audit_required": True,
+        "source_checkbox_eligible": False,
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--author-root", type=Path)
@@ -365,6 +399,12 @@ def main():
     output.add_argument("--prepare-npu-launcher", type=Path, metavar="NEW_OUTPUT")
     output.add_argument("--prepare-qwen35-actor", type=Path, metavar="NEW_OUTPUT")
     output.add_argument("--prepare-fixed-classifieds", type=Path, metavar="NEW_OUTPUT")
+    output.add_argument(
+        "--audit-classifieds-results",
+        nargs=2,
+        type=Path,
+        metavar=("AUTHOR_LOG", "RESULT_DIR"),
+    )
     parser.add_argument("--classifieds-origin")
     args = parser.parse_args()
     if (
@@ -377,7 +417,11 @@ def main():
         parser.error(
             "--prepare-fixed-classifieds and --classifieds-origin are required together"
         )
-    if args.author_root is None:
+    if args.audit_classifieds_results:
+        if args.author_root is not None:
+            parser.error("result audit does not take an author source directory")
+        result = audit_classifieds_results(*args.audit_classifieds_results)
+    elif args.author_root is None:
         result = {
             "source_id": "VISUALWEBARENA",
             "status": "PLAN_ONLY",

@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import sys
 from types import SimpleNamespace
+from zipfile import ZipFile
 
 import pytest
 
@@ -17,6 +18,41 @@ spec = importlib.util.spec_from_file_location(
 )
 runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
+
+
+@pytest.mark.parametrize(
+    ("outcomes", "missing_trace", "has_error", "failure"),
+    [
+        ("PASS FAIL PASS", False, False, None),
+        ("PASS FAIL", False, False, "exactly one"),
+        ("PASS FAIL PASS PASS", False, False, "exactly one"),
+        ("PASS FAIL PASS", True, False, "trace archive"),
+        ("PASS FAIL PASS", False, True, "per-task error"),
+    ],
+)
+def test_classifieds_result_coverage(
+    tmp_path, outcomes, missing_trace, has_error, failure
+):
+    prefix = "2026-11-07 11:20:21,234 - INFO - "
+    lines = [
+        f"{prefix}[Result] ({outcome}) /private/tasks/{idx}.json"
+        for idx, outcome in enumerate(outcomes.split())
+    ]
+    if has_error:
+        lines.append(f"{prefix}[OpenAI Error] fixture")
+    log = tmp_path / "author.log"
+    log.write_text("\n".join(lines), encoding="utf-8")
+    (tmp_path / "traces").mkdir()
+    for idx in range(2 if missing_trace else 3):
+        with ZipFile(tmp_path / "traces" / f"{idx}.zip", "w") as archive:
+            archive.writestr("trace.fixture", "fixture")
+    if failure:
+        with pytest.raises(ValueError, match=failure):
+            runner.audit_classifieds_results(log, tmp_path)
+    else:
+        receipt = runner.audit_classifieds_results(log, tmp_path)
+        assert [row["original_binary_score"] for row in receipt["tasks"]] == [1, 0, 1]
+        assert receipt["source_checkbox_eligible"] is False
 
 
 def fixture(root, *, ids=(0, 1, 2), launcher=None):

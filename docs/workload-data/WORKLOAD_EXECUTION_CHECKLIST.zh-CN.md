@@ -847,6 +847,10 @@ python run.py \
 作者启动器可能捕获单题异常后继续，因此不能只核对进程退出码或平均分。按固定顺序核对原评价器确实对 0、1、2 三题各给出一条结果，核对实际模型请求及对应轨迹，并排除 API
 或浏览器异常。原评价器给出的 0 分是有效结果； 缺失评分不是 0 分。登录态、站点重置配置、原运行日志和轨迹留在私有目录，不提交到 PR。该命令尚未在真实站点执行。
 
+可在原运行退出后执行
+`python scripts/check_visualwebarena_native_prerequisites.py --audit-classifieds-results "$PRIVATE_AUTHOR_LOG" "$NEW_PRIVATE_RESULT_DIR"`
+检查固定三题的原结果行、错误和轨迹归档。输出只含题号和原二值分数；模型请求与站点仍须独立核验，不自动勾选。
+
 公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
 CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。
 
