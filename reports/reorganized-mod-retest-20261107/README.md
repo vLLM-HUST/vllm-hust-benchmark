@@ -35,21 +35,20 @@ transferred to the reorganized repositories.
 ## Runtime micro-optimizations formal result
 
 The runtime family was subsequently ported, reviewed, and committed in its canonical repository.
-Candidate commit `210038bc250d2558c039f6c0874f403c4d89588e` was measured against unchanged
-Native on Core `c4df37dfcc7f72ca41cd43801a468526ecf99a2b` and Ascend Host
-`ab05682845beb9f54a9522122f48f628c3f5b649`. Both TP ranks emitted install and
-first-exercise receipts for empty-padding, query-start-location reuse, and residual-scale in every
-candidate process.
+Candidate commit `210038bc250d2558c039f6c0874f403c4d89588e` was measured against unchanged Native on
+Core `c4df37dfcc7f72ca41cd43801a468526ecf99a2b` and Ascend Host
+`ab05682845beb9f54a9522122f48f628c3f5b649`. Both TP ranks emitted install and first-exercise
+receipts for empty-padding, query-start-location reuse, and residual-scale in every candidate
+process.
 
 The complete frozen campaign used Qwen3.5-35B-A3B BF16 TP2/EP on Ascend 910B2. It completed three
 alternating-order Native/candidate pairs with fresh processes. Every process ran one warm-up plus
 three measured 200-request windows. Every measured window used 282,265 prompt tokens and 51,200
 output tokens, with zero failed requests.
 
-Pair throughput changes were +0.841%, -0.494%, and -0.213%. The geometric pair aggregate was
-+0.043% (arithmetic nine-window aggregate +0.041%). Geometric pair TTFT and TPOT changes were
--0.152% and -0.122%, respectively. These sub-percent, mixed-direction changes do not establish a
-stable speedup.
+Pair throughput changes were +0.841%, -0.494%, and -0.213%. The geometric pair aggregate was +0.043%
+(arithmetic nine-window aggregate +0.041%). Geometric pair TTFT and TPOT changes were -0.152% and
+-0.122%, respectively. These sub-percent, mixed-direction changes do not establish a stable speedup.
 
 The 70/2048 quality overlap completed in every process. Across the three pairs, all 210 candidate
 outputs and reasoning traces had exactly the same hashes as Native; transitions were 129
@@ -57,8 +56,8 @@ correct-to-correct and 81 incorrect-to-incorrect. The result is therefore **meas
 equivalent in this cell, and without demonstrated stable performance benefit**. It is not
 `retest_pending`, but it must not be advertised as a positive speedup.
 
-Machine-readable aggregation is in [`runtime-formal-summary.json`](runtime-formal-summary.json).
-The complete 17 MiB custody bundle is attached to the
+Machine-readable aggregation is in [`runtime-formal-summary.json`](runtime-formal-summary.json). The
+complete 17 MiB custody bundle is attached to the
 [`runtime-micro-formal-retest-20261107` release](https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/runtime-micro-formal-retest-20261107),
 with SHA-256 `9f2cb812f3d593e84b9c450510d35efa24ace44da3a7a7fd831b610a75fee972`.
 
