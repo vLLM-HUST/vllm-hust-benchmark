@@ -1345,6 +1345,11 @@ SimpleJudge、`o3-mini-2025-01-31` 及 high reasoning。作者锁定的 OpenAI S
 读取这两个默认客户端的地址，不读取 `GRADER_OPENAI_BASE_URL`；未设置时有外部默认地址。
 本地执行前须显式绑定受信回环端点，核验两个接口和实际模型身份。若更换裁判，须按独立配置记录，不能伪装成默认裁判成绩。当前仅做静态核对，没有发送模型或工具请求。
 
+调度端已在断网 ARM64/Python 3.11 容器安装：183 份锁定依赖逐件核对，8 份 wheel 由锁定源码构建，`pip check` 通过，作者 CLI 能显示帮助。实际用作者 Chz
+解析正式参数时，锁定的 SDK 1.99.9 拒绝 `web_search`；只覆盖 SDK 2.11.0 后，解析又拒绝原 CLI 的嵌套运行时参数。两个失败均保留。 独立兼容对照用 SDK
+覆盖层、作者原类型构造 Agent 和复现运行时对象，并从原 NanoEval 源路径加载记录器；未修改锁文件或切分。作者类成功构造 20 个原实例，首项为 `fre`，保留每阶段 86,400 秒和
+`runner.n_tasks=1`。未启动 Runner，不证明模型工具、裁判、镜像或原生评分可用。
+
 交付抽样在产生任何 Agent 结果前锁定：从发布方 `all.txt` 的 20 篇原始论文中，按原文件顺序取首篇 `fre`。用预检的 `--fixed-paper` 核对原切分和该篇 21
 个固定文件，包括原论文、附加说明和 rubric。固定作者 NanoEval 先取任务前缀再打乱，正式命令保留 `paperbench.paper_split=all`，加
 `runner.n_tasks=1 runner.shuffle=false runner.concurrency=1`；不改切分文件，使用新运行组。另设
