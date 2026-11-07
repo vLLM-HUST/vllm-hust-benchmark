@@ -5785,6 +5785,24 @@
   "blocker": "CIFAR10 and ogbn-arxiv valid original evidence reused. IMDb Messages004 ended at original18000s with no submission and original empty/-1 score, not a live task. Original evaluator now independently passes full25000-row known-label controls1.0/0.0 in an isolated offline CPU container, and rejects a missing CSV. These are controls, not model results. The original task explicitly requires DistilBERT finetuning and per-class predictions for all test rows. Remaining: obtain a practical original native Agent execution producing its own submission under the original budget; do not replace it with reference labels or another classifier. Source remains incomplete."
     },
     "MLEBENCH": {
+      "nomad_aide_cpu_science_control_20261107": {
+        "status": "ORIGINAL_INTERPRETER_AND_OFFICIAL_SCORER_PASSED_KNOWN_CODE_CONTROL",
+        "requirements": "configs/workload-native/mlebench-aide-arm64-nomad-science.txt",
+        "server_receipt": "mlebench-aide-cpu-science.mzKigh/interpreter-control.public.json",
+        "private_grade_receipt": "mlebench-aide-cpu-science.mzKigh/grade-control.private.log",
+        "scientific_overlay_install_exit_code": 0,
+        "scientific_overlay_packages": 6,
+        "original_aide_interpreter_unchanged": true,
+        "original_training_rows": 2160,
+        "original_test_rows_predicted": 240,
+        "official_grade_sample_exit_code": 0,
+        "official_grade_recognized_valid_submission": true,
+        "private_labels_mounted_in_scoring_container_only": true,
+        "execution_program_provenance": "trusted scientific control, not Agent-generated",
+        "npu_model_calls": 0,
+        "native_agent_executed": false,
+        "source_checkbox_eligible": false
+      },
       "nomad_aide_split_submission_validator_20261107": {
         "status": "ORIGINAL_VALIDATOR_WORKER_AND_AUTHOR_HELPER_PASSED_NO_AGENT_RUN",
         "entry": "scripts/mlebench_nomad_validation.py",

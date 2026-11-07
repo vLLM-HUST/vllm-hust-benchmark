@@ -1263,6 +1263,11 @@ Agent 容器以 `frontend --socket <同一套接字>` 提供回环 HTTP，只读
 工作容器调用未修改的作者 `validate_submission`，只返回有效或无效，不返回分数、标签或异常明细。隔离双容器实跑已用原 Shell 工具接受原样例并拒绝无效 CSV；
 此项不替代最终独立评分，也不计 Agent 完成。
 
+NOMAD 的 ARM64 CPU 科学执行对照补齐了 `configs/workload-native/mlebench-aide-arm64-nomad-science.txt` 中的 6
+项依赖，独立于 AIDE 核心和评分客户端安装。 在断网、无 NPU、只读公开输入的容器内，通过未修改的 AIDE Interpreter 执行受信代码：读取全部 2,160 条训练记录、生成 240
+行预测； 独立容器随后以作者 `grade-sample` 和私有标签验证提交有效。该对照只证明固定赛题的 CPU 执行和评分链路，不是 Agent 生成的提交，不代表作者完整 CUDA
+镜像或其他科学包已适配。
+
 PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
