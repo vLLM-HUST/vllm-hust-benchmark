@@ -1345,7 +1345,9 @@ PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07�
 
 `fre` 的外部数据与论文包分开。服务器已从
 [D4RL 发布方数据映射](https://github.com/Farama-Foundation/D4RL/blob/master/d4rl/infos.py) 对应的 Berkeley
-端点取得 `antmaze-large-diverse-v2` 和 `kitchen-complete-v0`，核对了实际大小、HDF5 文件签名和下载摘要；摘要是本次观测值。
+端点取得 `antmaze-large-diverse-v2` 和 `kitchen-complete-v0`，核对了实际大小、HDF5 文件签名和下载摘要；摘要是本次观测值。 在断网 ARM64
+CPU 容器使用已与 PyPI 核对摘要的 h5py 3.12.1 复验文件并读回结构：两份数据分别为 1,000,000 和 3,680
+条，观察、动作、奖励和终止标记行数一致，首尾记录可读且有限；未逐行解码。
 [ExORL 原下载脚本](https://github.com/denisyarats/exorl/blob/main/download.sh)对应的 Walker、Cheetah RND
 压缩包只核对了 HEAD，合计约 4.84 GB，尚未下载。 未运行科学训练，不把外部数据就绪等同于原生复现或评分。
 
