@@ -18,10 +18,10 @@ from appworld_model_transport import model_proxy
 from mlebench_nomad_validation import UnixHTTPConnection, frontend
 
 
-START_SHA = "38b106593621f46a5a990d19ce05dc205de13743f02c81ffe7b38ba33dc4e66d"
-CONFIG_SHA = "b40e0e1dd07bfbfb8140507f887bb99230d542a41030632ff757d498559e0e55"
-NOTES_SHA = "0dbd723720145e77d671bbb8b0c9ba684aa565f99634b6f50b47a50b72915595"
-INSTRUCTIONS_SHA = "7f6bfde87ed88d53afef1688dd9206753982baf4a4038e87d6069ab57224ec7a"
+START_SHA = "38b106593621f46a5a990d19ce05dc205de13743f02c81ffe7b38ba33dc4e66d"  # pragma: allowlist secret - public source checksum
+CONFIG_SHA = "b40e0e1dd07bfbfb8140507f887bb99230d542a41030632ff757d498559e0e55"  # pragma: allowlist secret - public source checksum
+NOTES_SHA = "0dbd723720145e77d671bbb8b0c9ba684aa565f99634b6f50b47a50b72915595"  # pragma: allowlist secret - public source checksum
+INSTRUCTIONS_SHA = "7f6bfde87ed88d53afef1688dd9206753982baf4a4038e87d6069ab57224ec7a"  # pragma: allowlist secret - public source checksum
 TIME = 86400
 STEPS = 500
 OUTPUTS = ("agent", "submission", "logs", "code")

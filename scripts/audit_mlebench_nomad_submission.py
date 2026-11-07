@@ -10,7 +10,9 @@ from pathlib import Path
 
 
 COMPETITION = "nomad2018-predict-transparent-conductors"
-PUBLIC_TEST_MD5 = "be4e478c19d962eae8ffde95163fe8b1"
+PUBLIC_TEST_MD5 = (
+    "be4e478c19d962eae8ffde95163fe8b1"  # pragma: allowlist secret - publisher checksum
+)
 TARGETS = ("formation_energy_ev_natom", "bandgap_energy_ev")
 MAX_FILE_BYTES = 1024 * 1024
 

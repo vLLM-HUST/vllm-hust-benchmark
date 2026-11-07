@@ -33,7 +33,7 @@ def bind_local_openai(
     ):
         raise RuntimeError("bind before AIDE initializes the original OpenAI backend")
     client = openai.OpenAI(
-        api_key="local-file-queue",
+        api_key="local-file-queue",  # pragma: allowlist secret - dummy loopback value
         base_url=api_base,
         max_retries=0,
         timeout=timeout,

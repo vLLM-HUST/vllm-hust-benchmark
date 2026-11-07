@@ -14,12 +14,12 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 
 COMPETITION = "nomad2018-predict-transparent-conductors"
-REVISION = "8ab1dd297a3692a3ec24fa9528c18bd0883ce85f"
+REVISION = "8ab1dd297a3692a3ec24fa9528c18bd0883ce85f"  # pragma: allowlist secret - public Git revision
 SOURCE_URL = (
     f"https://codeload.github.com/csutton7/nomad_2018_kaggle_dataset/zip/{REVISION}"
 )
 SOURCE_BYTES = 6_957_213
-SOURCE_SHA256 = "fbbc2667ff62b057d258725729f0506f48254f4c8606f44db01e587e405c89cf"
+SOURCE_SHA256 = "fbbc2667ff62b057d258725729f0506f48254f4c8606f44db01e587e405c89cf"  # pragma: allowlist secret - public archive checksum
 PROFILE = (
     Path(__file__).resolve().parents[1]
     / "configs/workload-native/mlebench-author-source.json"
