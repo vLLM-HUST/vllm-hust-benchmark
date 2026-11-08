@@ -1785,9 +1785,22 @@ buffer和评分结果只保存在外部私有目录。声明的Qwen9B原生配�
 
 公共使用：`iter_workload("SCHEMASTORE", data_root=Path("/external/schemastore/data"))`返回1006份按原schema路径排序的资产；`record.task["input"]["schema"]`是原JSON对象/boolean，`record.outcome_record()`的`positive_examples`/`negative_examples`保持官方目录关联规则和原路径/字节数/校验和。用`vllm_hust_workload_data.schemastore.read_original_fixture(data_root, record.source, reference)`读取不改写的JSON/YAML/TOML等原字节；不默认联网解析`$ref`、不生成prompt、不能调用`record.request_body()`冒充原始请求。共享准备入口仍按既有`sources:[{source_id,data_root}]`配置，不需科研专用配置。
 
-准备运行时：从`https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-arm64.tar.xz`取得原归档，再用`python scripts/prepare_schemastore_runtime.py --archive /external/node-v22.14.0-linux-arm64.tar.xz --output /external/private-node --execute`校验并解包。需要Python3.12+的tarfile数据过滤器及lzma模块，不依赖系统xz程序；本服务器初次系统tar解包因缺xz失败，改用标准库解包，原归档不变。校验入口默认只规划，显式提供`--source`原源码、`--original-tree`官方完整recursive
-Git
-tree元数据、`--node`私有node路径、`--output`独立日志目录和`--execute`才运行`node cli.js check`；源码/例子全保留，不以自定义JSON校验替代官方流程。
+准备运行时：从 [Node.js v22.14.0 发布目录](https://nodejs.org/dist/v22.14.0/)获取与平台匹配的归档，对照同目录的 `SHASUMS256.txt`
+校验后解包。Linux ARM64 可直接用
+`python scripts/prepare_schemastore_runtime.py --archive /external/node-v22.14.0-linux-arm64.tar.xz --output /external/private-node --execute`
+校验并解包，需要 Python 3.12+ 的 tarfile 数据过滤器及 lzma 模块。把这套 Node.js 加到当前终端的 PATH，再运行下面的命令。
+
+把准备器下载的 `data/schemastore-original.zip` 解包到工作目录，`SOURCE` 指向包含 `cli.js` 和 `package-lock.json`
+的源码根，`WORK` 指向仓库外可写目录。从仓库根目录运行：
+
+```sh
+gh api 'repos/SchemaStore/schemastore/git/trees/98c02d0c58f9cfee9eaa667af2bce08ee1111fc5?recursive=1' > "$WORK/original-tree.json" # pragma: allowlist secret - public Git tree
+(cd "$SOURCE" && npm clean-install --ignore-scripts --no-audit --no-fund)
+python scripts/run_schemastore_original_validation.py --source "$SOURCE" --original-tree "$WORK/original-tree.json" --node "$(command -v node)" --output "$WORK/check-result" --schema-name all-contributors.json --execute
+```
+
+示例检查 `all-contributors.json` 的原正例和负例。需要执行完整作者校验时去掉 `--schema-name`，另用一个输出目录。 在
+`check-result/receipt-public.json` 读取退出码，在 `official-check.private.log` 查看作者测试覆盖数。
 
 ### NarrativeQA原始summary-QA（来源交付完成）
 

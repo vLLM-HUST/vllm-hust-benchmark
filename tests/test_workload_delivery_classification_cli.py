@@ -46,3 +46,14 @@ def test_replacement_execution_entries_identify_the_actual_source(capsys):
         ]
         assert entry["execution_source_id"] == replacement
         assert entry["path"] == path
+
+
+def test_bbh_source_plan_includes_original_archive_preparation(capsys):
+    main(["source-plan", "BBH"])
+    payload = json.loads(capsys.readouterr().out)
+    assert any(
+        entry["role"] == "prepare_assets"
+        and entry["path"] == "src/vllm_hust_benchmark/workload_data.py"
+        and "workload-data prepare-bbh-original" in entry["scope"]
+        for entry in payload["entrypoints"]
+    )

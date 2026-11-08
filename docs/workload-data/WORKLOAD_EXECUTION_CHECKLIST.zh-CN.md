@@ -665,6 +665,9 @@ python scripts/run_workbench_calendar_native.py score "$AUTHOR" "$PREDICTIONS" "
 `scripts/appworld_model_transport.py` 的 `--watch --expected-model Qwen/Qwen3.5-9B` 转发同一队列，
 待该模型在私有地址就绪后启动，完成后在队列中写入 `STOP`。`score` 在独立断网 CPU 容器运行，读取保存的预测和作者结果。
 
+使用其他能处理作者工具调用的模型时，在 `execute` 指定 `--model <服务端模型ID>`，转发器的 `--expected-model` 填同一个
+ID。开始三题前，确认模型收到含工具定义的请求后，能在作者客户端的 60 秒读取时限内返回响应。
+
 WorkArena（以下保留 ServiceNow 原协议）：使用
 `scripts/prepare_workarena_author_source.py --action prepare --archive <官方源码包> --author-root <新目录>`
 准备固定版本，再用同一脚本的 `--action verify --author-root <源码目录>` 核验。官方源码包不是 ServiceNow 实例快照。
@@ -1380,6 +1383,20 @@ Agent，也不重放已有成功响应。新运行可在启动器和可信转发
 原时限退出码 124 须有至少 86,400 秒容器墙钟记录；手工中断或评分未通过会被拒绝。已用历史 240 行中断提交复核：行身份有效，但不满足终态交付条件。审计不自动勾选整项。
 
 ### ResearchCodeBench 论文片段替代协议
+
+只在研究代码里读取任务时，用 `workload-data download-plan RESEARCHCODEBENCH` 获取所需文件清单和 SHA-256。 若 GitHub Raw
+下载中断，可从下方固定提交取得同路径文件，再核对清单中的字节数和 SHA-256。保留原目录结构，把实际的数据根写入 JSON 配置：
+
+```json
+{
+  "sources": [
+    {"source_id": "RESEARCHCODEBENCH", "data_root": "/path/to/author-tree"}
+  ]
+}
+```
+
+按[研究侧使用说明](../../workload-preparation/README.md#%E6%8C%89%E6%9D%A5%E6%BA%90%E6%89%BE%E5%88%B0%E5%87%86%E5%A4%87%E4%B8%8E%E6%89%A7%E8%A1%8C%E5%85%A5%E5%8F%A3)建索引。
+原生生成和评分使用下面的完整作者源码与隔离环境。
 
 检出
 [ResearchCodeBench 固定版本](https://github.com/PatrickHua/ResearchCodeBench/tree/db3d16d94cfa6b6785bef6f1db0263edfe6f1d34)。

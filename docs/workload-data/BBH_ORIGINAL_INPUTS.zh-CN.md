@@ -11,10 +11,12 @@
 
 ## 使用链路
 
-安装本批匹配的根CLI和数据组件，按发布方条款自行取得固定原归档：
+从仓库根目录安装匹配的 CLI 和数据组件，查询准备与运行入口，再取得发布方的固定原归档：
 
 ```sh
-# 在测试服务器的可写目录执行；不要下载到开发者本地电脑
+python -m pip install -e . -e ./workload-preparation
+workload-data source-plan BBH
+# 选择本机或实验服务器上的仓库外可写目录
 export BBH_ROOT=/path/on/server/bbh
 mkdir -p "$BBH_ROOT"
 curl --fail --location --output "$BBH_ROOT/publisher-legacy.zip" https://codeload.github.com/suzgunmirac/BIG-Bench-Hard/legacy.zip/9ee07bd481feebf959a6b59d61ea57bdcf30964d
@@ -66,7 +68,10 @@ python scripts/run_bbh_original_tasks.py --data-root /data/bbh-original-all --ou
 python scripts/run_bbh_original_tasks.py --data-root /data/bbh-original-all --output /data/bbh-run-full-private --endpoint http://127.0.0.1:19466/v1 --model MODEL_ALIAS --max-model-len 131072 --task-ids causal_judgement --full
 ```
 
-runner只允许无凭据的本机HTTP接口，输出目录必须不存在；原始请求、响应及参考答案仅写入该私有目录。所有评测输入保留原文与原行序；参考答案不进入请求。运行前需自行准备已启动的兼容模型服务及固定harness环境；脚本不启动模型、不下载数据、不执行任务代码。`--max-model-len`必须等于当前部署配置；runner先做完整输入token预检，超限即失败，不截断。执行协议使用发布方原始三示例CoT提示、固定harness的generation/regex/exact-match配置和模型原生chat传输；这不等于发布方论文设置或发布方评分器。未迁入观测钩子或研究特征分析。
+runner只允许无凭据的本机HTTP接口，输出目录必须不存在；原始请求、响应及参考答案仅写入该私有目录。所有评测输入保留原文与原行序；参考答案不进入请求。运行前在独立环境中装好下方固定
+harness 依赖，启动同时支持 `POST /tokenize` 和 `POST /v1/chat/completions`
+的模型服务。脚本不启动模型、不下载数据、不执行任务代码。`--model` 使用服务端公开的模型名，`--max-model-len`
+必须等于当前部署配置。runner先做完整输入token预检，超限即失败，不截断。执行协议使用发布方原始三示例CoT提示、固定harness的generation/regex/exact-match配置和模型原生chat传输；这不等于发布方论文设置或发布方评分器。未迁入观测钩子或研究特征分析。
 
 根候选wheel与数据候选wheel安装后的`prepare-bbh-boolean`已在服务器通过；公开脚本按同一配置复验同三题并得到0/3，输入token一致，重复运行不增加唯一题数。见[脱敏记录](validation/bbh-boolean-original-npu-20261023.json)。这些原题评分可复用，不重跑同配置、不改stop。脚本正确性夹具加入CPU
 smoke，不在CI跑真实模型。

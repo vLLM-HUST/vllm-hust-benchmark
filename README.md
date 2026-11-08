@@ -683,8 +683,12 @@ python -m pip install -e . -e './workload-preparation[data]'
 workload-data source-plan BBH
 ```
 
-例如要跑一道类目下的推理任务，按 BBH 指南取得原始归档，运行 `prepare-bbh-original`，再连接自己的模型服务执行固定抽样。指南列出了完整命令、依赖版本和如何读取评分结果。
-[BBH 从准备到评分](docs/workload-data/BBH_ORIGINAL_INPUTS.zh-CN.md)
+第一次跑文本推理可以从 [BBH 从准备到评分](docs/workload-data/BBH_ORIGINAL_INPUTS.zh-CN.md)开始。取得固定原始归档并运行
+`prepare-bbh-original` 后，连接自己的模型服务，先跑一个任务的前三条并查看评分。 做研究侧数据读取可从
+[ResearchCodeBench 下载与建索引](docs/workload-data/WORKLOAD_EXECUTION_CHECKLIST.zh-CN.md#researchcodebench-%E8%AE%BA%E6%96%87%E7%89%87%E6%AE%B5%E6%9B%BF%E4%BB%A3%E5%8D%8F%E8%AE%AE)开始。
+做结构化数据校验可从
+[SchemaStore 下载与原版校验](docs/workload-data/DATASET_CHECKLIST.zh-CN.md#schemastore%E5%8E%9F%E5%A7%8Bschema%E8%B5%84%E4%BA%A7%E4%BA%A4%E4%BB%98%E5%AE%8C%E6%88%90)开始。
+各示例的新环境试跑结果见[首次使用抽样记录](docs/workload-data/validation/workload-first-use-samples-20261108.json)。
 
 1. 从下表选择 workload，再点击来源 ID，查看官方来源、仓库入口和证据。
 1. 按[安装说明](docs/workload-data/INSTALLATION.zh-CN.md)准备数据组件，按对应脚本帮助和[来源使用文档](workload-preparation/README.md)准备独立原生环境。**纯数据

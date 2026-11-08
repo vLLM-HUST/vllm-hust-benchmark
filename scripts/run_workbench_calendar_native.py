@@ -2,19 +2,37 @@
 
 import argparse
 import ast
+import csv
 import json
 import os
-from pathlib import Path
 import sys
+from ctypes import c_long, sizeof
+from importlib import import_module
+from pathlib import Path
 
 import pandas as pd
-
 from appworld_model_transport import model_proxy
-
 
 POSITIONS = [0, 10, 20]
 MODEL = "Qwen/Qwen3.5-9B"
 MODEL_ALIAS = "qwen3.5-9b-local"
+
+
+def load_author_metrics():
+    limit = csv.field_size_limit
+    max_csv_field = (1 << (sizeof(c_long) * 8 - 1)) - 1
+    if sys.maxsize <= max_csv_field:
+        return import_module("src.evals.metrics")
+
+    # WorkBench asks for sys.maxsize at import. On Windows csv takes a 32-bit C long.
+    def compatible_limit(size=None):
+        return limit() if size is None else limit(min(size, max_csv_field))
+
+    csv.field_size_limit = compatible_limit
+    try:
+        return import_module("src.evals.metrics")
+    finally:
+        csv.field_size_limit = limit
 
 
 def plan(author, cohort):
@@ -30,7 +48,7 @@ def plan(author, cohort):
     return selected
 
 
-def execute(author, cohort, output, origin):
+def execute(author, cohort, output, origin, model):
     data = pd.read_csv(cohort)
     if list(data.columns) != ["task", "domains"] or len(data) != 3:
         raise ValueError("expected a fixed three-row task-only cohort")
@@ -38,23 +56,25 @@ def execute(author, cohort, output, origin):
         raise ValueError("author outcome files must stay outside the agent input tree")
     os.chdir(author)
     sys.path.insert(0, str(author))
+    load_author_metrics()
     from src.evals.agent import (
-        MODEL_REGISTRY,
         _PROVIDER_API_KEY_ENV,
         _PROVIDER_BASE_URLS,
+        MODEL_REGISTRY,
         ModelConfig,
         resolve_route,
     )
     from src.evals.inference import generate_results
 
-    MODEL_REGISTRY[MODEL_ALIAS] = ModelConfig("local/" + MODEL, True, "local")
+    model_alias = MODEL_ALIAS if model == MODEL else "workbench-local"
+    MODEL_REGISTRY[model_alias] = ModelConfig("local/" + model, True, "local")
     _PROVIDER_API_KEY_ENV["local"] = "WORKBENCH_PRIVATE_LOOPBACK"
     _PROVIDER_BASE_URLS["local"] = origin
     os.environ["WORKBENCH_PRIVATE_LOOPBACK"] = "loopback"
-    route = resolve_route(MODEL_ALIAS)
-    if (route.model_id, route.base_url, route.provider) != (MODEL, origin, "local"):
+    route = resolve_route(model_alias)
+    if (route.model_id, route.base_url, route.provider) != (model, origin, "local"):
         raise ValueError("author route does not match the verified loopback model")
-    predictions = generate_results(str(cohort), MODEL_ALIAS, workers=1, log_traces=True)
+    predictions = generate_results(str(cohort), model_alias, workers=1, log_traces=True)
     if len(predictions) != 3 or predictions["task"].tolist() != data["task"].tolist():
         raise ValueError("author inference did not retain the three original task rows")
     with output.open("x") as stream:
@@ -64,7 +84,7 @@ def execute(author, cohort, output, origin):
 def score(author, predictions, output):
     os.chdir(author)
     sys.path.insert(0, str(author))
-    from src.evals.metrics import compute_metrics
+    compute_metrics = load_author_metrics().compute_metrics
 
     baseline = pd.read_csv(
         "data/processed/tasks_and_outcomes/v1/calendar_tasks_and_outcomes.csv"
@@ -97,6 +117,9 @@ if __name__ == "__main__":
     parser.add_argument("input", type=Path)
     parser.add_argument("output", type=Path, nargs="?")
     parser.add_argument("--queue", type=Path)
+    parser.add_argument(
+        "--model", default=MODEL, help="Exact model served by the queue worker"
+    )
     args = parser.parse_args()
     if args.mode == "plan":
         plan(args.author.resolve(strict=True), args.input.resolve())
@@ -105,12 +128,15 @@ if __name__ == "__main__":
     elif args.mode == "execute":
         if args.queue is None:
             parser.error("an isolated model queue is required")
-        with model_proxy(args.queue, port=0, timeout=900, expected_model=MODEL) as port:
+        with model_proxy(
+            args.queue, port=0, timeout=900, expected_model=args.model
+        ) as port:
             execute(
                 args.author.resolve(strict=True),
                 args.input.resolve(strict=True),
                 args.output.resolve(),
                 f"http://127.0.0.1:{port}/v1",
+                args.model,
             )
     else:
         score(

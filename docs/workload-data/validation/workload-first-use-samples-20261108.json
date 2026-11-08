@@ -1,0 +1,63 @@
+{
+  "schema_version": "workload-first-use-samples/v1",
+  "date": "2026-11-08",
+  "scope": "README discovery, fresh public assets, isolated client installation and representative execution or research consumption.",
+  "cases": [
+    {
+      "source_id": "BBH",
+      "status": "ORIGINAL_SAMPLE_GENERATED_AND_SCORED",
+      "preparation": "Pinned publisher legacy ZIP verified and expanded into 27 task files and 27 prompt files.",
+      "task_id": "causal_judgement",
+      "original_rows": [0, 1, 2],
+      "model": "Qwen/Qwen3-0.6B",
+      "execution": "Windows CPU, cached publisher model weights, Transformers 4.57.3 and PyTorch 2.7.1+cpu behind a local tokenizer and chat adapter.",
+      "scorer": "Pinned lm-eval 0.4.11 BBH recipe",
+      "normal_stops": 3,
+      "exact_match_correct": 0,
+      "answers_extracted": 0,
+      "private_runner_receipt_sha256": "ed904dfcbbba06e8b2ed66162ce563db85f2962cc6cafb3228fbd750da9f1839"
+    },
+    {
+      "source_id": "SCHEMASTORE",
+      "status": "ORIGINAL_VALIDATION_PASSED",
+      "preparation": "The public preparation command downloaded and verified the pinned ZIP. The data reader loaded three original schemas with two positive and two negative example references.",
+      "runtime": "Windows x64 Node.js 22.14.0 and npm 10.9.2, 190 packages installed from the publisher lock with install hooks disabled.",
+      "original_full_check_exit_code": 0,
+      "original_full_check_tested_schemas": 976,
+      "original_full_check_files_verified_before_and_after": 4810,
+      "publisher_cli_single_schema_checks_passed": ["appveyor.json"],
+      "repository_single_schema_check": {
+        "schema_name": "all-contributors.json",
+        "exit_code": 0,
+        "author_positive_examples": 4,
+        "author_negative_examples": 6,
+        "files_verified_before_and_after": 4810
+      },
+      "model_calls": 0
+    },
+    {
+      "source_id": "RESEARCHCODEBENCH",
+      "delivery_slot": "PAPERBENCH",
+      "status": "RESEARCH_INPUTS_AND_REFERENCES_READ_BACK",
+      "preparation": "All 13 files matched the pinned sizes and SHA-256 values. GitHub Git blobs supplied files whose Raw downloads were interrupted.",
+      "provider_index_rows": 3,
+      "research_index_rows": 3,
+      "inputs_and_references_equal": 3,
+      "target_code_present_in_model_input": false,
+      "research_consumer_revision": "9933c1e3449a050238edc639d6439de14c761c69",
+      "model_calls": 0
+    },
+    {
+      "source_id": "WORKBENCH",
+      "delivery_slot": "WORKARENA",
+      "status": "MODEL_TRANSPORT_STARTED_WITHOUT_COMPLETED_NATIVE_SCORE",
+      "original_calendar_positions": [0, 10, 20],
+      "preparation": "Fresh pinned author archive and calendar CSV verified. Agent data root excluded author outcome tables.",
+      "windows_failure": "Author metrics import used sys.maxsize as a CSV field limit, exceeding Windows C long. The runner now loads the original module with a compatible bound.",
+      "live_run": "After the fix the author agent sent a real tool request through the queue. The local CPU model returned no response within the publisher client's 60-second read limit. The run was stopped without a new prediction or score.",
+      "scorer_control": "Original scorer ran against three explicit empty-action rows on Windows, with 0/3 correct states and zero scorer errors. This was a control, not an agent result."
+    }
+  ],
+  "environment_note": "The original NPU workspace was unreachable over SSH during this attempt. No remote service was restarted or reconfigured.",
+  "raw_assets_or_model_outputs_published": false
+}

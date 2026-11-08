@@ -2,6 +2,8 @@
 
 import hashlib
 import importlib.util
+import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -71,3 +73,31 @@ def test_unsafe_or_disconnected_tree_is_rejected(tmp_path, change):
         tree["tree"] = tree["tree"][1:]
     with pytest.raises(ValueError):
         load().verify_tree(tmp_path, tree, root)
+
+
+def test_single_schema_plan_preserves_author_selector(monkeypatch, capsys):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            str(ENTRY),
+            "--source",
+            "source",
+            "--original-tree",
+            "tree.json",
+            "--node",
+            "node",
+            "--output",
+            "result",
+            "--schema-name",
+            "all-contributors.json",
+        ],
+    )
+    load().main()
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["command"] == [
+        "node",
+        "cli.js",
+        "check",
+        "--schema-name=all-contributors.json",
+    ]
