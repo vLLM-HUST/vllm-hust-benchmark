@@ -1,9 +1,7 @@
 # Workload 分类执行清单
 
-当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，112 项已勾选，1 项待完成；另有 5
-项仅分类。 下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
-
-待完成：PaperBench。
+当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，113 项已勾选；另有 5 项仅分类。
+下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
 
 ## 轻量替代验证
 
@@ -15,8 +13,9 @@
   登录和持久业务状态另计。[抽样回执](validation/miniwob-visual-fixed3-native-20261108.json)
 - **WorkArena** 使用 WorkBench v1 原版日历位置 0、10、20。真实 Agent 三题均通过原状态评分，未产生额外副作用。ServiceNow
   的仪表盘、表单和知识库浏览器任务另计。[抽样回执](validation/workbench-calendar-fixed3-native-20261108.json)
-- **PaperBench** 的轻量候选是 CORE-Bench。已固定位置 4、5、6，三份原归档合计约 11.2 MB。原评分器的参考答案对照为 6/6，空答为 0/6。两份原程序的 CPU
-  对照生成了图表或分类指标；第 6 号样本在 ARM64 上因 NumPy 位运算失败，真实 Agent 评分待补。CORE-Bench 从作者提供的代码出发，PaperBench 从头复现另计。
+- **PaperBench** 使用 ResearchCodeBench，从 Diff-Transformer、GPS、LEN
+  各固定一段作者标注代码。保留完整原论文文本、原遮蔽上下文和原程序测试，三次真实生成，原评分 0/3。CORE-Bench 的两份 CPU 对照和第三份 ARM64 失败另存，PaperBench
+  整篇复现另计。[抽样回执](validation/researchcodebench-fixed3-native-20261108.json)
 
 ## 原40类计划的增量定义（不改变历史快照）
 
@@ -1380,7 +1379,24 @@ Agent，也不重放已有成功响应。新运行可在启动器和可信转发
 `--start-receipt <原启动回执> --terminal-receipt <终态回执> --grader-log <原评分器日志>`，核对作者启动器退出、真实响应、冻结提交摘要和有效官方分数。
 原时限退出码 124 须有至少 86,400 秒容器墙钟记录；手工中断或评分未通过会被拒绝。已用历史 240 行中断提交复核：行身份有效，但不满足终态交付条件。审计不自动勾选整项。
 
-PaperBench（未完成）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
+### ResearchCodeBench 论文片段替代协议
+
+检出
+[ResearchCodeBench 固定版本](https://github.com/PatrickHua/ResearchCodeBench/tree/db3d16d94cfa6b6785bef6f1db0263edfe6f1d34)。
+使用 Python 3.11 CPU 客户端，复用 PyTorch 2.6.0+cpu、NumPy 1.26.4 和 SciPy 1.17.1，并提供作者模块需要的
+PyYAML、Pydantic、Matplotlib 和 tqdm。固定三段分别来自 Diff-Transformer、GPS 和 LEN 的首个作者标记。
+
+```bash
+python scripts/run_researchcodebench_fixed3_native.py plan --author "$AUTHOR" --output "$RESULTS"
+python scripts/run_researchcodebench_fixed3_native.py generate --author "$AUTHOR" --output "$RESULTS" --queue "$QUEUE"
+python scripts/run_researchcodebench_fixed3_native.py score --author "$AUTHOR" --output "$RESULTS"
+```
+
+生成侧在断网容器挂载只读作者目录和专用文件队列。使用 `scripts/appworld_model_transport.py` 的
+`--watch --expected-model Qwen/Qwen3.5-9B` 在可信 NPU 主机转发请求，生成结束后向队列写入 `STOP`。 在独立断网 CPU
+容器内评分，只挂载作者目录和独立结果目录，给 `/tmp` 提供临时写空间。原评分器会执行生成的 Python。
+
+PaperBench（以下保留原整篇复现协议）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
 `prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
 `check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
 `project/paperbench`。两步均不占卡。原构建脚本指定 `linux/amd64`，应在经过验证的隔离执行节点上构建和运行；当前宿主机已有隔离 Docker，

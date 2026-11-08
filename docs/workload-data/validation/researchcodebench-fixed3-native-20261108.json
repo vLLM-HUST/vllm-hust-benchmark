@@ -1,0 +1,80 @@
+{
+  "schema_version": "native-source-delivery-audit/v1",
+  "source_id": "RESEARCHCODEBENCH",
+  "delivery_inventory_slot": "PAPERBENCH",
+  "publisher": "https://github.com/PatrickHua/ResearchCodeBench",
+  "publisher_revision": "db3d16d94cfa6b6785bef6f1db0263edfe6f1d34",
+  "qualified_protocol": "One original annotated missing code block per paper for three fixed CPU-compatible papers, with complete author paper text, original masked context, extraction and native executable testing",
+  "entry": "scripts/run_researchcodebench_fixed3_native.py",
+  "fixed_selection": "Diff-Transformer, GPS and LEN are the first three papers in the screened subset supported by the existing torch, scipy and matplotlib CPU environment without new dependencies. Use the first original marker in each annotated file.",
+  "author_baseline_cpu_tests": [
+    5,
+    3,
+    3
+  ],
+  "model": "Qwen/Qwen3.5-9B",
+  "temperature": 0.0,
+  "completion_per_task": 1,
+  "output_token_cap": 4096,
+  "original_test_timeout_seconds": 60,
+  "original_results": [
+    {
+      "paper": "Diff-Transformer",
+      "snippet": "empirical lambda init function",
+      "original_exit_code": 1,
+      "original_passed": false,
+      "generated_code_errors": [
+        "AssertionError"
+      ],
+      "original_unittest_cases_run": 5
+    },
+    {
+      "paper": "GPS",
+      "snippet": "chamfer distance",
+      "original_exit_code": 1,
+      "original_passed": false,
+      "generated_code_errors": [
+        "ValueError"
+      ],
+      "original_unittest_cases_run": 3
+    },
+    {
+      "paper": "LEN",
+      "snippet": "gradient descent ascent field",
+      "original_exit_code": 1,
+      "original_passed": false,
+      "generated_code_errors": [
+        "IndentationError"
+      ],
+      "original_unittest_cases_run": 0
+    }
+  ],
+  "original_passed_tasks": 0,
+  "original_prompt_used_full_paper": true,
+  "original_masking_and_scoring_code_changed": false,
+  "model_requests": 3,
+  "successful_http_statuses": [
+    200,
+    200,
+    200
+  ],
+  "response_finish_reasons": [
+    "stop",
+    "stop",
+    "stop"
+  ],
+  "model_calls_during_scoring": 0,
+  "separate_saved_result_regrade_byte_equal": true,
+  "scientific_test_container_network_disabled": true,
+  "native_test_scaffold": "Original PSet parser and generation, masked-source completion, original test_all with original case tests. The provider client is bound to the local vLLM queue.",
+  "evidence": {
+    "server_stage": "researchcodebench-native.rPgMvSP7",
+    "original_score_sha256": "898abefa054f49d82c1208dfb8dccf32757adcfd4638ad2a9a2b097146e4d3b1",
+    "private_completion_file_sha256": "2bc9f34906c3ae42b19c5cd436673199fdbb5d0e901b83fa4958960a10062c43",
+    "identity_note": "pragma: allowlist secret - observed original test and saved completion file digests"
+  },
+  "scope_limits": "This fixed replacement exercises paper-to-code implementation at snippet scope. PaperBench fre whole-paper agent, reproduction and judge remain unqualified. No full ResearchCodeBench score or original leaderboard comparison.",
+  "raw_data_published": false,
+  "source_checkbox_eligible": true,
+  "independent_full_paper_and_annotation_mask_verified": 3
+}
