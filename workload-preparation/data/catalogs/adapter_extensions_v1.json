@@ -26,6 +26,8 @@
       "requirements":["Original GUI task list/setup/evaluator references only; native environment/Agent/scoring separate, no prompt renderer"],
       "status":"ORIGINAL_GUI_TASK_READER_NATIVE_VALIDATION_SEPARATE"
     },
+    "RESEARCHCODEBENCH": {"kind":"task_dataset","mapping":"researchcodebench_fixed_annotations","input_fields":["paper_text","masked_code","annotation"],"required_fields":["task_id","paper_text","masked_code","annotation","reference_code","evaluation_assets"],"outcome_fields":["reference_code","evaluation_assets"],"annotation_fields":[],"id_field":"task_id","requirements":["Fixed three author annotations with original paper text and author masking; original isolated executable scorer is separate"],"status":"FIXED_ORIGINAL_PAPER_CODE_INPUTS"},
+    "MLEBENCH": {"kind":"task_dataset","mapping":"mlebench_nomad_competition","input_fields":["description","public_files","geometry_paths"],"required_fields":["competition","description","public_files","geometry_paths"],"outcome_fields":[],"annotation_fields":[],"id_field":"competition","requirements":["Use the fixed prepared NOMAD public directory; private test labels are never read by this adapter","One competition is one task; original AIDE and grading are separate"],"status":"FIXED_ORIGINAL_NOMAD_PUBLIC_INPUTS"},
     "WORKBENCH": {
       "kind": "task_dataset",
       "mapping": "native_fields",

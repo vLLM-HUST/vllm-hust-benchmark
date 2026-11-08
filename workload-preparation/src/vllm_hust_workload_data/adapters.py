@@ -14,6 +14,16 @@ from .registry import adapter_spec, source_spec
 
 def iter_source_rows(path, spec):
     """Use one source view for reading, binding and index resolution."""
+    if spec["mapping"] == "researchcodebench_fixed_annotations":
+        from .researchcodebench import original_rows
+
+        yield from original_rows(path)
+        return
+    if spec["mapping"] == "mlebench_nomad_competition":
+        from .mlebench import original_rows
+
+        yield from original_rows(path)
+        return
     if spec["mapping"] == "webarena_original_packages":
         from .webarena import original_rows
 

@@ -18,6 +18,23 @@ python -m vllm_hust_benchmark.workload_data source-plan BURSTGPT
 按role区分。路径相对于benchmark仓库根目录，执行脚本不会随纯数据wheel打包；先按相应 文档准备外部原始资产和独立环境，再查看脚本帮助。数据读取入口不是原生benchmark执行器。
 索引包含尚未验证的实现，空列表也不表示已经审计为“没有实现”；完成状态仍只看机器清单， 不能从脚本存在推断原生验证通过。
 
+替代协议在原交付槽位下保留导航。查询 `TOOLBENCH`、`VISUALWEBARENA`、`WORKARENA` 或 `PAPERBENCH` 时，用入口的
+`execution_source_id` 识别实际执行和读取的来源。 对应来源是 `STABLETOOLBENCH`、`MINIWOB_PLUSPLUS`、`WORKBENCH` 和
+`RESEARCHCODEBENCH`。
+
+研究侧使用安装后的数据 wheel 与既有 `llm_serving_workloads.pipeline`。 在配置 `sources` 中为每条记录填写实际的 `source_id` 和外部
+`data_root`，再执行：
+
+```bash
+python -m llm_serving_workloads.pipeline plan --config "$SOURCE_CONFIG"
+python -m llm_serving_workloads.pipeline run --config "$SOURCE_CONFIG" --output "$NEW_OUTPUT"
+```
+
+`WORKBENCH` 和 `RESEARCHCODEBENCH` 的根目录指向固定作者树，`MLEBENCH` 的根目录指向 固定 NOMAD 的
+`prepared/public`。WorkBench 日历结果、ResearchCodeBench 目标代码和评估文件引用 留在参考侧。NOMAD
+读取的是一场竞赛的公开输入及几何路径，评分私有标签不参与读取。
+见[独立安装与研究侧读回](../docs/workload-data/validation/replacement-research-consumption-20261108.json)。
+
 检索/重排新增入口：`BEIR_SCIFACT`、`BEIR_NFCORPUS`的原zip准备、原文档/查询/qrels读取，以及`scripts/run_beir_original.py`的全量test检索和dense
 top100重排，见[原生协议与环境](../docs/workload-data/PUBLIC_ASSET_SERVER_READINESS.zh-CN.md#beir-%E5%8E%9F%E5%A7%8B%E6%A3%80%E7%B4%A2%E9%9B%86%E5%90%88%E4%B8%8E%E9%87%8D%E6%8E%92%E5%8D%8F%E8%AE%AE)。原集合不是chat请求，qrels只作评分参考。原全量NPU运行、最终公开入口交接和固定CI工件/研究消费均已验证，范围限定为上述两集合的原test检索及dense
 top100重排。

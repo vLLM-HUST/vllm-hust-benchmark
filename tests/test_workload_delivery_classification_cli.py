@@ -26,3 +26,23 @@ def test_original_execution_entries_are_discoverable_without_delivery_claim(caps
         entries = {(row["role"], row["path"]) for row in payload["entrypoints"]}
         assert ("generation", path) in entries
         assert ("native_evaluation", path) in entries
+
+
+def test_replacement_execution_entries_identify_the_actual_source(capsys):
+    replacements = {
+        "TOOLBENCH": ("STABLETOOLBENCH", "scripts/run_stabletoolbench_local_server.py"),
+        "VISUALWEBARENA": ("MINIWOB_PLUSPLUS", "scripts/run_miniwob_agentlab.py"),
+        "WORKARENA": ("WORKBENCH", "scripts/run_workbench_calendar_native.py"),
+        "PAPERBENCH": (
+            "RESEARCHCODEBENCH",
+            "scripts/run_researchcodebench_fixed3_native.py",
+        ),
+    }
+    for slot, (replacement, path) in replacements.items():
+        main(["source-plan", slot])
+        payload = json.loads(capsys.readouterr().out)
+        (entry,) = [
+            row for row in payload["entrypoints"] if row.get("execution_source_id")
+        ]
+        assert entry["execution_source_id"] == replacement
+        assert entry["path"] == path

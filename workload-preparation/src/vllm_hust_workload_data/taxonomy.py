@@ -194,6 +194,10 @@ def delivery_assets(root=None):
                 or ".." in path.parts
                 or "\\" in entry["path"]
                 or ":" in entry["path"]
+                or (
+                    "execution_source_id" in entry
+                    and entry["execution_source_id"] not in registered
+                )
                 or key in seen
             ):
                 raise ValueError(
