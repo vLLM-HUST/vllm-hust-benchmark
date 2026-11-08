@@ -55,7 +55,30 @@
       "preparation": "Fresh pinned author archive and calendar CSV verified. Agent data root excluded author outcome tables.",
       "windows_failure": "Author metrics import used sys.maxsize as a CSV field limit, exceeding Windows C long. The runner now loads the original module with a compatible bound.",
       "live_run": "After the fix the author agent sent a real tool request through the queue. The local CPU model returned no response within the publisher client's 60-second read limit. The run was stopped without a new prediction or score.",
-      "scorer_control": "Original scorer ran against three explicit empty-action rows on Windows, with 0/3 correct states and zero scorer errors. This was a control, not an agent result."
+      "scorer_control": "Original scorer ran against three explicit empty-action rows on Windows, with 0/3 correct states and zero scorer errors. This was a control, not an agent result.",
+      "fresh_gpu_rerun": {
+        "status": "FIXED_THREE_ORIGINAL_TASKS_GENERATED_AND_SCORED",
+        "preparation": "Downloaded a fresh pinned author ZIP, verified its digest, created a new Python 3.12.10 client, and staged an Agent directory without author outcomes.",
+        "source_archive_sha256": "2ce2d277eafe567c634bc29f2f131a90fecaaa2d01f3b5d4bb08051a84e5d214",
+        "model": "Qwen/Qwen3-4B-Q4_K_M",
+        "model_repository": "Qwen/Qwen3-4B-GGUF",
+        "model_revision": "bc640142c66e1fdd12af0bd68f40445458f3869b",
+        "model_file_sha256": "7485fe6f11af29433bc51cab58009521f205840f5b4ae3a32fa7f92e8534fdf5",
+        "runtime": "llama.cpp b12207, Windows Vulkan on RTX 4060 Laptop GPU, 12288 context tokens, single slot, thinking disabled",
+        "agent_exit_code": 0,
+        "score_exit_code": 0,
+        "http_200_responses": 25,
+        "normal_stop_responses": 25,
+        "longest_queue_roundtrip_seconds": 14.54,
+        "author_recorded_tool_attempts": [1, 2, 20],
+        "original_state_correct": [false, false, false],
+        "original_unwanted_side_effects": [false, false, false],
+        "original_task_errors": [false, false, true],
+        "failure_details": "The model passed an unsupported input keyword to the calendar tools. The third task used the author's 20-step limit.",
+        "saved_predictions_regrade_byte_equal": true,
+        "predictions_sha256": "f66b8fbd487749158902b35793e15749b099ae45dd9ea0a62d08429de161834e",
+        "score_receipt_sha256": "8c12914695d0814159e57f055f314ac0a4172b2e8b83f260d11934905df6263c"
+      }
     }
   ],
   "environment_note": "The original NPU workspace was unreachable over SSH during this attempt. No remote service was restarted or reconfigured.",

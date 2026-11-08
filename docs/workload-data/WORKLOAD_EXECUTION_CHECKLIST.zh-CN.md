@@ -651,22 +651,64 @@ Agent容器断网，无NPU设备或Docker socket；只挂私有队列和原资�
 
 检出作者
 [WorkBench 固定版本](https://github.com/olly-styles/WorkBench/tree/49c7dfd00c03d384ec59ea57374f50b766aa5613)，
-保留独立的完整作者目录用于选样和评分。另建 Agent 输入目录，复制作者 `src/`、`data/processed/` 中的运行数据及
-`data/raw/email_addresses.csv`，将 `data/processed/tasks_and_outcomes/` 留在评分侧。固定客户端使用 Python 3.11、
-pandas 2.3.1、openai 1.99.5、tenacity 9.1.2、python-dateutil 2.9.0.post0、pydantic 2.11.7。
+保留完整作者目录用于选样和评分。以下命令从仓库根目录运行，`WORK` 指向仓库外的一个新目录。 在 Windows 的 Git Bash 中，把环境激活路径换成
+`"$WORK/client/Scripts/activate"`，并设置 `export PYTHONUTF8=1`。
 
 ```bash
+WORK=/path/to/workbench-run
+REV=49c7dfd00c03d384ec59ea57374f50b766aa5613 # pragma: allowlist secret - public Git revision
+mkdir "$WORK"
+curl -fL "https://codeload.github.com/olly-styles/WorkBench/zip/$REV" -o "$WORK/author.zip"
+echo "2ce2d277eafe567c634bc29f2f131a90fecaaa2d01f3b5d4bb08051a84e5d214  $WORK/author.zip" | sha256sum --check # pragma: allowlist secret - public archive checksum
+unzip -q "$WORK/author.zip" -d "$WORK"
+AUTHOR="$WORK/WorkBench-$REV"
+AGENT_INPUT="$WORK/agent"
+QUEUE="$WORK/queue"
+COHORT="$WORK/calendar.csv"
+PREDICTIONS="$WORK/predictions.csv"
+SCORE="$WORK/score.json"
+mkdir -p "$AGENT_INPUT/data/"{processed,raw,results} "$QUEUE"
+cp -r "$AUTHOR/src" "$AGENT_INPUT/"
+cp "$AUTHOR"/data/processed/*.csv "$AGENT_INPUT/data/processed/"
+cp "$AUTHOR/data/raw/email_addresses.csv" "$AGENT_INPUT/data/raw/"
+python -m venv "$WORK/client"
+source "$WORK/client/bin/activate"
+python -m pip install pandas==2.3.1 openai==1.99.5 tenacity==9.1.2 python-dateutil==2.9.0.post0 pydantic==2.11.7
 python scripts/run_workbench_calendar_native.py plan "$AUTHOR" "$COHORT"
-python scripts/run_workbench_calendar_native.py execute "$AGENT_INPUT" "$COHORT" "$PREDICTIONS" --queue "$QUEUE"
-python scripts/run_workbench_calendar_native.py score "$AUTHOR" "$PREDICTIONS" "$SCORE"
 ```
 
-在断网 CPU 容器运行 `execute`，只读挂载 Agent 输入及题表，为 `data/results`、输出路径和专用队列提供独立写入目录。 NPU 侧用
-`scripts/appworld_model_transport.py` 的 `--watch --expected-model Qwen/Qwen3.5-9B` 转发同一队列，
-待该模型在私有地址就绪后启动，完成后在队列中写入 `STOP`。`score` 在独立断网 CPU 容器运行，读取保存的预测和作者结果。
+Agent 输入目录只含运行数据，`data/processed/tasks_and_outcomes/` 留在评分侧。使用 Python 3.11 或 3.12。 准备一个提供
+`/v1/chat/completions` 的本地模型服务，`API_BASE` 填它的 `/v1` 地址，`MODEL` 填服务公布的准确模型 ID。 例如用
+[llama.cpp b12207](https://github.com/ggml-org/llama.cpp/releases/tag/b12207) 的 Vulkan 版和
+[Qwen3-4B Q4_K_M](https://huggingface.co/Qwen/Qwen3-4B-GGUF/blob/bc640142c66e1fdd12af0bd68f40445458f3869b/Qwen3-4B-Q4_K_M.gguf)：
 
-使用其他能处理作者工具调用的模型时，在 `execute` 指定 `--model <服务端模型ID>`，转发器的 `--expected-model` 填同一个
-ID。开始三题前，确认模型收到含工具定义的请求后，能在作者客户端的 60 秒读取时限内返回响应。
+```bash
+llama-server -m /path/to/Qwen3-4B-Q4_K_M.gguf --alias Qwen/Qwen3-4B-Q4_K_M --host 127.0.0.1 --port 19686 --device Vulkan0 -ngl 99 -c 12288 -np 1 --reasoning off
+# 以下变量在运行转发器和 Agent 的终端中使用
+API_BASE=http://127.0.0.1:19686/v1
+MODEL=Qwen/Qwen3-4B-Q4_K_M
+```
+
+先用 `llama-server --list-devices` 核对本机独显的设备名；实际不是 `Vulkan0` 时，用列出的名称。 在能访问该服务的终端启动转发器，保持运行：
+
+```bash
+python scripts/appworld_model_transport.py --queue "$QUEUE" --api-base "$API_BASE" --expected-model "$MODEL" --watch
+```
+
+在另一终端用同一组变量执行。使用断网容器时，只挂载 Agent 输入及题表，并为 `data/results`、预测文件和专用队列提供写入目录。 转发器与 Agent 使用同一个队列路径和模型
+ID，模型应在作者客户端的 60 秒读取时限内返回响应。
+
+```bash
+python scripts/run_workbench_calendar_native.py execute "$AGENT_INPUT" "$COHORT" "$PREDICTIONS" --queue "$QUEUE" --model "$MODEL"
+python scripts/run_workbench_calendar_native.py score "$AUTHOR" "$PREDICTIONS" "$SCORE"
+touch "$QUEUE/STOP"
+```
+
+`score.json` 的 `original_state_correct` 按三题原顺序给出状态正确性，`original_unwanted_side_effects` 记录额外状态变化，
+`errors` 记录作者客户端或工具执行错误。
+
+本机 Qwen3-4B 配置完成三题评分，25 次请求均返回，原状态正确 0/3。此前 Qwen3.5-9B 的同三题记录为 3/3。
+见[本机试跑](validation/workload-first-use-samples-20261108.json)和[此前交付回执](validation/workbench-calendar-fixed3-native-20261108.json)。
 
 WorkArena（以下保留 ServiceNow 原协议）：使用
 `scripts/prepare_workarena_author_source.py --action prepare --archive <官方源码包> --author-root <新目录>`
