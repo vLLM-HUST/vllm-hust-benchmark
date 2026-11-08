@@ -5,6 +5,17 @@
 
 待完成：MLAgentBench、VisualWebArena、WorkArena、PaperBench。
 
+## 轻量替代验证
+
+- **MLAgentBench** 使用同一作者仓库的 `vectorization` 补测科学代码修改、隔离执行和原评分，复用已完成的 CIFAR-10 和 OGBN-Arxiv。原始 NumPy
+  基线和评分器已在断网 CPU 容器跑通，真实 Agent 已启动。IMDb 微调和测试预测保留为独立缺口。
+- **VisualWebArena** 优先推进 MiniWoB++。复用 `click-dialog` 和 `multi-layouts` 两条已有视觉原生轨迹，再补第三题
+  `click-color`。第三题已通过种子 42 的原页面重置和截图验证，待真实视觉 Agent 及原奖励。此配置覆盖视觉定位和浏览器动作，Classifieds 登录和持久业务状态另计。
+- **WorkArena** 的轻量候选是 WorkBench 的原版日历工具流程。已固定 v1 原表位置 0、10、20。原评分器对参考操作判对三题，对空操作判错三题，待真实 Agent
+  运行。覆盖本地业务工具状态和副作用校验，ServiceNow 浏览器操作另计。
+- **PaperBench** 的轻量候选是 CORE-Bench。按作者测试顺序固定前三个公开可达、压缩包不超过 20 MiB 的 Python 样本，位置为 4、5、6。已取得三份原归档，合计约
+  11.2 MB，作者指引均无 GPU 标记，待验证 CPU 复现和原评分。该候选从已提供的论文复现代码出发，PaperBench 从头实现的能力另计。
+
 ## 原40类计划的增量定义（不改变历史快照）
 
 当前程序目录新增下列两类，活跃定义由36增至38；总目标仍为40类，约束规划及语音合成尚待补齐，不能把38类称为40类全部就绪。
