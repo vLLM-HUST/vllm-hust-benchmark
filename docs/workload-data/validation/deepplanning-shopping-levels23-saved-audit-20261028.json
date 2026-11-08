@@ -1,0 +1,51 @@
+{
+  "schema_version": "workload-partial-native-evidence/v1",
+  "source_id": "DEEPPLANNING",
+  "domain": "shopping_levels2_and3",
+  "status": "ORIGINAL_FIXED_SHOPPING_CASES_EXECUTED_SCORED_AND_SAVED_CONSISTENCY_VERIFIED",
+  "source_checkbox_eligible": false,
+  "original_source": "https://github.com/QwenLM/Qwen-Agent/tree/main/benchmark/deepplanning",
+  "server_stage": "deepplanning-shopping-levels23-native-9b-32028-001",
+  "native_receipt": "native-public.json",
+  "native_receipt_sha256": "3fc40c99a1e3efbbb0b185154b2ba3a9ac110791d70f733b9cc7a5cb83ca3adf", "identity_note": "pragma: allowlist secret - verified public metadata checksum",
+  "saved_audit_receipt": "saved-audit-public.json",
+  "saved_audit_sha256": "6fbb45c39a360d7c2d583e993c0400bbf576a42609502b6beffd373657a5e342", "audit_identity_note": "pragma: allowlist secret - verified public metadata checksum",
+  "public_verifier": "scripts/verify_deepplanning_shopping_saved.py",
+  "executed_verifier_sha256": "e998aea18ea79787e188a3008eb6b6536818a0a1b8ac9249251d4a1a05fbab87", "verifier_identity_note": "pragma: allowlist secret - verified public executed script checksum",
+  "native_terminal_status": "ORIGINAL_SHOPPING_LOOPS_AND_SCORING_RETURNED_SAVED_AUDIT_PENDING",
+  "process_naturally_exited": true,
+  "selection": "First3 original rows independently for levels2 and3, original IDs1/2/3; no level1 rerun",
+  "model": "Qwen/Qwen3.5-9B",
+  "deployment": "Existing vLLM-Ascend BF16 TP1 NPU service; declared fallback, not author model reproduction",
+  "original_max_llm_calls_per_stage": 400,
+  "native_request_attempts": 158,
+  "saved_assistant_messages": 154,
+  "attempt_difference": "Four attempts are not attributed or counted as successful saved responses; request attempts and persisted assistant messages remain separate.",
+  "original_tool_calls": 321,
+  "original_tool_results": 321,
+  "case_scores": [
+    {"level": 2, "id": "1", "case_score": 0.0, "model_messages": 42, "tool_calls": 172, "completed": true},
+    {"level": 2, "id": "2", "case_score": 0.0, "model_messages": 42, "tool_calls": 51, "completed": true},
+    {"level": 2, "id": "3", "case_score": 0.0, "model_messages": 29, "tool_calls": 40, "completed": true},
+    {"level": 3, "id": "1", "case_score": 0.0, "model_messages": 13, "tool_calls": 21, "completed": true},
+    {"level": 3, "id": "2", "case_score": 0.0, "model_messages": 11, "tool_calls": 16, "completed": true},
+    {"level": 3, "id": "3", "case_score": 0.0, "model_messages": 17, "tool_calls": 21, "completed": true}
+  ],
+  "saved_consistency_verification": {
+    "status": "ORIGINAL_SAVED_INPUT_PHASE_TOOL_RELATIONS_AND_AUTHOR_SCORE_CONSISTENCY_VERIFIED",
+    "original_author_sources_verified": true,
+    "original_queries_and_both_phase_prompts_verified": true,
+    "tool_call_result_id_pairing_verified": true,
+    "original_products_and_validation_bytes_verified": true,
+    "original_author_scores_recomputed_equal_saved": true,
+    "new_model_calls": 0,
+    "environment_or_tool_reexecution_claim": false
+  },
+  "remaining": [
+    "Original travel en/zh fixed cases, conversion and constraint scoring remain unverified.",
+    "Shopping level1 original BrokenPipe failure and separately recovered histories/scores remain distinct evidence; no blind rerun.",
+    "Known surrounding root-PVC ENOSPC and service logging impairment are not waived; no performance or unaffected-execution claim.",
+    "Zero final case scores retained. Intermediate product-match percentages are not final case scores or quality acceptance.",
+    "Complete-source qualification is still pending; raw tasks, references and histories stay on the private server."
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "source_id": "NATUREBENCH",
+  "source_checkbox_eligible": false,
+  "scope": "Fixed original CPU3 terminal progress and read-only final-prediction audit; not a completed source handoff or full task-set result",
+  "original_controller_exit_codes": [0, 0, 0],
+  "scientific_attempt_counts": [13, 25, 20],
+  "second_task": {
+    "task_id": "s41592-025-02870-5",
+    "earlier_best_aggregate_improvement": -1.0,
+    "earlier_best_group_errors": ["All 10 sub-datasets failed", "All 33 sub-datasets failed"],
+    "final_saved_prediction_audit": {
+      "original_validation_and_metric_calculation_passed": 32,
+      "original_prediction_validation_rejected": 11,
+      "generated_program_executed": false,
+      "predictions_repaired": false,
+      "new_model_calls": 0,
+      "receipt": "naturebench-current-native-evaluators-20261106-001/second-prediction-metric-audit.private.json",
+      "receipt_sha256": "cffd0bba5b687c93ecc48f246600486f7527b4baa70ec7cc087265be01ac7f17",
+      "boundary": "Final saved predictions are a different time point from earlier submitted best scores; no merged or replacement score claimed"
+    },
+    "original_judge_recovery": {
+      "receipt": "naturebench-second-original-judge-recovery-20261106-002/recovery-public.json",
+      "receipt_sha256": "249c9ea0aba9efd394bb99f54bc803d09845098895812fd0431080986e1067aa",
+      "input_tokens": 336129,
+      "original_output_budget": 4096,
+      "served_max_context": 1010000,
+      "original_input_sha256": "a96b029606ac47e50c44b312ef38b8184c14c72d1c15d8a8a903862e03fd17e2",
+      "original_prompt_sha256": "2696e40ed542511a57f14348a4c4d773ff21491af04303bfc73397abcdef104a",
+      "materials_truncated": false,
+      "new_agent_calls": 0,
+      "is_valid": true,
+      "boundary": "Method-validity verdict does not certify successful scientific metrics or prediction completeness"
+    }
+  },
+  "second_saved_original_evaluator": {
+    "entry": "scripts/score_naturebench_saved_predictions.py",
+    "exit_code": 0,
+    "score_receipt": "naturebench-second-saved-native-evaluator-20261106-001/score.json",
+    "score_sha256": "0b7c186c203791a19a236a9af9f506376b292089f5243ce9c09fca11bf66dcbc",
+    "simulated_dla_tree": {"HIM": 0.73756, "Correlation": null, "F1_branches": 1.0, "F1_milestones": 0.210653, "Accuracy": null},
+    "real_scrna_seq": {"HIM": 0.529133, "Correlation": null, "F1_branches": 1.0, "F1_milestones": 0.172619, "Accuracy": null, "partial_error_count": 11},
+    "null_correlation_diagnostic": "For each of the32 base-validation-passing datasets, the original prediction/ground-truth/declared-cell intersection has only1 cell and0 finite upper-triangle distance pairs. Original compute_correlation returns null below3 common cells; Accuracy is consequently null. No scorer repair or prediction rewrite applied.",
+    "isolation": "Qualified immutable CPU image, network none, read-only evaluation and predictions, capability dropped, no NPU or Docker socket, only fresh score directory writable"
+  },
+  "public_judge_recovery_entry": {
+    "entry": "scripts/recover_naturebench_original_judge.py",
+    "server_original_package_plan": "naturebench-public-recovery-entry-20261106-001/plan-public.json",
+    "server_plan_passed": true,
+    "server_execute_tested_for_this_wrapper": false,
+    "existing_successful_original_judge_recovery_reused": true,
+    "new_model_calls_in_plan": 0
+  },
+  "remaining": ["public and unchanged research consumer output handoff"]
+}

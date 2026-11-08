@@ -1,0 +1,56 @@
+{
+  "schema_version": "native-source-delivery-audit/v1",
+  "source_id": "MLAGENTBENCH",
+  "publisher_revision": "5d71205cc20a8e95d43aa7cb7120e89ca3323e31",
+  "qualified_protocol": "Three original author ResearchAgent tasks, using the declared same-source vectorization replacement for IMDb",
+  "original_tasks": [
+    "cifar10",
+    "ogbn-arxiv",
+    "vectorization"
+  ],
+  "reused_original_receipts": {
+    "cifar10": "docs/workload-data/validation/mlagentbench-formal-cifar10-native-audit-20261102.json",
+    "ogbn-arxiv": "docs/workload-data/validation/mlagentbench-formal-ogbn-arxiv-native-audit-20261102.json"
+  },
+  "original_readback": "docs/workload-data/validation/mlagentbench-native-definitions-readback-20261102.json",
+  "entry": "scripts/run_mlagentbench_messages_agent.py",
+  "port_preparation": "scripts/prepare_mlagentbench_messages_agent.py",
+  "vectorization": {
+    "model": "Qwen/Qwen3.8-27B",
+    "original_max_steps": 50,
+    "original_max_time_seconds": 18000,
+    "original_wall_seconds": 2281.9085478782654,
+    "actual_npu_http200_jobs": 21,
+    "cpu_scientific_executor_network_disabled": true,
+    "agent_exit_code": 0,
+    "agent_oom": false,
+    "submitted_final_answer": true,
+    "original_grader_exit_code": 0,
+    "original_final_score": 5.4359636306762695,
+    "original_score_definition": "First CSV field reported by the submitted program, in seconds",
+    "final_submission_matches_working_submission": true,
+    "saved_program_sha256": "76dba44f728272ff868729207d60a3928bbb55d0505e446ebe317eb26bf23443",
+    "final_submission_sha256": "e3158d677eb323f2b0074ae2a0f3ba8e42e5de71c751fc90ade2ccdfa6b897e6",
+    "identity_note": "pragma: allowlist secret - actual isolated submission and public aggregate audit digests",
+    "changes_limited_to_conv2d_forward": true,
+    "fresh_cpu_numerical_equivalence": [
+      true,
+      true,
+      true
+    ],
+    "terminal_evidence": "mlagentbench-vectorization-native.PruZ2hAP/terminal-public.json",
+    "original_grader_evidence": "mlagentbench-vectorization-native.PruZ2hAP/grade/original-score.json",
+    "numerical_audit_evidence": "mlagentbench-vectorization-native.PruZ2hAP/saved-program-audit-public.json",
+    "terminal_evidence_sha256": "0d46ee9da066187f70a946b169088967c600d12b7883c616e5560bf0fac57070",
+    "original_grader_evidence_sha256": "df03ca209e2ba3a1ecb0ed43c082ec98838d4702c5ef61df7f228a2b496df49d",
+    "numerical_audit_evidence_sha256": "ef7c6d5bb6462aaa6ebac7fb40fa022c218bce8c18c34394b1fc5c202f0c4488"
+  },
+  "scope_limits": [
+    "The historical IMDb attempts remain unqualified for original DistilBERT fine-tuning and full test predictions.",
+    "The reused tasks retain their original scores and terminal response failures.",
+    "The original vectorization score is a submitted runtime field. The independent comparison verifies numerical agreement on three inputs and does not establish speedup.",
+    "Full-suite model execution is outside the declared sample."
+  ],
+  "raw_data_published": false,
+  "source_checkbox_eligible": true
+}

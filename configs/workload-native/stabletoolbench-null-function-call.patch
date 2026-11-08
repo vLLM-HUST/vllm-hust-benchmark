@@ -1,0 +1,11 @@
+--- a/toolbench/tooleval/convert_to_answer_format.py
++++ b/toolbench/tooleval/convert_to_answer_format.py
+@@ -39,7 +39,7 @@
+             index = index + 1
+             continue
+         elif role == 'assistant':
+-            if 'function_call' in message :
++            if message.get('function_call') is not None:
+                 node = ExecutionNode(role='tool', message={
+                     'name':message['function_call']['name'],
+                     'arguments':message['function_call']['arguments'],

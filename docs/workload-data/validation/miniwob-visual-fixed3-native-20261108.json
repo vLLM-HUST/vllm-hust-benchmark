@@ -1,0 +1,57 @@
+{
+  "schema_version": "native-source-delivery-audit/v1",
+  "source_id": "MINIWOB_PLUSPLUS",
+  "delivery_inventory_slot": "VISUALWEBARENA",
+  "publisher": "https://github.com/Farama-Foundation/miniwob-plusplus",
+  "publisher_revision": "33c3b4ddef8c6eb67c57a29663d844b1eda7e614",
+  "qualified_protocol": "Original MiniWoB++ pages and BrowserGym native reward, using AgentLab VisualAgent coordinate actions",
+  "entry": "scripts/run_miniwob_agentlab.py",
+  "model": "Qwen/Qwen3.5-9B",
+  "agentlab": "0.4.2",
+  "browsergym_miniwob": "0.14.2",
+  "task_seed": 42,
+  "max_steps": 20,
+  "max_output_tokens": 4096,
+  "tasks": [
+    "miniwob.click-dialog",
+    "miniwob.multi-layouts",
+    "miniwob.click-color"
+  ],
+  "steps": [
+    20,
+    20,
+    20
+  ],
+  "original_reward": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "truncated": [
+    true,
+    true,
+    true
+  ],
+  "actual_npu_image_requests_by_task": [
+    20,
+    23,
+    20
+  ],
+  "reused_native_and_provider_readback_receipt": "docs/workload-data/validation/miniwob-visual-native-20261105.json",
+  "click_color": {
+    "container_exit_code": 0,
+    "framework_error": null,
+    "action_error_count": 0,
+    "screenshot_count": 21,
+    "http200_requests": 20,
+    "output_length_stops": 0,
+    "metadata": "miniwob-click-color-native.mdkAIhsg/output/click-color/response-metadata.jsonl",
+    "summary_sha256": "3cf83c50f6830187328d24050b085d45abc90306e98c016a3114eea866041f96",
+    "metadata_sha256": "1f310caf4c8636c1dba9344e470e3b44752de1707da9c27543acc9fcd4e2aaf7",
+    "entry_sha256": "2f7586075837c7e269ed9b4a372052839a5dbbfe5249eeb58e8fd3030bba2e30",
+    "identity_note": "pragma: allowlist secret - actual browser run and entry file digests"
+  },
+  "scope_limits": "Screenshots and coordinate actions on original MiniWoB++ pages. Rewards remain zero. VisualWebArena Classifieds login, multi-page workflows and persistent business state remain unqualified.",
+  "raw_data_published": false,
+  "source_checkbox_eligible": true
+}

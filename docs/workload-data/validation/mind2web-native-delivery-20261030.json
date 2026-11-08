@@ -1,0 +1,54 @@
+{
+  "source_id": "MIND2WEB",
+  "status": "FIXED_ORIGINAL_NATIVE_SAMPLE_OFFICIAL_SCORING_AND_RESEARCH_CONSUMER_VALIDATED",
+  "source_checkbox_eligible": true,
+  "completion_scope": "Original first3 complete tasks of each official test split, 9 tasks and 89 actions; not full1341-task evaluation or live-browser execution.",
+  "author_source_files_verified": 31,
+  "original_assets": ["test.zip", "scores_all_data.pkl"],
+  "original_asset_bytes": 812936103,
+  "official_asset_hashes_verified": true,
+  "model": "Qwen/Qwen3.5-9B",
+  "model_profile": "Explicit non-thinking fallback, not author GPT-3.5 reproduction",
+  "chat_template_kwargs": {"enable_thinking": false},
+  "original_prompts_ranking_tournament_and_scorer_unchanged": true,
+  "generation_max_new_tokens": 50,
+  "temperature": 0,
+  "top_k": 50,
+  "native_model_requests": 846,
+  "native_http_statuses": {"200": 846},
+  "split_results": [
+    {"split": "test_task", "tasks": 3, "actions": 24, "top50_recall_misses": 7, "step_acc": 0.25, "marco_step_acc": 0.4545454545454546},
+    {"split": "test_website", "tasks": 3, "actions": 35, "top50_recall_misses": 4, "step_acc": 0.11428571428571428, "marco_step_acc": 0.09572649572649572},
+    {"split": "test_domain", "tasks": 3, "actions": 30, "top50_recall_misses": 6, "step_acc": 0.2, "marco_step_acc": 0.33434343434343433}
+  ],
+  "saved_response_public_runner_replay": {
+    "responses": 846,
+    "original_prompts_and_order_exact": true,
+    "all_official_outputs_predictions_metrics_equal": true,
+    "new_model_calls": 0,
+    "network_blocked": true,
+    "scope": "Independent saved-result software replay, not another native run"
+  },
+  "ci_provider": {
+    "artifact_id": 12929054859,
+    "cpu_run": 40948724923,
+    "main_run": 40948724924,
+    "both_runs_succeeded": true,
+    "runtime_payloads_exact_git_and_installed_source": 68,
+    "whole_wheel_metadata_identity_claimed": false,
+    "consumer_records": 9,
+    "consumer_actions": 89,
+    "public_and_existing_research_consumer_restore_all_original_fields": true,
+    "research_code_changed": false
+  },
+  "retained_failures": [
+    "First native attempt: one HTTP200 with content=None, unmodified author scorer failed; not a valid score and not overwritten.",
+    "Initial saved-response replay: offline network guard rejected datasets cache lookup before model replay; fixed explicit offline loading, retained old output directory.",
+    "CI2d1d5aea: data-module allowlist missing Mind2Web; exact allowlist entry fixed, no broad exclusion."
+  ],
+  "guard_and_exclusive_lease_released": true,
+  "model_service_stopped_or_reconfigured": false,
+  "raw_data_or_native_response_files_published": false,
+  "server_evidence_root": "/data/shared_upload/hust-phr/workload-benchmark-native-delivery-20261024",
+  "server_receipts": ["mind2web-native-execution-002/saved-evidence-audit-public.json", "mind2web-public-wrapper-saved-replay-002/replay-audit-public.json", "mind2web-ci-consumer-index-684020bf-001/audit-public.json"]
+}

@@ -1,0 +1,48 @@
+{
+  "source_id": "BIXBENCH",
+  "status": "OFFICIAL_FROZEN_CLIENT_AND_GENERATOR_HELP_VERIFIED_NOT_NATIVE",
+  "author_repository": "Future-House/BixBench",
+  "author_revision": "49311180bdacb324c596f2e07596c126f2004008",
+  "original_software_files": 27,
+  "original_software_bytes": 627314,
+  "python_files_statically_parsed": 13,
+  "environment": {
+    "platform": "Linux aarch64",
+    "python": "3.12.13",
+    "uv": "0.9.9",
+    "isolated_from_model_service": true,
+    "venv_cache_and_temporary_files_outside_author_root": true
+  },
+  "installation": {
+    "command": "uv sync --frozen --no-dev --no-python-downloads --python <python3.12> --project <original-author-root>",
+    "uv_sync_exit_code": 0,
+    "uv_pip_check_exit_code": 0,
+    "original_lock_unchanged": true,
+    "original_author_source_verified_after_install": true
+  },
+  "entrypoint": {
+    "command": "PYTHONPATH=<original-author-root> <client-venv>/bin/python -m bixbench.generate_trajectories --help",
+    "exit_code": 0,
+    "without_explicit_author_path": "ModuleNotFoundError: No module named 'bixbench'",
+    "agent_constructed": false,
+    "tasks_executed": 0
+  },
+  "later_original_grader_and_transport_preflight": {
+    "status": "REAL_FROZEN_CLIENT_IMPORT_AND_CONSTRUCTION_PASSED_NOT_SCORING",
+    "official_grade_answers_imported": true,
+    "router_kwargs_timeout_seconds": 600,
+    "temperature": 1.0,
+    "max_tokens": 4096,
+    "num_retries": 5,
+    "parallel_tool_calls": false,
+    "network_calls_forbidden_during_preflight": true,
+    "model_calls": 0,
+    "retained_failed_preflight": "Top-level timeout was ignored by the original lmi wrapper; checking litellm_params raised KeyError. Fixed public binding uses router_kwargs.timeout. The already-running native attempt was not modified or restarted and still uses its prior timeout.",
+    "boundary": "Actual installed original-client construction and original grading-function import only; not a task, model response or score."
+  },
+  "notebook_container_qualified": false,
+  "official_scoring_executed": false,
+  "model_calls": 0,
+  "source_checkbox_eligible": false,
+  "boundary": "Dependency installation and official CLI loading only. This does not establish scientific Agent execution, notebook isolation, model connectivity or scoring. No original task data, credentials or private platform identities are included."
+}

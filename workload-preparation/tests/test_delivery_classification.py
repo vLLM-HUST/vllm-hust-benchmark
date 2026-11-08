@@ -25,6 +25,21 @@ def test_all_118_ledger_sources_have_one_source_plan():
     assert all(r["local_availability"] == "NOT_CHECKED_ON_THIS_MACHINE" for r in assets)
 
 
+def test_wavcaps_native_path_is_discoverable_without_model_imports():
+    plan = provider.delivery_source_plan("WAVCAPS")
+    entries = plan["entrypoints"]
+    assert len(entries) == 7
+    assert {row["path"] for row in entries if row["role"] == "generation"} == {
+        "scripts/run_wavcaps_original_captioning.py"
+    }
+    assert any(
+        row["role"] == "original_profile"
+        and row["path"].endswith("wavcaps-original-captioning-protocol.json")
+        for row in entries
+    )
+    assert plan["native_validation"] == "NOT_ESTABLISHED_BY_CLASSIFICATION"
+
+
 def test_enterprise_and_traces_not_forced_into_task_classes():
     assets = taxonomy.delivery_assets()
     private = [r for r in assets if r["asset_group"] == "enterprise-private-requests"]
@@ -97,6 +112,44 @@ def test_existing_deliveries_have_real_indexed_paths_without_runtime_claim():
     }
     assert assets["AZURE_LLM"]["entrypoints"][0]["role"] == "data_reading_only"
     assert assets["JSONSCHEMABENCH"]["entrypoints"]
+    scientific = {
+        (item["role"], item["path"])
+        for item in assets["SCIENCEAGENTBENCH"]["entrypoints"]
+    }
+    assert (
+        "generation",
+        "scripts/run_scienceagentbench_original_baseline.py",
+    ) in scientific
+    assert (
+        "native_evaluation",
+        "scripts/run_scienceagentbench_scientific.py",
+    ) in scientific
+    assert (
+        "native_evaluation",
+        "scripts/scienceagentbench_codebert_npu.py",
+    ) in scientific
+    temporal = {
+        (item["role"], item["path"]) for item in assets["TEMPORALWIKI"]["entrypoints"]
+    }
+    assert ("native_evaluation", "scripts/run_temporalwiki_original_npu.py") in temporal
+    assert (
+        "prepare_assets",
+        "scripts/prepare_temporalwiki_original_assets.py",
+    ) in temporal
+    assert ("generation", "scripts/run_ljspeech_vits_original_npu.py") in {
+        (item["role"], item["path"]) for item in assets["LJSPEECH"]["entrypoints"]
+    }
+    ovo = {(item["role"], item["path"]) for item in assets["OVOBENCH"]["entrypoints"]}
+    assert ("generation", "scripts/run_ovobench_original_npu.py") in ovo
+    assert (
+        "saved_output_reuse_audit",
+        "scripts/score_ovobench_original_saved.py",
+    ) in ovo
+    assert {item["role"] for item in assets["SPOKENWOZ"]["entrypoints"]} == {
+        "prepare_assets",
+        "original_profile",
+        "saved_output_reuse_audit",
+    }
     assert {item["role"] for item in assets["NARRATIVEQA"]["entrypoints"]} == {
         "prepare_assets",
         "original_profile",
@@ -139,3 +192,37 @@ def test_invalid_entrypoint_metadata_rejected(monkeypatch, failure):
     )
     with pytest.raises(ValueError):
         taxonomy.delivery_assets()
+
+
+def test_videomme_v2_execution_is_discoverable_without_runtime_upgrade():
+    row = next(
+        row for row in taxonomy.delivery_assets() if row["source_id"] == "VIDEOMME_V2"
+    )
+    entries = {(entry["role"], entry["path"]) for entry in row["entrypoints"]}
+    assert ("generation", "scripts/run_videomme_v2_original.py") in entries
+    assert ("native_evaluation", "scripts/run_videomme_v2_original.py") in entries
+    assert (
+        "prepare_assets",
+        "scripts/prepare_videomme_v2_original_prompts.py",
+    ) in entries
+    assert (
+        "original_profile",
+        "configs/workload-native/videomme-v2-official-full-local.json",
+    ) in entries
+    assert row["native_validation"] == "NOT_ESTABLISHED_BY_CLASSIFICATION"
+
+
+@pytest.mark.parametrize(
+    "source,path",
+    [
+        ("WEBARENA", "scripts/run_webarena_agentlab.py"),
+        (
+            "WORKARENA",
+            "configs/workload-native/workarena-agentlab-cpu.Dockerfile",
+        ),
+    ],
+)
+def test_browser_preparation_entries_do_not_claim_native_completion(source, path):
+    row = next(row for row in taxonomy.delivery_assets() if row["source_id"] == source)
+    assert any(entry["path"] == path for entry in row["entrypoints"])
+    assert row["native_validation"] == "NOT_ESTABLISHED_BY_CLASSIFICATION"

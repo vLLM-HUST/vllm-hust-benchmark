@@ -93,6 +93,8 @@ def test_guide_local_links_exist():
     import re
 
     root = Path(__file__).resolve().parents[1]
-    for target in re.findall(r"\]\(([^)]+)\)", (root / "DATA_INDEX.md").read_text()):
+    for target in re.findall(
+        r"\]\(([^)]+)\)", (root / "DATA_INDEX.md").read_text(encoding="utf-8")
+    ):
         if "://" not in target:
             assert (root / target.split("#", 1)[0]).exists(), target

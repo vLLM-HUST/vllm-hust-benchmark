@@ -1,0 +1,13 @@
+config_cls: MiniCPMODuplexPipelineConfig
+model_path: /models
+reference_audio: /models/assets/system_ref_audio.wav
+max_sessions: 1
+stages:
+  thinker:
+    engine:
+      attention_backend: ascend
+      disable_cuda_graph: true
+  talker:
+    engine:
+      attention_backend: ascend
+      disable_cuda_graph: true

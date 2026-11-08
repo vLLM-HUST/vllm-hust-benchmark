@@ -312,7 +312,7 @@ def test_unknown_source_and_missing_data_do_not_generate(tmp_path):
         list(iter_workload("UNKNOWN", data_root=tmp_path))
     with pytest.raises(FileNotFoundError, match="no download or fallback"):
         list(iter_workload("GSM8K", data_root=tmp_path))
-    with pytest.raises(NotImplementedError, match="no QBI fallback"):
+    with pytest.raises(FileNotFoundError, match="no download or fallback"):
         list(iter_workload("GAIA", data_root=tmp_path))
 
 

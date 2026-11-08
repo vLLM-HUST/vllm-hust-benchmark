@@ -5,11 +5,13 @@ container binary is only a prerequisite, never proof of a qualified sandbox.
 """
 
 import argparse
+import ast
 from collections import defaultdict
 import hashlib
 import json
 from pathlib import Path
 import shutil
+import re
 
 from audit_structeval_saved_nonrender import ARCHIVE_SHA, DATA_SHA, verify_author
 
@@ -56,6 +58,35 @@ def prerequisites(which=shutil.which):
     }
 
 
+def author_render_dependencies(package_root):
+    """Static author-source dependency inventory, not renderer execution."""
+    modules = []
+    for path in sorted((Path(package_root) / "render_engine").glob("*.py")):
+        text = path.read_text(encoding="utf-8")
+        tree = ast.parse(text)
+        imports = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                imports.update(item.name for item in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                imports.add(node.module or "")
+        modules.append(
+            {
+                "path": path.relative_to(package_root).as_posix(),
+                "imports": sorted(imports),
+                "literal_http_assets": sorted(
+                    set(re.findall(r"https?://[^\s\"\'<>`]+", text))
+                ),
+            }
+        )
+    return {
+        "original_modules": modules,
+        "scope": "Static literal dependencies only; generated code may require additional assets",
+        "offline_network_qualified": False,
+        "policy": "Preserve original renderer and VQA questions. Discover/cache exact dependencies before isolated runtime; do not silently remove CDN scripts, rewrite tasks, enable unrestricted generated-code egress, or count rendering alone as scoring.",
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-file", type=Path, required=True)
@@ -86,6 +117,7 @@ def main():
         "official_source_modules_verified": len(modules),
         "render_protocols": protocols,
         "runtime_prerequisites": prerequisites(),
+        "author_render_dependencies": author_render_dependencies(args.package_root),
         "nonrendering_results_rerun": 0,
         "generated_code_executed": False,
         "model_calls": 0,

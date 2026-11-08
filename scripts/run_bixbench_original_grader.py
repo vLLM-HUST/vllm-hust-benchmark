@@ -1,0 +1,226 @@
+"""Invoke the pinned publisher's open-answer grader; plan-only by default.
+
+Input is the publisher grade_outputs.py CSV contract, not task trajectories.
+The publisher overwrites its input CSV; only a new private copy is passed to it.
+No model service, downloader, question transformation or paid endpoint is started.
+"""
+
+import argparse
+import asyncio
+from contextlib import nullcontext
+import csv
+import hashlib
+import importlib.abc
+import importlib.util
+import io
+import json
+import os
+from pathlib import Path
+import sys
+from urllib.parse import urlsplit
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class PatchedGraderLoader(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    def __init__(self, path):
+        self.path = path
+        self.loaded = False
+
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == "bixbench.graders":
+            return importlib.util.spec_from_file_location(
+                fullname, self.path, loader=self
+            )
+        return None
+
+    def create_module(self, spec):
+        return None
+
+    def exec_module(self, module):
+        exec(compile(self.path.read_bytes(), str(self.path), "exec"), module.__dict__)
+        self.loaded = True
+
+
+def validate(args):
+    endpoint = urlsplit(args.api_base)
+    if (
+        endpoint.scheme != "http"
+        or endpoint.hostname not in {"127.0.0.1", "localhost", "::1"}
+        or endpoint.username
+        or endpoint.password
+        or endpoint.path.rstrip("/") != "/v1"
+        or endpoint.port is None
+        or endpoint.query
+        or endpoint.fragment
+    ):
+        raise ValueError("owned loopback OpenAI endpoint required")
+    if not args.model.startswith("openai/") or not args.model.removeprefix("openai/"):
+        raise ValueError("explicit local OpenAI-compatible judge binding required")
+    author, original, output = (
+        Path(value).resolve()
+        for value in (args.author_root, args.input_file, args.output)
+    )
+    if (
+        output.exists()
+        or output.is_relative_to(ROOT)
+        or any(
+            output.is_relative_to(source) or source.is_relative_to(output)
+            for source in (author, original)
+        )
+    ):
+        raise ValueError("fresh external scoring output required")
+    queue = getattr(args, "model_queue", None)
+    if queue:
+        queue = Path(queue).resolve()
+        if (
+            endpoint.hostname != "127.0.0.1"
+            or queue.is_relative_to(ROOT)
+            or any(
+                queue.is_relative_to(source) or source.is_relative_to(queue)
+                for source in (author, original, output)
+            )
+        ):
+            raise ValueError(
+                "separate external queue and IPv4 loopback endpoint required"
+            )
+    return author, original, output
+
+
+async def execute(args, report):
+    author, original, output = validate(args)
+    from prepare_jsonschemabench_author_source import verify_source
+
+    pins = ROOT / "configs/workload-native/bixbench-author-source.json"
+    verify_source(author, pins)
+    payload = original.read_bytes()
+    digest = hashlib.sha256(payload).hexdigest()
+    expected = getattr(args, "input_sha256", None)
+    if expected is not None and digest != expected.lower():
+        raise ValueError("grading CSV does not match the retained SHA-256")
+    report["input_sha256"] = digest
+    with io.StringIO(payload.decode("utf-8"), newline="") as stream:
+        reader = csv.DictReader(stream)
+        if not {"question", "target", "predicted"}.issubset(reader.fieldnames or ()):
+            raise ValueError("publisher question/target/predicted CSV fields required")
+        rows = list(reader)
+    if not rows:
+        raise ValueError("empty input cannot establish native scoring")
+    patched = getattr(args, "patched_grader", False)
+    if patched and any(
+        name == "bixbench" or name.startswith("bixbench.") for name in sys.modules
+    ):
+        raise ValueError("patched grading requires a fresh Python process")
+    # The input and original author source are never passed as writable outputs.
+    output.mkdir(mode=0o700)
+    loader = None
+    if patched:
+        from prepare_bixbench_patched_grader import SOURCE, prepare
+
+        overlay = output / "grader-overlay"
+        report["local_patch"] = prepare(author, overlay)
+        loader = PatchedGraderLoader(overlay / SOURCE)
+    copied = output / "graded.private.csv"
+    copied.write_bytes(payload)
+    os.chmod(copied, 0o600)
+    sys.path.insert(0, str(author))
+    os.environ["OPENAI_API_BASE"] = args.api_base
+    os.environ["OPENAI_API_KEY"] = (
+        "local-owned-no-paid-provider"  # pragma: allowlist secret - noncredential for owned loopback service
+    )
+    spec = importlib.util.spec_from_file_location(
+        "bixbench_pinned_original_grade_outputs", author / "grade_outputs.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    receipt = output / "state.private.json"
+    try:
+        if loader:
+            sys.meta_path.insert(0, loader)
+        spec.loader.exec_module(module)
+        if loader and not loader.loaded:
+            raise RuntimeError("patched grader was not imported; refusing scoring")
+        label = "PATCHED" if patched else "ORIGINAL"
+        report.update(status=f"RUNNING_{label}_OPENANSWER_GRADER", input_rows=len(rows))
+        receipt.write_text(json.dumps(report, indent=2))
+        metrics = await module.grade_answers(
+            copied,
+            module.AnswerMode.openanswer,
+            model_name=args.model,
+            temperature=1.0,
+            api_base=args.api_base,
+        )
+        verify_source(author, pins)
+        (output / "metrics.private.json").write_text(json.dumps(metrics, indent=2))
+        report.update(
+            status=f"{label}_OPENANSWER_SCORING_RETURNED", scoring_returned=True
+        )
+    except BaseException as error:
+        report.update(status="SCORING_FAILED_RETAINED", error_type=type(error).__name__)
+        raise
+    finally:
+        if loader:
+            sys.meta_path.remove(loader)
+            sys.modules.pop("bixbench.graders", None)
+        receipt.write_text(json.dumps(report, indent=2))
+    return report
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        epilog=(
+            "Before treating results as validated, check the pinned publisher "
+            "scorer with empty-answer and numeric-range controls. The audited "
+            "revision can award partial match to an empty answer and bypass "
+            "the dedicated range template. --patched-grader explicitly opts "
+            "into a separately labeled local repair of those two defects."
+        ),
+    )
+    for name in ("author-root", "input-file", "output", "model", "api-base"):
+        parser.add_argument("--" + name, required=True)
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument(
+        "--input-sha256", help="Expected digest from the retained grading receipt"
+    )
+    parser.add_argument("--patched-grader", action="store_true")
+    parser.add_argument("--model-queue", type=Path)
+    args = parser.parse_args(argv)
+    validate(args)
+    report = {
+        "source_id": "BIXBENCH",
+        "status": "PLAN_ONLY",
+        "entry": "publisher grade_outputs.grade_answers",
+        "answer_mode": "openanswer",
+        "temperature": 1.0,
+        "actual_judge_binding": args.model,
+        "author_judge_reproduction": False,
+        "source_checkbox_eligible": False,
+        "scorer_validity_verified": False,
+        "grader_variant": "local_patch"
+        if args.patched_grader
+        else "publisher_original",
+        "known_publisher_scorer_defects": [
+            "empty_answer_can_receive_partial_match",
+            "dedicated_numeric_range_template_can_be_bypassed",
+        ],
+        "scoring_returned": False,
+        "model_queue_enabled": args.model_queue is not None,
+        "boundary": "A returned local-judge score is not official-model accuracy reproduction or proof that native Agent generation and research consumption completed.",
+    }
+    if args.execute:
+        from appworld_model_transport import model_proxy
+
+        endpoint = urlsplit(args.api_base)
+        transport = (
+            model_proxy(args.model_queue, port=endpoint.port)
+            if args.model_queue
+            else nullcontext()
+        )
+        with transport:
+            report = asyncio.run(execute(args, report))
+    print(json.dumps(report, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

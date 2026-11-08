@@ -79,7 +79,15 @@ def main():
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1")
     parser.add_argument("--model", default="workload-qwen35-27b-128k-nonthinking")
     parser.add_argument("--model-max-length", type=int, default=131072)
+    parser.add_argument(
+        "--request-timeout-seconds",
+        type=int,
+        default=300,
+        help="HTTP timeout per request; does not change the original generation budget",
+    )
     args = parser.parse_args()
+    if not 1 <= args.request_timeout_seconds <= 7200:
+        parser.error("--request-timeout-seconds must be between 1 and 7200")
     url = urlparse(args.endpoint)
     if (
         url.scheme != "http"
@@ -141,7 +149,7 @@ def main():
         base_url=endpoint,
         api_key="local-unused",  # pragma: allowlist secret - dummy loopback key
         max_retries=0,
-        timeout=300,  # pragma: allowlist secret - dummy loopback key
+        timeout=args.request_timeout_seconds,
     )
     validate_deployment(
         [item.model_dump() for item in client.models.list().data],
@@ -211,6 +219,7 @@ def main():
         "started_at_unix": time.time(),
         "model": alias,
         "model_max_length": args.model_max_length,
+        "request_timeout_seconds": args.request_timeout_seconds,
         "chat_template_kwargs": {"enable_thinking": False},
         "temperature": 0.1,
         "max_new_tokens": 128,

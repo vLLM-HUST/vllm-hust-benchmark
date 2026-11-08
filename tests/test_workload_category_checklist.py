@@ -146,7 +146,11 @@ def test_category_checklist_preserves_every_class_and_source():
     assert len(ids) == 38
     assert all(checklist.count("· " + identifier + "\n") == 1 for identifier in ids)
     assert all(row["source_id"] in checklist for row in ledger["sources"])
-    assert all("- [ ] " + row["id"] + "：" in checklist for row in gaps["sources"])
+    for row in gaps["sources"]:
+        source_id = row["id"]
+        checked = ledger["delivery_inventory"][source_id]["checked"]
+        marker = "x" if checked else " "
+        assert f"- [{marker}] {source_id}：" in checklist
 
 
 def test_incremental_receipt_does_not_claim_full_split():

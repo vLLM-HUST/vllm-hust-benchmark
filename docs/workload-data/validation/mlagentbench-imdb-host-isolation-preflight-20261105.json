@@ -1,0 +1,225 @@
+{
+  "source_id": "MLAGENTBENCH",
+  "status": "ISOLATED_SOFTWARE_PREFLIGHT_NOT_NATIVE_TASK_EXECUTION",
+  "date": "2026-11-05",
+  "platform": "linux/aarch64",
+  "base_image": "quay.io/ascend/vllm-ascend:v0.21.0rc1-openeuler",
+  "local_image_id": "sha256:105834a38766a6b1b89a7eeb313a37351d098a69e8cdee87ad0ca3a6e090ce13",
+  "versions": {
+    "python": "3.12.13",
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0",
+    "transformers": "5.5.4"
+  },
+  "controls": {
+    "network": "none",
+    "read_only_root": true,
+    "user": "65534:65534",
+    "capabilities_dropped": "ALL",
+    "observed_cap_eff": "0000000000000000",
+    "observed_no_new_privs": 1,
+    "device_mappings": [],
+    "docker_socket_mounted": false,
+    "memory_limit": "3g",
+    "pids_limit": 128,
+    "driver_mount": "host Ascend driver, read-only"
+  },
+  "attempts": [
+    {
+      "driver_mounted": false,
+      "exit_code": 1,
+      "outcome": "torch_npu backend import failed: libascend_hal.so missing"
+    },
+    {
+      "driver_mounted": true,
+      "exit_code": 0,
+      "outcome": "DistilBertForSequenceClassification, Trainer and TrainingArguments imported",
+      "warnings": "Expected unavailable device-count and owner mismatch warnings retained; no devices exposed"
+    }
+  ],
+  "module_presence": {
+    "datasets": false,
+    "accelerate": false,
+    "anthropic": true,
+    "dacite": false
+  },
+  "existing_dependency_overlay_probe": {
+    "exit_code": 0,
+    "network": "none",
+    "device_mappings": [],
+    "root_filesystem": "read-only",
+    "capabilities_dropped": "ALL",
+    "no_new_privileges": true,
+    "container_user": "0, with all capabilities dropped",
+    "overlay_mount": "existing task-owned Python dependency directory, read-only",
+    "versions": {
+      "datasets": "5.1.0",
+      "accelerate": "1.15.0"
+    },
+    "imported": [
+      "datasets",
+      "accelerate",
+      "DistilBertForSequenceClassification",
+      "Trainer",
+      "TrainingArguments"
+    ],
+    "dependency_downloads": 0,
+    "note": "Root was used only for software import because the retained dependency directory is owner-readable only. This does not qualify execution of generated code or NPU training. Agent dacite integration remains pending."
+  },
+  "native_task_executed": false,
+  "isolated_npu_tensor_attempt": {
+    "research_coordination": "Research thread confirmed no current or scheduled use of these two cards; host snapshot showed only this benchmark's existing service on physical card0.",
+    "network": "none",
+    "capabilities_dropped": "ALL",
+    "no_new_privileges": true,
+    "mapped_compute_device": "/dev/davinci0 only",
+    "manager_devices": ["/dev/davinci_manager", "/dev/devmm_svm", "/dev/hisi_hdc"],
+    "driver_mount": "read-only",
+    "attempt": "torch.ones(1, device='npu:0'), then tensor addition",
+    "exit_code": 1,
+    "failure": "aclInit 507899; Resource_Busy EL0005; invalid driver device id, retCode 0x7020010",
+    "cause_confirmed": false,
+    "training_started": false,
+    "device_reset_or_service_stop": false,
+    "post_attempt_existing_service_health": {"reader19466": 200, "mirror19467": 200},
+    "scope": "A failed isolated-device qualification, not an IMDb attempt. Do not infer insufficient HBM or modify shared driver policy from this error alone."
+  },
+  "original_agent_subprocess_dependency_bootstrap": {
+    "bootstrap": "configs/workload-native/mlagentbench-imdb-bootstrap/sitecustomize.py",
+    "environment": {
+      "PYTHONPATH": "/opt/tooling/configs/workload-native/mlagentbench-imdb-bootstrap",
+      "MLAGENTBENCH_COMPATIBILITY_DIR": "/opt/compat",
+      "MLAGENTBENCH_SUPPLEMENTAL_DIR": "/opt/overlay"
+    },
+    "server_parent_and_child_python_exit_code": 0,
+    "child_imported_numpy": "1.26.4",
+    "child_imported_datasets": "4.0.0",
+    "base_package_precedence_preserved": true,
+    "network": "none",
+    "device_mappings": [],
+    "agent_actions_executed": 0,
+    "qualification": "Dependency-path inheritance only; not original generated training code execution."
+  },
+  "public_combined_environment_probe": {
+    "script": "scripts/check_mlagentbench_imdb_environment.py",
+    "exit_code": 0,
+    "status": "SOFTWARE_AND_DATA_PROBE_NOT_NATIVE_TASK_EXECUTION",
+    "verified_port_source": true,
+    "original_runner_imported": true,
+    "train_rows": 25000,
+    "test_rows": 25000,
+    "network": "none",
+    "device_mappings": [],
+    "model_calls": 0,
+    "agent_actions": 0,
+    "source_checkbox_eligible": false
+  },
+  "public_local_runner_preparation": {
+    "original_files_verified": 138,
+    "preparation_command": "python scripts/prepare_mlagentbench_local_agent.py --author-root <verified-originals> --output <fresh-port-directory> --action prepare",
+    "preparation_exit_code": 0,
+    "ported_original_files": ["MLAgentBench/LLM.py", "MLAgentBench/runner.py"],
+    "task_or_prompt_modified": false,
+    "port_sha256": {
+      "MLAgentBench/LLM.py": "5e6ffec0e9c7368d24e1de34c4bf47e7dd171b1fc59a481d23058077d8da6eb8",
+      "MLAgentBench/runner.py": "77ff81cddb2a12aad9ab3bac01ef0a7058b2658a5509d61d8f65d36830a69be3"
+    },
+    "isolated_runner_import_exit_code": 0,
+    "isolated_runner_import": "MLAgentBench.runner",
+    "network": "none",
+    "device_mappings": [],
+    "optional_warning": "AutoGPTAgent dependencies absent; original default ResearchAgent selected, no AutoGPT qualification claimed",
+    "model_calls": 0,
+    "agent_actions": 0
+  },
+  "minimal_environment_original_data_loading": {
+    "exit_code": 0,
+    "network": "none",
+    "device_mappings": [],
+    "datasets_version": "4.0.0",
+    "original_call": "load_dataset('imdb')",
+    "mount": "existing pinned original Parquet directory mounted read-only as ./imdb",
+    "offline_environment": ["HF_HUB_OFFLINE=1", "HF_DATASETS_OFFLINE=1"],
+    "actual_split_rows": {"train": 25000, "test": 25000},
+    "scope": "Data loading in the new candidate environment only. No training, Agent execution, prediction, scoring or new source qualification."
+  },
+  "original_research_agent_import": {
+    "exit_code": 0,
+    "network": "none",
+    "device_mappings": [],
+    "original_source_modified": false,
+    "first_failure": "Original import requested cl100k_base tokenizer from the network; isolated container had no cache.",
+    "recovery": "Mounted the original tokenizer cache read-only; no external API credentials supplied.",
+    "tokenizer": {
+      "url": "https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken",
+      "cache_filename": "9b5ad71b2ce5302211f9c61530b329a4922fc6a4",
+      "sha256": "223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7"
+    },
+    "module": "MLAgentBench.agents.agent_research",
+    "warnings": "Original optional provider imports and absent API-key files printed warnings; the ResearchAgent module import completed. This does not qualify those external providers or the local model binding.",
+    "agent_actions_executed": 0,
+    "model_calls": 0
+  },
+  "fresh_original_source_acquisition": {
+    "repository": "snap-stanford/MLAgentBench",
+    "revision": "5d71205cc20a8e95d43aa7cb7120e89ca3323e31",
+    "archive_bytes": 1878397,
+    "archive_sha256": "db86702c1366338b517d3c4ee729ecec14a22455126a18022fc759258e0ad66b",
+    "manifest_files_verified": 138,
+    "verification": "Every selected regular tar member matched both byte count and SHA-256 in the existing author-source manifest before extraction. Only manifest-selected files extracted, no arbitrary archive paths.",
+    "research_agent_import_attempt": "SSH connection closed before any container output; completion and container state unverified. Inspect authoritative Docker state before retrying.",
+    "shared_storage_archive_recheck": "archive present, 1878397 bytes, verified from storage host after execution-host SSH failure",
+    "native_execution_claim": false
+  },
+  "minimal_path_import_probe": {
+    "exit_code": 0,
+    "network": "none",
+    "device_mappings": [],
+    "path_order": "base site-packages first, selected compatibility packages second, existing supplemental directory last",
+    "versions": {
+      "numpy": "1.26.4",
+      "huggingface-hub": "1.19.0",
+      "pyarrow": "21.0.0",
+      "datasets": "4.0.0",
+      "accelerate": "1.15.0",
+      "dacite": "1.9.2"
+    },
+    "imported": ["datasets", "accelerate", "dacite", "Trainer", "DistilBertForSequenceClassification"],
+    "dependency_downloads": 0,
+    "changes_to_shared_runtime": 0,
+    "failed_intermediate_attempts": [
+      "base NumPy 1.26.4 plus overlay PyArrow 26 failed: PyArrow requires NumPy >=2",
+      "PyArrow 21 plus datasets 5.1 failed: base Hub lacks the expected utils.httpx export"
+    ],
+    "limitations": [
+      "Selective read-only mounts qualify imports only, not a relocatable packaged environment.",
+      "Dacite 1.9.2 differs from the separate historical CPython 3.10 Agent lock; original Agent integration is not yet qualified.",
+      "Full dependency-closure validation, original offline IMDb loading, original Agent and isolated NPU training remain required."
+    ]
+  },
+  "dependency_consistency_check": {
+    "base_pip_check_exit_code": 1,
+    "overlay_pip_check_exit_code": 1,
+    "overlay_conflicts": [
+      "huggingface-hub 1.33.0 requires click>=8.4.2,<9; image has 8.4.1",
+      "triton-ascend 3.2.1 requires numpy==1.26.4; overlay supplies 2.2.6",
+      "prometheus-fastapi-instrumentator 8.0.0 requires starlette>=1,<2; image has 0.50.0"
+    ],
+    "base_preexisting_issues": [
+      "te: missing ml-dtypes/tornado and platform unsupported declaration",
+      "mindstudio-kpp: missing plotly",
+      "ms-service-profiler: missing matplotlib/msguard/openpyxl, mismatched OTLP exporters and pandas",
+      "opencv-python-headless requires numpy>=2 while base uses 1.26.4",
+      "prometheus-fastapi-instrumentator/starlette mismatch"
+    ],
+    "qualification": "IMPORTS_PASSED_BUT_DEPENDENCY_CONSISTENCY_NOT_QUALIFIED",
+    "next_action": "Create a minimal task-only environment from verified assets instead of globally upgrading the shared image or claiming pip-check success."
+  },
+  "npu_training_qualified": false,
+  "source_delivered": false,
+  "next_steps": [
+    "Build a task-owned dependency overlay; preserve original Agent and training entrypoints.",
+    "Qualify limited NPU device access in the isolated executor during an available resource window.",
+    "Run the fixed original IMDb Agent protocol and original full-test submission scoring."
+  ]
+}

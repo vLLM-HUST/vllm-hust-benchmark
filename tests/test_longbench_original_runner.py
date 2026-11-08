@@ -92,8 +92,13 @@ def test_v2_updated_entry_does_not_relabel_historical_npu_evidence():
     )["delivery_inventory"]["LONGBENCH_V2"]
     assert ledger["explicit_selection_entry_software_checked"]
     assert not ledger["entry_native_after_update_checked"]
-    assert not ledger["checked"]
-    assert ledger["delivery_receipt"] is None
+    assert ledger["checked"]
+    assert ledger["existing_receipt"] != ledger["delivery_receipt"]
+    receipt = json.loads((ROOT / ledger["delivery_receipt"]).read_text("utf-8"))
+    assert receipt["status"] == "END_TO_END_EXECUTED_AND_SCORED"
+    assert receipt["original_row_indices"] == [0, 2, 7]
+    assert receipt["full_prompt_tokens"] == [295877, 530991, 815430]
+    assert receipt["official_judge_correct"] == [True, False, True]
 
 
 @pytest.mark.parametrize(
@@ -274,6 +279,34 @@ def test_help_without_optional_official_environment():
     )
     assert result.returncode == 0
     assert "--capacity-selection" in result.stdout
+    assert "--request-timeout-seconds" in result.stdout
+
+
+@pytest.mark.parametrize("timeout", ["0", "7201"])
+def test_v2_invalid_request_timeout_rejected_before_loading_data(tmp_path, timeout):
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/run_longbench_v2_original_samples.py"),
+            "--data-file",
+            "missing.json",
+            "--official-archive",
+            "missing.zip",
+            "--capacity-selection",
+            "missing-selection.json",
+            "--tokenizer",
+            "missing-tokenizer",
+            "--output",
+            str(tmp_path / "out"),
+            "--request-timeout-seconds",
+            timeout,
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "--request-timeout-seconds must be between 1 and 7200" in result.stderr
+    assert not (tmp_path / "out").exists()
 
 
 @pytest.mark.parametrize("host", ["127.0.0.1", "localhost"])

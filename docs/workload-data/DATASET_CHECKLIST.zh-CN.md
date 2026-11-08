@@ -1,7 +1,1609 @@
 # 数据集逐项验证清单
 
+### 本次实际推进（2026-11-06—2026-11-07）
+
+- [x] MLAgentBench
+  IMDb原评价器已在隔离离线CPU容器完成控制：原100000行三split接口和原评分文件未改，对完整25000行测试标签构造的正确/反向控制分别得1.0/0.0，缺少CSV时原函数抛FileNotFoundError。控制输入不是模型预测，不计原生Agent或来源完成；两份控制CSV已删除。原题明确要求微调DistilBERT并保存全部测试行类别概率，不能用参考标签或其他分类器替代。此结果排除了当前原评价器/数据接口缺陷，剩余是Agent在原预算内完成科学程序并产出自身提交。回执：`mlagentbench-imdb-original-evaluator-controls-20261107-001/qualification-public.json`。
+
+- [x] Full-Duplex保存结果与ASR/VAD入口绑定核验完成：22份原作者文件身份通过；15份v1.0转录、48份v1.5原音频/转录及24份时序/区间回执的哈希全部一致。公共VAD的原模型加载、前向、状态复位和返回操作与原实跑适配器AST相同，额外设备检查更严格；ASR两版本完整调用的14项Linux夹具测试通过，并修复未知失败状态被误当成功的问题。新推理0；夹具与历史真实神经证据分别记录。[来源审计回执](validation/full-duplex-fixed27-native-delivery-20261107.json)等待当前软件检查后再升级来源总勾。
+
+- [x] Full-Duplex首次speaker资格入口已完成真实NPU控制：无需旧回执，固定原图/派生图和参考特征身份不变，一次encoder执行输出SHA与原控制一致；释放成功后才生成可供正式服务入口接受的profile。实际使用隔离重建环境、获准空闲物理1，退出后无进程/HBM3455MiB，物理0原9B服务未改。原图、OM副本、派生图三份临时模型共78564754字节已清理，回执和布局留档，留档布局不是仍可使用的安装bundle。回执：`full-duplex-first-time-public-speaker-qualification-20261107-001/qualification-public.json`及`handoff-and-cleanup.json`；非原生benchmark重跑或全网络CPU数值等价证明。
+
+- [x] Full-Duplex官方operator载荷的公共纯解包入口已在服务器验证：核验原ZIP、run成员及内嵌gzip三层身份，直接解包、不执行shell或installer。1126份普通文件哈希和2个包内库链接与原已验证载荷一致；新载荷与隔离环境/公共源码组合的8个关键模块导入通过。初次拒绝符号链接的失败保留，现仅允许包内指向普通文件的链接。Linux服务器12项测试通过；临时两棵载荷树共75033550字节已清理，原载荷和证据保留。回执：`full-duplex-public-operator-extraction-20261107-001/qualification-public.json`。
+
+- [x] Full-Duplex模型依赖独立重建与公共源码组合导入通过：182项依赖按固定来源安装并核对私有位置，6个核心包共19900份文件/1806502988字节物理复制后逐文件SHA相同，关闭system-site-packages，未创建可写核心符号链接。官方3856字节Python
+  kernel补充按哈希绑定，8个关键模块从新环境/公共副本导入通过；没有加载模型或重启9B服务。原已核验vendor载荷复用，未重新解包；13项SDK/测试工具等声明冲突原样保留，不称全环境pip检查通过。5份临时wheel共52305767字节已清理。回执：`full-duplex-isolated-model-rebuild-20261107-001/qualification-public.json`。
+
+- [x] Full-Duplex完整模型依赖来源已公开绑定：177个公开包、5个官方归档wheel和2份源码共184项，3份原发布归档及其wheel/run成员哈希核验通过；公共版本核验入口在服务器对184项及6个核心包共190项版本全部匹配。新公共兼容源码的8个关键模块导入通过，Omni模块路径确认为新副本，未触发设备初始化控制、未加载模型。其他可选模型的导入警告原样保留，不能称SGLang所有模型可用；完整模型环境新建重装仍未验证。[依赖锁](validation/full-duplex-model-runtime-lock-20261107.json)及[核验记录](validation/full-duplex-model-metadata-20261106.json)。
+
+- [x] Full-Duplex固定参考speaker派生图新增公共准备入口：服务器用固定作者ONNX重建，52处池化替换、原始参数不变，派生图SHA256与已验证部署图一致；不执行神经网络。回执：`full-duplex-public-graph-preparation-20261107-001/qualification-public.json`。本次未重跑ATC或NPU控制，编译/推理证据沿用原独立记录；临时原图和派生图两文件共57281671字节已清理。
+
+- [x] Full-Duplex原生本地judge保存结果的公共复用入口已在服务器验证：`v15-localjudge --reuse-completed`调用原`run_custom`，12条结果均为valid，原目录与独立副本的24份request/result文件哈希不变；缺失缓存时禁止发送新模型请求，invalid_label和not_judged不算成功。回执：`full-duplex-public-saved-judge-reuse-20261107-001/qualification-public.json`。本地judge仍为非官方评分；新增模型调用0，不替代其他神经阶段验证。
+
+- [x] Full-Duplex公共模型源码准备与新speaker绑定控制：核对三份固定原文件后准备1029份源码副本，原源码未改，其他复制文件不变。物理1上的一次新ACL
+  encoder控制通过，固定输入/输出哈希与旧NPU控制相同，改动输入被拒绝，退出后设备释放；未回放benchmark或请求LLM，物理0服务未改。临时三份小模型副本共78564754字节已清理，回执保留。
+
+- [x] Full-Duplex参考音色读取去除本机路径依赖：固定发布方WAV哈希不变，真实269494个样本、16000Hz和BytesIO位置逐项核验；新旧解码逐值相同。此阶段只核对参考音频和既有工件；随后新ACL绑定的真实NPU控制见上项。来源总勾仍等待完整运行时与公共神经评分绑定资格核验。
+
+- [x] Full-Duplex固定原生协议已完成：9类各3条、27条原题/39会话，原观察窗导出、63份NPU Parakeet转写、24个NPU
+  VAD时序变体及全部类别评分路径通过。行为judge为现有Qwen3.5-9B，原提示词与上游本地judge配置保留，结果与官方GPT成绩分开；未冒充全量数据或性能成绩。三机确认无活动引用后，清理已用完的9份MiniCPM/Parakeet权重文件，释放20.91GiB；原数据、配置、源码差异、结果均保留，NPU0服务和IMDb训练未动。[协议与清理证据](validation/full-duplex-model-metadata-20261106.json)。
+
+- [x] Full-Duplex本次27条原生原题的研究侧回读完成：复用已审计CI软件包，重建1225条原始索引；公共入口与未改研究读取器的27条完整记录相同，全部原注解、配对控制角色及实际输入音频字节核验通过，读取不改变索引。未执行观测、特征或新模型调用，研究默认依赖锁未改。
+
+- [x] Full-Duplex公共导出/离线评分入口实际验证：15条v1.0及12组v1.5原捕获重新导出，63份WAV字节及全部样本元数据与原导出一致；公共入口的三类非神经评分和原汇总结果与旧结果一致（汇总仅生成时间不同）。复用保存的音频/转录/时序，无新模型调用。原缺Silero依赖及测试复制漏manifest的失败保留。
+
+- [x] Full-Duplex
+  ASR依赖工件锁及重建完成：65个wheel、1个源码包绑定原地址和SHA256，8508个原安装RECORD摘要通过；公共入口在服务器本地新venv完成66包安装，全部版本/位置、NeMo
+  ASR导入及六个核心包未变核验通过。首个缺CANN动态库环境的失败保留，并增加下载前预检和`--verify-only`。全环境11项声明冲突与原基线完全相同、无新增；不称全环境pip检查通过，也不把导入检查计为ASR神经实跑。
+
+- [x] Full-Duplex固定原生协议已交付：原27题/39会话、63份NPU
+  ASR、24个VAD时序变体、原评分/本地judge、独立部署准备与研究回读已核验，当前代码CI/tests/lint和CPU
+  smoke通过。总进度107/113，余6项，另5项仅分类；非全量或官方GPT成绩。[最终回执](validation/full-duplex-fixed27-native-delivery-20261107.json)。
+
+- [x] Full-Duplex原始资产口径：9份原档案共7230成员已解包校验，按上游原排序固定9类各3条、共27条；v1.5的user_backchannel实际98条与文档99条差异保留。首题曾因NPU设备分类及ATB动态库路径失败，原尝试与最小运行时修复均保留；之后完成上述全部固定协议，没有换题。[完整执行证据](validation/full-duplex-model-metadata-20261106.json)。
+
+- [x] Full-Duplex公共源码准备入口补齐可选`--include-reference`：覆盖v1.0/v1.5所需参考时序、行为、各类别评分器及原分布文件，共22份固定作者文件。服务器完成获取与全部22文件校验，并与上游框架引用的SHA256逐一对照；本次核验复用已有文件，不宣称22文件全新下载。默认11文件与`--include-client`的15文件行为保持不变；源码准备不计来源完成。
+
+- [x] OSWorld
+  固定原前三题协议已交付：3题真实NPU/GUI操作及原评分（均0），368个原任务完整包与统一索引、当前成功CI软件包安装及未改研究消费者4项回读通过。终止/评分分段恢复与运行时兼容明确披露；不是全368题原生执行或未经修改的官方成绩。研究默认锁未改，使用独立精确锁核验。[交付回执](validation/osworld-fixed3-native-delivery-20261106.json)。当前总进度106/113，另5项仅分类。
+
+- [x] MLAgentBench 固定 IMDb
+  的原9份数据/模型/元数据文件核验通过；发布方README与原plain_text目录视图保留，原短名调用的train/test各25000条及unsupervised50000条全部逐行一致，neg/pos类别名称保留。初始平铺视图省略分片发现是接口缺陷，已在独立新目录修复。科学CPU环境通过依赖与前向预检，公开69-wheel哈希锁和离线镜像已构建，实际客户端版本一致。原资产获取/核验、离线绑定及保存结果评分入口均有明确范围；环境通过不等于来源完成。[准备与原尝试记录](validation/mlagentbench-imdb-cpu-preparation-20261106.json)。
+
+- [ ] MLAgentBench 总勾仍未完成：CIFAR10/ogbn-arxiv
+  原有效结果不重跑。IMDb初始9B及后续失败尝试均保留，不能把HTTP200当任务完成。Messages004终态回执已复查：原18000秒到限、容器exit0、最终快照存在，但无预测提交；原score为空/-1，公开评分入口exit2。该旧任务已结束。2026-11-07另启Messages005：复用经发布方身份核验的公共池Qwen3.8-27B，原50步、18000秒、2000/4000输出预算及原题保持不变；隔离Agent已启动、首个原生请求已转发。此次采用模型所在网络命名空间连通文件队列，不依赖旧SSH转发。新尝试尚未取得提交和原评分，不打勾；状态以机器清单中的独立尝试记录为准。[原准备与终态记录](validation/mlagentbench-imdb-cpu-preparation-20261106.json)。
+
+### 最新原生运行复核（2026-11-04）
+
+现有双卡环境的替代优先级：不再为固定来源等待 x86 节点。先复用已在 ARM64 验证的官方环境；原来源的阻塞和覆盖缺口保留，替代来源独立记录，不重复计数。MiniWoB++ 已有两道固定原题的真实
+NPU 证据：`click-dialog` 原奖励 1，`multi-layouts` 在单独记录的 4096-token 配置下到达原生 20 步上限、奖励
+0。后者是有效的协议终态，不是任务成功；原 1024-token
+配置的解析失败另保留。该候选只覆盖基础浏览器交互，不替代认证业务网站、持久站点状态或桌面系统控制；公共执行入口、证据审计及研究消费闭环核对前不打勾。
+
+MiniWoB++ 保存证据复核：对每道题的 AgentLab 原结果目录运行
+`python scripts/run_miniwob_agentlab.py --task miniwob.click-dialog --verify-saved <RESULT_DIR>`，
+第二题将 `--task` 换成 `miniwob.multi-layouts`。命令仅核对固定摘要的字节摘要与原生终态，无需模型、浏览器或 AgentLab，不替代对完整运行记录和研究侧接入的核验。
+
+MiniWoB++ 公共运行入口：使用
+[发布方源码](https://github.com/Farama-Foundation/miniwob-plusplus/tree/33c3b4ddef8c6eb67c57a29663d844b1eda7e614)
+的原始网页，通过回环 HTTP 提供 `/miniwob/`。已实跑客户端使用 AgentLab 0.4.2、BrowserGym MiniWoB 0.14.2 和 ARM64 Chromium
+125.0.6422.26。先让 Chromium 能在所在环境打开原网页，再按以下固定配置生成计划；确认服务资源窗口后加
+`--execute --record-response-metadata`。端口是本地示例，需换成实际回环端口；输出目录必须尚不存在。
+
+```bash
+python scripts/run_miniwob_agentlab.py --task miniwob.click-dialog --site http://127.0.0.1:8001/miniwob/ --endpoint http://127.0.0.1:8002/v1 --model Qwen/Qwen3.5-9B --output ./miniwob-click --max-steps 20 --max-output-tokens 1024
+python scripts/run_miniwob_agentlab.py --task miniwob.multi-layouts --site http://127.0.0.1:8001/miniwob/ --endpoint http://127.0.0.1:8002/v1 --model Qwen/Qwen3.5-9B --output ./miniwob-layout --max-steps 20 --max-output-tokens 4096
+```
+
+两个配置的种子都是 42，生成预算不同，结果不混报。上述运行入口不构成研究侧统一数据读取：原任务是由浏览器环境提供的交互任务，不能把截图或摘要包装成原始静态问答。
+
+WorkArena：已有固定版本作者源码和本地归档时，用
+`python scripts/prepare_workarena_author_source.py --author-root <源码目录> --archive <归档路径> --action verify`
+复核；软件验证不获取实例凭据。官方 WorkArena-Instances 访问权限、可重置浏览器环境和原生任务评分仍需单独验证。
+
+LongBench v2 长档补跑：用 `scripts/prepare_longbench_v2_original_capacity.py` 对目标模型及窗口做预检，指定
+`--row-index 0 --row-index 2 --row-index 7`。将生成的 `capacity-selection.private.json` 传给
+`scripts/run_longbench_v2_original_samples.py --capacity-selection`，沿用原输入和 128-token
+输出预算。任一固定原题放不下时不截断、不换题；短档和中档复用已有结果。 超长提示预填充需要更长的 HTTP 等待时，可通过 `--request-timeout-seconds` 设置并在回执中记录；
+该参数不改变原提示、输出预算或评分，默认仍为 300 秒。
+
+InfiniteBench：在独立客户端按 `configs/workload-native/infinitebench-client-dependencies.txt` 安装依赖， 用
+`scripts/verify_infinitebench_original_code.py --official-checkout <作者源码目录>` 核验源码。
+`scripts/run_infinitebench_original.py` 使用原数据目录、原任务名及明确的作者提示模板； 即使是选择题或问答，作者评分模块导入时也会初始化
+ROUGE。服务器不能访问评分器仓库时， 为每个任务传入已核验的 `--offline-rouge <rouge.py>` 与 `--offline-rouge-sha256 <SHA-256>`，
+避免导入时等待外网；这不替换作者评分规则。
+
+Full-Duplex-Bench：已取得原包时，用
+`python scripts/prepare_full_duplex_original_assets.py --action verify --output <服务器原包目录>`
+核验，不重新下载。已有固定版本评分器及客户端源码时，用
+`python scripts/prepare_full_duplex_original_scorers.py --verify-only --include-client --output <服务器源码目录>`
+核验。两条命令只检查材料；Moshi 双工推理和原生 ASR 评分仍需另行验证。
+
+2026-11-05 补充软件预检：在服务器对已取得的 `moshi==0.2.13` wheel 运行
+`python scripts/inspect_moshi_runtime_requirements.py --wheel <原wheel> --torch-version 2.10.0+cpu`。
+该入口需要 `packaging`，仅解析归档，不导入模型、不下载权重、不访问加速卡。 真实 wheel SHA-256 为
+`beeb3ebc1d769a800e22b26bf4ec0d25f9525d54ae77979b37c86a2f782f4e64`； 声明的 `torch>=2.2.0,<2.10` 不接受现有
+2.10.0+cpu，原服务第72行仍包含 CUDA 同步调用。 这证明不能直接按依赖声明复用现有模型服务环境，不证明 Moshi 无法适配 NPU。
+后续应在独立环境核验匹配版本及加速器调用，再运行原双工任务和原 ASR 评分；来源总勾保持未完成。 本次服务器宿主 Python 缺少 `packaging`；实际静态检查通过显式使用现有客户端的
+pip vendored `packaging` 完成，未修改全局依赖。这不是独立 Moshi 推理环境安装成功的证据。
+
+MLE-bench：在隔离执行节点按[固定版本官方说明](https://github.com/openai/mle-bench/blob/507f92e1138bb6e40dac5c6ee7a6758e6424bf97/README.md)安装。由操作者配置自己的
+Kaggle 访问权限和凭据，勿提交凭据或竞赛文件。对既定竞赛运行 `mlebench prepare -c <competition-id>`，保留官方拆分；原生 Agent 生成提交 CSV
+后，用 `mlebench grade-sample <submission.csv> <competition-id>` 评分。固定 NOMAD
+已通过竞赛作者的公开分发完成原准备、原生执行和官方评分。Kaggle 下载路径未核验。
+
+PaperBench 在构建隔离环境前，先运行
+`python scripts/check_paperbench_native_prerequisites.py --author-root <已校验的上游源码根目录>`。此命令核验固定上游版本的原始文件及镜像、架构和时间预算约束，不构建镜像或接受供应商条款。预检通过不代表运行环境可用；正式验证仍需合规的隔离执行环境，并保留原任务预算和
+rubric。
+
+MultiAgentBench 中断恢复：沿用原运行的作者源码、准备目录、模型绑定及工具环境，给 `scripts/run_marble_original_research.py` 的执行命令加上
+`--original-row 2`，并将 `--output` 指向新的目录。这只执行第三道固定原题（行号从 0
+开始）；不加该参数时仍执行原固定三题。补跑记录标记为部分恢复，须与前两题已审计的原生结果合并核对，不能单独勾选来源。保留旧尝试及失败记录。
+
+补跑退出后，用本次新运行目录和对应的启动回执核对进程、返回行号和队列：
+
+```bash
+python scripts/audit_marble_original_research_saved.py \
+  --run-root "$row2_run_root" --launch-receipt "$row2_launch_receipt"
+```
+
+运行目录的 `state-private.json` 须标记只恢复原行 `2`，并保留完整固定范围 `[0, 1, 2]`；启动回执用于核验进程身份。即使 CLI
+正常返回，也须单独核对原评分结果。该审计不会回放遗留请求。
+
+- [x] 研究交接进一步按正式入口补强：研究README指定的是`workload-preparation`子项目，不是历史根目录wheel。两份发布源码快照各84个软件/目录文件按Git校验，主分支与PR57均从各自完整pipeline和consumer执行500条回读，不借用旧研究pipeline；公共provider来自实际CI安装。原数据/索引、默认依赖和活动研究工作区未改，0神经调用，不替代原生完成。专用CPU回执：`/root/marble-complete-published-research-component-20261104-002/qualification-public.json`。
+
+- [x] MultiAgentBench研究读取交接补齐当前版本核验：实际成功CI41679369206工件13252192256的94个载荷全部一致，复用原500条索引；当前研究main入口和已发布PR57入口分别完成500条公共/研究完整回读，原配置及关系可逆还原，固定原三题均匹配索引。外部任务锁CLI通过，原数据/索引未改、未重建索引，研究旧客户端和默认锁未改，0神经调用。服务器回执：专用CPU的`/root/marble-current-ci-research-reuse-20261104-001/qualification-public.json`。这是输入交接，不替代原生任务与评分，不增加来源完成数。
+
+- [x] xLAM作者原格式生成协议已交付；原前三条、当前成功CI包与研究读取证据见本文件xLAM小节及机器清单。当前总计96/113（当时），剩17项；三条围栏输出不是质量通过。精确回执提交db548b1d的完整CI41676183006和CPU
+  smoke41676190613均成功，不能替代原生执行证据。
+
+- [x] MultiAgentBench独立9B262144配置的原固定三题均已终止并审计：三题CLI退出码均1，31次保存模型返回中16次200、15次400，全部400均为官方聊天模板`No user query found in messages`；原关键词工具7次返回，在途请求0。原任务、角色、工具、材料、5轮最大值和各类调用预算未改；保存请求的输出预算为256/512/2048，不笼统称每次512。失败和旧14B结果完整保留。服务器回执：专用CPU的`/root/marble-original-research-native-launch-20261104-004/terminal-independent-audit-public.json`。
+
+- [ ] MultiAgentBench来源仍未交付。Qwen3-30B-A3B-Instruct-2507与Qwen3-4B-Instruct-2507的固定官方模板均已在CPU完整渲染上述15条原失败请求，0模型调用、不改原消息；这是模板资格，不是NPU部署或原生跑通。替代模型需先核验原输入容量、文件身份、隔离资源及完整原流程，不能把小模型、低分或仅返回HTTP200当作完成依据。
+
+- [x] 固定官方4B
+  tokenizer已检查33条完整保存请求（上述31条及旧14B每个已有原题目录中按字节长度选出的最大请求），最大177444输入tokens，原256/512/2048输出预算保留，均在原生262144内。原固定三题已通过公共binder生成4B
+  actor/judge绑定，仅改模型标识、评价模型标识及输出路径。模型权重、部署和后续Agent新消息容量另验；本步骤0神经调用、不打来源总勾。服务器回执：`marble4b-saved-request-capacity-20261104-001/qualification-public.json`。
+
+以下早期阶段记录保留原证据与当时状态；其中资源交接和“仍运行／待用9B”不覆盖上方最新终态。当前资源以用户最新独占授权为准。
+
+### 剩余原生环境前置条件复核（2026-11-02）
+
+- [x] 经用户明确同意，MultiAgentBench失败14B配置已在无在途模型/关键词请求的边界结束；父子均终止，原前两题已存在的结果文件SHA256不变，其余输入/输出/失败记录全留，不回放未知队列。整体目标未暂停，下一原生窗口用已准备的独立9B262144配置完整验证原固定任务。xLAM3条生成也已终止，周期队列第240批完整收口，原模型/队列精确快照保存后交接下一双卡研究窗口；不将停止失败配置或交卡当作来源完成。
+
+- [x] 上述HTTP错误保护又直接用于服务器保存记录只读检查：快照75请求/74返回中29个200、45个400、1个未返回，修复入口会返回失败；原请求、响应、状态、评分均未改，新增模型调用0。该快照仍在第二原题运行期间，不是最终终态。扩大相关软件回归114项通过、1项平台跳过；单元测试与实际元数据核查均不能替代原生新配置执行。
+
+- [x] MultiAgentBench外层命令修复HTTP失败漏报：官方子进程退出0/结果文件存在不再足以让命令返回0；保存HTTP非200、未返回请求或无请求证据均返回非0，并输出HTTP计数。新保护只影响命令错误报告，不改作者任务、工具、评分或生成预算。错误状态、孤立响应和不同原题同ID等人为控制连同原恢复/传输回归43项通过、1项Windows平台跳过；不是新原题执行。在途fresh002仍使用其冻结软件副本，不热替换或重启，后续独立配置才使用修复入口。
+
+- [ ] MultiAgentBench
+  fresh002发现真实上下文阻塞：原首题CLI虽退出0，35个HTTP返回中仅10个200、25个因完整输入超过14B的131072容量返回400；原planning/communication均保留-1，不能算原生跑通。原上限5轮未改，原Planner自行在2轮后终止，不人为缩短。未截断原材料或降低512预算；现有9B的同一完整请求tokenizer检查为177117
+  tokens，加512在262144容量内，但仅是容量检查，尚非新模型原生运行。已仅按现有公共绑定入口准备原固定3题的9B
+  actor/judge新配置；原任务、agents、关系、工具与轮数上限不变，旧14B结果单列。当前第二原题继续运行，只暂停其外层等待进程以在原题结束后交接研究窗口，不向原Agent子进程发暂停信号。
+
+- [x] AppWorld研究读取缺口已补最小公共委托：旧入口在7项资产结构控制中6项失败；修复后连同GAIA和provider共21项通过，5类原生资产变更及索引缺守卫均拒绝。复用服务器实际CI71载荷、原732条索引及固定3题，公共/修复研究回读与历史原记录、specs及每题6份参考资产一致，0模型调用。现有研究Draft
+  PR57已补入，精确新头4项CI通过；默认锁未改，旧provider缺AppWorld时7项资产控制明确skip，不用skip替代配套provider实测。未合并、不称研究main已切换。[修复回执](validation/appworld-research-integrity-repair-20261103.json)。下方2026-10-31缺陷记录保留为历史观察，不覆盖本次修复状态。
+
+- [ ] MultiAgentBench第二次原固定三题已在精确恢复服务后启动，仍原5轮/512预算；仅本任务加密出网和缺失lxml解析依赖改变。原首题已保存实际模型返回及原MiniLM
+  NPU关键词返回，完整Agent迭代和原评分尚未结束，不打来源总勾、不回放旧队列。前次不完整尝试与授权停止证据保留。
+
+LMSYS复用步骤（在服务器、仓库根目录执行）：先用自己的HF账号在官方页面取得访问权，再执行`hf auth login`隐藏输入凭据。已核实的获取客户端为`huggingface-hub==1.27.0`；续接客户端为Python3.12.13、`pyarrow==21.0.0`，安装`workload-preparation[data]`。下载文件放仓库外，原始数据不提交Git。原始会话是数据资产，下面是明确声明的历史续接协议，不冒称发布方提供了质量benchmark。
+
+```bash
+python - <<'PY'
+import json
+from pathlib import Path
+from huggingface_hub import HfApi, hf_hub_download
+source = json.loads(Path("workload-preparation/data/catalogs/source_manifests_v1.json").read_text())["sources"]["LMSYS_CHAT"]
+HfApi().auth_check(repo_id=source["repo_id"], repo_type="dataset")
+for item in source["files"]:
+    if item["role"] == "raw_source":
+        hf_hub_download(repo_id=source["repo_id"], repo_type="dataset", revision=source["revision"], filename=item["path"], local_dir="/data/lmsys-original")
+PY
+python scripts/prepare_reused_research_assets.py LMSYS_CHAT --mode verify --data-root /data/lmsys-original
+python scripts/prepare_reused_source_records.py LMSYS_CHAT --data-root /data/lmsys-original --output /data/lmsys-prepared --limit 3
+python scripts/run_historical_dialogue_original.py LMSYS_CHAT --prepared /data/lmsys-prepared --data-root /data/lmsys-original --output /data/lmsys-run-fresh --endpoint http://127.0.0.1:19468/v1 --model Qwen/Qwen3-14B --max-tokens 512 --context-capacity 131072 --request-timeout-seconds 600 --count 3
+```
+
+上述路径是使用者自行指定的外部目录，输出目录必须全新。模型服务须按最终回执的Qwen3-14B固定权重和131072上下文配置准备；端口可改为自己的已部署端点。`--limit 3`只限制索引记录，不裁剪会话；`--count 3`运行原前三段的全部前缀。全量使用时，准备命令去掉`--limit 3`，执行命令用`--full`替代`--count 3`；不代表本次做过全量推理。此前服务器获取使用同一官方SDK逐文件调用，准备/续接命令和参数已实际使用；上面的通用路径整段未重新冷下载，不将命令示例当作新增实跑证据。
+
+- [x] LMSYS授权后取得原六分片共1488850250字节，全部100万条绑定核验；固定原前三段全部8个历史前缀已在14B
+  NPU运行，独立审计通过。8次均到达声明512-token上限，不是自然结束或质量通过；原历史回复用于后续前缀，不是在线Agent。实际成功CI94载荷、3个公共脚本逐字节一致，3处公共／未修改研究读取及实际外部锁CLI通过，默认研究锁未改。[最终回执](validation/lmsys-original-native-delivery-20261103.json)。下方403和未取得文件记录是授权前历史状态。
+
+- [x] MultiAgentBench经用户同意已在无在途模型/关键词调用时结束前次不完整尝试，旧输入、输出、未决请求及日志全留。仅为本任务建立过期的加密环回HTTP(S)出网，不改原URL/材料/工具/5轮/512预算。另查明作者`fetch_html_content`显式选用`lxml`，但默认锁安装未含该可选解析器，其异常被原函数捕获为None；已仅给隔离原生客户端补`lxml==6.0.2`，既有95项发行版不变、原Poetry锁与源码不改，依原uv管理器安装并检查通过。未修改作者函数的泛化对照已返回16个章节、85项参考文献，用时约7秒；这是网络/解析资格控制而非原题执行。首次代理控制与缺pip的安装失败保留；下一资源窗口再跑原固定前三题，来源总勾仍不变。
+
+- [x] 2026-11-03重新核查LMSYS-Chat：服务器现有HF登录确实存在，但恢复此前获准的加密环回出网后，官方账号访问检查仍返回403/GatedRepoError。GAIA访问权不等于LMSYS访问权。首次旧代理连接拒绝的检查点保留；未代用户接受新条款、未下载原数据或输出凭据、模型调用0。已请用户在官方页面自行决定并获得权限，之后继续原六分片/原生历史会话流程；来源总勾不变，不能拿历史文件身份或已注册adapter当当前数据/原生执行完成。
+
+- [x] MultiAgentBench旧运行已按进程出生身份确认父子均停止，第一题虽留有结果文件但迭代数为0，不能当完成。47条原模型请求、4条返回、43条未返回与已知NPU转发路径逐字节核对：5条曾转发、4条有返回、1条未决；另42条未见于这条转发路径，不据此断言其他系统绝无推理。旧队列及未决请求不回放，全部证据保留。经用户明确同意，对原固定前三题新开一次验证尝试，仍原5轮/512输出预算/原工具与评分；模型改用受限加密流式转发至原14B服务，原NPU关键词工具已有真实返回，父子原生进程仍在执行，来源尚未打勾。首次关键词调用在神经计算前被私有卡归属解析守卫拦截，修正NPU/chip合列格式后同一仍存活调用返回；未重启Agent、未改原查询或模型计算。
+
+- [x] 2026-11-03新增PaperBench离线前置核验入口：`python scripts/check_paperbench_native_prerequisites.py`仅展示计划；提供`--author-root /external/frontier-source`后逐项核验195份固定源码，再报告作者镜像为amd64、Miniconda为x86_64及原构建自动接受Anaconda条款的行为。该入口不构建、不安装、不接受条款、不执行作者程序；服务器现有195份原源码已实际验证，5项人为夹具控制通过，尚非CI安装工件验证。ARM64不能因此算作原生执行就绪，x86主机匹配也不证明镜像、科学任务与评分已合格。原BasicAgent默认300秒和README开发配置的复现60秒分别标明，不将开发/默认配置冒称24小时正式协议；PaperBench来源总勾不变。
+
+- [x] OSWorld官方镜像元数据已从原Docker注册表取得，manifest与config摘要一致，观测版本仅发布linux/amd64、无ARM64。没有拉取镜像层、启动桌面或执行任务；当前原生架构兼容仍未解决，不以官方`KVM=N`支持推断ARM64镜像可用。该核验只解决前次网络不可达导致的平台元数据未知，不代表桌面或Agent完成。
+
+- [x] PaperBench客户端安装、pip
+  check、原版editable源码路径及可写HOME已核验；195份运行软件与48份固定chz源码逐文件保持原字节，CPU工作区的506份材料也已核验。禁网检查中，原版注册器解析23个论文配置，作者`check_for_lfs`在all/debug/dev/human/testing五种划分均通过，分别20/1/3/5/1项。真实`--help`正常打印完整参数，但该固定chz版本的帮助分支原本就退出1；已核验原源码语义，不篡改退出码、不误报为运行失败。初次只读HOME/普通wheel缺划分目录的失败保留，按原工作区editable方式修正。此项仍不是Agent、复现或评分完成。证据：CPU工作区`/root/swe-bench/docker-data/paperbench-native-client-20261103-001/original-client-readiness-public.json`。
+
+- [x] PaperBench公共读取入口已通过实际CI工件安装验证（运行41493282959／工件13165601157，软件提交d42097da，90份Git／包内／安装文件一致）。服务器全部23个原始论文任务包、23次公共索引回读及未经修改研究consumer的23次回读一致。原始配置、404份任务材料、79份评分材料保持分离，consumer和SQLite未改变；研究软件仅用于私有联调，未迁入公共代码。原生Agent执行、复现和评分尚未完成，来源总完成勾不变。
+
+- [x] PaperBench公开的原始论文资产准备入口已在服务器完成全部506份既有原文件的plan、prepare复用、verify；并分别用新目录验证一份原LFS文件和一份原普通Git文件的真实下载。没有重复下载全部506份，也未据此宣称完整从零获取链路在所有网络环境通过。使用下列命令，原文件只放服务器仓库外目录；输出会给出原版运行器所需的`PAPERBENCH_DATA_DIR`。
+
+  ```bash
+  python scripts/prepare_paperbench_original_assets.py --output /server/paperbench-assets --action plan
+  python scripts/prepare_paperbench_original_assets.py --output /server/paperbench-assets --action prepare --max-bytes 213434104 --github-api
+  python scripts/prepare_paperbench_original_assets.py --output /server/paperbench-assets --action verify
+  export PAPERBENCH_DATA_DIR=/server/paperbench-assets/project/paperbench/data
+  ```
+
+  `--github-api`只用于原普通Git文件，原LFS文件直接读取官方media端点；须遵守API配额和访问条件。配额或网络错误保留原错误，恢复后重用已通过文件；已有不合格文件或`.partial`须先检查，不覆盖。该入口不包含论文实验依赖的外部ImageNet等科学数据，不启动Agent/复现/评分。证据：`/var/lib/npc/paperbench-public-asset-entry-20261103-001/qualification-public.json`。
+
+- [x] PaperBench发布的23个论文目录、506份原始论文/评分规则/配套资产共213434104字节已在服务器全部核验；这不是23个独立benchmark，也不等于论文实验所需的外部科学数据集均已取得。首轮487份成功、19份受网络及限定回退次数影响而失败，失败记录保留；19份从同一官方Git
+  blob接口恢复后，全506份重新做字节及Git/LFS身份核验，未替换材料。原始材料不进入公开仓库。证据：`/var/lib/npc/paperbench-original-task-assets-20261103-001/complete-original-assets-public.json`。Agent、复现实验及评分未执行，来源仍不打勾。
+
+- [x] 补齐原生软件实际依赖的六份`experiments/splits/*.txt`，原软件选择现为195文件、2114907字节；只加入官方划分，不加入作者历史实验结果。修正后的两个公共准备入口在服务器重新通过plan/prepare/verify。证据：`/var/lib/npc/paperbench-public-source-entry-20261103-002/qualification-public.json`。下文189文件是先前运行代码/common准备的历史记录，不是最新完整软件选择。
+
+- [x] PaperBench的189份原生运行代码及common依赖共2114286字节已通过官方Git
+  blob接口取得并在服务器核验，未传输凭据、未取得LFS任务数据，排除作者历史实验目录。公共原文件入口在已有文件上通过plan/prepare/verify；归档入口也通过，但验证输入是服务器按已核验原文件打的软件包，不是重新下载的完整官方归档。初次验证误将输出放进软件目录而被拒绝的记录保留，修正为独立输出目录后通过。原uv.lock含206个包，另有固定chz
+  Git依赖；尚未安装完整环境、未运行Agent/复现/评分，来源仍不打勾。
+
+  ```bash
+  python scripts/prepare_jsonschemabench_author_source.py --source paperbench --author-root /server/paperbench-source --action plan
+  python scripts/prepare_jsonschemabench_author_source.py --source paperbench --author-root /server/paperbench-source --max-bytes 2114907 --action prepare
+  python scripts/prepare_jsonschemabench_author_source.py --source paperbench --author-root /server/paperbench-source --action verify
+  ```
+
+  新文件获取需GitHub
+  API可达并有足够配额；本轮未验证服务器从零获取全部189文件。不要盲目下载包含全部LFS数据的大归档，也不要把未展开指针当论文/评分规则。软件证据：`/var/lib/npc/paperbench-official-api-software-20261103-001/qualification-public.json`；公共入口证据：`/var/lib/npc/paperbench-public-source-entry-20261103-001/qualification-public.json`。
+
+- [x] OSWorld公共归档准备入口已在服务器通过plan、prepare、verify，复用原归档、0模型调用；统一`source-plan OSWORLD`登记入口和缺口。命令为`python scripts/prepare_swebench_author_source.py --profile osworld --author-root /server/osworld-source --action plan`，prepare另传`--archive /server/original-osworld.tar.gz`，verify复核同一目录。官方Docker
+  Hub元数据显示镜像为linux/amd64；当前ARM64
+  CPU节点未注册binfmt仿真器。原Ubuntu.qcow2.zip为12273896463字节，卷余7.6GiB不足以容纳压缩包，因此未下载。主仓准备通过不是桌面环境或原生任务完成。
+
+- [x] OSWorld固定版本的主仓1324份原文件已在服务器核验，共21403779字节，当前test_all含368个任务；两个Agent
+  Git子模块尚未取得，不宣称完整Agent环境。官方Docker
+  provider明确在缺KVM时设置`KVM=N`，因此不能仅以缺KVM判定无法执行。官方容器架构、原桌面镜像、Agent与评分仍待核验；本次容器元数据请求遇到网络不可达，未下载镜像层。来源仍不打勾。证据：`/var/lib/npc/osworld-original-harness-20261103-001/qualification-public.json`。
+
+- [x] NatureBench第三道固定原题的原版评分服务在对应合格科学环境通过独立回环健康检查；只读挂载原数据，不挂Docker套接字，准备检查0模型调用。第二题现已终止为原4小时预算超时，原任务评分-1，有效性judge因上下文容量不足失败。CPU自动停止后已恢复同一持久卷、独立Docker、同一第三题评分容器及受限模型通道；第三题启动阶段于UTC2026-11-02T19:37:41记录到实际Agent事件和原工具调用；现已正常结束，但科学评估尝试0、judge为空，最新终态见下文科学代码工作流。原预算与judge保留，来源仍不打勾。证据：`validation/naturebench-original-fixed3-native-progress-20261102.json`。
+
+- [x] VisualWebArena已复用公共归档准备器：478份原生软件、任务配置、网站准备与仓内参考资产共200942354字节，在服务器通过plan、prepare、verify，复用原归档、没有重复下载。仅排除media演示和tests；网站镜像及题目外链媒体仍需另行准备。公共仓仅存固定摘要元数据，不存这些原文件。用法如下（先plan查看官方固定归档地址）：
+
+  ```bash
+  python scripts/prepare_swebench_author_source.py --profile visualwebarena --author-root /server/visualwebarena-source --action plan
+  python scripts/prepare_swebench_author_source.py --profile visualwebarena --author-root /server/visualwebarena-source --archive /server/original-visualwebarena.tar.gz --action prepare
+  python scripts/prepare_swebench_author_source.py --profile visualwebarena --author-root /server/visualwebarena-source --action verify
+  ```
+
+- [x] VisualWebArena官方固定版本的511份原文件已在服务器按Git对象与SHA256核验，共212274671字节；原任务含classifieds 234、shopping
+  466、reddit
+  210，共910题。这里只完成取得和盘点，没有执行网站初始化、登录、Agent或评分，来源仍不打勾。剩余条件是原可复位网站、题目引用媒体及合适的NPU视觉Agent/评分后端；不能用公开网页demo或伪装GPT模型名替代。证据：`/var/lib/npc/visualwebarena-original-harness-20261102-001/qualification-public.json`和同目录`original-task-inventory-public.json`。
+
+- [x] MLE-bench原版Python 3.11客户端安装、pip check及官方CLI
+  help已在专用CPU容器通过。首次help因原代码在当前目录建立cache、而工作目录只读而失败；保留失败记录，仅改为本任务可写工作目录后，在禁网容器复核help退出0，未改源码。此项不代表官方完整Agent镜像、竞赛数据或评分完成，来源仍不打勾。证据：`/root/swe-bench/docker-data/mlebench-cpu-client-20261102-001/client-help-writable-public.json`。
+
+  客户端环境的复现步骤如下，先通过下述固定归档入口准备`/server/mlebench-native-source`，再在独立CPU环境执行。Python须为3.11，工作目录须可写；这是已验证的客户端准备流程，不是完整竞赛运行命令。首次验证使用原pyproject允许范围内的解析依赖，未证明任意后续解析结果均兼容。
+
+  ```bash
+  python3.11 -m venv /server/mlebench-client/venv
+  /server/mlebench-client/venv/bin/python -I -m pip install /server/mlebench-native-source
+  /server/mlebench-client/venv/bin/python -I -m pip check
+  cd /server/mlebench-client
+  env -u PYTHONPATH -u PYTHONHOME /server/mlebench-client/venv/bin/mlebench --help
+  ```
+
+  后续仍须取得官方Kaggle竞赛访问授权、按原README准备固定竞赛数据、配置与NPU模型兼容的原生Agent，完成运行和官方grade。当前ARM64节点不能原样使用硬编码x86
+  Miniconda的官方完整Agent Dockerfile；未执行其中的自动条款接受步骤，未用替代数据或空评分填补缺口。
+
+- [x] MLE-bench固定官方版本的1015份原仓库文件已在服务器核验，展开后41716866字节；其中322份Git
+  LFS文件已核验内容摘要、大小与原Git指针身份的绑定。初次将展开文件直接按指针摘要比较而失败的记录保留，原内容未改。这里只记录原仓库取得；下述公共运行时准备已另行验证，竞赛数据授权获取、原生Agent及官方评分仍未完成，来源不打勾。服务器证据：`/var/lib/npc/mlebench-original-source-20261102-001/lfs-qualified-public.json`。
+
+- [x] 复用既有源码归档准备器，MLE-bench的758份原生运行时/Agent/环境/竞赛定义及评分资产共7501882字节已通过服务器plan、prepare、verify；其中83份LFS内容保持原字节并绑定原指针身份。未选作者历史运行结果与familiarity研究抓取代码。WebArena同入口的88文件归档准备及复核也通过，原归档复用、没有重复下载，0模型调用。公共仓只存固定元数据和准备代码，不带原文件；它们均不是原生任务完成。
+
+  下列入口在服务器的仓库外目录准备软件，plan会给出固定版本的官方归档地址；竞赛数据须另按官方授权流程取得：
+
+  ```bash
+  python scripts/prepare_swebench_author_source.py --profile mlebench --author-root /server/mlebench-native-source --action plan
+  python scripts/prepare_swebench_author_source.py --profile mlebench --author-root /server/mlebench-native-source --archive /server/original-mlebench-source.tar.gz --action prepare
+  python scripts/prepare_swebench_author_source.py --profile mlebench --author-root /server/mlebench-native-source --action verify
+  # WebArena已取得的官方源码归档同样可复用：将profile换为webarena并使用对应的独立目录/归档。
+  ```
+
+- [x] Playwright官方ARM
+  Chromium125.0.6422.26已在任务独立目录准备，34项官方系统依赖仅在专用CPU容器安装，未要求升级已有包。无头浏览器启动及本地静态页面渲染通过，原网站未部署、benchmark任务执行数0、模型调用数0。下载客户端等待超时后已核实原Node进程继续下载，最终复用原下载完成安装，没有重复下载。服务器证据：`webarena-agentlab-dependency-preflight-20261102-001/chromium-smoke-public.json`。
+
+  浏览器准备须在专用CPU容器完成，不在共享NPU工作区安装系统库。先用`/server/webarena-env/bin/python -I -m playwright install-deps --dry-run chromium`查看当前平台的官方依赖清单，再由该容器的操作人以`--no-upgrade --no-install-recommends`安装缺项；随后设置`PLAYWRIGHT_BROWSERS_PATH=/server/webarena-browsers`，使用同一虚拟环境执行`python -I -m playwright install chromium`。正式执行时保留该浏览器路径及上述NLTK资源路径。软件页面渲染不替代原网站状态、Agent动作或官方任务评分。
+
+- [x] BrowserGym安装包中的812条WebArena任务与固定官方`test.raw.json`逐字节一致，任务ID集合及所有任务字段均一致，差异任务为0。该结果只证明任务身份保持，不代表Agent、网站或评分已跑通；服务器证据：`webarena-agentlab-dependency-preflight-20261102-001/original-task-identity-public.json`。
+
+- [x] WebArena官方推荐框架路径已完成独立CPU环境准备：AgentLab0.4.2、BrowserGym
+  WebArena0.14.2；复用官方发布锁文件的252项约束，安装、隔离`pip check`及禁网导入通过，vLLM后端类可用，0网络尝试、0模型调用。原浮动解析超时、二进制限定解析失败、CANN全局`PYTHONPATH`污染及NLTK资源缺失记录保留；只对本进程使用`-I`隔离，不改全局环境。
+
+  环境准备示例（独立服务器目录，不安装到系统Python）：
+
+  ```bash
+  python3.12 -m venv /server/webarena-env
+  /server/webarena-env/bin/python -I -m pip install --index-url https://pypi.org/simple --constraint /path/to/benchmark/configs/workload-native/webarena-agentlab-0.4.2-official-constraints.txt agentlab==0.4.2
+  /server/webarena-env/bin/python -I -m pip check
+  NLTK_DATA=/server/webarena-nltk /server/webarena-env/bin/python -I -c "import nltk; nltk.download('punkt_tab',download_dir='/server/webarena-nltk',raise_on_error=True)"
+  ```
+
+  本机NLTK默认下载因网络重置失败，实际改用官方NLTK GitHub同一`punkt_tab.zip`对象，Git
+  blob、大小和SHA256校验后在专用目录准备；没有替换分词内容。后续进程须显式设置`NLTK_DATA`。本项只证明依赖与导入可用，浏览器软件检查另见上述记录；原网站状态、真实NPU
+  Agent及原评分尚未验证；采用原始任务加官方推荐框架的配置，不能混报成旧论文运行器成绩。框架不会在CPU执行LLM、embedding或judge前向。
+
+- [x] 已复用现有作者源码准备器接入WebArena完整88文件固定清单；服务器对已取得原文件执行plan、prepare复用、verify均通过，未重复下载。完整88文件的全新GitHub
+  API下载分支未实跑，不能冒充已验证；原始取得方式是逐文件Git身份核验的官方归档。
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source webarena --author-root /server/webarena-original-source --action plan
+python scripts/prepare_jsonschemabench_author_source.py --source webarena --author-root /server/webarena-original-source --action prepare --max-bytes 7550641
+python scripts/prepare_jsonschemabench_author_source.py --source webarena --author-root /server/webarena-original-source --action verify
+```
+
+- [x] WebArena同一固定版本的完整官方源码归档已在服务器取得：88份原文件、7550641字节，逐份按官方Git
+  tree的大小和blob身份核验，保留原归档。包含原Agent、浏览器环境、评分器及依赖声明；本项记录原源码取得阶段，后续公共入口、框架和浏览器准备另见上述记录，原网站及原生执行仍未完成。
+
+- [x] WebArena官方固定版本的812条原任务配置及LICENSE/README共901850字节已在服务器取得，Git
+  blob及SHA256核验通过；已有公共获取入口的plan、download和verify实际通过。前3条原题均依赖`shopping_admin`，后续优先核验该原网站镜像与完整原题流程；不将下载或读取算作来源交付。首次raw域名连接重置及编排脚本误把下载成功的空stdout当JSON的失败保留，已回查实际成功回执，未重复下载。
+
+- [ ] WebArena `shopping_admin` 部署：在具备独立 Docker 的兼容节点按固定摘要拉取候选镜像，再按作者原步骤设置站点 URL、验证登录和复位。镜像配置摘要已与官方
+  TAR 的 `manifest.json` 匹配；拉取和站点运行未验证。固定任务 0/1/2 不依赖其他站点，模型推理仍在 NPU。
+
+  ```bash
+  docker pull --platform linux/amd64 webarenaimages/shopping_admin_final_0719@sha256:428cdedfc10996d7f5378299cff541c93c187d1243643e31d439a66c0156147d
+  ```
+
+```bash
+python scripts/prepare_reused_research_assets.py WEBARENA --mode plan
+python scripts/prepare_reused_research_assets.py WEBARENA --mode download --data-root /server/fresh-webarena-assets --max-bytes 901850 --github-api
+python scripts/prepare_reused_research_assets.py WEBARENA --mode verify --data-root /server/fresh-webarena-assets
+```
+
+以下三项保持未完成，不因官方文档核查或环境探测而打勾；机器记录见`dataset-validation-status.json`的`delivery_inventory`。
+
+| 来源      | 本次确认的缺口                                                                                                                                                                   | 下一步原生验证条件                                                                                   |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| MLE-bench | [官方获取流程](https://github.com/openai/mle-bench#dataset)使用Kaggle API；专用CPU工作区默认凭据文件不存在。本次未检索、复制其他任务凭据。                                       | 授权可用的竞赛数据与访问方式；固定原竞赛，完成官方prepare、Agent及grade，不能以合成CSV替代。         |
+| WebArena  | [官方协议](https://github.com/web-arena-x/webarena#end-to-end-evaluation)要求自建网站和原始状态、登录及重置。当前服务未配置；官方推荐AMI的1000GB不是本次固定抽样的实测最低空间。 | 先盘点固定原题对应的完整网站依赖、镜像架构与空间，再部署自有隔离网站；不改题、不借用演示站完成评估。 |
+| [x]       | OSWORLD                                                                                                                                                                          | desktop-gui-interaction                                                                              |
+
+### DiscoveryBench 隔离执行准备（2026-11-02）
+
+- [x] 公共原始任务适配器已接入：固定186份原文件身份，共13,883,534字节，原答案表239条全部保留。229条能解析原生问题与数据关系；5条原元数据解码异常、5条原文件关系异常保留为阻塞记录（后者共8处缺失引用，非8条任务），不改编码、不补文件别名、不过滤原题。
+- [x] 229条输入材料与原官方默认提示构造器结果一致，答案表gold与元数据main假设不进入输入材料；原完整元数据可通过原生文件关系恢复。原前三题完整元数据恢复、239条公共/未修改研究入口回读及索引不变检查通过，未运行模型或重跑原题。本地数据准备包及边界测试566项通过；本项是源码验证，尚非安装版CI工件验证。
+
+原始任务读取入口：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+from vllm_hust_workload_data.discoverybench import restore_original_case
+
+data_root = Path("/external/discoverybench-native-real")
+records = iter_workload("DISCOVERYBENCH", data_root=data_root)
+try:
+    record = next(records)  # 原答案表顺序；不要用跳过失败题改变固定样本。
+    if record.runtime["blockers"]:
+        raise RuntimeError(record.runtime["blockers"])
+    native = restore_original_case(record, data_root=data_root)
+    # native含原metadata/question和单独的answer_key_row，供原框架/评分器使用。
+finally:
+    records.close()
+```
+
+外部数据目录保留`answer_key/answer_key_real.csv`及`discoverybench/real/test/...`原相对路径。准备索引仍使用统一pipeline；记录不是可直接发送的模型请求，必须接原Agent/工具/评分流程。研究侧复用原始任务、参考及文件关系，不迁入观测或特征分析。读取回执：`discoverybench-public-native-relations-20261102-001/qualification-public.json`。
+
+- [x] 完整原coder
+  Agent驱动`run_discoverybench_original_actor.py`已在实际无网络/非root/只读容器完成构造检查，模型和工具请求均为0。默认仅plan；`--preflight`只构造；`--execute`才调用原提示构造器和原Agent循环，保留5轮/1次Python规则，读取哈希固定的四份作者源码。模型提供方与隔离工具传输明确披露，不称GPT-4复现。
+- [x] 固定前三题原coder
+  Agent已全部返回，各3次真实NPU14B请求、1次原Python调用；CPU与NPU保存的原请求/响应逐字节一致，原元数据未变，未重新生成答案。该勾仅代表Actor阶段，原评分与来源总勾尚未完成。回执：`discoverybench-fixed3-saved-execution-audit-20261102-001/qualification-public.json`。
+- [x] 三题原评分已返回并审计，各3/3/5次NPU
+  judge请求，实际judge为Qwen3-14B，不是官方GPT-4成绩；原参考/预测保持一致，评分算式核对通过。三题均为0分，原工具均报`NameError: py`：模型生成的`py`代码围栏被原清洗器保留，未成功执行科学程序。原输出/原工具未修补，没有重跑题目；不能称科学任务通过。回执及格式诊断位于`discoverybench-fixed3-saved-scoring-audit-20261102-001/`。
+- [ ] 完整公共运行入口，以及CI安装版工件上的原始任务、参考答案和原生文件关系读取核验仍待完成；源码版239条公共/研究回读已通过，来源总勾不变。科研观测、特征和分析仍留研究仓，不另建研究结果接入系统。
+- [x] `discoverybench_tool_transport.py`补齐原一次Python调用计数及按题独占的工具请求队列；实际CPU文件队列到隔离官方工具往返通过，返回字符串精确保留，二次提交被拒绝。超时/基础设施失败保留请求，不自动重放；返回值必须匹配原代码哈希。该传输不在宿主机执行代码，完整Agent与评分绑定仍待完成。回执：`discoverybench-tool-queue-public-20261102-001/qualification-public.json`。
+- [x] 原官方依赖在专用CPU独立Docker镜像安装、依赖检查及离线导入通过；19份官方源码身份核对，两个官方CLI在无网络/非root/只读容器中启动通过。实际115项依赖快照已保存，未修改全局环境。
+- [x] 按官方real答案表原顺序固定前三题`archaeology/0/0`、`archaeology/1/0`、`archaeology/10/0`；六份原始文件共2,010,940字节已在CPU侧核对Git
+  blob、大小及SHA256。题目、元数据和数据路径保持原样，参考答案单独保存，未进入Git。
+- [x] 公开子入口`scripts/discoverybench_isolated_python.py`在实际隔离容器完成普通输出和异常输出夹具验证；8项本地边界测试通过。脚本先检查无网络/非root/只读/无额外能力及no-new-privileges，再导入哈希固定的原官方Python工具，不在宿主机执行生成代码。
+- [x] 原固定前三题完整Agent／工具及替代NPU
+  judge原评分已核验；后续原位置3完成公开编排、隔离工具及恢复评分验证，实际CI包239条公共／研究原输入与参考关系回读通过。[最终交付回执及负结果](validation/discoverybench-original-native-delivery-20261102.json)。
+
+该脚本是容器内的Python工具子入口，不是独立的DiscoveryBench
+Agent或评分器。调用者须通过只读挂载提供原官方源码及该脚本，使用已安装官方依赖的Python执行`python -B /boundary/discoverybench_isolated_python.py --source /original`，标准输入为`{"code": "原Agent生成的代码"}`，标准输出为`{"tool_output": "原工具返回字符串"}`；容器须使用`--network none --read-only --user 65534:65534 --cap-drop ALL --security-opt no-new-privileges`，并提供有容量限制的`/tmp`和工作目录tmpfs。容器内不会挂载Docker套接字、模型服务凭据或评分参考。外层Agent仍须保持官方最多5次迭代和最多1次Python执行，不能通过反复启动工具进程增加预算。上述夹具是初期工具边界证据；完整原生与公开编排终验现已完成，仍保留原工具错误和0分，不称科学程序成功。
+
+原评分CLI硬编码`gpt-4-1106-preview`。若使用本地NPU
+judge，须在调用记录和报告中明确实际模型及评分配置，不能标成官方GPT-4成绩。阶段证据见[原资产与隔离准备回执](validation/discoverybench-original-assets-20261028.json)。
+
+### LongMemEval-V2 正向记忆流程（已交付，2026-11-02）
+
+- [x] 默认`Qwen/Qwen3-Embedding-8B`已在NPU以BF16、LAST pooling启动，既有9B
+  reader及14B服务未改动。作者嵌入内容上限仍为4096；服务上下文设为4224以容纳编码后的额外token。使用原生因果分块预填充512，不启用会分块求平均的`enable_chunked_processing`；单序列、显存比例0.243只是本机共驻验证配置，不是跨硬件最低需求。启动回执`lme-v2-original-embedding-service-20261102-004/state-public.json`。
+
+- [x] 原enterprise/small位置0／1／2的正向`rag_query_to_slice`已完成完整共享100轨迹建库、三题NPU生成及原评分0／1／1；原20,000输出／200,000记忆预算及thinking保留，三题记忆上下文均未截断。实际CI451条原关系、四处公共／未修改研究回读和三题原生输入绑定通过。[最终回执](validation/longmemeval-v2-positive-rag-native-delivery-20261102.json)。初次原请求400及两次KV容量失败保留；临时8B已释放，原9B／14B不变。
+
+- [x] RAG公开执行入口补齐`--embedding-assets /external/embedding/model`，同时建立固定reader与嵌入模型的离线缓存；清除继承的`HF_HUB_CACHE`／`HUGGINGFACE_HUB_CACHE`／`TRANSFORMERS_CACHE`覆盖，避免误读其他任务缓存。服务器核验原reader12份、嵌入模型13份元数据及原嵌入tokenizer离线加载通过，全部神经前向和权重加载被禁止。首次缓存覆盖失败保留；回执`lme-v2-dual-offline-cache-20261102-002/qualification-public.json`。本项0模型调用，不代表正向RAG已跑通，来源仍未完成。
+
+- [x] 451道原题的8个原始字段及两档有序记忆关联已与官方读取器逐项核对；企业/网页两域、small/medium四组代表记忆完整回读（100/500/100/479条轨迹），保留历史状态，不重新构造prompt。
+
+- [x] 当前源码公共入口与未修改的研究侧入口完成4条记录回读一致性检查；451条索引及研究读取器前后未改变。该验证未使用安装后的CI
+  wheel，未解码原题图片，也未执行原生RAG或评分，不增加来源完成数。服务器证据：`lme-v2-public-relations-20261102-001/qualification-public.json`；本地数据准备包测试539项通过。
+
+- [x] 原`enterprise/small`前三条`no_retrieval`结果及三个0分保留为消融对照，不改算正向记忆验证。
+
+- [x] 按原`run_eval.py`默认值固定`Qwen/Qwen3-Embedding-8B`的17文件身份，约15.15GB；公开获取入口已补充。
+
+- [x] 原嵌入模型17份文件、15,150,575,778字节全部校验通过，公开入口`--verify-only`实际通过；HF固定元数据和官方ModelScope同哈希大文件分工传输，不把ModelScope浮动master当不可变身份；该服务器的直接HF下载分支未验证。
+
+- [x] 独立ARM64/Python3.12预处理环境及依赖检查通过，公开检查器对原reader的12份处理器元数据前后校验一致，CPU夹具通过，神经前向/权重加载被禁用；不在CPU运行嵌入器、LLM或judge，也不把该夹具算原题执行。
+
+- [ ] 原固定前三条正向`rag_query_to_slice`、原评分以及公共包/研究侧任务结果交接。
+
+- [x] 本地构建的小型wheel已传到服务器隔离目录安装；安装版再次核对451道原题、两档记忆关系、四组代表完整轨迹及4条公共/研究消费记录，全部一致。证据：`lme-v2-installed-wheel-relations-20261102-001/qualification-public.json`。这是安装包实数据验证，不是CI下载工件验证，也不是模型执行或评分。
+
+原始数据读取入口（数据须在外部目录取得，仓库不内置）：
+
+- [x] 当前提交CPU
+  CI通过；正式工件13102996636的84份包文件在服务器独立安装并核对。先前本地wheel的两份源码仅有换行差异，因此没有直接升级旧证据；已使用正式CI安装版重新完成451题、两档关联、四组完整代表记忆及4条公共/研究回读，全部通过。证据：`lme-v2-ci-payload-equivalence-20261102-001/qualification-public.json`，仍未执行模型或原生评分。
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+from vllm_hust_workload_data.longmemeval_v2 import (
+    iter_haystack_trajectories,
+    restore_original_question,
+)
+
+data_root = Path("/external/longmemeval-v2")
+records = iter_workload("LONGMEMEVAL_V2", data_root=data_root)
+try:
+    record = next(records)
+    # 输入保留原问题和有序记忆ID；答案与评分函数只在outcome.references。
+    original_question = restore_original_question(record)  # 仅供官方任务/评分器使用
+    for trajectory in iter_haystack_trajectories(
+        record, tier="small", data_root=data_root
+    ):
+        pass  # 原始完整历史轨迹；不在这里生成prompt或研究特征
+finally:
+    records.close()
+```
+
+图片引用及截图归档身份保留在`runtime.native_files`。该元数据入口不会解码图片、执行记忆检索、调用模型或运行评分；应接原官方流程，不把`restore_original_question`返回的答案字段直接送给模型。准备索引仍使用统一pipeline，研究侧继续通过`resolve_input`消费。
+
+源数据、原9B
+reader及已有有效结果复用，不重跑消融以凑完成数。下载在服务器进行，本地不保存权重；默认8B嵌入服务已完成原生验证并释放，既有reader／14B服务未改动。早期动态进程与证据路径见[准备状态](validation/longmemeval-v2-rag-prerequisites-20261102.json)，后续运行以本节及机器清单的新回执为准，不能仅凭静态回执推定进程继续存活。
+
+预处理环境使用`configs/workload-native/longmemeval-v2-processor-arm64-py312-lock.txt`安装到单独Python3.12
+venv，保留原HTTP客户端不动；这是ARM64
+CPU构建适配，不是作者CUDA环境。检查命令：`python scripts/verify_longmemeval_v2_processor.py --python /external/client/bin/python --reader-assets /external/reader/model --execute`。默认只打印plan；执行仅运行图像/token预处理夹具，不调用模型或下载数据。
+
+### WorkArena 公开准备进展（2026-11-02）
+
+- [x] 官方固定版本174份源码与静态运行资产已在服务器取得，148,527,353字节逐份核对Git blob和SHA256；本地未保存数据。
+- [x] 公共原始归档`prepare`和`verify`命令在服务器通过，未导入发布方模块、启动浏览器或访问实例凭据。
+- [ ] 官方ServiceNow实例池授权及独立浏览器/依赖环境验证。
+- [ ] 使用合适NPU模型按原AgentLab/BrowserGym动作、步数与原生validator完成任务，并验证研究侧接通。
+
+准备命令：`python scripts/prepare_workarena_author_source.py --author-root /external/workarena --archive /external/original.tar.gz --action prepare`；只读复核将`--action`改成`verify`并省略`--archive`。默认`plan`仅打印固定下载地址和预算。原始归档地址由该入口打印，下载到服务器，不放仓库。
+
+官方当前要求申请[WorkArena-Instances](https://huggingface.co/datasets/ServiceNow/WorkArena-Instances)访问；未替用户接受条款或获取凭据。README中的cheat/oracle演示不能当作模型Agent验证。见[准备回执及原始说明](validation/workarena-original-public-preparation-20261102.json)。本来源仍不打完成勾。
+
+### MultiAgentBench 原生运行恢复核对（2026-11-02）
+
+- [x] 核验原父进程及子进程均已退出；旧状态文件的`RUNNING`不是当前运行证据。
+- [x] 两端逐字节对账保留4条原模型HTTP200返回及4条关键词返回，没有重复推理。
+- [x] 区分42条未转发请求与1条已claim但无保存返回的请求；不向已退出的消费者补发43条请求。
+- [ ] 完成固定前三条原生协议、judge资格验证、官方评分及原生结果交接。
+
+原第0条CLI曾以1退出，不能据此归因模型质量。原状态、请求、返回与失败均保留。见[恢复核对回执](validation/multiagentbench-native-recovery-audit-20261102.json)。只读检查入口`audit_marble_original_research_saved.py --run-root <原运行目录> --launch-receipt <原启动回执>`不触发推理或恢复操作。
+
+### SWE-smith 当前补接入记录（2026-11-02）
+
+- [x] 复用已有24条完整作者历史轨迹，保留原始消息、patch与历史结果；共3,083,863字节，服务器回查未新增下载或模型调用。
+- [x] 补充原始任务发布版本、11份分片身份及复用获取入口；夹具检查通过，不代表服务器已下载或执行原题。
+- [x] 在服务器核对官方源码：原patch引入缺陷，gold模式反向应用，模型修复正向应用；不能直接复用SWE-bench参考答案映射。
+- [x] 11份原始分片全部取得并逐份核验官方LFS身份，共277,767,206字节；公共`--verify-only`通过。服务器直连HF失败，使用4MiB分块内存中转，本地未保存原数据。直接下载分支尚未在服务器验证。
+- [x] 固定原第一分片前三条。第三条原issue为空，保留、不换题。见[原题准备回执](validation/swesmith-original-first3-preparation-20261102.json)。
+- [x] 公共源码`iter_workload`、准备索引和未修改的研究消费端在服务器对原前三条回查一致，七字段完整恢复，缺陷patch和测试划分不进入模型输入，索引未被读取修改；仍不代表wheel或原生评分通过。
+- [x] 公共读取器遍历11份原分片全部59,136条任务，逐条七字段合同检查通过；这是读取验证，不是全量Agent执行。
+- [x] 绿色CPU
+  CI的实际wheel已在专用服务器安装，82项包内工件逐项匹配提交源码；原前三条公共与未修改研究消费端回查一致。构建提交、artifact与哈希见准备回执，不代表原生Agent或评分完成。
+- [ ] 原生Agent与官方评分执行，以及原生结果的研究侧接通验证。
+
+当前专用CPU为ARM64；官方容器创建与评分路径显式请求x86_64。尚未验证兼容执行，不能仅凭profile支持ARM镜像就宣称可跑。见[源码语义审计](validation/swesmith-original-semantics-audit-20261102.json)。
+
+2026-11-05
+补齐固定oauthlib环境的[发布方构建资产](https://github.com/SWE-bench/SWE-smith-envs/tree/21549127f50e75d0ed62db9740d6b458f09683f7/env/oauthlib__oauthlib.1fd52536)：
+Dockerfile、setup脚本、原导出安装脚本及Conda清单共4文件3302字节，服务器逐文件Git blob及SHA-256核验通过。 原始下载连接重置后改用同一发布方Git blob
+API，未改文件。 用现有公共入口获取或核验：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source swesmith-env --author-root /external/swesmith-env --action prepare --max-bytes 3302
+python scripts/prepare_jsonschemabench_author_source.py --source swesmith-env --author-root /external/swesmith-env --action verify
+```
+
+原Dockerfile明确指定x86_64，原Conda清单还固定linux-64包及构建号，因此不能只换Docker的platform参数后称为原环境。
+下一步须单独核验ARM依赖替换、固定原仓库和原测试行为，并披露兼容差异；当前未构建镜像、未执行Agent或评分，来源不打总勾。
+
+后续ARM候选验证：保留Python3.10.15、全部13项原pip依赖及3项导出构建工具版本， 使用固定摘要的官方ARM Python基础镜像替代原x86
+Conda系统库；这是披露差异的兼容候选，不是原镜像。
+[候选Dockerfile](../../configs/workload-native/swesmith-oauthlib-arm-candidate.Dockerfile)在断网条件构建成功，
+`pip check`退出0。固定原oauthlib仓库的原全套命令
+`pytest --disable-warnings --color=no --tb=no --verbose`在断网、只读根、cap-drop ALL、NoNewPrivs容器中退出0： 673
+passed、2 skipped，原测试未删改，0模型调用、不挂NPU。
+这是基础仓库兼容控制；固定任务bug分支、反向gold/正向候选评分对照、完整Agent工具链及原生三题仍待核验，来源总勾不变。
+基础候选镜像约69MB，依赖准备只在服务器，未下载到本地；具体镜像、源码、日志摘要见上述语义审计记录。
+
+固定前三题的ARM故障/参考控制进一步完成：已恢复原第一分片并核验原SHA-256及三个固定ID，
+三份原故障补丁在固定原仓库上分别产生18/13/37项失败，反向应用各自原补丁后三次均恢复673通过、2跳过。
+原F2P名单18/13/37项全部在故障态失败、反向参考态通过，原P2P名单655/660/636项在两态均通过；
+反向恢复后的251份原源码字节逐文件一致。第三题原issue为空、补丁原有空白告警均保留。
+这只验证原测试名及参考控制，不是官方harness评分或模型修复结果；原任务分支、Agent和官方评分仍待补齐。
+
+原生Agent入口核对：固定作者源码中的`agent/swesmith_gen_gpt.yaml`使用`instances.type: swesmith`，
+原调用上限75、单工具执行超时300秒；`swesmith_infer.yaml`则默认SWE-bench verified，不能混用。
+现有`run_swebench_original_agent.py`要求旧SWE-bench十字段，并不适配这批原七字段任务；不得补造base_commit/test_patch等字段来强行接入。
+发布方API已返回三个固定分支的真实提交号，详见上述语义审计；直接Git传输未取得分支，后续按下述方式恢复精确浅快照，不能用自造提交冒充原分支。
+后续需按原SWE-agent的SWE-smith实例类型部署、固定这些分支，并独立核验本地NPU模型绑定。
+
+固定三题源码快照恢复已实跑：三个发布方固定提交归档的完整Git树ID、从原元数据恢复的commit对象ID逐一与发布方一致，
+共314个原Git对象，`git fsck --full --strict`退出0。
+使用`scripts/recover_swesmith_fixed3_repository.py --archive-dir <三个原提交归档目录> --output <全新目录>`可复核恢复；
+归档名须为`<原提交ID>.tar.gz`，commit元数据只从发布方API获取，任一原对象ID不匹配就拒绝输出。
+工具在本仓库内单独关闭autocrlf以保留检出字节，不修改全局Git配置；单元测试覆盖逃逸路径、原提交校验及真实Git检出/fsck。
+这仍是深度1的三个原快照，不含完整镜像仓库历史；不能把未恢复的历史、完整Agent工具链或官方评分算作已合格。
+网络正常时优先直接克隆原仓库；该恢复入口只是固定样本的传输后备，不限制用户正常取得全部原任务分支。
+
+后续已补齐评分必需的直接父提交：原`run_patch_in_container`评分时执行`git checkout <instance_id>`后再执行`git checkout HEAD~1`，
+用于恢复任务分支中隐藏的测试，因此深度1不能用于完整评分。 恢复工具增加`--include-grading-parents`，目录中还需包含语义审计记录所列三个父提交的原归档。
+服务器已恢复6份原提交/树、共321个原Git对象并通过严格fsck；三个固定任务逐一执行上述两条原Git命令成功，
+每题所需55份原测试文件均存在。未获取更早历史不自动等同于原协议受阻，后续只按实际执行需要补齐。 原Agent与官方评分尚未运行，不因Git控制通过而打总勾。
+
+官方评分客户端已补齐：固定原作者归档安装其`validate`最小依赖；第一次自动取得SWE-bench5.0.2，
+原评分器因缺`KEY_PREDICTION`导入失败。按官方v4.1.0的常量接口固定`swebench==4.1.0`后，
+原评分器导入、`python -m swesmith.harness.eval --help`及`pip check`均退出0，未修改原评分器。
+配方见[评分客户端Dockerfile](../../configs/workload-native/swesmith-scoring-client.Dockerfile)。
+使用该客户端在断网、无Docker套接字、无NPU容器中，对保存的六份测试输出运行原profile parser、
+原`get_eval_tests_report`和原`get_resolution_status`：三个故障态均为RESOLVED_NO，三个反向参考态均为RESOLVED_FULL，
+F2P/P2P数量与原任务一致。没有重跑测试或模型；这只补评分函数控制，不等于完整容器评分harness或原生Agent完成。
+
+完整容器评分harness后续已实跑：公共`run_swesmith_arm_evaluation.py`在执行前后核对原作者5个核心模块字节，
+保留原题、原七字段、原gold反向补丁、原测试集合及计分逻辑。 原gold控制为3/3解决，明确标注的空补丁负对照为0/3解决；两次均退出0、无超时/评分错误，6份原报告已检查。
+ARM部署适配仅绑定本地兼容镜像/平台、安全选项及真实系统Python的激活方式，原pytest命令不变；未伪造Conda命令。
+可信评分控制器使用Docker套接字，不执行生成程序；原题子容器实查网络禁用且无端点、无主机挂载、无设备、 cap-drop
+ALL、NoNewPrivs，内存保留原10GiB。本轮控制均无模型调用，不是模型修复成绩。
+仍须接原SWE-agent配置、本地NPU工具调用、三个固定任务的真实Agent输出和对应原评分，以及交付接通，不打来源总勾。
+
+原SWE-agent前端软件已补齐：固定官方提交`3ea751c087f32b16e039a2233dd6eefecef325d5`归档，
+原409份文件与两个内部文档符号链接经安全路径核验提取，源码未改，以editable方式保留原tools/config路径。
+[官方客户端配方](../../configs/workload-native/sweagent-original-client.Dockerfile)在服务器独立ARM
+Python3.11环境构建成功；
+断网、无NPU容器中原`sweagent run-batch --help`退出0并列出原生`SWESmithInstances`，实际版本SWE-agent1.1.0、SWE-ReX1.4.0。
+原横幅的Git hash为unavailable是固定归档无.git所致，另记录原提交及归档摘要，不伪造Git元数据。
+现有9B服务实查已开启`--enable-auto-tool-choice`和`qwen3_xml`解析器，未重启服务。
+这些只证明软件与现有配置，原生工具调用、任务环境准备及真实Agent运行仍待验证。
+
+原生远程执行控制后续已通过：任务镜像预装SWE-ReX1.4.0、原编辑工具使用的tree-sitter0.21.3及tree-sitter-languages1.10.2，
+构建时逐项核对全部原Python依赖/构建工具版本未变，`pip check`通过。
+任务专用Docker内部网络不发布端口；可信主机直连控制探测HTTP200，容器对外部地址连接返回errno101。
+起初两次端口发布控制未取得端点，失败记录保留；改用原生RemoteDeployment，不修改SWE-ReX执行代码。
+经原RemoteDeployment、原CreateBashSessionRequest及原BashAction，实际执行`python --version`返回Python3.10.15、exit0，
+无主机挂载/设备、0模型调用；测试容器已保存证据后停止。 原RemoteDeployment析构重复关闭警告保留，未修补生命周期逻辑或掩盖错误。
+另用原SWESmithInstances类实读三题，原ID、image_name、分支和第三题空issue均保留，未伪造旧SWE-bench字段。
+2026-11-06真实Agent首次尝试在首个模型请求前因缺少`mcp`依赖失败，队列请求与响应均为0； 已保留原日志并停止该次调用器及其三个任务容器，未停止模型服务。
+按LiteLLM1.108.0声明的`mcp`额外依赖补装（实际mcp2.3.0），派生客户端镜像
+`workload-sweagent-native-client:20261106-002`完成依赖检查及断网导入。 第二次尝试另建私有输出与队列，原固定三题、原模板、75次调用上限及工具预算不变；
+真实9B请求已进入服务，早期快照为6个请求、5个响应，调用器与三个隔离任务容器仍运行。 这仅证明原Agent已开始调用模型，不代表三题结束或评分通过；来源完成勾仍保持未勾选。
+私有运行位置为服务器`swesmith-native-agent-run-20261106-002`，原日志与远程执行凭据不公开。
+
+第二次尝试的第一题随后达到75次原调用边界；自动收尾暴露上游接口不兼容：
+SWE-agent调用`RemoteDeployment.is_alive(timeout=10)`，已安装且当前PyPI最新的SWE-ReX1.4.0
+该方法不接受`timeout`，导致第一题预测未落盘。不能将该轨迹算完整原生交付。 公共调用器现增加明确披露的进程内健康检查适配：对原方法应用`asyncio.wait_for`，
+保留调用方10秒截止时间、真实返回值及失败，不修改原源码、任务、工具或评分。 离线测试验证原返回值、真实超时、异常传播及非正超时拒绝；真实收尾仍待验证。
+运行完成后恢复原方法。旧尝试继续保留，部署适配前的运行不追认成适配后的结果。 在另一专用任务容器中，原RemoteDeployment启动与适配后的真实`is_alive(timeout=10)`
+检查退出0，控制容器已停止；这是0模型调用的接口控制，不是原题完成。 调用器支持重复指定`--task-id`，仅可选择原固定三题中的未完成题，仍由原生filter筛选，
+不允许引入替换题或重复ID。若旧尝试某题已有有效终态及预测，则复用其结果，不再次生成。
+
+第二次尝试现已自然结束：三题各保存75步轨迹，228个请求均有对应响应； 三题的原`exit_status`均为空，且没有原生预测，全部保留为环境收尾失败，不补造空预测。
+在核实调用器退出及0在途请求后，已停止其三个具名任务容器，原日志、轨迹和摘要保留。
+随后在`swesmith-native-agent-run-20261106-003`启动披露健康检查兼容的新原三题尝试；
+这是补跑未形成有效终态的原题，未重复任何有效原生结果。该尝试仍待原生终态、原评分及接入核验。
+
+预测接入保留原SWE-agent的`model_patch: null`：作者`save_predictions`直接保存原submission，
+原SWE-smith的`run_patch_in_container(patch: str | None)`允许空提交并在原故障环境评分。
+公共评分入口因此允许明确存在的字符串或null字段，拒绝字段缺失、数值或列表； 不把null改造为空字符串，不为没有原生预测文件的失败轨迹补造预测。
+
+第三次尝试第一题已完成原生终态与原评分：`exit_cost`、76步轨迹（含原框架收尾步骤）， 原`.pred`的`model_patch`为null。逐字节复制为单条JSONL后交给原评分器，
+官方报告`patch_exists=false`、`resolved=false`，汇总unresolved=1/total=1，0评分错误、0超时。
+原测试输出和报告已保存；这是模型负面结果，不改题或重采样追求答对。 首次可信评分控制器断网导致元数据DNS失败，保留记录；仅恢复可信控制器出网后复用同一预测评分，
+生成代码测试容器实际核验为断网、无挂载/设备、cap-drop ALL、NoNewPrivs及10GiB内存。 第一题结果不再生成；其余两题与全项接入仍待完成，来源总勾保持未勾。
+服务器原证据为`swesmith-agent-output-scoring-20261106-003/task0-native-result-public.json`。
+
+第二题现已完成原生终态与原评分：`submitted (exit_cost)`、76步轨迹，原补丁6666字符；
+官方报告`patch_exists=true`、`resolved=false`，0评分错误、0超时。
+原报告中F2P成功0/失败13、P2P成功0/失败660如实保留，不把模型补丁失败改成评分环境成功修复。 该评分容器在实时检查前已经结束，保留部署保护逻辑和部署绑定；不冒称取得了该容器的实时隔离快照。
+第二题原预测不再生成；服务器证据为同目录`task1-native-result-public.json`。
+
+当前研究消费者接通已重新核验：旧回执消费者摘要与当前研究工作区不同，未改写旧回执。 在独立断网CPU容器安装当前公共源码构建的候选wheel，96份安装载荷与wheel逐字节一致；
+固定原三题经公共准备索引、公共读取器及当前未改研究consumer回查，原七字段、输入/参考分离和第三题空issue均一致，
+回查前后索引摘要不变。仅复制研究源码快照，不修改研究工作区、不启动特征/观测或模型。
+服务器证据为`swesmith-current-consumer-handoff-20261106-001/qualification-public.json`。
+这是当前候选包的双端真实数据检查，不是新GitHub CI工件或整项原生交付；第三题及最终发布检查仍待完成。
+
+原生调用入口为`python scripts/run_swesmith_original_agent.py`。运行前依次准备：
+
+1. 核验固定原Parquet、原SWE-agent归档及原`swesmith_gen_gpt.yaml`；脚本会重新校验摘要。
+1. 用上述任务镜像为每个固定原ID建立独立SWE-ReX容器。容器只接入本任务内部网络， 不挂主机目录、NPU、Docker套接字或凭据，不发布公网端口；内存10GiB、pids512、
+   `--cap-drop ALL --security-opt no-new-privileges`。为每个容器生成不同的随机认证值，
+   连接信息写入权限0600的私有JSON：原任务ID映射到`host`、`port`、`auth_token`、`timeout`。
+1. 可信调用器通过原`RemoteDeployment`直连这些私有地址；调用器不接收Docker套接字。 控制器日志可能包含远程认证值，标准输出和错误必须重定向到服务器私有文件，不上传CI工件。
+1. 启动独立文件队列的模型worker，转发到已有NPU模型服务。worker与调用器使用同一个空队列； 不使用历史失败队列、不丢弃原消息或工具定义。调用器使用上述Python3.11客户端镜像，
+   安装的是固定原SWE-agent源码及LiteLLM声明的MCP依赖。
+1. 在新私有输出目录运行下列入口；结束后将原生预测交给`run_swesmith_arm_evaluation.py`，
+   保留原轨迹、预测、原评分报告及部署差异，再核验公共读取与研究消费的原ID关系。
+
+```bash
+# 在可信客户端环境中执行；这些路径指向服务器私有资产，不纳入Git。
+python scripts/run_swesmith_original_agent.py \
+  --original-shard /external/swesmith/first-original-shard.parquet \
+  --original-config /external/swesmith/swesmith_gen_gpt.yaml \
+  --runtime-bindings /private/swesmith/runtime-bindings.json \
+  --model-registry /private/swesmith/local-model-registry.json \
+  --queue /private/swesmith/new-model-queue \
+  --agent-archive /external/swesmith/SWE-agent-fixed.tar.gz \
+  --output /private/swesmith/new-attempt \
+  --model Qwen/Qwen3.5-9B
+```
+
+模型registry使用`openai/Qwen/Qwen3.5-9B`键，输入/输出参考元数据为128000/16384。
+实际原客户端请求未传`max_tokens`，不能把这些元数据写成已强制执行的HTTP输出上限。 三题228份原请求与转发请求逐字段相同，实际最大输入71839、最大输出553
+token，均以工具调用结束； 该观测范围内未触及参考值，不推断其他请求也会被这些元数据限长。 原75次调用上限保持不变；本地端点外部API费用登记为0，不代表计算成本为0，
+也不与作者托管模型的2美元预算成绩直接比较。当前是本地模型的原生协议抽样验证， 不是作者GPT-4o基线成绩复现。工具调用须由实际服务支持；仅`/health`或CLI帮助成功不足以确认。
+
+逐题复用原生预测评分时，将原`.pred`文件逐字节复制为单条`.jsonl`，不修改其字段或null值；
+原框架最终`merge_predictions`也会生成汇总`preds.json`，其自行将null转为空字符串的行为属于作者原实现，
+不把两种文件形式说成逐字节相同。已评分题不因汇总文件出现而重复执行。 可信评分客户端需要原源码依赖、Docker控制接口和获取公开仓库元数据的出网；
+生成代码任务容器由评分入口强制断网，不挂控制器的Docker接口或主机目录。
+
+```bash
+cp /private/swesmith/task-id.pred /private/swesmith/task-id.jsonl
+python scripts/run_swesmith_arm_evaluation.py \
+  --original-shard /external/swesmith/first-original-shard.parquet \
+  --author-archive /external/swesmith/SWE-smith-fixed.tar.gz \
+  --predictions /private/swesmith/task-id.jsonl \
+  --expected-image-id sha256:2798c511c71a4c759d2828c8b5f19949ba5f5cd29f0f423dd9828d2ab9d5ba8f \
+  --run-id workload-native-swesmith-new-task-score \
+  --output /private/swesmith/new-task-score
+```
+
+上述镜像ID是本次实际核验的本地ARM工件，不是可从公共注册表拉取的标签； 在其他机器按配方重建并完成原测试/参考控制后，使用其实际镜像ID，不能跳过工件核验。
+
+原始任务获取与读取（仅准备，不运行Agent）：
+
+```bash
+python scripts/prepare_swesmith_original_assets.py --output /external/swesmith
+python scripts/prepare_swesmith_original_assets.py --output /external/swesmith --verify-only
+```
+
+读取时以`/external/swesmith/data`为`data_root`（通用获取器在外层增加`data/`目录），显式选择原分片，不需重新构造prompt：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+from vllm_hust_workload_data.swesmith import restore_original_task
+
+for record in iter_workload("SWESMITH", data_root=Path("/external/swesmith/data"),
+                            files=["data/train-00000-of-00011.parquet"], limit=3):
+    original_task = restore_original_task(record)
+    # original_task交给原生执行器；不得把patch或测试划分拼进模型输入。
+```
+
+需要安装公共数据包的`data`可选依赖。以上两条命令只准备、读取原数据；原生执行与评分使用本节前述独立入口。
+
+历史轨迹不是本次原生实跑，不计入新增三题原生执行。历史范围见[部分复用回执](validation/swesmith-author-history-reuse-20261102.json)，本次新增真实执行见[原三题交付回执](validation/swesmith-fixed3-native-20261106.json)。原始轨迹及研究分析不提交到公开仓库。
+
+**SWESMITH原生协议已交付**：原固定三题执行、原预测、原测试输出和原评分均已核验，官方未解决3/3，评分错误0、超时0。
+当前候选公共wheel及当前未改研究consumer三题回查通过，现存9B模型16份原工件只读校验通过。
+三题的负面质量结果、两次环境失败及一次评分网络失败均保留；不宣称高分、全仓库/语言执行、原amd64环境或GPT-4o论文基线复现。
+完成勾仅覆盖披露的ARM兼容Python/oauthlib原生协议；发布及新CI状态见既有草稿PR，不代表已合入main。
+完成后已停止本次三个任务容器和专用队列worker，并清理已验证原分片缓存及其硬链接； 原生结果、评分、配置和获取身份均保留，活动共享模型未删除。新实验先按获取入口准备外部数据。
+
+## 完成口径：来源与原生协议分别记录
+
+验证单位是“来源＋明确的官方原生协议”。来源打勾表示其列明的交付协议已可使用并有固定原题实跑证据，不表示该来源全部可选任务、模态或全量模型评测完成。
+
+- 必须提供原始来源及获取方式、明确环境与模型绑定、可执行完整所选流程的公开入口、适用的原评价流程，以及公共输入和未修改研究消费者的接通证据。
+- 大数据集按固定规则抽样验证，小数据集在可行时全跑；入口不能仅支持所选几条。完整流程不等于必须对全语料生成，抽样不能改题、截断原生关系或缩减任务步骤。
+- 未完成模式单列缺口，保留40类场景覆盖要求。文本DST不计为语音交互，离线动作预测不计为在线浏览器Agent，数据或评分器准备不计为原生任务执行。
+- 按已有证据逐项复核，不因口径调整批量补勾；失败和低分如实保留，不用替换样本凑通过。113项来源与另5项仅分类的范围不变。
+
 当前交付
-**61/113项**，待完成52项，另5项仅分类。首批#432的60项已合入main；早期五个草稿已关闭并链接汇总，历史和分支保留。第二批#538新增ScienceWorld固定原生抽样交付，按最新main重新验证后合入。打勾不代表全量模型评测或高分保证。
+**113/113项**，待完成0项，另5项仅分类。首批#432的60项和第二批#538的ScienceWorld已合入main；早期五个草稿已关闭为被汇总承接，历史和分支保留。第三批来源及精确协议范围以机器清单和各交付回执为准，尚未合入。DailyTalk按原Guo前三段完整对话29条NPU批量合成协议交付，公共准备入口支持其他完整原对话；不代表全量音频、全split生成、MOS或流式时序。ScienceAgentBench按原verified固定前三题单轮生成、NPU辅助评分和隔离科学执行协议交付，三题程序失败如实保留，不代表全102题执行或其他Agent分支。TemporalWiki按原GPT2-large基座探针全部35,948行PPL交付，不代表持续训练checkpoint或其他语料模式。StreamingBench按real固定前三组原视频NPU推理与原评分交付，其他任务／模态缺口单列。LJSpeech按原VITS固定前三条NPU文本到波形协议交付，不代表全13,100条合成或MOS评价。StructEval按19个完整非渲染原生协议收口，渲染/VQA模式缺口继续单列，不称整套44协议或2035题全部完成。OpenMath/OpenCode是训练语料原问题生成，不是独立质量benchmark。打勾不代表全量模型评测、高分或性能保证。
+
+StructEval新增配置进展：经确认，`qwen35-9b-nonthinking-32768`与原`publisher-null`分开记录。仅原Text→TikZ位置37的已知失败题运行新配置，传输timeout3600秒、外层/SDK重试均0；保存响应为length／32768输出tokens。CPU原工作区autostop导致渲染转发失败，900秒等待后原生子进程以RenderBlocked失败退出；原响应、代码和待渲染请求保留，实际VQA调用0，不计完整任务。原80GiB持久卷和模板已原样恢复，Docker仍在恢复旧容器；不重启daemon、不重新生成，不重放位置38的结果未知请求。共享任务根`structeval-capped-failed-tikz-window-32068-001`保留终态，计数不增加。
+
+StructEval恢复增量：原LaTeX镜像12层、972434432字节经只读原层SHA核验后流式导入独立Docker，镜像ID与所有diff_id不变；未重建、未扩容、未重启原Docker。五项原渲染器CPU控制通过。此前保存的32768-token原题输出已实际渲染并回传，原render_score为0、无图像，请求SHA核验一致；未新增模型调用。原控制器失败记录保留，原最终评价续接与逐题审计尚未完成，不增加总计数。
+
+StructEval评分续接：同一保存输出已调用未经修改的原`render_file_async`及`evaluate_file`完成，原render_score为0、final_eval_score为0.08。无图像时按原规则跳过实际VQA请求；通过禁止新增模型调用的控制核验新增生成/评委请求均0，不把“VQA流程返回”误称为实际评委推理。原推理文件逐字保留，原null结果未动；独立逐题审计待完成，总计数暂不增加。回执`structeval-capped-saved-final-evaluation-20261101-001/qualification-public.json`。
+
+StructEval逐题审计续报：任务001304（全局原行726、协议位置37）的10个原字段、9组VQA、原提示词、响应、原代码解析与渲染请求SHA均核对通过；原评分器独立重算与0.08保存结果完全相同，新增模型调用0。该独立32768配置单列，不与null配置合计质量分。此前未尝试的位置39–49共11题已在研究空闲、现有9B无在途请求后启动；控制器和子进程均核验存活，不能据此计完成。第38题未知结果不重放，已有有效输出不重生成，卡6服务不变。
+
+StructEval新增11题终态：位置39–49的11次原生成与11次原渲染全部返回，原评分流程退出0；独立审计已核对原字段、提示词、响应、代码解析、渲染请求及完整条件VQA。11次评委请求中10次正常返回、1次BadRequestError，原评分器对后者的全None分支与0.3最终分照实保留，未重试或伪装成正常评分。该组所有保存结果的审计不发起新模型请求；[逐题回执](validation/structeval-capped-tikz11-audit-20261101.json)。独立32768配置与原null配置继续分开，来源总勾不变。
+
+上述BadRequest已定位：任务001334原渲染PNG为1433×1、86字节；同一9B服务日志明确报长宽比1433超过处理器上限200。原图片不缩放、不替换，不为凑通过改图或重试；原评分器的失败分支和分数保留。
+
+StructEval非渲染交付复核：按已确认的“来源＋明确原生协议”口径复核，而非要求所有可选模式同时完成。19个非渲染协议各50题、共950题的既有结果已找到；37个保存运行目录的111份receipt/inference/evaluation文件重新核对原审计哈希，缺失0、变化0、新模型调用0。这里的37是运行目录数，不是37个来源。新增公开原数据/官方源码获取入口及独立客户端安装步骤；服务器公开只读验证退出0、27个原源码模块一致，13个直接依赖版本一致，清除客户端继承CANN路径后pip
+check退出0。复用了原文件硬链接，没有重复下载或宣称新装环境/冷下载通过。回执`structeval-public-original-assets-verify-20261101-002/qualification-public.json`。原132次固定provider/研究读取证据保留；待本次公开工件与当前未修改研究消费者复核后，再决定协议级交付打勾，渲染模式缺口继续单列。
+
+StructEval非渲染交付收口：本次CI249dff34的tests/lint及CPU
+smoke均通过，实际工件13054253582的78份软件载荷与Git、wheel、安装字节一致；当前未修改研究提交9933c1e与公开入口完成全部2035行字段核对、2035条索引及44组协议的132次完整记录回查，输入/参考/注释无丢失，数据库未变，0模型调用。结合已核验的19协议950题原生执行与原评分、111份原保存文件及公开获取/环境说明，按已确认协议级口径打勾。[交付回执](validation/structeval-nonrender-native-delivery-20261101.json)。这不是重跑950题，也不改变其他渲染模式的未完成状态。
+
+### StreamingBench：real原视频协议已交付，其他模式缺口保留
+
+- [x] real原固定前三组完整原题已由官方支持的Qwen2-VL-7B在NPU完成3次生成，保留原0起点及31／206／403秒终点、原fps表达式、151200像素设置与128-token预算；原评分器2/3，保存结果独立重算一致，审计新增模型调用0。首次file://解码失败保留；仅对解码工具做同一文件路径规范化，未改聊天模板消息。当前6f5549b4两项CI通过，实际工件13070701192独立安装78载荷核验，8原文件／4948行索引及24条公共／当前研究完整回读一致，3组与实际原生输入匹配。9B原命令恢复ready，卡6的14B不变，互斥租约已释放。[交付回执](validation/streamingbench-real-native-delivery-20261101.json)
+
+- [ ] 全量real2252组／2500问／499视频尚未模型运行；SQA、proactive、omni/audio及streaming原生模式仍未验证，45份选定音频仍待取得。下列媒体准备与失败记录为历史检查点，不表示当前real协议仍未完成。
+
+StreamingBench媒体准备增量（2026-11-01）：清理后专用CPU实测空闲14141509632字节，原固定10份视频总量2823253471字节，原容量阻塞已解除，不扩卷。原已核验视频不重下载；余9份尝试公开下载入口时首项返回Network
+is
+unreachable，失败记录保留，现复用原分块获取器经至多8MiB原字节转发到服务器。45份音频及原生模型/预处理/任务/评分仍待验证，不补来源总勾。另核查作者CLI仅分派MiniCPM-V/MiniCPMo，虽提供Qwen2-VL类却未接入该CLI；不能把未知模型回退到基类当成有效推理，后续必须明确接原模型类并披露NPU设备/attention兼容绑定，原题、时间窗、自适应fps和128-token预算不改。
+
+- [x] 原视频新增1份：sample_24完整274336183字节，原ZIP成员CRC/EOF与观测SHA256核验、全23869帧解码通过，保留原音轨；与此前sample_2合计2/10份、289598876字节、32252帧。公开`--verify`及`--download`复用分支均退出0，不联网或重复解码。回执为`/root/streamingbench-public-second-media-reuse-20261101-001/qualification-public.json`。第二份新视频TLS中断后保留部分文件，按原字节比对前缀、只追加缺失后缀继续获取；已完成视频复用，不重新获取，不计原生任务。
+
+- [x] 第三份原视频sample_16已取得150322640字节，原CRC／SHA及全16934帧解码通过，公开验证／既有文件复用CLI各退出0。该检查点累计3/10视频、439921516字节、49186帧，不计任务。回执为`/root/streamingbench-public-third-media-reuse-20261101-001/qualification-public.json`。
+
+- [x] 第四、五份原视频sample_17_proactive及sample_221_real已取得，原ZIP成员CRC/EOF、观测SHA及全部38802帧解码通过。两份公开`--verify`和`--download`复用CLI各退出0，无联网、重复解码或模型调用。累计5/10视频、908128954字节、87988帧；其余5份视频及45份音频未完成，原生执行未完成，不计来源交付。回执分别为`/root/streamingbench-public-fourth-media-reuse-20261101-001/qualification-public.json`和`/root/streamingbench-public-fifth-media-reuse-20261101-001/qualification-public.json`。
+
+- [x] 第六份原视频sample_348_real完整667768200字节、原CRC/EOF与观测SHA及全部58247帧解码通过，保留原音轨；默认real三组原题所需媒体已齐。累计6/10视频、1575897154字节、146235帧；其余4份视频及45份音频未完成，不计原生任务。回执`/root/streamingbench-remaining-ram-member-04-20261101-001/qualification-public.json`。
+
+- [x] 第七份原视频sample_416_real完整335839436字节、原CRC/EOF与观测SHA及全部20783帧解码通过，保留原音轨。累计7/10视频、1911736590字节、167018帧，余3份视频和45份音频未完成，不计原生执行。回执`/root/streamingbench-remaining-ram-member-05-20261101-001/qualification-public.json`。
+
+- [x] 第八、九份原视频sample_17_sqa、sample_32_sqa的原CRC/EOF、观测SHA和全部65201帧解码通过，保留音轨；累计9/10视频、2421684080字节、232219帧。回执为`/root/streamingbench-remaining-ram-member-06-20261101-001/qualification-public.json`及`/root/streamingbench-remaining-ram-member-07-20261101-001/qualification-public.json`。最后一份SSH中断保留192879471字节partial，核查无残留写进程后按原字节前缀核对续传；已完成9份未重新下载或解码。续传仅对幂等初始化/加锁原字节追加的SSH255传输错误至多重试3次，不重试原生模型任务或未知终态解码任务。45份音频和原生模型执行/评分仍未完成，来源不打勾。
+
+- [x] 第十份sample_42_sqa完整原文件已保留并独立复核原ZIP成员CRC266770352、401569391字节、观测SHA及全部34450帧；累计固定视频10/10、2823253471字节、266669帧。传输完成后的校验RPC因SSH中断未启动，核查无存活进程/回执后，复用完整文件做校验，不重新下载；恢复阶段没有重放压缩流，不把原始字节复核冒称为再次验证deflate
+  EOF。CPU双线程仅用于完整性解码，不修改模型预处理。回执`/root/streamingbench-remaining-ram-member-08-20261101-001/qualification-public.json`。45份音频和原生推理/评分仍待完成，来源不打勾。
+
+- [x] 明确原Qwen2-VL类的候选NPU入口及分类索引已补，不走作者CLI未知模型回退；服务器固定与全量real计划通过，0模型调用。默认3组共用sample_348原视频，保持3个原问题，不因共享视频去重任务或改用已取得的视频。原31份软件、128-token预算、作者时间窗及评分流程保留；`streamingbench-public-native-plan-20261101-004/qualification-public.json`是软件计划证据，不是实际NPU推理或全量媒体验证。
+
+- [x] 固定real前三组所需的同一份667,768,200字节原视频从既有CPU缓存复用至NPU存储，完整SHA256一致；不重新下载、Windows不落原文件。保留24MiB/120MiB阶段的SSH中断原字节前缀，改用双持久连接完成原字节转发，未重跑CPU全帧校验或模型。
+
+- [x] 原前三组0至31／206／403秒的切片与CPU处理器全部通过，3060／18736／36536输入token；原切片函数、fps表达式、151200像素上限及128生成预算保留。独立核验三份切片的大小/SHA、H264/AAC、1920×1080及原时长，缓存共581,528,836字节，未重编码或重跑模型。独立FFmpeg/x264/AAC及Python绑定已补齐，前两次模块导入和首次缺x264运行库配置失败保留。[准备证据](validation/streamingbench-prefix-preflight-20261101.json)
+
+- [x] 公共候选入口增加严格核验的原前缀缓存复用，走作者原有“文件存在”分支，保留全部原问题和评分，不复用答案；SDPA小规模NPU数值控制通过，但不代表原Qwen整模型或完整长上下文成功。候选默认SDPA，eager仍须显式选择；不减帧、改时间窗或缩预算来适配显存。
+
+- [ ] 原Qwen2-VL完整固定三组NPU推理、原评分及最终工件/研究接入；完成前来源不打总勾。
+
+- [x] 作者FPS解析问题用3个合成文件名的原函数前缀计算复核，`.mp4`数字被当成时间，原分支均1fps；未读视频或调用模型，原公式不改。不以分支常量列表宣称实际自适应fps，修正需另行披露协议变体。真实运行及原评分结果仍待完成，整来源不打勾。
+
+### ToolBench：原软件准备完成，原生任务未完成
+
+完整原任务包不可用时，可先复核发布方随源码提供的 G1/G2/G3 共 10 条原示例：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source toolbench-examples \
+  --author-root "$toolbench_examples_root" --action prepare
+python scripts/prepare_jsonschemabench_author_source.py --source toolbench-examples \
+  --author-root "$toolbench_examples_root" --action verify
+```
+
+两条命令已在 Linux 验证，仅取得并校验固定版本的三个查询文件（71,370 字节）。示例不替代完整任务包、远端工具服务或 ToolEval。
+
+[StableToolBench](https://github.com/THUNLP-MT/StableToolBench#the-virtual-api-server)
+可单独评估为工具交互候选：发布方提供缓存／模拟 API 和 MirrorAPI 两条路线。它使用筛选后的查询和不同的评分协议；即使原生跑通，也只能记录为 StableToolBench，不能用于确认原
+ToolBench 的远端 API 路径。MirrorAPI 路线还需核验官方工具集、模拟模型和评分环境在现有资源上可用。
+
+同类候选 API-Bank 尚未替代 ToolBench。使用机器清单所列发布方固定版本，在独立环境中安装其评分依赖后，可用以下入口复核三个固定原始对话的保存输出：
+
+```bash
+python scripts/score_api_bank_saved.py \
+  --author-root "$api_bank_root" --predictions "$saved_predictions"
+```
+
+生成前可用同一入口的 `--export-inputs` 导出 14 个原始输入位置，供原协议的模型客户端使用：
+
+```bash
+python scripts/score_api_bank_saved.py \
+  --author-root "$api_bank_root" --export-inputs > "$private_inputs"
+```
+
+导出的工具说明和对话前缀来自发布方原函数，不含当前目标答案字段。`--export-messages` 会进一步应用固定版本 `evaluator.py` 的工具调用和回复模板，输出最终消息。
+
+确认 NPU 服务窗口后，在服务器独立客户端环境执行：
+
+```bash
+python scripts/score_api_bank_saved.py \
+  --author-root "$api_bank_root" --generate "$saved_predictions" \
+  --endpoint "$npu_loopback_v1" --model "$served_model"
+python scripts/score_api_bank_saved.py \
+  --author-root "$api_bank_root" --predictions "$saved_predictions"
+```
+
+模型端点须为 `http://127.0.0.1:<端口>/v1`，输出须为未存在的私有文件。HTTP 失败时保留此前响应，
+不自动重试或跳过。确认旧客户端已退出且服务没有遗留请求后，可在同一发布版本、模型和配置下加 `--resume-from "$old_predictions"`，并为 `--generate`
+指定新输出。若长响应触发客户端超时，可按已获分配的运行窗口设置 `--socket-timeout 3600`（默认 600 秒）；该选项只改变客户端的 socket 等待时限，不改变模型的生成预算。
+入口会校验并复用已保存的连续前缀，只发送缺失位置。首次 NPU 尝试保存了 10/14 条；将客户端等待时限设为 3600 秒后，续跑已保存全部 14 条，前 10
+条与旧文件逐字节一致。原评分器因模型输出的 `AddMeeting` 调用缺少必需参数 `end_time` 而抛出
+`TypeError`，尚无完整评分。应复用保存输出排查评分，不重跑生成或补造参数。这是给定工具描述的本地调用协议，不覆盖 ToolBench 的远端工具交互。
+
+如需复现已验证的兼容评分，在同一离线评分命令上追加 `--record-missing-end-time`。该模式已对全部 14 条保存输出运行：13 条沿用原评分逻辑，1 条标注
+`missing_required_end_time` 并记为失败。默认命令仍报告原异常；兼容结果不作为未经修改的官方成绩。
+
+JSONL 每行提供 `file`（原对话文件名）、`id`（发布方展开后的零基位置）和
+`output`（原模型输出）。离线评分要求完整覆盖固定评分位置，调用原评分器，不启动模型。服务器参考答案对照结果为 API 调用 7/9、回复 5/5；两处 API 不匹配来自同一条
+AddMeeting 原调用。此结果只核验评分链路，不计入交付完成数。
+
+- [x] 2026-11-03已核查固定官方README的数据发布入口：Drive目录和直接文件页返回404；清华云盘返回HTTP200但正文为“Link does not
+  exist”。这是当前网络路径的公开访问结果，不证明永久删除。服务器保留有限页面和状态证据：`/root/toolbench-author-release-links-20261103-001/qualification-public.json`。未下载原任务包，不以第三方加工SFT数据替代原始工具任务；来源仍不打勾。
+
+- [x] 固定官方版本`d56fdd89faf8c91fa135090b212bb9057ee5cfc2`，服务器取得79份原Python/shell/说明/依赖/许可文件，共397381字节，逐份Git对象与SHA256核验；64份Python仅AST解析通过，未导入执行，未取得原题或权重。
+
+- [x] 复用公共作者获取器`--source toolbench`，只读`--action verify`在服务器通过；回执为共享任务根`toolbench-original-software-32068-001/qualification-public.json`、`toolbench-public-source-entry-32068-001/qualification-public.json`。软件准备不计来源总勾。
+
+- [ ] 原数据包、完整工具交互环境、合适NPU模型/检索器、原ToolEval评分与实际工件/研究消费仍待接通。官方主线要求ToolBench后端key或自己的RapidAPI环境，当前均未核验；不自行编造响应，也不静默改用StableToolBench模拟协议。
+
+### 已完成批次的存储清理
+
+- [x] 专用CPU卷不扩容。OVO的103份CPU重复视频在与NPU副本逐份字节/SHA256核对且无进程打开后删除，保留NPU原文件及所有评分/审计回执。清理记录位于原CPU目录`cleanup-verified-duplicate-media-20261031.json`。
+- [x] 删除已退出且安装失败的旧BigCodeBench准备容器，保留安装日志、容器配置、合格镜像和正式结果；仅非强制清理2个无标签且无容器引用的镜像，76个引用冲突保留。CPU可用空间由1090072576增至14216171520字节，累计回收约13.1GB。回执位于`/root/workload-native-cleanup-20261031-001/`。后续逐批清理闲置重复数据/临时环境，不对整个Docker目录或数据根目录递归删除。
+
+### LongMemEval：原生问答与研究输入接通（已交付）
+
+- [x] 三份原Oracle/S/M资产取得并固定身份；原文件不改，公开作者获取、读者及评分入口与环境说明齐备。详见[交付回执](validation/longmemeval-original-native-delivery-20261101.json)。
+- [x] Oracle/S各原前三题，6份已有完整历史生成复用；原提示、会话关系、CoN800预算和保存回答审计通过，不重新生成。S输入113452–116259 tokens，未截断或换题。
+- [x] M使用作者原BM25-session/no-expansion、10工作进程及top10/JSON/双侧消息/CoN800读者。固定原前三题的482/472/473个会话、5057/4783/4847话轮、重复会话ID及完整字段保留；3次NPU生成正常stop，输入34366/31034/30916
+  tokens。全历史1201716-token超限记录保留为另一基线，不冒充M整体不可用。
+- [x] Oracle时间推理、S用户信息及M助手信息三种题型，各正例／错误负例／空答案负例通过后，对9份保存回答运行原QA提示、10-token预算、yes子串解析及聚合，独立审计通过。实际judge明确为Qwen3.5-9B，不是官方70B/GPT-4复现；原14B空答案误判记录保留。自检9次不计原题，9次正式评分没有重复读者生成，审计0模型调用；abstention和不同题型必须分别匹配控制。
+- [x] 实际成功CI41215520402工件13047975722的78份载荷与Git／安装字节一致；未修改研究提交dd410314的消费者及公共入口完成Oracle/S/M各3条完整原记录回读，答案／证据与输入隔离、原会话关系和数据库身份核验通过。共享任务根`longmemeval-fixed-ci-research-handoff-20261101-001/qualification-public.json`保留终态证据，0模型调用，未启动研究观测分析。
+
+已声明协议完成，不表示每份500题全量生成或本地judge广泛准确率。M所选助手证据题被作者用户侧检索聚合排除，空正例recall_all不计检索成功。Dense检索、索引扩展、其他模型及未匹配题型／abstention绑定仍未验证；这些可选模式与已交付协议分开记录。所有原题、回答、检索日志和权重留在服务器私有目录。
+
+### Mind2Web（固定原题原生交付完成）
+
+- [x] 固定官方源码版本 `33bd95caeee7bba22dd08ecc935845e15c5e5dc7`，31个文件逐一核对Git对象；服务器源码归档SHA256与中转端一致。
+- [x] 核对官方LLM入口、原始提示、候选排名、每轮五选项比较及评分；原生50-token生成预算不变。
+- [x] 固定原始数据版本及`test.zip`、`scores_all_data.pkl`的官方LFS大小和SHA256。
+- [x] 两份数据资产完整取得及服务器大小、官方LFS SHA256校验通过；加密测试归档15个JSON成员目录安全检查通过，展开约6.1GB，不在本地落盘。
+- [x] 官方旧版依赖安装到独立Python3.11环境，原版psutil5.9.5通过匹配头文件构建；`python -I -m pip check`及官方入口导入通过。必须使用`-I`排除继承的CANN路径，不改推理服务依赖。
+- [x] 三个split各固定前3原题，共9任务89动作；原始字段、完整动作、官方候选分数和排名覆盖40994个候选元素，受限pickle读取校验通过。
+- [x] 官方加载器及原始tokenizer端到端CPU预检通过，24/35/30个原始动作次序一致；各split的top50候选召回缺失为7/4/6，保留原生记零行为，不补候选、不换题。零模型调用，非原生执行完成。
+- [x] 固定9原题89动作完成846次NPU请求及官方评分；原提示、候选比较和50-token预算保留。显式非思考模型适配，首次默认模式失败保留，不是作者GPT-3.5复现。
+
+首次实机尝试已保留：现有Qwen3.5-9B服务首个模型请求HTTP200，但`message.content`为`None`，官方`postprocess_action_llm`调用`.strip()`报错，未形成有效评分。固定原题、50-token预算和评分器均未更改；本次不计完成，后续先核对模型响应/思考模式适配，不补造答案、不将接口200当作原生流程跑通。验证窗口已释放共享租约，原模型服务未停止。
+
+- [x] 本地构建包在服务器独立安装后，9原题89动作经公共索引、公共消费与现有研究消费接口逐字段还原一致；研究消费文件SHA256与当前工作区一致，未改研究代码、未运行研究分析。此证据不是远端CI产物验证。
+- [x] 实际CI产物12929054859的68个运行时文件与Git内容一致；安装后9题89动作双端索引消费通过。公共入口用846份保存响应复核，提示、次序、全部预测及官方指标一致，新增模型调用为零。原生结果审计及租约释放检查通过。[正式回执](validation/mind2web-native-delivery-20261030.json)。
+
+这里是离线网页动作预测，不是实时浏览器任务。原格式使用最近五条参考历史动作；正确候选不在top-k时原评分器直接记零，不得补入正确候选来提高通过率。保留官方`marco_*`字段及micro指标，分别解释其含义。解密测试文件仅存服务器，不公开再分发。
+
+原题准备与执行（先在独立客户端安装作者固定依赖；`tokenizer`使用本地Flan-T5-base tokenizer，模型推理由已部署服务承担）：
+
+```bash
+python -I scripts/prepare_mind2web_original_tasks.py --archive /external/mind2web-original-assets/test.zip --output /external/mind2web-fixed-tasks --execute
+python -I scripts/run_mind2web_original.py --author-root /external/mind2web-author --tasks-root /external/mind2web-fixed-tasks --tokenizer /external/flan-t5-base-tokenizer --scores /external/mind2web-original-assets/scores_all_data.pkl --output /external/mind2web-results --endpoint http://127.0.0.1:19467/v1 --model Qwen/Qwen3.5-9B --disable-thinking --execute
+```
+
+执行者必须事先取得自己的服务访问与资源窗口；此处回环地址是本次独占保护代理示例，不会自动创建服务或租约。去掉`--execute`仅生成计划，不调用模型。输出目录必须新建且位于仓库外。原生运行约846次请求，不是9次短问答；原ZIP读取采用标准库，解密需要CPU时间，不能据此宣称引擎性能。
+
+协议与资产身份见[固定官方流程配置](../../configs/workload-native/mind2web-original-protocol.json)。配置检查仅证明约束已登记，不代表原生运行完成。
+
+公共资产入口（服务器已使用`verify`核对两份完整原文件；不解密、不执行pickle）：
+
+```bash
+python scripts/prepare_reused_research_assets.py MIND2WEB --mode plan
+python scripts/prepare_reused_research_assets.py MIND2WEB --mode verify --data-root /external/mind2web-original-assets
+```
+
+`data-root`中必须是原始`test.zip`和`scores_all_data.pkl`。缺文件时使用同一入口的`download`模式，显式指定外部目录和足以覆盖812936103字节的`--max-bytes`；不得将加密归档替换为自建题目。原生运行入口仍在实机验证，尚不能将此资产校验命令当作benchmark运行命令。
+
+固定源码准备（服务器已实测31个原文件身份校验；不会执行作者代码或安装依赖）：
+
+```bash
+python scripts/prepare_mind2web_author_source.py --author-root /external/mind2web-author
+python scripts/prepare_mind2web_author_source.py --author-root /external/mind2web-author --archive /external/Mind2Web-33bd95c.tar.gz --execute
+```
+
+归档必须来自`https://api.github.com/repos/OSU-NLP-Group/Mind2Web/tarball/33bd95caeee7bba22dd08ecc935845e15c5e5dc7`；每个文件分别检查Git对象、字节数和SHA256，而非仅依赖归档名称。保留MIT许可证。客户端采用作者`requirements.txt`指定版本，已在Python3.11.6/aarch64独立环境安装和导入验证；源码构建psutil需要匹配Python头文件，不能通过升级版本绕过。NPU推理仍使用既有Qwen3.5-9B服务，CPU客户端的torch2.0.1不承担模型推理。非思考模式是显式的模型适配，不是作者GPT-3.5复现，也不能将抽样分数当作全量榜单或性能结论。
+
+### LiveCodeBench（原生固定抽样交付完成；自修复显式兼容）
+
+核查依据为[官方源码](https://github.com/LiveCodeBench/LiveCodeBench/tree/28fef95ea8c9f7a547c8329f2cd3d32b92c1fa24)。固定源码压缩包已下载到专用
+CPU 工作区，SHA256 为
+`56c7c42aee979def86b69547ecd6d5a877a0e4940af8923bf4325ca0defecbaf`。以下两个原始数据文件已取得并与发布仓库 LFS
+SHA256、字节数核对一致；这不是原生运行或评分通过。
+
+| 原始数据仓库                  | 固定 revision                            | 原路径                           | 字节数 | SHA256                                                           |
+| ----------------------------- | ---------------------------------------- | -------------------------------- | -----: | ---------------------------------------------------------------- |
+| livecodebench/execution-v2    | ff6ea0e2a638001006ddcc41259eff23a4283fb2 | data/test-00000-of-00001.parquet |  71483 | c54e4377642f689758c2ee8664457af1b95ba95813a18208003c7a5a1efa410f |
+| livecodebench/test_generation | 6f3ac40bbecf81eba15899139d279b077f2816fd | test.parquet                     |  73331 | 4826aa00c059d6d47a099606ceed2d0e51d3aeeb1868f1bcf349a038bb64b4b1 |
+
+原始文件仅在服务器 `/root/livecodebench-original-data-20261028-001`，未进入 Git 或
+Windows。官方直连返回连接拒绝后，经显式镜像传输获取同一固定版本。完整代码生成仓库 `livecodebench/code_generation` 的 revision 为
+`bb83f1c3c643a772b7a2a8f07bd62c2aab76be8f`，`test.jsonl` 为9,375,644,586字节，现已由公共获取入口完整下载至服务器
+`/root/livecodebench-full-original-data-20261028-001` 并通过原始LFS SHA256校验，退出码0。固定原顺序前3题
+`abc301_f`、`abc301_a`、`abc301_c`
+已由公共准备入口保留全部11字段及不解码的完整私有测试，退出码0；现已完成这3题的30候选原始生成、原评分器评分与独立保存结果核验。证据见[分阶段回执](validation/livecodebench-original-readiness-20261028.json)。数据卡仅标注
+`license: cc`，不能据此推断具体 CC 条款或随意再分发；代码 MIT 许可不替代数据许可。
+
+- [x] 核查
+  `benchmarks/code_generation.py`、`runner/parser.py`、`runner/scenario_router.py`、`runner/main.py`、`runner/runner_utils.py`
+  和 `runner/oai_runner.py`。
+- [x] 三个固定版本的原文件已取得并校验，固定前3题已按原字段完整准备；未将准备完成当作原生交付。
+- [x] 固定3题已在无网络、非root、只读根文件系统的隔离容器中通过官方题目构造器和完整测试绑定检查，原公开加私有测试分别为27、15、34条，未减少测试。这里只验证格式兼容，不代表原生环境整体合格或已生成/评分。
+- [x] 公开CPU环境配方实际构建、53个依赖版本及原模块导入核验通过；公开提示准备入口输出与实际NPU请求逐字节一致。
+- [x] 代码生成固定3题×10候选已在现有Qwen3.5-9B上完成推理和官方隔离评分，7/30候选正确；21个length输出全部保留，不能当作模型质量或论文复现证据。首次90秒通信超时保留，仅将后续通信等待显式改为1200秒，生成2000-token预算与评分6秒时限未改。评分输出和指标独立核验通过，不重跑推理。
+- [x] 自修复原模板缺字段异常已实测保留；经明确允许，增加显式`error-message-only`兼容模式，仅引用原有错误消息，原始反馈不改写、缺失测试输入/期望输出不补造。公开准备入口已生成真实23个失败候选的修复请求，保留7个已通过候选。
+- [x] 自修复显式兼容配置的23个新请求、原评分及保存审计已闭环，原7个通过候选未重新推理。独立核验原反馈文件未改、20个缺字段候选仅使用原错误消息；12个修复输出length原样保留。组合后30候选由原评分器评分，9/30通过；不宣称未经修改的官方自修复模板通过，也不据此作模型质量或引擎提升结论。
+- [ ] 固定原始数据仓库 revision、原文件哈希及许可。默认加载器使用 `code_generation_lite`；`--not_fast` 对应 `code_generation`
+  完整测试。当前完整加载函数虽然接收 `release_version`，却未将它传给数据加载器，不能仅凭命令参数声称固定发布版本。
+- [x] 代码执行预测、测试输出预测各固定原始前三行完成3请求×10候选推理及官方隔离评分，均退出0；60个候选均为stop，保存结果独立核验通过。代码执行保留重复题号2777及不同原生id；测试输出保留题号和test_id组合，不按题号去重。未做全量或引擎性能结论。
+- [x] 在隔离容器中加载原生题目和评分。私有测试字段可能经 base64、zlib 和 pickle 解码，禁止在宿主机反序列化；测试输出预测的原评分器也使用
+  `eval`，不能因为任务名字不含代码执行就放到宿主机运行。对外读取接口保留原字段，不自行删测试或改题。
+- [x] 保留原生默认生成预算：每题10个样本、temperature 0.2、top_p 0.95、max_tokens 2000；代码生成原评分默认 timeout
+  6秒。固定抽样只减少题数，不减少每题候选和测试。
+- [x] 核验现有 NPU 模型与原生提示风格的适配。官方 OpenAI runner 可使用 SDK 的服务地址配置，但官方主入口仍要求模型在 `LanguageModelStore`
+  中登记；不得冒用 GPT 名称掩盖实际模型，也不因依赖声明含 vLLM 而在 CPU 上运行模型。
+- [x] 分别明确代码生成、自修复、代码执行、测试输出预测的抽样覆盖状态。自修复承接真实代码生成及评测反馈，使用已声明兼容模板；不能宣称未经修改的官方模板或全量复现。四场景抽样已有证据，但统一接入和研究消费尚未闭环。
+- [x] 公共入口、可复现环境、四场景原始输出及评分回执、维护中研究侧各3条无损回读、实际CI工件12831578310安装载荷及索引回读已核验；47e9f804三项远端CI通过。按固定原生抽样及显式兼容边界更新机器清单。
+
+### MVBench视频理解（固定原生协议交付完成）
+
+- [x] 官方video分支完整3895文件共15,796,297,352字节已在服务器逐文件校验，复用单份外部缓存，不下载到开发机或提交原始视频。
+
+- [x] 固定版本VLMEvalKit的原始生成函数已生成全部4000题MVBench_MP4表，MD5与作者定义一致；正常完整构造器通过，不伪造部分数据完整性。
+
+- [x] 固定20类每类原顺序前3题，共60题，已完成原始16帧解码与提示构造检查；0模型调用，不代表原生执行完成。
+
+- [x] 60题原始流程推理及官方支持的exact_matching评分已完成，34/60；全部60题得到有效响应和0/1评分，实际子进程退出码0。只代表固定样本可执行，不是4000题全评、论文分数复现或性能结论；不替换失败。
+
+- [x] 候选纯数据读取/投影在服务器核验全部4000题原字段、选项/答案和媒体关系；额外时间边界、fps、show_name与subtitle原样保留，不静默丢弃、不塞进原协议没有使用的模型输入。这不是统一提供侧或研究消费闭环。
+
+- [x] 公共获取、统一数据适配、研究消费者与实际CI工件消费闭环：实际CPU CI工件独立安装62个包载荷字节一致，完整4000条索引、60条提供侧与当前研究消费者逐值回读通过；无新增模型调用。
+
+  候选安装包证据已由实际CI包独立复核：工件12792027468、来源提交ce823541；62载荷字节一致，source-plan的4个入口可发现，完整4000题/索引与60条提供侧/当前研究回读通过（此前75b36c27的有效证据保留）。公共获取复用完整缓存、校验3895文件并建立不复制视频的普通文件视图；原生60题保存请求/响应/评分也已按原qa_template交叉核验。来源勾表示固定协议可用，不是全量评测、高准确率或推理引擎性能结论。
+
+复用已核验的外部完整快照、VLMEvalKit和FFmpeg/Decord环境。模型为现有NPU视觉模型Qwen3.5-9B，是适配的替代模型，不宣称复现VideoChat2论文分数。保持原始16帧、2048输出token和温度0；关闭thinking为显式模型profile，不改题。原始API角色预处理及编码保持不变，评分使用官方支持的exact_matching，不调用付费judge。抽样评分表使用连续评价索引，原始全局索引另存source_index；题目、选项、答案和视频关系不变。
+
+以下是准备入口（默认仅计划，无下载、无模型调用）：
+
+完整资产获取和校验：下载依赖单独准备环境中的`huggingface_hub==0.36.0`；计划、校验与建立普通文件视图只依赖Python标准库。下载需显式完整字节预算和至少100GiB可用空间；已有缓存由官方Hub工具复用。不可达时可显式选择`--hf-endpoint https://hf-mirror.com`，固定版本与全部SHA256不变。
+
+```bash
+python scripts/prepare_mvbench_original_assets.py --cache /external/hf-cache
+python scripts/prepare_mvbench_original_assets.py --cache /external/hf-cache --action download --max-bytes 15796297352
+python scripts/prepare_mvbench_original_assets.py --cache /external/hf-cache --action prepare --data-root /external/mvbench-original-data
+```
+
+`prepare`先完整校验，再在同文件系统的新目录中建立硬链接普通文件视图，避免额外复制视频，也不放宽公共读取器的路径检查；跨文件系统会明确失败，已有目录不覆盖、不自动清理。原快照供原生执行，普通文件视图供统一准备与研究读取。完整3895文件清单进入公共安装包，只有`test.json`是主任务表，不将原始侧标注重复计为新任务。
+
+安装公共数据包后，外部配置为`{"sources":[{"source_id":"MVBENCH","data_root":"/external/mvbench-original-data"}]}`；使用统一入口准备完整索引，输入引用中不写原题或答案：
+
+```bash
+python -m vllm_hust_workload_data.pipeline plan --config /external/mvbench-prepare.json
+python -m vllm_hust_workload_data.pipeline run --config /external/mvbench-prepare.json --output /external/mvbench-prepared-new
+```
+
+```bash
+python scripts/prepare_mvbench_original_view.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--OpenGVLab--MVBench/snapshots/a776e554280b99b70f00cc3eacd69a65e0727efc
+```
+
+完整快照取得并核验后，加`--execute`使用固定原生成函数生成原表；已有表只复用或拒绝异常内容，不覆盖。原生验证入口同样默认仅计划；执行前必须核实设备空闲、研究任务优先及共享服务窗口，并配置原环境的FFmpeg库路径和HF缓存路径。`--frame-cache`须为已存在的外部目录。
+
+```bash
+python scripts/run_mvbench_original.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--OpenGVLab--MVBench/snapshots/a776e554280b99b70f00cc3eacd69a65e0727efc --frame-cache /external/mvbench-frames --output /external/mvbench-fixed60-new-run --model Qwen/Qwen3.5-9B
+```
+
+仅在确认窗口后加`--execute`；原始请求、响应、预测及评分保存到新的私有输出目录，不加入Git。来源总勾须等上述全部交付环节通过。
+
+上述原生入口默认固定60题验证；完整正式评测可增加`--full --execute`运行全部4000原题及同一原生评分。当前实际证据只覆盖固定60题，不把全量可运行入口写成已完成全量评测。
+
+### Video-MME视频理解（固定原生协议交付完成）
+
+- [x] 固定发布元数据、README原Git身份和2700题原Parquet完整SHA256已核验；900视频，短/中/长各900题；官方工具包已有8帧无字幕和带字幕两profile，不是自行削减64帧配置。
+- [x] 推理前固定各时长原顺序前三个不同视频，保留每视频全部3题，共27题/profile、计划54次调用。不能按模型结果换题，字幕只按原始采样帧时间提取。
+- [x] 公共原表准备入口已在服务器生成/复核2700题完整原TSV，与作者MD5一致；全部题目/选项/答案及视频/字幕路径关系通过，原注释不改写。只有准备证据，不冒充完整媒体或原生执行。
+- [x] 字幕库pysubs21.8.0按官方PyPI轮子SHA256独立安装，未改基础客户端/模型服务；原subtitle.zip完整身份及744份原SRT、275142条事件解析通过，0模型调用。镜像无可用版本的失败保留，官方PyPI安装成功，未静默换版本。
+- [x] 候选安装包阶段核验64载荷，原2700条全部11字段可完整重建、完整2700条索引通过；固定27题在提供侧与研究消费者回读一致。这一历史阶段仅为注释数据链，0模型调用，不能独自证明媒体/原生完成或实际CI工件验证。
+- [x] 实际CPU
+  CI工件12795044334在服务器独立安装，64包载荷字节相等，全部2700条原始11字段/索引及固定27题提供侧与研究main消费者逐值回读通过；不是仅源码或候选wheel测试。该次核验0模型调用，范围仅注释/索引/消费，媒体与原生证据另列，见[交付回执](validation/videomme-original-readiness-20261028.json)。
+- [x] 完整24原文件共101002235118字节已在服务器逐文件SHA校验，与固定发布清单一致。原整包任务末尾Hub缺文件失败保留；只恢复最后缺失的videos_chunked_20.zip（2241427390字节），其他23份复用，不重下整包、不修改资产。
+- [x] 公开媒体准备入口已完成原解包及逐字节核验：900视频、744字幕，共101427428166解包字节，真实退出码0。容器干净inactive文件缓存造成的内存误拒已修复，不清全局缓存、不改模型或原解包余量；失败证据保留。
+- [x] 两个原profile各27题的原解码/8帧/采样字幕/提示预检完成；随后54次NPU推理和未修改的exact_matching评分全部完成、全54
+  stop、0未决评分，各13/27。没有按结果改题、缩减原流程或调用付费judge。
+- [x] 独立保存审计重建原提示和API编码，核对全部8帧摘要、原请求/响应/usage/参考关系，并重新调用原评分验证54条逐题一致；审计禁用IP网络/模型生成，0新模型调用。原库对未抽中类别的nan警告保留，不改成0或隐藏未覆盖语义域。
+- [x] 当前CI40663611039与已验证CI包64载荷按来源复核：63份逐字节不变，唯一变动的source_manifests资源仅新增BIGCODEBENCH获取描述，VIDEOMME描述/适配/读取代码不变；2700原字段/索引和27条消费证据有效复用。研究main与受维护工作树的消费者身份再次核对相同，不将其他未合并分支算作接通。
+
+来源总勾对应54个profile任务、27道独立问题、9个原视频的可用性验证。固定样本在各时长内只抽到Knowledge/Humanity &
+History，未验证其他语义域的模型质量；不代表2700题全评、论文模型分数或引擎性能提升。完整环境和从原资产到原生评分的命令见[组件操作说明](../../workload-preparation/README.md#video-mme-%E5%8E%9F%E7%94%9F%E8%A7%86%E9%A2%91%E4%BB%BB%E5%8A%A1)。
+
+配置见`configs/workload-native/videomme-original-protocol.json`。原项目明确仅限学术研究、禁止商业用途及未经许可的再分发/修改；本次按科研用途私下验证，不公开原视频、题目、字幕或模型输出。[原项目使用条款](https://github.com/MME-Benchmarks/Video-MME#-dataset)。64帧及变fps配置不在当前已验证范围，不能以这份计划宣称它们已跑通。
+
+获取入口默认只做离线计划；完整下载须显式确认学术限定、预算和外部缓存，预留至少500GiB供原归档、后续解包及服务余量。下载依赖单独环境中的`huggingface_hub==0.36.0`，其余计划/校验/注释视图使用标准库。已有同一缓存的下载任务存活时不另起重复任务；官方SDK复用固定原始对象和断点。原站不可达可显式加`--hf-endpoint https://hf-mirror.com`，仍核验同一固定版本与文件身份，不绕过访问门槛。
+
+```bash
+python scripts/prepare_videomme_original_assets.py --cache /external/hf-cache
+python scripts/prepare_videomme_original_assets.py --cache /external/hf-cache --action download --accept-academic-only --max-bytes 101002235118
+python scripts/prepare_videomme_original_assets.py --cache /external/hf-cache --action prepare-data --accept-academic-only --data-root /external/videomme-annotation-data
+```
+
+`prepare-data`只校验并硬链接原注释到同文件系统的新目录；即使视频缺失也可用于原记录核验，绝不声称原生媒体已就绪。完整归档另用`--action verify --accept-academic-only`逐文件校验，仍不是解包、视频解码或推理。
+
+安装公共数据包后，使用外部配置`{"sources":[{"source_id":"VIDEOMME","data_root":"/external/videomme-annotation-data"}]}`走统一prepare/index/resolve。原始11字段、原视频/问题ID、选项顺序及答案均保留，参考答案不混入输入，媒体和字幕路径只是原生布局引用，读取器不伪造请求或实际媒体就绪状态。
+
+```bash
+python -m vllm_hust_workload_data.pipeline plan --config /external/videomme-prepare.json
+python -m vllm_hust_workload_data.pipeline run --config /external/videomme-prepare.json --output /external/videomme-prepared-new
+```
+
+原表准备默认只输出离线计划；核验原Parquet与固定作者代码后加`--execute`，原生成函数生成/核对整表，不检查或假装存在900视频。已有异常表拒绝覆盖，原数据目录必须在仓库外：
+
+```bash
+python scripts/prepare_videomme_original_view.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b
+```
+
+完整归档到齐后，可用以下媒体准备入口。默认只计划，显式执行须加`--execute --accept-academic-only`：先验证全部原文件，再检查ZIP原始成员名、重名覆盖、解包预算、内存和磁盘余量，使用固定作者原解包函数，最后逐字节比较全部输出与原归档流/CRC并生成外部回执。已有video/subtitle目录拒绝跳过或覆盖，未知/其他任务的提取锁不清理；失败半成品保留待核查。原函数软件夹具和部分已到齐归档头已在服务器预检，不代表完整媒体已解包或原生任务完成。
+
+内存余量检查只保守计入干净inactive文件缓存，不把active页、shmem、dirty/writeback或匿名模型内存当作可用；仍受宿主MemAvailable和容器上限约束，保持最大原成员3倍加2GiB的原保护余量。首次仅按上限减当前占用而误拒绝的失败已保留，修正后真实容量前置检查通过；不通过全局清缓存或停模型来规避检查，不代表媒体或推理已完成。
+
+```bash
+python scripts/prepare_videomme_native_media.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b --output /external/videomme-native-media-receipt.json
+```
+
+字幕依赖仅装到新的外部目录，不升级已验证的基础环境。原生调用方仍须显式加载该目录并核验版本；安装依赖不是原生评测：
+
+```bash
+python -m pip --isolated install --no-deps --only-binary=:all: --require-hashes --target /external/videomme-subtitle-overlay -r configs/workload-native/videomme-subtitle-requirements.txt
+```
+
+原生执行入口已提供，但尚未真实执行，不据软件测试打来源总勾。完整媒体回执通过后，分别选择作者已有`Video-MME_8frame`、`Video-MME_8frame_subs`配置；默认只输出计划，显式执行另加`--execute --accept-academic-only`。每个配置固定27题，覆盖短/中/长视频各前三个视频的全部原问题；`--full`运行该配置全部2700题。入口保持原提示、抽帧/字幕、API编码、2048生成预算及exact-matching评分，不更换失败题，不调用付费judge；未决评分和错误保留，不写成完成。使用专用外部帧缓存和新的私有输出目录，完整媒体回执、当前选定媒体SHA及作者源码均检查；原SDK缓存缺失的main元数据引用显式绑定固定版本，已有冲突引用拒绝覆盖。执行前仍须协调研究侧资源，不能把示例命令视为获准占卡。
+
+可在完整媒体回执通过后加`--execute --accept-academic-only --prepare-prompts-only`先做CPU原生输入预检：使用相同原始抽帧/字幕/提示函数，保存选定原题的私有提示及8帧摘要，0模型调用、无评分、不产生来源完成勾。默认不加`--execute`仍只计划。预检与正式推理须使用不同的新输出目录；原题和帧缓存可复用，不因解码或输入失败换题。
+
+```bash
+python scripts/run_videomme_original.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b --media-receipt /external/videomme-native-media-receipt.json --frame-cache /external/videomme-frames --output /external/videomme-8frame-run --model Qwen/Qwen3.5-9B --profile Video-MME_8frame
+```
+
+运行环境须使用独立CPU解码/API客户端，不能往在用NPU服务中装评测依赖。服务器实测Python3.12客户端：torch2.10.0+cpu、Decord0.6.0、pandas3.0.5及外部FFmpeg动态库，原工具包和评分/API类导入通过；`/v1/models`只读确认既有Qwen3.5-9B服务存在，不代表已执行视频。原工具包找不到可选`.env`时会打印提示，本地服务不需要因此创建外部凭据或付费judge。
+
+带字幕配置显式传入已按上述哈希安装的独立字幕目录，入口检查pysubs2==1.8.0及实际模块来源，不自动升级。无字幕配置不加载该overlay。先建立外部帧缓存、在进程启动时提供已准备好的FFmpeg库位置，再使用原配置；以下仍默认计划，不发模型请求：
+
+```bash
+mkdir -p /external/videomme-frames
+LD_LIBRARY_PATH=/external/ffmpeg/lib python -B scripts/run_videomme_original.py --official-checkout /external/VLMEvalKit --snapshot /external/hf-cache/datasets--lmms-lab--Video-MME/snapshots/ead1408f75b618502df9a1d8e0950166bf0a2a0b --media-receipt /external/videomme-native-media-receipt.json --frame-cache /external/videomme-frames --subtitle-overlay /external/videomme-subtitle-overlay --output /external/videomme-8frame-subs-run --model Qwen/Qwen3.5-9B --profile Video-MME_8frame_subs
+```
+
+### LongVideoBench 长视频交错理解（固定原三题已交付）
+
+- [x] 固定原三题完成 NPU 推理和上游评分；实际 CI 安装包重建 1,337
+  条索引，固定三题公共端与研究侧回读一致。[交付回执](validation/longvideobench-native-delivery-20261104.json)。以下保留执行前预检记录。
+
+固定三题的原素材现已齐备。Qwen3.5-9B 的 CPU 容量检查得到 167957／167931／226248 token；262144 窗口内最长题余 35896 token。单卡 256
+图服务已启动，原生推理与评分结果另验。复现时使用 `--endpoint`、`--model Qwen/Qwen3.5-9B`、`--max-tokens 32` 和新的私有 `--output`
+目录，保留作者加载器交错顺序；该部署显式关闭思考并用贪心解码。
+
+评分使用
+[LMMs-Eval 固定上游版本](https://github.com/EvolvingLMMs-Lab/lmms-eval/tree/19085f3ac07e4631fd2f0218786741b6bbc40f69)
+的原解析及聚合函数；在独立环境运行
+`python scripts/score_longvideobench_original_results.py --validation <原验证集JSON> --responses <私有结果目录> --seed 0`。原评分器有随机回退，种子必须记录；三题分数不作全量质量结论。
+
+- [x] 发布方固定版本的 validation 1337 条和原位置 0、1、2 对应的两份原字幕已在服务器核验。已取得位置 2
+  的原视频，并通过[原版加载器预检入口](../../scripts/verify_longvideobench_original_inputs.py)：256 帧、68
+  段文本，参考选项与输入分离。位置 0、1 共用的原视频已从发布方归档提取并核验；预检不计模型执行。
+
+```bash
+python scripts/verify_longvideobench_original_inputs.py --author-loader /external/LongVideoBench/longvideobench/longvideobench_dataset.py --data-root /external/LongVideoBench-data --position 2
+```
+
+使用作者加载器依赖（含 Decord 和 Pillow）及原始 `lvb_val.json`、`videos/`、`subtitles/` 布局。素材齐备后去掉
+`--position 2`，预检全部三个固定位置；不更换题目，不减少已选帧数。
+
+已有本地候选模型权重时，可在同一预检命令上加 `--capacity-model <本地模型目录>`，按该模型的图像处理器和聊天模板核算完整输入。不传 `--endpoint`，不占用
+NPU；实跑前还须核对输出预算、服务上下文和多图接收上限。
+
+- [x] 2026-10-28复核[官方数据页](https://huggingface.co/datasets/longvideobench/LongVideoBench)及[原生软件](https://github.com/longvideobench/LongVideoBench)：6678题，validation1337/test5341；长视频、字幕与图像交错关系属于原任务，不能用Video-MME替代，不构造纯文本题冒充。
+- [ ] 现有账号授权已核验，原素材部分取得，不公开受控原数据。位置 2 的 256 帧均为 1280×720；按本机 Qwen2-VL-7B 图像处理配置（patch 14、merge
+  2）估算，不另降采样约需 30.6 万视觉 token，未计字幕、题目和生成预算，远超现有 32K 服务。此为容量预判，不是服务实测。仍缺合格 NPU 执行配置、原生推理和评分；来源总勾保持未选。
+
+### TemporalWiki原基座探针PPL已交付，其他演化语料模式缺口保留
+
+- [x] 原GPT2-large基座PPL全部8CSV／35,948行、1126个NPU批次完成，原评分标量独立重算精确一致；296cc656补齐分类API入口后两项CI通过，实际工件13073205020的78提供方载荷独立安装核验，全部原字段／索引和24条公共／当前研究回读通过，与原生全部输入文件绑定；TemporalWiki原生评测和LJSpeech原生TTS可通过分类API查询，751项CPU同套检查通过，先前漏登失败保留。现有9B／14B未重启，保护租约已释放。[交付回执](validation/temporalwiki-base-probes-native-delivery-20261101.json)
+
+- [ ] 持续训练checkpoint、T5、生成、全文／差分语料等模式未完成，另2份语料归档和发布方许可审查仍待补；不编造更新事件。下列准备与失败记录为历史检查点，不表示当前声明的基座探针协议仍未交付。
+
+- [x] 官方GPT2-large全部8份模型文件／3,250,026,117字节在服务器核验通过，权重整文件3,247,159,078字节与发布方LFS
+  SHA256一致，未写入Windows原始数据或权重。公开候选入口`run_temporalwiki_original_npu.py`的完整8文件／35,948行计划核验通过，保留原25-token输入／输出和batch32；明确为empty-checkpoint基座原探针困惑度，不冒充持续训练论文模型。
+
+- [x] 全部35,948行／1126批次原GPT2基座NPU评测完成，8份原困惑度CSV均返回；保存loss按原float32顺序在NPU仅重算标量评分，8份结果逐一精确一致，0新模型调用。第一轮自设4GiB分配器上限失败保留，5GiB配置成功，显存增量峰值4926MiB，9B／14B不重启；当前19项直接依赖版本及隔离`pip check`通过，继承CANN工具元数据的失败另存。仍需当前CI及公共／研究消费交接后补来源总勾，下列更早准备记录按历史检查点保留。
+
+- [x] 隔离兼容环境安装、`pip check`及真实依赖导入通过；未替换系统Torch。执行未修改的原`Datasets.py`与原GPT2分词器，在1,776条changed探针中核验固定前三条，保留原25-token输入/输出、特殊token和左侧padding。证据`temporalwiki-original-dataset-cpu-20261101-001/qualification-public.json`；仅CPU数据处理，0模型调用，仍需权重、NPU评测和官方困惑度结果。
+
+- [x] 重新核验原`evaluation_ppl.py`及GPT2
+  baseline配置：原作者支持`checkpoint_path=""`时直接使用基座模型，配置模型为`gpt2-large`，原input/output长度25、batch32。可以继续适配这一明确的原生基座探针协议，不必把未公开的持续训练checkpoint当作该分支的必需前置；不能据此声称复现持续训练模型或改用Qwen聊天。证据`temporalwiki-original-base-probe-review-20261101-001/qualification-public.json`，0模型调用，模型/分词器及NPU原生执行仍待验证。
+
+- [x] 原GPT2-large模型快照固定到`32b71b12589c2f8d625668d2335a01cac3249519`，7份原分词器/配置/模型卡共2,867,039字节通过Git内容身份核验，仅在服务器保存。服务器直连官方模型源的网络不可达失败保留；配置经原官方URL和既有代理有界RAM转发，未下载大权重、未加载模型，不能计原生执行。
+
+- [x] 官方代码版本已固定，177份原软件/配置共382,667字节在服务器逐文件Git blob及SHA256核验；13份Python仅AST解析，162份原配置保留，不导入或执行作者代码。
+
+- [x] 原协议已区分：56份探针困惑度配置、56份语料困惑度配置，以及44份微调/6份预训练配置。README示例并不是普通聊天问答，不能换成当前Qwen API调用冒充复现。
+
+- [x] 官方历史上传版本的完整TWiki_Probes.zip已在服务器取得，620,459字节，与发布方LFS SHA256一致，未在本地下载数据；获取回执已保存。
+
+- [x] 公共获取入口复用整包原文件，安全解包并校验全部9文件：8份月份/changed或unchanged探针CSV及原不透明.DS_Store。全部35,948行三元组/索引验证通过；未按实体猜测跨文件关联，也不构造更新事件。
+
+- [x] 提供侧及当前研究消费者固定每文件前3条、共24条完整记录回读一致；这是候选代码验证，0模型调用，不冒充原生困惑度评测。
+
+- [x] 实际CI工件12785028172在服务器独立安装，60个包载荷字节一致；全部35,948原字段/索引及24条提供侧/当前研究完整记录回读通过，0模型调用，不是原生困惑度结果。
+
+- [ ] 原数据许可待核验；另外两种归档尚未取得，不得把Wikipedia全文、差分语料和subject/relation/object探针强行合并为同一种行结构。
+
+- [x] 2026-10-31通过发布方dataset info和不可变版本tree
+  API补齐三种归档身份，登记在现有探针profile的`publisher_archive_inventory`，计划CLI直接显示。另两包分别为932070039和24655216607字节，仅登记官方LFS身份，未下载、未重算整包SHA；原探针取得版本与内容不变。许可和剩余数据获取仍未完成，不计来源总勾。
+
+- [ ] 官方模型/checkpoint、合格NPU环境及原生评测待完成。旧环境为Python3.8、Torch1.9 CUDA11.1等，不在当前NPU环境盲装或静默修改作者配置。
+
+  仅准备/核验作者软件（外部目录；不下载数据或权重、不执行训练/推理）：
+
+  ```bash
+  python scripts/prepare_jsonschemabench_author_source.py --source temporalwiki --author-root /external/temporalwiki
+  python scripts/prepare_jsonschemabench_author_source.py --source temporalwiki --author-root /external/temporalwiki --action prepare --max-bytes 382667
+  python scripts/verify_temporalwiki_original_contract.py --author-root /external/temporalwiki
+  ```
+
+  原始探针资产准备（默认离线计划；实际下载和解包均须显式选择，目录必须在本仓库以外）：
+
+  ```bash
+  python scripts/prepare_temporalwiki_original_assets.py --archive /external/TWiki_Probes.zip
+  python scripts/prepare_temporalwiki_original_assets.py --archive /external/TWiki_Probes.zip --action download --max-bytes 620459
+  python scripts/prepare_temporalwiki_original_assets.py --archive /external/TWiki_Probes.zip --action extract --data-root /external/temporalwiki-probes
+  python scripts/prepare_temporalwiki_original_assets.py --archive /external/TWiki_Probes.zip --action verify --data-root /external/temporalwiki-probes
+  ```
+
+  原站不可达时可显式加`--hf-endpoint https://hf-mirror.com`，仍核对同一发布方固定版本/整包SHA256。已有原包复用，不重下；已有解包目录只核验，不覆盖。subject/relation作为输入字段，object单独保留为参考；官方likelihood流程须读取完整三元组，不能只拿输入字段声称测过困惑度。
+
+  安装公共数据包后，沿用统一prepare入口。外部配置示例（不是模型执行配置）：
+
+  ```json
+  {"sources": [{"source_id": "TEMPORALWIKI", "data_root": "/external/temporalwiki-probes"}]}
+  ```
+
+  ```bash
+  python -m vllm_hust_workload_data.pipeline plan --config /external/temporalwiki-prepare.json
+  python -m vllm_hust_workload_data.pipeline run --config /external/temporalwiki-prepare.json --output /external/fresh-temporalwiki-index
+  ```
+
+  服务器GitHub匿名配额及原代码域名连接失败记录保留；最终只通过已有认证读取原小型软件并内存中转到服务器，没有发送凭据、原软件入Git或本地落数据集。HF镜像元数据403与原站连接超时仍是数据获取缺口。软件无LICENSE文件，Wikipedia衍生数据许可应另外核对。[阶段证据](validation/temporalwiki-original-readiness-20261028.json)。
+
+### NatureBench科学代码工作流（进行中，不打来源总勾）
+
+第三题最新终态：原`s43588-024-00689-2`于UTC
+2026-11-02T21:47:34结束，Agent与harness退出0，任务状态`success`，实际7781.7秒；原4小时是上限，没有人为缩短。官方`scored_tasks=0`、科学评估尝试0、`judge=null`，不把Agent正常结束写作科学评价通过。原输出与失败保留，详情见机器清单`NATUREBENCH.third_original_terminal_20261103`；来源仍未完成。
+
+- [x] 固定官方代码与数据版本，服务器取得56份原始运行/评估/环境/任务列表文件，共514543字节，Git blob及SHA256核验通过；30份Python只做语法解析，未执行科学任务代码。
+
+- [x] 完整90任务的CPU3/GPU-low70/GPU-high17分组，以及NatureBench-25的1/22/2分组全部核验；25任务轨道是原90任务的按资源一致子集，不新增来源计数。
+
+- [x] 未改的官方`run_naturebench.py --help`返回0；这只是准备客户端中的CLI可用性，不代表原始conda环境复现、Agent执行或科学评分通过。
+
+- [x] 官方全部3个CPU任务的576原文件已取得，共2,754,532,128字节，500份LFS SHA256和76份Git
+  blob逐份核验通过。复用574份已有文件，两个超时对象以固定原URL整文件回退取得，未截断、改内容或换任务；58,059,841字节的重复临时副本已清理，规范数据和回执保留。
+
+- [x] 独立准备环境13个固定依赖/14个已安装分发，`pip check`及官方CLI
+  help通过；公开只读入口核验576文件，官方`--skip-download --download-only`离线准备返回0。这不是科学任务执行；其他87个Full任务数据未取得。这里CPU是科学任务资源组，后续LLM仍须用NPU，未启用CPU模型推理。
+
+- [x] 3个CPU原始任务包的关系读取已在服务器逐包核验：576文件读取前后校验，保留7项原始元数据，隐藏评估与参考结果不进入题目输入；这是候选代码验证，不代表已安装CI工件、统一索引或研究消费者接通。
+
+- [x] 候选代码统一索引3个原任务引用、提供侧回读3条、当前研究消费者回读3条均在服务器验证通过，原输入和outcome逐值一致；研究消费者版本及摘要保存在阶段证据，0模型调用。
+
+- [x] 实际CI工件12783786040在服务器独立安装，59个包载荷字节一致；3个原任务的索引、提供侧/研究侧完整记录回读均通过，0模型调用。
+
+- [x] 专用CPU
+  Docker恢复；官方ARM64基础镜像12层完整哈希核验后加载；56份原代码与576份CPU任务文件已从原服务器直传、逐份核验，不在本地保存数据。已清理8个无容器引用的已完成SWE软件镜像，原数据、容器和结果保留。
+
+- [x] 科学基础镜像构建返回0，`pip check`通过；43个原固定版本包和56个回收依赖包核验后复用。ARM64使用同版本官方CPU科学计算轮子，完整记录与原CUDA轮子的环境差异；未进行CPU上的LLM、embedding或judge推理。
+
+- [x] 第一、第三个CPU任务的原始Dockerfile独立构建返回0，原配方未改；这只是环境构建，不代表任务执行、运行时导入、Agent调用或评分已通过。
+
+- [x] 两个已建成镜像的任务固定版本核验完成。第一环境`pip check`通过；第三环境原始安装将NumPy升至2.2.6、protobuf升至7.36.2，与原CatBoost/wandb冲突，原镜像及失败记录保留。
+
+- [x] 第三环境独立兼容层恢复原基础NumPy1.26.4、兼容的protobuf5.29.6，并固定未被原方案钉死的传递依赖TensorBoard2.20.0、numdifftools0.9.41；`pip check`及Scanpy/scvi/monod实际导入通过。第一次修复的额外冲突仍保留，原任务固定版本、题目、预算和评分未改。
+
+- [x] 第二任务的原固定`gudhi==3.10.1`已由核验官方校验和的同版本源码构建成功；独立环境保留原43个基础固定版本和原任务固定版本，`pip check`及Scanpy/scvelo/phate/palantir/GUDHI/scikit-sparse/PyGraphviz实际导入通过。原ARM安装失败保留，不换版本、不删依赖。
+
+- [x] Docker守护进程实际可见路径已核验：56个原软件文件按固定清单核验、576个原任务文件以同inode硬链接接通，任务数据重复占用为0；最初将Python生成缓存也计入源文件的未合格尝试保留。三个原CPU任务在实际只读挂载下的官方运行dry-run、solve/evaluation/judge/Agent帮助共5项均返回0；没有模型或科学任务执行。
+
+- [ ] 完整原生Agent流程、官方评估器与有效性judge仍待完成，不以静态问答或`--skip-judge`替代。独立Docker仅有host/none网络；已保留原代码并单列仅修改容器host网络与loopback主机别名的兼容配置，不称未修改官方运行时。实际通信、工具调用和评分仍须实跑，CLI帮助或dry-run不替代原生验证。
+
+- [x] CPU到现有NPU
+  14B服务的限时受限SSH回环通道已接通，未改写流式HTTP、未重启模型；原版评估服务回环健康检查及第一题注册通过。Docker权限仅交给可信原harness，不挂入生成代码任务容器。
+
+- [ ] 原CPU组固定第一题已终止为`agent_error`，任务返回1、控制器退出0，官方已评分任务数0。终止请求为输入至少99073、输出32000，合计超过服务131072容量；不以容器退出0当成功，也不归因于科学答案质量。原输入、输出及失败轨迹保留，未人工修答案、未换题。其余两题及最终原生评分/judge、公共入口和最终研究交接待完成。进展证据：`validation/naturebench-original-fixed3-native-progress-20261102.json`。
+
+- [x] 已核验原Claude
+  Code2.1.316支持[官方自定义模型上下文配置](https://code.claude.com/docs/en/model-config#correct-the-window-for-a-gateway-or-custom-model-id)。公共入口新增`--model-context-tokens`，执行前必须按实际部署声明容量，使用`CLAUDE_CODE_MAX_CONTEXT_TOKENS`交给原客户端；不改任务、4小时预算、输出预算或模型服务。修复后原题执行尚待验证，首次失败不合并为成功结果。
+
+- [x] 公共运行时软件准备器已在服务器候选版本验证：离线计划、准备、再核验均返回0；生成的56个文件与正在执行的原生运行时逐字节一致，0新增模型调用。9项小夹具覆盖原文件保护、两处网络兼容改动、重复目录拒绝与篡改拒绝；不是数据集或科学任务测试，也还不是CI工件核验。
+
+  软件准备入口（不下载任务、不装科学依赖、不启动Agent）：
+
+  ```bash
+  # 默认只做离线计划；新原生执行须显式选择original-context以透传真实容量。
+  python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --profile original-context
+  python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --profile original-context --write
+  python scripts/prepare_naturebench_native_runtime.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-runtime --verify
+  # owned-hostnet-context仅用于专用、已核验的pod，不是通用不可信网络隔离方案。
+  # 两个-context配置只额外透传CLAUDE_CODE_MAX_CONTEXT_TOKENS，不修改原任务或提示。
+  ```
+
+- [x] 公共原生委托入口`run_naturebench_original.py`已接好：复用原包读取器核验输入、隐藏评估、环境与许可证，直接委托原版harness，默认原CPU3、单worker、原4小时预算，不提供`skip-judge`或宿主机生成代码回退。服务器在实际挂载命名空间通过第二题完整原包的离线计划核验，0模型调用、未创建实验输出目录；这不是第二题执行或来源交付。
+
+  已保存预测可用独立入口复核原评分，默认仅打印计划，确认合格的不可变科学CPU镜像后加`--execute`。它只运行原`evaluation/evaluator.py`，不运行生成程序，不重跑Agent；评分目录必须全新，不覆盖早先提交结果。第二题已真实验证；原null指标和11项预测校验错误均保留，评分器正常退出不代表预测质量通过。
+
+  ```bash
+  python scripts/score_naturebench_saved_predictions.py \
+    --data-root /path/to/original-naturebench-data \
+    --task-id s41592-025-02870-5 \
+    --predictions /path/to/saved-task/workspace/output \
+    --image sha256:QUALIFIED_64_HEX_CPU_IMAGE_ID \
+    --output /path/to/fresh-final-prediction-score
+  ```
+
+  原有效性裁判因上下文或连接问题失败后，可在合格可信控制环境使用以下恢复入口。它拒绝重跑已有布尔判决，只复用保存输出和原问题材料，默认不调用模型；加`--execute`才调用原collector、prompt、4096-token输出策略及parser。服务需提供`/v1/messages/count_tokens`和含真实`max_model_len`的`/v1/models`，完整材料放不下时直接报错，不截断。保存输出及原数据应只读挂载，新恢复目录单独可写；凭据通过私有环境`JUDGE_API_KEY`或`ANTHROPIC_API_KEY`注入，不写命令。
+
+  ```bash
+  python scripts/recover_naturebench_original_judge.py \
+    --author-root /path/to/pinned-naturebench-code \
+    --runtime /path/to/verified-runtime \
+    --data-root /path/to/original-naturebench-data \
+    --saved-task /path/to/saved-native/s41592-025-02870-5 \
+    --task-id s41592-025-02870-5 --model YOUR_ACTUAL_JUDGE_MODEL \
+    --endpoint http://127.0.0.1:YOUR_JUDGE_PORT \
+    --output /path/to/fresh-judge-recovery
+  ```
+
+  2026-11-06服务器真实原包已通过此公共入口离线计划核验，未产生新模型调用；已有成功裁判结果复用，不为验证新包装器重复调用。独立长上下文配置的完整材料裁判实跑证据另见终态回执，两种证据不混称。
+  连接已启动的原评分服务时，可加`--eval-control-token-file /path/to/private/control-file`，使作者脚本读取与服务匹配的控制文件；只转交文件路径，不打印凭据内容，不改题目或预算。控制环境须满足作者Python3.11及依赖要求；服务器已复用合格科学镜像作为可信编排环境，实际科学任务另起原任务容器，后者不挂载Docker控制接口或NPU设备。第一题现已进入原Agent流程并实际调用现有NPU模型，尚不能当作执行、科学评分和validity
+  judge全部完成。
+
+- [ ] 公共委托入口的`--execute`实跑及科学环境完整复现说明待完成；首次失败运行保留，修复后的原题运行须单独记录。14项编排夹具只验证参数、身份/数据拒绝、显式凭据、上下文容量声明、容器透传、失败保留和不自动宣告完成。
+
+  ```bash
+  # 离线计划；科学依赖、原任务Docker镜像和原evaluator须先准备并核验。
+  python scripts/run_naturebench_original.py --author-root /path/to/pinned-naturebench-code --runtime /path/to/fresh-runtime --data-root /path/to/original-naturebench-data --output /path/to/new-native-run --model YOUR_SERVED_MODEL --model-context-tokens 131072 --endpoint http://127.0.0.1:YOUR_MODEL_PORT
+  # 131072对应本次已核验14B服务；其他部署填其真实的输入+输出总容量，不是修改输出预算。
+  # --execute只在已准备好的可信控制环境显式调用；Agent/judge端点和API_KEY均显式配置。
+  # 默认三题；--task-id只接受原CPU任务ID，不会换题或减预算。
+  ```
+
+  原生执行前的环境核对：
+
+  | 层次         | 本次实际配置与核对要求                                                                                                                                                                        |
+  | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | 可信控制器   | Python3.12、Docker客户端及专用守护进程；Claude Code2.1.316。Docker客户端和socket仅交给控制器，不交给生成代码的任务容器。                                                                      |
+  | 科学基础环境 | 原43个固定包保持版本；ARM64使用同版本官方CPU科学计算轮子。CPU仅执行科学任务程序，Agent和judge调用NPU服务。                                                                                    |
+  | 第一题       | 原Dockerfile、Scanpy1.10.4；`pip check`与科学包导入通过。原harness镜像别名为`naturebench-task-s41592-022-01709-7:base`。                                                                      |
+  | 第二题       | GUDHI3.10.1从官方同版本源码构建，保留原固定包；`pip check`及科学包导入通过。别名为`naturebench-task-s41592-025-02870-5:base`。                                                                |
+  | 第三题       | 保留原镜像，另加兼容层：NumPy1.26.4、protobuf5.29.6、TensorBoard2.20.0、numdifftools0.9.41；原任务固定包不变，`pip check`及科学包导入通过。别名为`naturebench-task-s43588-024-00689-2:base`。 |
+  | 数据路径     | 使用Docker守护进程可见的绝对路径，不假定控制器内路径对守护进程可见。Agent仅见`problem/`，隐藏评估及真值由原evaluator读取。                                                                    |
+  | 模型接口     | 本次使用Qwen3-14B BF16 TP1 NPU服务，经受限回环转发提供原Anthropic消息接口；不是官方论文模型成绩复现。judge保留原客户端与规则。                                                                |
+
+  镜像标签是本次环境名称，不是已发布的下载地址；完整镜像身份、构建差异和失败记录见上述准备证据。已公开服务器实际构建的[GUDHI同版本源码配方](../../configs/workload-native/naturebench-arm64/gudhi-3.10.1.Dockerfile)与[第三题传递依赖兼容层](../../configs/workload-native/naturebench-arm64/third-task-constraints.Dockerfile)。三题执行、评分和公共`--execute`尚未全部验证。
+
+  GUDHI配方的构建上下文需提供[官方3.10.1源码](https://github.com/GUDHI/gudhi-devel/releases/download/tags/gudhi-release-3.10.1/gudhi.3.10.1.tar.gz)，先核验SHA256为`24f9743c579c9e01696cb2cbc564248d6e038e4bf23e7484073283e57495d80d`。配方不自动下载任务数据。构建前核对`naturebench-base:v3`为本次合格基础环境；不能将任意同名镜像当作已验证环境。第三题兼容层依赖未改的原第三题镜像，不能代替原Dockerfile构建。两个配方都只做软件构建与导入，不进行模型前向；公共入口生成的配方尚未独立重建，不冒充第二次构建通过。
+
+  复用已验证任务镜像时，作者实际读取的标签是`naturebench-task-<原题号>:base`，不是`naturebench-task:<原题号>`。在私有JSON中将原题号映射到已验证的完整`sha256:`镜像ID，先运行`python scripts/bind_naturebench_task_images.py --manifest /path/to/qualified-image-ids.json`检查计划，再加`--execute`绑定。入口拒绝覆盖已有的不同镜像；绑定只建立别名，不证明环境合格或原生题目完成。保持原运行入口的`--build-task-images`路径，作者会优先复用这些已有镜像；不要改用`--skip-build`，该参数会回到基础镜像并重新运行任务安装命令。兼容环境的差异仍须随结果披露。
+
+  基础科学配方也可从已核验原源码准备，默认只打印计划；它不安装依赖、不启动Docker，不下载数据或模型。服务器已通过真实固定源码的计划与准备核验；缓存模式生成配方除不可变基础镜像引用外，与实际已构建配方逐字节一致。5项软件夹具不等于重建镜像或原生题目验证。
+
+  ```bash
+  python scripts/prepare_naturebench_scientific_base.py --author-root /path/to/pinned-naturebench-code --output /path/to/fresh-build-context
+  # 同时核验完整CPU3原包并准备三题软件配方及第二题43个原基础包约束：
+  python scripts/prepare_naturebench_scientific_base.py --author-root /path/to/pinned-naturebench-code --data-root /path/to/original-naturebench-data --output /path/to/fresh-task-context --write
+  # 确认计划后追加--write；仅已有独立、经核验wheelhouse时使用--cached-wheelhouse。
+  # 生成目录保留原配方、派生配方、LICENSE/NOTICE及差异证据；缓存文件不由此入口复制或核验。
+  ```
+
+  带`--data-root`的服务器验证已通过全部三个完整原任务包，第二题生成配方与已成功构建配方逐字节一致，未复制问题、隐藏真值或其他数据文件。构建顺序：基础镜像→GUDHI同版本镜像→第二题；第一、第三题先使用对应原配方，第三题再加公开兼容层。实际构建后的`pip check`、科学包导入和镜像身份核验仍必须保留，不能仅凭标签或生成成功认定环境合格。
+
+  原evaluator必须与本次运行使用同一份已核验运行时，并在相同控制网络内启动。另开运行时后不要复用旧运行时的私有控制token。先检查端口未被占用，再在独立科学容器内启动原服务：
+
+  ```bash
+  python /path/to/fresh-runtime/source/eval_service.py --host 127.0.0.1 --port 18322 --timeout 14400
+  # 在另一可信控制会话中检查公共入口；密钥经私有环境注入，不写入命令或Git。
+  export PYTHONPATH=/path/to/benchmark/workload-preparation/src
+  python /path/to/benchmark/scripts/run_naturebench_original.py \
+    --author-root /path/to/pinned-naturebench-code \
+    --runtime /path/to/fresh-runtime --data-root /path/to/original-naturebench-data \
+    --output /path/to/separate-fresh-run --model YOUR_SERVED_MODEL --model-context-tokens 131072 \
+    --endpoint http://127.0.0.1:YOUR_MODEL_PORT --eval-port 18322 \
+    --eval-mapping /path/to/mapping-with-matching-main-port.json
+  # 离线计划通过后，同命令追加--execute；先显式设置ANTHROPIC_API_KEY和JUDGE_API_KEY。
+  ```
+
+  `--output`必须在源码、运行时和原数据目录之外，且不存在；不要预先创建该叶目录。原生任务运行期间保留预算及失败反馈，不人工编辑Agent答案、不因模型答错换题。退出后仍须核查官方评估、有效性judge和三题终态，退出码0不能直接打勾。
+
+  任务包关系核验（不执行科学代码、不调用模型）：
+
+  ```bash
+  python scripts/verify_naturebench_original_packages.py --data-root /path/to/original-naturebench-data
+  # 可选：在全新、与原始数据分离的目录建立引用索引并逐条回读
+  python scripts/verify_naturebench_original_packages.py --data-root /path/to/original-naturebench-data --prepare-output /path/to/fresh-index
+  ```
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source naturebench \
+  --action prepare --author-root <仓库外官方源码目录> --max-bytes 600000
+python scripts/verify_naturebench_original_contract.py \
+  --author-root <同一官方源码目录> --output <源码目录外的新证据文件>
+python scripts/prepare_naturebench_original_assets.py --mode download \
+  --author-root <同一官方源码目录> --data-root <仓库外服务器新数据目录> \
+  --cache-root <独立新缓存目录> --max-bytes 3000000000
+python scripts/prepare_naturebench_original_assets.py --mode verify \
+  --data-root <上述原始数据目录>
+```
+
+下载客户端依赖见`configs/workload-native/naturebench-preparation-client-py312-observed.txt`，是已验证的Python3.12
+ARM准备环境，不是原始科学任务conda环境。默认优先调用未改的官方download-only入口；确需镜像时显式指定`--hf-endpoint https://hf-mirror.com`，通过[官方HTTP后端扩展](https://huggingface.co/docs/huggingface_hub/v0.36.0/package_reference/utilities#configure-http-backend)仅保持同版本分页请求的传输域名，保留路径和参数。中断后可用相同目录加`--resume`，先完整校验已有文件再续传；不要与其他下载器同时写同一目录。对象超时可显式加`--transport publisher-files`，仅获取缺失的完整原对象，仍须全部576文件的原始摘要/大小通过，不更换数据源或任务。所有已取得数据原样保留在服务器，未下载到本地工作站或Git。
+
+官方数据是科学代码任务包：`problem/`向Agent可见，`evaluation/`与隐藏真值不可泄漏；任务环境、评估器和有效性审查均属于原生流程。NPU工作区没有Docker/Podman/bwrap，本次使用专用CPU工作区的独立Docker执行科学程序，经回环转发调用NPU模型。官方conda导出包含linux-64/MKL构建；上述ARM环境差异必须披露，不能称原封不动复现。代码/任务规范的MIT许可不覆盖全部第三方科学数据，必须保留每任务许可与署名；公开可下载不等于可随意再分发。[原始版本与资源分组](../../configs/workload-native/naturebench-original-release.json)；[阶段证据](validation/naturebench-original-readiness-20261028.json)。
+
+### OpenCodeInstruct原始代码训练语料（固定原始profile已交付）
+
+- [x] 核验官方固定版本元数据：50个原始train分片、6,861,113,102字节，公开CC-BY-4.0。复用已有原字段适配，问题与教师代码、原测试、历史测试状态和判断信息分开保存，不生成替代题目。
+- [x] 公共获取入口支持固定原文件，公共引用准备入口及微型夹具回归已补齐；这些只是软件能力验证，不代表真实数据或模型已跑通。
+- [x] 服务器已取得预先固定的0/24/49原始分片，共422,115,928字节，发布方LFS摘要及大小全部复核通过；每份Parquet元数据100000行，schema及原前3条字段类型已检查。实际`average_test_score`为double/float，不按HF卡片中的string描述强转。[阶段证据](validation/opencode-original-readiness-20261028.json)
+- [x] 三份可用原分片全部300000条九字段、引用索引及9条当前研究侧回读通过；使用候选目录和已验证CI适配运行库，不能冒充新目录的实际CI工件验证。
+- [x] 固定9条原问题在现有9B BF16 TP1 NPU服务生成并保存核验：7 stop、2 length，预算8192，未换题或重跑。实际3bf633eb CPU
+  CI包57载荷核验和9条当前研究回读通过，未重建索引。
+- [x] 3bf633eb的tests、lint及CPU
+  smoke全部通过，[最终交付范围与证据](validation/opencode-native-delivery-20261028.json)。原`unit_tests`及生成代码未执行；如需功能评估，必须另行核验隔离环境，不把生成跑通当代码正确率。
+
+```bash
+python scripts/prepare_reused_research_assets.py OPENCODE --mode plan \
+  --files data/train-00000-of-00050.parquet data/train-00024-of-00050.parquet data/train-00049-of-00050.parquet
+python scripts/prepare_reused_research_assets.py OPENCODE --mode download \
+  --data-root <仓库外原始目录> --max-bytes 450000000 \
+  --files data/train-00000-of-00050.parquet data/train-00024-of-00050.parquet data/train-00049-of-00050.parquet
+python scripts/prepare_reused_source_records.py OPENCODE \
+  --data-root <仓库外原始目录> --output <仓库外新引用目录> \
+  --files data/train-00000-of-00050.parquet data/train-00024-of-00050.parquet data/train-00049-of-00050.parquet
+```
+
+这是合成代码训练语料，不是独立代码质量benchmark。教师答案和原历史测试分数不代表本地模型结果；实际三份文件的`average_test_score`为double，与HF卡片的string描述不同，必须原样保留数值，不能擅自改类型或补造评分器。
+
+原问题生成复用已测的训练语料执行流程，默认只显示计划；`--full`为流式执行所选原文件全部行，默认固定原前3条/文件，不按结果换题。可用模型回退profile如下，已完成9条原问题生成与保存核验，但不是作者质量评测配置。
+
+```bash
+python scripts/run_opencode_original.py --mode run \
+  --data-root <仓库外原始目录> --output <仓库外私有新结果目录> \
+  --files data/train-00000-of-00050.parquet data/train-00024-of-00050.parquet data/train-00049-of-00050.parquet \
+  --model Qwen/Qwen3.5-9B --max-tokens 8192 --context 262144
+python scripts/verify_opencode_original_saved.py \
+  --data-root <仓库外原始目录> --saved <上述私有结果目录> \
+  --files data/train-00000-of-00050.parquet data/train-00024-of-00050.parquet data/train-00049-of-00050.parquet
+```
+
+### OpenMathInstruct-2原始推理训练语料（固定原始profile已交付）
+
+- [x] 完整主train32分片的固定版本/URL/LFS摘要/大小已登记，共7,576,089,560字节；不把与主train重叠的1M/2M/5M子集重复计为独立问题来源。
+- [x] 运行前固定的0/15/31原分片已在服务器取得并核验，共710,707,907字节。三份Parquet元数据行数为436650/436650/436649；已检查原schema及各原前3条字段类型，未据此宣称所有行值或索引均验证通过。
+- [x] 三个可用分片全部1,309,949条原字段及索引完成核验；实际CI28997404包的56个载荷与工件一致，9条公共/当前研究消费者回读通过。初次私有核验器误比较逐文件与三文件全量选择范围，已明确校验各自范围并恢复只读核验；失败记录保留，未重建索引或重跑模型。
+- [x] 原前3条/分片共9条原问题已在现有Qwen3.5-9B BF16 TP1 NPU3服务生成：3 stop、6
+  length，显式预算8192，未改问题、换题或重试。保存的输入、参考、来源、预算和响应已用公开核验入口复核，0新增模型调用；不独立判断数学正确性，不冒充作者教师模型复现。
+- [x] 当前a70da63a的tests、lint及CPU
+  smoke全部通过；独立安装实际CI工件并核验56个包载荷，复用全量索引后9条公共/当前研究侧回读通过，未重建索引或重跑模型。`problem`独立作为输入，教师解答、参考及空答案均保留在参考侧。[最终范围与证据](validation/openmath2-native-delivery-20261028.json)；[历史阶段证据](validation/openmath2-original-readiness-20261028.json)。
+
+```bash
+python scripts/prepare_reused_research_assets.py OPENMATH2 --mode plan \
+  --files data/train-00000-of-00032.parquet data/train-00015-of-00032.parquet data/train-00031-of-00032.parquet
+python scripts/prepare_reused_research_assets.py OPENMATH2 --mode download \
+  --data-root <仓库外数据目录> --max-bytes 800000000 \
+  --files data/train-00000-of-00032.parquet data/train-00015-of-00032.parquet data/train-00031-of-00032.parquet
+```
+
+这是发布方公开的合成推理训练语料，不是独立质量benchmark，不能把训练语料续写说成官方独立评测、训练复现或真实线上分布证明。当前只取得主train三个固定分片，其他29份仅登记；原始数据不放入仓库或本地工作站，运行配置须明确模型与预算，不能补造作者未给出的质量评分器。
+
+原问题生成默认只展示计划；运行必须显式给出模型、上下文和输出预算。以下为当前已验证的本地模型回退profile，不是作者官方质量配置：
+
+```bash
+python scripts/run_openmath2_original.py --mode run \
+  --data-root <仓库外原始目录> --output <仓库外私有新结果目录> \
+  --files data/train-00000-of-00032.parquet data/train-00015-of-00032.parquet data/train-00031-of-00032.parquet \
+  --model Qwen/Qwen3.5-9B --max-tokens 8192 --context 262144
+```
+
+默认原前3条/文件，`--count`明确增加固定前缀；`--full`流式遍历所选文件全部原行，不按结果过滤。输入只使用原`problem`作为user内容，模型原生模板由服务处理；不加入教师解答。`verify_openmath2_original_saved.py`使用相同原始目录/文件选择及`--saved`结果目录复核，无模型调用、无独立数学评分。原字段准备复用`prepare_reused_source_records.py OPENMATH2 --data-root ... --output ... --files ...`；全量模式可生成三个所选分片的全部引用索引，不复制原载荷。
+
+### DRAGOn同版本原始RAG资产（未交付，不打总勾）
+
+- [x] 复用公共获取入口，服务器取得发布方1.15.0同标签四份原文件并核验SHA256/大小，共2,277,123字节：600个公开问题、542篇公开文本、600条参考QA及542条参考文本映射。
+- [x] 全量原关系已核验：问题和参考问题逐字一致、全部公开/参考文本ID映射及正文一致、933条参考文本关联有效。四份原文件均未修改，不把参考答案混入模型输入。
+- [x] 原作者16份协议/核心库文件、44366字节已从固定Git
+  blob取得并核验；复用现有作者源码获取入口，不复制作者代码入仓库。原始Git连接失败、HF主通道失败及改用原始同摘要传输的过程保留。
+- [x] 原始四文件关联适配已实现；服务器独立安装候选wheel，55个包载荷与wheel一致。全部600条原问题/参考字段及索引通过，原前3条公共/当前研究消费者回读逐字段一致，0模型调用。当前研究main版本已在线核对；未更改研究线程默认依赖。
+- [x] 原作者核心库环境已在Linux aarch64/Python3.12.13独立安装112项依赖；清除客户端继承的CANN
+  PYTHONPATH后，pip一致性检查、四个原模块导入及原评分器软件夹具通过。实测约束与原lib requirements的dry-run无变更；初次旧环境缺依赖与继承路径污染记录保留。
+- [x] 实际CPU CI工件已独立安装复核：55个载荷文件与工件一致，全部600条原字段/索引和原前3条当前研究消费者回读通过，未重跑模型或升级研究默认依赖。旧候选记录保留，不冒充实际CI工件。
+- [ ] 官方检索/生成与原题评分尚未完成；需要适配NPU的embedding和reader环境。实际CI读取/回读也不替代benchmark运行。[准备与CI消费证据](validation/dragon-original-preparation-20261028.json)
+
+```bash
+python scripts/prepare_reused_research_assets.py DRAGON_PUBLIC --mode plan
+python scripts/prepare_reused_research_assets.py DRAGON_PUBLIC --mode download \
+  --data-root <仓库外数据目录> --max-bytes 3000000
+python scripts/prepare_jsonschemabench_author_source.py --source dragon --action prepare \
+  --author-root <仓库外作者源码目录> --max-bytes 100000
+```
+
+准备好原始四文件后，可使用公共原字段读取入口（不是模型执行或评分入口）：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+records = iter_workload("DRAGON_PUBLIC", data_root=Path("/external/dragon-original"))
+```
+
+保持发布方600个问题的原始顺序；`task.input`只含原id/question，`outcome.original_reference_qa`保留完整原始8字段参考，`runtime.corpus_file`指向完整原语料。四份文件逐一检查版本/摘要及完整关联，不能按参考文件行号拼答案；协议版本与各数据仓库版本分别保留。读取前后均核验原文件，参考变更会失败，不从gold生成输入。
+
+核心库准备可使用外部Python3.12环境，以`configs/workload-native/dragon-core-client-py312-observed.txt`作为约束安装不修改的原`lib/requirements.txt`。这是实测兼容版本，不是作者冻结锁；模型客户端另见`dragon-npu-model-client-py312-observed.lock.txt`，固定原前三题的NPU嵌入/现有reader适配已验证，不能只安装核心库就宣称完整基线可运行。客户端须排除未经核验的继承`PYTHONPATH`，不要修改在用NPU服务环境。
+
+仅登记既定113项中的`DRAGON_PUBLIC`，不新增交付范围；参考仓库虽名含private，已通过官方无凭据元数据实查同版本非gated且Apache-2.0，不能仅凭名字推断公开/私有。四份资产保持独立版本身份，均固定同一发布标签。其月度新闻快照不是生产文档增删事件或逐请求版本轨迹，不补造不存在的在线事件。
+
+### VisionArena-Chat原始多模态会话资产（未交付，不打总勾）
+
+- [x] 固定官方版本完整文件元数据已登记：43份原Parquet分片，共84,565,530,886字节（约84.6GB），每份记录发布方LFS摘要、大小和原始URL，见`visionarena_original_files_v1.json`。仅元数据，不含图片或会话正文。
+- [x] 官方自定义协议边界已补充：获取/使用须接受协议，禁止向第三方转移原数据；未代用户或机构接受协议，未启用自动下载profile。非gated不等于无限制开放再分发；授权使用者从发布方直接取得原始数据。
+- [ ] 原图像与会话绑定、完整历史的多模态续写、声明生成预算及实际CI/研究消费尚未验证。保留现有原生字段适配，不用文本代理替代图片，不把历史模型回复当标准答案，不另造官方质量评分。
+
+该来源是已发布历史会话语料，不是自带完整任务评分器的benchmark。现有适配状态仍为`CONTRACT_MAPPED_ASSET_VALIDATION_PENDING`；43分片的登记不等于取得数据或原生运行成功。[固定版本官方协议](https://huggingface.co/datasets/lmarena-ai/VisionArena-Chat/blob/1394b4f59ab6f1f2e5aff6bc15b448e15960e170/README.md)
+
+已取得并核验首个原分片；固定位置 0、1、2 的原图及会话与公共索引和研究侧读取一致。三条原样本均已在单张 Ascend 910B2 上用 Qwen2-VL-7B-Instruct（BF16，修订
+`eed13092ef92e448dd6875b2a00151bd3f7db0ac`）正常生成结束。复现协议把未改动的图片挂在首条用户消息上，保留历史消息，将末尾参考回答留在模型输入之外。图像挂载是本地约定，无官方评分。
+
+按发布方条款自行取得首分片并核验发布方摘要，安装 `pyarrow==22.0.0`、`Pillow==11.3.0` 后可运行：
+
+```bash
+python scripts/run_visionarena_original_continuation.py --shard /external/train-00000-of-00043.parquet
+python scripts/run_visionarena_original_continuation.py --shard /external/train-00000-of-00043.parquet --endpoint http://127.0.0.1:19466/v1 --model Qwen/Qwen2-VL-7B-Instruct --max-tokens 1024 --output /private/visionarena-results
+```
+
+第一条命令仅预检，已在原分片上通过并匹配实跑的三张图摘要。第二条需本地兼容 OpenAI
+接口的视觉服务，输出目录须不存在。结果可能包含会话衍生内容，不上传原图、原会话或完整结果。首分片固定三条实跑不代表剩余 42 个分片或质量评测。
+
+### AppWorld固定原三题原生执行、官方评分与消费交接
+
+- [ ] 2026-10-31研究消费端完整性回归待修复：当前研究消费文件与既有回查证据的SHA256一致。小型结构夹具确认，修改原数据库资产后公共入口拒绝读取，研究旧入口却重新计算引用并返回。此前固定三题的原生执行、官方评分和未改资产的完整记录回读仍有效，但不能据此声称防篡改校验已闭环。拟仅让研究AppWorld消费委托现有公共reader，并补数据库/参考资产负例；研究线程已暂停，正在等待用户确认最小接入修复，不启动研究实验。机器记录见`dataset-validation-status.json`的`current_research_consumer_integrity_followup`。
+
+- [x] 2026-10-30经授权恢复原专用CPU工作区，原模板、持久卷及资源预算不变，实际Pod运行且两容器就绪。既有732条索引与历史实际CI提供方复用；固定原三条经未修改的研究消费入口读取，完整记录与历史保存结果一致，原specs及每题6份参考资产保持分离。0模型调用、0
+  Agent或评分重跑。[研究消费回查证据](validation/appworld-research-consumer-20261030.json)
+
+- [x] 官方0.1.3.post1核心客户端已在服务器Linux
+  aarch64、完整CPython3.11.17隔离环境安装；官方`appworld install`、依赖一致性检查和CLI帮助均成功，83个安装发行包。受保护代码仅解包到服务器私有环境，未放入Git。
+
+- [x] 官方`appworld download data`取得14696文件、169528045字节，全部留在服务器；公共只读入口复用同一数据验证train90、dev57、test_normal168、test_challenge417，共732项原任务的划分ID和目录关系，无重下、无改题。[数据准备证据](validation/appworld-original-data-preparation-20261028.json)
+
+- [x] 公共入口固定原三题完成141步ReAct及官方评分：28条精确缓存响应复用、113次新增NPU请求全部HTTP200。三题均1/5测试通过、任务未成功，失败保留；这表示原生流程可用，不表示高质量。实际CI71运行载荷与当前提供方一致，732条原索引不变，研究侧三题完整记录、原specs及每题6份独立参考资产回读通过。详见[最终交付回执](validation/appworld-native-delivery-20261030.json)。不代表全732题推理、原70B复现、确定性环境重放或性能结论；历史准备回执不升级为执行证据。
+
+2026-10-30历史首次只读复核（早于上述原生交付完成，以下为当时结论，不代表当前勾选状态）：原专用CPU
+Pod已不存在（Kubernetes返回`NotFound`）；Coder最新build为`stopped`、原因`autostop`、停止job成功，但本任务原80GiB持久卷仍为`Bound`，UID与既有记录一致。因此不能认定历史数据丢失，也不能认定旧进程仍在运行；恢复自有工作区后，应先从持久卷回查既有结果，不重复下载或执行原任务。本次未挂载卷、未修改平台配置、未新增模型调用，AppWorld保持未勾选。
+
+公共入口：`python scripts/prepare_appworld_runtime.py --output <仓库外新目录> --uv <已有uv> --python <完整Python3.11>`默认只输出计划。显式加`--execute --install-protected-code`才安装官方包并在私有环境解包；可用`--uv-cache <已有自有软件缓存>`避免重复下载。工具将`APPWORLD_ROOT`、`APPWORLD_CACHE`及临时目录都指向外部目录，不改HOME或模型服务环境。该版本声明范围安装不是作者冻结锁；ARM需要Python.h。历史缺头文件和根盘缓存失败均保留，未删数据掩盖失败。
+
+原始数据入口：`python scripts/prepare_appworld_original_assets.py --output <外部新目录> --client <上步client目录> --cache <上步cache/appworld目录>`默认计划，加`--execute`调用官方CLI；拒绝已有目标，避免作者下载器覆盖旧数据。已有资产用`--verify-only`只读核验，不重下不覆盖。不把这些任务改造成静态prompt，也不把目录关系核验当作原生任务执行。
+
+本次核心客户端的83项实际依赖版本记录在`configs/workload-native/appworld-core-client-py311-observed.txt`。需要约束重建时向环境入口显式传`--constraints <该文件>`；这是本次ARM/Python3.11.17环境的观测版本，不是作者冻结锁，也未证明其他平台兼容。本次已安装环境直接复用，不为增加证据重复安装。
+
+### BixBench原问题与科学环境资产准备（未交付）
+
+- [x] 最新原生终态：固定三题均完成原40动作，客户端退出0。第一题原轨迹完整复用，第二、三题新增共160次请求/HTTP200响应，三题最终答案均为`null`，原样保留，不重新生成或替换。三题原CSV输入已按`str/str/range`模式准备，尚未正式评分。
+- [ ] 正式评分待恢复原输入：五个独立合成控制例仅三个符合预期。原评分器可能把空答案判为部分匹配，区间分支也误用了普通模板。已获准单独使用只修这两处的本地评分器；原版与原控制结果保留，控制例不计入
+  benchmark 成绩。修补版结果不能称为未经修改的官方成绩。
+
+在专用 CPU 工作区优先复用已保存的 `original-grade-input.private.csv`。若只有完整原生轨迹，用
+`scripts/prepare_bixbench_original_grade_input.py` 指定
+`--author-root`、`--data-root`、`--native-output` 和新的外部 `--output`，加 `--limit 3 --execute` 从原轨迹重建
+CSV；不重新生成答案。评分命令如下，变量指向服务器上的原始文件、新输出目录和已获空闲窗口的本地 NPU 裁判：
+
+```bash
+python scripts/run_bixbench_original_grader.py \
+  --author-root "$author_root" --input-file "$grade_csv" \
+  --output "$score_dir" --model "openai/$judge_model" \
+  --api-base "$judge_loopback_v1" --patched-grader
+```
+
+上面默认只检查执行计划；确认路径、裁判与空闲窗口后加 `--execute`。评分器只改写输出目录中的私有副本；保留原 CSV、评分回执及补丁摘要，核对三条结果后再更新机器清单。
+
+以下准备和失败记录保留其发生时的范围；与最新终态不同时，以上述最新终态及机器清单为准。
+
+- [x] 固定官方数据版本，服务器取得285,842字节原JSONL，按发布方Git
+  blob身份和SHA256核验；实际为205条扁平问题、17字段，问题ID唯一。数据卡的嵌套`questions`结构不能用于本版本适配。原始正文、参考答案和canary没有进入本机文件或Git。
+- [x] 注册原JSONL及64个ZIP的完整文件身份，实际205条问题引用其中59个ZIP，约5.20GB；另5个已登记ZIP不因此变成额外任务。全部`data_folder`关系核验通过。固定原前三题为`bix-1-q1`、`bix-1-q2`、`bix-10-q1`，不为覆盖更多capsule而换题。[原始资产清单](../../workload-preparation/data/catalogs/bixbench_original_files_v1.json)、[准备证据](validation/bixbench-original-metadata-20261030.json)
+- [x] 固定原前三题对应的两份原ZIP已在服务器取得，共5,962,719字节，发布方LFS摘要及16个成员CRC全部核验；未解压或执行代码，没有原始数据落入本机文件。全体语料仍缺另57份引用ZIP，不能将两份算作全量资产取得。
+- [x] 原生字段适配器安装候选软件包后，服务器全部205条原字段可还原、205条索引及固定前三条公共/未修改研究消费完整记录回查通过，原ZIP引用与摘要验证通过。输入只含原问题和数据目录名，答案/结果/未知扩展字段保持参考侧；不是API
+  prompt生成器。[候选包交接证据](validation/bixbench-candidate-handoff-20261030.json)
+- [x] 实际CI工件12953366374的71个运行载荷与Git及安装文件逐字节一致；服务器全部205条原记录还原、复用未改变的205条索引及固定原前三条公共/研究消费与ZIP校验通过，无索引重建和模型调用。[实际CI交接证据](validation/bixbench-actual-ci-handoff-20261030.json)
+- [x] 官方ARM64 Notebook镜像16层摘要与最终配置身份核验通过；原作者Notebook
+  API的可信`1+1`夹具在非root、离线、只读根容器执行成功。保留第一次运行副本权限失败，只调整本任务副本的组权限及客户端umask，未改作者源码或共享数据权限。[环境夹具证据](validation/bixbench-notebook-preparation-20261030.json)
+- [ ] 原生科学任务与官方评分仍待完成，不打来源总勾。固定原前三题的40步Agent流程使用单NPU
+  Qwen3-14B和专用CPU隔离Notebook；原始消息不重排，温度1.0及4096-token预算保留。此前9B拒绝原始系统消息位置；14B后续收到6次HTTP200，但客户端60秒超时，0题完成。输出文本位于reasoning字段，需核查解析器与非思考绑定，不能搬移字段伪造响应。失败环境、请求和响应均保留，原评分尚未执行。
+
+本来源保留科学Agent执行路线，不能用发布方另有的零样本问答模式替代。固定原配置默认40步，依赖`fhaviary`、`fhda`、`fhlmi`和`ldp`；作者入口为`bixbench/generate_trajectories.py`，随后按作者后处理/评分协议评判。原ZIP须保留为来源；运行副本按作者预处理移动Data内容、移除参考Notebook，不能将整个含参考Notebook的归档直接暴露给Agent。官方软件准备入口已补充，27份原文件在专用CPU工作区校验通过、13份Python文件通过静态解析；原锁文件客户端安装仍在进行，尚未验证Agent导入、隔离容器或原生执行，不打来源总勾。命令与边界见[组件说明](../../workload-preparation/README.md#bixbench-%E5%8E%9F%E7%A7%91%E5%AD%A6%E4%BB%BB%E5%8A%A1%E5%87%86%E5%A4%87%E4%B8%8E%E8%AF%BB%E5%8F%96%E5%8E%9F%E7%94%9F%E6%89%A7%E8%A1%8C%E6%9C%AA%E5%AE%8C%E6%88%90)。
+
+2026-10-30后续环境核验：上述安装过程已经结束，Python3.12.13按原锁文件安装、依赖检查及安装后源码复核通过。显式指定原源码目录后，官方生成入口`--help`通过；不指定目录时模块未找到，不能把安装成功等同入口可用。隔离Notebook夹具随后通过，固定原题14B尝试已超时结束；原评分仍待验证，不打来源总勾。[客户端环境证据](validation/bixbench-official-client-20261030.json)
+
+后续绑定修复正在验证：仅重启本线程服务并移除不适合非思考模式的reasoning解析器，保留同一模型、精度、上下文和原生成预算。公共入口可显式指定传输等待600秒，默认不改作者设置。新的固定三题原生尝试已观察到正文、工具调用及后续工具结果消息；尚无题目完成或评分成功结论，不打总勾。此前失败请求和响应没有被改写或覆盖。
+
+### DiscoveryBench原始资产准备（未交付，不打总勾）
+
+- [x] 固定官方版本的完整原树1499文件、54085184字节已在服务器按Git
+  blob身份、大小、文件集合核验，包含原real/synth数据、Agent及评判源码；公共只读核验复用同一目录，无重下。原始数据和作者代码不纳入Git。[证据](validation/discoverybench-original-assets-20261028.json)
+
+- [ ] 原生科学Agent、代码执行环境/隔离、评判模型与官方评分、公共提供方和研究侧消费尚待接通，不能把1499文件当作1499任务或已完成样本。
+
+- [x] Linux
+  aarch64/Python3.11.17独立客户端按作者原`requirements.txt`安装110项依赖，`uv pip check`及原`discovery_agent.py --help`、`discovery_eval.py --help`均通过；之后复核原资产未变化。没有构造或运行Agent，不代表安全代码执行环境或评判模型已就绪。
+
+核心环境准备：用完整Python3.11在外部新目录建venv，再以`uv pip install --python <venv/bin/python> --link-mode copy -r <原source/requirements.txt>`安装，`uv pip check --python <venv/bin/python>`检查；软件缓存和临时目录均设置到外部目录，不改模型服务环境。从原source目录以该venv运行两个CLI的`--help`可检查导入。作者requirements不是完整传递依赖锁，未声称其他平台或未来依赖解析结果已验证。
+
+原metadata扫描仍有缺口：982份可按UTF8
+JSON解析，80份原文件解析失败，不能以CLI帮助通过声称数据可运行。解析成功文件中的1122条数据文件关系有1121条存在；唯一缺链来自`.ipynb_checkpoints`辅助元数据，不作为正式任务数据缺失的结论。正式任务目录及编码兼容还须单独核验；保留原字节，不猜编码、忽略坏字节、替换题目或直接转写原文件。这些是文件检查数，不是任务数。
+
+入口：`python scripts/prepare_discoverybench_original_assets.py --output <外部新目录>`默认只展示计划；`--execute`从固定官方版本获取并核验，拒绝已有目标；已有原目录用`--verify-only`只读复用，不改原题，不下载替代数据，不执行Agent。保留作者原许可证与归属说明；数据库层面的许可不自动覆盖所有内容权利，不公开原始资产。
+
+原始real任务的只读输入预检入口（不是Agent或评分入口）：
+
+```bash
+python scripts/verify_discoverybench_original_contract.py \
+  --native-assets <publisher-native-real外部目录> \
+  --answer-assets <publisher-answer-keys外部目录>
+```
+
+先核验全部185份固定real资产和原real答案键身份，再按原dataset/metadataid/query_id检查原题及精确文件关系，不按CSV行号配答案，不输出参考答案。发现原始问题时退出码1并列出失败引用，不自动改编码、补文件别名或过滤任务。服务器已用该公开入口检查全部239条引用，复现229条关系通过、5条UTF8失败及5条文件关系失败；这是预检真实结果，不是原生执行或来源交付成功。
+
+DiscoveryBench还提供两个官方HF准备profile：向同一准备入口传`--release publisher-task-index`取得固定数据卡及原默认train/test
+CSV；`--release publisher-answer-keys`取得原real/synth答案键。默认官方HF通道；服务器原通道明确失败后，显式`--hf-endpoint https://hf-mirror.com`可按同一官方版本、Git
+blob和大小校验获取，不带凭据、不用改造数据。`--reuse-assets <已有外部资产目录>`仅复制校验一致的文件到新目录、缺什么取什么，不覆盖旧目录；只读复用仍用`--verify-only`。
+
+当前5份官方文件字节身份已通过：默认CSV原train25、test239行，其JSON查询字段均可解析；real答案键239行可解析，synth答案键仍有原UTF8解析错误，已保留字节与失败，不猜编码或宣称已解决。正式任务/答案/数据文件关系及两个发布版本的一致性还须核验；默认CSV行数不等于Git仓库所有元数据文件或完整synthetic任务数。参考答案只用于评分，不作为模型输入。
+
+官方原生real数据使用`--release publisher-native-real`及固定pins，当前185文件、13825701字节已取得核验；`--reuse-assets <旧Git source目录>`仅复用165份字节一致文件，20份发行版本不同的元数据按HF固定版本获取，不覆盖旧缓存。任务对应使用同一HF版本的原metadata和答案键dataset/metadataid/query_id，不按CSV行顺序配对，不把不同发布版本当作相同对象。
+
+原生输入合同仍未全通：239条原test答案引用中229条通过原JSON题目/数据文件关系及原作者默认提示构造；10条失败引用中5条为原metadata的UTF8解码失败、5条为原metadata引用的精确文件名不存在。后者引用连字符文件名，而目录只有下划线形式，未擅自重命名或补别名。这里未运行Agent、生成代码或评分；不得过滤这10条换题。两个官方版本的20份不同文件，即便做严格、可逆的旧代码页诊断，其完整JSON对象也均不相同；未采用运行时猜编码或转写。安全执行隔离、原生调用/评判及公共/研究消费仍待完成，来源总勾保持未完成。
+
+#### DiscoveryBench公共案例准备与安装包核验
+
+原软件与原real数据是两个固定版本，不能用GitHub软件树中的旧数据替代HF修正版。首次取得数据可按以下顺序操作，所有目录均为仓库外的新目录，保留发布方使用条款：
+
+```bash
+python scripts/prepare_discoverybench_original_assets.py \
+  --release github-tree --output /private/discovery-author --execute
+python scripts/prepare_discoverybench_original_assets.py \
+  --release publisher-native-real --output /private/discovery-real --execute
+python scripts/prepare_discoverybench_original_assets.py \
+  --release publisher-answer-keys --output /private/discovery-keys --execute
+mkdir -p /private/discovery-real/answer_key
+cp -n /private/discovery-keys/answer_key/answer_key_real.csv /private/discovery-real/answer_key/
+```
+
+软件根为`/private/discovery-author/source`，原生数据根为`/private/discovery-real`。最后一步仅汇集原real答案表，字节不变；案例准备会再核对完整186文件身份，不接受覆盖旧文件或修改参考。原synth答案表的UTF8失败是单列的官方资产缺陷，不将它用于本次real协议。已有资产用相应release的`--verify-only`只读复核，或用`--reuse-assets`逐文件核验复用，不重复下载。上述不同资产入口的历史验证范围见回执，不将本次目录说明称作一次新冷下载验证。
+
+- [x] CI运行41363321688的工件13106550478已在服务器独立安装，86份包载荷逐份核对；239条原键的公共及未修改研究消费者回读通过，229条可解析原输入与原作者默认提示材料一致。10条原资产阻塞保留，不过滤或替换。
+- [x] 公共案例准备命令已使用上述CI安装包实际准备原位置0/1/2：元数据、科学数据逐字节匹配固定原资产，参考行匹配原答案表，三个目录隔离。首次核验误把CPU路径用于NPU节点，保留错误记录；仅纠正保存结果核验，没有重做准备或推理。
+- [x] 公开编排入口`run_discoverybench_native.py`已串接actor、独立科学工具容器、公共模型传输和原评分；专用CPU实际构造原前三题actor通过，所有模型／工具／judge队列为空。73项相关夹具测试通过。此前输出位置、运行时目录权限及核验脚本路径错误保留；成功预检没有运行模型或科学程序。
+- [x] 公开编排入口的原位置3真实actor、隔离工具和恢复评分已终验：3次actor与3次judge
+  NPU请求逐字节关联，原题、参考和回答未变，分数0独立重算一致。首次评分权限失败保留，修复后仅恢复评分，没有重跑actor或工具。历史原前三题单列，不混计为新入口的重复验证。
+- [x] ac00提交的完整CI与CPU
+  CI均通过，工件13107833146的86载荷已在服务器独立安装核对；239条公共／未修改研究消费回读全部通过。来源按原real/coder固定协议打总勾，科学失败与其他模式不扩大解释。[最终回执](validation/discoverybench-original-native-delivery-20261102.json)
+
+准备命令：`python scripts/prepare_discoverybench_original_cases.py --data-root /external/discoverybench-native-real --output /private/fresh-discovery-cases --positions 0 1 2 --execute`。先安装公共数据包；数据目录布局和固定文件身份见原资产准备入口。省略`--execute`只输出计划。输出必须为仓库及原数据目录之外的新目录；阻塞题停止，不自动换题。输出`cases-private.json`关联原题、元数据、参考和科学文件哈希。工具容器只能挂载对应科学数据，不能挂载含主假设的元数据、评分参考、模型队列或Docker套接字。此命令不启动模型、Agent或评分器。[证据及原生运行边界](validation/discoverybench-original-assets-20261028.json)
+
+公开编排在持有专用Docker权限的Linux
+CPU节点运行，主机Python只需标准库；LLM端点由使用者提供已有NPU服务的回环地址或已授权SSH转发。先准备发布方原软件和科学客户端镜像，镜像须包含原依赖及`/opt/discovery-client/bin/python`（可显式指定其他路径），并传入不可变本地镜像ID与预期Docker
+daemon
+ID。已补公开构建上下文入口，先验证原requirements的固定SHA256，再生成Dockerfile，不改原依赖声明。服务器上生成的两个文件与已有成功构建的上下文逐字节相等，复用原构建和离线导入证据，没有重复安装。基础镜像仍须使用者提供，不能把本机已有镜像当成公开可下载镜像；传递依赖未做全量wheel哈希锁定，不承诺任意日期重新构建得到相同镜像。
+
+```bash
+python scripts/prepare_discoverybench_client_context.py \
+  --author-root /private/discoverybench-author \
+  --base-image sha256:<local-base-image-id> \
+  --base-python /opt/miniconda3/bin/python \
+  --output /private/fresh-client-context --execute
+docker build -t discoverybench-local-client /private/fresh-client-context
+docker image inspect discoverybench-local-client --format '{{.Id}}'
+docker info --format '{{.ID}}'
+```
+
+基础镜像必须已有Python3.10及venv；若路径不同，显式修改`--base-python`，不修改原requirements。构建时需要访问PyPI；本次专用环境的默认构建DNS曾失败，使用已授权主机网络构建后成功，这仅用于安装依赖。原题actor、工具及评分容器运行时始终为`--network none`。构建完成后将实际不可变镜像ID传给编排入口，并保留`pip freeze`、Python版本、CPU架构和构建日志。本次环境为ARM64／Python3.10.22，115份实际分发包的快照不是wheel哈希锁；它也不是发布方官方Docker镜像。
+
+```bash
+python scripts/run_discoverybench_native.py \
+  --cases /private/cases/cases-private.json \
+  --author-root /private/discoverybench-author \
+  --host-bind-root /private --daemon-bind-root /private \
+  --image sha256:<actual-image-id> --daemon-id <owned-daemon-id> \
+  --output /private/fresh-offline-check --preflight
+```
+
+若Docker
+daemon在独立sidecar，两个bind-root分别指宿主Python与daemon可见的同一专用卷根目录；不得指向他人目录。完整执行使用另一个新输出目录，将`--preflight`改成`--execute --api-base http://127.0.0.1:<port>/v1 --model <actual-model> --judge-model <actual-judge>`；本次14B非思考配置还显式加`--disable-thinking`。原评分的提示、预算和应用级重试不改，替代judge不是官方GPT-4成绩。程序失败保存原输出；基础设施错误保留请求声明及容器身份，不自动重发、换题或删除现场。当前完整公开执行尚未验证，不能仅凭上述预检宣布可交付。
+
+CPU和NPU没有已授权回环转发时，可使用`--external-model-worker`代替`--api-base`，由操作者已有的可信队列传输器服务每题的`model-queue`及`judge-model-queue`。该模式下编排器不发送HTTP模型请求，但仍执行原actor、独立隔离工具及原评分；外部worker须保留原请求／响应、一次性声明、真实模型配置和资源互斥，不将队列或Docker套接字挂入科学工具容器。本次使用已有共享租约传输器验证原位置3，尚在运行，不新增SSH公钥或开放公网服务。
+
+原位置3的公开actor已完成3次NPU请求及一次隔离原Python工具调用；工具同样保留原`py`围栏导致的NameError。评分首次因目录权限失败，未发出judge请求；修正权限后，在新输出目录使用`--score-existing-run /private/previous-run`复用已完成actor，完成3次judge请求及原评分，得分0。该参数逐字节核验原准备输入及完成回执的题目／模型身份，不重新生成回答或执行科学程序。保存结果审计已确认原输入、参考、回答、全部CPU-NPU字节关联及计分算术一致；并未证明科学程序成功、官方GPT-4分数或引擎性能提升。双CI与最终实际包提供侧闭环现已通过，按声明协议打勾，其余模式保留缺口。
 
 ### Copilot 2026嵌套会话元数据（已交付，非原始请求回放）
 
@@ -95,8 +1697,9 @@ Similarity/CodeBLEU小型自一致夹具及venv依赖检查；这些是环境检
 ### StructEval剩余渲染/VQA环境（未交付）
 
 - [x] 公开只读入口`scripts/prepare_structeval_rendering_plan.py --data-file <原parquet> --official-archive <固定官方zip> --package-root <原structeval包目录> --output <新元数据json>`已在服务器执行；2035原行、27官方模块身份通过，明确950非渲染/1085渲染行。只输出原协议计数与固定位置，不调用模型或渲染器。
-- [x] 现有950条非渲染结果保留不重跑；当前PATH没有Docker/Podman/bwrap，完整隔离namespace探测失败（挂载传播Permission
-  denied）。私有Node可复用但不代表沙箱可用；二进制存在本身也不算环境合格。
+- [x] 现有950条非渲染结果保留不重跑；历史NPU宿主隔离不可用问题由已授权的专用CPU
+  Docker工作区承接，不在NPU宿主执行生成代码。当前Matplotlib最小镜像及隔离控制器已实测，其他渲染格式依赖仍待补齐。
+- [x] 原Text-to-Matplotlib固定前三题000802/000803/000804已通过生成、官方代码提取、CPU隔离渲染及完整VQA，7/8/8个原问答对保留。6次实际模型调用均stop，生成提示、裁判提示和图片字节已独立核验；使用现有Qwen3.5-9B、显式关闭thinking，不宣称作者模型复现或引擎性能。27个官方模块未改，未增加来源完成数。
 - [ ] 提供合格隔离worker后执行原渲染及完整VQA评测。Python/JavaScript/TeX生成代码不能直接在宿主机执行；worker应无网络、凭据或NPU设备，原输入只读、输出限额且有CPU/RAM/PID/时间边界。VQA可用明确配置的本地NPU视觉模型，不默认授权付费judge；渲染成功不能代替VQA完成。
 
 ### Mooncake官方存储回放（固定原生抽样交付完成）
@@ -182,9 +1785,22 @@ buffer和评分结果只保存在外部私有目录。声明的Qwen9B原生配�
 
 公共使用：`iter_workload("SCHEMASTORE", data_root=Path("/external/schemastore/data"))`返回1006份按原schema路径排序的资产；`record.task["input"]["schema"]`是原JSON对象/boolean，`record.outcome_record()`的`positive_examples`/`negative_examples`保持官方目录关联规则和原路径/字节数/校验和。用`vllm_hust_workload_data.schemastore.read_original_fixture(data_root, record.source, reference)`读取不改写的JSON/YAML/TOML等原字节；不默认联网解析`$ref`、不生成prompt、不能调用`record.request_body()`冒充原始请求。共享准备入口仍按既有`sources:[{source_id,data_root}]`配置，不需科研专用配置。
 
-准备运行时：从`https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-arm64.tar.xz`取得原归档，再用`python scripts/prepare_schemastore_runtime.py --archive /external/node-v22.14.0-linux-arm64.tar.xz --output /external/private-node --execute`校验并解包。需要Python3.12+的tarfile数据过滤器及lzma模块，不依赖系统xz程序；本服务器初次系统tar解包因缺xz失败，改用标准库解包，原归档不变。校验入口默认只规划，显式提供`--source`原源码、`--original-tree`官方完整recursive
-Git
-tree元数据、`--node`私有node路径、`--output`独立日志目录和`--execute`才运行`node cli.js check`；源码/例子全保留，不以自定义JSON校验替代官方流程。
+准备运行时：从 [Node.js v22.14.0 发布目录](https://nodejs.org/dist/v22.14.0/)获取与平台匹配的归档，对照同目录的 `SHASUMS256.txt`
+校验后解包。Linux ARM64 可直接用
+`python scripts/prepare_schemastore_runtime.py --archive /external/node-v22.14.0-linux-arm64.tar.xz --output /external/private-node --execute`
+校验并解包，需要 Python 3.12+ 的 tarfile 数据过滤器及 lzma 模块。把这套 Node.js 加到当前终端的 PATH，再运行下面的命令。
+
+把准备器下载的 `data/schemastore-original.zip` 解包到工作目录，`SOURCE` 指向包含 `cli.js` 和 `package-lock.json`
+的源码根，`WORK` 指向仓库外可写目录。从仓库根目录运行：
+
+```sh
+gh api 'repos/SchemaStore/schemastore/git/trees/98c02d0c58f9cfee9eaa667af2bce08ee1111fc5?recursive=1' > "$WORK/original-tree.json" # pragma: allowlist secret - public Git tree
+(cd "$SOURCE" && npm clean-install --ignore-scripts --no-audit --no-fund)
+python scripts/run_schemastore_original_validation.py --source "$SOURCE" --original-tree "$WORK/original-tree.json" --node "$(command -v node)" --output "$WORK/check-result" --schema-name all-contributors.json --execute
+```
+
+示例检查 `all-contributors.json` 的原正例和负例。需要执行完整作者校验时去掉 `--schema-name`，另用一个输出目录。 在
+`check-result/receipt-public.json` 读取退出码，在 `official-check.private.log` 查看作者测试覆盖数。
 
 ### NarrativeQA原始summary-QA（来源交付完成）
 
@@ -223,14 +1839,33 @@ tree元数据、`--node`私有node路径、`--output`独立日志目录和`--exe
 - [x] 全8000条人工test＋其他5文件各原前三，共8015题已执行并保存，全部stop、无非法输出；正式test正确6774/8000（84.675%），仅报告该模型配置结果，不设质量通过结论。保存结果复核无新增模型调用；来源总勾仍等待下项闭环。
 - [x] 751450条原记录4字段及全量索引核对、精确CI工件44文件一致、固定研究消费21处回查完成；无新增模型调用。[最终交付回执](validation/paws-native-delivery-20261027.json)。21处回查不冒称逐一覆盖全部8015次推理。
 
-### TraceLab分步骤（来源总勾未完成）
+### TraceLab分步骤（固定原3会话20轮交付完成）
+
+最终交付：[原生回放与两端接入回执](validation/tracelab-original-native-delivery-20261103.json)。原14B缓存探测通过，完整20轮成功且目标/实际输出均6904
+token；独立核对原会话/轮次、输入/输出预算和工具等待，未改原源码、锁或探测。成功CI工件94载荷与Git一致，665453行原索引及首尾6处公共/未修改研究消费回读通过，未重新推理。以下保留早期预检与失败历史；全量1006780上下文仍超所验证131072，未声明全轨迹模型评测或性能提升。
+
+- [x] 2026-11-03只读核查现有14B服务：固定三会话全部20轮最大输入加原输出46646，小于实际131072上下文；全量1006780仍不满足。原Rust0.19.1读取14B原tokenizer失败，保留失败；新增`prepare_tracelab_tokenizer_legacy.py`仅将BPE合并对数组转换成无歧义旧序列化，原文件、词表ID、全部151387合并对及顺序不变。服务器266组编码对照相等，格式化后的当前公开脚本AST及输出字节与该对照配置一致；0模型调用。原1亿token文本池CPU核验正在运行，原512-token缓存探测及20轮回放尚未执行；不将容量预检或序列化兼容计为来源完成。
+
+  ```bash
+  # 默认只规划；从实际已核验的模型工件取得原tokenizer SHA256。
+  # 输出必须是仓库外的新文件；确认后加--write，不覆盖模型原文件。
+  python scripts/prepare_tracelab_tokenizer_legacy.py --tokenizer /path/to/original-model/tokenizer.json --expected-sha256 ORIGINAL_TOKENIZER_SHA256 --output /path/to/private-preparation/tokenizer-legacy.json
+  # 后续给原回放器的--tokenizer指定经核验的兼容副本，并披露此格式兼容。
+  # 这不改变原缓存探测、会话、轮次、预算或模型；仍须空闲窗口实际验证。
+  ```
+
+- [x] 同一14B兼容副本的后续CPU检查：原版Rust文本池输出确认完整100000000token；独立进程退出码未保存，不声称exit0。另一次有完整退出状态的跨运行时检查exit0：固定旧Rust0.19.1与当前编码器对同一133段文本、含/不含特殊token共266组ID完全一致，原文件和Rust源码/锁未变。此项只证明编码兼容和已观测池容量，不证明原缓存探测、NPU回放或来源完成；证据为私有任务根`tracelab-14b-legacy-serialization-20261103-002/cross-runtime/qualification-public.json`。
 
 - [x] 复用665453轮全部元数据、全量索引、原DuckDB及官方确定性CSV转换、独立enwik9文本身份；不是原始用户prompt正文。
+
 - [x] 官方Rust1.90归档和校验文件核对，恢复到持久化私有前缀；公共构建入口实际按原锁编译exit0，原源码不变，避免下次容器切换丢失二进制。[恢复回执](validation/tracelab-original-locked-build-20261024.json)
+
 - [x] 公开原生回放入口及7项离线合同测试：默认只规划，不绕过原缓存资格探测，超上下文在调用前阻塞、不截断或跳过，核验全部原session/轮次/预算/工具等待。
-- [ ] 官方原生回放：已到达原缓存资格探测，但512-token探测在当前1024-token
-  Mamba对齐缓存块下未命中，原程序exit1，20轮任务均未开始。[失败证据](validation/tracelab-original-dry-run-20261024.json)。缓存相关开关已开启，不能误称未配置；未改探测、换session或重启服务，待合适模型/配置后续验证。
-- [ ] 保存原生日志/summary独立复核与公共提供者/固定研究消费交接；不迁入研究采集和分析，不报告性能提升。
+
+- [x] 官方原生回放：14B原探测及固定20轮完整通过。原9B在1024-token
+  Mamba块下未命中512-token探测的失败仍保留，不倒填为通过：[早期失败证据](validation/tracelab-original-dry-run-20261024.json)。14B仅增加获批的报告开关，没有绕过探测、改变会话或修改原预算。
+
+- [x] 原生日志/summary独立复核与成功CI提供者/未修改研究消费交接均通过；不迁入研究采集和分析，不报告性能提升。
 
 ### MMMU分步骤（固定原validation抽样交付完成）
 
@@ -247,7 +1882,7 @@ tree元数据、`--node`私有node路径、`--output`独立日志目录和`--exe
 
 - [x] 复用已有MMMU原生字段适配，更新92文件身份并保留旧登记revision；全16字段/11550行及索引完整，答案/解释与输入分离。精确CI的44载荷逐字节核验、152条公共/研究往返通过，未迁入研究观测或分析。
 
-当前机器清单计算：**57/113项已交付，56项待补**（另5项仅分类，不计入分母），已超过一半。新增LAB-Bench固定93题原生执行、原评分及保存审计，复用已核的公共/研究接入证据；不是作者模型质量复现。Azure
+历史阶段快照（非当前进度）：**当时57/113项已交付，56项待补**（另5项仅分类，不计入分母），当时已超过一半。新增LAB-Bench固定93题原生执行、原评分及保存审计，复用已核的公共/研究接入证据；不是作者模型质量复现。Azure
 LMM
 2025仍仅按服务轨迹元数据资产交付，不是视觉benchmark或原始请求回放。RepoBench样本EM均0、OpenThoughts3九条预算耗尽的边界不变。以下历史统计保留其原时点，不代表当前总数。
 
@@ -285,7 +1920,7 @@ LMM
 
 - [x] 最终公共数据/研究消费审计通过，2500条原字段/索引与6条固定往返闭环，CI安装44文件逐字节相等；原始数据未公开。
 
-### LongMemEval-V2分步骤（来源总勾未完成）
+### LongMemEval-V2分步骤（原enterprise/small正向RAG协议已交付）
 
 - [x] 固定官方53文件源码身份，服务器只读verify成功；不套用旧LongMemEval协议。
 - [x] 公共数据准备入口、原41文件身份与容量预算已补，调用未修改作者脚本；软件夹具通过。
@@ -293,12 +1928,15 @@ LMM
 - [x] 截图展开及small/medium官方完整性校验均exit0：每档451问题、1870轨迹、451问题映射，未关闭截图检查；见[原始准备回执](validation/longmemeval-v2-original-readiness-20261026.json)。
 - [x] 官方9B完整16资产校验、空闲窗口服务切换及HTTP健康检查通过；BF16/TP1/262144上下文，NPU3运行。配置支持图片不等于真实视觉题已验证。
 - [x] 原enterprise/small前三题`no_retrieval`负对照完成NPU生成、原本地评分与独立复核；thinking开启、原预算20000保留，三个0分不删改；不冒称正向记忆检索。
-- [x] 独立HTTP客户端依赖锁、隔离后pip check与两份原CLI导入预检通过；RAG图像预处理的PyTorch另列未完成。
-- [ ] 原生记忆方法执行与原评分；视觉reader、RAG embedding及judge条件仍未齐备。
-- [ ] 公共数据关系适配与固定研究消费闭环；准备成功不等于原生benchmark交付。
+- [x] 独立HTTP客户端依赖锁、隔离后pip check与两份原CLI导入预检通过；后续RAG图像/token预处理及双离线缓存通过。CPU仅做预处理，原reader及嵌入推理均在NPU。
+- [x] 原enterprise/small固定前三题`rag_query_to_slice`完成全100条共享轨迹建库、103次成功嵌入响应、三题生成及原本地评分；原输出20,000／记忆200,000预算保留，三题均无记忆上下文截断。得分0／1／1如实保留，第一题用满输出预算，不换题或加预算凑分。独立保存审计0新增模型调用。
+- [x] 实际CI工件87载荷与Git／安装一致，全451条原问题及双档haystack关系核验；四处公共／未修改研究回读与三条正向原生输入绑定通过。[最终交付回执](validation/longmemeval-v2-positive-rag-native-delivery-20261102.json)。本项只交付所声明原生协议，web／medium／在线记忆模式及外部judge另列未验证。
 
-### InfiniteBench分协议进展（2026-10-26；来源总勾仍未完成）
+### InfiniteBench分协议进展（2026-10-28；来源总勾仍未完成）
 
+- [x] 2026-11-03更新安装版与研究侧接通复核：成功CPU
+  smoke运行41574452438的真实工件13203500562，91个安装载荷与提交`d7f3f64c`一致，2个原生入口可发现；全部3946条原记录核对通过，36处公共与现有研究接口回读一致，800条数值答案数组与3146条字符串答案数组不改变类型，原文件/行关系保留。原索引与研究consumer均未改变，新增模型调用0；证据为`infinitebench-current-ci-handoff-20261103-001/qualification-public.json`。这项只补齐安装版和研究接通证据，不代替原生协议执行或抹去长上下文缺口。
+- [x] 2026-11-03留存运行复核：208批完整回执的原题身份、原消息与预算、请求/响应摘要、答案、用量及独立重算的作者评分全部通过，无未合格完整回执；`code_run`覆盖400/400个不同原题，`number_string`覆盖222/590个不同原题。前者27B完成3题、14B完成397题，后者分别3题与219题；不合并为同一模型的质量或性能成绩。本次没有新增模型调用，其他未完成协议和来源总勾不变。
 - [x] 全部12份原文件校验，2499838795字节；正确旧文件复用，未重复下载。
 - [x] 全3946条记录引用准备：数值答案数组800条、字符串答案数组3146条，不强制转类型。
 - [x] 全3946条原字段、答案类型、文件/行关系与索引核对；每文件原前3条共36处公共/固定研究回查通过，研究默认依赖未升级。
@@ -315,26 +1953,268 @@ LMM
   token，原预算50，三条stop、作者评分1.0，独立回查通过。旧27B/131072阻塞记录保留，不混作同一模型的性能结果。
 - [x] `code_debug`原始0/1/2：新9B显式非思考，完整输入214956/214962/214964
   token、原预算5，三条length、作者评分0，生成和评分独立回查通过；不加预算或换题凑分。
-- [ ] `longbook_sum_eng`、`longbook_choice_eng`、`longbook_qa_chn`：旧27B服务原前三题至少一题超131072上下文，最高402028输入token；新9B服务尚未逐协议验证，不截断或改选题。
-- [ ] `math_calc`：原后置system轮被当前Qwen原生模板拒绝400；不改消息角色，尚未完成原生验证。
+- [ ] `longbook_sum_eng`：当前9B原前三题完整输入402028/88408/240818
+  token，保留原输出预算1200时至少需要403228上下文；当前262144不能覆盖固定样本。不跳过第一题或截断。
+- [ ] `longbook_choice_eng`：当前9B原前三题268007/268000/268007输入token，原输出预算40，固定三题至少需要268047上下文；当前262144不足。
+- [ ] `longbook_qa_chn`：当前9B原前三题339312/339331/339312输入token，原输出预算40，固定三题至少需要339371上下文；当前262144不足。
+- [x] `math_calc`旧9B兼容性核查：原前三题均以原`system,user,system,user`消息顺序在tokenize阶段被拒绝400，失败保留；未删除/移动后置system或更换作者模板，后续用14B保持原协议完成验证。
+- [x] `math_calc`新增14B绑定的原样预检通过：同一原前三题的消息角色不变，输入54280/54301/54350
+  token，加原30000输出预算均在当前131072窗口内。预检零生成，旧9B拒绝记录保留。
+- [x] `math_calc`14B原生固定三题完成：原第0/1/2题全部返回，均保留原30000-token输出及length终态。原问题/提示/请求、保存哈希、原数据及官方/独立计分一致，三题及聚合得分均0，不重跑凑分。完整只读审计回执为共享任务根`infinitebench-mathcalc-complete-audit-20261031-001/qualification-public.json`，新增模型调用0。复用此前合格的隔离评分环境、原ROUGE缓存和客户端组件，未重装或修改全局服务环境；第一次缺少`evaluate`的模型调用前失败保留。实际执行目录为`infinitebench-mathcalc-14b-native-20261031-002`，原进程已结束，不再标为在途。未改原角色、题目、输出预算或模型自动重试；与其他正确性客户端共享过服务，不用于性能测量。此为新增一个子协议完成，来源总勾仍待三个长书协议。
 
-旧27B六协议18次任务与新9B两个协议6次任务分开保留，不能当作统一模型的总体质量或性能结果；旧11次length及新增3次length终态和低分不删除，不增预算重跑凑分。阶段证据统一在[原复用审计](validation/research-acquisition-reuse-audit-20261025.json)。
+本次只读预检12次tokenize、0次生成，原代码/数据身份核验通过，服务器回执为`infinitebench-remaining-9b-original-preflight-32028-001/receipt-public.json`。上述上下文需求只是当前固定三题的token算术下界，不代表扩大服务上下文即可部署或已验证硬件可行性；未重跑已有原生结果，来源总勾仍未完成。
+
+固定首批为9/12子协议、27道原题经原生执行及保存结果审计：旧27B六协议18题、9B两协议6题及14B数学协议3题分别保留；后续未见原题的扩展覆盖数见本节2026-11-03复核项，不能继续把27当作全部已跑题数。不合并为统一模型质量或性能结论。首批旧11次、9B新增3次及14B新增3次length终态和低分均保留，不加预算重跑。三个长书协议仍未完成，不给来源总勾。既有阶段证据见[原复用审计](validation/research-acquisition-reuse-audit-20261025.json)，新增数学完整回执见上项。
 
 ### StructEval分步骤核验（2026-10-26；不增加来源完成数）
 
 - [x] 公共审计入口在服务器重评950条历史原题输出，19个非渲染协议各50条；官方分数一致，新增模型调用0次。
 - [x] 完整2035条记录及索引、每条10个原字段和参考隔离核验通过。
 - [x] 44种原协议组合各取原始前3条，132处公共入口与固定研究消费者回查通过；研究默认依赖未改变。
-- [ ] 剩余1085条渲染/VQA协议的原生执行、视觉评分及完整来源交付。
+- [x] 2026-10-29完成Text-to-Matplotlib全50题原生流程：前三题复用，新增47题，历史950题未重跑。总计99次模型调用均stop；49题完成渲染及完整VQA，000815保留原代码AttributeError的渲染0分，按作者缺图规则跳过裁判，不换题、不重生成。原解析代码、完整问答与裁判图片字节已核验。
+- [x] 原Typst模块在专用CPU隔离容器中通过正常1/非法语法0两个控制，非原题、不算原题验证。
+- [x] Typst公共分派通过正常、语法错误、多页返回1但指定图片缺失及Matplotlib兼容性四项实测控制；保留原返回/缺图语义，不改题或补造图片。
+- [x] 原Typst固定前三题001401/001402/001406已生成并由原流程评分，三次stop、渲染均0、原最终分数均0.1。原输入与解析关系已核验；代码使用Markdown式标题，编译诊断为语法错误。仅复用失败代码补查编译stderr，未重新生成或覆盖原分数。
+- [x] Typst全部50道原题执行及条件评分已审计：复用前三题，新增原位置3..49的47次生成均stop，原解析/隔离渲染返回及全部原字段核验一致。50题均render0，最终分数48题0.1、1题0.09、1题0.07；按作者缺图规则跳过全部视觉裁判（实际0次）。新增47份保存编译日志均为语言错误，47份代码均带Markdown式标题、无外部import；不改代码或为提高分数重新生成。已核对执行数包含这些原失败结果，不代表成功答案或来源交付。[50题阶段证据](validation/structeval-typst-full50-audit-20261031.json)。
+- [ ] Typst成功图片及实际视觉裁判分支仍未建立，不能把条件跳过或渲染控制夹具说成该分支已验证。此前更强27B设想未执行；当前9B输出不满足Typst语法，失败保留。
+- [x] 原Text-to-SVG固定前三题001200/001201/001202已完成原生成、官方解析、隔离浏览器渲染与完整VQA；7/8/10个原问答对保留，6次模型调用均stop，输入/原提取代码/实际裁判图片字节已核验。原最终分0.9/0.65/1.0如实保留，不作模型或引擎性能结论。
+- [x] SVG入口通过内联图、空输入、外部HTTP资源阻塞和Matplotlib兼容性四项服务器控制；外部资源缺失不伪造模型0分。
+- [x] 公共浏览器配方实际构建退出0，在非root/离线/只读容器中完成7个扩展依赖和浏览器资产核验，四项隔离控制另行通过；原题使用的准备镜像与公共配方镜像分开记录，未为了公共配方重跑有效原题。
+- [x] HTML、Canvas、Markdown共用隔离分派与原相对导入；10项CPU控制通过，覆盖正常、空输入、内部HTML调用中的外部资源阻塞及SVG兼容。Markdown仅在既有浏览器镜像上增加观察版本3.11.2，不重下浏览器。控制夹具不计原题或来源完成。
+- [x] HTML、Canvas、Markdown六组协议各固定前三题已完成原生生成、隔离渲染和完整VQA；18道原题、36次stop调用、158对原问答保留，十个原字段、实际提示、原提取代码与裁判图片字节独立核验。Canvas三题VQA均0、原最终0.29/0.3/0.3如实保留，不换题凑分。
+- [x] Text-to-HTML全50道原题已完成；前三题复用、新增47题，合计100次调用均stop，345对原VQA、原字段、提示、提取代码和实际裁判图片字节独立核验。
+- [x] Markdown-to-HTML全50道原题已完成；前三题复用、新增47题，合计100次stop调用、439对原VQA，原字段、提示、提取代码和实际裁判图片字节独立核验；原转义警告及回退保留，不修补生成。
+- [x] React-to-HTML全45道原题已完成；前三题复用、新增42题，90次stop调用、408对原VQA、十个原字段/提示/提取代码/实际裁判图片字节独立核验，不重跑有效前三题。
+- [x] Vue-to-HTML全40题已完成；前三题复用、新增37题，新增74次stop调用和317对原VQA，原字段、提示、提取代码和实际裁判图片字节独立核验。
+- [x] Text-to-Canvas全50题已完成；前三题复用、新增47题，新增94次stop调用和374对原VQA，低分原样保留，不修题或更换样本。
+- [x] Text-to-Markdown全50道原题完成；前三题复用、新增47题，新增94次stop调用、377对原VQA，原字段、提示、提取代码和实际裁判图片独立核验，全部六组浏览器协议原队列正常结束。
+- [x] 原LaTeX/TikZ渲染器公共分派和配方已通过五项隔离CPU控制：片段、完整文档、LuaLaTeX、缺失文档类0/缺图、Matplotlib兼容。非root/只读/断网软件核验通过，原dpi300/45秒预算、引擎回退和首PDF页转换不改。
+- [x] Text-to-Latex、Text-to-Tikz、Matplotlib-to-TikZ各固定原前三题完成原生流程和独立审计；9次生成/8次实际裁判、17次调用均stop。001303原渲染0/缺图/最终0.1如实保留，不补造裁判调用。
+- [x] Text-to-Latex全50题完成原生执行和独立审计：复用前三题，新增47次生成/47次完整VQA，共94次stop；47张实际裁判图片和343对新增原问题、原提示/解析代码/评分关系均核验。审计0次新模型调用。[三组增量进度](validation/structeval-latex-full-protocol-progress-20261031.json)。
+- [ ] Text-to-Tikz新增47题运行因传输超时终止：34份成功生成保留，第35个逻辑请求遇到SDK内部2次重试后失败，第36个请求取消/结果未知。未重放这些请求，未把超时填成0分；Matplotlib-to-TikZ剩余97题尚未启动。已有6道原题继续复用。
+- [x] 修正外层重试0未传到SDK的接口缺陷：新入口显式关闭内部重试，提供独立`--request-timeout`和外层`--max-retries`配置，不改原题、生成token预算或模型精度。真实客户端对本地503软件夹具，旧配置3次HTTP请求、修复配置1次，0神经模型调用；回执为共享任务根`structeval-sdk-retry-fix-32068-001/qualification-public.json`。失败原运行不改写；输出预算变更尚未执行。
+- [x] Text-to-SVG全50题已完成原生生成、隔离渲染及完整VQA：前三题复用，新增47题，合计100次模型调用均stop；原字段、原提取代码关系、397个原问答对和实际裁判图片字节已独立核验，未重跑有效前三题。
+- [ ] 其他15种部分或尚未覆盖渲染协议及完整来源交付；当前累计1441道原题真实执行和保存结果核验（含上述50道失败分支），剩余594道。上述另两组144题尚未完成，不提前计入；失败目录为共享任务根`structeval-original-latex-window-32068-001`。来源仍未打勾。
 
 以上使用[原阶段回执](validation/structeval-nonrender-checkpoint3-20261025.json)记录；前三项是证据复用与数据链路核验，不是整套原生benchmark完成。
+
+### Spider原数据与官方测试套件（固定原生抽样交付完成）
+
+- [x] 复用此前固定官方协议来源记录；原作者GoogleDrive数据包已在服务器取得，205800266字节、2234文件、ZIP
+  CRC通过，Windows无原数据落盘。SHA256仅为接收端观察值，不冒称发布方校验和。
+
+- [x] 官方Test Suite数据库原包已取得，1269456098字节、3944文件、全部ZIP CRC通过；原包保留，未重新下载已完成数据包。
+
+- [x] 两原包在新目录完成受控解压，6178文件/约6.99GB；原包不变。全11840条原记录与原schema/SQLite文件关联核验，372份原数据库文件头/哈希核验；166/206两个原目录同名DB不合并。
+
+- [x] 独立CPU评分软件环境实际构建，并通过非root/只读/断网检查；固定NLTK官方分词资源离线安装，不将依赖准备算作原SQL、模型或评分完成。
+
+- [x] 公共准备入口在服务器绑定dev原前三题、隔离问题/schema与七字段原参考记录，并核对完整32份官方测试数据库；原评分器参考控制在隔离容器运行，3题Test Suite
+  Accuracy为1.000。此为参考控制，不是模型成绩或来源完成。
+
+- [x] 物理SQLite schema、原SQL及固定dev前三题的实际官方评分已核验：公开dev的20个DB均有测试套件；public
+  test使用的40个DB无对应套件，不以单库评分替代，也不宣称已执行public test。
+
+- [x] 公共生成/评分入口完成原dev位置0/1/2的真实NPU验证：Qwen3.5-9B三次响应均stop，原响应与SQL预测逐字节一致；官方完整32份测试库评分1.000。接入提示及4096输出预算明确非官方模板/预算，不据三题作质量结论。
+
+- [x] 固定CI工件及研究消费闭环；实际CI安装工件的全11840条原记录与原索引核对、12次公共/研究回查通过，原生三题生成/官方Test
+  Suite评分结果直接复用。来源按固定抽样交付打勾，不是全量原生评分，见[阶段回执](validation/spider-original-preparation-20261029.json)。
+
+- [x] Spider读取模块在服务器核对全部11840条、四个原始划分、七个原字段及分划分schema/数据库资产关系；数据库同名不跨命名空间合并。统一registry、候选及实际CI安装验证均已完成，新增模型调用0。
+
+- [x] Spider统一registry和候选wheel已接通：服务器独立环境安装后，从site-packages统一入口核对全部11840条原记录，原问题、独立参考答案、schema及两个数据库命名空间均保持；候选验证不替代后续实际CI验证，二者均有独立回执。
+
+- [x] Spider候选工件全11840条索引已核对，四个原划分各前三条共12次公共/研究消费回查完全一致；冻结研究代码身份与当前研究checkout一致，未改默认依赖。首次审计的单文件/全文件选择范围差异已查清并按同范围纠正，不重建有效索引。
+
+- [x] 固定提交366f8323的两项CI成功，实际工件12876710598的67份载荷与精确Git
+  blob一致、独立安装字节一致；全11840条原记录与原索引核对、12次公共/研究回查通过，零新增模型调用。Spider按固定原生抽样交付整项打勾，不是全dev质量或性能结论。
+
+- [x] 后续入口导航修复已通过固定提交9b36fb93的两项CI，并在服务器独立安装实际工件12879026361；67份包载荷一致，准备、生成、隔离评分三个入口已核验。与先前工件相比仅分类资源变更，原生结果和研究回查证据直接复用，不重复调用模型。
+
+### SWE-bench／Verified共用官方软件与环境（两来源分别固定抽样交付）
+
+- [x] SWE_BENCH自身固定版本原测试Parquet已在服务器取得并按官方LFS大小/SHA核验，2,294条/12字段、12,097,227字节；原前三题11693/12057/12318均不在Verified中，不能复用其模型结果。复用公共获取/只读核验入口，Windows不落原数据。
+
+- [x] SWE_BENCH原三题官方仓库镜像经公共入口冷构建完成；参考补丁环境对照3/3修复通过，保存原测试脚本/参考ID/评分重新核对一致，0重复测试/模型调用，原Docker历史配置保留。仅环境对照，不是模型任务完成。
+
+- [x] 实际CI39636工件12910016155独立安装，67份载荷与Git/安装文件逐字节相同。SWE_BENCH全2294条/12字段和Verified全500条/13字段完整适配、索引及各固定3条研究回读通过；研究代码/默认依赖不变，无原数据重下载。
+
+- [x] 最新实际CI工件12912171225再次核验两来源全字段/索引与各固定3条研究回读；67份软件载荷与b3e4
+  Git对象相同。该提交两项CI均通过（40910826104、40910833864），仅同步137条既有基线行号，不新增豁免、不改摘要或审核标记。
+
+- [x] SWE_BENCH固定原三题原生链路完成：首题11693的非法补丁结果保留不重跑；连接中断的原12057/12318恢复后均提交并完成官方测试，均未修复，原失败尝试全部保留，不挑题或重跑质量失败。原模板、任务、提交、测试脚本/参考ID与保存评分独立核验；两轮146+238=384次NPU后端请求均200，模型窗口结束、租约释放，15分钟原生队列仍活。当前代码9399两项CI均绿，67份已核验软件载荷逐字节相同。[来源独立交付回执](validation/swebench-classic-native-delivery-20261030.json)；非全2294题评测，组合验证不冒称单轮官方榜单分数。
+
+- [x] 固定Verified原顺序前三题为Astropy12907/13033/13236，保留原13字段。发现已准备的新官方harness要求额外image/eval_script/log_parser/eval_type，不能直接套用旧数据。另固定官方v4.1.0发布版原87文件/594174字节及Git/SHA身份，`prepare_swebench_author_source.py --profile v4.1.0`计划与软件夹具通过，默认配置不变；没有补造字段或更换原题。
+
+- [x] 服务器实际执行v4.1.0公共准备入口，87份原文件核验通过；只读复用已有客户端满足原14项直接依赖，原模块导入及固定前三题ARM规格构建通过。原FAIL_TO_PASS数量2/1/2、PASS_TO_PASS数量13/20/644保持不变；这是源码、依赖和规格核验，不是仓库测试或Agent执行。
+
+- [x] 官方Ubuntu22.04的ARM基础镜像已从官方仓库按manifest/config/压缩层SHA及解压DiffID校验后导入独立实例。服务器直连DockerHub超时、默认断网下apt解析失败的两次原构建记录保留；仅对可信官方软件安装的第三次构建指定进程级host网络，原Dockerfile不改，已观察到原apt源正常下载索引。Windows不保存镜像大文件，不变更全局网络，生成代码评分不能沿用该联网配置。
+
+- [x] 未修改的v4.1.0原基础Dockerfile在独立实例构建成功，镜像约1.29GB；原三题共享Python3.9环境和全部三题仓库镜像按原脚本构建完成。原依赖和安装脚本不改，镜像构建不等于任务执行和评分完成。
+
+- [x] 公共准备器新增可选`--profile mini-swe-agent`，固定官方原78文件/302226字节，服务器实际公共入口逐文件Git/SHA/大小核验通过。保留原配置与Agent实现，不在数据包中夹带模型、原题或研究观测。软件准备、客户端及原题执行分别核验，不能据此新增来源完成数。
+
+- [x] 官方Agent独立客户端已只读复用原核心依赖，36项差量包逐项SHA固定后安装，组合依赖检查和未修改的原CLI帮助通过。原Docker环境类使用首题原镜像的只读控制通过：原Python3.9激活正常，容器内cap0/NNP、8GiB内存、2CPU、512PID限额生效，无网络、宿主挂载、NPU或模型凭据；容器内root与可写文件系统如实保留，不冒称非root/只读根。无模型生成或原题执行。
+
+- [x] 经明确授权建立只监听回环的临时SSH转发，保留原公钥、禁止命令执行和其他转发端口，带UTC到期时间；两项拒绝控制及CPU到原NPU模型发现接口通过。原模型服务未重启、不改监听、不开放公网。旧SSH到期格式兼容和一次传输超时均保留证据；这只是客户端连通，不是Agent原题运行。对应软件两项CI通过。
+
+- [x] 原Agent公共调用入口及无模型计划验证已补；原题字段与物理顺序不改，部署绑定与原Agent设置分离，参考补丁不拼入任务。每次NPU请求先检查原服务身份、空闲与NPU所有者，定时队列协作让出窗口，保留原250步预算；完整原生结果和当前软件CI状态分列于下，不把计划验证等同任务执行。
+
+- [x] 保留真实执行暴露的可选依赖缺失：原LiteLLM在首个模型请求前找不到`mcp`，未改原SDK/Agent，而是仅补官方`mcp==2.3.0`等11个新包并逐项SHA核验，所有已有依赖版本不变、依赖检查通过。原生执行随后真实进入NPU；不把此前CLI帮助或静态检查冒充运行时完整性。
+
+- [x] 固定三题全部由原Agent提交，144次NPU请求均HTTP200；独占窗口正常释放，评分仅用专用CPU。官方参考补丁环境对照3/3修复通过；模型实际为1题修复、1题未修复、1题非法补丁被原工具拒绝。五份实际测试日志重新判分一致，三份轨迹的初始原模板/任务、提交和原预算逐项核对；第三题失败原样保留，不修输出、不换题、不重跑模型。原1423份容器/108份镜像配置哈希及1365个卷名仍未变。
+
+- [x] 最新实际CI工件12900186474的67份软件载荷与精确Git对象、wheel及安装文件逐字节一致；原500条/13字段、500索引和固定3条当前研究消费再次通过。研究当前HEAD与冻结consumer源码身份一致，未修改研究代码或依赖。新增直接原Parquet入口全500条与原文件一致，前三题导出字节与真实运行JSON快照相同；公共镜像入口实际复用3镜像，Agent/评分的原Parquet计划通过，没有新模型调用、原数据重下载或重复测试。
+
+- [x] 已导出实际CPU客户端的76包评分/120包Agent官方PyPI
+  SHA锁定清单，120个最终版本与真实叠加环境逐项核对；不安装进NPU服务或原Python3.9测试镜像。未额外声称重跑过全新扁平环境安装。公共镜像入口显式传原生ARM规格，避免原CLI默认x86；原生任务/模板/测试脚本保持不变。
+
+- [x] 当前批公共镜像、Parquet和评分入口的c5859eda两项CI均通过（40893299266、40893307702）；67份已核验数据载荷与该提交Git对象逐字节相同，无归一化。Verified固定原顺序三题原生链路和研究回读完成，已打来源勾；模型失败保留，非全量500题评测。SWE_BENCH自身数据/执行仍未完成，不共用完成勾选。
+
+- [x] Verified固定三题的原作者源码部署、隔离客户端/ARM仓库镜像、官方Agent和原评分已完成；不以此替代SWE_BENCH自身的数据、任务与执行验证。
+
+- [x] 固定上游02e7a74f的605份原软件、2950700字节；服务器公共准备入口及独立只读verify均通过，逐文件Git对象/SHA256/大小一致，不下载或复制任务数据、原仓库镜像或生成补丁。
+
+- [x] 新隔离Python3.12/ARM客户端按原17项核心依赖解析76项官方PyPI确定哈希安装；`pip check`及未修改的原评测CLI帮助均通过，不安装CUDA推理extra，不调用模型，不执行任务或评分。
+
+- [x] Verified已有原始记录取得/读取证据保留，两个来源复用同一准备入口，不重复建设。专用CPU工作区自动停止后按原配置恢复；原PVC身份及Spider评分回执仍在，没有变更TTL或共享模板。
+
+- [x] 实际CI工件12880396493的67份载荷已核对精确Git对象并独立安装；复用原Verified文件核验全部500条、13个原字段、500条索引及固定前三条公共/研究消费一致。参考补丁与测试不进入模型输入，不改研究代码或默认依赖，无新增模型调用。这是数据接入闭环，不是原生仓库修复或评分完成。
+
+- [x] 经明确授权，在同一专用CPU工作区启动独立Docker29.9.1，采用19GiB容量受限文件系统和独立套接字；真实非root/只读/断网/cap0容器及内核CPU/内存/PID限额探测通过。原daemon未重启、1423份容器和108份镜像配置哈希、1365个卷目录名未变；只清除了已保存证据的本次临时探测容器。不是原daemon根因修复，也不是原生benchmark运行完成。
+
+- [x] 独立实例已精确恢复此前合格的Matplotlib与浏览器镜像：分别8/11层，完整层SHA256及镜像配置不变；流式导入，不另存镜像大包。两个环境校验器通过，公开隔离控制器的SVG正常/空输入、Matplotlib正常/超时四项控制通过；超时如实保留为阻塞，非模型得分。原环境配置哈希和卷名再次核验不变，没有新增模型调用或来源完成数。
+
+- [ ] SWE_BENCH自身的数据取得、精确工件消费与原生任务/评分仍待补，复用已合格的公共软件与环境；Verified不能替代它的完成勾选。ARM支持属上游实验性，当前证据仅固定原三题，不是完整500题或任意任务容量保证。独立运行时受19GiB文件容量上限约束，另为辅助文件预留1GiB，总新增预算20GiB；37GiB是恢复前历史观察，1.80GiB是仅恢复两运行时后的历史占用，都不是当前任务占用。实际任务镜像和评分已在此限额内执行，当前容量与结果见[阶段回执](validation/swebench-original-readiness-20261029.json)。
+
+### LJSpeech原始TTS语料与VITS原生合成（已交付）
+
+- [x] 核定原1.1版本、13,100条原配对语料定位及官方TorchAudio校验依据，补充无模型依赖的公共获取/核验入口和离线夹具测试；只允许来源记录匹配的精确范围续传，不覆盖原文件，不自动换来源。
+- [x] 公共获取器在服务器实际下载完整2,748,572,632字节原包，SHA256与官方TorchAudio固定源码一致；约203秒，零重试，Windows没有原始音频落盘。
+- [x] 全13,100条原三字段元数据与13,100份WAV一一对应，原文本不改写；全部RIFF长度、单声道16-bit/22050Hz音频头核验通过。仅流式读取原包，没有再解压一份数据或生成模型输入。
+- [x] 实际CI工件12945880401安装后，69个载荷与Git及安装文件逐字节核验；完整13,100条索引及固定原前三条公共/未修改研究消费入口回查通过，完整记录一致、参考音频分离。复用完整索引恢复中断的回查，不重下、不重建索引。[原数据交接证据](validation/ljspeech-actual-ci-handoff-20261030.json)
+- [x] 公共原归档适配器在服务器复用同一原包核验全部13,100条，最终代码字节单独复验，保留原文本、发布方规范化文本和参考WAV关系；不解压、不合成。原顺序、配对完整性、索引回查及既有研究消费的人工夹具测试通过；夹具不算真实数据研究消费。[公共读取证据](validation/ljspeech-public-reader-20261030.json)
+- [x] 发布方VITS原软件23文件和配置固定并通过公共准备入口复验；官方链接的145,599,717字节权重已在服务器取得，记录观察SHA256并通过全部ZIP成员CRC核验。文件完整性检查未执行模型，后续安全加载见下一项。模型数据未写入本地磁盘。详见[准备证据](validation/ljspeech-vits-preparation-20261101.json)。
+- [x] 独立环境安装官方phonemizer 2.2.1及兼容依赖；eSpeak NG
+  1.51与动态库仅解包到本任务目录，原对齐扩展编译、原模型模块导入及原清洗函数控制测试通过。权重另经`weights_only=True`在CPU安全加载，未执行模型；控制测试不是原题合成，初次构建和导入失败记录保留。
+- [x] [原生入口](../../scripts/run_ljspeech_vits_original_npu.py)按原前三条规范化转写在Ascend 910B2执行VITS
+  FP32合成；原生成参数和完整输出保留，3份波形经独立RIFF/float32/22050Hz、有限非静音及输入/参考关系核验，无神经重跑。两套常驻服务未变、租约已释放。[实跑证据](validation/ljspeech-native-fixed3-20261101.json)
+- [x] 当前软件CI工件13067137328的78载荷与Git、wheel和安装字节一致；复用13,100条原索引，原前三条公共/当前研究完整记录及实际合成输入、参考音频对应关系通过，无研究代码改动、无神经重跑。CPU
+  smoke 41265280781和完整CI 41265277911均通过，来源按明确的原生合成协议交付；全量13,100条合成与人工自然度/MOS评价不在当前声明中。
+
+### DRAGON原生RAG（固定原生抽样交付完成）
+
+- [x] 新增无模型加载的依赖预检，在服务器现有服务环境实际执行；torch_npu可发现，但缺sentence_transformers及三项LangChain组件，不把包存在等同NPU执行合格。
+- [x] 原示例CUDA专用初始化与可复用核心链路已核查；CLI默认top_k5/字符chunk1000/overlap100，核心使用完整语料的Chroma
+  MMR，不能换成任意词法检索或随机embedding。
+- [x] 固定原前三题的原提示传输、实际NPU嵌入、完整检索/生成/官方评分及无推理保存核验通过：完整542篇/1157原分块，5次直接验证输出NPU张量的编码调用，3次reader请求。3次均为作者512预算下的length终止，低质量结果保留；未缩提示、减少语料或替换题目，不算正确作答或性能证明。
+- [x] 新客户端56项确定版本/原PyPI哈希安装及核心模块真实导入核验；Torch/NPU等六项保护版本未变。保留全套失败记录，修复仅限新客户端；全局已有11项依赖问题仍在，但未新增问题。不是干净全SDK或NPU模型执行合格，来源总勾不变。
+- [x] 发布方列举的`intfloat/multilingual-e5-large-instruct`已固定官方版本`274baa43b0e13e37fafa6428dbc7938e62e5c439`，11份原模型/配置/分词器文件共1,142,121,329字节直接传到服务器；官方LFS
+  SHA256或Git对象及独立全文件SHA256复核通过。391个safetensors张量范围完整，原Transformer/Pooling/Normalize三模块不改。既有网络失败保留，未换代理节点、未绕过访问限制；Windows未保存权重。此获取阶段没有加载模型或运行NPU，后续原生验证独立记录于上项。
+- [x] 发布方原始reader配置已核对：此Qwen版本没有独立generation_config，显式从原config派生；作者预算fallback512不变。无效物理设备掩码、HOME满盘日志错误、缺配置及未触发的ST6
+  hook均有记录，最终只调整部署适配和私有目录；不改作者核心、数据或在用服务。旧零hook计数未追认为有效设备证明，最终直接检查输出NPU张量。
+- [x] 精确提交675b7da2的两项CI均成功；实际CI工件12890070997的67份载荷与Git对象、独立安装文件一致。原生入口/保存核验器与实际服务器执行代码字节相同，模型身份清单只补公开哈希误报注释。安装后的四类导航、全部600条原字段/索引和固定3条当前研究回读通过，0新增推理。来源总项按原生固定抽样交付打勾，不是全600或质量/性能完成；见[交付证据](validation/dragon-original-preparation-20261028.json)。
+
+### LibriTTS多说话人TTS（固定三条原生协议已交付）
+
+原生执行入口为`scripts/run_libritts_styletts2_original_npu.py`，默认仅输出计划，固定前三条已完成实际合成。需准备固定作者源码、发布方模型、原test-other归档、官方NLTK资源及独立StyleTTS2依赖环境；设置已验证的eSpeak路径，并安装本仓库数据读取包。在执行进程中加载服务器已安装CANN的`set_env.sh`，保留其编译器Python路径，不要用数据包路径覆盖整个`PYTHONPATH`。命令如下，只有补上`--execute`才进行NPU推理，`--full`选择原5120条；输出目录须在仓库外且尚不存在。服务器已验证公开入口的plan及固定三条执行分支，全量5120条未执行。
+
+```bash
+python scripts/run_libritts_styletts2_original_npu.py \
+  --author-root /path/to/pinned-StyleTTS2 \
+  --model-root /path/to/publisher-model-assets \
+  --archive /path/to/test-other.tar.gz \
+  --nltk-root /path/to/nltk-data \
+  --output /path/to/new-external-output
+```
+
+入口保留作者notebook推理定义、alpha=0.3、beta=0.7、5步扩散、embedding_scale=1及作者原50样本尾部处理；使用float32／NPU和种子0，不截断原始文本，不使用目标录音作为条件参考。仅校验输出波形结构，未提供MOS或冒称官方LibriTTS质量评分。
+
+- [x] 固定前三条已完成NPU合成，输出为316150／215350／121150个24kHz采样点；原文SHA、不同同说话人参考录音、波形哈希、有限非零单声道输出及执行入口字节一致性均独立审计通过，审计0新增模型调用。两套服务进程身份不变，临时进程退出且租约释放；回执`libritts-original-fixed3-saved-audit-20261102-001/qualification-public.json`。LSTM使用CANN的acl_op路径，不是CPU神经回退；不据此声明MOS或性能。当前CI注册入口的提供者／研究消费最终复核已通过，来源总勾已完成。
+
+首次原题执行已到达NPU参考编码，因隔离进程遗漏CANN编译器Python路径，原LSTM初始化报`No module named tbe`，未生成波形。失败保存在`libritts-public-native-entry-20261102-002/execution-window`，两套服务进程身份保持不变；随后只读接入既有CANN路径，`tbe/te`导入控制通过，回执`libritts-cann-compiler-imports-20261102-001/qualification-public.json`。这不代表完整合成通过。
+
+- [x] 隔离客户端77项新依赖已安装并通过`pip check`，安装计划未替换Torch／torch_npu，原只读vendor链接保留。按原Git树编译作者要求的monotonic_align扩展，源码未改；补齐旧phonemizer漏声明的six后，原模块导入通过。导入检查期间禁止所有神经前向和权重加载，未初始化NPU上下文。
+
+- [x] 原模型构造器／build_model构建的13个模块全部从发布方主检查点严格加载参数，只移除保存时的`module.`键前缀。ASR辅助包的旧训练调度器pickle被安全加载器拒绝，旧失败保留；不放宽安全反序列化，改从已包含全部最终参数的主检查点加载，未改网络计算定义、未缺失参数或补随机权重。检查时禁止所有前向，0神经调用；尚不是NPU模型验证。回执`libritts-styletts2-state-loading-20261102-002/qualification-public.json`。
+
+- [x] 固定前三条原始规范文本经作者音素化／分词流程得到214／144／76个token，无截断。补齐官方NLTK的`punkt_tab`软件资源，校验发布索引SHA256后仅安装到本任务目录。缺资源及服务器下载连接重置的失败保留；回执`libritts-styletts2-original-frontend-20261102-003/qualification-public.json`，0神经调用。
+
+- [x] 固定三条均绑定同一原始说话人的另一条录音`1688_142285_000059_000000`作为条件参考，不使用目标句子的参考WAV；规则为全test-other同说话人中按ID排序最后一条不同录音。原24kHz音频身份、作者trim及Mel预处理已通过，未改作者Mel默认采样率；回执`libritts-original-reference-binding-20261102-001/qualification-public.json`。这是公开模型在原语料上的显式TTS协议准备，不是官方LibriTTS质量评分或已完成合成。
+
+- [x] 主权重已在独立检查中用`torch.load(weights_only=True, map_location="cpu")`安全读取，14个网络状态、1475个张量共872183356字节。只做张量反序列化／元数据检查，没有构建或前向执行模型、没有初始化NPU上下文，现有服务身份未变；不代表NPU适配成功。服务器回执`libritts-styletts2-safe-checkpoint-20261102-001/qualification-public.json`。下方“未加载／未反序列化”均指各自早期源码／下载阶段，非此后检查状态。
+
+- [x] 复用已核验的原test-other整包964502297字节、5120条原文／规范化文本／参考WAV关系，以及实际CI包和原研究消费者固定3条回读；不重新下载原数据。
+
+- [x] 已在服务器取得作者StyleTTS2固定源码，48份原文件175216146字节复现原Git树；原`Demo/Inference_LibriTTS.ipynb`存在并可解析。版本`5cedc71c333f8d8b8551ca59378bdcc7af4c9529`，未导入作者Python、未加载神经权重、0模型调用。
+
+- [x] 作者`yl4579/StyleTTS2-LibriTTS`多说话人模型的配置／主权重已取得，共771392385字节，固定HF版本`3aa7ba7f8f275ec13dce21682a61494c35089e2a`；Git配置身份和主权重LFS
+  SHA256均匹配，公共只读verify复核通过。仅下载字节，未反序列化权重，NPU兼容性未验证；不能拿现有LJ Speech单说话人权重冒充此模型或编造缺失说话人向量。
+
+公共模型准备：`python scripts/prepare_libritts_styletts2_model.py`只输出计划；加`--output /external/fresh-styletts2 --download`取得固定原文件，`--output /external/saved-styletts2 --verify-only`只读复核。服务器实际使用显式`--hf-endpoint https://hf-mirror.com`传输，身份仍按作者原Git对象／LFS
+SHA验证；不据此声称本机直接HF下载分支也已验证。新输出必须在仓库外，原失败／partial不覆盖；不下载作者示例语音替换原LibriTTS任务，不加载模型。公共下载／verify已在服务器验证，6项本地字节／预算／路径夹具测试通过。
+
+- [x] 原推理示例的语音条件、采样预算、模型依赖及原文本／说话人关系已核对；使用不同同说话人原录音作条件，不使用目标WAV。当前CI87载荷／4入口、固定三条公共及未修改研究消费与保存波形原输入绑定均通过。[最终交付回执](validation/libritts-original-native-delivery-20261102.json)，来源已计完成。
+
+### Video-MME-v2基础64帧原生协议（已交付）
+
+- [x] 原生入口统一索引补齐后，6cb0d0a8的CPU CI 41384656261和完整CI
+  41384659590均通过；实际工件13114113410已在服务器独立安装，87份软件载荷一致，6个执行入口元数据可发现，3200原题／800完整组再次完成公共和未修改研究消费者回读。源码索引和研究消费者未改，0模型调用；不重跑已完成24题。最新回执在`videomme-v2-actual-ci-group-provider-20261102-002`。
+
+本来源已按原基础64帧协议交付：固定24题／6完整组全部NPU推理及官方分组评分完成，独立核验24份请求、回复、参考和评分一致。当前模型2/24题答对，官方分组总分2.0833；不以答对率作为工程接通的替代标准。固定验证入口使用上面给定的6段媒体，原数据／研究读取入口保留全部3200题／800组，未迁入研究观测或分析。
+
+全量使用固定上游VLMEvalKit原入口，而不是把24题的验证结果称为全量：`python /external/pinned-VLMEvalKit/run.py --config /absolute/benchmark/configs/workload-native/videomme-v2-official-full-local.json --work-dir /external/fresh-full-results --api-nproc 1 --retry 1 --judge exact_matching --max-tokens 2048 --temperature 0`。该配置未限制题号、视频数或分组，会运行原3200题；本轮未执行全量。全量之前须在服务器仓库外取得固定HF版本`6e4bebb03202e1ddbf3d37703e560e51c5aa2d64`的完整800视频快照（可用官方`hf download MME-Benchmarks/Video-MME-v2 --repo-type dataset --revision 6e4bebb03202e1ddbf3d37703e560e51c5aa2d64`，设置独立`HF_HOME`）；该独立缓存的`refs/main`须绑定该版本，再设置`HF_HUB_OFFLINE=1`供上游原构造器解析。不能将本轮6视频缓存冒充全量，不能修改共享缓存引用或从在线main悄悄取另一版。原构造器负责原ZIP展开和TSV生成；需先确认完整媒体下载与解压峰值空间，原数据不入Git。
+
+客户端环境：先使用固定上游requirements，ARM64无合适Decord轮子时复用`scripts/prepare_chartqa_native_runtime.py`构建原Decord0.6.0／FFmpeg依赖，按其回执配置`DECORD_LIBRARY_PATH`和`LD_LIBRARY_PATH`。本次兼容组合为Python3.12.13、NumPy1.26.4、PyArrow19.0.1、portalocker3.2.0；XLSX需要`xlsxwriter==3.2.0`、`openpyxl==3.1.5`、`et-xmlfile==2.0.0`。CPU
+PyTorch只用于工具包导入，不做神经模型推理。已验证服务器私有补充环境及实际原生运行，未宣称在另一台干净机器重建全套环境。缺官方依赖应装入独立客户端环境，不能升级正在服务模型的全局包；全量也需同样的64图NPU服务。未验证字幕／交错字幕／推理／缩放变体，不能据此扩大完成范围。
+
+- [x] 四份固定发布方原文件共9046844字节已在服务器取得，Git/LFS身份核验通过；包含全3200题和原800份字幕，不含视频，Windows无原始文件落盘。
+
+- [x] 全3200题的11字段、800个完整四题组与原顺序、字幕对应关系及ZIP CRC核验通过；未拆散四题组或用旧Video-MME数据替换。
+
+- [x] 三份官方协议源码共49432字节核验；原非线性分组评分器通过参考答案/CPU控制，不是模型评分，不计来源完成。
+
+- [x] 六个冻结完整原组对应的视频001/002/003/009/013/016共697616024字节已在服务器取得，原2,020,332,935字节压缩包的发布方LFS
+  SHA256、六成员CRC和保留媒体独立SHA均核验。没有转码、裁剪或移除音轨。已核对公开准备器与实跑代码一致；74项相关视频夹具测试通过，这不是完整解码或推理。
+
+- [x] 旧压缩包在下载／提取进程终止、整包身份及六媒体独立哈希复核后已精确清理，释放约2GB；六段原媒体与证据保留，压缩包可按固定官方URL重新取得。未删除模型、其他数据集或原失败证据。
+
+- [x] 六段固定原视频完整解码通过，共103832帧（001/002/003/009/013/016分别12675/19262/5797/15070/35828/15200帧）；终态与每段原媒体后验哈希均核验。音轨仍保存在原视频中，本次未解码音频，未运行模型。
+
+- [x] 六个固定完整原组共24题的原64帧提示、NPU推理及官方非线性分组评分已完成；独立保存证据核验通过，2/24题答对，分组总分约2.08。原服务仅图像上限改为64，不缩帧、不换题。[原生交付证据](validation/videomme-v2-original-native-delivery-20261102.json)。
+
+- [x] 固定24道原题的官方64帧提示已在服务器实际准备完成，保留全部3200条标注及384个独立帧文件。原构造器、抽帧与提示函数未改，字幕／推理／额外缩放均关闭；后验源码树核验通过，NPU上下文未初始化、0模型调用。仍缺兼容64帧服务、实际推理及原分组评分，来源总勾不变。
+
+原生推理／评分入口已补写，尚待服务器实跑：`python scripts/run_videomme_v2_original.py --official-checkout /external/pinned-VLMEvalKit --prepared-root /external/fresh-native-prompts --model Qwen/Qwen3.5-9B --output /external/fresh-native-results --execute`。默认端点为本地19466；模型服务必须支持每请求64图，不能把提示减为32帧。入口复核原元数据、24题顺序及全部帧哈希，复用官方OpenAI编码与默认2048输出上限、temperature0，明确使用非思考模型配置，再调用官方exact_matching及非线性完整组评分。Qwen3.5-9B是现有可部署模型的功能验证配置，不是官方全量榜单成绩复现；原题、帧数和评分保持原样。无`--execute`只输出计划；请求失败即保留并停止，不换题。新增7项入口夹具测试，相关视频测试共95项通过；尚无该入口的模型调用或评分证据。
+
+- [x] 官方工具包 CPU 导入环境已核验：私有依赖目录使用 PyArrow19.0.1、Decord0.6.0、portalocker3.2.0及官方所需补充依赖；不升级全局
+  NumPy。官方类默认64帧已确认。工具包会导入`torch_npu`模块，但实测未初始化NPU上下文，0模型调用。各轮原失败日志保留。
+
+- [x] 提示的自包含缓存准备：首次真实入口在发出请求前发现原帧落在官方默认缓存目录，被边界检查拒绝，0模型调用。原因是官方`LMUDataRoot`只接受已存在的目录，准备器漏建目录。现已补建独立缓存及路径边界检查，同配置原CPU准备在`videomme-v2-original-prompts-20261102-003`终态通过，24题／384原帧均位于独立目录，全部3200标注保留。旧帧、提示和失败日志保留；原生入口已接回此新目录，推理／评分尚待结果，不据此勾选来源交付。
+
+- [x] 用户授权的本线程服务32→64图调整已完成，原9B模型、精度、262144上下文、内存比例及其他参数不变。新API594476／birth878851616健康检查通过，14B服务及周期队列未改。该项仅服务就绪，不是原题推理通过。
+
+原64帧提示准备入口：`python scripts/prepare_videomme_v2_original_prompts.py --official-checkout /external/pinned-VLMEvalKit --data-root /external/original-metadata --media-root /external/saved-media --output /external/fresh-native-prompts --execute`。需先配置官方工具包的CPU依赖及已核验Decord运行库，并安装公共数据包。入口使用未修改的官方构造器、抽帧和提示函数，冻结每种原组类型前3组、共24题，保留全部3200条标注及6段原视频；用硬链接准备独立离线缓存，因此输入和输出须在同一文件系统。设计输出为原提示及384个独立帧文件，不调用模型或评分。默认不加`--execute`只输出计划。首次服务器运行在官方构造器生成完整TSV后停止：生成MD5为`ecd7dbb2900f0cb549d4e85b64af1476`，与官方类固定MD5不同，尚待逐字段与序列化核查；未开始抽帧／模型推理，不据此勾选交付。原失败与完整TSV保留，未跳过校验。
+
+- [x] 原字段／媒体定位／分组适配及实际CI安装包消费闭环：b40f68dd的CPU
+  CI工件13110416014已在服务器独立安装，87份包载荷与原wheel逐份相等；全3200题／800完整组和800组公共／未修改研究读取一致，已取得6段媒体哈希复核通过。该项不是64帧模型输入、全800段视频或原生推理／评分。[阶段回执](validation/videomme-v2-original-preparation-20261029.json)保留范围，来源仍不打总勾。
+
+- [x] 当前源码公共组适配已在服务器全量核验：3200原题按原顺序生成800个完整四题组，11个原字符串字段逐项还原，答案只在参考侧，800个字幕ID关系及已取得6段媒体身份匹配。公共及未修改研究消费者完成800组回读，索引和消费者源码未变。首次逻辑记录计数失败保留；修正为原3200行／每组4题的显式计数规则，未改成800条原标注或删除题目。本项尚不是实际CI安装包验证或原生模型执行。
+
+公共数据入口现在支持`iter_workload("VIDEOMME_V2", data_root=...)`及统一pipeline。数据根保留四份发布方原文件的路径，视频另放`videos/<原ID>.mp4`；字幕保持原`subtitle.zip`。pipeline配置为`{"sources":[{"source_id":"VIDEOMME_V2","data_root":"/external/videomme-v2"}]}`，执行`python -m vllm_hust_workload_data.pipeline run --config /external/v2-config.json --output /external/fresh-v2-prepared`即可准备800组引用索引。原Parquet有3200题，但一个可读记录是完整四题组；`options`和`group_structure`保持原字符串，不用旧版的选项列表适配器。`restore_original_group(record)`还原四条原记录供原框架／评分读取，不是可直接发送给模型的请求；它会检查参考与题号的逐题绑定。媒体解码、原64帧提示、模型及原分组评分仍须走原生入口，不能拿800组读取成功代替。
+
+媒体准备：先将固定官方`videos/001.zip`下载到服务器的仓库外目录（URL、大小、SHA和冻结ID由`python scripts/prepare_videomme_v2_fixed_media.py`只读输出），然后执行`python scripts/prepare_videomme_v2_fixed_media.py --archive /external/001.zip --output /external/fresh-videomme-v2-media --execute`。原包约2.02GB，默认新提取数据预算4GiB，另保留256MiB磁盘余量；这个预算不包含已存在的原包。缺失、重复、非法成员、CRC或整包身份失败均停止，不换视频。当前服务器用显式镜像传输取得原包，整包SHA仍以官方固定版本为准；准备器自身不负责联网下载。输出仅原MP4及媒体身份回执，不读取答案、不构造prompt、不做模型评分。
+
+已取得媒体可不依赖原包再次核验：`python scripts/prepare_videomme_v2_fixed_media.py --verify-media-root /external/saved-media --output /external/fresh-media-audit --execute`。完整视频流解码再加`--decode --ffmpeg /trusted/prefix/bin/ffmpeg`，并为该进程配置其已有运行库路径；使用两线程CPU将全部视频帧解码到null输出，不抽帧、不改尺寸、不输出新视频，不调用NPU或模型。音轨保留在原文件中，本检查不解码音频。输出逐文件帧数、原媒体哈希、解码器版本和哈希；任何解码错误／超时均保留失败，不换媒体。服务器已复用既有FFmpeg4.4.8低优先级开始六段完整解码，现已完成六段全部103832帧解码；这不代表原生64帧推理、音频任务或来源整体交付。
+
+上述TSV差异已追加只读核验：3200行、14列与固定原Parquet及官方构造器的序号／路径映射逐项一致，零字段差异。官方构造器本身在缓存MD5不符时会重新生成TSV，并不要求生成文件再次匹配旧缓存MD5。公共准备器因此改为逐字段校验全部原始内容，同时独立记录官方缓存MD5与生成MD5，不改官方源码或生成文件。第二次仅CPU准备任务终态已核验：24题全部完成，每题64帧，共384个独立原采样帧；两次日志均保留，0模型调用。服务器实跑准备器与当前公共脚本SHA一致。相关88项夹具测试及静态检查通过，不等于原生推理／评分交付。
 
 ## 本轮完整交付清单（2026-10-24）
 
 2026-10-25补充复核：原37项复核与研究人员七批23项成果去重为46个有历史获取/准备/验证记录的来源（含本轮仅分类项及受限子集，不是46个完整benchmark）。其中此前遗漏的8项已有48份原文件身份，本轮已复用固定版本、URL与校验和，并提供统一离线计划/原文件校验入口；没有重新下载9.51GB原数据，也未复制研究特征、观测或分析。详见[复用审计](validation/research-acquisition-reuse-audit-20261025.json)。这些来源改标“历史资产已复用、原生待补”，不再用“未开始”掩盖已有成果；准备映射、原生执行和固定工件消费未收口前，完成勾保持不勾。
 
 40 类共登记 110 个公开来源、8 份企业资产，合计 118 项；五个指定来源只分类，本轮推进 113 项。下方历史 19
-个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。当前交付可用48/113项、65项待补（新增TULU3原始对话抽样续接交付，详见具名回执）；原有分类统计说明如下：2项服务轨迹资产、30项原任务/固定评测协议交付（JSONSchemaBench原11配置、BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
+个勾保留，不自动提升为本轮完成，也不要求已验证项目重复跑。以下为历史阶段快照（非当前进度）：当时交付可用48/113项、65项待补（新增TULU3原始对话抽样续接交付，详见具名回执）；当时分类统计说明如下：2项服务轨迹资产、30项原任务/固定评测协议交付（JSONSchemaBench原11配置、BBH、MATH500、GSM8K、AI2-ARC、NI登记任务、BFCL登记类别、QuALITY原NYU多选集成、LongBench登记Qasper200、tau2登记telecom_full、LoCoMo完整上下文文本QA、RULER原13种任务集成、GPQA原三split
 zero-shot集成、BEIR
 SciFact/NFCorpus原检索与重排、STSB原句对相似度、XLSUM原45变体摘要、LibriSpeech原完整波形抽样ASR、FLEURS原102语言306条完整波形ASR、XSum原BART抽样摘要、Multi-News原PEGASUS多文档抽样摘要、BillSum发布方HF原法案抽样摘要、HumanEval原三题功能评分、DS1000七库24题评分、MBPP
 full原三题CodeEval评分、FLORES原三语向抽样翻译与原指标评分、NQ-open原dev3610纯文本及原生聊天3题集成、DuReader原search demo
@@ -384,6 +2264,8 @@ UTC合并为`da48172b57f14d0f7762201e08bbf026a808476b`，其消费源码树与�
 1项正在原生验证、32项已有缺口待补、HumanEval、QReCC与ChartQA共3项受资源/环境阻塞、76项未开始，另5项仅分类。QReCC官方网页集合需tens of
 TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机没有Qwen3-VL权重且SSH已拒绝重连，未发模型请求。只有Azure数据资产计1个交付勾；这不是模型benchmark完成数。
 
+QReCC历史容量判断后来补正：数十TB是从网页重建的获取代价，不是作者已发布段落包的容量。2026-11-03已核实作者27.5GB原passages归档及约86.6GB解压空间，当前获取情况见本节原检索集合补齐记录；不再据旧重抓网页估算判定原始collection无法取得。
+
 | 来源 ID                    | 证据与能力复核 | 历史实证阶段                                   | 研究侧消费证据                         | 复用与待补                                                                     |
 | -------------------------- | -------------- | ---------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------ |
 | AGENTBENCH                 | [x] 已复核     | 原生任务已有抽样评分                           | 有固定研究侧逐源回执                   | 复用已验证子集；剩余范围见8.5.2                                                |
@@ -424,126 +2306,126 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 | PAIO-REUSE-CONV-5000       | [x] 已复核     | 响应/原始关系完整性                            | 本地补充消费回执3/3；未在研究PR #37    | 复用私有请求和完整性记录；不宣称语义正确                                       |
 | PAIO-SEMANTIC-SIMILAR-5000 | [x] 已复核     | 响应/原始关系完整性                            | 本地补充消费回执3/3；未在研究PR #37    | 复用私有请求和完整性记录；不宣称语义正确                                       |
 
-| 来源 ID                    | 本轮勾选                     | 复用证据或待补事项                                                                                                                                                                                                                                                                                                                                  |
-| -------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| WILDCHAT                   | [x] 有界原始历史续写可用     | 原首分片59857条绑定/索引；前三会话全部4处NPU续写，3 stop/1声明2048预算length保留；前三条完整字段与固定工件公共/研究回查一致。[证据](validation/wildchat-original-continuation-20261026.json)；无质量评分/在线Agent承诺，其他13分片和全量生成未验证。                                                                                                |
-| LMSYS_CHAT                 | [ ] 历史资产已复用           | 已复用研究原6文件的版本/URL/校验和，支持离线计划与原文件只读校验；服务器路径、准备映射、原生执行/评分和固定消费待补。不是重新取数，不提前勾选。                                                                                                                                                                                                     |
-| OASST1                     | [x] 原始会话语料可用         | 两split原资产、88838行字段核对及各三点历史续接/安装包prepare→resolve通过。[交付回执](validation/oasst-corpus-delivery-20261024.json)；无官方质量评分、非实时会话、非全量生成                                                                                                                                                                        |
-| ULTRACHAT                  | [x] 原始历史续写可用         | 复用原适配/准备入口；原test_gen28304条完整字段/索引核验，前三会话全部7处NPU续写正常stop，首尾6处固定工件公共/研究回查一致；[证据](validation/ultrachat-original-continuation-20261026.json)。发布方合成历史语料，无质量评分；不是在线Agent，其他7分片/全量模型推理未验证。                                                                          |
-| DOLLY                      | [x] 原请求语料可用           | 八原类别各三条共24条生成/完整性及固定版本CI、安装回核通过。[交付回执](validation/dolly-request-corpus-delivery-20261024.json)；非15011条全量，无官方语义评分                                                                                                                                                                                        |
-| GSM8K                      | [x] 原生抽样交付             | 复用204/1319唯一原题执行评分；固定CI组件核对完整原资产及输入/参考隔离、保存原生结果回查。[交付回执](validation/gsm8k-native-delivery-20261024.json)；支持原生全量，未全跑、跨配置不汇总分数                                                                                                                                                         |
-| MATH500                    | [x] 原生抽样交付             | H4原前三题完整4轮及评分完成；固定CI wheel全500条字段、3条往返及三项CI通过。[交付回执](validation/math500-native-delivery-20261024.json)；非全500题，不冒充独立裁判质量认证                                                                                                                                                                          |
-| GPQA                       | [x] 可用                     | 原三个CSV全部1192位置均有响应及评分审计；原skip69循环分数保留，显式兼容只补3次推理、复用1189结果，原题/提示/预算不改。固定CI、作者Python3.9及研究消费通过，不称GPT-4或其他协议复现。                                                                                                                                                                |
-| MMLU_PRO                   | — 仅分类                     | 复用历史回执，核对完整使用链路                                                                                                                                                                                                                                                                                                                      |
-| AI2_ARC                    | [x] 原生抽样交付             | 两子集各原前三题及末三题共12题执行、原版似然评分与回查通过；固定CI组件核对六文件。[交付回执](validation/arc-native-delivery-20261024.json)；支持分别全量，未全跑、不合并分数                                                                                                                                                                        |
-| LONGBENCH                  | [x] 登记Qasper交付           | 原Qasper200题原生执行、官方评分及完整输入/参考均复核；研究端固定工件三条双路径接通。不宣称其他LongBench子集或原Qasper全库。[交付回执](validation/longbench-qasper-native-delivery-20261024.json)                                                                                                                                                    |
-| LONGBENCH_V2               | [ ] 原上下文容量阻塞         | 原Short三题复用；事前固定Medium原3/5/8行中两题超131072窗口，Long原0/2/7行全部超限。未截断、换题或新增推理，不计完成。[容量回执](validation/longbench-v2-length-group-capacity-20261025.json)                                                                                                                                                        |
-| LONGMEMEVAL                | [ ] 评分/容量阻塞            | 三份原资产已取得；oracle/S共1000题字段关系已验，原前三题各3条真实生成及请求/响应审计完成（S完整输入113452–116259 tokens，原CoT预算800）。原judge客户端环境已验，但缺官方支持judge；M原首题历史1201716 tokens超预算，未截断/换题/发生成请求。见原生checkpoint，复用已有6条，不重跑。                                                                 |
-| LONGMEMEVAL_V2             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| QASPER                     | [x] 原版v0.3抽样原生交付完成 | 复用原5049字段/索引与图像准备；原dev0..2完成3次NPU答案/证据预测和作者原CLI评分，Answer F1约0.4996、Evidence F1=0保留。当前A9精确工件/研究dd三split9处旧索引回查通过。[证据](validation/qasper-native-delivery-20261026.json)。非LongBench200、全dev/test、LED或视觉推理，不筛图表参考，不称质量通过。                                               |
-| NARRATIVEQA                | [x] 原summary-QA已完成       | 原test前三题生成/双参考评分/保存审计完成；全46765问答三表字段关系与索引、精确CI44文件及固定研究端18处回查通过。[回执](validation/narrativeqa-native-delivery-20261027.json)。不是full-story、全test推理或作者模型复现。                                                                                                                             |
-| XLAM_TOOL                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| BIGCODEBENCH               | [ ] 隔离运行环境阻塞         | 当前实例复核：Docker/Podman不存在，可信namespace空操作因挂载传播权限失败。保留1140原任务、前三条已有生成和32作者文件；不降低作者30GiB限制、不在宿主执行生成代码，待合格隔离评分环境。                                                                                                                                                               |
-| SWE_BENCH                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| SWE_VERIFIED               | [ ] 缺口已列待补             | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                                                                                                                                       |
-| VISIONARENA                | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| MMMU                       | [x] 原validation抽样交付完成 | 全92文件/11550行/16字段与索引核验，30学科固定90题NPU推理和原评分（含4多图），152处公共/固定研究消费往返通过。[回执](validation/mmmu-native-delivery-20261027.json)。59次length保留，非完整validation质量或LLaVA复现。                                                                                                                               |
-| CHARTQA                    | [x] 原测试抽样原生交付完成   | 原测试2500条全字段/图像字节/索引核验；双类别固定6题NPU生成、原评分与公共离线复核，CI产物和固定研究6条往返通过。[回执](validation/chartqa-native-delivery-20261026.json)。非全量质量/性能；修复构建器全新重编译未验证。                                                                                                                              |
-| VIDEOMME                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| VIDEOMME_V2                | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| MVBENCH                    | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| LONGVIDEOBENCH             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| LIBRISPEECH                | [x] 已完成                   | 原两split前三+最长共8条完整音频NPU转写和原规范WER通过；固定公开入口另跑未见原位置，5559条保真、CI38文件工件及两split公共/研究消费已核验。不是全5559推理或流式ASR。                                                                                                                                                                                  |
-| FLEURS                     | [x] 原生交付可用             | 原102语言test/模型全校验，各原始前3条共306条完整波形NPU转写/CER评分和保存结果独立重评通过；最新成功CI44包3语言9处公共/研究消费一致。非全test或Conformer复现。                                                                                                                                                                                       |
-| WAVCAPS                    | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| SCIENCEAGENTBENCH          | [ ] 缺口已列待补             | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                                                                                                                                       |
-| DS1000                     | [x] 已交付                   | 通用原题ID／范围／full入口已接通，七库24道原题生成及作者评分完成；1000原字段公共／研究消费一致。ARM移植差异及告警保留，非全1000题成绩。见[回执](validation/ds1000-native-delivery-20261025.json)。                                                                                                                                                  |
-| MIND2WEB                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| GAIA                       | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| STRUCTEVAL                 | [ ] 非渲染部分完成           | 已审计950条唯一原题，19个非渲染协议各全50题；339→480→621→950增量证据不重复计算。其余1085条渲染/VQA及完整来源交接待验证，不勾选整个来源。[阶段审计](validation/structeval-nonrender-checkpoint3-20261025.json)                                                                                                                                       |
-| PAWS                       | [x] 已完成                   | 全8000条人工test＋15条辅助分类、保存输入/响应/评分复核；全751450条4字段/索引、精确CI44文件和固定研究消费21处回查通过。[交付回执](validation/paws-native-delivery-20261027.json)。声明式模型适配非作者聊天运行器；noisy辅助标签不作人工test。                                                                                                        |
-| XLSUM                      | [x] 已完成                   | 原45变体6173个固定位置均核验原输入/编码/解码及作者ROUGE；10变体全6068、其余35各3。固定CI/研究消费与独立环境通过，不代表全114198条NPU推理；限非商业研究。                                                                                                                                                                                            |
-| FLORES200                  | [x] 原生抽样协议已交付       | 原Meta归档204代码、2009公开平行位置保留；复用原NLLB-600M三语向9次NPU翻译/6个唯一平行位置，chrF++与原SPM spBLEU评分、固定CI安装及公共/研究消费通过；[交付证据](validation/flores200-native-delivery-20261026.json)。不重生成、不替换3个缺失模型语言标记、不称全部语向已执行，模型限非商业研究。                                                      |
-| BURSTGPT                   | [x] 已交付                   | 三份各原20条官方模拟已核；固定CI提供者及研究消费端三份各原3行消费相等。无新模型调用；第2/3份仅授权官方缩放，不作原时序性能结论。见[回执](validation/burstgpt-native-delivery-20261025.json)。                                                                                                                                                       |
-| TRACELAB                   | [ ] 缺口已列待补             | 复用历史证据；原生缺口见37项复核表及方案8.5.2                                                                                                                                                                                                                                                                                                       |
-| AZURE_LLM                  | [x] 数据资产可用             | Azure 本轮脱敏回执；非模型 benchmark                                                                                                                                                                                                                                                                                                                |
-| MOONCAKE                   | [x] 固定官方存储回放可用     | 两原轨迹35639条读取/索引及12实际CI研究回读；两个官方场景各首3条原生I/O通过并独立核验，测试页已精确清理。无prompt合成、无模型推理或性能结论。[证据](validation/mooncake-official-storage-delivery-20261027.json)                                                                                                                                     |
-| QRECC                      | [ ] 阻塞                     | 官方原始collection规模超过当前约1.42TB可用空间；未缩减或替换                                                                                                                                                                                                                                                                                        |
-| INFINITEBENCH              | [ ] 历史资产已复用           | 已复用研究原12文件的版本/URL/校验和，支持离线计划与原文件只读校验；服务器路径、准备映射、原生执行/评分和固定消费待补。不是重新取数，不提前勾选。                                                                                                                                                                                                    |
-| RULER                      | [x] 可用                     | 原13种任务15组配置2530条真实请求及原评分审计完成，完整输入/预算保留；固定CI工件完成7500条全字段重建、公共回查90条及研究两路径各45条。QA2显式兼容修复已披露；不声称完整长度网格或复现发布方模型。                                                                                                                                                    |
-| QUALITY                    | [x] 原NYU多选集成可用        | 原6题/24候选似然及固定harness评分、完整文章token与安装包2086题索引/6条回查通过。[交付回执](validation/quality-native-delivery-20261024.json)；非SCROLLS数据、非发布方训练基线，非全2086题执行                                                                                                                                                       |
-| BBH                        | [x] 原生抽样交付             | 全27变体原任务准备、执行及固定评分可用；81个唯一原题已验证，固定CI工件安装回查及三项CI通过。[交付回执](validation/bbh-native-delivery-20261024.json)。不是6511题全量或高分保证                                                                                                                                                                      |
-| BFCL                       | [x] 登记原生类别可用         | simple_python原400题生成、官方AST判定及原文/响应/安装包400条prepare→resolve审计通过。[交付回执](validation/bfcl-native-delivery-20261024.json)；静态函数/参数匹配，不代表其他BFCL类别或真实工具执行                                                                                                                                                 |
-| TAUBENCH                   | [x] 登记telecom交付          | 复用ENV原三题，新跑ENV＋ACTION原三题并官方重评分一致，双角色/200步/10错误/ALL保留；干净客户端125依赖、89原源码及保存结果重评分核验通过，全部2285原生引用研究侧接通。非其他domain或全2285模型运行完成。[交付回执](validation/tau2-native-delivery-20261024.json)                                                                                     |
-| TOOLBENCH                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| AGENTBENCH                 | [ ] 等研究窗口后续跑         | 官方FC ALFWorld前三组全41题已审计：复用0–2、新执行3–40，保留失败及原评分；剩68题待验证，不启动下一组、不冒充AgentBench整套完成。[回执](validation/agentbench-original-complete-groups-audit-20261024.json)                                                                                                                                          |
-| SCHEMASTORE                | [x] 原schema资产已完成       | 原4810文件全核验，官方CLI测试976 schemas exit0；全1006 schema/3688正负例引用及索引、精确CI45文件和固定研究端16 schema/70例子字节回查通过。[回执](validation/schemastore-native-delivery-20261027.json)。非LLM请求/质量benchmark。                                                                                                                   |
-| JSONSCHEMABENCH            | [x] 原生固定协议交付         | 11原配置全部核验：WashingtonPost全38，其余9具名及default各原前3，共68配置视图任务；原bench/evaluator及逐项重评通过。33原文件19100视图行/索引、99处固定提供者/研究回查通过。旧生成复用，不称全量推理、统一后端性能或模型质量达标。[交付回执](validation/jsonschemabench-official-workflow-readiness-20261024.json)                                   |
-| LIVECODEBENCH              | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| HUMANEVAL                  | [x] 已交付                   | 原前三题NPU生成结果复用，公共隔离入口官方评分2/3，失败保留；164题原字段公共/研究消费相等，原3题索引消费相等。不是全164题模型成绩。见[回执](validation/humaneval-native-delivery-20261025.json)。                                                                                                                                                    |
-| MBPP                       | [x] full原生抽样可用         | 原题11/12/13双NPU生成、原始三测试与setup隔离CodeEval：参考解均通过，预测2通过/1失败原样保留；974原记录完整映射/索引，14处公共/研究回查一致，精确CI安装工件已核。[证据](validation/mbpp-original-native-sample-20261026.json)；非全500题，sanitized仅取得资产。                                                                                      |
-| REPOBENCH                  | [x] 固定原生抽样交付完成     | 官方默认30层各3题共90原题NPU生成/原评分及保存审计完成；49684原行与60研究回读复用，47实际CI安装载荷重新核对。固定评分哈希种子0，EM均0保留，不是质量验收。见[交付回执](validation/repobench-native-delivery-20261027.json)。                                                                                                                          |
-| CROSSCODEEVAL              | [x] 原生协议已交付           | 69,494配置行全字段/索引核验复用；四语言原0..2生成/评分保留，公共入口原3..5共12条NPU生成及作者评分通过。精确成功CI44文件及12处公共/研究回查完成；非全语料或所有检索配置推理。[证据](validation/crosscodeeval-original-acquisition-20261026.json)。                                                                                                   |
-| LOCOMO                     | [x] 原生抽样交付             | 原9题复用、新99题执行及原提示/官方评分复核完成，合计108条；第3类全96题，其他四类各原前三题。原数据不改，第5类显式缺键兼容非上游已合并补丁；研究端接通。不称全1986题、图像或RAG完成。[交付回执](validation/locomo-native-delivery-20261025.json)                                                                                                     |
-| NATUREBENCH                | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| DISCOVERYBENCH             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| MLAGENTBENCH               | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| MLEBENCH                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| WEBARENA                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| VISUALWEBARENA             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| OSWORLD                    | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| XSUM                       | [x] 已完成                   | 原BART固定test抽样、官方HF ROUGE与公开入口未见原题/空正文边界验证通过；三split226711条保真、CI38文件工件和研究消费已核验。不是全11334条test推理或2018论文复现；34条原空正文保留。                                                                                                                                                                   |
-| MULTINEWS                  | [x] 已完成                   | 原PEGASUS固定test抽样/原HF评分、公共入口未见原题及空正文边界通过；56216条与作者loader逐条一致，原配对/换行/分隔符保留。CI39文件工件和研究消费已核，不是全5622题test或全文长上下文验证。                                                                                                                                                             |
-| BILLSUM                    | [x] 原生协议已交付           | 发布方HF原23455条三字段、两测试集冻结前三条及公共入口3/4/5的NPU推理/HF评分、固定CI39文件工件与研究消费均通过。不代表全量推理、原论文clean_text或完整原始归档。[交付回执](validation/billsum-native-delivery-20261025.json)                                                                                                                          |
-| TULU3                      | [x] 原始历史续接交付         | 原6文件、全939343条字段与索引、18处固定研究回查；6分片前3条共18对话21次NPU续接，精确CPU CI工件复核通过。见原生交付回执；非官方评分/全量推理。                                                                                                                                                                                                       |
-| NATURAL_INSTRUCTIONS       | [x] 登记原生任务可用         | 五文件/8284实例字段及固定CI回查通过；分类102、翻译250、抽取261、改写1178全覆盖，摘要首尾6题，合计1797唯一实例。[交付回执](validation/ni-native-delivery-20261024.json)；非整个NI，不替代底层数据集原benchmark协议                                                                                                                                   |
-| OPENMATH2                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| OPENTHOUGHTS3              | [x] 原语料续写交付           | 固定三分片30000行/索引保真，三域各3条NPU续写及保存审计、实际CI46载荷/18研究回读通过；九条均预算耗尽无最终答案，不作质量或全120万条执行结论。[回执](validation/openthoughts3-native-delivery-20261027.json)                                                                                                                                          |
-| OPENCODE                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| SWESMITH                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| WORKARENA                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| APPWORLD                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| SCIENCEWORLD               | [x] 固定原生抽样交付完成     | 原生9个episode/464次NPU调用及保存作者评分核验完成；7207原始记录全字段/索引、9实际CI研究回读、51安装载荷与CI闭环通过。入口支持全部30类及原生完整test。严格新环境文本重放差异保留，非确定性复现或质量/性能验收。[交付证据](validation/scienceworld-original-native-delivery-20261027.json)。                                                          |
-| BIXBENCH                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| LABBENCH                   | [x] 已完成                   | 31原子集各首3条共93题原生NPU运行、原评分及保存复核通过；87 stop/6 length保留，45题被原解析器解析、14题正确。1967条索引/原图像、CI46载荷和124研究回读已核复用；不是全量推理或作者模型质量复现。                                                                                                                                                      |
-| PAPERBENCH                 | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| SPOKENWOZ                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| DAILYTALK                  | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| LONGWRITER                 | [x] 原语料生成交付           | 6000条原字段/索引审计，复用前三条、新范围入口实跑末三条均完成响应完整性复核；研究侧双路径三条接通。无语义或长度达标结论，不是LongBench-Write。[交付回执](validation/longwriter-native-delivery-20261024.json)                                                                                                                                       |
-| LONGALPACA                 | [x] 原始指令语料使用已交付   | 原12000条全部字段/索引和12处固定工件公共/研究回查，补回3231条file来源标识于非输入侧；固定原0..2与7324..7326共6题NPU执行并核验，6 stop，含2条原非空input。[证据](validation/longalpaca-native-delivery-20261026.json)。构造训练语料而非独立质量benchmark，不称全量生成、训练复现或每条均为文档分析。                                                 |
-| TOOLACE                    | [x] 有界原始历史续写可用     | 全11300条原system/对话字段及索引、首尾6条固定工件公共/研究回查；原三会话全部15处NPU续写正常stop。[证据](validation/toolace-original-continuation-20261026.json)；原历史tool返回保留、不造工具/ID；无在线Agent/BFCL/ToolACE-8B复现或全量模型推理承诺。                                                                                               |
-| DUREADER                   | [x] 原demo原生交付完成       | 原dev100题/453文档完整NPU生成、五种原评分分支与保存输入/响应复核；94条预测格式有效、6条格式错误保留。200题/916文档保真及12处固定工件公共/研究消费复用。[交付证据](validation/dureader-native-delivery-20261026.json)。是Qwen生成式替代配置，不是作者旧基线或完整DuReader/Zhidao；无效Depends/ROUGE-L不填0。                                         |
-| SPIDER                     | [ ] 原数据库获取阻塞         | 已核验Spider及官方test-suite-sql-eval的12份原文件；两个官方GoogleDrive下载入口在当前实例网络不可达，原题/数据库尚未取得。按Test Suite Accuracy准备，不换成字符串或旧单库评分；0模型调用，不计完成。                                                                                                                                                 |
-| NATURALQUESTIONS           | [x] NQ-open原任务已交付      | 原dev3610题纯文本全量NPU生成/评分，原生聊天模式另3题；91535条索引、12处固定工件公共/研究回查及干净客户端重评分通过；[交付证据](validation/nq-open-native-delivery-20261026.json)。低分与空输出保留，两profile不混分，不是完整NQ文档、RAG或质量通过。                                                                                                |
-| MULTIAGENTBENCH            | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| DEEPPLANNING               | [ ] 原资产已取得             | 服务器已取得固定作者版本63份原源码/题目文件及全部5份原数据库归档（约104MB，逐份LFS SHA256核验）；公开准备入口已通过68文件只读核验及独立目录复用；独立客户端导入通过，候选包360行核验/索引及15条研究回读通过；购物一级原题运行中，其他难度/旅行、实际CI与原生评分仍待完成，0模型调用，不计完成。购物保留原购物车评分，旅行保留原报告转换及约束评分。 |
-| STREAMINGBENCH             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| OVOBENCH                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| FULL_DUPLEX_BENCH          | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| LIBRITTS                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| LJSPEECH                   | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| BEIR_SCIFACT               | [x] 已完成                   | 原test全量检索/top100重排、原评分、最终公开NPU命令及固定CI组件/研究消费均通过。范围仅为登记集合与协议，不是BM25或全部BEIR基线。                                                                                                                                                                                                                     |
-| BEIR_NFCORPUS              | [x] 已完成                   | 原test全量检索/top100重排、原评分、最终公开NPU命令及固定CI组件/研究消费均通过。范围仅为登记集合与协议，不是BM25或全部BEIR基线。                                                                                                                                                                                                                     |
-| MSMARCO_PASSAGE            | [ ] 原候选集合获取阻塞       | Microsoft原README/许可/评分器/脚本4文件已核验；官方静态下载入口连接重置、旧Blob入口409，公共镜像探测404。已找到IR-datasets规范校验元数据，仍缺原dev候选集合与qrels；不得造负例、改用QA或缩减候选集合。仅非商业研究。                                                                                                                                |
-| STSB                       | [x] 已完成                   | 原dev1500/test1379全量NPU编码与原评分通过；8628行保真、固定CI组件、三split公共回查/研究消费及安装后缓存重算通过。不含训练复现或生产检索流量。                                                                                                                                                                                                       |
-| DOCVQA                     | [x] 固定原生视觉问答可用     | 六原文件5349题全字段/原图及引用索引、36实际CI研究回读；固定首3题NPU原生模板/图像处理/ANLS及独立保存复核完成，分数0.75/1/1。非全量模型评测或作者模型质量复现。[证据](validation/docvqa-original-native-delivery-20261027.json)                                                                                                                       |
-| CODEJUDGE_EVAL             | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| DRAGON_PUBLIC              | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| TEMPORALWIKI               | [ ] 待开展                   | 查已有入口，缺失再补原生协议                                                                                                                                                                                                                                                                                                                        |
-| COPILOT_AGENT_2026         | [x] 原生元数据资产可用       | 七日606分片/301026原会话全量核验和索引，49实际CI载荷与候选一致，42固定实际CI研究回读及3条公共smoke完成；不造prompt、不宣称请求回放。[证据](validation/copilot-2026-metadata-delivery-20261027.json)                                                                                                                                                 |
-| AZURE_LMM_2025             | [x] 服务轨迹元数据资产交付   | 全100万行四字段保真/索引、47实际CI安装载荷、首3/末3研究回读完成；无原prompt/媒体，不造请求，不称视觉benchmark。见[回执](validation/azure-lmm-2025-asset-delivery-20261027.json)。                                                                                                                                                                   |
-| HLE_VERIFIED               | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                                                                |
-| SWE_BENCH_PRO              | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                                                                |
-| FRONTIERSCIENCE            | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                                                                |
-| TERMINAL_BENCH_2_1         | — 仅分类                     | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                                                                |
-| PAIO-CHAT-1000             | [x] 私有原请求可用           | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                               |
-| PAIO-CODE-EVAL-1000        | [x] 私有原请求可用           | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                               |
-| PAIO-JSON-500              | [x] 私有原请求可用           | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                               |
-| PAIO-LONG-PREFILL-5000     | [x] 私有原请求可用           | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                               |
-| PAIO-LONGTEXT-4000         | [x] 私有原请求可用           | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                               |
-| PAIO-PREFIX-SHARED-5000    | [x] 私有原请求可用           | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                               |
-| PAIO-REUSE-CONV-5000       | [x] 私有原请求可用           | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                               |
-| PAIO-SEMANTIC-SIMILAR-5000 | [x] 私有原请求可用           | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                               |
+| 来源 ID                    | 本轮勾选                                               | 复用证据或待补事项                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| -------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| WILDCHAT                   | [x] 有界原始历史续写可用                               | 原首分片59857条绑定/索引；前三会话全部4处NPU续写，3 stop/1声明2048预算length保留；前三条完整字段与固定工件公共/研究回查一致。[证据](validation/wildchat-original-continuation-20261026.json)；无质量评分/在线Agent承诺，其他13分片和全量生成未验证。                                                                                                                                                                                                                                     |
+| LMSYS_CHAT                 | [x] 已交付：原历史会话续接协议                         | 原6文件／100万条绑定核验，原前三段全部8个前缀NPU执行，公共及未修改研究读取3处一致、实际外部锁CLI通过；8次均length／512预算，不作自然结束、质量通过、在线Agent或全量推理声明。[回执](validation/lmsys-original-native-delivery-20261103.json)。                                                                                                                                                                                                                                           |
+| OASST1                     | [x] 原始会话语料可用                                   | 两split原资产、88838行字段核对及各三点历史续接/安装包prepare→resolve通过。[交付回执](validation/oasst-corpus-delivery-20261024.json)；无官方质量评分、非实时会话、非全量生成                                                                                                                                                                                                                                                                                                             |
+| ULTRACHAT                  | [x] 原始历史续写可用                                   | 复用原适配/准备入口；原test_gen28304条完整字段/索引核验，前三会话全部7处NPU续写正常stop，首尾6处固定工件公共/研究回查一致；[证据](validation/ultrachat-original-continuation-20261026.json)。发布方合成历史语料，无质量评分；不是在线Agent，其他7分片/全量模型推理未验证。                                                                                                                                                                                                               |
+| DOLLY                      | [x] 原请求语料可用                                     | 八原类别各三条共24条生成/完整性及固定版本CI、安装回核通过。[交付回执](validation/dolly-request-corpus-delivery-20261024.json)；非15011条全量，无官方语义评分                                                                                                                                                                                                                                                                                                                             |
+| GSM8K                      | [x] 原生抽样交付                                       | 复用204/1319唯一原题执行评分；固定CI组件核对完整原资产及输入/参考隔离、保存原生结果回查。[交付回执](validation/gsm8k-native-delivery-20261024.json)；支持原生全量，未全跑、跨配置不汇总分数                                                                                                                                                                                                                                                                                              |
+| MATH500                    | [x] 原生抽样交付                                       | H4原前三题完整4轮及评分完成；固定CI wheel全500条字段、3条往返及三项CI通过。[交付回执](validation/math500-native-delivery-20261024.json)；非全500题，不冒充独立裁判质量认证                                                                                                                                                                                                                                                                                                               |
+| GPQA                       | [x] 可用                                               | 原三个CSV全部1192位置均有响应及评分审计；原skip69循环分数保留，显式兼容只补3次推理、复用1189结果，原题/提示/预算不改。固定CI、作者Python3.9及研究消费通过，不称GPT-4或其他协议复现。                                                                                                                                                                                                                                                                                                     |
+| MMLU_PRO                   | — 仅分类                                               | 复用历史回执，核对完整使用链路                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| AI2_ARC                    | [x] 原生抽样交付                                       | 两子集各原前三题及末三题共12题执行、原版似然评分与回查通过；固定CI组件核对六文件。[交付回执](validation/arc-native-delivery-20261024.json)；支持分别全量，未全跑、不合并分数                                                                                                                                                                                                                                                                                                             |
+| LONGBENCH                  | [x] 登记Qasper交付                                     | 原Qasper200题原生执行、官方评分及完整输入/参考均复核；研究端固定工件三条双路径接通。不宣称其他LongBench子集或原Qasper全库。[交付回执](validation/longbench-qasper-native-delivery-20261024.json)                                                                                                                                                                                                                                                                                         |
+| LONGBENCH_V2               | [x] 固定短／中／长档已交付                             | 长档原0/2/7行完整输入、原预算与官方评分，2/3正确；短中档历史结果保留。[长档回执](validation/longbench-v2-fixed-long-npu-20261104.json)。不代表全量或同模型比较。                                                                                                                                                                                                                                                                                                                         |
+| LONGMEMEVAL                | [x] 已声明原生协议交付                                 | Oracle/S完整历史及M原BM25-session/top10/CoN流程各原前三题，共9条生成、原QA评分及独立审计。实际CI工件78载荷匹配，公共／未修改研究消费者9条完整回读；本地9B judge与官方推荐judge分开。M全历史超限及非适用检索分数保留，不冒称全量或质量复现。                                                                                                                                                                                                                                              |
+| LONGMEMEVAL_V2             | [x] 原enterprise/small正向RAG交付                      | 固定三题、完整100原轨迹、103成功嵌入响应及原评分0／1／1；全451原问题与双档haystack、当前CI87载荷及公共／研究读取闭环。非全量、web／medium／在线学习或性能。[回执](validation/longmemeval-v2-positive-rag-native-delivery-20261102.json)。                                                                                                                                                                                                                                                |
+| QASPER                     | [x] 原版v0.3抽样原生交付完成                           | 复用原5049字段/索引与图像准备；原dev0..2完成3次NPU答案/证据预测和作者原CLI评分，Answer F1约0.4996、Evidence F1=0保留。当前A9精确工件/研究dd三split9处旧索引回查通过。[证据](validation/qasper-native-delivery-20261026.json)。非LongBench200、全dev/test、LED或视觉推理，不筛图表参考，不称质量通过。                                                                                                                                                                                    |
+| NARRATIVEQA                | [x] 原summary-QA已完成                                 | 原test前三题生成/双参考评分/保存审计完成；全46765问答三表字段关系与索引、精确CI44文件及固定研究端18处回查通过。[回执](validation/narrativeqa-native-delivery-20261027.json)。不是full-story、全test推理或作者模型复现。                                                                                                                                                                                                                                                                  |
+| XLAM_TOOL                  | [x] 已交付                                             | 原前三条9B NPU作者原格式生成、当前CI包及研究侧6条回读；三条围栏输出保留，非质量通过。[回执](validation/xlam-original-author-generation-delivery-20261104.json)                                                                                                                                                                                                                                                                                                                           |
+| BIGCODEBENCH               | [x] 固定原题交付闭环                                   | 原3条sanitize、参考3/3、候选pass/pass/fail及独立审计通过，0新增模型调用。公共原Parquet获取/摘要、实际CI64载荷、1140原9字段/索引及受维护研究入口3条回读已核验。原Python3.10完整依赖CPU-only镜像已实际评分；新增代码专用构建上下文32原源码+6运行文件，完整锁及公开配方服务器实际构建完成，233锁版本/71原评估要求/32原文件核验通过；复用已有有效原3条评分，不重跑模型或冒充新镜像评分结果。e2b0.17废弃警告保留。[回执](validation/bigcodebench-container-runtime-readiness-20261028.json)。 |
+| SWE_BENCH                  | [x] 固定原三题原生链路完成                             | 全2294条/12字段、CI工件和研究回读通过；原Agent三题提交，原评分2未修复/1非法补丁，故障原题恢复且首题不重跑。384次NPU请求，保存审计通过，非全2294题评测；[独立回执](validation/swebench-classic-native-delivery-20261030.json)。                                                                                                                                                                                                                                                           |
+| SWE_VERIFIED               | [x] 固定三题原生链路完成                               | 原Agent144次NPU请求、官方参考对照3/3通过；模型1修复/1未修复/1非法补丁失败原样保留。保存结果审计、全500条数据字段/索引和固定3条研究回读通过，c585两项CI通过。非全量模型评测，SWE_BENCH另行待完成；[回执](validation/swebench-original-readiness-20261029.json)。                                                                                                                                                                                                                          |
+| VISIONARENA                | [x] 固定原三条多模态续写交付                           | 首个原分片核验、原图及对话研究回读、三条 NPU 续写及公共入口预检均通过。[交付回执](validation/visionarena-original-continuation-20261104.json)。无官方评分。                                                                                                                                                                                                                                                                                                                              |
+| MMMU                       | [x] 原validation抽样交付完成                           | 全92文件/11550行/16字段与索引核验，30学科固定90题NPU推理和原评分（含4多图），152处公共/固定研究消费往返通过。[回执](validation/mmmu-native-delivery-20261027.json)。59次length保留，非完整validation质量或LLaVA复现。                                                                                                                                                                                                                                                                    |
+| CHARTQA                    | [x] 原测试抽样原生交付完成                             | 原测试2500条全字段/图像字节/索引核验；双类别固定6题NPU生成、原评分与公共离线复核，CI产物和固定研究6条往返通过。[回执](validation/chartqa-native-delivery-20261026.json)。非全量质量/性能；修复构建器全新重编译未验证。                                                                                                                                                                                                                                                                   |
+| VIDEOMME                   | [x] 固定原生协议交付完成                               | 全24原文件及900视频/744字幕字节核验、2700题原11字段/索引、实际CI及受维护研究27条回读已闭环。官方8帧与字幕8帧各27题均原生NPU推理/原评分完成，各13/27、全54 stop，独立原输入/帧/请求/回答/参考/评分审计通过且0新调用。27独立问题、9视频，不是2700题/全语义域质量或性能保证；仅学术研究。[环境与操作](../../workload-preparation/README.md#video-mme-%E5%8E%9F%E7%94%9F%E8%A7%86%E9%A2%91%E4%BB%BB%E5%8A%A1)、[回执](validation/videomme-original-readiness-20261028.json)。                |
+| VIDEOMME_V2                | [x] 原基础64帧协议交付                                 | 原3200题／800组输入与实际CI公共／研究回读闭环；固定24题、每题64帧NPU推理和原完整组评分通过独立核验，2/24答对。全量3200及其他字幕／推理变体未实跑。[证据](validation/videomme-v2-original-native-delivery-20261102.json)。                                                                                                                                                                                                                                                                |
+| MVBENCH                    | [x] 固定原生协议与公共消费交付完成                     | 完整3895原文件、4000题表/索引已核验；20类各前3题、16帧原生推理/评分34/60；实际CI62载荷及60条研究回读通过。支持全量4000题入口，未声称已全评或性能提升。                                                                                                                                                                                                                                                                                                                                   |
+| LONGVIDEOBENCH             | [x] 固定原三题已交付                                   | NPU 推理、原评分及实际 CI 包双端回读通过。[回执](validation/longvideobench-native-delivery-20261104.json)                                                                                                                                                                                                                                                                                                                                                                                |
+| LIBRISPEECH                | [x] 已完成                                             | 原两split前三+最长共8条完整音频NPU转写和原规范WER通过；固定公开入口另跑未见原位置，5559条保真、CI38文件工件及两split公共/研究消费已核验。不是全5559推理或流式ASR。                                                                                                                                                                                                                                                                                                                       |
+| FLEURS                     | [x] 原生交付可用                                       | 原102语言test/模型全校验，各原始前3条共306条完整波形NPU转写/CER评分和保存结果独立重评通过；最新成功CI44包3语言9处公共/研究消费一致。非全test或Conformer复现。                                                                                                                                                                                                                                                                                                                            |
+| WAVCAPS                    | [x] 原生captioning交付                                 | 原固定12条NPU生成、公共入口原2215、成功CI安装包及未修改研究消费均核验；[交付回执](validation/wavcaps-original-native-delivery-20261103.json)。非全量模型执行或论文质量成绩。                                                                                                                                                                                                                                                                                                             |
+| SCIENCEAGENTBENCH          | [x] 已交付原固定前三题单轮协议                         | 原始生成、NPU CodeBERT、隔离科学执行与102条研究消费核验完成；[最终回执](validation/scienceagentbench-fixed3-native-delivery-20261101.json)，程序失败保留，其他模式未验证。                                                                                                                                                                                                                                                                                                               |
+| DS1000                     | [x] 已交付                                             | 通用原题ID／范围／full入口已接通，七库24道原题生成及作者评分完成；1000原字段公共／研究消费一致。ARM移植差异及告警保留，非全1000题成绩。见[回执](validation/ds1000-native-delivery-20261025.json)。                                                                                                                                                                                                                                                                                       |
+| MIND2WEB                   | [x] 原生交付可用                                       | 原始三split各前3完整任务共9题89动作、846次NPU请求及官方评分；原提示/预算不变，显式非思考模型适配。保存响应复核、实际CI包及双端索引消费通过，非全量/实时浏览器结论。[交付回执](validation/mind2web-native-delivery-20261030.json)                                                                                                                                                                                                                                                         |
+| GAIA                       | [x] 原始文本/web/Python协议交付                        | 原0/3（含1超时）与失败第二题独立1800秒复核0/1分开保留，未换题。119资产/466任务109附件关系、原生溯源、公开研究PR57的7处回读、真实依赖锁及4项CI通过，研究方只读核对最小兼容diff；[最终回执](validation/gaia-original-native-delivery-20261103.json)。附件/视听执行未验证，兼容草稿PR未合并，默认锁未改。                                                                                                                                                                                   |
+| STRUCTEVAL                 | [x] 已交付：19个完整非渲染协议                         | 原950题NPU生成/官方语法路径评分复用，111份保存文件哈希一致；公开原数据/源码获取及隔离客户端说明齐，当前CI工件/未修改研究消费者完成2035行原字段与132次回查。仅声明非渲染协议，其他渲染/VQA模式及原生失败单列，不称全44协议完成。[交付范围与证据](validation/structeval-nonrender-native-delivery-20261101.json)                                                                                                                                                                           |
+| PAWS                       | [x] 已完成                                             | 全8000条人工test＋15条辅助分类、保存输入/响应/评分复核；全751450条4字段/索引、精确CI44文件和固定研究消费21处回查通过。[交付回执](validation/paws-native-delivery-20261027.json)。声明式模型适配非作者聊天运行器；noisy辅助标签不作人工test。                                                                                                                                                                                                                                             |
+| XLSUM                      | [x] 已完成                                             | 原45变体6173个固定位置均核验原输入/编码/解码及作者ROUGE；10变体全6068、其余35各3。固定CI/研究消费与独立环境通过，不代表全114198条NPU推理；限非商业研究。                                                                                                                                                                                                                                                                                                                                 |
+| FLORES200                  | [x] 原生抽样协议已交付                                 | 原Meta归档204代码、2009公开平行位置保留；复用原NLLB-600M三语向9次NPU翻译/6个唯一平行位置，chrF++与原SPM spBLEU评分、固定CI安装及公共/研究消费通过；[交付证据](validation/flores200-native-delivery-20261026.json)。不重生成、不替换3个缺失模型语言标记、不称全部语向已执行，模型限非商业研究。                                                                                                                                                                                           |
+| BURSTGPT                   | [x] 已交付                                             | 三份各原20条官方模拟已核；固定CI提供者及研究消费端三份各原3行消费相等。无新模型调用；第2/3份仅授权官方缩放，不作原时序性能结论。见[回执](validation/burstgpt-native-delivery-20261025.json)。                                                                                                                                                                                                                                                                                            |
+| TRACELAB                   | [x] 固定原3会话20轮原生回放交付                        | 原缓存探测、20轮/6904 token与预算/等待核验通过；成功CI94载荷、665453行索引及6处公共/未修改研究回读通过。全量上下文缺口保留；[回执](validation/tracelab-original-native-delivery-20261103.json)。                                                                                                                                                                                                                                                                                         |
+| AZURE_LLM                  | [x] 数据资产可用                                       | Azure 本轮脱敏回执；非模型 benchmark                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| MOONCAKE                   | [x] 固定官方存储回放可用                               | 两原轨迹35639条读取/索引及12实际CI研究回读；两个官方场景各首3条原生I/O通过并独立核验，测试页已精确清理。无prompt合成、无模型推理或性能结论。[证据](validation/mooncake-official-storage-delivery-20261027.json)                                                                                                                                                                                                                                                                          |
+| QRECC                      | [x] 固定原3题完整RAG协议交付                           | 原问题/历史→模型改写→完整54241550文档索引→全部top100阅读→原检索/QA评分均通过；全16451原记录及6处公共/未修改研究消费核验通过。[最终回执](validation/qrecc-original-native-delivery-20261103.json)。不声称全量推理或论文模型复现。                                                                                                                                                                                                                                                         |
+| INFINITEBENCH              | [x] 固定原题已交付                                     | 12 个原生协议各覆盖固定原行 0/1/2，保留原预算终态及作者评分。[交付回执](validation/infinitebench-fixed-native-delivery-20261104.json)。不代表全量或统一模型成绩。                                                                                                                                                                                                                                                                                                                        |
+| RULER                      | [x] 可用                                               | 原13种任务15组配置2530条真实请求及原评分审计完成，完整输入/预算保留；固定CI工件完成7500条全字段重建、公共回查90条及研究两路径各45条。QA2显式兼容修复已披露；不声称完整长度网格或复现发布方模型。                                                                                                                                                                                                                                                                                         |
+| QUALITY                    | [x] 原NYU多选集成可用                                  | 原6题/24候选似然及固定harness评分、完整文章token与安装包2086题索引/6条回查通过。[交付回执](validation/quality-native-delivery-20261024.json)；非SCROLLS数据、非发布方训练基线，非全2086题执行                                                                                                                                                                                                                                                                                            |
+| BBH                        | [x] 原生抽样交付                                       | 全27变体原任务准备、执行及固定评分可用；81个唯一原题已验证，固定CI工件安装回查及三项CI通过。[交付回执](validation/bbh-native-delivery-20261024.json)。不是6511题全量或高分保证                                                                                                                                                                                                                                                                                                           |
+| BFCL                       | [x] 登记原生类别可用                                   | simple_python原400题生成、官方AST判定及原文/响应/安装包400条prepare→resolve审计通过。[交付回执](validation/bfcl-native-delivery-20261024.json)；静态函数/参数匹配，不代表其他BFCL类别或真实工具执行                                                                                                                                                                                                                                                                                      |
+| TAUBENCH                   | [x] 登记telecom交付                                    | 复用ENV原三题，新跑ENV＋ACTION原三题并官方重评分一致，双角色/200步/10错误/ALL保留；干净客户端125依赖、89原源码及保存结果重评分核验通过，全部2285原生引用研究侧接通。非其他domain或全2285模型运行完成。[交付回执](validation/tau2-native-delivery-20261024.json)                                                                                                                                                                                                                          |
+| TOOLBENCH                  | [x] StableToolBench具名同类替代协议已交付              | 官方G1固定三题原生Agent及FAC评分0/1/1，全部163题统一读取、无损还原与固定研究pipeline接通；非实时外部API、非全量Agent或其他组。[回执](validation/stabletoolbench-fixed3-native-20261105.json)                                                                                                                                                                                                                                                                                             |
+| AGENTBENCH                 | [x] FC ALFWorld原生协议已交付，其他域未完成            | 原new_std全部109任务、1625次模型交互及原评分46/109已审计；当前保存结果重评分/资产核验通过，0新增模型调用，全部109项研究原生引用接通。非全域AgentBench、视觉环境或官方Docker等价。[协议交付证据](validation/agentbench-alfworld-protocol-delivery-20261031.json)。                                                                                                                                                                                                                        |
+| SCHEMASTORE                | [x] 原schema资产已完成                                 | 原4810文件全核验，官方CLI测试976 schemas exit0；全1006 schema/3688正负例引用及索引、精确CI45文件和固定研究端16 schema/70例子字节回查通过。[回执](validation/schemastore-native-delivery-20261027.json)。非LLM请求/质量benchmark。                                                                                                                                                                                                                                                        |
+| JSONSCHEMABENCH            | [x] 原生固定协议交付                                   | 11原配置全部核验：WashingtonPost全38，其余9具名及default各原前3，共68配置视图任务；原bench/evaluator及逐项重评通过。33原文件19100视图行/索引、99处固定提供者/研究回查通过。旧生成复用，不称全量推理、统一后端性能或模型质量达标。[交付回执](validation/jsonschemabench-official-workflow-readiness-20261024.json)                                                                                                                                                                        |
+| LIVECODEBENCH              | [x] 原生四场景固定抽样闭环                             | 三份原文件已取得校验；公开入口已完成3题×10候选代码生成/原评分，以及显式兼容自修复23请求/复用7输出/原评分，保存审计通过。另2场景各3请求×10候选/官方隔离评分及保存审计已通过；全479/442条公共字段及索引、各3条维护中研究读取已核验；代码生成原3条索引及实际CI安装包的三类任务/维护中研究回读均通过；自修复显式兼容，不宣称原模板或全量复现。                                                                                                                                               |
+| HUMANEVAL                  | [x] 已交付                                             | 原前三题NPU生成结果复用，公共隔离入口官方评分2/3，失败保留；164题原字段公共/研究消费相等，原3题索引消费相等。不是全164题模型成绩。见[回执](validation/humaneval-native-delivery-20261025.json)。                                                                                                                                                                                                                                                                                         |
+| MBPP                       | [x] full原生抽样可用                                   | 原题11/12/13双NPU生成、原始三测试与setup隔离CodeEval：参考解均通过，预测2通过/1失败原样保留；974原记录完整映射/索引，14处公共/研究回查一致，精确CI安装工件已核。[证据](validation/mbpp-original-native-sample-20261026.json)；非全500题，sanitized仅取得资产。                                                                                                                                                                                                                           |
+| REPOBENCH                  | [x] 固定原生抽样交付完成                               | 官方默认30层各3题共90原题NPU生成/原评分及保存审计完成；49684原行与60研究回读复用，47实际CI安装载荷重新核对。固定评分哈希种子0，EM均0保留，不是质量验收。见[交付回执](validation/repobench-native-delivery-20261027.json)。                                                                                                                                                                                                                                                               |
+| CROSSCODEEVAL              | [x] 原生协议已交付                                     | 69,494配置行全字段/索引核验复用；四语言原0..2生成/评分保留，公共入口原3..5共12条NPU生成及作者评分通过。精确成功CI44文件及12处公共/研究回查完成；非全语料或所有检索配置推理。[证据](validation/crosscodeeval-original-acquisition-20261026.json)。                                                                                                                                                                                                                                        |
+| LOCOMO                     | [x] 原生抽样交付                                       | 原9题复用、新99题执行及原提示/官方评分复核完成，合计108条；第3类全96题，其他四类各原前三题。原数据不改，第5类显式缺键兼容非上游已合并补丁；研究端接通。不称全1986题、图像或RAG完成。[交付回执](validation/locomo-native-delivery-20261025.json)                                                                                                                                                                                                                                          |
+| NATUREBENCH                | [x] 固定原CPU3原生协议已交付                           | 原科学Agent、评估及有效性裁判完成，576原资产和未改研究消费者3包回读通过；披露ARM64兼容、保存预测评分及长上下文裁判恢复。原坏预测、null指标和负改进保留；其余87任务不在本次执行范围。                                                                                                                                                                                                                                                                                                     |
+| DISCOVERYBENCH             | [x] 已交付原real/coder固定协议                         | 原位置0/1/2完整原生链路保留，位置3公开actor／隔离工具／恢复评分终验；4题原工具均py错误、替代judge均0分，失败不改题。双CI通过，实际CI包86载荷及239条公共／研究回读通过。10条原资产阻塞及全量／其他模式缺口保留；[最终回执](validation/discoverybench-original-native-delivery-20261102.json)。                                                                                                                                                                                            |
+| MLAGENTBENCH               | [x] 原作者固定替代三题                                 | 复用 CIFAR-10、OGBN-Arxiv，补跑同源 vectorization 并取得原评分。IMDb 微调与预测保留为缺口。[抽样回执](validation/mlagentbench-fixed3-with-vectorization-native-20261108.json)                                                                                                                                                                                                                                                                                                            |
+| MLEBENCH                   | [x] 固定 NOMAD 原生执行及评分                          | 原 AIDE 24 小时、240 条冻结预测、RMSLE 0.06022。[交付回执](validation/mlebench-nomad-native-delivery-20261108.json)                                                                                                                                                                                                                                                                                                                                                                      |
+| WEBARENA                   | [x] 固定前三题原生流程与官方计分、812任务公共/研究回读 | [交付回执](validation/webarena-fixed3-native-delivery-20261107.json)；三题均0分；环境兼容配置明确披露，其他网站与全量执行未验证                                                                                                                                                                                                                                                                                                                                                          |
+| VISUALWEBARENA             | [x] MiniWoB++ 固定视觉三题                             | 63 次真实图像请求，原奖励均为 0。Classifieds 登录和状态任务保留缺口。[抽样回执](validation/miniwob-visual-fixed3-native-20261108.json)                                                                                                                                                                                                                                                                                                                                                   |
+| OSWORLD                    | [x] 固定原前三题协议已交付                             | 原368任务/统一索引、3题原评分及4项当前CI/研究回读通过；兼容和分段恢复单列，非全量或原始性能复现。[回执](validation/osworld-fixed3-native-delivery-20261106.json)。                                                                                                                                                                                                                                                                                                                       |
+| XSUM                       | [x] 已完成                                             | 原BART固定test抽样、官方HF ROUGE与公开入口未见原题/空正文边界验证通过；三split226711条保真、CI38文件工件和研究消费已核验。不是全11334条test推理或2018论文复现；34条原空正文保留。                                                                                                                                                                                                                                                                                                        |
+| MULTINEWS                  | [x] 已完成                                             | 原PEGASUS固定test抽样/原HF评分、公共入口未见原题及空正文边界通过；56216条与作者loader逐条一致，原配对/换行/分隔符保留。CI39文件工件和研究消费已核，不是全5622题test或全文长上下文验证。                                                                                                                                                                                                                                                                                                  |
+| BILLSUM                    | [x] 原生协议已交付                                     | 发布方HF原23455条三字段、两测试集冻结前三条及公共入口3/4/5的NPU推理/HF评分、固定CI39文件工件与研究消费均通过。不代表全量推理、原论文clean_text或完整原始归档。[交付回执](validation/billsum-native-delivery-20261025.json)                                                                                                                                                                                                                                                               |
+| TULU3                      | [x] 原始历史续接交付                                   | 原6文件、全939343条字段与索引、18处固定研究回查；6分片前3条共18对话21次NPU续接，精确CPU CI工件复核通过。见原生交付回执；非官方评分/全量推理。                                                                                                                                                                                                                                                                                                                                            |
+| NATURAL_INSTRUCTIONS       | [x] 登记原生任务可用                                   | 五文件/8284实例字段及固定CI回查通过；分类102、翻译250、抽取261、改写1178全覆盖，摘要首尾6题，合计1797唯一实例。[交付回执](validation/ni-native-delivery-20261024.json)；非整个NI，不替代底层数据集原benchmark协议                                                                                                                                                                                                                                                                        |
+| OPENMATH2                  | [x] 固定原始语料profile已交付                          | 3个固定原分片全部1309949条字段/索引、9条原问题生成与保存核验、实际CI包及研究回读通过；其余29分片未验证，不宣称数学质量评测。                                                                                                                                                                                                                                                                                                                                                             |
+| OPENTHOUGHTS3              | [x] 原语料续写交付                                     | 固定三分片30000行/索引保真，三域各3条NPU续写及保存审计、实际CI46载荷/18研究回读通过；九条均预算耗尽无最终答案，不作质量或全120万条执行结论。[回执](validation/openthoughts3-native-delivery-20261027.json)                                                                                                                                                                                                                                                                               |
+| OPENCODE                   | [x] 固定原始代码语料profile已交付                      | 3个固定原分片全部300000条九字段/索引、9条原问题生成及保存核验、实际CI包57载荷和研究侧回读通过；未执行代码或评判正确率，其余47分片未验证。                                                                                                                                                                                                                                                                                                                                                |
+| SWESMITH                   | [x] 原生协议已交付                                     | 原固定三题NPU执行及原评分完成：0/3解决，错误0/超时0；当前候选wheel与当前研究端三题回查一致，原空issue保留。披露ARM兼容及实际预算边界。[回执](validation/swesmith-fixed3-native-20261106.json)                                                                                                                                                                                                                                                                                            |
+| WORKARENA                  | [x] WorkBench 固定日历三题                             | 真实 Agent 原评分 3/3，未产生多余状态变化。ServiceNow 浏览器协议保留缺口。[抽样回执](validation/workbench-calendar-fixed3-native-20261108.json)                                                                                                                                                                                                                                                                                                                                          |
+| APPWORLD                   | [x] 固定原三题原生流程与消费交接完成                   | 公共入口141步、官方评分三题各1/5且均失败；28缓存响应复用＋113新增HTTP200。14696原文件、实际CI71运行载荷及732原索引上三题公共/研究完整回读已核验。不代表全量、高分或性能；见[交付回执](validation/appworld-native-delivery-20261030.json)。                                                                                                                                                                                                                                               |
+| SCIENCEWORLD               | [x] 固定原生抽样交付完成                               | 原生9个episode/464次NPU调用及保存作者评分核验完成；7207原始记录全字段/索引、9实际CI研究回读、51安装载荷与CI闭环通过。入口支持全部30类及原生完整test。严格新环境文本重放差异保留，非确定性复现或质量/性能验收。[交付证据](validation/scienceworld-original-native-delivery-20261027.json)。                                                                                                                                                                                               |
+| BIXBENCH                   | [x] 固定三题原生执行与兼容评分完成                     | 原三题 40 步结果保留，授权补丁评分均为 0；当前 CI 工件及未修改研究端回查一致。见 [交付回执](validation/bixbench-fixed-native-delivery-20261104.json)。不代表全量或未修改的官方成绩。                                                                                                                                                                                                                                                                                                     |
+| LABBENCH                   | [x] 已完成                                             | 31原子集各首3条共93题原生NPU运行、原评分及保存复核通过；87 stop/6 length保留，45题被原解析器解析、14题正确。1967条索引/原图像、CI46载荷和124研究回读已核复用；不是全量推理或作者模型质量复现。                                                                                                                                                                                                                                                                                           |
+| PAPERBENCH                 | [x] ResearchCodeBench 固定三篇论文代码片段             | 原遮蔽上下文、真实生成及原程序测试 0/3。PaperBench 原整篇复现保留缺口。[抽样回执](validation/researchcodebench-fixed3-native-20261108.json)                                                                                                                                                                                                                                                                                                                                              |
+| SPOKENWOZ                  | [x] 原文本DST协议已交付，音频未完成                    | 固定3+3完整对话，共128次NPU原生DST请求，官方/独立评分4/68、6/60，低分保留。全1000对话入口及范围选择可用；实际CI组件与研究原输入接通。音频/其他响应协议未完成，不据此计语音覆盖。[协议交付证据](validation/spokenwoz-text-dst-native-delivery-20261031.json)。                                                                                                                                                                                                                            |
+| DAILYTALK                  | [x] 原Guo对话TTS协议已交付                             | 原三段完整对话29条NPU合成及独立PCM审计；23676行原字节保真，CI79文件工件/研究29条回查通过，完整对话准备可参数化；不称全量媒体、MOS或流式时序。[交付回执](validation/dailytalk-fixed3-native-delivery-20261101.json)                                                                                                                                                                                                                                                                       |
+| LONGWRITER                 | [x] 原语料生成交付                                     | 6000条原字段/索引审计，复用前三条、新范围入口实跑末三条均完成响应完整性复核；研究侧双路径三条接通。无语义或长度达标结论，不是LongBench-Write。[交付回执](validation/longwriter-native-delivery-20261024.json)                                                                                                                                                                                                                                                                            |
+| LONGALPACA                 | [x] 原始指令语料使用已交付                             | 原12000条全部字段/索引和12处固定工件公共/研究回查，补回3231条file来源标识于非输入侧；固定原0..2与7324..7326共6题NPU执行并核验，6 stop，含2条原非空input。[证据](validation/longalpaca-native-delivery-20261026.json)。构造训练语料而非独立质量benchmark，不称全量生成、训练复现或每条均为文档分析。                                                                                                                                                                                      |
+| TOOLACE                    | [x] 有界原始历史续写可用                               | 全11300条原system/对话字段及索引、首尾6条固定工件公共/研究回查；原三会话全部15处NPU续写正常stop。[证据](validation/toolace-original-continuation-20261026.json)；原历史tool返回保留、不造工具/ID；无在线Agent/BFCL/ToolACE-8B复现或全量模型推理承诺。                                                                                                                                                                                                                                    |
+| DUREADER                   | [x] 原demo原生交付完成                                 | 原dev100题/453文档完整NPU生成、五种原评分分支与保存输入/响应复核；94条预测格式有效、6条格式错误保留。200题/916文档保真及12处固定工件公共/研究消费复用。[交付证据](validation/dureader-native-delivery-20261026.json)。是Qwen生成式替代配置，不是作者旧基线或完整DuReader/Zhidao；无效Depends/ROUGE-L不填0。                                                                                                                                                                              |
+| SPIDER                     | [x] 固定原生抽样及CI工件/研究消费交付完成              | 原dev0/1/2由Qwen3.5-9B生成，完整32库原Test Suite评分1.000；固定CI工件12876710598核对全11840条、原索引及12次公共/研究回查，非全量质量或性能保证。[交付证据](validation/spider-original-preparation-20261029.json)。                                                                                                                                                                                                                                                                       |
+| NATURALQUESTIONS           | [x] NQ-open原任务已交付                                | 原dev3610题纯文本全量NPU生成/评分，原生聊天模式另3题；91535条索引、12处固定工件公共/研究回查及干净客户端重评分通过；[交付证据](validation/nq-open-native-delivery-20261026.json)。低分与空输出保留，两profile不混分，不是完整NQ文档、RAG或质量通过。                                                                                                                                                                                                                                     |
+| MULTIAGENTBENCH            | [x] Research 固定前三题原生交付                        | 5 份原文件、500 条公共与研究侧读回；固定前三题完成原流程及最终任务评分，其他四场景不计为已验证。                                                                                                                                                                                                                                                                                                                                                                                         |
+| DEEPPLANNING               | [x] 五类原生样本及实际CI/研究消费闭环                  | 购物三级、英文/中文旅行共5个profile各原前三题，合计15题原生执行/评分及保存审计通过；360条原字段/索引及15条当前研究回读经实际CI包复核。436次SDK尝试与414条保存消息分记；失败/零分保留，不宣称360题模型全跑或性能。[交付证据](validation/deepplanning-original-native-delivery-20261028.json)                                                                                                                                                                                              |
+| STREAMINGBENCH             | [x] 已交付real原视频NPU协议                            | 固定前三完整组原生生成3次、原评分2/3且独立重算一致；原题、参考、时间窗和128预算未改。当前CI工件78载荷独立安装核验，8文件／4948索引及24条公共研究完整回读通过，实际原生输入匹配；原9B恢复，卡6未动。全量、SQA／主动／音频／在线模式未验证，45音频待补，详见交付回执。                                                                                                                                                                                                                     |
+| OVOBENCH                   | [x] offline原生协议已交付                              | 12类36题/103响应NPU执行、原评分、完整入口及实际CI消费交接已核验；[交付证据](validation/ovobench-offline-native-delivery-20261031.json)                                                                                                                                                                                                                                                                                                                                                   |
+| FULL_DUPLEX_BENCH          | [x] v1.0/v1.5固定原生协议交付                          | 9类各3条、27原题/39会话，NPU ASR/VAD与各类别原评分、本地9B judge、公共部署和研究读取已核验，CI通过；不是全1225题、v2/v3或官方GPT成绩。[交付回执](validation/full-duplex-fixed27-native-delivery-20261107.json)。                                                                                                                                                                                                                                                                         |
+| LIBRITTS                   | [x] 原生固定三条TTS交付                                | 原test-other5120配对保留；原多说话人StyleTTS2、float32/NPU、5步采样，三条波形及不同同说话人条件参考核验通过。实际CI87载荷／4入口、公共及研究三条原输入回读通过；非全量、非MOS／性能。[最终回执](validation/libritts-original-native-delivery-20261102.json)。                                                                                                                                                                                                                            |
+| LJSPEECH                   | [x] 原VITS文本到波形协议可用                           | 原13100配对索引和公共/研究读取保留；固定原前三条NPU完整合成、独立RIFF与输入/参考关系核验，以及当前CI工件接入均通过。全量合成、MOS和性能不作声明。见ljspeech-native-fixed3-20261101.json。                                                                                                                                                                                                                                                                                                |
+| BEIR_SCIFACT               | [x] 已完成                                             | 原test全量检索/top100重排、原评分、最终公开NPU命令及固定CI组件/研究消费均通过。范围仅为登记集合与协议，不是BM25或全部BEIR基线。                                                                                                                                                                                                                                                                                                                                                          |
+| BEIR_NFCORPUS              | [x] 已完成                                             | 原test全量检索/top100重排、原评分、最终公开NPU命令及固定CI组件/研究消费均通过。范围仅为登记集合与协议，不是BM25或全部BEIR基线。                                                                                                                                                                                                                                                                                                                                                          |
+| MSMARCO_PASSAGE            | [x] 原dev前三查询重排交付                              | 官方完整dev档与qrels已校验，适配6,980查询/6,668,967候选。原始前三查询各1,000候选已NPU重排并经原Microsoft评分，MRR@10=0.5；保存排名复算、实际CI包88载荷、公共/研究各3次回查通过。仅此抽样协议交付，非全量；仅非商业研究。[证据](validation/msmarco-original-native-delivery-20261102.json)。                                                                                                                                                                                              |
+| STSB                       | [x] 已完成                                             | 原dev1500/test1379全量NPU编码与原评分通过；8628行保真、固定CI组件、三split公共回查/研究消费及安装后缓存重算通过。不含训练复现或生产检索流量。                                                                                                                                                                                                                                                                                                                                            |
+| DOCVQA                     | [x] 固定原生视觉问答可用                               | 六原文件5349题全字段/原图及引用索引、36实际CI研究回读；固定首3题NPU原生模板/图像处理/ANLS及独立保存复核完成，分数0.75/1/1。非全量模型评测或作者模型质量复现。[证据](validation/docvqa-original-native-delivery-20261027.json)                                                                                                                                                                                                                                                            |
+| CODEJUDGE_EVAL             | [x] 原生固定抽样可用                                   | 六份发布原JSON共11160配置行核验/索引、18条原题NPU执行和独立评分/保存核验通过；实际CI工件独立安装及18条研究回读通过。[交付证据](validation/codejudge-original-native-delivery-20261027.json)。不是作者未发布regex或论文分数复现。                                                                                                                                                                                                                                                         |
+| DRAGON_PUBLIC              | [x] 固定原生抽样交付完成                               | 完整542篇/1157分块的NPU嵌入、原MMR/提示/官方评分和保存审计通过；实际CI67载荷及原600行/索引/固定3条研究回读通过。3次原512预算length保留，不是正确作答、全600或质量/性能结论。[回执](validation/dragon-original-preparation-20261028.json)。                                                                                                                                                                                                                                               |
+| TEMPORALWIKI               | [x] 已交付原GPT2基座探针PPL                            | 全部8CSV／35948行／1126批次NPU计算及原float32标量评分独立重算通过；当前CI工件78载荷安装核验、全部原字段／索引和24条公共研究回读一致。原25-token／batch32／float32不变；未复现持续训练checkpoint、T5或其他语料模式，低质量分数与首次资源上限失败保留。                                                                                                                                                                                                                                    |
+| COPILOT_AGENT_2026         | [x] 原生元数据资产可用                                 | 七日606分片/301026原会话全量核验和索引，49实际CI载荷与候选一致，42固定实际CI研究回读及3条公共smoke完成；不造prompt、不宣称请求回放。[证据](validation/copilot-2026-metadata-delivery-20261027.json)                                                                                                                                                                                                                                                                                      |
+| AZURE_LMM_2025             | [x] 服务轨迹元数据资产交付                             | 全100万行四字段保真/索引、47实际CI安装载荷、首3/末3研究回读完成；无原prompt/媒体，不造请求，不称视觉benchmark。见[回执](validation/azure-lmm-2025-asset-delivery-20261027.json)。                                                                                                                                                                                                                                                                                                        |
+| HLE_VERIFIED               | — 仅分类                                               | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| SWE_BENCH_PRO              | — 仅分类                                               | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| FRONTIERSCIENCE            | — 仅分类                                               | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| TERMINAL_BENCH_2_1         | — 仅分类                                               | 本轮不补实现、不重跑                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| PAIO-CHAT-1000             | [x] 私有原请求可用                                     | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                                                                                                                                                                    |
+| PAIO-CODE-EVAL-1000        | [x] 私有原请求可用                                     | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                                                                                                                                                                    |
+| PAIO-JSON-500              | [x] 私有原请求可用                                     | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                                                                                                                                                                    |
+| PAIO-LONG-PREFILL-5000     | [x] 私有原请求可用                                     | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                                                                                                                                                                    |
+| PAIO-LONGTEXT-4000         | [x] 私有原请求可用                                     | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                                                                                                                                                                    |
+| PAIO-PREFIX-SHARED-5000    | [x] 私有原请求可用                                     | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                                                                                                                                                                    |
+| PAIO-REUSE-CONV-5000       | [x] 私有原请求可用                                     | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                                                                                                                                                                    |
+| PAIO-SEMANTIC-SIMILAR-5000 | [x] 私有原请求可用                                     | 复用原前三条NPU回放；固定CI读取/原响应束/原声明格式回核通过。[交付复核](validation/enterprise-fixed-ci-handoff-20261024.json)；无语义gold，正文不公开                                                                                                                                                                                                                                                                                                                                    |
 
 ### 真实原生执行进展
 
@@ -558,7 +2440,12 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
   参数/历史回执回归15项通过，模型调用0。历史三题执行结果保持不变，本项不代表全503题或修改后入口已完成NPU复验。
 - [x] SCIENCEAGENTBENCH：原verified版102题的全部输入、参考及环境字段、全量索引和102条回查核验通过；30份官方执行/评分及依赖源码已固定并核对Git
   blob，未执行代码。[准备回执](validation/scienceagentbench-cpu-preparation-20261024.json)。
-- [ ] SCIENCEAGENTBENCH：verified配套科学数据/参考程序/评价脚本、隔离运行环境、本地模型及辅助评分模型未就绪；发现两个上游直接入口仍读旧validation
+- [x] SCIENCEAGENTBENCH：固定原前三题（1/2/3）的完整科学数据目录、各自参考程序/评价脚本/rubric已在专用CPU服务器取得，共14文件1006008字节；同一原归档ETag的Range请求、原CRC和保存后SHA复核通过，公开资产校验入口实测退出0。未整包下载1.77GB归档，未执行参考程序或生成代码，原始文件不公开；这不是全102题资产取得或来源完成。
+- [x] SCIENCEAGENTBENCH：原30份源码在专用CPU工作区复核，24份Python静态解析；原`make_test_spec`在Python3.10构造前三题通过，12个字段保留，ID仅沿用官方转字符串规则，配方选择ARM64。未构建镜像、未运行程序或模型，不代表科学环境通过；细节见唯一机器清单。
+- [x] SCIENCEAGENTBENCH：显式本地模型通信接口及固定旧版SDK的两次合成回环HTTP控制通过，保留模型标识、原消息及所选GPT-chat分支2000输出预算；不是原题、不是NPU推理。原Agent价格/tokenizer、完整流程仍未接通，不填虚假价格，也不将Qwen改名GPT。官方OpenHands
+  legacy入口亦经检查，不能盲用其validation默认值和旧整包镜像。
+- [x] SCIENCEAGENTBENCH：原verified固定前三题单轮生成、NPU
+  CodeBERT评分和隔离科学执行终态完成；102条原字段及当前CI工件研究消费验证通过。[最终回执](validation/scienceagentbench-fixed3-native-delivery-20261101.json)。程序错误保留，未执行全102题或其他Agent分支；旧validation入口不混用。
   split，不能与当前verified版混跑，不勾原生通过。
 - [x] TAUBENCH/τ²：2285个原telecom任务与引用全量准备/预检，新增3个原ACTION类任务公共引用交接预检通过；补齐显式ID/全量入口，125包实测环境快照和pip
   check通过，模型调用0。[CPU回执](validation/tau2-readiness-cpu-20261024.json)。
@@ -573,7 +2460,7 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
   dry-run通过，模型调用0。[构建回执](validation/tracelab-original-locked-build-20261024.json)、[dry-run回执](validation/tracelab-original-dry-run-20261024.json)。
 - [x] TRACELAB：独立CPU诊断程序直接引用未改的上游Rust分词器/token池函数，当前Qwen3.5
   tokenizer加载及默认1亿token池构建通过，未降低池容量、模型调用0。[诊断回执](validation/tracelab-original-token-pool-cpu-20261024.json)。回执依据SSH失败前完整采到的结构化stdout恢复，未冒充SCP成功；这不是原回放器或NPU运行。
-- [ ] TRACELAB：服务缓存明细探测、真实NPU回放未完成。全量336898轮的完整输入+原输出预算超当前131072，保留阻塞，不跳题；固定三会话20轮容量可容纳但尚未调用模型。新实例已核验连通；近期原生响应的缓存明细为null，官方缓存探测仍未运行，不绕过探测或修改正在使用的服务。[前提复核](validation/runtime-prerequisite-recheck-20261025.json)。来源继续未勾，运行边界见[服务轨迹说明](ORIGINAL_SERVING_TRACES.zh-CN.md)。
+- [x] TRACELAB：原14B缓存资格探测及固定三会话20轮完整回放通过，原6904输出token全部生成；独立原预算/等待核验和成功CI94载荷/665453行索引/6处公共与未修改研究回读通过。[最终回执](validation/tracelab-original-native-delivery-20261103.json)。原9B探测失败保留，全量1006780上下文仍不满足，不冒称全轨迹模型执行或性能结论。
 - [x] TOOLACE：原11300条system/历史对话、原轮次与工具描述、全量索引及首尾6条回查完成，保持历史对话资产身份。[CPU回执](validation/toolace-corpus-cpu-audit-20261024.json)。
 - [ ] TOOLACE：服务器新取固定版数据卡网络不可达，不能将目录中的预期SHA当下载验证；没有附带可执行工具环境/任务oracle，不编prompt冒充Agent原生评测，来源级继续未勾。
 - [x] JSONSCHEMABENCH：固定CI包与登记的三个原schema
@@ -586,16 +2473,531 @@ TB；服务器/data约1.42TB可用，未缩小语料。ChartQA当前两卡主机
 
 #### ScienceAgentBench verified版原生链路准备
 
+2026-10-30复查：固定官方README指向的`benchmark_verified.zip`分享链接在匿名访问（含官方分享下载参数）下返回HTTP401，未取得文件。只记录访问阻塞，不使用旧版资产替代、不绕过授权，也不将102题元数据与预览算作原生执行完成；继续推进其他来源。
+
 数据沿用`osunlp/ScienceAgentBench@9c6e96c9e74572e979b0930ee735041cef528cb7`的原`verified`文件，102题；代码固定为`OSU-NLP-Group/ScienceAgentBench@c26e151ed601ba109dc4d35e057ff8e73fec469d`。原适配保留task_inst、domain_knowledge、dataset_folder_tree和dataset_preview；gold_program_name与eval_script_name仅作参考，其余instance/domain/源码及输出路径字段保留元数据。不要把整个envelope或参考侧直接当模型输入。
 
 原数据URL及SHA可用`workload-data catalog download-plan SCIENCEAGENTBENCH`查看。配置`{"sources":[{"source_id":"SCIENCEAGENTBENCH","data_root":"/private/ScienceAgentBench"}]}`即可用现有pipeline全量准备/回查；数据目录须保留原`data/verified-00000-of-00001.parquet`路径。本次102条均实测回查，不仅前三题，也未修改源Parquet。
 
-[发布方当前说明](https://github.com/OSU-NLP-Group/ScienceAgentBench/tree/c26e151ed601ba109dc4d35e057ff8e73fec469d)要求verified版使用配套`benchmark_verified.zip`，并明确不得在线重新分发解包数据。该包中科学数据、参考程序及原评价脚本尚未取得；预览文字不能替代真实数据文件，旧benchmark压缩包不能冒充verified修正版。
+[发布方当前说明](https://github.com/OSU-NLP-Group/ScienceAgentBench/tree/c26e151ed601ba109dc4d35e057ff8e73fec469d)要求verified版使用配套`benchmark_verified.zip`，并明确不得在线重新分发解包数据。该包中原前三题的完整科学数据目录、参考程序、原评价脚本及rubric现已取得并核验，14文件1006008字节；其余题资产尚未取得。预览文字不能替代真实数据文件，旧benchmark压缩包不能冒充verified修正版。
 
 原生生成入口为上游run_infer.py/agent.py，评估可使用上游`evaluation.harness.run_evaluation`容器化路径，直接Conda评估为另一官方路径。当前两份直接脚本run_infer.py和run_eval.py仍硬编码`validation`
 split；后续必须明确将生成和评估同时绑定原verified版本，并核验instance ID及配套评价脚本，不能静默运行不同split或回退main。原源码未修改，本次未执行任何生成程序或评分。
 
-环境不能写成只装一个requirements就可用：上游主Agent和科学程序评估环境分开，直接路径使用Python3.10及独立sci-agent-eval环境；任务还会配置各自的科学依赖，CodeBERT和视觉judge也是评分链路的一部分。本机有Conda命令但其环境未核验，未找到Docker；既有隔离预检未证明可安全运行生成程序。本地NPU模型、辅助评分模型、原框架模型表/上下文和loopback配置尚待适配与验证；不得在全局推理环境执行上游会卸载/同步包的评估脚本，不发默认外部付费模型请求，不删指标以凑通过。原代码与依赖文件已私有保存并校验，但未安装或冒充干净环境复现。
+环境不能写成只装一个requirements就可用：上游主Agent和科学程序评估环境分开，直接路径使用Python3.10及独立sci-agent-eval环境；任务还会配置各自的科学依赖，CodeBERT和视觉judge也是评分链路的一部分。专用CPU的独立Docker已恢复并完成无网络、只读根、内存及PID限制的容器控制；科学任务镜像尚未构建，不能据此计原题通过。本地NPU模型、辅助评分模型、原框架模型表/上下文和loopback配置尚待适配与验证；不得在全局推理环境执行上游会卸载/同步包的评估脚本，不发默认外部付费模型请求，不删指标以凑通过。
+
+2026-11-01依赖核查：官方`code_bert_score==0.4.1`源码分发包已按PyPI
+SHA256取得并静态核验；Python默认评分模型为`neulab/codebert-python`、第11层。评分API允许显式device，但无CUDA时默认CPU，后续必须显式绑定并验证NPU，不能直接运行默认设备。官方requirements的`litellm==1.52.8`精确版本查询返回HTTP404，当前查询的包索引未列出该版本；历史发布及失效原因未确认，也未静默安装替代版本。原Agent的真实模型tokenizer和价格绑定仍待补，不将Qwen冒称GPT或填写虚假价格。[依赖与隔离环境准备记录](validation/scienceagentbench-original-library-audit-20261101.json)仅证明准备，不是原生任务交付。
+
+- [x] ScienceAgentBench辅助模型准备：原Python评分模型`neulab/codebert-python`固定版本的8份原文件、502184777字节已取得，逐份核对发布方Git/LFS身份，权重仅保存于NPU共享盘，本地磁盘不落权重。尚未加载模型或运行评分，不算原题通过或来源交付。
+
+- [x] ScienceAgentBench辅助评分环境准备：独立虚拟环境安装原`code_bert_score==0.4.1`及作者Docker配方指定的`transformers==4.46.3`，包依赖和导入检查均退出0；4份包内Python源码与官方原始分发包逐字节相同。该原分发包内部`__version__`仍写0.3.5，已核实不是换包。新Python3.12及厂商Torch2.10只作明确披露的NPU兼容环境，未初始化NPU或加载模型。30份原作者源码和102题原verified元数据也已从已有CPU副本转入NPU服务器并核验，未重新下载、不经本地磁盘；科学任务数据和参考程序仍在隔离CPU侧，未混入模型输入。
+
+- [x] ScienceAgentBench原基线输入控制：使用未改写的原任务格式化/提示函数及现有14B模型的真实tokenizer，在CPU核验全部102题；原单轮、不加知识、不自调试基线的完整聊天输入为280至21059
+  token，均小于原26000输入预算，预留2000输出不变。仅为未裁剪输入和真实tokenizer的控制，不等于原LiteLLM运行、模型生成或任务评分；没有初始化NPU。
+
+- [x] 专用CPU磁盘清理：已完成来源LiveCodeBench的原始9.38GB文件逐次核对官方SHA256及未打开/未映射状态，清理两个既有硬链接；首个链接删除未释放空间，查明并清理同任务原消费者留下的最后链接后，实测释放9375645696字节，空余20745592832字节。原消费索引、审计、生成结果、评分及环境均保留；原始数据可按固定官方版本重新获取，未扩卷。这是缓存退役，不是新增数据集验证。
+
+##### ScienceAgentBench原版辅助指标NPU入口
+
+- [x] `scripts/scienceagentbench_codebert_npu.py`在卡4完成一次明确标注的原参考自匹配控制：原函数处理canary前缀，3次原模型NPU前向，控制值0.9999998807907104。未执行生成程序，未生成模型回答，不是科学任务得分或来源完成。显存增量实测采样最高492MiB，原9B/14B服务身份不变，租约已释放；保存结果独立复核不重跑模型。[控制回执](validation/scienceagentbench-codebert-original-npu-control-20261101.json)。
+
+该入口只补原CodeBERTScore辅助评分，不替代原科学执行、成功率或视觉评价。环境沿用上文隔离版本，并使用原Python模型固定版本`c4ff459e2a91d002d9bb4ab8cc2b7ee7125ef213`；入口核对8份模型文件、4份原评分包源码和原`compute_scores.py`身份，禁止CPU/CUDA回退。运行前先取得空闲资源窗口，入口不会替使用者停服务或协调共享卡。
+
+输入JSON为记录列表，每项仅含`task_inst`、`pred_fname`、`gold_fname`：分别是原任务指令、实际生成程序路径、原参考程序路径。原参考仅供评分，不能放进生成提示。任务、代码、权重和输出保存在执行者私有目录，不提交到仓库。
+
+```bash
+python scripts/scienceagentbench_codebert_npu.py \
+  --original-source /private/ScienceAgentBench/compute_scores.py \
+  --model-dir /private/codebert-python \
+  --records /private/actual-prediction-records.json \
+  --output-dir /private/new-codebert-result \
+  --device npu:0
+```
+
+使用原作者固定源码版本，`--output-dir`必须尚不存在；生成程序与科学评价另行接原容器流程。本次真实NPU证据仅覆盖辅助组件控制，尚未覆盖实际生成答案的评分或完整科学任务。
+
+##### ScienceAgentBench原单轮本地基线与科学执行进展
+
+- [x] 原前三题`1/2/3`已用现有`Qwen/Qwen3-14B`完成真实NPU生成，原完整消息、代码提取、temperature=0.2、top_p=0.95及2000输出预算保留；输出701/359/329
+  token。原GPT-chat协议明确绑定本地非思考模型，不冒称Claude/GPT论文成绩；价格仅记为`null`，不伪造API单价。原作者不加知识、不自调试分支的3个方法沿用，未开放宿主机安装/调试代码路径。
+- [x] 三份实际生成程序完成原CodeBERTScore
+  NPU评分，9次模型前向，原值0.7892104387/0.7659464478/0.8183770776保留；不是此前自匹配控制，也不是科学任务成功率。生成程序未重跑，参考仅在生成结束后供独立评分。
+- [x] 原ARM64科学基础配方的软件安装完成；磁盘保护中断后复用已提交安装层，只补原配方最后一步，不重装、不扩卷、不删旧环境。原Python3.10环境依赖/导入通过，第2/3题原instance配方已构建。第2题补齐原XLSX数据必需的`openpyxl==3.1.5`；上游pipreqs不能推断pandas动态可选reader，首次缺依赖记录保留，不改模型程序。
+- [x] 实际容器控制验证只读根、无网络、no-new-privileges、UID1000执行、参考不可读、数据可读及结果可写。原`compute_scores.py`不改；辅助F1经原任务/程序/参考SHA绑定复用真实NPU结果，原900秒执行预算、原成功判定及结果tuple保留。只增加非root执行身份和缓存目录隔离，未在CPU重新计算神经辅助分数。
+- [x] 第2/3题到达原程序错误终态，原结果分别为`(valid=0, CodeBERT=0.7659464478, success=0)`和`(0, 0.8183770776, 0)`：程序将set作为pandas列名、预测特征与训练不一致。原成功评价脚本因程序先失败而未进入；不改答案、不降校验、不换题凑通过。第3题不重复执行；第2题只在补reader后重跑科学程序，不重跑LLM或CodeBERT。[实际进展回执](validation/scienceagentbench-original-fixed3-native-progress-20261101.json)。
+- [x] 第1题按官方科学执行流程在专用CPU隔离容器执行；任务内部科学网络允许使用CPU，LLM与CodeBERT评分仍使用NPU。原程序因`from_smiles`参数错误进入官方失败分支，原始错误及评分保留，不修改生成程序凑通过。
+- [x] 公共科学执行编排入口已用第2题保存的真实生成程序完成`prepare`和`run`实跑，二者退出码均为0；保留原程序错误和原始评分，未重新调用生成或辅助评分模型。
+- [x] 前三题保存结果已跨端复核：原12字段、生成程序、NPU评分回执、原评分源码及各题科学输入文件身份一致，三题原始成功标记均为0。汇总见`validation/scienceagentbench-fixed3-saved-audit-20261101.json`；本次审计新增模型调用和程序执行均为0。
+- [x] 当前CPU
+  CI工件已在服务器隔离安装，78份包内文件与提交一致；全部102条原始记录的12字段完整往返，公共端和研究端逐条读取一致，SQLite和研究消费者均未修改。见`validation/scienceagentbench-current-ci-research-handoff-20261101.json`，新增模型调用0。
+- [x] 原verified固定前三题单轮协议交付收口：[最终回执](validation/scienceagentbench-fixed3-native-delivery-20261101.json)。全102题科学执行和其他官方Agent分支另列缺口，不将全量读取作为全量科学执行；三题原程序失败保留，不声称科学任务成功。
+
+生成客户端在执行机隔离环境安装`configs/workload-native/scienceagentbench-local-baseline-requirements.txt`；该文件不是科学执行镜像依赖。固定源码沿用上文版本，元数据必须是原`verified`
+Parquet；不要用硬编码旧validation的直接脚本替换。
+
+```bash
+python scripts/run_scienceagentbench_original_baseline.py \
+  --source-dir /private/ScienceAgentBench \
+  --metadata /private/ScienceAgentBench-data/data/verified-00000-of-00001.parquet \
+  --tokenizer /private/deployed-model-tokenizer \
+  --model Qwen/Qwen3-14B \
+  --api-base http://127.0.0.1:8000/v1 \
+  --output-dir /private/new-science-baseline \
+  --start 0 --limit 3
+```
+
+`--full`选择原102题；超出原输入预算会失败，不裁剪。输出目录必须全新，已有程序拒绝覆盖；每次请求前记录在途原位置，响应先私有保存，未知请求不得盲目重放。容器内评分入口`scienceagentbench_isolated_scoring.py`拒绝宿主机或放宽的容器环境。外层公共入口`scripts/run_scienceagentbench_scientific.py`提供`--action prepare`生成原作者镜像配方及私有任务目录，再用`--action run`连接明确指定并核对身份的专用Docker执行；镜像构建仍由使用者按生成配方完成。第2题已验证这两个公共动作，不能据此代替来源总验收。
+
+在专用Linux CPU执行机上准备任务，所需原始资产均保存在仓库外；`--program-root`指向已保存的生成程序目录，`--npu-receipt`指向上述真实程序的NPU
+CodeBERT评分回执：
+
+```bash
+python scripts/run_scienceagentbench_scientific.py --action prepare \
+  --source-dir <固定作者源码目录> --metadata <原verified.parquet> \
+  --asset-root <固定原科学资产根目录> --program-root <保存的生成程序目录> \
+  --npu-receipt <真实NPU评分回执.json> --base-image <专用基础镜像名> \
+  --work-dir <外部全新私有工作目录> --start 0 --limit 3 --xlsx-reader
+```
+
+源码身份由`scienceagentbench-author-software-pins.json`核对。准备后先构建工作目录内的原基础镜像配方，再按各`<instance_id>/recipe/Dockerfile`构建任务镜像，镜像映射JSON使用原`instance_id`作为键、完整`sha256:`镜像ID作为值。`--xlsx-reader`明确补充原Excel任务缺失的`openpyxl==3.1.5`读取依赖，不改原题或计分。默认ARM64，x86执行机显式使用`--arch x86_64`，不得混用不同架构镜像。
+
+```bash
+python scripts/run_scienceagentbench_scientific.py --action run \
+  --work-dir <上述私有工作目录> --image-map <镜像映射.json> \
+  --docker-host <专用Docker套接字URI> --docker-id <已核验的Docker实例ID> \
+  --daemon-work-dir <Docker守护进程所见的同一工作目录>
+```
+
+执行客户端与Docker守护进程位于不同容器时，二者路径必须对应同一持久卷中的同一目录；不能直接假定客户端绝对路径可供守护进程挂载。入口核对专用Docker身份，使用无网络、只读根文件系统、受限权限的容器；原生成程序以非root用户运行。已有科学结果拒绝覆盖。程序报错仍保留官方结果四元组及日志，不改程序或换题；基础设施失败则明确失败，不算完成。
+
+#### OVO-Bench原生在线视频路径准备（未完成来源交付）
+
+- [x] 官方Qwen2-VL-7B-Instruct固定版本的14个必需模型文件已在NPU共享盘取得，合计16594373111字节，逐份与官方Git/LFS身份一致；未下载权重到本地，未更改卡6现有14B服务。
+
+- [x] 官方offline协议的12类原前三题、36个完整case及全部103个原响应位置已在物理卡4真实NPU运行，103/103返回，无推理错误。BF16、原最多64帧及128-token预算保持；短片段仍按原`min(64, len(video)-2)`规则，不强行补足64帧。NPU采用明确披露的eager注意力绑定，不冒称CUDA/FlashAttention2硬件复现。
+
+- [x] 保存结果完成原评分及独立复核：原Qwen2-VL包装返回单元素文本列表，官方REC评分器期望字符串，首次评分TypeError保留；只在评分副本中将`[text]`无损解包为完全相同的`text`，不提取答案、不改任何文字、标签或计分函数。未修改官方评分器，原生成输出不变，原任务及全部阶段顺序逐项一致；原宏平均47.04%，独立复算47.0417853751187%，按作者打印精度一致。评分和审计均0次新模型调用。回执位于共享任务根`ovobench-lossless-scalar-original-score-32068-001/qualification-public.json`及`ovobench-original103-independent-audit-32068-001/qualification-public.json`。该数值只是固定抽样可用性结果，不是全量质量或引擎性能结论。
+
+- [x] 公开NPU入口支持固定抽样及`--full`；服务器核验当前入口的103份原媒体身份快照、1640题/3035片段全量计划，模型调用0。回执`ovobench-current-public-media-32068-001/qualification-public.json`。模型修订、隔离视频环境、原始媒体、抽样/全量与保存输出评分命令已写入使用说明。
+
+- [x] 新CPU
+  smoke运行41202187413成功；实际工件13042688731独立安装，78份载荷与Git/包内字节一致。复用1640条原索引，12类各前三题共36条公共/未修改研究消费端完整回读通过，数据库与研究代码不变；回执`/root/ovobench-actual-ci-wheel-20261031-002/qualification-public.json`。0新模型调用，输入消费与上文原生推理分别举证。
+
+- [x] 通用CI41202187376的测试、lint均通过，CPU
+  smoke41202187413通过；来源总勾仅覆盖明确的offline原生协议。[完整交付证据](validation/ovobench-offline-native-delivery-20261031.json)。103次有效生成不重跑，online路径与全量生成单列缺口。
+
+- [x] NPU共享盘原软件与注释准备：复用专用CPU已取得的45份固定官方软件，逐份与仓库固定SHA256/字节数一致；原注释918443字节、1640个case原样转入`ovobench-original-inputs-32068-001`，软件和注释转移后再次逐份核验，Python仅AST解析。回执为该目录`qualification-public.json`。未执行模型、未取得原生成绩，不以输入准备计来源完成。
+
+- [x] NPU侧原媒体准备完成：从本任务专用CPU既有103份原片段向NPU共享目录`ovobench-existing-original-media-32068-001`的流式传输全部完成，逐文件按已登记字节数和SHA256核验后才转正式文件。公共`verify_ovobench_original_media.py --require-all`在NPU侧再次核验全部103份exit0；回执为共享任务根`ovobench-public-npu-entry-32068-001/qualification-public.json`。原CPU文件保留，不经本地磁盘、不重复下载或完整解码；只计输入准备，不计原生推理/评分完成。
+  首份`0.mp4`第一次接收短读，保留150962176字节的partial，与CPU原文件同长度前缀SHA256一致后仅补2346712字节；完整153308888字节及登记SHA256复核通过，已转正式文件。早期6/103检查点已由上项最终103/103核验覆盖；真实观察到的末尾短读和SSH断连保留，不发布失败partial，复核原前缀后只续传剩余字节。队列对已确认短读最多续传3次，身份不符即停；`1210.mp4`已实际经此路径完整核验，不隐藏成首轮成功。
+
+- [x] 隔离`qwen-vl-utils==0.0.8`工具目录已准备并在NPU服务器导入通过：固定PyPI原wheel字节数/SHA256校验，未改全局包、未加载模型、未解码视频。此版本是显式候选兼容配置，非作者指定的依赖锁定；回执`ovobench-video-utils-overlay-32068-001/qualification-public.json`位于共享任务根。不计模型运行或合格完整环境。
+
+- [x] 官方Decord 0.6.0隔离构建和导入通过：服务器直连GitHub clone失败保留；通过有界RAM中转取得固定提交及其两个固定子模块的构建代码。FFmpeg
+  4.4.8官方源码、独立前缀构建和Decord
+  CPU构建均已完成，导入exit0；每个构建最多2个低优先级CPU任务，不占NPU、不全局安装。回执为共享任务根`ovobench-ffmpeg-isolated-32068-001/qualification-public.json`及`ovobench-decord-build-32068-001/qualification-public.json`。这些不是模型环境或原生题目完成证据。
+
+- [x] 原视频64帧CPU前处理控制通过：复用已校验的原`0.mp4`，核验后执行未修改的官方`get_max_frames`函数及隔离`qwen-vl-utils`视频路径，保持64帧、`360×420`最大像素设置，实际得到CPU
+  float32张量`[64,3,336,448]`。原媒体及作者代码哈希未变，不落原帧文件；回执`ovobench-original-frame-control-32068-001/qualification-public.json`。控制文本不是数据集题目，不计原生case、模型processor加载、NPU推理或评分；这些仍待验证。
+
+- [x] 固定12类各原前三题的36个完整case所需103份原片段已全部取得并公开登记身份，共3520157133字节；全部文件重算SHA256，通过旧完整解码回执核验489216视频帧，未重下载或重复解码。公共CLI以`--require-all`核验全部103份exit0；完整回执`/root/ovobench-fixed-original-media-all-20261031-001/complete-fixed103-registration-public.json`及`/root/ovobench-public-registered103-20261031-001/qualification-public.json`。重复分块bin缓存余量为0，仅清理已核验重复缓存，完整原文件和全部证据保留；0模型调用，不打来源总勾。
+
+- [x] 未修改的官方offline评分器完成参考正确/全部None两项控制；12类36-case全部103响应位置均计入，None计0不丢弃，原宏平均不变。回执`/root/ovobench-original-score-reference-controls-20261031-001/qualification-public.json`及同目录`slot-count-public.json`。仅评分器控制，模型未加载，不是Qwen模型成绩。
+
+- [x] 专用CPU核验当前官方固定版本45份原软件、79170字节，20份Python只做AST解析；复用公共作者获取器`--source ovobench --action verify`退出0。回执`/root/ovobench-original-software-20261031-001/preparation-public.json`。该软件准备阶段不导入执行原代码，模型调用0，不取得视频或发布方模型结果；后续媒体及评分控制另项记录。
+
+- [x] README补充官方软件准备、推理及评分入口，明确三种时间模式、12种任务、向前任务全部`test_info`阶段、原64帧上限/128-token预算及CUDA到NPU环境缺口；代码与数据许可分别核对。
+
+- [x] 合格NPU模型、原帧处理、36-case/103调用流程及真实输出原评分已核验，见本节原生执行与独立审计回执；消费交接另列，不重复生成。
+
+- [x] 原注释918443字节整文件取得并校验；1640个case/12类任务/644个视频名、全部1567个向前阶段经公共候选适配器及`iter_workload`逐字段完整还原。`count/type`等参考不入模型输入，不改题、不丢阶段。回执`/root/ovobench-original-public-adapter-20261031-002/qualification-public.json`，0模型调用。
+
+- [x] 固定抽样原生NPU推理及真实输出评分闭环已完成；早期元数据工件/读取证据保留其原范围，新公开入口交接仍单独核验。
+
+- [x] 成功CPU
+  CI运行41151526268的实际工件13022928107独立安装，75个Git/包内/安装载荷字节一致；复用1640条原索引，12类原前三条共36条公共/未修改研究端完整回读通过。回执`/root/ovobench-actual-ci-wheel-20261031-001/qualification-public.json`；0模型调用，不恢复研究任务，不计视频原生完成。
+
+- [x] 官方固定媒体版本20分卷大小/LFS身份已登记并由计划CLI展示；原视频总46341744640字节，预切分总153277153280字节，专用CPU剩余5040644096字节，未启动装不下的整包下载。仅身份登记，不冒称视频取得。
+
+- [x] 原预切分分卷仅取64KB，精确HTTP206/Content-Range及原TAR目录头核验通过。首个文件是非固定抽样的`35.mp4`，57464390字节，未因其容易取得而换题或下载；该首头探测阶段完整视频取得数为0。回执`/root/ovobench-original-media-ranges-20261031-001/first-tar-header-public.json`。此为早期探测记录，后续完整目录和103片段核验另见本节。
+
+- [x] 公共`plan_ovobench_original_media_ranges.py`在专用CPU对实际捕获的368个原头部快照实跑exit0，逐头校验捕获哈希、TAR校验和/连续偏移/原分卷/观察ETag，已定位固定103片段中的16个、553531286字节。仅结构与范围计划，不独立证明发布方整分卷哈希；未定位项明确保留，不换片段，未下载完整视频。回执`/root/ovobench-public-media-range-plan-20261031-001/qualification-public.json`。此为中间快照；最终完整头索引及媒体核验另见本节，不以本快照冒称完成。
+
+- [ ] 澄清代码README数据CC BY-NC-SA 4.0与官方Hub数据卡CC BY-SA 4.0差异；代码MIT单独登记，不以更宽松数据卡推定再分发权限。
+
+- [x] ASI固定原前三题483/484/485输入媒体已齐：完整原文件共37469641字节，公共`--decode`核验全部8556帧。新取得483/484，485不重取、以硬链接复用原文件不额外占空间；各自原帧率保留，不重编码、不更换题目。回执`/root/ovobench-public-media-verifier-20261031-002/qualification-public.json`，0模型调用。该早期子集阶段为3/103；最终全量见本节首项，ASI原生模型执行/官方评分仍未完成。
+
+- [x] 公共`prepare_ovobench_original_media.py`完整成员网络读取在Windows
+  RAM中验证：原分卷ETag/精确范围/完整SHA核验通过，8800190字节与服务器保留原文件逐字节一致；不在本地落数据、不新增服务器副本。服务器CLI复用已有原文件也exit0。回执分别为`/root/ovobench-public-media-network-20261031-001/qualification-public.json`和`/root/ovobench-public-media-prepare-reuse-20261031-001/qualification-public.json`。不据此宣称服务器直连网络可用。
+
+- [x] 公共`capture_ovobench_original_tar_headers.py`已实现，每次只取512字节原头部、跳过成员载荷、检查点可继续；RAM真实网络推进2048→2050验证通过。纠正验证脚本输出目录后，服务器CLI真实尝试失败于`Network is unreachable`，最后有效检查点成功保留；首次路径边界拒绝单独保留，不冒充网络故障。回执`/root/ovobench-public-header-capture-20261031-002/qualification-public.json`，未改动/重启主目录任务，0模型调用。
+
+- [ ] 公共目录捕获和片段获取的服务器直连网络环境仍未通过；原主目录已沿用原控制完成（见下项），不重复扫描；本任务通过有界RAM中转完成103片段取得，不等于服务器直连公共下载链路通过。
+
+- [x] 原主目录任务已自然完成：3036个原TAR头、3035个视频成员及两个结束标记，公共规划器`--require-complete`实跑exit0；36个原case所需103片段全部定位，总3520157133字节。仅目录/范围闭环，不重算整分卷哈希、不冒充媒体取得或模型运行。回执`/root/ovobench-complete-original-index-20261031-001/qualification-public.json`。
+
+- [x] 全部固定103原媒体队列已退出0：复用既有3份、补齐100份，原问题和阶段未改变；逐文件保留512MiB空间，验证后只清理重复分块缓存。进度回执`/root/ovobench-fixed-original-media-all-20261031-001/progress-public.json`，完整核验见本节首项；不计原生模型或评分完成。
+
+- [x] 首轮在5份原媒体验证后遇到发布方TLS握手EOF，已核实控制进程退出1后恢复；5份已完成媒体及有效分块缓存复用，恢复时只剩98份，不重新取已通过内容、不换源/换题。公共传输补充最多3次同一原范围重试，仅覆盖临时连接/TLS
+  EOF/超时及部分5xx；权限、限流、ETag/身份差异不重试，成功结果仍记录传输失败次数，非模型质量验证。
+
+- [x] 固定原ASI
+  case485完整原片段`485.mp4`取得，8800190字节；固定URL/精确原范围和原捕获ETag一致，文件身份登记到既有profile。复用服务器PyAV18.1.0逐帧解码全部2128帧，公共`verify_ovobench_original_media.py --decode`实跑exit0，未重编码/截断/安装依赖。回执`/root/ovobench-public-media-verifier-20261031-001/qualification-public.json`。该最初阶段仅1/103片段准备完成；最终全量见本节首项，官方帧采样、NPU推理、评分均未完成，0模型调用。
+
+- [x] 公共`prepare_ovobench_native_selection.py`在服务器成功生成12类各原前三题的36-case原字段子集，供官方`--anno_path`读取，列出全部103个必需原视频片段，不删向前阶段。实跑复用已安装CI提供侧，原文件不变；回执`/root/ovobench-native-selection-20261031-002/qualification-public.json`。首次输出边界拒绝记录保留，纠正为独立数据目录后通过；未下载视频、0模型调用。
+
+- [x] 候选源码建立1640条引用索引；每种任务原前三条，共36条，经公共和未修改研究消费者完整回读一致。当前研究工作树消费者SHA与服务器副本一致，索引读取前后不变；未恢复研究任务。回执`/root/ovobench-original-index-20261031-001/qualification-public.json`。该候选阶段本身不是实际CI证明，后续实际CI闭环见前项，0模型调用。
+
+#### WavCaps原生音频路径准备（未完成来源交付）
+
+- [x] 原模型构建及严格权重恢复通过：465项状态匹配、171336151个参数、原FP32；控制期间禁止全部神经前向，未初始化NPU。原29份软件保持不变，权重仅硬链接复用。回执：`wavcaps-original-state-restoration-20261103-001/state-public.json`，位于私有共享任务根目录。
+
+- [x] 固定首条原SoundBible
+  `2219`已在NPU真实生成1份caption，exit0，保持原FP32、beam=3、作者32kHz/10秒窗口处理及原生成体；只替换部署路径和CUDA到NPU绑定，不改原FLAC、模型源码或题目。使用Transformers4.36.2/tokenizers0.15.2；更高版本的原None参数兼容失败及包装失败保留，不把它们归为模型质量问题。回执：`wavcaps-original-soundbible-first-native-20261103-006/state-public.json`；[原生协议](../../configs/workload-native/wavcaps-original-captioning-protocol.json)。
+
+- [x] 固定四组件各3条、共12条原音频已全部完成NPU生成，随后独立核验全部原音频SHA256、case
+  ID/结果映射、原标准输出及29份原源码。首条有效结果复用，其余11条均exit0，无换题、无新评分或审计推理。回执：`wavcaps-original-fixed12-native-20261103-001/independent-audit-public.json`；不是全403050条执行或质量成绩。
+
+- [x] 公共原生执行入口已用预先固定的原第四条SoundBible `2215`完成prepare和NPU execute，保留原参数和源文件；该条只验证入口，不替换或重跑原12条。
+
+- [x] 新注册版本的实际CI安装包及研究侧工件交接：成功CPU
+  smoke41544364309的工件13188276346在专用CPU安装，91份Git/wheel/安装载荷一致，7个公开入口可发现。复用403050条原索引只读，公共与未修改研究消费者均完整还原原第4条2215，参考答案分离、索引及研究代码不变；未新增模型调用。
+
+- [x] 完整CI41544364424及CPU
+  smoke41544364309均成功，原生执行与实际安装包/研究交接证据齐全，来源总勾更新；原12条有效推理与独立审计复用。[交付回执](validation/wavcaps-original-native-delivery-20261103.json)。
+
+- [x] 额外原HTSAT编码器127072759字节、202个ZIP成员CRC通过；固定官方BART版本5份文件560422635字节均核验Git身份/原safetensors
+  LFS摘要。公共`--action verify-dependencies`在服务器exit0，不重下原2.03GB
+  checkpoint或12条音频，不反序列化或前向。回执：`wavcaps-public-checkpoint-verifier-20261103-002/qualification-public.json`，位于私有共享任务根目录。
+
+- [x] 独立候选环境安装、pip
+  check及原`BartCaptionModel`模块导入通过；厂商Torch/NPU库仅只读链接，未替换全局环境。首次缺`ruamel`的导入失败保留，隔离环境补`ruamel.yaml==0.17.40`后通过；导入期间禁止checkpoint加载，NPU未初始化，没有模型实例或前向。这是兼容候选环境，不是作者发布的依赖锁。版本及回执见机器清单，模型构建/状态恢复及真实NPU音频推理仍待完成。
+
+- [x] 已取得发布方原`HTSAT_Clotho_Spider_29_7.pt`：2028254247字节，完整1332个ZIP成员CRC通过；以有界管道直接写服务器共享目录，本地没有权重文件。SHA256是本次官方文件获取记录而非作者校验码。公共`verify_wavcaps_original_checkpoint.py`的plan及完整原文件verify均exit0，不下载或反序列化模型。回执：`wavcaps-official-htsat-clotho-checkpoint-20261103-001/state-public.json`和`wavcaps-public-checkpoint-verifier-20261103-001/qualification-public.json`，位于私有共享任务根目录。
+
+- [x] 原checkpoint安全元数据检查通过：465项模型张量均映射到`meta`，配置为HTSAT、`facebook/bart-base`、32000Hz、原保存设备CUDA；只允许原NumPy标量/dtype类型，维持`weights_only=True`，未实例化模型或前向。首次默认安全加载拒绝记录保留；后续回执：`wavcaps-safe-checkpoint-metadata-20261103-002/qualification-public.json`。仍缺原构造器的额外HTSAT/BART资产、隔离环境及NPU原生执行，不打来源总勾。
+
+- [x] 补齐固定发布方版本的完整captioning软件子树及原说明，共29文件、191308字节，24份Python通过AST解析；排除`captioning/data/`与模型权重。复用公共源码准备器新增`--source wavcaps`，服务器plan、prepare复用、verify均exit0；没有导入模型、下载权重或改动原12条音频。回执：`/root/wavcaps-original-captioning-software-20261103-001/qualification-public.json`、`/root/wavcaps-public-source-entry-20261103-002/qualification-public.json`。新鲜网络获取分支尚未实测。
+
+- [x] 发布方README链接的原checkpoint目录及AudioCaptioning子目录已只读核查，可见`Cnn14_Clotho_Spider_31.pt`、`HTSAT_AudioCaps_Spider_48_5.pt`、`HTSAT_Clotho_Spider_29_7.pt`；仅取得目录HTML及元信息，尚未下载、校验或加载权重，不把目录可见当作模型可用。
+
+- [x] 四组件各固定原前三条，共12个真实FLAC已取得并通过同一公共CLI完整解码；原CRC、PCM MD5和原时长均匹配。AudioSet保留原`.wav`
+  ID，另绑定发布包FLAC；FreeSound保留原`file_name`。四个CLI均exit0，回执：`/root/wavcaps-original-media-public-verifier-20261031-003/qualification-public.json`。仅CPU信号解码，模型调用0。
+
+- [x] BBC固定原前三条`NHU05051026/07066104/07039376`取得并完整解码，原PCM
+  MD5与时长核验通过；原字符串ID保留前导零。按原分卷ZIP64目录和盘内偏移取8段共16538564字节，不下载130GB整包，不把不同分卷的ETag误当一个值。旧两组件回执保留于`/root/wavcaps-original-media-public-verifier-20261031-002/qualification-public.json`；四组件现状见上项，不打来源总勾。
+
+- [x] 固定SoundBible原前三条`2219/2218/2217`的真实FLAC已取得：原Hub固定版本ZIP仅取8段共4869230字节，原成员CRC及同一ETag核验；3个文件完整解码、PCM
+  MD5匹配原STREAMINFO，均为32kHz单声道，时长与原字段完全一致。公共`verify_wavcaps_original_media.py --decode`实跑exit0。原JSON的`audio`实际是`wav_path`占位符，单独按原ID/原ZIP成员绑定，不改JSON或音频。不冒称完整580MB归档哈希已重算；此项仅说明SoundBible样本。
+
+- [x] 复用公共原始数据接口，四份JSON的403050条逐字段完整还原通过；音频定位信息与caption/原描述/类别/标签分离，12条固定样本不能伪装为聊天请求。使用者缺文件时仍显式报错，不静默跳过。源码回执：`/root/wavcaps-public-adapter-20261031-003/qualification-public.json`；实际安装另见下项。
+
+- [x] 复用既有获取器的原文件校验CLI，四份元数据实际执行通过；源码候选的403050条索引与12条固定公共/未修改研究端完整读取核验通过，旧三文件索引保留且未恢复研究任务。服务器消费端源码与研究工作树版本一致。回执：同CPU目录下`getter-verify-public.json`、`research-handoff-public.json`。原生音频任务仍未完成。
+
+- [x] 实际CI工件13018794405独立安装通过：74份包内软件/资源逐项匹配已提交Git字节和安装文件，403050条原索引只读复用，四份各原前三条共12条公共/研究端完整读取一致，无模型调用。见[元数据CI交接回执](validation/wavcaps-original-metadata-ci-handoff-20261031.json)。这只证明原始元数据的获取与消费链路，不计原生音频交付。
+
+- [x] 取得并校验SoundBible、BBC、AudioSet、FreeSound四份原始JSON，共403050条、174782992字节，保留各组件原前三条完整记录。FreeSound通过现有公共获取器直接下载并验证发布方LFS哈希，以硬链接复用原文件、不重复占用数据空间。完整回执：`/root/wavcaps-original-metadata-20261031-002/complete-metadata-public.json`；原三文件回执、CPU直连TLS失败记录保留，不因网络失败换数据。
+
+- [x] 在专用CPU取得发布方固定版本的6份说明、音频captioning入口/评分器及检索入口，逐份核验Git
+  blob和SHA256；3份Python仅做AST解析，未导入执行。服务端回执：`/root/wavcaps-original-source-20261031-001/preparation-public.json`。
+
+- [x] 公共`prepare_wavcaps_original_media.py --cache-root ... --decode`在专用CPU使用保留的原压缩范围完成四组件12条重新解压、身份及PCM校验。回执`/root/wavcaps-public-media-preparation-20261031-001/qualification-public.json`，模型调用0；不重复下载原媒体。
+
+- [ ] 公共有界媒体获取的`--download`网络路径真实核验；已实现精确206/Content-Range、长度和成员身份限制。专用CPU对FreeSound原第一成员的真实下载exit1：`urllib.error.URLError: [Errno 101] Network is unreachable`，尚未取得首成员，未换来源或换题。缓存实跑及HTTP夹具不能代替网络获取成功，不宣称完整自动获取已完成。
+
+- [ ] 补齐专用checkpoint和完整原生依赖，完成原生NPU推理、适用评分和输出消费闭环。四组件媒体准备不等于模型运行；未下载模型，也未调用文本模型替代。
+
+WavCaps是弱标注音频—文本资产；作者captioning示例使用专用音频编码器和BART
+checkpoint，不能直接填入Qwen文本服务。原评分器要求五条参考的接口不能靠复制弱标注caption凑足；须按原任务选用真实评价资产和协议。其音频仅限学术研究且保留各源条件，不作默认企业再分发。以上准备不增加来源完成数，机器清单状态为`IN_PROGRESS`。
+
+#### xLAM工具调用语料获取（2026-11-03）
+
+当前协议已由用户确认：按作者原格式对原query和全部tools生成，原answers仅作独立参考，不编造官方评分。入口为`scripts/run_xlam_original_generation.py`，复用已有语料生成executor；作者固定版本原`task_instruction`、`format_instruction`和纯`build_prompt`从原README校验后加载，不公开复制整份作者提示，也不执行作者模型安装代码。原tools已经是xLAM紧凑格式，不再次按OpenAI
+schema压缩而丢参数。
+
+独立核查已验证5份执行软件、实际成功CI提供方94载荷及原60000条文件身份；原前三条请求/参考/返回一致，输入tokens346/399/762，输出64/39/72，均自然stop。三条回复都包含Markdown围栏，不是严格原始JSON，原输出未去围栏或重写；这是保留的模型格式偏差，不声称语义正确或官方评分通过。当前提交后的成功CI包和研究消费仍待核验，来源总勾保持未完成。
+
+- [x] 服务器固定原0/1/2的全部1/2/2个工具已保留；Qwen3.5-9B BF16 TP1
+  NPU显式回退配置、512输出上限、262144上下文、非思考模式已生成3次stop返回。首次仅在模型调用前遇到注册表role标准化差异，旧失败与软件保留，0神经调用；修复支持data/raw_source后使用全新输出目录，没有回放未知请求。
+- [ ] 原输入、参考、输出和公开源代码字节的独立审计、当前成功CI包/研究回读待收口，暂不打来源总勾。下列0模型调用/待确认条目保留为更早阶段的证据，不覆盖本段最新状态。
+
+服务器使用方式（先取得数据访问权，凭据由使用者自行登录；原数据、作者卡和输出均在仓库外）：
+
+```bash
+python -m pip install -e './workload-preparation[data]' 'huggingface-hub==1.27.0'
+hf auth login
+hf download --repo-type dataset Salesforce/xlam-function-calling-60k xlam_function_calling_60k.json --revision 26d14ebfe18b1f7b524bd39b404b50af5dc97866 --local-dir /data/xlam-original
+hf download Salesforce/xLAM-7b-fc-r README.md --revision 42587ba3ff49d92c1b37e23f9c651ff753f60742 --local-dir /data/xlam-author
+python scripts/run_xlam_original_generation.py --mode plan
+python scripts/run_xlam_original_generation.py --mode run --data-root /data/xlam-original --author-card /data/xlam-author/README.md --output /data/xlam-native-fresh --model Qwen/Qwen3.5-9B --context 262144 --disable-thinking --count 3
+```
+
+只下载作者README，不需要为提示构造下载作者模型权重。若已有授权原数据，直接复用，无需重新下载。`--full`替代`--count 3`处理全部60000条；本次仅生成原前三条。官方推荐模型为作者xLAM-7b-fc-r，现有NPU服务为明确披露的Qwen回退，不当作者模型复现。该来源用于结构化/工具调用生成，不冒称多步Agent、真实工具API执行或独立质量benchmark。公开入口取得环境数据与推理端点后可完整处理选择范围；通用下载命令没有重新冷下载验证。
+
+- [x] 用户既有账号的官方授权检查通过；固定原版本的`xlam_function_calling_60k.json`已在服务器取得，96116570字节与发布方LFS摘要一致，60000行原数据均含`answers/id/query/tools`四字段。回执：`xlam-original-acquisition-20261103-001/qualification-public.json`。原内容未进入Windows或Git，未由Agent代接受条款。
+- [x] 提交版候选软件94个载荷在服务器回读全部60000行，原问题、工具、答案及数值ID逐条相等，ID唯一。原`tools/answers`均为JSON编码字符串，读取保持原字符串而非隐式重新编码。回执：`xlam-original-candidate-readback-20261103-001/qualification-public.json`；这是候选源码验证，未证明成功CI安装包或原生执行。
+- [x] 成功CPU
+  smoke运行`41592801251`的实际工件`13210797671`已安装，94个软件载荷与提交版Git逐字节一致；原60000行准备为引用索引，原前3行公共/未修改研究consumer回读一致，研究默认锁未改。回执：`xlam-current-ci-research-handoff-20261103-001/qualification-public.json`。模型调用0，非原生benchmark执行；这是早期只读阶段；当前作者原格式生成交付以本节顶部回执为准。
+- [x] 用户确认的作者原格式语料生成协议及公共/研究接入已闭环；不是工具API执行协议，不另造官方评分。`query/tools`是输入，`answers`仅作独立参考。全60000条生成、其他模型和真实工具执行不在本次已验证范围。
+
+官方授权后，将固定原文件放在外部数据目录；读取不下载数据、不发模型请求。工具执行层如需解析JSON，应显式解析原`tools`字符串，不能把`answers`传给模型：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+for record in iter_workload("XLAM_TOOL", data_root=Path("/data/xlam-original")):
+    original_inputs = record.task["input"]
+    references = record.outcome_record()
+```
+
+#### GAIA原始数据访问前置条件（2026-11-03）
+
+当前结论：[原始文本/web/Python协议已交付](validation/gaia-original-native-delivery-20261103.json)。原题Agent运行、官方评分、独立溯源、实际CI公共包及公开研究PR57回读已核验，研究方只读确认兼容diff，4项CI通过；两份PR均未合并，默认研究锁未切换。原0/3（含1超时）与失败第二题1800秒复核0/1不合并，附件/音视频执行仍未验证。以下候选与构造检查为依次保留的历史检查点，不代表当前仍未执行或补丁尚未发布；不能将早期读取证据单独用作本次完成依据。
+
+GAIA访问前置条件补查（2026-11-03）：[官方页面](https://huggingface.co/datasets/gaia-benchmark/GAIA)要求账号同意信息共享和访问条件，并限制公开再分发。初查自有环境未配置凭据；随后用户已自行完成服务器登录，官方授权检查通过，未代用户接受条款，凭据不回显或进入仓库。下面的原资产和读取验证不等于Agent/工具、评分或研究接通完成，不以QBI
+FrozenEvidence、公开镜像、改写题目或预先整理的证据包替代原任务。
+
+- [x] 固定原版本`682dd723ee1e1697e00360edccf2366dc8418dd9`全部119文件、110175514字节已在服务器取得，逐文件发布方LFS摘要或Git
+  blob核验通过；原始内容不落Windows、不进Git/CI。原validation165题、test301题的7字段完整恢复，109处原附件路径和字节身份核实；6个分级视图不重复计成任务，答案及Annotator
+  Metadata的步骤/工具留在outcome，不进入模型输入。
+- [x] 原始任务适配候选已准备466行引用索引，7处公共回读通过，包含两种split的首个原附件；读取时重新核对固定原版本、元数据及存储资产身份，拒绝伪造的QBI映射或版本。这是93载荷的候选源码树验证，尚非成功CI安装包。回执：`gaia-original-adapter-candidate-20261103-003/qualification-public.json`。
+- [x] 研究侧候选读取接通：维护线程确认现有consumer无同文件改动/替代入口后，仅为GAIA加`gaia_original_tasks`委托，旧QBI拒绝保留；6项隔离接口测试通过。服务器私有覆盖层实际7处公共/研究读取一致，含两种split首附件，466行索引和历史研究快照未改，模型调用0。回执：`gaia-original-research-handoff-20261103-001/qualification-public.json`。研究补丁仅为本地改动，未提交/推送，默认依赖锁未改；这不是已发布依赖环境或原生Agent闭环。
+- [x] 官方[GAIA榜单评分器](https://huggingface.co/spaces/gaia-benchmark/leaderboard/blob/9f133d71362e77b3539f1514f31b9c101a545fec/scorer.py)固定代码已取得并验证Git对象/文件摘要；原`question_scorer`以numpy1.26.4完成12项人工正反控制，未改规则、未评分真实GAIA题目或调用模型。回执：`gaia-official-scorer-controls-20261103-001/qualification-public.json`。
+- [x] 成功CI安装包复核：提交`2ee41c49a841b59eb48c1f249093f6cef9d2d37a`的CPU
+  smoke运行`41588224018`、工件`13208757996`实际安装后，93个软件载荷与Git逐字节一致；119份原资产、466行原字段及109处附件关系核实，7处公共/研究读取一致。回执：`gaia-current-ci-handoff-20261103-001/qualification-public.json`。研究补丁仍未发布，模型调用与原生Agent执行均为0。
+- [x] 隔离环境准备：固定smolagents1.26.0及42个包已安装，依赖检查通过；原Python工具在无网络、只读根目录、非root、受内存/CPU/PID限制的专用Docker中完成人工控制。这里只证明工具与隔离可用，不是GAIA原题执行。
+- [x] 公共隔离辅助模块`gaia_isolated_python_tool.py`已在专用CPU工作区实跑人工算术控制：生成代码仅通过stdin进入无网络、非root、只读Docker；仅挂载框架venv，不挂原题参考、凭据或Docker套接字。固定镜像、256MiB内存/1CPU/64PID、私有日志1MiB上限，超时或客户端异常仅停止本次容器。回执：CPU工作区`/root/gaia-public-tool-control-20261103-001/qualification-public.json`。不是原生Agent运行，完整Agent工具绑定仍待完成。
+- [ ] 原生Agent/工具、原验证集真实输出评分及研究默认安装环境闭环尚未完成，不能以读取通过打来源总勾。测试集参考答案不可用，不将其当作本地可评分验证集。
+
+使用者先自行完成官方授权并配置HF CLI，然后获取同一原始版本（不需要本项目维护者分享数据）：
+
+```bash
+hf download gaia-benchmark/GAIA --repo-type dataset \
+  --revision 682dd723ee1e1697e00360edccf2366dc8418dd9 --local-dir /data/gaia-original
+python -m pip install -e 'workload-preparation[data]'
+```
+
+直接读取原validation，不筛掉无附件题目，问题和附件交给所声明的Agent配置，答案只用于独立评分：
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+for record in iter_workload(
+    "GAIA", data_root=Path("/data/gaia-original"),
+    files=["2023/validation/metadata.parquet"],
+):
+    original_inputs = record.task["input"]
+    scoring_references = record.outcome_record()
+    # 原生Agent及工具消费original_inputs；不要把scoring_references加入模型提示。
+```
+
+上述入口是原始任务读取，不是已完成的原生benchmark命令。`record.request_body()`会拒绝把它伪装成单条聊天请求；附带原参考步骤的“annotated”版本不作为输入替代。
+
+独立评分入口使用固定官方评分函数，输入为原validation任务的已保存输出；不负责生成答案。JSONL每行仅含`task_id`和`prediction`（字符串或明确的null失败），拒绝重复、未知或test任务ID。全部165题均可提交，抽样时保留未评分数量；不改题、不以参考答案构造预测。
+
+```bash
+python -m pip install -r configs/workload-native/gaia-original-scorer-client.txt
+curl --fail --location \
+  https://huggingface.co/spaces/gaia-benchmark/leaderboard/resolve/9f133d71362e77b3539f1514f31b9c101a545fec/scorer.py \
+  --output /data/gaia-scorer.py
+python scripts/score_gaia_original_predictions.py --help
+python scripts/score_gaia_original_predictions.py --execute \
+  --data-root /data/gaia-original --scorer-file /data/gaia-scorer.py \
+  --predictions-file /data/gaia-predictions.jsonl --output /data/gaia-score-run-001
+```
+
+评分器文件必须匹配固定摘要，输出目录必须为仓库和原资产之外的新私有目录，不能覆盖历史结果。官方函数可能打印答案，因此其标准输出与错误仅保存在该私有目录。默认不加`--execute`只显示计划，不读取数据或调用模型。当前评分入口仅经过人工夹具测试，不能证明预测生成过程或原生Agent任务已完成。
+
+Agent参考实现核查：[smolagents公开GAIA示例](https://github.com/huggingface/smolagents/blob/96f33faaf028479119ec8d34507b47694cf14e34/examples/open_deep_research/run_gaia.py)默认涉及annotated数据分支，原始数据分支仍引用旧`GAIA.py`布局，且选题逻辑只保留有附件的题。因此不能将它未经检查地当作当前原始GAIA全题集入口；需要对当前Parquet读取和工具/本地NPU模型绑定做明确适配，保留原题、原附件和失败，不照搬其过滤逻辑。
+
+原题Agent入口`run_gaia_original_agent.py`使用固定smolagents1.26.0的`ToolCallingAgent`，由操作者提供固定摘要的已审查工具工厂。选题按原validation顺序，默认前3题，可显式选择完整范围；不筛掉无附件题、不传参考答案或Annotator步骤。失败题保留null预测及失败记录，不重选；保存原Agent步骤和输出，随后独立调用上述官方评分入口。声明的文本配置为20步、每次输出4096
+token、工具串行；这是本项目公开配置，不是未经修改的官方open_deep_research脚本或官方规定预算。
+
+`gaia_smolagents_text_tools.py`复用框架搜索解析与网页格式化，限定公网HTTP(S)、逐次重验重定向并固定实际连接IP；网页最多2MiB、文本输出沿用40000字符上限。Python只交给隔离容器。原二进制附件及音视频读取尚未合格，不能声称完整GAIA能力已覆盖。工具构造已在专用CPU固定环境验证，首轮公开代码目录权限失败保留，修正只读代码挂载后第二轮通过；模型调用0，真实原题执行/网络工具实用性与评分尚未完成。
+
+搜索后端由`GAIA_SEARCH_ENGINE`显式固定，可选`duckduckgo`（默认）或`bing`，不在失败后静默切换。服务器DuckDuckGo连接超时记录保留；Bing采用同一稳定框架已有的RSS接口和字段投影，泛化查询实测返回10条结果，模型调用0。使用已验证后端时，在原题启动前设置`export GAIA_SEARCH_ENGINE=bing`并重算工厂文件摘要；该选择及隔离工具绑定会写入私有回执。原问题和原评分不变，不提供预先整理的题目证据。
+
+固定原validation前三题现已全部尝试并使用原官方函数评分：2题返回、1题客户端超时，正确0/3；独立核验原题输入完全一致、没有参考答案或Annotator步骤入模。超时请求的服务器响应随后保留为HTTP200、输出4096-token上限且正文为空，不追填为原Agent已收到的成功步骤。来源总勾仍未完成。模型等待时限可通过`--model-timeout`明确设置（默认600秒），并写入私有回执；外部代理和转发等待也必须匹配，不能以缩题、缩预算代替修复。本次仅对失败的原第二题使用1800秒单列配置复核，正常返回且官方评分0/1；保留首次失败和评分，不重跑已完成的第一、第三题，不混合报告两套配置的成绩。复核涉及模型随机生成和实时网页变化，不能据此宣称延长等待造成了答案或执行改善。成功CI94载荷及466原任务/109附件/7处公共和研究回读均已复核；原生请求/响应与执行软件独立核验已通过，原33次及复核9次请求均有HTTP200留存，首次1个迟到响应未注回已超时的Agent；研究侧补丁发布和最终交付尚待收口，附件/视听能力未验证。
+
+```bash
+python -m pip install -r configs/workload-native/gaia-smolagents-client.txt
+python scripts/run_gaia_original_agent.py --help
+python scripts/run_gaia_original_agent.py  # 仅显示计划，不读取题目或调用模型
+```
+
+实际执行需先核验工具环境及NPU回环转发：显式提供`--execute --data-root --output --factory-file --factory-sha256 --endpoint --model`，并在运行前固定`--start/--count/--max-steps/--max-output-tokens`。Qwen3非思考配置可显式加`--disable-thinking`，不能把不同配置结果混报。Python工厂另需`GAIA_DOCKER_HOST/GAIA_PYTHON_IMAGE/GAIA_FRAMEWORK_VENV`绑定本机Unix套接字、已验证本地不可变镜像及仅含框架的venv；不能挂载宿主机根目录、原参考数据或凭据给生成代码。默认计划、软件测试和构造验证均不构成已完成的原生运行。
+
+#### QReCC原检索集合获取（2026-11-03）
+
+原test文件复用已有`workload-data prepare-qrecc-test --data-archive /data/qrecc_data.zip --output /data/qrecc-original-test`公共能力，从固定原ZIP只提取test成员并验证归档/成员哈希，不提取train。服务器已通过实际成功CI94载荷中的该接口复用原包，准备全部16451条原test，新增下载0次；不是重写解析器或重新构造请求。
+
+最新终态：原Java索引器退出0，但初始包装器要求empty为0，因数量不相等而停止验收。原日志为indexed54241550、empty331514、unindexable/skipped/errors均0，二者之和等于54573064原始行；公共只读计数器已独立确认实际Lucene文档数54241550，未重建或修改索引。固定原JAR字节码证实其空记录规则为Java
+`String.trim().length()==0`。完整56003份原JSONL已按发布ZIP
+CRC及原Java规则全部复核，54573064行/331514空记录与作者计数一致；原索引可用，未重建。初始失败来自包装器要求空记录为0的过严假设，不是原数据丢失；原生检索/阅读/评分仍待完成。回执：`qrecc-full-original-index-job-20261103-001/counter-reconciliation-public.json`；独立审计：`qrecc-original-empty-record-audit-20261103-001/state-public.json`。
+
+- [x] 完整原集合公共解压入口退出0：56003个原JSONL、86557816928字节，全部成员CRC通过，保留原路径和原字节，不是仅ZIP目录检查。完整回执：`qrecc-full-original-collection-prepared-20261103-001/collection-preparation.private.json`。索引构建阶段记录（现已结束，见上述终态）：完整索引准备进程PID1163702/出生时间887989570曾核验存活；使用原Pyserini0.10.0.1
+  JAR/Java11，2个索引工作线程、4GiB堆，保留storePositions/storeDocvectors/storeRaw。索引新增预算200GiB、共享盘至少保留64GiB；租约出现或预算触及时仅终止自有索引并保留记录，不自动重试。索引完成还须核对原日志零错误/跳过及实际Lucene文档数，不能以退出0或论文约5400万代替精确验证。当前索引、检索/阅读/评分及来源总勾仍未完成。
+
+- [x] 作者完整`passages.zip`已取得，27512656777字节，发布方MD5校验通过；本机实测SHA256为`7ebb7612101bc383c597b47babd511470c0b3b59210d1ce6e2fe475b5e1d3920`，原断流和显式续传记录保留。下载进程正常结束，公共完整解压器已启动并核验PID1119538/出生时间887910350存活，请求idle
+  I/O及nice10；当前尚未完成全库CRC解压、建索引或原题RAG，来源不打勾。
+
+完整包到达后的原集合解压任务已排队，UTC2026-11-03T03:31:27核验相同PID/出生时间的等待进程存活，尚未启动公共解压器。仅在发布方整包校验通过、已有资源租约解除及原集合容量加64GiB余量满足后启动；请求nice10和可用时的idle
+I/O优先级，效力未作性能测量。研究线程仅确认其自身无敏感I/O测量，不代表其他使用者独占空闲；不占NPU、不改服务、不停周期原题验证，也不自动重试失败解压。实际终态以`qrecc-complete-collection-preparation-job-20261103-001/state-public.json`和公共准备回执为准，本记录不是原集合已解压或来源完成证明。
+
+- [x] 公开保存检索结果评分入口及独立nltk3.5客户端已补齐；15项人工保存结果控制、服务器4个人工查询的真实作者函数控制通过，保留零命中任务分母及100位之后的真实命中，不补造段落。原函数对零命中的抽取上界未定义时明确记null，不冒充模型成绩。复用旧原CLI相同输入及5指标对照一致，不重跑旧CLI；尚不是原题检索/阅读执行。回执：`qrecc-public-retrieval-score-control-20261103-002/qualification-public.json`。
+
+- [x] 原Apple固定提交的11份软件及53913字节身份已通过服务器公共plan/verify入口，原requirements明确锁定Pyserini0.10.0.1。按该版本、复用Java11完成3人工文档索引和1条BM25控制查询，顶一结果核实，0模型调用；不是全库或原题执行。原软件回执：`qrecc-original-author-source-20261103-001/qualification-public.json`；原锁版本控制回执：`qrecc-original-pinned-index-runtime-20261103-001/qualification-public.json`。较新0.44候选及组织方0.12基线是独立软件协议，不混用索引或替换原任务/评分。
+
+已核实[作者Zenodo5760304发布](https://zenodo.org/records/5760304)的完整`passages.zip`为27512656777字节，非必须重新爬取数十TB网页。完整原ZIP目录56007个成员已检查：56003个JSONL，解压合计86557816928字节。原包已在服务器取得并完成发布方校验；获取阶段限速8MiB/s、共享盘保留64GiB余量，本地不落数据，过程中核验了writer的PID/出生时间和partial增长。全库准备进程状态见上项，不将旧下载中快照当作当前状态。
+
+- [x] 两份作者原test全部16451条逐行比较，原文件哈希/发布方MD5通过，会话与话轮顺序一致；每条增加`Passages`参考，24条原`Answer_URL`不同，其余原字段相同。原文件独立保留，不当作同一版本覆盖，模型调用0次。服务器回执：`qrecc-author-test-release-comparison-20261103-001/qualification-public.json`。
+- [x] 服务器独立安装原Pyserini0.44.0包与Temurin21.0.13+9，两个发布方SHA-256及解包成员核验通过；使用未修改Anserini
+  Java入口完成3人工文档的索引、1条BM25控制查询并核查顶一结果。原命令参数失败记录保留；不是QReCC原题、完整索引或Python包装器通过。回执：`qrecc-original-index-runtime-20261103-001/original-java-entrypoint-control-001/qualification-public.json`。
+- [x] 完整原包MD5、全库CRC准备和原索引计数已完成。新增公开执行入口`run_qrecc_original_native.py`，按原问题/会话历史依次完成模型改写、完整原索引BM25和模型阅读；参考Rewrite/Answer/Answer_URL不进入执行输入。公开Java搜索源码已在服务器原Java11/Anserini0.10上验证：3文档夹具控制通过，完整54241550文档索引实测返回100条原正文命中，均为人工通用查询、0模型调用，不是原题RAG完成。7项新增软件控制及整组40项测试通过。
+- [x] 固定原0/1/2题完整改写/全库检索/阅读及原评分均已完成，3成功/0执行失败；6次真实NPU响应、300条真实检索结果和全部reader输入独立核验一致。成功CI工件94载荷实际安装、全16451原记录及6处公共/未修改研究回读通过，原索引、研究代码和默认锁未改。QA的EM0/F1约0.302为本次3题样本结果，MRR0.3457；不作论文复现、全量推理或引擎性能结论。[最终回执](validation/qrecc-original-native-delivery-20261103.json)。
+
+执行采用明确披露的本地LLM改写/阅读配置，不冒称复现论文训练过的改写器或阅读器。原发布方未提供该LLM配置的提示或生成预算，因此固定声明BM25
+`k1=0.82/b=0.68`、前100命中全部交给阅读器、改写128/回答512输出上限和非思考模式；不裁短原问题、历史或命中正文。若长度、模型或环境不适配，逐题保留失败、空预测及真实已有排名，不换题。公开执行入口支持按原顺序运行整个test范围；本次计划固定原0/1/2条。
+
+准备好固定原`qrecc_test.json`、完整索引、Java11、原0.10
+JAR、作者11份固定软件及隔离的nltk3.5评分客户端后，使用以下三步。`QRECC_TEST/QRECC_INDEX/JAVA11/ANSERINI_JAR/QRECC_AUTHOR/QRECC_SCORER_PYTHON`由操作者设为实际绝对路径；原资产获取、版本与完整性检查见上述准备说明，模型端点须绑定实际NPU服务。
+
+```bash
+python scripts/run_qrecc_original_native.py --execute \
+  --data-file "$QRECC_TEST" --index "$QRECC_INDEX" \
+  --java "$JAVA11" --jar "$ANSERINI_JAR" --output /data/qrecc-native-001 \
+  --endpoint http://127.0.0.1:19468/v1 --model Qwen/Qwen3-14B \
+  --start 0 --count 3 --retrieval-k 100 --rewrite-budget 128 --answer-budget 512 \
+  --model-timeout 1800
+python scripts/score_qrecc_original_retrieval.py --execute \
+  --data-file "$QRECC_TEST" --author-root "$QRECC_AUTHOR" \
+  --rankings-file /data/qrecc-native-001/rankings-private.jsonl \
+  --python "$QRECC_SCORER_PYTHON" --workers 1 --output /data/qrecc-retrieval-score-001
+python scripts/score_qrecc_original_qa.py \
+  --data-file "$QRECC_TEST" --scorer-file "${QRECC_AUTHOR}/utils/evaluate_qa.py" \
+  --predictions-file /data/qrecc-native-001/predictions-private.json \
+  --output /data/qrecc-qa-score-001
+```
+
+前两步不带`--execute`仅显示计划；第三步的旧评分入口直接评估给定文件，可先用`--help`核对参数。实际评分只使用已保存的排名和答案，不重复生成。运行目录须全新且在仓库与原资产之外。上述命令是运行说明，不是已执行原题或达到论文成绩的证明；完整私有日志和模型配置须与最终交付回执一并核验。
+
+#### MultiAgentBench原Research续跑
+
+MultiAgentBench续跑状态（2026-11-02重新核验）：原Research固定前三题、5/5/3个Agent及各5轮不变。原CPU父/子进程已退出，旧`RUNNING`状态不可沿用。CPU保存47个模型请求和4个返回，两端已转发的5个请求及4个HTTP200返回逐字节一致；另有42条未转发请求与1条已claim但无保存返回的请求，不给已退出的消费者补发。关键词4个返回保留。原第0条CLI以1退出，其余流程未收口，不能据此归因模型质量。保留原响应、失败及状态；恢复前先核对请求级消费者与不确定推理，不自动重启Actor或替换题目。原目录`/root/marble-original-research-native-runtime-20261031-003`，证据见[恢复回执](validation/multiagentbench-native-recovery-audit-20261102.json)。
+
+同一CPU/原客户端的独立网络对照显示：`http://arxiv.org/html/2401.00123`连接超时约9.02秒，HTTPS同路径约2.04秒返回200；原论文工具将检索结果URL直接用于HTML抓取，超时为60秒。此对照不是原题URL或所有慢请求的因果证明。现有任务、题目、工具及模型没有改动；已提出仅为后续新执行制作明确披露的同路径HTTPS兼容副本，等待确认，不热修改运行中的任务。
+
+- [x] 原Research前三题真实启动，首个原生模型与关键词请求已在NPU返回。
+
+- [ ] 三题完整原Agent流程及原评分结束，并完成保存结果核验；当前原Actor已退出，43条无返回请求不能补发，不能将启动、HTTP成功或论文检索当成任务完成。
+
+- [x] 2026-11-03重新核对保存响应：4条均HTTP200，原输入5212/5230/5270/5159 tokens，输出117/120/120/118
+  tokens，队列保存到返回约13–16秒；第0题CLI退出1，第1题无结果、第2题未开始。控制进程确已退出，未补发旧请求，不能仅由这些响应断言模型不适配。
+
+- [ ] 新增可选的同进程、按原题隔离队列的本地转发路径已通过HTTP软件夹具；它不依赖外部操作者逐条搬运模型请求，保留原请求/响应及nonthinking部署绑定，旧队列拒绝重放。真实NPU路径、原4份响应精确匹配复用及不确定请求处理尚待核验，不能据此打来源总勾。
+
+- [x] 新转发helper已在专用CPU保留的原Python3.10.12客户端执行虚构HTTP200/500对照，原请求/后端响应一致，已存在队列拒绝重放；未导入Torch/NPU、未访问外网、未执行原题。回执：`/root/marble-live-transport-control-20261103-001/qualification-public.json`。该对照不是原生NPU模型调用。
+
+- [x] 默认关闭、显式开启的旧响应精确复用控制通过：服务器原3.10.12客户端验证4份旧响应/16个原文件哈希，完整请求/参数一致才命中，每份旧响应跨原题只消费一次，不确定消费拒绝补发；原缓存资产不变，后端HTTP和新模型调用均0，未运行Agent题。回执：`/root/marble-verified-response-reuse-control-20261103-002/qualification-public.json`。实际恢复前仍须核验当前后端部署绑定；不用于性能或新的独立质量评价。
+
+- [x] 当前公共CLI已在服务器原3.10客户端执行`--prepare-only --model-api-base --reuse-model-results`，10份软件按摘要固定，原前三题/5轮、actor/judge绑定、按题关键词队列及1条不确定请求保护均通过；原源码不改，Agent/后端/新模型调用均0。回执：`/root/marble-current-public-live-entry-20261103-002/qualification-public.json`。不是原题执行。
+
+- [x] 公开Research执行入口的前三题硬上限已解除，支持原1–100题前缀；本次实跑仍固定前三题。服务器真实100题的原转换器、绑定及最终原YAML加载均逐字段核验通过，未启动Agent或模型。第34题DEL触发旧序列化失败已保留；修复只改变JSON-as-YAML转义表示，不删字符、不改原题和官方读取器。回执：`/root/marble-full100-public-preparation-20261103-002/qualification-public.json`；不将配置准备计作100题推理通过。
+
+#### SpokenWOZ原文本DST协议交付
+
+- [x] 从[发布方项目页](https://spokenwoz.github.io/SpokenWOZ-github.io/)当前链接的`ssz1111/SpokenWOZ-Test-Text-Fixed`取得固定版本原`data.json`：52233254字节，发布方LFS
+  SHA256匹配，1000完整对话、35564话轮。原文件保存在服务器，后续NPU共享盘副本同样完整校验；传输内存块上限8MiB，不在Windows落盘。
+- [x] 固定原JSON首次出现的前三个完整对话`MUL0001/MUL0002/MUL0004`，分别50/44/42话轮；不截取单轮冒充完整对话，不换成功样本。回执：`/root/spokenwoz-original-test-text-20261031-001/acquisition-public.json`。
+- [x] 公共适配对全部1000对话/35564话轮逐字段无损还原；原goal、metadata、dialog_act和span_info留在参考侧，原text、tag、words及词时间戳保持不变。公共获取器只读校验、固定前三个完整对话的准备入口均exit0。回执：`/root/spokenwoz-public-adapter-20261031-002/qualification-public.json`。
+- [x] 未修改的研究消费端从固定三条索引读回完整136话轮，与公共消费端和原JSON一致；索引不变、研究任务未恢复。回执：同目录`research-handoff-public.json`。这是候选源码验证，不是CI安装工件或原生模型结果验证。
+- [x] 成功CI
+  `41172187985`产物`13032060104`已在专用CPU独立环境实际安装，77份Git/wheel/安装文件逐份相同；公共与未修改研究消费端复用原索引读回三完整对话136话轮，索引未变。回执：`/root/spokenwoz-actual-ci-wheel-20261031-001/qualification-public.json`。没有重新下载、准备或模型调用，不把该数据接入核验冒称原生推理。
+- [ ] 尚缺的扩展模式：原音频和语音交互；另保留新鲜公共下载的服务器网络实测缺口。原文件已通过有界中转取得并全包校验，不把“此服务器直接下载未实测”写成“原数据未取得”。首次文件角色注册错误及stage001失败保留。
+- [x] 固定三个完整对话已完成官方文本DST流程：Qwen3-14B作为明确披露的NPU替代模型，68个原始用户话轮请求全部`stop`、0请求失败；原提示、完整可见历史、参考及实际响应独立核验通过。未改变原客户端省略采样/预算参数的方式，仅显式声明非思考模型绑定。官方JGA与独立累计状态核验一致：4/68，约5.88%；保留低分，不换题，不与原GPT3.5或隐藏榜单比较。
+- [x] 原预处理在共享盘遇到写后未刷新的中间JSON读取失败；保留原文件和stage001失败，兼容副本仅增加两处`f2.flush()`，题目、提示、顺序、参考和评分不变。原始68次生成没有重跑。回执：共享任务根`spokenwoz-original-DST-fixed3-32068-002/{launch-public.json,saved-audit-public.json}`。
+- [x] 公共原生准备`prepare_spokenwoz_original_dst.py`与运行/保存核验`run_spokenwoz_original_dst.py`已提供；专用CPU实际执行原准备与`--verify-saved`，68份原提示/参考与既有NPU响应全部一致，评分4/68再次核对，无新模型调用。回执：`/root/spokenwoz-native-public-entry-20261031-002/qualification-public.json`。原准备成功回执复用，首次公共入口把输出放入源码目录被路径保护拒绝的记录保留，未降低保护。
+- [x] 公共新生成循环已在不重叠的原第3至5号对话真实完成：120话轮/60请求全部`stop`、0请求失败，原官方评分和独立核验均6/60。当前公共`--verify-saved`再次通过，不新增模型调用；原前三例68次生成及4/68结果保持不变。真实DST调用累计128，不冒充128个数据集。回执：共享任务根`spokenwoz-public-native-saved-audit-32068-001/qualification-public.json`。
+- [x] 公开区分生成调用和只读核验调用：初版运行报告继承了核验的`new_model_calls=0`，但已有正确的`actual_model_calls=60`。已修复计数字段，单独保留更正报告，原报告、请求、响应和评分未改写、不重新生成。修复后的保存核验新增调用数仍为0。
+- [x] 原文本DST协议已按正式范围收口，见[交付记录](validation/spokenwoz-text-dst-native-delivery-20261031.json)。当前公开保存核验在服务器重查60请求通过，原运行目录136个文件哈希未变，新增模型调用0；实际CI提供方和原研究输入消费证据也已复查。
+- [ ] 可选全量评测与扩展模式尚未完成：1000对话/17782请求全量生成、原音频/语音及其他响应协议。它们不阻塞已声明的文本DST协议交付，但不计对应模态覆盖，不声称复现隐藏榜单或全部来源能力。
+
+当前公开测试文件与旧Git说明中的隐藏测试集必须区分，不能声称复现隐藏榜单。官方既有文本DST/响应基线，也有语音—文本模型；文本基线运行不能证明音频或双工流程跑通。原数据遵循发布方CC
+BY-NC4.0，不在公共PR再分发。
+
+在仓库根目录使用统一入口；所有原数据与索引保存在服务器外部目录，`--limit 3`选择前三个完整对话，不是前三个话轮。读取完整对话仅获得原生任务包，每次模型调用的历史可见范围仍由官方runner负责。
+
+原生DST入口现支持完整对话范围`--start N --count M`及`--full`，不把默认前三个验证对话当成全部可运行范围。专用CPU已实测全量计划：1000完整对话、35564话轮、17782个原DST请求；另按原顺序准备了不重叠的第3至5号对话`MUL0012/MUL0015/MUL0019`，120话轮/60请求。回执：`/root/spokenwoz-range-full-entry-20261031-001/qualification-public.json`。全量计划不等于全量模型执行；原前三对话68份有效生成仍复用。
+
+```bash
+python scripts/prepare_reused_research_assets.py SPOKENWOZ
+python scripts/prepare_reused_research_assets.py SPOKENWOZ --mode download --data-root /srv/workloads/spokenwoz
+python scripts/prepare_reused_research_assets.py SPOKENWOZ --mode verify --data-root /srv/workloads/spokenwoz
+PYTHONPATH=workload-preparation/src python scripts/prepare_reused_source_records.py SPOKENWOZ --data-root /srv/workloads/spokenwoz --output /srv/workloads/spokenwoz-first3 --limit 3
+```
+
+#### Full-Duplex-Bench原生准备
+
+- [x] 2026-11-06当前服务器重新取得并核验全部9个原数据包705372348字节，2576条原JSON及冻结哈希一致；固定模型27文件均通过发布方Git/LFS身份校验，仅保留单份权重。
+
+- [ ] 首次NPU服务启动退出1，未就绪、0个benchmark请求。驱动日志`drvGetDevNum=87`，本机头文件定义为`DRV_ERROR_RESOURCE_OCCUPIED`；单换torch_npu补丁版本仍失败。在现有获分配工作区内，绑定物理卡1的真实NPU张量运算已成功。后续使用该工作区内的独立环境，不再反复另起Docker申请设备；不将设备控制、软件安装或依赖解析计作原生语音验证。
+
+- [x] 已核验官方SGLang-Omni镜像内`python -m benchmarks.duplex.fdb --help`正常退出。优先复用其原生录制、音频导出及reference评分入口，不自行构造输入或改写评分。镜像按不可变digest固定；帮助命令通过仅为软件证据，不是NPU推理或benchmark完成。
+
+- [ ] 原框架`asr.py`仍硬编码CUDA；必须先验证同一Parakeet模型的NPU设备绑定，才可串起完整评分。不能直接执行`generate --all-stages`后宣称NPU链路通过。上游另有unified/listening评价，不能将其冒充数据集发布方的原评分。[环境和模型核验记录](validation/full-duplex-model-metadata-20261106.json)
+
+- [x] 原Moshi客户端CPU环境已核验：Python3.11、Torch/torchaudio2.6.0、NumPy1.26.4复用现有科学环境，官方固定`sphn==0.1.12`在ARM64按原版本源码编译；Rust1.90官方归档校验、CMake3.22.1及maturin1.16.0记录保留。初次128MB临时目录不足、后续子环境继承到错误系统路径的失败均保留；仅修本任务环境路径，`pip check`及未改原客户端`--help`均exit0，没有更改全局镜像或原科学任务环境。
+
+- [x] 未改原客户端的编解码控制实际解码30包、51840个PCM样本；本地WebSocket回声控制31包往返，57600采样点输出含53712个非零采样，源文件哈希未变。使用的是明确标注的软件控制音频，不是原benchmark请求或模型输出；0模型调用，0原题执行，不能据此补来源总勾。服务器证据：任务自有`full-duplex-moshi-client-recovery-20261103-002`的`path-repair-public.json`、`codec-control-public.json`及`websocket-fixture/qualification-public.json`。
+
+- [x] 公共源码准备入口新增可选`--include-client`：默认原11文件不变，可选包含4份固定Moshi/ASR源码共15文件；当前脚本在服务器完成两种plan及11/15文件verify，原文件以硬链接复用。新鲜下载分支因连接被重置失败，保留日志，不当作新鲜获取成功；已有官方原文件的身份校验通过。此参数不安装Moshi或NeMo，不启动模型、ASR或评分。
+
+- [x] 固定发布方版本`3e799c45a045256f47d5f1c9cda90157e2d2ec9e`的`v1_v1.5`离线协议，专用CPU取得16份原说明、评分软件和官方样例JSON，逐份校验Git
+  blob与SHA256；未在Windows落盘原始资产。
+
+- [x] 未修改的`eval_pause_handling.py`和`eval_smooth_turn_taking.py`分别对官方自带的1份输出样例实际运行，均exit0。回执：`/root/full-duplex-original-scorer-controls-20261031-001/qualification-public.json`。这是发布方输出的评分器控制，不是本项目模型结果，也不是固定原前三题的验证。
+
+- [x] 公共评分器准备入口`prepare_full_duplex_original_scorers.py --verify-only`已在专用CPU核验现有原11文件子集，exit0，无新下载、无重复评分。回执：`/root/full-duplex-public-source-entry-20261031-001/qualification-public.json`。新鲜`--download`的服务器网络路径未通过实测，不冒称整仓或原音频已取得。
+
+- [x] 官方公开数据目录已定位9份原ZIP：v1.0的Candor暂停/换轮、ICC反馈、合成暂停/打断，v1.5的背景语音、对他人说话、用户反馈/打断。官方文档分别列727和499条；目录声明的文件ID和字节数已记录到机器清单，不将可变Drive文件ID当作版本哈希。初次盘点仅取得目录元信息；后续原包获取及内容校验见下一项。CPU/NPU直接访问失败均保留，本地未保存数据文件。
+
+- [x] 全部9份官方原ZIP已在服务器取得，共705372348字节；全部ZIP
+  CRC与路径安全检查、2576份原JSON解析通过，原3119份WAV成员保持原样。用户反馈原包实际98条而文档写99条，原字段为`backchannel_text`而非文档示例的`current_turn_text`，均未补造或改名；该包392份原WAV已完整读取PCM，其他包仅作ZIP层完整性核验，不混称均已解码。CPU/NPU直连失败保留，成功获取经有界内存中转，本地无数据文件；9份原包未解压重复占盘。观察到的SHA256及服务器回执见机器清单`original_archive_acquisition`，不是作者发布的校验码。
+
+- [x] 公共原包准备入口`prepare_full_duplex_original_assets.py`已接入统一source-plan；格式化后的候选脚本在服务器对9份原ZIP完成plan、prepare既有文件复用、verify，2576份原JSON核验通过。原包以同文件系统硬链接复用，没有复制原始数据；这是候选代码的真实CLI验证，不是当前CI工件或新鲜公网下载验证。回执：`/root/full-duplex-public-assets-entry-20261103-002/qualification-public.json`。
+
+- [x] 候选统一provider已完成全部1225原任务目录的输入/关联音频/标注关系核验，并绑定和准备1225条引用索引。9份归档各原前三条共27条的公共端/未修改研究consumer回读一致，原包、consumer、SQLite均未改变；原始ZIP输入成员顺序保持，不解释成到达轨迹。回执：`/root/full-duplex-common-provider-handoff-20261103-001/qualification-public.json`。
+
+- [x] 成功CI运行41505642132的实际工件13171405317已在服务器独立安装，软件提交6896e413，91份Git/包内/安装文件一致。该安装包重新完成全部1225条绑定和引用索引，以及9包各前三条共27次公共端和27次未改研究consumer回读；索引及consumer未改，0模型调用，原包未复制。回执：`/root/full-duplex-actual-ci-provider-20261103-001/qualification-public.json`。这不等于原生语音推理或评分完成，总项仍不打勾。
+
+- [ ] 合适的NPU双工语音模型、原生输入/输出音频、ASR和适用完整评分、输出消费闭环。模型调用仍为0，总项不打勾。
+
+- [x] 固定Moshi官方软件版本`e6a55d2722a65870ef52a6c9f6ecfc0e90f38362`，在服务器核验3份模型服务/依赖文件；原warmup无条件调用`torch.cuda.synchronize()`，官方禁用graph/compile开关不会消除它。模型服务器要求sphn至少0.2.0，不能与benchmark客户端0.1.12环境混用。回执：`/root/moshi-original-server-prerequisites-20261103-001/qualification-public.json`。这是静态前置审查，未做NPU后端适配、权重下载或模型调用，不判定硬件不可行。
+
+公共入口在仓库根目录运行，原资产仅写服务器外部目录；评分脚本依赖发布方要求中的`tqdm`，不需要模型、ASR或外部judge。官方样例输出不代表本项目模型输出。
+
+```bash
+# 默认离线计划，不下载；显式下载只取11份固定原文件，不取整仓/node_modules
+python scripts/prepare_full_duplex_original_scorers.py
+python scripts/prepare_full_duplex_original_scorers.py --download --output /srv/workloads/fdb-scorer-subset
+python scripts/prepare_full_duplex_original_scorers.py --verify-only --output /srv/workloads/fdb-scorer-subset
+# 可选原客户端/ASR源码：先离线查看15文件计划，再获取或核验已有原文件。
+python scripts/prepare_full_duplex_original_scorers.py --include-client
+python scripts/prepare_full_duplex_original_scorers.py --include-client --download --output /srv/workloads/fdb-scorer-and-client-subset
+python scripts/prepare_full_duplex_original_scorers.py --include-client --verify-only --output /srv/workloads/fdb-scorer-and-client-subset
+python scripts/prepare_full_duplex_original_scorers.py --include-reference
+python scripts/prepare_full_duplex_original_scorers.py --include-reference --download --output /srv/workloads/fdb-complete-reference
+python scripts/prepare_full_duplex_original_scorers.py --include-reference --verify-only --output /srv/workloads/fdb-complete-reference
+python /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/eval_pause_handling.py --root_dir /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/example_data/pause_handling_example
+python /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/eval_smooth_turn_taking.py --root_dir /srv/workloads/fdb-scorer-subset/v1_v1.5/evaluation/example_data/smooth_turn_taking_example
+```
+
+官方的v1/v1.5离线、v2实时考官、v3语音工具调用是不同协议，不得把上述两个样例评分推及其他版本；也不得以文本问答、拼造音频或CPU神经推理替代原生流程。官方协议入口：[Full-Duplex-Bench](https://github.com/DanielLin94144/Full-Duplex-Bench)。
+
+客户端控制环境另记录soundfile0.14.0、websockets17.4。Moshi推理需要对应的独立模型服务，原NeMo转写脚本使用`nvidia/parakeet-tdt-0.6b-v2`并调用CUDA；其NPU模型/ASR执行尚未核验。不能把上述CPU编解码与传输控制写成NPU神经推理完成。
 
 #### TOOLACE原始语料使用入口
 
@@ -676,6 +3078,227 @@ smoke、tests和lint全部通过。[交付回执](validation/ruler-native-delive
 
 更新时间：2026-10-23。清单覆盖现有 **89 个公开候选来源、8 份企业数据**；“候选”不等于已取得、已适配或已跑通。新推荐的 17 个来源另列，尚不计入已接入范围。
 
+### DailyTalk：原Guo完整对话批量合成
+
+- [x] [合并交付回执](validation/dailytalk-fixed3-native-delivery-20261101.json)：原作者Guo900000权重、原universal
+  HiFi-GAN、FP32
+  NPU、seed1234、batch8、10轮历史及原控制值，前三段完整原对话29条合成完成；声学/vocoder各4批、29个WAV完整PCM与原图头部核验通过，历史失败和原结果保留。
+
+- [x] 全23676行原输入/参考关系保真，实际成功CI工件79文件逐份匹配；29条公共与未修改研究消费者回读及原生输入行哈希一致。通用对话准备代码两类CI通过，真实原对话23的12条准备验证通过；既有合成不重跑。
+
+- 已交付的是上述明确原生批量合成协议，不是全量合成或音质评分。其他原对话需原ZIP/解压音频，完整ZIP分支只有夹具验证；公共`execute`包装没有为整理代码重复生成，真实原CLI合成及公共保存结果核验分别留证。以下阶段记录的单项回执不单独代表源级交付状态。
+
+- [x] 已定位原生失败：原Guo模型进入声学前向后，当前NPU的`DynamicGRUV2Hidden`拒绝FP32隐藏权重；尚未执行vocoder，不算合成完成。原失败、权重、精度和输入均保留。
+
+- [x] `scripts/dailytalk_gru_npu.py`提供显式、单实例、仅推理的原GRU公式分解候选，保留原参数对象和state-dict键，不替换checkpoint、不降精度、不改变10轮历史。使用PyTorch的reset-after-hidden-affine公式，不能换成原论文的另一种GRU公式。依据：[PyTorch 2.10 GRU](https://docs.pytorch.org/docs/2.10/generated/torch.nn.GRU.html)。
+
+- [x] 20组CPU合成夹具通过，环境Python3.12.10/PyTorch2.7.1+cpu；覆盖方向、层数、bias、布局、非零/默认零hidden和原Guo的128维双层双向、1/10步输入。输出及最终hidden均按`atol=1e-6, rtol=1e-5`对照原PyTorch
+  GRU，原参数不变；这是合成单元测试，不是原任务或NPU数值结果。
+
+- [x] 实际服务器PyTorch2.10.0+cpu/Python3.12.13隔离环境完成18组CPU数值对照，最大绝对误差`3.5762786865234375e-7`；没有初始化NPU、加载原checkpoint或执行原任务。[服务器夹具回执](validation/dailytalk-gru-cpu-equations-20261101.json)。
+
+- [x] 确认两服务在途/排队均0、仅有原受保护引擎后，在互斥窗口完成18组NPU
+  FP32数值对照，最大绝对误差`2.682209014892578e-7`；包含原Guo维度，关闭HF32，不加载原checkpoint。[NPU夹具回执](validation/dailytalk-gru-npu-equations-20261101.json)。控制进程已退出，服务身份未变，互斥租约释放；不把合成算子夹具计为原TTS任务。
+
+- [x] 原29条输入在全新输出目录尝试原checkpoint合成，声学前向1次，已越过GRU错误；在原绘图函数遇到Matplotlib3.10.9移除`tostring_rgb`的兼容失败，vocoder尚未执行、WAV文件0。失败和旧环境保留，控制/子进程均已退出，服务身份未变。[原任务失败回执](validation/dailytalk-original-gru-compat-render-blocker-20261101.json)。这不是原任务质量失败，也不算完整合成；后续先在独立绘图环境核验兼容版本，不改原请求或模型。
+
+使用时只对原声学模型中明确定位的Guo
+`gru`实例调用`install_npu_gru_forward`，并先沿用原`model.eval()`；不修改全局`torch.nn.GRU`。正式forward拒绝CPU/CUDA、非FP32、训练及非原稠密批输入。`require_npu=False`仅供合成数值夹具，不可作为实际任务的CPU回退。原失败工作区未修改；候选已在新目录完成原29条合成，尚待公开入口和最终交接，DailyTalk来源总勾仍为空。
+
+- [x] 独立绘图overlay固定Matplotlib3.9.4原wheel并校验SHA256，原绘图函数按原调用者前置条件验证通过；原环境不变。[绘图回执](validation/dailytalk-plotting-overlay-20261101.json)。
+- [x] 原29条完整合成及独立保存结果审计通过：声学/vocoder各4批，29个WAV全部完整PCM解码、均有非零采样，29份PNG签名及尺寸核验；重核2份原模型、52份既有兼容源码和29份原Guo特征，新增模型调用0。[合成审计](validation/dailytalk-original-fixed29-synthesis-audit-20261101.json)。原失败保留，无主观音质或引擎性能结论。
+- [x] 公开工作区准备和完整合成执行入口代码已补齐；服务器实测准备/复核及已有29条结果复用，未为包装重复生成。公共`execute`包装未重新实跑，与既有原流程NPU证据分开记录。
+- [ ] 原协议评价边界已固定，CI工件研究消费已通过，其他原完整对话的自动准备已补，待新增代码CI闭环，来源总勾为空。
+
+#### DailyTalk 公共 Guo 文本嵌入入口
+
+入口为
+`scripts/run_dailytalk_guo_encoder_npu.py`。这是原TTS模型必需的文本嵌入预处理，不是研究特征挖掘；它不替代声学/vocoder执行或音质评价。公开入口已在服务器实测
+`plan` 和已有29份原结果的
+`verify`，没有导入Torch、改动旧回执或新增模型调用。[入口核验回执](validation/dailytalk-public-encoder-entry-20261101.json)。公共
+`execute` 路径本次未为包装重复运行，既有NPU生成证据与该项验证分别保留。
+
+使用固定原模型身份配置中的distiluse发布文件，先准备原元数据及完整对话输入；环境版本见
+[85项观测约束](../../configs/workload-native/dailytalk-npu-py312-observed.txt)。这是ARM64/Python3.12.13实际运行环境，不是作者锁文件或平台安装脚本；厂商Torch2.10/Torch_npu2.10和CANN须由执行平台提供，不要用普通CPU包替换。原基础Matplotlib3.10.9与合成所需的独立3.9.4绘图overlay分开配置，不合并为一次全局降级。
+
+```bash
+python scripts/run_dailytalk_guo_encoder_npu.py --action plan --prepared <外部准备目录> --metadata-root <原元数据目录> --encoder-root <固定原encoder目录> --output <外部新回执目录>
+python scripts/run_dailytalk_guo_encoder_npu.py --action execute --prepared <外部准备目录> --metadata-root <原元数据目录> --encoder-root <固定原encoder目录> --output <外部新回执目录> --device npu:0 --resource-window-confirmed
+python scripts/run_dailytalk_guo_encoder_npu.py --action verify --prepared <上述准备目录> --metadata-root <原元数据目录> --encoder-root <固定原encoder目录> --output <已有execution-private.json所在目录>
+```
+
+执行前先核查研究占用并设置平台允许的设备映射；`npu:0`相对于当前可见设备，不代表主机物理卡号。默认计划不读取输入或加载模型；`execute`要求显式空闲窗口确认，只允许NPU
+FP32，禁止覆盖已有嵌入。`verify`仅按原文件身份及结果哈希核验，不调用模型。
+
+入口不硬编码29条：按原输入逐句使用 `encode([原文])[0]`，校验完整对话历史、512维及原128-token
+encoder策略。`--source-file`和`--split train/val`可绑定其他原行集合；原行字节、原顺序及整对话关系必须匹配固定元数据，不能提交重写的prompt。其他原集合仍需先按原协议准备；现有自动音频/对话准备配置只验证了登记的三段，不能把本入口参数化等同全量准备已通过。声学/vocoder公开入口已补，实际CI工件研究消费已通过，其他完整对话的自动准备仍按下方未完成项推进。
+
+#### DailyTalk 公共保存结果核验
+
+- [x] `scripts/verify_dailytalk_synthesis_outputs.py`已在服务器对已有29条原合成结果实测`plan/verify`，均退出0。重核原元数据、原请求和历史关系、2份原权重、声学/vocoder各4批、29个WAV全部PCM及29份PNG头部；旧原生回执不变，未导入Torch，新增模型调用0。[公共核验回执](validation/dailytalk-public-synthesis-audit-20261101.json)。
+- [ ] 本入口只验证已保存的原合成工件，不替代完整公开执行入口、最终研究消费或音质评价；来源总勾仍为空。
+
+```bash
+python scripts/verify_dailytalk_synthesis_outputs.py --action verify --prepared <外部原输入准备目录> --metadata-root <固定原元数据目录> --models-root <原900000及universal权重目录> --stage <已有合成stage目录>
+```
+
+`--stage`应包含原`native-execution/state-private.json`和`results/900000/<对话ID>/`；按原文件名逐一匹配，不通过改名、删题或重新生成来修补失败。结果中的非零采样、格式与文件完整性不是音质分数。默认`plan`不读取数据或加载模型。
+
+#### DailyTalk 公共原生合成链路
+
+`scripts/prepare_dailytalk_synthesis_workspace.py`从固定原作者源码创建外部新工作区，逐份校验52份文件及原权重，复核完整对话输入和已有Guo嵌入；原源码和旧输出不覆盖。仅披露两类兼容处理：未使用的DeepSpeaker/G2P分支延迟导入，以及显式NPU设备和原seed绑定。两份YAML只改路径，原模型配置、batch8、900000步权重和10轮历史不变。
+
+`scripts/run_dailytalk_synthesis_npu.py`调用原`batch`合成CLI，使用原FP32声学模型和universal
+HiFi-GAN；显式启用已验证的单实例GRU公式分解，安全权重加载，无CPU/CUDA神经网络回退。执行要求空闲窗口确认、共享互斥文件和最多6GiB的进程分配器预算；这些条件不替代平台调度或研究侧优先检查。默认`plan`不加载模型，已有结果可通过`verify --result-stage`复用。
+
+```bash
+common=(--author-root <固定原作者源码目录> --prepared <外部输入准备目录> --metadata-root <固定原元数据目录> --models-root <原权重目录> --audio-root <原音频根目录> --encoder-output <已有Guo编码回执目录> --stage <外部新stage目录>)
+python scripts/prepare_dailytalk_synthesis_workspace.py "${common[@]}" --action prepare
+python scripts/prepare_dailytalk_synthesis_workspace.py "${common[@]}" --action verify
+PYTHONPATH="<独立Matplotlib3.9.4-overlay目录>${PYTHONPATH:+:$PYTHONPATH}" TMPDIR=/tmp MPLBACKEND=Agg python scripts/run_dailytalk_synthesis_npu.py "${common[@]}" --action execute --device npu:0 --allocator-gib 6 --lease-file <平台共享互斥文件> --resource-window-confirmed
+python scripts/run_dailytalk_synthesis_npu.py "${common[@]}" --action verify --result-stage <已有原合成stage目录>
+```
+
+以上为Bash参数数组示例，尖括号替换为实际外部路径；准备前先按前述入口取得原源码、元数据、原音频、权重和Guo嵌入，激活平台已有CANN环境及独立绘图overlay。当前服务器原安装记录为CANN9.1.0、aarch64；85项Python观测约束不是CANN安装器。保留平台的`ASCEND_HOME_PATH`、`ASCEND_OPP_PATH`、`LD_LIBRARY_PATH`及CANN
+Python路径，绘图overlay只前置追加，不覆盖SDK路径；使用短实例临时目录，避免共享内存管理器的Unix套接字路径过长。不要将示例直接作为平台调度器。执行前检查研究占用和设备映射；失败保留新stage，已有结果不重新生成凑通过。`verify`会重新核验公开工作区和原资产，再读取指定已保存结果，不调用模型。
+
+- [x] 服务器公共准备入口`plan/prepare/verify`均退出0，52文件及42份Python语法检查通过，原作者文件未改，原vocoder符号链接核验通过。
+- [x] 公共合成入口`plan/verify`均退出0，完整PCM核验原29条已保存WAV，无Torch导入、无新增模型调用。[实际入口回执](validation/dailytalk-public-workspace-entry-20261101.json)。
+- [ ] 公共`execute`包装未为整理代码重新运行；既有原流程NPU合成成功回执单列，不把此入口的读取/核验称作第二次真实生成。原协议评价边界已固定，CI工件研究消费已通过，其他原完整对话的自动准备已补，待新增代码CI闭环，来源不打总勾。
+
+#### DailyTalk 实际CI安装包与剩余使用链路
+
+- [x] 提交`70335959`的全量CI `41309439575`和CPU smoke
+  `41309442204`均成功；实际安装CPU工件`13084712746`后，79份提供者文件逐份匹配。复用既有23676条索引，两个原split全部原行字节还原通过，固定29条公共/未修改研究消费者回读相等，原生输入行哈希及参考媒体对应一致；无Torch导入、无新增模型调用。[实际工件回执](validation/dailytalk-actual-ci-research-handoff-20261101.json)。
+- [ ] 默认原音频/Guo输入准备保留前三段，新入口已支持其他原完整对话和全split，条件和实际验证范围见下节。新增代码CI闭环和总交付审计尚未完成，不打来源总勾。
+
+#### DailyTalk 任意原完整对话准备
+
+`prepare_dailytalk_original_guo_inputs.py`保留原固定前三段默认行为，新增`--dialogue-ids`选择任意原完整对话，或`--all-dialogues`选择指定原split的全部对话。`--split train/val`绑定对应原元数据，未知/重复ID、缺失历史、缺失或多余音频turn均报错，不重构缺失请求、音频或目录。原行、原顺序、原10轮历史和原映射文件不变。
+
+```bash
+# 已有发布方固定哈希覆盖的原对话23，不需要重新下载或调用模型。
+python scripts/prepare_dailytalk_original_guo_inputs.py --action prepare --metadata-root <原元数据根目录> --audio-root <包含dailytalk目录的原音频根目录> --output <外部新准备目录> --split val --dialogue-ids 23
+# 其他原完整对话：先从原作者入口取得原ZIP，在服务器外部数据目录原样解压并保留ZIP。
+python scripts/prepare_dailytalk_original_guo_inputs.py --action prepare --metadata-root <原元数据根目录> --audio-root <原解压根目录> --output <外部新准备目录> --split val --all-dialogues --original-audio-archive <原作者ZIP路径>
+```
+
+非固定选择输出`<split>_phone.selected.private.txt`；后续编码器、工作区准备和合成入口应同时传入对应`--split`与`--source-file <上述文件>`。原音频根目录是ZIP解压后`dailytalk/`的父目录，不能指向合成结果目录。其他对话的原WAV会与给定ZIP的同名原成员逐字节比对，并检查CRC/EOF、目录turn集合及原归档大小；未得到发布方完整ZIP摘要，不把大小/成员校验称为完整归档官方SHA认证。此准备入口不下载全量归档，也不创建原WAV占位文件。
+
+- [x] 服务器实测显式选择原对话23的`plan/prepare/verify`，全部12个原turn、真实音频SHA/CRC和原历史与既有原生验证集合的对应子集一致，无Torch/模型调用；完整train22479行与val1197行的原行还原及历史构造通过。[实际准备回执](validation/dailytalk-general-cohort-preparation-20261101.json)。首次把数据输出放入软件目录被安全检查拒绝，已改用独立外部数据目录，未放宽检查。
+- [ ] 非固定原音频的完整ZIP比对分支当前只有明确标注的夹具测试，未取得和验证全量原ZIP；不称全量音频已取得、全split推理已跑完。新增入口的CI闭环及总交付审计仍待完成，来源总勾不变。
+
+#### DailyTalk 原协议及结果含义
+
+本来源采用原作者README的`history_guo`完整对话`batch`语音合成协议，定义见[固定协议](../../configs/workload-native/dailytalk-guo-batch-protocol.json)，不是新增一个自动音质评分benchmark。原作者说明生成某一turn可能依赖对话历史，因此固定抽样按前三段完整对话取29条，保留原音素、原顺序和10轮历史，不按单句拆题。原`evaluate.py`是训练/验证损失循环，与README的合成命令分别登记，不用格式或非零采样冒充MOS、论文评价指标或质量分数。
+
+- [x] 原协议、原模型绑定、完整对话抽样、实际输出核验及兼容变更已明确，原合成NPU证据与公开入口源码/保存结果核验分别保留。
+- [x] 实际CI安装包研究消费已完成，见上方工件回执；全量音频/合成、论文音质评价和流式时间关系未验证，不计为本次已取得能力。
+
+#### DailyTalk 原数据公共适配与研究读取
+
+- [x] 固定原`train_phone.txt`的22479条和`val_phone.txt`的1197条，共23676条；公共适配器逐行保留原5列及原行字节，完整重建两个原文件，SQLite索引全量建立。文本、音素、说话人和情绪作为原TTS输入；对话/turn和相邻原turn关系单列，原音频只作为参考侧定位符，不包装成聊天请求。
+- [x] 固定原生验证的29条经公共`resolve_input`及未修改的研究`resolve_input`回读，完整记录相等；与既有原生输入的行哈希全部匹配，29份原参考音频存在。未启动观测/分析，索引不变，未导入Torch，新增模型调用0。[候选源码联调回执](validation/dailytalk-original-provider-research-20261101.json)。
+- [x] 上述候选源码联调后，实际CI安装包的同等核验也已通过；来源总勾仍需完整准备链路收口。全量参考音频未取得，只有固定三段29份音频实证；其他定位符不表示本地已有文件。原录音和turn顺序也不表示具有流式到达、重叠或打断时间戳。
+
+```python
+from pathlib import Path
+from vllm_hust_workload_data import iter_workload
+
+records = iter_workload("DAILYTALK", data_root=Path("<已按原入口取得的外部元数据根目录>"), files=["preprocessed_data/DailyTalk/val_phone.txt"])
+for record in records:
+    original_tts_inputs = record.task["input"]
+    original_reference = record.outcome_record()["reference_audio"]
+    # 交给原生TTS入口；此处没有模型调用、改写prompt或取得参考音频。
+```
+
+### MLAgentBench：原任务环境准备
+
+- [x] 按作者`get_task_info`两条原生分支补齐读取：1个registry别名和15个真实目录任务定义，服务器逐项核对全部16个入口及原描述字节；未修改的研究消费入口16条读回一致。[原生定义接通回执](validation/mlagentbench-native-definitions-readback-20261102.json)。16是入口数，不是16个独立数据集或论文任务数；`bibtex-generation`、`literature-review-tool`、`llama-inference`缺少发布的`eval.py`，只保留原任务定义，不标为已评分benchmark。
+
+- [ ] 正式固定样本为`cifar10`、`imdb`、`ogbn-arxiv`，见[冻结配置](../../configs/workload-native/mlagentbench-original-directory-fixed3.json)。作者Quick
+  Start使用`--task cifar10`；原默认`debug`虽然共用数据但描述不同，不能代替正式样本。执行入口新增显式`--task`选择，原默认值、步骤及预算不变。
+
+- [x] 原作者版本 `5d71205cc20a8e95d43aa7cb7120e89ca3323e31`
+  的138份软件／任务定义、670271字节已校验，79份Python静态解析通过。15个发布目录含示例，不能据此称论文有15个评测任务；原许可、Agent、准备和评价脚本保留。[源码准备回执](validation/mlagentbench-original-source-preparation-20261101.json)。
+
+- [x] 原CIFAR10完整归档170498071字节通过官方MD5校验；50000训练图、10000测试图只在专用隔离CPU容器加载。公共资产及原任务目录准备入口均已实测。[原任务准备回执](validation/mlagentbench-cifar-original-preparation-20261101.json)。软件及数据均在服务器取得，没有在Windows保存数据或权重。
+
+- [x] 独立CPU任务镜像使用已核验的Python3.10.22／aarch64、Torch2.3.0及TorchVision0.18.0；25份真实Agent
+  SDK轮子逐个对照官方PyPI校验SHA256，离线扩展镜像构建和真实SDK／原runner导入通过。原LLM及runner文件、两处适配差异保留；没有用假SDK或GPT／Claude别名。[任务镜像回执](validation/mlagentbench-cifar-cpu-image-20261101.json)、[Agent环境回执](validation/mlagentbench-local-agent-preparation-20261101.json)。
+
+- [x] 原五轮科学基线和原任务评分器已完成，评分0.5152，仅用于科学环境核验，不替代Agent。[基线回执](validation/mlagentbench-cifar-original-baseline-20261101.json)。
+
+- [x] 原默认 `debug`／CIFAR10 ResearchAgent 与原评分入口完成：实际NPU模型请求13个，原工具动作4步，容器退出0；原生格式重试耗尽，未提交Final
+  Answer，原评分0.3103。失败不换题、不补造答案、不放大原预算，也不称任务效果成功或性能提升。[原执行／评分审计](validation/mlagentbench-default-agent-native-audit-20261102.json)。保留原提示、工具、50步／5小时、编辑4000-token上限、fast0.01参数和原OpenAI-chat分支默认500-token／0.2；本地Qwen3-14B不是作者默认Claude配置。
+
+- [x] 公共读取适配保留原registry别名与目录原描述字节、真实原生ID及科学环境文件关系；评价软件独立放在outcome，不拼成聊天请求，底层科学数据是否取得单独核验。
+
+- [x] 本地构建的真实wheel在服务器安装后，81份包文件逐字节校验；全部138原软件资产校验、原任务索引及未修改研究消费入口读回通过，输入／评价引用一致，数据库未变，未运行研究观测／特征或模型。[本地wheel接通回执](validation/mlagentbench-local-wheel-research-readback-20261102.json)。这是本地源码构建包，不冒称GitHub
+  CI工件。
+
+- [x] 实际绿色CPU CI `41334800512`
+  的wheel已在专用服务器安装：81份包文件逐字节核验、138原软件资产核验、16原生入口与作者API及未修改研究消费入口读回一致。见[同一回执的CI补验](validation/mlagentbench-native-definitions-readback-20261102.json)。不重跑模型，也不把读取成功当作原生任务完成。
+
+- [ ] 补齐三个冻结正式样本的原生协议。`cifar10`、`ogbn-arxiv`执行／原评分已审计，不能解读为任务效果成功；`imdb`原题要求微调DistilBERT。按已授权的任务内部科学程序隔离CPU执行、LLM/辅助编码器/裁判使用NPU的口径推进，不再把任务内部分类器误当作服务端编码器限制；历史隔离NPU初始化失败记录保留。原默认`debug`单独保留，不替代正式样本，不换题补勾。新增原资产离线绑定与科学CPU包锁，来源继续未勾选，须完成实际原Agent及原评分审计。
+
+- [x] 原工作区／私有Docker及持久卷已恢复。作者原生`--resume`／`--resume-step`入口接通，检查任务、实际模型、原预算、轨迹与科学快照；旧日志只读挂载，输出另存。正式CIFAR10从第3步检查点续跑，保留4步原历史；恢复后的第一个请求与原第9个请求完全一致，直接复用原响应，未重复推理／重做4步。
+
+- [x] 正式`cifar10`原生续跑和原评分已核验：共13个真实NPU请求（原段9＋续跑新增4），另有1个准确边界缓存回放；原4步工具历史和10000×10预测文件未变。原Agent格式重试耗尽、未提交Final
+  Answer，原评分0.4803，不能称效果成功。首次评分因原标签数据挂载缺失返回空评分／-1却退出0，已保留；补原数据只读挂载后原评分正常，未改评分器或重跑模型。[正式原题回执](validation/mlagentbench-formal-cifar10-native-audit-20261102.json)。其余冻结任务情况见下，不打来源总勾。
+
+长任务启动前检查执行工作区剩余寿命，至少覆盖原任务上限和收尾窗口。平台中断不记为题目效果失败；作者原生续跑重新建立环境计时，保留各段用时，不冒称无中断运行或性能测量。
+
+- [x] `ogbn-arxiv`完整原始归档83058288字节已在服务器取得，19个原ZIP成员CRC全部通过，未抽子图。公开入口`prepare_mlagentbench_arxiv_assets.py`的verify及已有缓存acquire均通过；摘要为本次官方源下载实测固定值，不冒称发布方提供的校验和。[准备回执](validation/mlagentbench-ogbn-arxiv-preparation-20261102.json)。图算子构建、原任务准备、Agent及评分另行核验，尚不代表原生完成。
+
+- [x] 图采样算子官方源码编译及隔离采样检查通过，公开`prepare_mlagentbench_arxiv_offline.py`执行原`scripts/prepare.py`通过：169343节点、1166243边、40类，train/valid/test分别90941/29799/48603，原划分不变。仅把官方URL下载接到已验证离线原归档；原解包、图处理及任务软件不改。两次准备失败已记录并修复，没有模型调用。
+
+- [x] 公开图环境配方已断网构建并完成采样检查；用其默认线程设置运行原评分器，对保留预测得到完全一致的0.2571857704评分记录，未重跑Agent／训练。默认OMP／OpenBLAS／MKL／NumExpr各2线程，避免受限容器线程耗尽。原生任务此前使用同版本已验证图环境；公开镜像本次核验范围是构建、采样及原评分，不冒称在新镜像重复完成Agent。
+
+- [x] `ogbn-arxiv`原生Agent／原评分／原题消费关系已核验：15个真实NPU请求、4个原工具动作，48603×1预测；原评分0.2571857704，未提交Final
+  Answer且格式重试耗尽。原源码／适配后软件后验、实际CI提供侧与未修改研究入口的完整输入／评价关系均通过。首次评分线程创建失败的空分／-1已保留；只限制库线程数后原评分正常，不改原评分器、不重跑模型。[原生图任务回执](validation/mlagentbench-formal-ogbn-arxiv-native-audit-20261102.json)。IMDb及公开环境终验仍待补，不打来源总勾。
+
+- [x] 公开图环境上下文入口已实测：7份官方软件按固定摘要复用，prepare／verify一致，实际构建上下文与仓库Dockerfile摘要相同，不含数据、权重或研究代码。首次采样回执因转发stdin缺失存为空文件，已保留；修复后只重做CPU小图夹具并确认完整落盘。清理未被使用的失败准备缓存191278556字节，保留原归档、当前缓存及全部结果，可重建。
+
+准备入口：
+
+```bash
+python scripts/prepare_jsonschemabench_author_source.py --source mlagentbench --author-root <外部原源码目录> --action prepare --max-bytes 670271
+python scripts/prepare_mlagentbench_cifar_assets.py --action prepare --parts software --output <外部软件目录> --max-bytes 13995854
+python scripts/prepare_mlagentbench_cifar_assets.py --action prepare --parts data --output <外部原数据目录> --max-bytes 170498071
+python scripts/prepare_mlagentbench_cifar_cpu.py --action prepare --software-root <已验证软件目录> --output <新的外部构建上下文>
+python scripts/prepare_mlagentbench_cifar_workspace.py --action prepare --author-root <完整原源码目录> --data-root <完整原归档目录> --output <新的外部任务目录>
+python scripts/prepare_mlagentbench_local_agent.py --action prepare --author-root <完整原源码目录> --output <新的外部适配目录>
+python scripts/prepare_mlagentbench_arxiv_assets.py --action acquire --data-root <外部原图归档目录> --max-bytes 134217728
+python scripts/prepare_mlagentbench_graph_cpu.py --action acquire --software-root <外部图软件目录> --max-bytes 16777216
+python scripts/prepare_mlagentbench_graph_cpu.py --action prepare --software-root <已验证图软件目录> --output <新的外部图构建上下文>
+# 显式指定前述已验证的Python3.10/aarch64科学CPU Agent基础镜像，不修改原模型服务环境：
+docker build --network none --build-arg BASE_IMAGE=<已验证Agent基础镜像> -t <独立图CPU镜像> <图构建上下文>
+# 仅在具备上述已验证图依赖的专用隔离CPU容器内，使用原任务的全新副本：
+python scripts/prepare_mlagentbench_arxiv_offline.py --task-root <原始ogbn-arxiv任务目录副本> --archive <已验证arxiv.zip> --execute
+```
+
+各准备入口支持显式verify；已有完整资产直接校验复用，不重复下载。下载resume只接受同一公开入口建立的归属记录及原HTTP字节范围；原数据不在宿主机解包／加载pickle。纯准备目录执行原脚本后产生的额外文件不再当作未运行准备目录校验。
+
+执行与评分：
+
+```bash
+# 默认只显示计划；仅在下面规定的专用隔离容器中添加 --execute。
+python scripts/run_mlagentbench_local_agent.py --port-root <已验证适配目录> --queue <独立私有队列> --work-root <新的任务工作目录> --log-root <新的任务日志目录> --model <NPU服务实际模型ID>
+# 正式CIFAR10任务在相同参数后添加 --task cifar10；其他冻结任务同理。
+# 原Agent终止后，在同样隔离的CPU容器中，从 <任务工作目录>/cifar10 运行：
+PYTHONPATH=<已验证适配目录> python -m MLAgentBench.eval --log-folder <原任务日志目录> --task debug --output-file <独立评分目录>/results.json
+```
+
+执行容器必须断网、只读根、移除全部capability并启用no-new-privileges；原科学数据只读挂载，适配软件／任务输出／私有队列分别限定到本任务目录，不挂Docker套接字或凭据。所有生成程序只在容器内执行。原
+`debug` 描述来自原 `tasks.json`，不能替换成目录默认 `research_problem.txt`。包装入口的早期主模块加载错误在创建Agent前退出，已用
+`alter_sys=True` 保留标准 `python -m`
+行为；失败容器／日志仍保留。[启动快照](validation/mlagentbench-original-agent-start-20261102.json)不当最终结果。
+
+可信队列worker只转发原请求给已有或SSH回环转发的NPU服务，可复用
+`scripts/appworld_model_transport.py`；本次跨服务器使用私有缓存HTTP作业和仅内存中转，原请求／响应不落Windows。队列服务覆盖原任务全时段，不能因科学训练暂时无模型请求提前退出。每次请求核验研究侧空闲及共享租约；观测超时检查原句柄和已存结果，不重提相同作业。评分前保留实际runner
+stdout／stderr到原日志目录的 `log` 文件，不补造日志；原最终文件及原科学数据保持一致，不重跑模型凑成绩。Kaggle等其他任务访问条件单独登记，不替使用者接受规则或填写凭据。
+
 ## 打勾规则
 
 - **一个来源一个勾**：先固定至少 3 条原始样本及其 ID，再在指定服务器使用 NPU 完成该来源适用的执行、终止及评分/完整性核验，保存脱敏验证记录后才改成 `[x]`。
@@ -721,7 +3344,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [ ]  | BURSTGPT             | 到达/尺寸等跨任务运行维度                                                                                                                            | 官方首文件已取得并传服务器                       | 当前安装前三条prepare/resolve通过          | 不适用：无原prompt                                            | 不适用：非任务评分                                            | 仅首文件抽样；其他文件/最终工件/消费端待核；不是对话原文                                                                                                                                                                                                                            |
 | [ ]  | CHARTQA              | visual-document-chart                                                                                                                                | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 阻塞：无Qwen3-VL权重，且SSH拒绝重连                           | 未评分                                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，仅读回执；未发视觉模型请求，等待可用视觉模型与服务器连接                                                                                                                                                                  |
 | [ ]  | CROSSCODEEVAL        | repository-completion                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
-| [ ]  | DAILYTALK            | conversation-continuation<br>audio-streaming-interaction                                                                                             | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [x]  | DAILYTALK            | conversation-continuation<br>audio-streaming-interaction                                                                                             | 原23676行全读/索引通过                           | 原Guo完整对话批量合成，非在线流式          | 固定原29条NPU合成，声学/vocoder各4批                          | 实际CI79文件与研究29条回读一致                                | [原生协议回执](validation/dailytalk-fixed3-native-delivery-20261101.json)；全量原ZIP仅夹具分支、非全量音频/合成/MOS，无流式时序证明                                                                                                                                                 |
 | [ ]  | DISCOVERYBENCH       | scientific-experiment-planning<br>simulation-analysis-verification                                                                                   | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [x]  | DOLLY                | general-single-turn-assistant<br>document-grounded-analysis<br>text-summarization<br>text-extraction-classification<br>text-rewriting                | 完整文件SHA已核验                                | 原前三条字段回查                           | NPU生成3条stop                                                | 响应完整性，未评语义正确性                                    | [来源与接入边界](DOLLY_ORIGINAL_INSTRUCTIONS.zh-CN.md)，3/15011；未覆盖其他类别与全量                                                                                                                                                                                               |
 | [ ]  | DS1000               | code-generation-with-tests<br>scientific-coding-workflow                                                                                             | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 原补全3题，1条原预算length                                    | 未功能评分：隔离/依赖待核                                     | [原始生成记录](DS1000_ORIGINAL_GENERATION.zh-CN.md)，原预算1024与后处理顺序不变；非完整任务/全量                                                                                                                                                                                    |
@@ -742,8 +3365,8 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [ ]  | LONGALPACA           | document-grounded-analysis                                                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [x]  | LONGBENCH            | rag-followup<br>document-grounded-analysis                                                                                                           | 官方归档及Qasper校验                             | 安装及原字段隔离验证                       | qasper原3题完成                                               | 官方QA-F1 22.52%                                              | 仅3/200；模型chat传输披露，其他子集未验                                                                                                                                                                                                                                             |
 | [ ]  | LONGBENCH_V2         | document-grounded-analysis                                                                                                                           | 官方文件SHA已核验                                | 服务器同三题完整输入回查                   | 公共入口同三题复验，1条原预算耗尽                             | 官方评分0/3，错误保留                                         | [尝试与范围说明](LONGBENCH_V2_ORIGINAL_ATTEMPT.zh-CN.md)，入口已复验；原预算终态及更长范围未完成                                                                                                                                                                                    |
-| [ ]  | LONGMEMEVAL          | rag-followup<br>conversation-memory-recall                                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
-| [ ]  | LONGMEMEVAL_V2       | evolving-corpus-rag<br>experience-memory-recall                                                                                                      | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [x]  | LONGMEMEVAL          | rag-followup<br>conversation-memory-recall                                                                                                           | 原资产已取得                                     | 原读者／BM25及QA入口已接                   | 原前三题各3条，合计9条已验证                                  | 原QA流程，本地9B judge明确披露                                | 实际CI工件与未修改研究消费者9条完整回读通过                                                                                                                                                                                                                                         |
+| [x]  | LONGMEMEVAL_V2       | evolving-corpus-rag<br>experience-memory-recall                                                                                                      | 原41文件及451条问题／双档haystack保留            | 实际CI87载荷与4处公共／研究读取通过        | 原enterprise/small固定三题正向RAG完成                         | 原本地评分0／1／1，保存审计通过                               | 完整100轨迹建库；在线演化／web／medium运行未验证，不从分类标签推导能力全覆盖。[回执](validation/longmemeval-v2-positive-rag-native-delivery-20261102.json)。                                                                                                                        |
 | [ ]  | LONGVIDEOBENCH       | video-understanding                                                                                                                                  | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [x]  | LONGWRITER           | general-single-turn-assistant                                                                                                                        | 完整文件SHA已核验                                | 原消息/参考隔离回查                        | NPU生成3条stop                                                | 响应完整性，未评质量/篇幅达标                                 | [LongWriter-6k说明](LONGWRITER_ORIGINAL_MESSAGES.zh-CN.md)，训练语料3/6000，不是LongBench-Write评估                                                                                                                                                                                 |
 | [ ]  | MATH500              | standalone-reasoning                                                                                                                                 | OpenAI PRM800K固定版本；500行/500唯一ID及SHA已核 | 当前适配器完整读500行；答案/解答与输入隔离 | H4 Inspect固定前三题入口已提供，尚未NPU执行                   | H4官方4轮/pass_at_1/model_graded_fact待执行                   | [来源与协议及运行命令](MATH500_ORIGINAL_TASK.zh-CN.md)、[本地读取回执](validation/math500-source-read-20261023.json)；PRM800K确定性评分脚本仅作数据包诊断，不冒充H4官方分数；仓库已有200请求性能材料，run绑定评级D，单独保留，不重复做性能                                          |
@@ -755,7 +3378,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [ ]  | MMMU                 | image-understanding<br>visual-document-chart                                                                                                         | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | MOONCAKE             | 到达/尺寸等跨任务运行维度                                                                                                                            | 固定两文件已取得                                 | 全字段读取/建索引，每文件3条回查           | 不适用：无原prompt                                            | 不适用：非任务评分                                            | 最终工件/消费端待核；仅FAST25两文件35639条                                                                                                                                                                                                                                          |
 | [ ]  | MULTINEWS            | text-summarization                                                                                                                                   | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
-| [ ]  | MVBENCH              | video-understanding                                                                                                                                  | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [x]  | MVBENCH              | video-understanding                                                                                                                                  | 完整3895文件校验/公共获取通过                    | 统一4000题/索引与原媒体关系通过            | 固定60题原生完成                                              | 官方exact_matching，34/60                                     | 实际CI62载荷及60条提供侧/当前研究回读通过；完整4000题模型评测未跑。                                                                                                                                                                                                                 |
 | [ ]  | NARRATIVEQA          | rag-followup<br>document-grounded-analysis                                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | NATURAL_INSTRUCTIONS | general-single-turn-assistant<br>structured-generation<br>text-translation<br>text-extraction-classification<br>text-rewriting<br>text-summarization | 固定五个NI指令任务已取得                         | 各任务安装候选前三条回查通过               | 分类102、翻译250、摘要3；新增改写3/实体抽取3                  | 原版函数评分，分任务记录                                      | 原三任务[355实例回执](validation/natural-instructions-original-npu-20261023.json)；[新增6实例回执](validation/ni-editing-extraction-original-npu-20261023.json)，新增批研究消费/CI工件未验；JSON等未测子类不升级                                                                    |
 | [ ]  | NATURALQUESTIONS     | general-single-turn-assistant<br>rag-followup<br>document-grounded-analysis                                                                          | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
@@ -764,7 +3387,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [ ]  | OPENCODE             | code-generation-with-tests<br>code-evaluation                                                                                                        | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | OPENMATH2            | standalone-reasoning                                                                                                                                 | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | OPENTHOUGHTS3        | standalone-reasoning<br>code-generation-with-tests                                                                                                   | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
-| [ ]  | OSWORLD              | desktop-gui-interaction                                                                                                                              | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [x]  | OSWORLD              | desktop-gui-interaction                                                                                                                              | 成功CI工件97软件载荷安装核验                     | 368原任务及统一索引核验                    | 固定原3题真实NPU/GUI流程                                      | 原评分0/0/0，恢复单列                                         | 4项未改研究消费者回读一致；默认依赖锁未改，不宣称全量执行或原始性能                                                                                                                                                                                                                 |
 | [ ]  | PAPERBENCH           | scientific-experiment-planning<br>scientific-coding-workflow                                                                                         | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | PAWS                 | 待分类核对                                                                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | QASPER               | rag-followup<br>document-grounded-analysis                                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
@@ -773,28 +3396,28 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [ ]  | REPOBENCH            | repository-completion                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | RULER                | 待分类核对                                                                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | SCHEMASTORE          | structured-generation                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
-| [ ]  | SCIENCEAGENTBENCH    | scientific-experiment-planning<br>simulation-analysis-verification<br>scientific-coding-workflow                                                     | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 原生任务未跑                                                  | 未评分                                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，非任务执行；原生环境/全量/最终交接未完                                                                                                                                                                                    |
+| [x]  | SCIENCEAGENTBENCH    | scientific-experiment-planning<br>simulation-analysis-verification<br>scientific-coding-workflow                                                     | 原verified102条元数据，原前三题完整科学资产      | 102条原12字段与公共/研究端回查一致         | 原前三题单轮生成与隔离科学执行终态完成                        | 原CodeBERT NPU评分，三题程序失败保留                          | [最终回执及未跑模式](validation/scienceagentbench-fixed3-native-delivery-20261101.json)，不代表全102题执行或其他Agent分支                                                                                                                                                           |
 | [x]  | SCIENCEWORLD         | scientific-experiment-planning<br>simulation-analysis-verification                                                                                   | 原资产7207条、30类已取得                         | 已适配；参考路径与输入分离                 | 固定9原生episode已跑完                                        | 保存作者评分已核验；严格新环境重放未通过                      | 实际CI51安装载荷、7207原字段/索引复用及9研究回读闭环通过；不代表全量模型执行或确定性重放                                                                                                                                                                                            |
 | [ ]  | SPIDER               | structured-generation                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
-| [ ]  | SPOKENWOZ            | conversation-continuation<br>audio-streaming-interaction                                                                                             | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [x]  | SPOKENWOZ            | conversation-continuation<br>audio-streaming-interaction                                                                                             | 原JSON1000对话/35564话轮已核验                   | 固定3+3完整对话，136+120话轮               | 原文本DST 68+60请求全部stop                                   | 官方/独立评分4/68、6/60，低分保留                             | 文本DST抽样协议已交付；音频与其他响应协议另列缺口，未声称全量推理。                                                                                                                                                                                                                 |
 | [x]  | STRUCTEVAL           | structured-generation                                                                                                                                | 官方文件SHA已核验                                | 修正后组件回查50原题                       | Text→JSON原50条全部完成                                       | 官方语法/路径均分0.9616，3条未满分                            | [完整子集回执](validation/structeval-text-json-full-npu-20261022.json)，其他格式/转换未跑                                                                                                                                                                                           |
 | [ ]  | SWE_BENCH            | repository-agent-loop                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | SWE_VERIFIED         | repository-agent-loop                                                                                                                                | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 原生任务未跑                                                  | 未评分                                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，非任务执行；原生环境/全量/最终交接未完                                                                                                                                                                                    |
-| [ ]  | SWESMITH             | repository-agent-loop                                                                                                                                | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [x]  | SWESMITH             | repository-agent-loop                                                                                                                                | 11份原始任务分片已取得                           | 全59,136条读取通过，原七字段保留           | 固定原三题原生执行及预测完成                                  | 官方未解决3/3，错误0/超时0                                    | [交付证据](validation/swesmith-fixed3-native-20261106.json)；当前双端三题接通，原ARM兼容及非全量范围保留                                                                                                                                                                            |
 | [x]  | TAUBENCH             | policy-constrained-service                                                                                                                           | 官方归档SHA已核验                                | 原生任务引用同三条                         | telecom_full 3/3正常结束                                      | 官方环境reward 1、1、0                                        | [完整引用交接回执](validation/tau2-reference-handoff-npu-20261022.json)，其他domain/全量未跑                                                                                                                                                                                        |
 | [ ]  | TOOLACE              | structured-generation<br>tool-call-generation                                                                                                        | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 不适用：历史对话/元数据                                       | 不适用：无原生任务评分                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，非任务执行；原生环境/全量/最终交接未完                                                                                                                                                                                    |
 | [ ]  | TOOLBENCH            | application-api-workflow                                                                                                                             | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | TRACELAB             | interactive-code-editing<br>evolving-corpus-rag<br>repository-agent-loop                                                                             | 服务器已核验选定原文件                           | 原0/1/2三条输入/参考往返                   | 不适用：历史对话/元数据                                       | 不适用：无原生任务评分                                        | [服务器读取记录](PUBLIC_ASSET_SERVER_READINESS.zh-CN.md)，非任务执行；原生环境/全量/最终交接未完                                                                                                                                                                                    |
 | [ ]  | TULU3                | general-single-turn-assistant<br>text-extraction-classification<br>text-rewriting                                                                    | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | ULTRACHAT            | general-single-turn-assistant<br>conversation-continuation                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
-| [ ]  | VIDEOMME             | video-understanding                                                                                                                                  | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [ ]  | VIDEOMME             | video-understanding                                                                                                                                  | 原2700题注释校验通过，完整媒体准备中             | 字段/原视频关系已检查，公共适配待补        | 未跑，计划原始8帧及字幕两profile                              | 未跑                                                          | 学术研究限定、原媒体/原生环境/评分及公共消费待完成；不打勾。                                                                                                                                                                                                                        |
 | [ ]  | VIDEOMME_V2          | video-understanding                                                                                                                                  | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | VISIONARENA          | image-understanding                                                                                                                                  | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | VISUALWEBARENA       | web-navigation-interaction                                                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
-| [ ]  | WAVCAPS              | offline-audio-understanding<br>audio-streaming-interaction                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [x]  | WAVCAPS              | offline-audio-understanding                                                                                                                          | 四组件403050条/12原音频/官方模型已取得           | 原前三条/组件，额外原第4行仅公开入口验证   | 原12条NPU生成与独立审计通过，公开入口第4行通过                | 作者原推理示例；不伪造五参考COCO评分                          | 成功CI注册包及未改研究消费交接通过；不是流式协议或全403050条模型执行。                                                                                                                                                                                                              |
 | [ ]  | WEBARENA             | web-navigation-interaction                                                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | WILDCHAT             | general-single-turn-assistant<br>conversation-continuation                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
-| [ ]  | WORKARENA            | web-navigation-interaction                                                                                                                           | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
+| [ ]  | WORKARENA            | web-navigation-interaction                                                                                                                           | 174份原始公开运行资产已取得                      | 公共归档准备/复核通过，非任务读取或执行    | 未运行Agent                                                   | 未执行官方验证                                                | [公开准备回执](validation/workarena-original-public-preparation-20261102.json)；官方实例池需授权，仍不完成                                                                                                                                                                          |
 | [ ]  | XLAM_TOOL            | structured-generation<br>tool-call-generation                                                                                                        | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | XLSUM                | text-summarization                                                                                                                                   | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
 | [ ]  | XSUM                 | text-summarization                                                                                                                                   | 待复核                                           | 待复核                                     | 未跑                                                          | 未跑                                                          | 待重新核验                                                                                                                                                                                                                                                                          |
@@ -868,7 +3491,23 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 17 个新增候选及适用边界见
 [缺口来源目录](gap-sources-20261021.json)。97项是历史盘点口径；当前交付统一按机器清单的113项统计，另5项仅分类，不用历史数字重新计算完成率。
 
-## 第二批：DeepPlanning 原资产、消费与原生运行（未交付）
+## 后续批次：CodeJudge-Eval 原生固定抽样交付
+
+固定来源为[COLING2025论文](https://aclanthology.org/2025.coling-main.7.pdf)及[作者仓库](https://github.com/CodeLLM-Research/CodeJudge-Eval)，不是其他同名CodeJudge框架。沿用发布数据的完整`input`和独立`answer`，不把代码生成题改写成自制评判题；0/1-shot与easy/middle/hard配置分别保留。该任务是判断给定代码，不是生成并执行代码，不需要为验证判断请求而在宿主运行不可信代码。
+
+论文设temperature0，报告Accuracy与Macro-F1并推荐后者。论文说明用多个正则提取选项，提取失败保留为失败；当前作者仓库只发现说明、许可和图片，未取得该提取器实现，也未核定作者max-token参数。后续若依据论文实现提取/评分，应明确为独立协议实现及声明模型/服务配置，不能冒称作者原脚本或分数复现。先取得原始数据并核对原提示与选项，再接入运行。
+
+服务器已取得六份原JSON，每份1860条、共11160条配置记录，全部大小/LFS校验通过。首次HTTP429失败保留，第二次请求在至少10分钟退避后成功，未绕过限流。安装后的候选数据包完整核验/索引11160行，六配置各前三题共18条经公开及固定研究消费者回读一致；复用公开准备接口对六原文件只读核验通过。使用原始完整input、独立answer和原问题/候选代码/生成模型关系，不重构评判提示。六配置各前三题共18条已在现有Qwen3.5-9B
+BF16 TP1
+NPU上执行，均正常stop。原始请求、参考、响应、独立strict-v1提取与各配置Accuracy/Macro-F1通过零模型调用离线审计。运行明确声明8192输出预算及非思考回退配置，不冒称作者未给出的预算/模型/提取器复现；低分保留。实际CI安装工件及最终交付回执尚未完成，仍不打勾。
+
+公开准备复用`python scripts/prepare_reused_research_assets.py CODEJUDGE_EVAL --mode plan`；获取用`--mode download --data-root <外部新目录>`，必要时显式选择同固定版本`--hf-endpoint https://hf-mirror.com`；已有资产用`--mode verify --data-root <原目录>`只读核验。该接口新增按已审计发布方profile显式选择data角色，旧来源默认raw_source不变，不重复下载已经取得的原文件。
+
+原生入口为`python scripts/run_codejudge_original.py --data-root <原目录> --output <独立新目录> --endpoint http://127.0.0.1:19466/v1 --model <真实模型ID> --api-server-pid <PID> --npu-engine-pid <PID> --max-output-tokens <明确声明的回退预算>`；默认只展示计划，加`--execute`执行，`--full`不抽样，默认六配置各原顺序前三题。验证使用8192输出上限和显式`--disable-thinking`，不把它们标为作者默认。`--resume`只续缺失条目，保留旧状态快照，不重复已保存请求，也不自动重试失败题或换题。各配置分别按原3/6/9选项空间评分，不能混合其不同标签语义。
+
+离线核验使用`python scripts/verify_codejudge_saved.py --data-root <原目录> --native-root <原运行目录> --output <新的外部审计JSON>`，无网络/模型依赖。后台任务使用独立进程会话及日志，避免SSH输出管道关闭中断任务；原生回答、完整请求/响应JSONL及控制台日志仅保留服务器外部目录，不进入Git。
+
+## DeepPlanning：原资产、消费与五类原生抽样交付完成
 
 公开准备：`python scripts/prepare_deepplanning_original_assets.py --output <仓库外新目录>`默认仅展示计划；加`--execute`取得固定作者版本，或加`--reuse-root <已核验资产目录>`复用原始文件。`--verify-only`只读核验68份原文件；服务器下载、离线核验和独立目录复用均已验证。原始任务和数据库不进入Git或本地客户端。
 
@@ -876,9 +3515,15 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 
 购物入口为`python scripts/run_deepplanning_original_shopping.py --assets <原资产目录> --output <独立新运行目录> --endpoint <本地模型API/v1> --model <真实模型ID> --api-server-pid <PID> --npu-engine-pid <PID>`，默认只展示计划，加`--execute`执行。默认每个难度原顺序前三题，可选`--levels 1 2 3`或`--full`；使用作者rerun_ids选择原题，保留原Agent两阶段工具流程、每阶段400调用参数和购物车评分，不缩减输出预算或换题。
 
-旅行入口`scripts/run_deepplanning_original_travel.py`使用相同基础参数并要求`--language en`或`zh`，保留原Agent、报告转换和约束评分三个阶段。报告转换的作者qwen-plus配置显式路由到已声明本地模型；这是模型回退，不是作者转换器分数复现，不启用外部付费API。当前仅完成入口夹具，原题未验证，不计完成。
+旅行入口`scripts/run_deepplanning_original_travel.py`使用相同基础参数并要求`--language en`或`zh`，保留原Agent、报告转换和约束评分三个阶段。报告转换的作者qwen-plus配置显式路由到已声明本地模型；这是模型回退，不是作者转换器分数复现，不启用外部付费API。英文、中文原前三题均已完整运行、转换和评分，保存记录及原逐题/聚合分数已独立重算核验；原聚合分母仍为每语言全部120题，不把抽样聚合当全量质量或样本均分。
 
-安装后的候选数据包已在服务器重建全部360条原记录并建立索引，五个子集各前三题经公开入口和固定研究消费者回读，共15条逐字段一致。旅行meta_info/query_with_constraints保留为参考，不送入原生Agent输入；工具库与原ID关系保留。此证据不是实际CI工件验证，更不是模型任务闭环。购物一级固定前三题已启动，同一原生进程仍在运行；取得原评分、保存结果审计及实际CI证据前不打勾。
+原生旅行结束后，使用同一作者客户端运行`python scripts/verify_deepplanning_travel_saved.py --assets <原始资产目录> --native-root <原运行目录> --output <独立新审计目录>`。入口先拒绝未终结任务，再核验作者原源码、原抽样、提示/输入、工具调用关系、报告及原数据库字节，重算作者评分并与保存结果逐项对照；不调用模型，不覆盖旧评分。作者转换器未保存原始转换请求/响应，因此该审计不声称独立重放转换模型，也不是质量或性能复现。入口夹具通过不能替代真实输出核验。
+
+候选及早期实际CI消费证据保留。当前实际CI工件12763808461（a83dfd58）已在服务器独立安装，52份包内载荷与工件一致；全部360条原记录重建/索引、五个子集各前三条公共及当前研究消费者回读通过。研究当前main与已测试consumer/pipeline/init的字节身份一致，未修改其环境或默认依赖。旅行meta_info/query_with_constraints保留为参考，不送入原生Agent输入；工具与原ID关系保留。
+
+购物三级、英文/中文旅行共五个profile各原前三题、合计15题已执行并完成作者评分及保存结果核验。购物一级原BrokenPipeError仍保留，完整两阶段历史及原评分0/0/1在独立副本恢复，未重跑模型；其他零分、转换重试及中文首次零请求占用拒绝均保留。实际436次guarded
+SDK create尝试与414条保存Agent
+assistant消息分开记录，不虚构差额归因或设备成本。可用全量入口不代表已对全部360题运行模型。[完整交付证据](validation/deepplanning-original-native-delivery-20261028.json)
 
 ## 第二批：ScienceWorld 固定原生抽样交付完成
 
@@ -918,3 +3563,57 @@ profile保留；因此是替代模型的接入验证，不是GPT-4质量复现�
 
 原生Agent基线拟复用作者[SwiftSage论文分支](https://github.com/SwiftSage/SwiftSage/tree/b8ea624231a6a8d83d78c1c12bea1b44b8ea758b)，而非其已转为通用推理的main。该分支要求
 `scienceworld==1.1.3`，已在服务器另建隔离环境安装，不能与1.3.0检查混算。原ReAct流程使用作者提示、test_mini原test首3个variation、100环境步数、最多200次Agent循环、每次50生成token，以及原动作处理和环境评分。作者脚本的easy配置须明确标为作者基线profile，不宣称无简化ScienceWorld或全量论文复现。原生模型执行、保存评分核验及候选研究侧消费已完成；严格新环境重放差异保留，实际CI及原生抽样交付闭环已完成；未通过的严格重放检查不改写成成功。
+
+- [ ] VisualWebArena 原站点与固定原题执行：独立环境已用 Playwright 启动 Chromium 116.0.5845.82 并打开 `about:blank`。作者发布的
+  Classifieds ZIP 已经由临时回环通路取得，25,366,023 字节，ZIP 完整性检查通过，SHA-256
+  `25b560fd0e1d7a8944ab3bb21916ffa2fe63e6272316d22d7bc43da9e7c0bc24`。原 Compose 的
+  `jykoh/classifieds:latest` 注册表仅列 `linux/amd64`，`mysql:8.1` 有 `linux/arm64`。站点镜像摘要见机器清单；注册表报告约 76.9
+  GB，超过共享盘实测 63 GiB 可用空间。先在隔离 amd64 节点核验独立 Docker 数据盘及解包余量，再拉取镜像并验证原站点初始化、登录和重置；随后才执行原题及评分。当前未拉镜像层。
+
+- [ ] NatureBench 固定样本原生结果：第二题已保存的 judge 文本使用作者原版 `judge_core.runner._extract_json` 成功解析，`is_valid`
+  为布尔值 `false`，不是解析错误。服务器保存的重建请求与实际发送请求逐字段比较，只有 `model` 字段不同；保存响应以 `end_turn` 结束，使用 360,566 个输入
+  token、791 个输出 token。尚未核对该判定与同一尝试的评估记录合并后的最终结果。本次比对未重跑推理，不将离线解析视为整项通过。
+
+- [ ] MLAgentBench IMDb：ARM64 Python 3.12 客户端已验证可导入 DistilBERT 分类器及
+  Trainer；[依赖清单](../../configs/workload-native/mlagentbench-imdb-npu-client-supplements.txt)只补客户端。执行须使用可访问指定
+  NPU
+  的专用隔离容器，并保留原执行入口的隔离检查；不要把依赖导入或容器标志当成隔离证明。2026-11-05在现主机的已有Ascend镜像中完成独立Docker软件预检：断网、只读根、非root、cap-drop
+  ALL、NoNewPrivs=1，未挂设备或Docker套接字；只读挂载驱动后DistilBERT与Trainer导入成功。镜像缺datasets、accelerate、dacite，依赖层和隔离NPU训练尚待完成；[实际预检记录](validation/mlagentbench-imdb-host-isolation-preflight-20261105.json)保留首次缺驱动失败，不计来源交付。待完成原
+  IMDb 训练、完整测试集 `submission.csv` 和原版评分；已审计的另外两题不重跑。
+
+  同日复用既有只读依赖目录，在独立断网、无设备、cap-drop ALL及NoNewPrivs容器中成功导入datasets 5.1.0、accelerate
+  1.15.0、DistilBERT和Trainer，0依赖下载；原目录权限为仅所有者可读，因此此导入探测使用容器root，不作为生成代码隔离执行或NPU训练合格证据。后续`pip check`实际失败：依赖层的NumPy
+  2.2.6与triton-ascend要求1.26.4冲突，hub
+  1.33.0需要更高click；基础镜像也有既存依赖冲突。不能将导入成功写成环境整体合格。下一步建立最小任务环境，不全局升级共享镜像；Agent的dacite整合仍待完成。
+  后续最小路径探测退出0：基础镜像site-packages优先，仅补挂兼容PyArrow 21.0.0、datasets 4.0.0及dacite 1.9.2，最后补入现有accelerate
+  1.15.0等缺失包；实际NumPy保持1.26.4、Hub保持1.19.0。原先PyArrow26/NumPy1.26和datasets5.1/Hub1.19两次导入失败均保留。新组合仅证明上述库及Trainer、DistilBERT可联合导入，未证明可分发环境、完整依赖闭包、原Agent或NPU训练合格，不替换历史依赖锁。
+  现执行主机已重新取得固定原作者归档（1878397字节），按既有清单核验138个文件的大小和SHA-256后仅提取清单文件；版本仍为`5d71205cc20a8e95d43aa7cb7120e89ca3323e31`。原ResearchAgent导入尝试未收到容器输出，执行主机SSH随即关闭；状态未知，恢复时先查Docker实际状态，不直接重复启动。共享存储主机仍可确认归档存在。上述均不是IMDb原生执行结果。
+  SSH恢复后已确认无遗留IMDb探测容器。原`MLAgentBench.agents.agent_research`在断网、无设备隔离容器中导入退出0：首次缺原cl100k_base缓存而失败，后从原地址取得文件并核验SHA-256
+  `223921b76ee99bde995b7ff738513eef100fb51d18c93597a113bcffe865b2a7`，只读补挂缓存后通过。原源码未改；可选外部提供商及API-key文件缺失警告保留，未提供外部凭据，0模型调用、0Agent动作，不代表原Agent执行或本地模型绑定已通过。
+  同一最小环境的原短名读取也已实测：断网容器中原`load_dataset("imdb")`返回train=25000、test=25000；只读挂载既有原Parquet，临时缓存随容器销毁，未请求模型或训练。该新环境读取结果不重复计入已完成数据集。
+  已部署当前已提交公共脚本与配置，并用`prepare_mlagentbench_local_agent.py --action prepare`对138份原文件生成、核验披露的本地接口适配；仅原LLM接口和runner的可选导入两处变化，任务与提示未改。独立断网、无设备容器中`import MLAgentBench.runner`退出0；AutoGPT可选依赖警告保留，未选择该Agent。该检查仍为0模型调用、0Agent动作，不等于原题完成。
+  公共组合检查入口已在服务器同一隔离容器实跑退出0：
+
+  ```bash
+  python scripts/check_mlagentbench_imdb_environment.py \
+    --compatibility /opt/compat --supplemental /opt/overlay \
+    --port-root /opt/author --tokenizer-cache /opt/tiktoken-cache \
+    --imdb-root /tmp/imdb
+  ```
+
+  该命令在容器`/tmp`工作目录运行：`/opt/author`是上述prepare产生的已核验适配树，
+  `/opt/tiktoken-cache`为已核验原缓存，`/tmp/imdb`为原Parquet目录；三者只读。
+  `/opt/compat`只补挂PyArrow21、datasets4和dacite包目录，`/opt/overlay`补既有accelerate等包，
+  脚本将两者追加到基础site-packages之后，不覆盖基础NumPy与Hub。 仓库脚本和configs也须一并只读挂载，以核验原文件及适配内容。
+  已验证Docker条件为`--network none --read-only --cap-drop ALL --security-opt no-new-privileges`、
+  内存3GiB、pids128、`/tmp`可写tmpfs128MiB、驱动只读且不挂NPU设备。
+  原runner导入、源码核验及两个25000条划分读取均通过；原可选AutoGPT依赖和无设备警告保留。 这不是生成代码执行容器或NPU训练配方，下一步仍须核验设备授权和原任务流程。
+
+  原Agent启动的Python子进程还需继承同一依赖路径。在专用容器设置
+  `PYTHONPATH=/opt/tooling/configs/workload-native/mlagentbench-imdb-bootstrap`、
+  `MLAGENTBENCH_COMPATIBILITY_DIR=/opt/compat`及`MLAGENTBENCH_SUPPLEMENTAL_DIR=/opt/overlay`；
+  任务自有只读`sitecustomize.py`只追加缺失包路径，基础包仍优先，不改原任务代码。
+  已在服务器断网、无设备容器实测父进程启动新Python，子进程导入NumPy1.26.4及datasets4.0.0退出0。 该项只核验子进程环境继承，原Agent动作、训练和评分仍待执行。
+  在原训练与评分命令各自的工作目录，将已核验的原始 Parquet 分片目录只读挂载为 `./imdb`，并设置
+  `HF_HUB_OFFLINE=1`、`HF_DATASETS_OFFLINE=1`。原脚本无需改动：`load_dataset("imdb")` 会读取本地目录。服务器已逐行比对训练集和测试集各
+  25,000 条，顺序、文本、标签均与发布方分片一致。权重目录另行只读挂载，训练输出写入独立目录。
