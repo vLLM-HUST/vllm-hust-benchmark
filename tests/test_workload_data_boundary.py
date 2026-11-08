@@ -13,6 +13,8 @@ DATA_MODULES = {
     "longmemeval_v2",  # Original memory/data-file relations only, no observation or models.
     "swesmith",  # Original repository task/bug-patch/test partitions only, no execution.
     "mlagentbench",  # Original task registry/software references; no Agent or scientific execution.
+    "mlebench",  # Prepared public NOMAD inputs and geometry references only.
+    "researchcodebench",  # Fixed author paper/code inputs and separate target references only.
     "dailytalk",  # Original phoneme/text/speaker/emotion and dialogue/reference relations only.
     "libritts",  # Original text/reference-wave pairs and chapter IDs only; no synthesis.
     "spokenwoz",  # Original complete dialogue/state/word-time relations, no execution.
