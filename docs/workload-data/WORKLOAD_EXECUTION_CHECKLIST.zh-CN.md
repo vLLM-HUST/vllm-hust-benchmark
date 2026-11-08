@@ -736,15 +736,64 @@ BixBench（固定三题已交付）：固定原题为 `bix-1-q1`、`bix-1-q2`、
 Agent 结果，恢复的 CSV 与历史回执逐字节一致；经兼容补丁及本地 Qwen3-14B 裁判评分，三题均为 0 分。 最终 CI 工件与未修改研究端已复验三条完整记录一致，见
 [交付回执](validation/bixbench-fixed-native-delivery-20261104.json)。
 
-StableToolBench（固定三题已交付，作为 ToolBench 同类替代）：G1 固定原题 588、608、1073 使用作者缓存或官方 MirrorAPI-Cache 模拟后端，均走完
-CoT@1 与 Finish。 以原 `toolbench/tooleval/fac_eval.py` 和固定评估模型完成评分，三题分别为 0、1、1。执行时将外部真实 API
-层设为不可用，保留作者模拟回退，未验证原 ToolBench 在线 API。 已核验 163 条原数据由公共入口和固定研究消费者无损读取；不代表 163 条均实跑，也不代表研究侧已更新部署依赖锁。详见
-[固定三题交付回执](validation/stabletoolbench-fixed3-native-20261105.json)。
+#### StableToolBench 工具调用
+
+用 StableToolBench 完成 ToolBench 对应的工具调用抽样。
+
+[StableToolBench 固定作者版本](https://github.com/THUNLP-MT/StableToolBench/tree/aa4ed9f4737ad98bd706663f01d63623c3427812)
+· [固定三题准备入口](../../scripts/prepare_stabletoolbench_fixed_g1.py) ·
+[ARM64 客户端兼容补丁](../../configs/workload-native/stabletoolbench-lazy-backend-imports.patch)。运行
+`python scripts/prepare_stabletoolbench_fixed_g1.py --instructions <G1_instruction.json> --toolenv <toolenv2404_filtered.tar.gz> --cache <server_cache.zip> --output <新目录>`。原题
+588、608、1073 已完成作者原生 Agent 流程与官方 FAC 评分（0、1、1）。Agent
+和工具服务必须显式使用回环地址；官方缓存未命中会先尝试外连，未隔离前不要启动服务。该运行使用缓存或模拟器响应。
+
+统一数据读取使用 `vllm_hust_workload_data.iter_workload("STABLETOOLBENCH", data_root=<固定官方源码目录>)`，覆盖原 G1 全部
+163 题。每条记录保留原 `query_id`、`query` 和完整 `api_list`；`relevant APIs` 仅作独立参考标注，不进入输入、不据此裁剪工具。
+`vllm_hust_workload_data.stabletoolbench.restore_original_task(record)` 可无损还原原题。安装包读取与固定研究版本
+`analysis_from_source_index` 已在服务器核验全部 163 条；不代表全量原生 Agent
+运行或研究结论。[执行、评分和双端读取回执](validation/stabletoolbench-fixed3-native-20261105.json)。
+
+本地工具服务入口为 [run_stabletoolbench_local_server.py](../../scripts/run_stabletoolbench_local_server.py)：
+
+```bash
+python scripts/run_stabletoolbench_local_server.py --author-server <固定原版server目录> --cache <原始tool_response_cache目录> --tools <原始工具定义目录> --output <新日志目录> --simulator-endpoint http://127.0.0.1:19467/v1 --simulator-model stabletoolbench/MirrorAPI-Cache --port 19468
+```
+
+默认只核验作者文件并生成计划；加 `--execute` 才启动服务。该入口只监听回环地址，阻断外连，不改写缓存；真实 API 层明确返回本地 HTTP
+503，再由作者原代码进入官方模拟器，不代表验证真实 API。官方模拟器权重已核验并在 NPU 上运行，固定三题已完成原生 Agent、官方评分及双端读取核验；按具名同类替代协议交付。调用 Agent
+时设置
+`SERVICE_URL=http://127.0.0.1:19468/virtual`，同时使用原始模型名及[本地模型名兼容补丁](../../configs/workload-native/stabletoolbench-local-model-name.patch)，不使用
+GPT 别名。
+
+在应用上述客户端补丁后的固定官方源码目录中，运行原生 Agent（两个本地模型服务和工具服务就绪后）：
+
+```bash
+SERVICE_URL=http://127.0.0.1:19468/virtual python toolbench/inference/qa_pipeline_multithread.py \
+  --backbone_model chatgpt_function --chatgpt_model Qwen/Qwen3.5-9B \
+  --base_url http://127.0.0.1:19466/v1 --openai_key local-loopback \
+  --tool_root_dir <准备后的toolenv2404_filtered目录> \
+  --input_query_file <准备后的fixed-g1.json> --output_answer_file <新答案目录> \
+  --method CoT@1 --max_observation_length 1024 --single_chain_max_step 50 \
+  --max_query_count 200 --num_thread 1
+```
+
+`local-loopback` 是本地无鉴权接口的占位值，不是凭据。不要传 `--overwrite`：作者该选项会递归删除输出目录。保留原生生成上限 1024
+token；原工具观测上限、步数和查询预算如上，不截断题目或筛除失败题。
+
+如需准备 FAC 评分，准备命令同时传入 `--official-ids <test_query_ids/G1_instruction.json>`。保留三题原始 Agent 输出，用作者的
+`convert_to_answer_format.py --method CoT@1` 转换。新版 OpenAI 消息可能包含 `function_call: null`；须在派生源码目录应用
+[空函数调用兼容补丁](../../configs/workload-native/stabletoolbench-null-function-call.patch)，让原有 `tool_calls`
+或普通文本分支处理消息。补丁不改题目、调用、答案或计分，原源码与失败转换记录保留。转换后先运行
+`python scripts/check_stabletoolbench_fac_inputs.py --instructions <fixed-g1.json> --ids <fixed-g1-fac-ids.json> --answers <转换后的答案.json>`。检查通过后才把相同的答案文件和题号表交给作者
+`fac_eval.py`；缺题应排查原运行，空答案则保留并按作者规则评分。评分器导入依赖包括作者要求的 `accelerate==0.20.3`；在 Ascend
+环境中应先加载工具链，再设置本任务独立依赖目录的 `PYTHONPATH`，避免工具链脚本覆盖该路径。
 
 ToolBench
 原在线协议（未完成，交付清单已用上面的同类替代覆盖）：`scripts/prepare_jsonschemabench_author_source.py --source toolbench-examples --author-root <新目录> --action plan`
 可查看固定作者样例的获取计划。 原仓公开样例已核验 G1/G2/G3 共 10 条，但没有完整原归档、可用原工具后端或 ToolEval 实跑结果。
 第三方归档仅有部分文件与作者字节一致，未核实的部分不作为原数据；StableToolBench 的模拟响应与 API-Bank 的本地工具也不计作 ToolBench 原后端验证。
+
+#### API-Bank 工具调用试跑
 
 API-Bank（同类候选，14 个固定位置已生成并完成兼容评分）：从 [作者仓库](https://github.com/AlibabaResearch/DAMO-ConvAI)
 检出机器清单所列提交，使用其中的 `api-bank/` 作为 `--author-root`。 在独立 Linux ARM64 Python 3.11 环境安装
@@ -754,22 +803,53 @@ API-Bank（同类候选，14 个固定位置已生成并完成兼容评分）：
 离线评分。若复现作者评分器的已知缺参中断， 可用 `--record-missing-end-time` 单独记录失败；不补造参数，不把兼容结果称为未修改的官方成绩。 现有结果中 13
 个位置由原评分器处理，另 1 个位置缺少必填参数，按兼容路径保留失败。离线重放与留存结果逐字节一致，无需重跑推理。 该协议覆盖本地工具调用与评分，不覆盖 ToolBench 的外部 API。
 
-MiniWoB++（补充来源，固定原题已原生验证，不计入 113 项）：从清单所列固定作者提交恢复网页，仅在回环地址启动静态站点，`--site` 指向其 `/miniwob/`。 在 ARM64
-上复用 Playwright Chromium 1117，令 `PLAYWRIGHT_BROWSERS_PATH` 指向浏览器缓存， `FONTCONFIG_SYSROOT`
-指向私有依赖根、`LD_LIBRARY_PATH` 指向该根下的 `usr/lib64`。两道原题均已在 seed 42 下初始化。 使用
+如需导出不含参考答案的原始模型输入，运行 `python scripts/score_api_bank_saved.py --author-root <原源码> --export-inputs`。
+
+#### MiniWoB++ 网页操作
+
+VisualWebArena 条目采用 MiniWoB++
+的固定三道视觉任务。使用[固定作者版本](https://github.com/Farama-Foundation/miniwob-plusplus/tree/33c3b4ddef8c6eb67c57a29663d844b1eda7e614)，仅在回环地址启动静态站点，`--site`
+指向其 `/miniwob/`。在 ARM64 上复用 Playwright Chromium 1117，令 `PLAYWRIGHT_BROWSERS_PATH` 指向浏览器缓存，
+`FONTCONFIG_SYSROOT` 指向私有依赖根、`LD_LIBRARY_PATH` 指向该根下的 `usr/lib64`。两道原题均已在 seed 42 下初始化。 使用
 `scripts/run_miniwob_agentlab.py` 先验证计划；获得 NPU 窗口后，按清单固定预算执行并保留原始奖励、终止状态及失败。 实际 NPU
 验证中，`click-dialog` 在每次 1024 token 配置下 1 步完成、奖励 1.0；`multi-layouts` 在单独的 4096 token 恢复配置下 到达 20
 步上限、奖励 0.0。保留 1024 token 配置的解析失败，两个配置不汇总成同一成绩。 后续还在独立视觉协议下验证了两道原题的截图、坐标动作和原终态奖励，两题均为 0 分；见
 [视觉原生回执](validation/miniwob-visual-native-20261105.json)。它覆盖原生多步浏览器动作，不覆盖登录后业务状态或桌面操作，不替代 WebArena。
 
-WebShop（同类候选，固定三题已验证）：按机器清单锁定作者提交和三份镜像语料，校验 Git 对象后接到作者 `data/`。 在任务私有环境配置 `JAVA_HOME`、Pyserini
-0.17.0 和 `en_core_web_sm` 3.7.1，再执行作者商品转换和 1k 索引命令。 已在 ARM64 验证 1,000 条索引和原生搜索—选商品—购买评分链路。模型验证用
+启动支持图像输入的回环模型服务后，运行下面的命令。每道视觉题使用独立的输出目录。
+
+```bash
+for task in click-dialog multi-layouts click-color; do
+  python scripts/run_miniwob_agentlab.py --task "miniwob.$task" --site "$SITE" \
+    --endpoint "$ENDPOINT" --model "$MODEL" --output "$RESULTS/$task" \
+    --agent-profile visual --max-steps 20 --max-output-tokens 4096 --execute
+done
+```
+
+三题使用固定 seed 42，均在 20 步时终止，原奖励为 0。[三题试跑记录](validation/miniwob-visual-fixed3-native-20261108.json)
+
+统一读取 ID 为
+`MINIWOB_PLUSPLUS`：`vllm_hust_workload_data.iter_workload("MINIWOB_PLUSPLUS", data_root=<原始ZIP所在目录>)`。返回原始任务名及生成器／奖励代码的资产引用，不生成
+prompt；可用 `vllm_hust_workload_data.miniwob.read_native_definition(record, data_root=...)`
+逐字节回查。原环境按显式 seed 生成真正的任务实例和截图。源码有130份定义，当前固定 BrowserGym0.14.2 注册125个环境；执行入口按原注册表检查，不将未支持定义算作已执行。
+
+加 `--agent-profile visual` 使用作者原始 VisualAgent 截图／坐标动作配置，不将 DOM 模式冒充视觉输入。相同两道原题按
+seed42、20步、每次4096输出token验证，43次请求均携带截图；两题均达到步数上限、奖励0，结果如实保留。[视觉原生回执](validation/miniwob-visual-native-20261105.json)。服务端须支持真实图像输入；客户端仅对回环服务使用占位
+API key。启动 Chromium 的任务子进程须移除本环境会触发崩溃的 `LD_PRELOAD`，并显式配置所需的任务级系统库、Fontconfig、Playwright
+浏览器路径；不修改模型服务环境。
+
+#### WebShop 购物试跑
+
+固定三题已完成。按机器清单锁定作者提交和三份镜像语料，校验 Git 对象后接到作者 `data/`。 在任务私有环境配置 `JAVA_HOME`、Pyserini 0.17.0 和
+`en_core_web_sm` 3.7.1，再执行作者商品转换和 1k 索引命令。 已在 ARM64 验证 1,000 条索引和原生搜索—选商品—购买评分链路。模型验证用
 `scripts/run_webshop_original.py --author-root <源码> --endpoint <回环模型地址> --model <模型> --output <新私有文件> --execute`，
 固定会话 0、1、2。对支持该模板选项的 Qwen 服务可加 `--qwen-no-thinking`，另存结果，不与默认配置合并统计。 原配置首题 15 步均未返回可执行动作。非思考配置三题共执行
 45 个有效动作，但均在步数上限内未到达购买终点，没有作者终局评分，不计完成。 保留历史的 15 步配置也未到达终点。正式回合验证加 `--author-episode-budget`：按作者基线允许
 100 步，耗尽时回合分为 0，另保留环境终局奖励字段。 该配置复用作者回合预算与计分，不等同于作者原模型或全量评测。 该配置已在 NPU 跑完固定三题，每题执行 100
 个有效动作，均未完成购买，按作者规则各得 0 分。WebShop 执行与计分已验证；不据此勾选 WebArena。 镜像尚未与作者 Drive 原件独立核对；文本购物流程不覆盖 WebArena
 后台登录或跨站状态。
+
+保存的三题结果可用 `python scripts/run_webshop_original.py --verify-saved-author-budget <结果文件>` 复核。
 
 WorkArena 客户端可复用下述 WebArena/AgentLab CPU 底座。先构建 `local/webarena-client:0.4.2`，再把固定作者源码准备到仓库外专用构建目录的
 `author/`；该构建目录不得放入凭据、数据集或结果。
