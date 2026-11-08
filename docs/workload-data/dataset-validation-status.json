@@ -5414,7 +5414,8 @@
         "isolated_cpu_baseline_seconds": 5.4198267459869385,
         "external_dataset_downloads": 0,
         "native_start_receipt": "mlagentbench-vectorization-native.PruZ2hAP/start-public.json",
-        "status": "SAME_SOURCE_ALTERNATE_ORIGINAL_TASK_STARTED",
+        "status": "SAME_SOURCE_ALTERNATE_ORIGINAL_TASK_EXECUTED_AND_SCORED",
+        "native_delivery_receipt": "docs/workload-data/validation/mlagentbench-fixed3-with-vectorization-native-20261108.json",
         "scope": "Alternate original task for the isolated scientific code-edit, execution and grading workflow. IMDb DistilBERT training and prediction coverage remains separate. The baseline is an environment control, and the original evaluator reads the submitted runtime field.",
         "source_checkbox_eligible": false
       },
@@ -5755,11 +5756,12 @@
       "imdb_host_isolation_preflight_receipt": "docs/workload-data/validation/mlagentbench-imdb-host-isolation-preflight-20261105.json",
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "IN_PROGRESS",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/mlagentbench-fixed3-with-vectorization-native-20261108.json",
+      "replacement_basis": "User authorizes lightweight alternatives. Original author vectorization replaces IMDb in the fixed sample while preserving ResearchAgent code modification, isolated execution and original scoring.",
       "original_source_preparation_receipt": "docs/workload-data/validation/mlagentbench-original-source-preparation-20261101.json",
       "cpu_runtime_inspection_receipt": "docs/workload-data/validation/mlagentbench-cpu-runtime-inspection-20261101.json",
       "public_cifar_software_preparation_receipt": "docs/workload-data/validation/mlagentbench-public-cifar-software-20261101.json",
@@ -5811,7 +5813,8 @@
         "uncertain_or_saved_inference_resubmitted": false
       },
       "original_default_task_assets_profile": "configs/workload-native/mlagentbench-cifar10-original-assets.json",
-  "blocker": "CIFAR10 and ogbn-arxiv valid original evidence reused. IMDb Messages004 ended at original18000s with no submission and original empty/-1 score, not a live task. Original evaluator now independently passes full25000-row known-label controls1.0/0.0 in an isolated offline CPU container, and rejects a missing CSV. These are controls, not model results. The original task explicitly requires DistilBERT finetuning and per-class predictions for all test rows. Remaining: obtain a practical original native Agent execution producing its own submission under the original budget; do not replace it with reference labels or another classifier. Source remains incomplete."
+      "blocker": null,
+      "unfinished_modes": "IMDb DistilBERT fine-tuning and original full test predictions remain unqualified. The prior 18000-second run produced no submission and an original empty/-1 result. Other original tasks were outside the fixed sample."
     },
     "MLEBENCH": {
       "nomad_terminal_delivery_audit_entry_20261107": {

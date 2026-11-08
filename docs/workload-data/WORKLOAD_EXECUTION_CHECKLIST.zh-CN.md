@@ -1,14 +1,15 @@
 # Workload 分类执行清单
 
-当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，109 项已勾选，4 项待完成；另有 5
+当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，110 项已勾选，3 项待完成；另有 5
 项仅分类。 下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
 
-待完成：MLAgentBench、VisualWebArena、WorkArena、PaperBench。
+待完成：VisualWebArena、WorkArena、PaperBench。
 
 ## 轻量替代验证
 
-- **MLAgentBench** 使用同一作者仓库的 `vectorization` 补测科学代码修改、隔离执行和原评分，复用已完成的 CIFAR-10 和 OGBN-Arxiv。原始 NumPy
-  基线和评分器已在断网 CPU 容器跑通，真实 Agent 已启动。IMDb 微调和测试预测保留为独立缺口。
+- **MLAgentBench** 按三题交付。复用 CIFAR-10 和 OGBN-Arxiv，使用同一作者仓库的 `vectorization` 补测科学代码修改、隔离执行和原评分。21 次真实
+  NPU 请求、原评分 5.43596 秒，三组独立数值对照通过。原评分读取提交运行时间，IMDb
+  微调和测试预测另记。[抽样回执](validation/mlagentbench-fixed3-with-vectorization-native-20261108.json)
 - **VisualWebArena** 优先推进 MiniWoB++。复用 `click-dialog` 和 `multi-layouts` 两条已有视觉原生轨迹，再补第三题
   `click-color`。第三题已通过种子 42 的原页面重置和截图验证，待真实视觉 Agent 及原奖励。此配置覆盖视觉定位和浏览器动作，Classifieds 登录和持久业务状态另计。
 - **WorkArena** 的轻量候选是 WorkBench 的原版日历工具流程。已固定 v1 原表位置 0、10、20。原评分器对参考操作判对三题，对空操作判错三题，待真实 Agent
@@ -579,8 +580,8 @@ InfiniteBench（固定抽样已验证）：12 组原生协议均已对固定原�
 先追加 `--capacity-only` 逐题检查，只调用服务的 tokenizer，不生成或评分。 全部放得下时退出码为 0，有超限题时为 2；私有回执保留每题的容量判定。
 正式运行时移除此参数，并使用另一新的输出目录。
 
-MLAgentBench（未完成）：固定 CIFAR-10 和 OGBN-Arxiv 已原生执行并评分，保留负面结果，不重跑。只补固定 IMDb：原题要求微调
-DistilBERT，不能换成其他模型或题目。按已授权的任务内部科学程序隔离 CPU 执行口径部署；Agent 的 LLM 请求、辅助编码器和裁判仍使用 NPU。此前把任务内部分类器也强制限定为
+MLAgentBench（固定替代三题已交付，IMDb 原题缺口保留）：固定 CIFAR-10 和 OGBN-Arxiv 已原生执行并评分，原结果保留。以下记录单独跟踪 IMDb
+的原始协议，原题要求微调 DistilBERT。按已授权的任务内部科学程序隔离 CPU 执行口径部署；Agent 的 LLM 请求、辅助编码器和裁判仍使用 NPU。此前把任务内部分类器也强制限定为
 NPU 的执行限制予以更正，历史 NPU 初始化失败记录保留，不计为成功。
 [CIFAR-10 回执](validation/mlagentbench-formal-cifar10-native-audit-20261102.json) ·
 [OGBN-Arxiv 回执](validation/mlagentbench-formal-ogbn-arxiv-native-audit-20261102.json) 续跑沿用

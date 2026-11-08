@@ -63,4 +63,13 @@ def test_source_preparation_does_not_promote_delivery():
         )
     )
     source = ledger["delivery_inventory"]["MLAGENTBENCH"]
-    assert not source["checked"] and source["delivery_receipt"] is None
+    assert source["checked"]
+    preparation = json.loads(
+        (ROOT / source["original_source_preparation_receipt"]).read_text("utf-8")
+    )
+    assert preparation["source_checkbox_eligible"] is False
+    delivery = json.loads((ROOT / source["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"]
+    assert delivery["original_tasks"] == ["cifar10", "ogbn-arxiv", "vectorization"]
+    assert delivery["vectorization"]["original_grader_exit_code"] == 0
+    assert delivery["vectorization"]["actual_npu_http200_jobs"] > 0
