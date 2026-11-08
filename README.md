@@ -666,7 +666,8 @@ pre-push hook additionally re-checks whitespace / conflict markers on main-bound
 
 ## 按 workload 查找原生 benchmark 与数据资产
 
-本仓库统一提供原始数据获取、读取适配、准备和必要的原生运行入口，方便实验直接复用；不包含研究侧的观测、特征挖掘与分析。**本表为 2026-11-07 的分支交付快照，不代表已合入 main。**
+同学可以按下面的 workload 分类选数据集，查看该数据集的获取方式、依赖、运行命令和已验证范围，再用同一个入口做自己的实验。当前交付在
+[草稿 PR #544](https://github.com/vLLM-HUST/vllm-hust-benchmark/pull/544)。
 
 当前范围为 **40 类 workload、113 项交付来源及 5 项仅分类来源**，其中包含 8 份企业私有请求资产。**113/113 项已交付**；首批 PR
 [#432](https://github.com/vLLM-HUST/vllm-hust-benchmark/pull/432) 固定 60 项，第二批已增加
@@ -674,6 +675,16 @@ ScienceWorld；当前第三批新增CodeJudge-Eval、DeepPlanning、OpenMath、O
 `delivery_inventory` 和[打勾清单](docs/workload-data/DATASET_CHECKLIST.zh-CN.md)为准。
 
 ### 怎么使用、怎么理解状态
+
+第一次使用时，可在对应版本的仓库根目录安装 CLI 和数据组件，然后查询一个来源：
+
+```bash
+python -m pip install -e . -e './workload-preparation[data]'
+workload-data source-plan BBH
+```
+
+例如要跑一道类目下的推理任务，按 BBH 指南取得原始归档，运行 `prepare-bbh-original`，再连接自己的模型服务执行固定抽样。指南列出了完整命令、依赖版本和如何读取评分结果。
+[BBH 从准备到评分](docs/workload-data/BBH_ORIGINAL_INPUTS.zh-CN.md)
 
 1. 从下表选择 workload，再点击来源 ID，查看官方来源、仓库入口和证据。
 1. 按[安装说明](docs/workload-data/INSTALLATION.zh-CN.md)准备数据组件，按对应脚本帮助和[来源使用文档](workload-preparation/README.md)准备独立原生环境。**纯数据
