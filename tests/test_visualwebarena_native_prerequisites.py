@@ -221,7 +221,9 @@ def test_npu_captioner_component_does_not_mark_browser_source_delivered():
     entry = ledger["delivery_inventory"]["VISUALWEBARENA"]
     component = entry["original_caption_helper_npu_component_20261107"]
     receipt = json.loads((ROOT / component["receipt"]).read_text("utf-8"))
-    assert not entry["checked"]
+    delivery = json.loads((ROOT / entry["delivery_receipt"]).read_text("utf-8"))
+    assert entry["delivered_source_id"] == delivery["source_id"] == "MINIWOB_PLUSPLUS"
+    assert entry["delivery_receipt"] != component["receipt"]
     assert not component["source_checkbox_eligible"]
     assert not receipt["source_checkbox_eligible"]
     assert receipt["native_browser_tasks_run"] == receipt["native_scores_produced"] == 0

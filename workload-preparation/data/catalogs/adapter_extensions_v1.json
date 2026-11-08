@@ -26,6 +26,17 @@
       "requirements":["Original GUI task list/setup/evaluator references only; native environment/Agent/scoring separate, no prompt renderer"],
       "status":"ORIGINAL_GUI_TASK_READER_NATIVE_VALIDATION_SEPARATE"
     },
+    "WORKBENCH": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": ["task", "domains"],
+      "required_fields": ["task", "outcome", "base_template", "chosen_template", "domains"],
+      "outcome_fields": ["outcome"],
+      "annotation_fields": ["base_template", "chosen_template"],
+      "id_field": "",
+      "requirements": ["Original v1 calendar table with reference outcomes kept separate from Agent inputs", "Native WorkBench tools and state scoring use the pinned original runtime"],
+      "status": "ORIGINAL_CALENDAR_READER_FIXED_THREE_NATIVE_RUNS_VERIFIED"
+    },
     "MINIWOB_PLUSPLUS": {
       "kind": "task_dataset",
       "mapping": "miniwob_original_html_definitions",

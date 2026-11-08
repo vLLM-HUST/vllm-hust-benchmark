@@ -1,21 +1,22 @@
 # Workload 分类执行清单
 
-当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，110 项已勾选，3 项待完成；另有 5
+当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，112 项已勾选，1 项待完成；另有 5
 项仅分类。 下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
 
-待完成：VisualWebArena、WorkArena、PaperBench。
+待完成：PaperBench。
 
 ## 轻量替代验证
 
 - **MLAgentBench** 按三题交付。复用 CIFAR-10 和 OGBN-Arxiv，使用同一作者仓库的 `vectorization` 补测科学代码修改、隔离执行和原评分。21 次真实
   NPU 请求、原评分 5.43596 秒，三组独立数值对照通过。原评分读取提交运行时间，IMDb
   微调和测试预测另记。[抽样回执](validation/mlagentbench-fixed3-with-vectorization-native-20261108.json)
-- **VisualWebArena** 优先推进 MiniWoB++。复用 `click-dialog` 和 `multi-layouts` 两条已有视觉原生轨迹，再补第三题
-  `click-color`。第三题已通过种子 42 的原页面重置和截图验证，待真实视觉 Agent 及原奖励。此配置覆盖视觉定位和浏览器动作，Classifieds 登录和持久业务状态另计。
-- **WorkArena** 的轻量候选是 WorkBench 的原版日历工具流程。已固定 v1 原表位置 0、10、20。原评分器对参考操作判对三题，对空操作判错三题，待真实 Agent
-  运行。覆盖本地业务工具状态和副作用校验，ServiceNow 浏览器操作另计。
-- **PaperBench** 的轻量候选是 CORE-Bench。按作者测试顺序固定前三个公开可达、压缩包不超过 20 MiB 的 Python 样本，位置为 4、5、6。已取得三份原归档，合计约
-  11.2 MB，作者指引均无 GPU 标记，待验证 CPU 复现和原评分。该候选从已提供的论文复现代码出发，PaperBench 从头实现的能力另计。
+- **VisualWebArena** 使用 MiniWoB++ 的 `click-dialog`、`multi-layouts` 和 `click-color`。三题共 63
+  次真实图像请求，原奖励均为 0，均达到 20 步上限。Classifieds
+  登录和持久业务状态另计。[抽样回执](validation/miniwob-visual-fixed3-native-20261108.json)
+- **WorkArena** 使用 WorkBench v1 原版日历位置 0、10、20。真实 Agent 三题均通过原状态评分，未产生额外副作用。ServiceNow
+  的仪表盘、表单和知识库浏览器任务另计。[抽样回执](validation/workbench-calendar-fixed3-native-20261108.json)
+- **PaperBench** 的轻量候选是 CORE-Bench。已固定位置 4、5、6，三份原归档合计约 11.2 MB。原评分器的参考答案对照为 6/6，空答为 0/6。两份原程序的 CPU
+  对照生成了图表或分类指标；第 6 号样本在 ARM64 上因 NumPy 位运算失败，真实 Agent 评分待补。CORE-Bench 从作者提供的代码出发，PaperBench 从头复现另计。
 
 ## 原40类计划的增量定义（不改变历史快照）
 
@@ -647,7 +648,25 @@ Agent容器断网，无NPU设备或Docker socket；只挂私有队列和原资�
 将其归为视觉预处理设备，不能据此认定它导致文本张量初始化失败。两个执行环境的隔离配置也不完全相同。下一次只在取得独立设备窗口后，先用受信最小张量程序核验托管隔离执行器，
 再验证科学训练；不放宽共享节点策略，不在现有推理服务里运行 Agent 生成代码。
 
-WorkArena（未完成）：使用
+### WorkBench 日历替代协议
+
+检出作者
+[WorkBench 固定版本](https://github.com/olly-styles/WorkBench/tree/49c7dfd00c03d384ec59ea57374f50b766aa5613)，
+保留独立的完整作者目录用于选样和评分。另建 Agent 输入目录，复制作者 `src/`、`data/processed/` 中的运行数据及
+`data/raw/email_addresses.csv`，将 `data/processed/tasks_and_outcomes/` 留在评分侧。固定客户端使用 Python 3.11、
+pandas 2.3.1、openai 1.99.5、tenacity 9.1.2、python-dateutil 2.9.0.post0、pydantic 2.11.7。
+
+```bash
+python scripts/run_workbench_calendar_native.py plan "$AUTHOR" "$COHORT"
+python scripts/run_workbench_calendar_native.py execute "$AGENT_INPUT" "$COHORT" "$PREDICTIONS" --queue "$QUEUE"
+python scripts/run_workbench_calendar_native.py score "$AUTHOR" "$PREDICTIONS" "$SCORE"
+```
+
+在断网 CPU 容器运行 `execute`，只读挂载 Agent 输入及题表，为 `data/results`、输出路径和专用队列提供独立写入目录。 NPU 侧用
+`scripts/appworld_model_transport.py` 的 `--watch --expected-model Qwen/Qwen3.5-9B` 转发同一队列，
+待该模型在私有地址就绪后启动，完成后在队列中写入 `STOP`。`score` 在独立断网 CPU 容器运行，读取保存的预测和作者结果。
+
+WorkArena（以下保留 ServiceNow 原协议）：使用
 `scripts/prepare_workarena_author_source.py --action prepare --archive <官方源码包> --author-root <新目录>`
 准备固定版本，再用同一脚本的 `--action verify --author-root <源码目录>` 核验。官方源码包不是 ServiceNow 实例快照。
 原生验证前须由具备权限的操作者配置官方实例，在隔离浏览器中确认登录、任务初始化与重置可用；凭据不进入仓库。 通过这些前置检查后，才运行固定原题的 Agent 和作者验证器。源码校验和 oracle
