@@ -72,10 +72,11 @@ def terminal_inputs():
     return start, terminal, submission, grade
 
 
-def test_frozen_terminal_grade_audit_keeps_manual_gate():
+@pytest.mark.parametrize("prefix", ["", "[2026-11-08 07:25:27,551] [cli.py:203] "])
+def test_frozen_terminal_grade_audit_keeps_manual_gate(prefix):
     start, terminal, submission, grade = terminal_inputs()
     report = MODULE["audit_terminal"](
-        start, terminal, submission, "grader\n" + json.dumps(grade, indent=2)
+        start, terminal, submission, "grader\n" + prefix + json.dumps(grade, indent=2)
     )
     assert report["official_score"] == 0.4
     assert report["agent_wall_seconds"] == 7200

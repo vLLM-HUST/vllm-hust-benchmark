@@ -6032,11 +6032,12 @@
       },
       "scope": "public",
       "delivery_kind": "review_original_source_protocol",
-      "status": "ORIGINAL_SOFTWARE_ACQUIRED_NATIVE_PENDING",
-      "checked": false,
+      "status": "AVAILABLE",
+      "checked": true,
       "legacy_checked": false,
       "existing_receipt": null,
-      "delivery_receipt": null,
+      "delivery_receipt": "docs/workload-data/validation/mlebench-nomad-native-delivery-20261108.json",
+      "scope_limits": "The single prespecified NOMAD competition with all 240 held-out rows and the original grader. The Kaggle outer archive and other registered competitions were outside this qualification.",
       "author_single_competition_entry_review": {
         "isolated_server_cli_preflight": {
           "client_dependency_snapshot": "configs/workload-native/mlebench-arm64-client-py312.txt",
@@ -6057,7 +6058,7 @@
         "grade_command": "mlebench grade-sample <submission-path> <competition-id>",
         "scope": "Official pinned README; a single original competition can be prepared and graded without downloading the full suite. No competition selection changed and no credentials, data, execution or grade obtained."
       },
-      "blocker": "The official Kaggle transport is still unavailable without authorized credentials. The fixed NOMAD competition author's public distribution, original preparation outputs and sample grading path have been verified independently. Actual isolated Agent execution, its submission and original grading still required; no other competition data implied.",
+      "blocker": null,
       "official_protocol_url": "https://github.com/openai/mle-bench#dataset",
       "original_software_preparation": {
         "revision": "507f92e1138bb6e40dac5c6ee7a6758e6424bf97",
@@ -6313,14 +6314,27 @@
       }
     },
     "VISUALWEBARENA": {
+      "official_classifieds_direct_retry_20261108": {
+        "status": "PINNED_AMD64_PULL_STARTED_AFTER_VERIFIED_GUESTFWD_RANGE",
+        "start_receipt": "workload-vwa-classifieds-w0bxbzsz/pull-start-public.json",
+        "guestfwd_receipt": "workload-vwa-classifieds-w0bxbzsz/registry-guestfwd-public.json",
+        "retention_lease_receipt": "workload-vwa-classifieds-w0bxbzsz/retention-lease-public.json",
+        "official_range_bytes_verified": 8388608,
+        "guest_disk_gib": 150,
+        "npu_devices_exposed": false,
+        "retention_lease_resources": 17,
+        "source_checkbox_eligible": false
+      },
       "official_classifieds_original_pull_interruption_20261108": {
         "status": "OFFICIAL_IMAGE_PULL_SHORT_READ_AFTER_REVERSE_FORWARD_LOSS",
         "receipt": "workload-vwa-classifieds-fs7dvpw_/pull-transport-interruption-public.json",
+        "main_disk_cleanup_receipt": "workload-vwa-classifieds-fs7dvpw_/main-disk-cleanup-public.json",
         "original_pull_exit_code": 1,
         "official_layer_expected_bytes": 76642798711,
         "official_layer_read_before_eof_bytes": 23140130332,
         "reverse_forward_listener_present_at_audit": false,
         "resumable_containerd_ingest_present_at_audit": false,
+        "main_disk_removed_after_guest_exit": true,
         "original_site_started": false,
         "source_checkbox_eligible": false
       },
@@ -6662,7 +6676,7 @@
         "inspected_reddit_rows_with_explicit_images": 3,
         "scope": "Static dependency audit only, not a new execution selection. None of these splits uses WebArena shopping_admin as its site."
       },
-      "blocker": "The pinned AMD64 Classifieds pull on the dedicated 150 GiB CPU guest ended after reverse forwarding was lost. The largest layer stopped at 23,140,130,332 of 76,642,798,711 bytes, with no resumable ingest retained. A bounded nonzero Range test verified the direct guest-to-host path. A new bounded pull needs retry authorization and a working registry egress relay before original site initialization and native execution/scoring for Classifieds 0/1/2.",
+      "blocker": "The first pinned AMD64 Classifieds pull ended after reverse forwarding was lost and retained no resumable ingest. The user-authorized single retry started in a new 150 GiB CPU guest after a verified nonzero Range test through guestfwd. Full acquisition and unpack, original site initialization, and native execution and scoring for Classifieds 0/1/2 remain pending.",
       "original_source_preparation": {
         "revision": "89f5af29305c3d1e9f97ce4421462060a70c9a03",
         "files_verified": 511,

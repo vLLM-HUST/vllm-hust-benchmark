@@ -124,7 +124,11 @@ def audit_terminal(start, terminal, submission_audit, grader_log):
         raise ValueError("frozen submission identity and valid official grade required")
     results = []
     decoder = json.JSONDecoder()
-    for match in re.finditer(r"(?m)^\s*\{", grader_log):
+    report_start = (
+        r"(?m)^[ \t]*(?:\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}\]"
+        r" \[cli\.py:\d+\] )?\{"
+    )
+    for match in re.finditer(report_start, grader_log):
         try:
             value, _ = decoder.raw_decode(grader_log, match.end() - 1)
         except ValueError:

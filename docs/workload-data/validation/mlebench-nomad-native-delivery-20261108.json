@@ -1,0 +1,56 @@
+{
+  "schema_version": "native-source-delivery-audit/v1",
+  "source_id": "MLEBENCH",
+  "qualified_protocol": "One prespecified original NOMAD competition, with the full prepared test split, original AIDE budgets, and original MLE-bench grading",
+  "competition_id": "nomad2018-predict-transparent-conductors",
+  "publisher_revision": "507f92e1138bb6e40dac5c6ee7a6758e6424bf97",
+  "aide_revision": "d4a77cf3ca11e0f70749052b2701003e32bc245a",
+  "model": "Qwen/Qwen3.8-27B",
+  "entries": {
+    "prepare_and_read": "scripts/prepare_mlebench_nomad_author_data.py",
+    "execute": "scripts/run_mlebench_nomad_aide.py",
+    "audit": "scripts/audit_mlebench_nomad_submission.py"
+  },
+  "original_run": {
+    "steps_limit": 500,
+    "time_limit_seconds": 86400,
+    "per_step_timeout_seconds": 32400,
+    "transport_request_wait_seconds": 3600,
+    "wall_seconds": 86400.910016,
+    "agent_exit_code": 124,
+    "original_launcher_exit_code": 124,
+    "oom_killed": false,
+    "real_model_requests": 46,
+    "successful_model_responses": 46,
+    "journal_and_best_solution_retained": true,
+    "runtime_profile": "Isolated ARM64 CPU science executor and split validator, with the existing NPU model endpoint and the author convert_system_to_user option"
+  },
+  "frozen_submission_and_grade": {
+    "rows": 240,
+    "ids_match_public_test_order": true,
+    "predictions_finite": true,
+    "sha256": "251956faa1b790f857c8903f9ef3ace7d8f6685259f78798e9da010986e404a1",
+    "original_grader_exit_code": 0,
+    "original_grader_valid_submission": true,
+    "metric": "mean-column-wise-rmsle",
+    "official_score": 0.06022,
+    "lower_is_better": true,
+    "private_labels_mounted_only_for_validation_and_grading": true
+  },
+  "evidence": {
+    "terminal_receipt": "mlebench-nomad-real.MgBAxT/terminal-original-score/terminal-public.json",
+    "terminal_receipt_sha256": "dcb3dc143e3c3ad2c989c8ff7827f8c3151b1609c67d15285a880d5f2aa84a02",
+    "original_grade_log_sha256": "2d4ca10352c178ecf7e8f9cb67e11af91133a4adc290b945d288634b20f65d9c",
+    "read_only_audit_receipt": "mlebench-nomad-delivery-audit.3KFj62Zz/audit-public.json",
+    "public_input_readback": "nomad-public-readback.lGv0VK/readback-public.json",
+    "public_train_rows": 2160,
+    "public_test_rows": 240,
+    "public_sample_submission_rows": 240,
+    "geometry_references_resolved": 2400,
+    "candidate_wheel_source_commit": "d52d1752a415de7b7bce0c611cde76655892d425",
+    "candidate_wheel_sha256": "2e6e387cb64f6b41e536a0ee224d88308b671efd35fc02dafa1ed35b1a9e8e98",
+    "candidate_wheel_payloads_match_installed": 98
+  },
+  "scope_limits": "The competition author's public distribution produced all four expected prepared files. The Kaggle outer archive, the other registered competitions, and the research main dependency pin are outside this qualification.",
+  "source_checkbox_eligible": true
+}
