@@ -945,7 +945,7 @@
         "offline"
       ],
       "deployment_topology": "separate_application",
-      "delivery_model": "source_toolkit",
+      "delivery_model": "python_distribution",
       "ownership": "hust_owned_subsystem",
       "maintainers": [
         "aly16-k"
@@ -967,12 +967,12 @@
       "maturity": "experimental",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-quant-hust",
       "upstream_repository": null,
-      "summary_en": "Offline model-artifact preparation toolkit with a bundled fail-closed artifact validator. The validator is a toolkit subcomponent, not a second runtime MOD; serving activation still requires typed vLLM Ascend loader/operator contracts. Public package publication is blocked pending an owner license declaration.",
-      "summary_zh": "离线模型产物制备工具，包含 fail-closed 产物校验器。该校验器是工具子组件，不是第二个运行时 MOD；服务激活仍需 vLLM Ascend typed loader/operator 合同。公共包发布仍等待负责人声明许可证。",
-      "public_effect_en": "Offline artifact preparation and contract validation only. CPU smoke tests cover versioned metadata generation and rejection of unknown schemas, layouts, or operator configurations; no online latency, throughput, quality, or NPU runtime benefit is claimed.",
-      "public_effect_zh": "仅用于离线产物准备和合同校验。CPU smoke 覆盖版本化元数据生成，以及对未知 schema、布局或算子配置的拒绝；不声明在线延迟、吞吐、质量或 NPU 运行时收益。",
+      "summary_en": "Licensed and buildable Ascend Quant Toolkit 0.5.0 source with a bundled fail-closed artifact validator and the Qwen3.5-35B-A3B W4A8 plus GDN W8A8 mixed-precision recipe. The validator is a toolkit subcomponent, not a second runtime MOD; serving activation still requires typed vLLM Ascend loader/operator contracts. PyPI publication remains a release/account step after repository acceptance.",
+      "summary_zh": "已具备许可证、可构建包与 fail-closed 产物校验的 Ascend Quant Toolkit 0.5.0 源码，并纳入 Qwen3.5-35B-A3B W4A8 + GDN W8A8 混合精度 recipe。校验器是工具子组件，不是第二个运行时 MOD；服务激活仍需 vLLM Ascend typed loader/operator 合同。PyPI 发布仍是仓库验收后的 release/账户步骤。",
+      "public_effect_en": "Offline artifact preparation and contract validation only. The accepted package passed its three-version CPU CI, build and wheel/sdist checks; mixed-scheme metadata, shard inventory and fail-closed rejection are covered, but no online latency, throughput, quality, or NPU runtime benefit is claimed.",
+      "public_effect_zh": "仅用于离线产物准备和合同校验。已验收包通过三个 Python 版本的 CPU CI、构建与 wheel/sdist 检查，覆盖混合 scheme 元数据、shard 清单及 fail-closed 拒绝；不声明在线延迟、吞吐、质量或 NPU 运行时收益。",
       "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-ascend-quant-hust",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-ascend-quant-hust/tree/7fa9222f84bacaf190814e763691ac52e6bfbaa0",
       "evidence_level": "cpu_smoke"
     },
     {
@@ -3360,14 +3360,14 @@
         "models": [
           "Qwen3.5 GDN family; result-specific scope applies"
         ],
-        "requirements_en": "Static decay is source-bound and has emitted cache and first-candidate receipts on both TP ranks. Native delayed still requires a current-runner lifecycle rewrite; static decay still needs three alternating Native/candidate pairs and the frozen quality workload.",
-        "requirements_zh": "静态衰减已绑定当前 Host，并在两个 TP rank 上产生缓存准备与首次候选命中回执；Native delayed 仍需按当前运行器重写生命周期，静态衰减仍须完成三组 Native/候选交替测试与冻结质量工作负载。"
+        "requirements_en": "Static decay is source-bound, default-off, and formally measured on the fixed Qwen3.5-35B-A3B BF16 TP2 Ascend 910B2 cell. Native delayed still requires a current-runner lifecycle rewrite; other hosts, models and workloads require separate qualification.",
+        "requirements_zh": "静态衰减已绑定当前 Host、保持默认关闭，并在固定 Qwen3.5-35B-A3B BF16 TP2 Ascend 910B2 单元完成正式测量；Native delayed 仍需按当前运行器重写生命周期，其他 Host、模型与工作负载须单独验收。"
       },
-      "evidence_level": "retest_pending",
-      "public_effect_status": "inconclusive",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/5c6f3496cc970f9cd85bef91ca59d40c7f06b8ac/reports/reorganized-mod-current-host-port-20261107",
-      "public_effect_en": "Static decay passed current-Host source checks and a two-rank Ascend 910B2 activation smoke: each rank prepared 18 cache entries and entered the candidate kernel, and inference returned OK. Performance and quality qualification remain pending; legacy measurements are source records only.",
-      "public_effect_zh": "静态衰减已通过当前 Host 源码检查及双 rank Ascend 910B2 激活冒烟：每个 rank 均准备 18 个缓存项并进入候选内核，推理返回 OK。性能与质量验收仍待完成，旧测量仅保留为来源记录。"
+      "evidence_level": "measured",
+      "public_effect_status": "neutral",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/gdn-static-decay-formal-retest-20261107",
+      "public_effect_en": "Formal Qwen3.5-35B-A3B BF16 TP2 testing completed three alternating fresh-process pairs. Throughput changes were +0.292%, +0.214%, and -0.516% (geometric aggregate -0.004%); TTFT/TPOT changes were also sub-percent. All 210 paired quality outputs and reasoning hashes were exact. Static decay is qualified as quality-equivalent in this cell, but no stable speedup is demonstrated.",
+      "public_effect_zh": "固定 Qwen3.5-35B-A3B BF16 TP2 正式测试完成三组新鲜进程交替配对。吞吐变化为 +0.292%、+0.214%、-0.516%（几何汇总 -0.004%），TTFT/TPOT 变化也低于 1%；210 条配对质量输出及推理哈希全部一致。静态衰减在本单元可认定质量等价，但未证明稳定加速。"
     },
     {
       "id": "runtime-micro-optimizations",
@@ -3422,14 +3422,14 @@
         "models": [
           "Result-specific model and workload scope"
         ],
-        "requirements_en": "Empty-padding, query-start-location reuse and residual-scale cache are source-bound, default-off, and activation-qualified on both TP ranks. Three alternating Native/candidate pairs and the frozen quality workload are still required.",
-        "requirements_zh": "空 padding、query-start-location 复用和 residual-scale 缓存已绑定当前 Host、保持默认关闭，并已在两个 TP rank 上完成激活资格校验；仍须完成三组 Native/候选交替测试与冻结质量工作负载。"
+        "requirements_en": "Empty-padding, query-start-location reuse and residual-scale are source-bound, default-off, and formally measured on the fixed Qwen3.5-35B-A3B BF16 TP2 Ascend 910B2 cell. Other hosts, models and workloads require separate qualification.",
+        "requirements_zh": "空 padding、query-start-location 复用和 residual-scale 已绑定当前 Host、保持默认关闭，并在固定 Qwen3.5-35B-A3B BF16 TP2 Ascend 910B2 单元完成正式测量；其他 Host、模型与工作负载仍须单独验收。"
       },
-      "evidence_level": "retest_pending",
-      "public_effect_status": "inconclusive",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/5c6f3496cc970f9cd85bef91ca59d40c7f06b8ac/reports/reorganized-mod-current-host-port-20261107",
-      "public_effect_en": "All three retained mechanisms emitted install and first-exercise receipts on both Ascend 910B2 TP ranks, and inference returned OK. The old RoPE repair is retired as absorbed. Performance and quality qualification remain pending; legacy measurements are source records only.",
-      "public_effect_zh": "三个保留机制均已在两个 Ascend 910B2 TP rank 上产生安装与首次实际命中回执，推理返回 OK；旧 RoPE 修复因已被底座吸收而退役。性能与质量验收仍待完成，旧测量仅保留为来源记录。"
+      "evidence_level": "measured",
+      "public_effect_status": "neutral",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/runtime-micro-formal-retest-20261107",
+      "public_effect_en": "Formal Qwen3.5-35B-A3B BF16 TP2 testing completed three alternating fresh-process pairs. Throughput changes were +0.841%, -0.494%, and -0.213% (geometric aggregate +0.043%); TTFT/TPOT changes were also sub-percent. All 210 paired quality outputs and reasoning hashes were exact. The MOD is qualified as quality-equivalent in this cell, but no stable speedup is demonstrated.",
+      "public_effect_zh": "固定 Qwen3.5-35B-A3B BF16 TP2 正式测试完成三组新鲜进程交替配对。吞吐变化为 +0.841%、-0.494%、-0.213%（几何汇总 +0.043%），TTFT/TPOT 变化也低于 1%；210 条配对质量输出及推理哈希全部一致。本单元可认定质量等价，但未证明稳定加速。"
     },
     {
       "id": "ascend-attention-optimizations",
