@@ -18,12 +18,30 @@ from urllib.request import Request, urlopen
 from verify_infinitebench_original_code import verify
 
 
-def select(rows, *, start=0, count=3, full=False):
+def select(rows, *, start=0, count=3, full=False, partial_positions=None):
+    if partial_positions is not None:
+        if full or start != 0 or count != 3:
+            raise ValueError(
+                "partial positions cannot combine with a range or full selection"
+            )
+        if not partial_positions or sorted(set(partial_positions)) != list(
+            partial_positions
+        ):
+            raise ValueError("partial positions must be unique and in source order")
+        if partial_positions[0] < 0 or partial_positions[-1] >= len(rows):
+            raise ValueError("partial position outside original data")
+        return [(index, rows[index]) for index in partial_positions]
     if full:
         if start != 0 or count != 3:
             raise ValueError("full selection cannot combine with a range")
         return list(enumerate(rows))
-    if start < 0 or count < 3 or start + count > len(rows):
+    final_tail = 0 < count < 3 and start > 0 and start + count == len(rows)
+    if (
+        start < 0
+        or count <= 0
+        or (count < 3 and not final_tail)
+        or start + count > len(rows)
+    ):
         raise ValueError("preselect at least three original positions within range")
     return list(enumerate(rows))[start : start + count]
 
@@ -45,8 +63,12 @@ def execute(
     count=3,
     full=False,
     disable_thinking=False,
+    capacity_only=False,
+    partial_positions=None,
 ):
-    selected = select(rows, start=start, count=count, full=full)
+    selected = select(
+        rows, start=start, count=count, full=full, partial_positions=partial_positions
+    )
     if template not in utils.MODEL_TO_PROMPT_TEMPLATE:
         raise ValueError("explicit author template profile required")
     if task not in utils.DATA_NAME_TO_MAX_NEW_TOKENS:
@@ -62,6 +84,7 @@ def execute(
         "scorer_model_name": model,
         "selected_original_positions": [index for index, _ in selected],
         "full_selection": full,
+        "partial_evidence_only": partial_positions is not None,
         "max_new_tokens": budget,
         "completed_original_positions": [],
         "attempted_original_positions": [],
@@ -83,6 +106,29 @@ def execute(
 
     save()
     try:
+        if capacity_only:
+            checks = []
+            for index, row in selected:
+                messages, _ = utils.create_msgs(
+                    None, row, task, data_dir=str(data_dir), model_name=template
+                )
+                tokens = token_count(messages)
+                if type(tokens) is not int or tokens < 1:
+                    raise ValueError("invalid tokenizer response")
+                checks.append(
+                    {
+                        "row_index": index,
+                        "input_tokens": tokens,
+                        "fits": tokens + budget <= context_limit,
+                    }
+                )
+            receipt.update(
+                status="CAPACITY_ONLY_NO_GENERATION",
+                capacity_checks=checks,
+                context_limit=context_limit,
+                all_selected_fit=all(check["fits"] for check in checks),
+            )
+            return receipt
         predictions, labels = [], []
         with (output / "predictions-private.jsonl").open(
             "x", encoding="utf-8"
@@ -167,9 +213,11 @@ def execute(
         ):
             raise ValueError("official scorer returned invalid aggregate")
         receipt.update(
-            status="SELECTED_ORIGINAL_TASKS_AND_AUTHOR_SCORE_COMPLETE",
+            status="PARTIAL_ORIGINAL_EVIDENCE_ONLY"
+            if partial_positions is not None
+            else "SELECTED_ORIGINAL_TASKS_AND_AUTHOR_SCORE_COMPLETE",
             score=score,
-            native_execution_complete=True,
+            native_execution_complete=partial_positions is None,
         )
     except Exception as exc:
         receipt.update(status="FAILED_NOT_COMPLETE", error_type=type(exc).__name__)
@@ -188,16 +236,43 @@ def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--template", required=True)
     parser.add_argument("--context-limit", type=int, required=True)
+    parser.add_argument(
+        "--request-timeout",
+        type=float,
+        default=600,
+        help="Finite positive HTTP wait in seconds; does not alter original generation budget or enable retry",
+    )
     parser.add_argument("--endpoint", default="http://127.0.0.1:19466/v1")
     parser.add_argument("--start", type=int, default=0)
     parser.add_argument("--count", type=int, default=3)
     parser.add_argument("--full", action="store_true")
+    parser.add_argument(
+        "--offline-rouge",
+        type=Path,
+        help="Existing trusted cached Evaluate rouge.py; no metric download",
+    )
+    parser.add_argument(
+        "--offline-rouge-sha256", help="Expected SHA-256 of the cached metric source"
+    )
+    parser.add_argument(
+        "--partial-original-position",
+        type=int,
+        action="append",
+        help="Run exact original positions as partial evidence, never count as native completion",
+    )
+    parser.add_argument(
+        "--capacity-only",
+        action="store_true",
+        help="Tokenize only; never generate or score",
+    )
     parser.add_argument(
         "--disable-thinking",
         action="store_true",
         help="Explicit compatible model transport option; original task prompt and budget unchanged",
     )
     args = parser.parse_args()
+    if not math.isfinite(args.request_timeout) or args.request_timeout <= 0:
+        raise ValueError("positive finite request timeout required")
     route = urlparse(args.endpoint)
     if (
         route.scheme != "http"
@@ -235,15 +310,42 @@ def main():
     data_identity = verify_file(args.data_root, spec)
     sys.path.insert(0, str(args.official_checkout.resolve() / "src"))
     utils = importlib.import_module("eval_utils")
-    scorer = importlib.import_module("compute_scores")
-    from openai import OpenAI
+    scorer = client = None
+    if not args.capacity_only:
+        if args.offline_rouge or args.offline_rouge_sha256:
+            if not args.offline_rouge or not args.offline_rouge_sha256:
+                raise ValueError(
+                    "offline ROUGE requires both cached source and its SHA-256"
+                )
+            rouge = args.offline_rouge.resolve(strict=True)
+            if (
+                rouge.name != "rouge.py"
+                or hashlib.sha256(rouge.read_bytes()).hexdigest()
+                != args.offline_rouge_sha256
+            ):
+                raise ValueError("offline ROUGE source identity mismatch")
+            import evaluate
+            from unittest.mock import patch
 
-    client = OpenAI(
-        base_url=args.endpoint,
-        api_key="local-only",  # pragma: allowlist secret - dummy for loopback-only service, not a credential
-        max_retries=0,
-        timeout=600,
-    )
+            original_load = evaluate.load
+            with patch.object(
+                evaluate,
+                "load",
+                lambda name, *a, **kw: original_load(
+                    str(rouge) if name == "rouge" else name, *a, **kw
+                ),
+            ):
+                scorer = importlib.import_module("compute_scores")
+        else:
+            scorer = importlib.import_module("compute_scores")
+        from openai import OpenAI
+
+        client = OpenAI(
+            base_url=args.endpoint,
+            api_key="local-only",  # pragma: allowlist secret - dummy for loopback-only service, not a credential
+            max_retries=0,
+            timeout=args.request_timeout,
+        )
 
     def token_count(messages):
         payload = {
@@ -279,6 +381,8 @@ def main():
         count=args.count,
         full=args.full,
         disable_thinking=args.disable_thinking,
+        capacity_only=args.capacity_only,
+        partial_positions=args.partial_original_position,
     )
     try:
         verify_file(args.data_root, spec)
@@ -313,6 +417,8 @@ def main():
         )
     )
 
+    return 2 if args.capacity_only and not receipt["all_selected_fit"] else 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

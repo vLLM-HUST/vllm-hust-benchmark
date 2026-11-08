@@ -1,0 +1,20 @@
+{
+  "schema_version": "dragon-inherited-runtime/v1",
+  "scope": "Observed existing NPU runtime, not an author lock or a request to install/upgrade these packages",
+  "python": "3.12.13",
+  "architecture": "aarch64",
+  "protected_versions": {
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "transformers": "5.5.4",
+    "numpy": "1.26.4",
+    "tokenizers": "0.22.2",
+    "vllm": "0.23.0+empty"
+  },
+  "install_into_serving_environment": false,
+  "model_device_execution_verified": false,
+  "base_pip_check_exit": 1,
+  "inherited_dependency_issues": 11,
+  "new_client_dependency_issues_after_compatibility_repairs": 0,
+  "boundary": "Version metadata does not prove a live NPU device or model execution. Inherited SDK/profiler/global-package issues remain disclosed; no whole-runtime clean pip-check claim. This profile is only for reproducing the observed isolated client. Different base runtimes require their own dependency resolution and real device qualification."
+}

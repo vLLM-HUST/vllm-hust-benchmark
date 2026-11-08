@@ -76,9 +76,16 @@ def test_local_execution_does_not_inherit_cloud_key_or_export_agent_traces(
     monkeypatch.setenv("OPENAI_API_KEY", "software-fixture-key")
     monkeypatch.setenv("OPENAI_BASE_URL", "https://fixture.invalid")
     monkeypatch.setenv("PYTHONPATH", "/fixture/inherited-cann")
+    for key in ["HF_HUB_CACHE", "HUGGINGFACE_HUB_CACHE", "TRANSFORMERS_CACHE"]:
+        monkeypatch.setenv(key, "/fixture/unrelated-cache")
     environment = runner.execution_environment(tmp_path)
     assert "OPENAI_API_KEY" not in environment and "OPENAI_BASE_URL" not in environment
     assert "PYTHONPATH" not in environment
+    assert all(
+        key not in environment
+        for key in ["HF_HUB_CACHE", "HUGGINGFACE_HUB_CACHE", "TRANSFORMERS_CACHE"]
+    )
+    assert environment["HF_HOME"] == str(tmp_path / "hf")
     assert environment["OPENAI_AGENTS_DISABLE_TRACING"] == "1"
     assert environment["HF_HUB_OFFLINE"] == "1"
     assert (
@@ -379,3 +386,27 @@ def test_processor_cache_binds_fixed_revision_without_reading_weights(runner, tm
     hub = cache / "hub/models--fixture--model"
     assert (hub / "refs/main").read_text("utf-8") == "fixed-fixture"
     assert (hub / "snapshots/fixed-fixture").resolve() == assets.resolve()
+    embedding = deepcopy(pins)
+    embedding["model"].update(repo_id="fixture/embedding", revision="embedding-fixture")
+    assert runner.prepare_processor_cache(assets, cache, embedding) == 1
+    embedding_hub = cache / "hub/models--fixture--embedding"
+    assert (embedding_hub / "refs/main").read_text("utf-8") == "embedding-fixture"
+    assert (embedding_hub / "snapshots/embedding-fixture").resolve() == assets.resolve()
+    assert (hub / "refs/main").read_text("utf-8") == "fixed-fixture"
+
+
+def test_embedding_cache_metadata_identity_is_checked_before_links(runner, tmp_path):
+    assets = tmp_path / "embedding"
+    assets.mkdir()
+    (assets / "tokenizer.json").write_bytes(b"changed")
+    pins = {
+        "model": {
+            "repo_id": "fixture/embedding",
+            "revision": "fixed",
+            "files": [{"path": "tokenizer.json", "bytes": 7, "sha256": "0" * 64}],
+        }
+    }
+    cache = tmp_path / "cache"
+    with pytest.raises(ValueError):
+        runner.prepare_processor_cache(assets, cache, pins)
+    assert not cache.exists()

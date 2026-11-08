@@ -86,15 +86,24 @@ def main():
     parser.add_argument("--original-tree", type=Path, required=True)
     parser.add_argument("--node", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--schema-name", help="Run the author's check for one schema filename"
+    )
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
+    command = ["node", "cli.js", "check"]
+    if args.schema_name is not None:
+        name = args.schema_name
+        if not name.endswith(".json") or "/" in name or "\\" in name:
+            parser.error("--schema-name must be a schema filename ending in .json")
+        command.append(f"--schema-name={name}")
     if not args.execute:
         print(
             json.dumps(
                 {
                     "source_id": "SCHEMASTORE",
                     "status": "PLAN_ONLY",
-                    "command": ["node", "cli.js", "check"],
+                    "command": command,
                     "model_calls": 0,
                     "source_checkbox_eligible": False,
                 }
@@ -111,6 +120,12 @@ def main():
         raise ValueError("fresh output disjoint from original source required")
     tree = json.loads(args.original_tree.read_text("utf-8"))
     count = verify_tree(source, tree)
+    if args.schema_name is not None and not any(
+        item["type"] == "blob"
+        and item["path"] == f"src/schemas/json/{args.schema_name}"
+        for item in tree["tree"]
+    ):
+        parser.error("--schema-name must be in the pinned source tree")
     version = subprocess.check_output([str(args.node), "--version"], text=True).strip()
     if version != "v22.14.0":
         raise ValueError("qualified private Node22.14.0 required")
@@ -121,7 +136,7 @@ def main():
         "source_revision": REVISION,
         "node": version,
         "verified_original_files_before": count,
-        "original_command": ["node", "cli.js", "check"],
+        "original_command": command,
         "model_calls": 0,
         "source_checkbox_eligible": False,
         "performance_or_model_quality_claim": False,
@@ -131,7 +146,7 @@ def main():
     try:
         with (output / "official-check.private.log").open("xb") as log:
             result = subprocess.run(
-                [str(args.node), "cli.js", "check"],
+                [str(args.node), *command[1:]],
                 cwd=source,
                 stdout=log,
                 stderr=subprocess.STDOUT,

@@ -1,5 +1,22 @@
 # Workload 分类执行清单
 
+当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，113 项已勾选，0 项待完成；另有 5
+项仅分类。 下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
+
+## 轻量替代验证
+
+- **MLAgentBench** 按三题交付。复用 CIFAR-10 和 OGBN-Arxiv，使用同一作者仓库的 `vectorization` 补测科学代码修改、隔离执行和原评分。21 次真实
+  NPU 请求、原评分 5.43596 秒，三组独立数值对照通过。原评分读取提交运行时间，IMDb
+  微调和测试预测另记。[抽样回执](validation/mlagentbench-fixed3-with-vectorization-native-20261108.json)
+- **VisualWebArena** 使用 MiniWoB++ 的 `click-dialog`、`multi-layouts` 和 `click-color`。三题共 63
+  次真实图像请求，原奖励均为 0，均达到 20 步上限。Classifieds
+  登录和持久业务状态另计。[抽样回执](validation/miniwob-visual-fixed3-native-20261108.json)
+- **WorkArena** 使用 WorkBench v1 原版日历位置 0、10、20。真实 Agent 三题均通过原状态评分，未产生额外副作用。ServiceNow
+  的仪表盘、表单和知识库浏览器任务另计。[抽样回执](validation/workbench-calendar-fixed3-native-20261108.json)
+- **PaperBench** 使用 ResearchCodeBench，从 Diff-Transformer、GPS、LEN
+  各固定一段作者标注代码。保留完整原论文文本、原遮蔽上下文和原程序测试，三次真实生成，原评分 0/3。CORE-Bench 的两份 CPU 对照和第三份 ARM64 失败另存，PaperBench
+  整篇复现另计。[抽样回执](validation/researchcodebench-fixed3-native-20261108.json)
+
 ## 原40类计划的增量定义（不改变历史快照）
 
 当前程序目录新增下列两类，活跃定义由36增至38；总目标仍为40类，约束规划及语音合成尚待补齐，不能把38类称为40类全部就绪。
@@ -120,18 +137,18 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 - [ ] 首批来源安装、执行、核验与消费链交付
 - [ ] 已纳入来源全部完成（候选不隐藏）
 
-| 来源             | 当前已验证范围                                        | 全量状态             | 缺项                                                    |
-| ---------------- | ----------------------------------------------------- | -------------------- | ------------------------------------------------------- |
-| LONGBENCH        | S：qasper原前三题，公开入口复验F1为22.52%，均stop     | [ ] 未完成           | 仅3/200，模型原生chat模板明确披露；其他子集与全量未验   |
-| LONGBENCH_V2     | 公共入口同三题全输入复验0/3；1条原预算耗尽            | [ ] 未完成           | 原预算终态、Medium/Long范围；不将0分抹掉                |
-| INFINITEBENCH    | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                     |
-| QUALITY          | 原三篇首题MC似然执行，固定harness acc1/3、acc_norm2/3 | [ ] 未完成           | 仅3/2086、非自由生成/发布方基线；待CI工件和研究消费     |
-| QASPER           | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                     |
-| NARRATIVEQA      | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                     |
-| NATURALQUESTIONS | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                     |
-| DUREADER         | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                     |
-| LONGALPACA       | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                     |
-| DOLLY            | closed_qa原前三条已生成并核验完整性                   | [ ] 长文档场景未验证 | 普通closed_qa不等于长上下文压力，不据此勾本类长文档验证 |
+| 来源             | 当前已验证范围                                        | 全量状态             | 缺项                                                                         |
+| ---------------- | ----------------------------------------------------- | -------------------- | ---------------------------------------------------------------------------- |
+| LONGBENCH        | S：qasper原前三题，公开入口复验F1为22.52%，均stop     | [ ] 未完成           | 仅3/200，模型原生chat模板明确披露；其他子集与全量未验                        |
+| LONGBENCH_V2     | 公共入口同三题全输入复验0/3；1条原预算耗尽            | [ ] 未完成           | 原预算终态、Medium/Long范围；不将0分抹掉                                     |
+| INFINITEBENCH    | 12 组协议各固定原题 0、1、2 已验证                    | [ ] 未全量执行       | [固定抽样回执](validation/infinitebench-fixed-native-delivery-20261104.json) |
+| QUALITY          | 原三篇首题MC似然执行，固定harness acc1/3、acc_norm2/3 | [ ] 未完成           | 仅3/2086、非自由生成/发布方基线；待CI工件和研究消费                          |
+| QASPER           | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                                          |
+| NARRATIVEQA      | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                                          |
+| NATURALQUESTIONS | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                                          |
+| DUREADER         | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                                          |
+| LONGALPACA       | 待核                                                  | [ ] 未完成           | 原生子集/协议、服务器执行及适用核验                                          |
+| DOLLY            | closed_qa原前三条已生成并核验完整性                   | [ ] 长文档场景未验证 | 普通closed_qa不等于长上下文压力，不据此勾本类长文档验证                      |
 
 ## [ ] 独立推理 · standalone-reasoning
 
@@ -253,13 +270,13 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 - [ ] 首批来源安装、执行、核验与消费链交付
 - [ ] 已纳入来源全部完成（候选不隐藏）
 
-| 来源           | 当前已验证范围 | 全量状态   | 缺项                                |
-| -------------- | -------------- | ---------- | ----------------------------------- |
-| AGENTBENCH     | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
-| MIND2WEB       | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
-| WEBARENA       | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
-| VISUALWEBARENA | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
-| WORKARENA      | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
+| 来源           | 当前已验证范围 | 全量状态   | 缺项                                                    |
+| -------------- | -------------- | ---------- | ------------------------------------------------------- |
+| AGENTBENCH     | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                     |
+| MIND2WEB       | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                     |
+| WEBARENA       | 固定前三题已核 | [x] 已完成 | 原生Agent和原评分、812任务公共/研究回读；其他网站未验证 |
+| VISUALWEBARENA | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                     |
+| WORKARENA      | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验                     |
 
 ## [ ] 操作系统命令执行 · os-command-execution
 
@@ -277,9 +294,9 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 - [ ] 首批来源安装、执行、核验与消费链交付
 - [ ] 已纳入来源全部完成（候选不隐藏）
 
-| 来源    | 当前已验证范围 | 全量状态   | 缺项                                |
-| ------- | -------------- | ---------- | ----------------------------------- |
-| OSWORLD | 待核           | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
+| 来源    | 当前已验证范围   | 全量状态   | 缺项                                                     |
+| ------- | ---------------- | ---------- | -------------------------------------------------------- |
+| OSWORLD | 固定原前三题协议 | [x] 已交付 | 368原任务索引、3题原评分及4项CI/研究回读；兼容与恢复单列 |
 
 ## [ ] 应用API多步工作流 · application-api-workflow
 
@@ -347,13 +364,13 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 - [ ] 首批来源安装、执行、核验与消费链交付
 - [ ] 已纳入来源全部完成（候选不隐藏）
 
-| 来源              | 当前已验证范围                        | 全量状态   | 缺项                                |
-| ----------------- | ------------------------------------- | ---------- | ----------------------------------- |
-| SCIENCEWORLD      | 待核                                  | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
-| DISCOVERYBENCH    | 待核                                  | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
-| BIXBENCH          | 待核                                  | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
-| NATUREBENCH       | 待核                                  | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
-| SCIENCEAGENTBENCH | 原三条服务器输入/参考往返，未原生执行 | [ ] 未完成 | 原生环境/评分、全量及交接未完       |
+| 来源              | 当前已验证范围                        | 全量状态       | 缺项                                                       |
+| ----------------- | ------------------------------------- | -------------- | ---------------------------------------------------------- |
+| SCIENCEWORLD      | 待核                                  | [ ] 未完成     | 原生子集/协议、服务器执行及适用核验                        |
+| DISCOVERYBENCH    | 待核                                  | [ ] 未完成     | 原生子集/协议、服务器执行及适用核验                        |
+| BIXBENCH          | 待核                                  | [ ] 未完成     | 原生子集/协议、服务器执行及适用核验                        |
+| NATUREBENCH       | 固定原CPU3协议已交付                  | [ ] 全量未完成 | 其余87任务未验证；固定协议原评分、质量失败和恢复范围见回执 |
+| SCIENCEAGENTBENCH | 原三条服务器输入/参考往返，未原生执行 | [ ] 未完成     | 原生环境/评分、全量及交接未完                              |
 
 ## [ ] 科学代码工作流 · scientific-coding-workflow
 
@@ -361,15 +378,15 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 - [ ] 首批来源安装、执行、核验与消费链交付
 - [ ] 已纳入来源全部完成（候选不隐藏）
 
-| 来源              | 当前已验证范围                              | 全量状态   | 缺项                                    |
-| ----------------- | ------------------------------------------- | ---------- | --------------------------------------- |
-| SCIENCEAGENTBENCH | 原三条服务器输入/参考往返，未原生执行       | [ ] 未完成 | 原生环境/评分、全量及交接未完           |
-| NATUREBENCH       | 待核                                        | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验     |
-| MLEBENCH          | 待核                                        | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验     |
-| MLAGENTBENCH      | 待核                                        | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验     |
-| BIXBENCH          | 待核                                        | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验     |
-| PAPERBENCH        | 待核                                        | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验     |
-| DS1000            | 原三条Pandas补全：2stop/1length；未功能评分 | [ ] 未完成 | 非科学闭环；原环境/评分、全量及交接未完 |
+| 来源              | 当前已验证范围                              | 全量状态       | 缺项                                                                                                       |
+| ----------------- | ------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------- |
+| SCIENCEAGENTBENCH | 原三条服务器输入/参考往返，未原生执行       | [ ] 未完成     | 原生环境/评分、全量及交接未完                                                                              |
+| NATUREBENCH       | 固定原CPU3协议已交付                        | [ ] 全量未完成 | 其余87任务未验证；固定协议原评分、质量失败和恢复范围见回执                                                 |
+| MLEBENCH          | 已核                                        | [x] 固定 NOMAD | 原 AIDE 24 小时、240 条冻结预测及原评分，见[回执](validation/mlebench-nomad-native-delivery-20261108.json) |
+| MLAGENTBENCH      | 待核                                        | [ ] 未完成     | 原生子集/协议、服务器执行及适用核验                                                                        |
+| BIXBENCH          | 待核                                        | [ ] 未完成     | 原生子集/协议、服务器执行及适用核验                                                                        |
+| PAPERBENCH        | 待核                                        | [ ] 未完成     | 原生子集/协议、服务器执行及适用核验                                                                        |
+| DS1000            | 原三条Pandas补全：2stop/1length；未功能评分 | [ ] 未完成     | 非科学闭环；原环境/评分、全量及交接未完                                                                    |
 
 ## [ ] 演化语料检索 · evolving-corpus-rag
 
@@ -554,25 +571,1016 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 
 ## 新增来源逐项接入
 
+InfiniteBench（固定抽样已验证）：12 组原生协议均已对固定原题 0、1、2 完成执行和评分。 复用已审计的九组结果；其余三组已用扩展上下文配置补齐缺失位置，保留已有有效结果。
+不同部署配置不合并为同一模型成绩。复现时分别用 `scripts/run_infinitebench_original.py --task <任务> --start 0 --count 3`
+执行，指定已验证的服务、模板、上下文上限及各自的新私有输出目录。 `longbook_sum_eng`、`longbook_choice_eng`、`longbook_qa_chn`
+的现有容量预检门槛 分别为 403,228、268,047、339,371 tokens，均含原输出预算。 更换模型时重新核对实际 tokenizer，不以周期队列的 `number_string`
+结果替代。
+
+先追加 `--capacity-only` 逐题检查，只调用服务的 tokenizer，不生成或评分。 全部放得下时退出码为 0，有超限题时为 2；私有回执保留每题的容量判定。
+正式运行时移除此参数，并使用另一新的输出目录。
+
+MLAgentBench（固定替代三题已交付，IMDb 原题缺口保留）：固定 CIFAR-10 和 OGBN-Arxiv 已原生执行并评分，原结果保留。以下记录单独跟踪 IMDb
+的原始协议，原题要求微调 DistilBERT。按已授权的任务内部科学程序隔离 CPU 执行口径部署；Agent 的 LLM 请求、辅助编码器和裁判仍使用 NPU。此前把任务内部分类器也强制限定为
+NPU 的执行限制予以更正，历史 NPU 初始化失败记录保留，不计为成功。
+[CIFAR-10 回执](validation/mlagentbench-formal-cifar10-native-audit-20261102.json) ·
+[OGBN-Arxiv 回执](validation/mlagentbench-formal-ogbn-arxiv-native-audit-20261102.json) 续跑沿用
+`scripts/run_mlagentbench_local_agent.py --task imdb`，先在专用容器内检查隔离和原源码，再用新工作及日志目录执行。 IMDb 三份分片与
+DistilBERT 权重可按机器清单的 SHA-256 回查，不需要重新下载。新环境可运行
+`python scripts/prepare_mlagentbench_imdb_assets.py --output <仓库外原资产目录> --action plan` 查看原9文件及总量； 加
+`--action acquire --max-bytes 352107518` 按固定上游URL取得并校验，断点续传另加 `--resume`； 已有文件用
+`--action verify`，不重复下载。当前服务器已核验9文件，包括发布方原README；完整网络下载分支未在该服务器重跑。 新增
+`scripts/prepare_mlagentbench_imdb_offline.py` 将已校验的原文件绑定到新建的原 Agent 工作副本：
+`--assets-root <原数据和模型目录> --port-root <新原Agent副本> --cache-root <新缓存目录> --container-asset-root /assets --container-cache-root /hf`。
+容器将原资产目录只读挂载为 `/assets`、缓存只读挂载为 `/hf` 并设 `HF_HOME=/hf`，为 `HF_DATASETS_CACHE` 指定私有可写目录。
+绑定保留发布方README和原 `plain_text` 路径，不把Parquet平铺后省略元数据。原 `load_dataset("imdb")` 已在断网隔离控制中加载
+train/test各25000条、unsupervised50000条，全部100000条与原Parquet一致，原ClassLabel的neg/pos名称保留。
+初始平铺视图只加载两份分片是接口缺陷，旧尝试及其失败记录保留；新视图在独立目录准备，不原地修改正在运行的输入。 模型缓存标签明确为本地内容标识，不伪造上游 Git revision。科学 CPU
+环境的完整 ARM64/Python3.11 包锁见
+`configs/workload-native/mlagentbench-imdb-cp311-arm64-requirements.txt`；配套离线 Dockerfile
+已构建，69份实际客户端版本与初始合格环境一致。环境检查不计来源完成。 attempt004已用满原18000秒预算并正常退出，但没有生成提交；原评分为
+`score=[]/final_score=-1`，仍未完成。attempt005改用现有Qwen3.5-9B非思考配置，独立运行同一原题，CPU配额32、线程环境上限8、内存24 GiB；
+不混用14B响应，也不改变原数据、提示、步数或预算。该9B尝试随后在约197秒正常结束，同样没有提交，原评分仍为空，不计完成。
+研究窗口协调后，attempt006已使用共享池Qwen2.5-32B-Instruct BF16双NPU/TP2、32768上下文启动同一原题；
+17份权重全量哈希及索引核验完成，没有下载或复制权重。该尝试已在约2486秒结束，未生成提交文件，原评分仍为`score=[]/final_score=-1`，不计完成。保存的动作存在输出截断，保留原解析器和原失败记录，不手工补写提交。
+CPU配额不代表独占绑核。原ResearchAgent仍为50步、18000秒；当前采用作者OpenAI调用路径的默认输出500 token、编辑4000
+token。历史attempt004仅对完全相同原请求逐次复用已保存14B响应，复用和新推理分别计数，不能据此报告性能；公共入口默认正常生成，不内置研究观测或恢复缓存。 原 Agent 终态后，将真实
+stdout/stderr 捕获保存为 `<log-root>/log`；保留原轨迹和 final 科学快照，不重跑 Agent。 在隔离评分容器只读挂载这些原日志，并使评分工作目录可读取相同原
+`imdb` 数据，运行
+`python scripts/run_mlagentbench_original_eval.py --port-root <原Agent副本> --log-root <原日志> --task imdb --output <新私有评分文件> --execute`。
+入口只为作者漏导入的 `typing.Dict` 注解提供执行命名空间绑定，不改作者文件或评分规则；原评分为空或不合法时退出2，不将作者静默的 `final_score=-1/score=[]`
+当作完成。
+
+IMDb另有独立的作者Anthropic Messages配置：默认输出2000 token、温度0.5，保留Human/Observation停止串、 编辑4000
+token、fast温度0.01以及原50步和18000秒。它不是把历史Chat的500-token预算原地调大，结果分开登记。
+`scripts/prepare_mlagentbench_messages_agent.py --author-root <固定作者源码> --output <新工作副本> --action prepare`
+复用已有源码准备与懒加载兼容；旧Chat入口及逐字节回执保持不变。
+`scripts/prepare_mlagentbench_messages_imdb.py`使用相同资产/缓存参数，复用原IMDb绑定逻辑。 在原隔离CPU环境中执行
+`scripts/run_mlagentbench_messages_agent.py --port-root /agent --queue /queue --work-root /results/work --log-root /results/logs --model <实际模型ID> --task imdb --execute`。
+Agent容器断网，无NPU设备或Docker socket；只挂私有队列和原资产。受信NPU请求侧另运行
+`scripts/mlagentbench_local_messages.py --queue <同一私有队列> --api-base <回环模型服务/v1> --model <同一实际模型ID> --watch`，
+先检查实际模型ID，默认逐字节转发原Messages请求。Qwen独立非思考配置可显式加`--disable-thinking`，先核验接口schema，再增加实际支持的`chat_template_kwargs.enable_thinking=false`；
+原始与转发请求均留存，题目、停止串、温度和2000/4000预算不变，不与思考配置混报。Agent终态后由运行方写入队列STOP标记并保留证据。
+首个Messages尝试因本地API在text前返回独立thinking块而退出，失败和原响应保留。 独立兼容配置只选择真实返回的第一个text块，跳过独立reasoning块，不修补动作或补造文本；
+第二次尝试在原摘要调用中耗尽2000-token预算，只返回thinking，原Agent退出1且没有final快照，不能评分。
+保留该失败后，第三次完整重开同一原题并冻结公共工具副本，但实查该服务忽略标准`thinking`字段，故第三次仍是思考配置，不能称作非思考结果。
+已按实际schema修正后续控制字段，并用一条固定保存的原题请求验证：HTTP200、只返回text、实际输出430 token；原2000-token上限、提示及其他参数保持，
+这只是模型配置核验，不是整题完成。第三次仍按实际配置保留运行，尚未取得完整科学评分，整项不加勾。结束后用同一入口的评分模式：
+`scripts/run_mlagentbench_messages_agent.py --port-root /agent --log-root /results/logs --task imdb --score-output /grade/original-score.json --execute`。
+评分容器断网、原日志及Agent/资产只读，保留实际控制台到原日志`log`；该模式复用既有原评分器，
+不重跑Agent、训练或模型调用，空评分仍返回退出码2。17项新协议/准备/队列/评分委派及独立模型配置夹具通过不等于原生任务完成。
+
+最新 27B Messages 尝试没有提交。其原轨迹最后一次 `Execute Script` 明确因 `train.py` 超时结束；脚本要训练两轮、每批 16 条固定补齐到 512 token，
+随后对 25,000 条测试数据逐条推理才写提交。独立断网 CPU 成本对照复用相同镜像、原 DistilBERT、原数据和 8 线程设置：首个训练步 31.67 秒； 同一原测试样本重复 4
+次，去掉首次后中位 0.327 秒。机械外推分别约 27.5 小时和 2.3 小时，说明不宜原样盲重跑；
+一次训练步与同一样本的重复测量不是稳态吞吐或整题完成时间，不能用来承诺更长预算一定完成，也不改变原 5 小时协议。
+
+随后在同一 NUMA 节点固定 CPU 与内存亲和性，用同一镜像、原模型、原数据、批量和 padding 对照 8 与 24 线程。各测 3 个训练步和同一测试样本的 4 次推理。
+去掉首步后，训练步中位耗时从 29.17 秒降至 18.07 秒，单条推理从 0.327 秒降至 0.142 秒。按生成脚本的计算量外推，24 线程仍约需 16.7 小时，不能据此启动原样重跑或改变
+5 小时预算。该结果只是短时 CPU 对照，未产生提交、评分或 NPU 请求。
+
+进一步用相同原 DistilBERT tokenizer 统计 IMDb 原训练和测试各 25,000 条。训练集在原顺序下按 16 条一批动态补齐，仍保留固定 512-token 补齐的
+98.31% token 位置；仅替换为按批最长补齐，不能据此认定足够快。长度排序的反事实统计为 53.80%，但没有测到训练加速，也没有把排序、提示或训练代码应用到原 Agent。
+
+科学 NPU 执行仍未验证。只读对比发现：正常托管容器由 containerd 注入两张已分配计算设备及管理设备，另有 `/dev/dvpp_cmdlist`； 此前四份独立 Docker
+对照只映射一张计算设备及管理设备，未映射该节点。[昇腾设备说明](https://github.com/Ascend/mind-cluster/blob/master/docs/zh/scheduling/07_references/05_appendix.md)
+将其归为视觉预处理设备，不能据此认定它导致文本张量初始化失败。两个执行环境的隔离配置也不完全相同。下一次只在取得独立设备窗口后，先用受信最小张量程序核验托管隔离执行器，
+再验证科学训练；不放宽共享节点策略，不在现有推理服务里运行 Agent 生成代码。
+
+### WorkBench 日历替代协议
+
+检出作者
+[WorkBench 固定版本](https://github.com/olly-styles/WorkBench/tree/49c7dfd00c03d384ec59ea57374f50b766aa5613)，
+保留完整作者目录用于选样和评分。以下命令从仓库根目录运行，`WORK` 指向仓库外的一个新目录。 在 Windows 的 Git Bash 中，把环境激活路径换成
+`"$WORK/client/Scripts/activate"`，并设置 `export PYTHONUTF8=1`。
+
+```bash
+WORK=/path/to/workbench-run
+REV=49c7dfd00c03d384ec59ea57374f50b766aa5613 # pragma: allowlist secret - public Git revision
+mkdir "$WORK"
+curl -fL "https://codeload.github.com/olly-styles/WorkBench/zip/$REV" -o "$WORK/author.zip"
+echo "2ce2d277eafe567c634bc29f2f131a90fecaaa2d01f3b5d4bb08051a84e5d214  $WORK/author.zip" | sha256sum --check # pragma: allowlist secret - public archive checksum
+unzip -q "$WORK/author.zip" -d "$WORK"
+AUTHOR="$WORK/WorkBench-$REV"
+AGENT_INPUT="$WORK/agent"
+QUEUE="$WORK/queue"
+COHORT="$WORK/calendar.csv"
+PREDICTIONS="$WORK/predictions.csv"
+SCORE="$WORK/score.json"
+mkdir -p "$AGENT_INPUT/data/"{processed,raw,results} "$QUEUE"
+cp -r "$AUTHOR/src" "$AGENT_INPUT/"
+cp "$AUTHOR"/data/processed/*.csv "$AGENT_INPUT/data/processed/"
+cp "$AUTHOR/data/raw/email_addresses.csv" "$AGENT_INPUT/data/raw/"
+python -m venv "$WORK/client"
+source "$WORK/client/bin/activate"
+python -m pip install pandas==2.3.1 openai==1.99.5 tenacity==9.1.2 python-dateutil==2.9.0.post0 pydantic==2.11.7
+python scripts/run_workbench_calendar_native.py plan "$AUTHOR" "$COHORT"
+```
+
+Agent 输入目录只含运行数据，`data/processed/tasks_and_outcomes/` 留在评分侧。使用 Python 3.11 或 3.12。 准备一个提供
+`/v1/chat/completions` 的本地模型服务，`API_BASE` 填它的 `/v1` 地址，`MODEL` 填服务公布的准确模型 ID。 例如用
+[llama.cpp b12207](https://github.com/ggml-org/llama.cpp/releases/tag/b12207) 的 Vulkan 版和
+[Qwen3-4B Q4_K_M](https://huggingface.co/Qwen/Qwen3-4B-GGUF/blob/bc640142c66e1fdd12af0bd68f40445458f3869b/Qwen3-4B-Q4_K_M.gguf)：
+
+```bash
+llama-server -m /path/to/Qwen3-4B-Q4_K_M.gguf --alias Qwen/Qwen3-4B-Q4_K_M --host 127.0.0.1 --port 19686 --device Vulkan0 -ngl 99 -c 12288 -np 1 --reasoning off
+# 以下变量在运行转发器和 Agent 的终端中使用
+API_BASE=http://127.0.0.1:19686/v1
+MODEL=Qwen/Qwen3-4B-Q4_K_M
+```
+
+先用 `llama-server --list-devices` 核对本机独显的设备名；实际不是 `Vulkan0` 时，用列出的名称。 在能访问该服务的终端启动转发器，保持运行：
+
+```bash
+python scripts/appworld_model_transport.py --queue "$QUEUE" --api-base "$API_BASE" --expected-model "$MODEL" --watch
+```
+
+在另一终端用同一组变量执行。使用断网容器时，只挂载 Agent 输入及题表，并为 `data/results`、预测文件和专用队列提供写入目录。 转发器与 Agent 使用同一个队列路径和模型
+ID，模型应在作者客户端的 60 秒读取时限内返回响应。
+
+```bash
+python scripts/run_workbench_calendar_native.py execute "$AGENT_INPUT" "$COHORT" "$PREDICTIONS" --queue "$QUEUE" --model "$MODEL"
+python scripts/run_workbench_calendar_native.py score "$AUTHOR" "$PREDICTIONS" "$SCORE"
+touch "$QUEUE/STOP"
+```
+
+`score.json` 的 `original_state_correct` 按三题原顺序给出状态正确性，`original_unwanted_side_effects` 记录额外状态变化，
+`errors` 记录作者客户端或工具执行错误。
+
+本机 Qwen3-4B 配置完成三题评分，25 次请求均返回，原状态正确 0/3。此前 Qwen3.5-9B 的同三题记录为 3/3。
+见[本机试跑](validation/workload-first-use-samples-20261108.json)和[此前交付回执](validation/workbench-calendar-fixed3-native-20261108.json)。
+
+WorkArena（以下保留 ServiceNow 原协议）：使用
+`scripts/prepare_workarena_author_source.py --action prepare --archive <官方源码包> --author-root <新目录>`
+准备固定版本，再用同一脚本的 `--action verify --author-root <源码目录>` 核验。官方源码包不是 ServiceNow 实例快照。
+原生验证前须由具备权限的操作者配置官方实例，在隔离浏览器中确认登录、任务初始化与重置可用；凭据不进入仓库。 通过这些前置检查后，才运行固定原题的 Agent 和作者验证器。源码校验和 oracle
+演示均不计为交付。
+
+固定 L1 样本使用 `scripts/plan_workarena_l1_sample.py` 在原 0.5.3 客户端离线生成。作者采样器 `l1`、元种子 42、每题 10 个种子给出 330
+个组合；按发布顺序，取前三个不同类别各自的首个原种子：`multi-chart-value-retrieval` / 102、`create-change-request` /
+58、`knowledge-base-search` / 1。三项均已核对原 BrowserGym 注册，在实例访问和结果产生前锁定。执行时从
+`DEFAULT_BENCHMARKS["workarena_l1"]()` 复用这三个原 `EnvArgs`，保留每题 15 步、无任务参数覆盖及原 `workarena` 单动作配置；后续用同一
+ID 和种子执行原重置、动作和校验，不按结果换题。
+
+执行入口为
+`scripts/run_workarena_agentlab.py --model <实际模型ID> --inventory docs/workload-data/dataset-validation-status.json`。
+默认只组装实验，已用原 AgentLab 0.4.2 容器离线核验三个配置，没有调用模型或实例。授权后，在隔离环境用原实例环境变量注入专用实例，不自动选共享池；再加
+`--execute --confirm-dedicated-instance --endpoint <回环/v1端点> --output <私有新目录>`。该执行分支尚未验证；保留各题终态、原奖励及错误证据，不把配置成功当作原生交付。
+
+BixBench（固定三题已交付）：固定原题为 `bix-1-q1`、`bix-1-q2`、`bix-10-q1`。取得原生状态与轨迹后，用
+`scripts/prepare_bixbench_original_grade_input.py --author-root <源码> --data-root <数据> --native-output <原输出> --output <新目录> --limit 3 --execute`
+生成评分输入，核对题目身份、原参考答案与 str/str/range 模式；不丢弃空答案。共享队列仅用于恢复审计，四条合成裁判对照不用于正式评分。 在隔离环境中用
+`scripts/run_bixbench_original_grader.py`；默认仅输出计划，核对私有输入副本和本地模型端点后再加
+`--execute --patched-grader`。恢复历史 CSV 时加
+`--input-sha256 <原准备回执中的 csv_sha256>`，校验值必须来自原回执，不能用重建文件自身的摘要代替。 修复版评分单独标记，不能作为未修改的官方评分。 固定三题已复用原
+Agent 结果，恢复的 CSV 与历史回执逐字节一致；经兼容补丁及本地 Qwen3-14B 裁判评分，三题均为 0 分。 最终 CI 工件与未修改研究端已复验三条完整记录一致，见
+[交付回执](validation/bixbench-fixed-native-delivery-20261104.json)。
+
+StableToolBench（固定三题已交付，作为 ToolBench 同类替代）：G1 固定原题 588、608、1073 使用作者缓存或官方 MirrorAPI-Cache 模拟后端，均走完
+CoT@1 与 Finish。 以原 `toolbench/tooleval/fac_eval.py` 和固定评估模型完成评分，三题分别为 0、1、1。执行时将外部真实 API
+层设为不可用，保留作者模拟回退，未验证原 ToolBench 在线 API。 已核验 163 条原数据由公共入口和固定研究消费者无损读取；不代表 163 条均实跑，也不代表研究侧已更新部署依赖锁。详见
+[固定三题交付回执](validation/stabletoolbench-fixed3-native-20261105.json)。
+
+ToolBench
+原在线协议（未完成，交付清单已用上面的同类替代覆盖）：`scripts/prepare_jsonschemabench_author_source.py --source toolbench-examples --author-root <新目录> --action plan`
+可查看固定作者样例的获取计划。 原仓公开样例已核验 G1/G2/G3 共 10 条，但没有完整原归档、可用原工具后端或 ToolEval 实跑结果。
+第三方归档仅有部分文件与作者字节一致，未核实的部分不作为原数据；StableToolBench 的模拟响应与 API-Bank 的本地工具也不计作 ToolBench 原后端验证。
+
+API-Bank（同类候选，14 个固定位置已生成并完成兼容评分）：从 [作者仓库](https://github.com/AlibabaResearch/DAMO-ConvAI)
+检出机器清单所列提交，使用其中的 `api-bank/` 作为 `--author-root`。 在独立 Linux ARM64 Python 3.11 环境安装
+`configs/workload-native/api-bank-fixed-client-arm64-requirements.txt`； 该依赖清单已离线安装验证，在线包源解析尚未验证。先通过
+`scripts/score_api_bank_saved.py --author-root <原源码> --export-messages` 核对原消息位置。 需要生成时使用同一脚本的
+`--generate <新私有输出> --endpoint <回环端点> --model <部署模型>`； 已有完整输出时直接用 `--predictions <留存输出>`
+离线评分。若复现作者评分器的已知缺参中断， 可用 `--record-missing-end-time` 单独记录失败；不补造参数，不把兼容结果称为未修改的官方成绩。 现有结果中 13
+个位置由原评分器处理，另 1 个位置缺少必填参数，按兼容路径保留失败。离线重放与留存结果逐字节一致，无需重跑推理。 该协议覆盖本地工具调用与评分，不覆盖 ToolBench 的外部 API。
+
+MiniWoB++（补充来源，固定原题已原生验证，不计入 113 项）：从清单所列固定作者提交恢复网页，仅在回环地址启动静态站点，`--site` 指向其 `/miniwob/`。 在 ARM64
+上复用 Playwright Chromium 1117，令 `PLAYWRIGHT_BROWSERS_PATH` 指向浏览器缓存， `FONTCONFIG_SYSROOT`
+指向私有依赖根、`LD_LIBRARY_PATH` 指向该根下的 `usr/lib64`。两道原题均已在 seed 42 下初始化。 使用
+`scripts/run_miniwob_agentlab.py` 先验证计划；获得 NPU 窗口后，按清单固定预算执行并保留原始奖励、终止状态及失败。 实际 NPU
+验证中，`click-dialog` 在每次 1024 token 配置下 1 步完成、奖励 1.0；`multi-layouts` 在单独的 4096 token 恢复配置下 到达 20
+步上限、奖励 0.0。保留 1024 token 配置的解析失败，两个配置不汇总成同一成绩。 后续还在独立视觉协议下验证了两道原题的截图、坐标动作和原终态奖励，两题均为 0 分；见
+[视觉原生回执](validation/miniwob-visual-native-20261105.json)。它覆盖原生多步浏览器动作，不覆盖登录后业务状态或桌面操作，不替代 WebArena。
+
+WebShop（同类候选，固定三题已验证）：按机器清单锁定作者提交和三份镜像语料，校验 Git 对象后接到作者 `data/`。 在任务私有环境配置 `JAVA_HOME`、Pyserini
+0.17.0 和 `en_core_web_sm` 3.7.1，再执行作者商品转换和 1k 索引命令。 已在 ARM64 验证 1,000 条索引和原生搜索—选商品—购买评分链路。模型验证用
+`scripts/run_webshop_original.py --author-root <源码> --endpoint <回环模型地址> --model <模型> --output <新私有文件> --execute`，
+固定会话 0、1、2。对支持该模板选项的 Qwen 服务可加 `--qwen-no-thinking`，另存结果，不与默认配置合并统计。 原配置首题 15 步均未返回可执行动作。非思考配置三题共执行
+45 个有效动作，但均在步数上限内未到达购买终点，没有作者终局评分，不计完成。 保留历史的 15 步配置也未到达终点。正式回合验证加 `--author-episode-budget`：按作者基线允许
+100 步，耗尽时回合分为 0，另保留环境终局奖励字段。 该配置复用作者回合预算与计分，不等同于作者原模型或全量评测。 该配置已在 NPU 跑完固定三题，每题执行 100
+个有效动作，均未完成购买，按作者规则各得 0 分。WebShop 执行与计分已验证；不据此勾选 WebArena。 镜像尚未与作者 Drive 原件独立核对；文本购物流程不覆盖 WebArena
+后台登录或跨站状态。
+
+WorkArena 客户端可复用下述 WebArena/AgentLab CPU 底座。先构建 `local/webarena-client:0.4.2`，再把固定作者源码准备到仓库外专用构建目录的
+`author/`；该构建目录不得放入凭据、数据集或结果。
+
+```bash
+python scripts/prepare_workarena_author_source.py --action prepare \
+  --archive "$OFFICIAL_WORKARENA_ARCHIVE" --author-root "$WORKARENA_CONTEXT/author"
+docker build -f "$PWD/configs/workload-native/workarena-agentlab-cpu.Dockerfile" \
+  -t local/workarena-client:0.5.3 "$WORKARENA_CONTEXT"
+```
+
+配方仅将底座的 WorkArena0.4.3 替换为固定源码0.5.3，保留其余已安装包的版本约束，并执行 `pip check`。已在 ARM64 实际构建，通过断网原任务注册及 Chromium
+检查，注册716个原任务ID；没有创建实例、调用模型或执行评分。此环境准备不替代实例访问授权或原生任务验证。
+
+验证收口后已停止本任务专用站点虚拟机，删除可重建的qcow2磁盘、Ubuntu下载镜像和31层压缩下载文件，保留站点身份/配置、原题、轨迹、模型输出及评分回执。此处是历史实跑证据及可重建流程，不表示共享服务器仍有常驻WebArena站点；使用前需重新准备独立站点。
+
+WebArena（固定协议已交付）：固定原题 ID 为 0、1、2，均只访问 `shopping_admin`，且需要登录。隔离 x86 系统及 Docker
+已就绪，候选镜像31层的压缩摘要和解压内容摘要均已核验，导入成功，原站点五条初始化命令均返回0；原始作者归档仍受配额限制，不宣称取得完整原归档。固定三题已使用现有9B模型完成原生Agent及未修改的官方计分：均为0分、30步耗尽（truncated=true）。实际安装通过CPU正确性CI的公共wheel，并通过未修改研究侧接口逐条回读812个原任务，输入与独立参考输出均可无损重组；据此按固定协议勾选，不代表812题或其他网站已执行。[交付回执](validation/webarena-fixed3-native-delivery-20261107.json)。
+
+本次为明确披露的环境兼容配置：ARM64主机以单核TCG运行x86站点，PHP
+OPcache调整为512MiB、60000文件槽并关闭不可变源码的时间戳检查；站点后台Java/cron降低优先级。浏览器等待上限显式设为180000毫秒，而非框架默认10000毫秒；模型保持Qwen3.5-9B、30步、种子42和未指定的作者默认输出上限。客户端使用4个数值计算线程及512进程上限。不得将该结果作为原默认环境成绩或引擎性能结论；首次浏览器初始化失败证据保留，未更换原题。
+公开演示站点不能替代可重置环境。站点与浏览器可在 CPU 节点运行，模型推理仍走独立 NPU 服务。 ARM64 Chromium 已通过 MiniWoB++
+的原题验证，浏览器本身不是这三项的共同阻塞：WebArena 缺可重置的 `shopping_admin`，VisualWebArena 缺已启动并核验的 Classifieds，WorkArena
+缺已授权的 ServiceNow 实例。固定版本优先使用官方 `ServiceNow/WorkArena-Instances` Hugging Face
+实例池；运行账号须自行申请并获批，随后在服务器登录 HF。作者仍支持自有实例配置，但不能把未设置旧版 `SNOW_*` 变量直接判为缺少实例访问权。2026-11-07
+已用服务器现有账号检查官方实例池访问权，返回403；未下载实例池或接受条款。
+
+原始任务读取已接入 `iter_workload("WEBARENA", data_root=...)` 和共用准备/回读接口。数据根目录指向已核验的原作者源码；按原顺序读取
+`config_files/test.raw.json`，输入保留全部原任务字段，原 `eval`
+定义单独作为参考输出，二者可无损重组为原任务。原站点关系、登录/重置标记和存储状态路径不改写，不构造提示词；该读取能力不代表原生任务已经完成。
+
+公共运行入口为 `scripts/run_webarena_agentlab.py`，已完成固定三题的原站点端到端验证及公共安装包/研究消费核验。先用现有作者源码准备入口取得并核验固定
+WebArena 源码；运行环境使用 AgentLab0.4.2、BrowserGym-WebArena0.14.2、libwebarena0.0.4 和仓库中的官方依赖约束，补齐官方 NLTK
+`punkt_tab` 资源。 `--sites` 指向 JSON 文件，例如
+`{"SHOPPING_ADMIN":"http://127.0.0.1:19680/admin"}`。只允许连接操作者已部署、通过回环或 SSH
+转发访问的站点；所选原题需要的站点不得缺失。未部署的其他站点明确记为不可用，不映射成已有站点。
+
+```bash
+python scripts/run_webarena_agentlab.py --task-id 0
+python scripts/run_webarena_agentlab.py --task-id 0 \
+  --author-root "$AUTHOR_ROOT" --sites "$SITE_MAP" \
+  --endpoint http://127.0.0.1:19476/v1 --model Qwen/Qwen3.5-9B \
+  --output "$NEW_OUTPUT" --execute
+```
+
+第一条仅输出计划，不启动浏览器或模型。第二条要求新输出目录、已准备的真实站点及模型服务；原题全部字段须与发布方包内定义一致，运行后使用原 BrowserGym
+终态和原评分。默认30步、随机种子42，输出预算未指定时保留作者模型参数默认值；显式调整须分配置记录。支持用 `--queue` 替代
+`--endpoint`，复用现有私有文件模型传输接口，不改题目、参考答案或评分代码。一个任务正常返回不自动勾选整项来源。
+
+可复现的客户端配方为 `configs/workload-native/webarena-agentlab-cpu.Dockerfile`，构建上下文仅为配置目录；它构建浏览器和 Agent
+客户端，站点独立部署，LLM 通过 NPU 端点调用。固定官方约束和 NLTK 资源摘要已在 ARM64 服务器重建并通过断网检查；其他架构尚未验证。
+
+```bash
+docker build -f configs/workload-native/webarena-agentlab-cpu.Dockerfile \
+  -t local/webarena-client:0.4.2 configs/workload-native
+```
+
+`AUTHOR_ROOT`、`SITE_MAP`、`RESULT_ROOT` 均指向仓库外已准备的路径。使用同一入口的容器调用方式如下；`task-0`
+必须尚不存在，模型及原站点须已通过准备核验。客户端同时设置发布方原站点变量和BrowserGym要求的`WA_*`变量。可显式传入`--browser-timeout-ms 180000`复现上述等待配置；不传则保留框架默认值。不能据构建或断网检查给来源打勾。
+
+```bash
+docker run --rm --network host --read-only --cap-drop ALL \
+  --security-opt no-new-privileges --memory 4g --cpus 4 \
+  --tmpfs /tmp:rw,nosuid,nodev,size=512m --shm-size 256m \
+  --mount type=bind,src="$PWD/scripts",dst=/delivery/scripts,readonly \
+  --mount type=bind,src="$PWD/configs/workload-native",dst=/delivery/configs/workload-native,readonly \
+  --mount type=bind,src="$AUTHOR_ROOT",dst=/author,readonly \
+  --mount type=bind,src="$SITE_MAP",dst=/sites.json,readonly \
+  --mount type=bind,src="$RESULT_ROOT",dst=/results --workdir /results \
+  local/webarena-client:0.4.2 python /delivery/scripts/run_webarena_agentlab.py \
+  --task-id 0 --author-root /author --sites /sites.json \
+  --endpoint http://127.0.0.1:19476/v1 --model Qwen/Qwen3.5-9B \
+  --output /results/task-0 --execute
+```
+
+VisualWebArena仍未完成。先复用固定作者源码准备入口，再运行
+`python scripts/check_visualwebarena_native_prerequisites.py --author-root "$AUTHOR_ROOT"`，预检不安装模型、不访问站点或调用Agent。2026-11-07当前服务器已按固定Git与SHA256核验478份原文件、全部910个任务定义及配套参考图片；约197MiB下载归档在核验解包后删除。固定Classifieds原题0/1/2均为URL匹配且没有目标输入图片，但作者原启动器仍无条件加载`Salesforce/blip2-flan-t5-xl`评分辅助模型，其设备选项只有CPU/CUDA；因此不能据题目类型跳过该依赖，也不能将CPU辅助模型执行称为NPU-only。NPU兼容环境、原站点和真正原生Agent/评分尚待验证。
+
+原启动器的设备适配可离线准备：`python scripts/check_visualwebarena_native_prerequisites.py --author-root "$AUTHOR_ROOT" --prepare-npu-launcher "$NEW_OUTPUT"`。
+该命令核验固定作者树，在全新目录写入适配后的 `run.py`、可审阅补丁和摘要，不写入作者树，不加载模型或启动站点。已在服务器上以 478 份原文件通过实际生成和编译检查。
+适配后的启动器要求明确传入 `--eval_captioning_model_device npu:0`，仅暴露一张获准使用的 NPU，并设置 `VWA_BLIP2_ROOT` 指向已核验的本地
+BLIP-2 权重目录。原观察和评分辅助模型的初始化分支均用 FP32 NPU， 相同模型仍沿用原来的共享实例逻辑。后续运行须使用隔离可写的作者树副本、原站点配置和已验证的 actor
+环境；当前尚未执行生成的启动器，不计原题或评分通过。
+
+SoM actor 另有独立接入缺口：原 `MultimodalCoTPromptConstructor` 把 3 组图文示例放入带 `example_user` /
+`example_assistant` 名称的后续 `system` 消息。 保留的 Qwen3.5-9B 模板离线渲染该角色结构时拒绝后续 `system`；单独诊断首条 `system`
+含图也被拒绝。单首条文本 `system` 后接 `user` 图像则可渲染。 该探针使用占位图像引用，仅验证模板约束，不是 HTTP 或模型运行证据。原 actor
+还按模型名称判断多模态，OpenAI 路径用 `tiktoken.encoding_for_model`，不能只换 endpoint 和 model 参数。
+下一步须验证可保留原图文、角色、示例顺序与预算的 actor 接入；删图、改角色、冒用 GPT-4V 名称或改用纯文本结果均不能据此勾选。
+
+真实服务的预处理入口也已验证：运行原 `get_lm_api_input` 和原 PNG 编码函数，使用全部三组原图文示例及一张公开示例图充当控制用页面图，不采集浏览器。 原结构 7 条
+`system`、1 条 `user`、4 个图像 part 调用 `/v1/chat/completions/render` 返回 HTTP 400，原因是后续 `system`。 单首条文本
+`system` 加 `user` 图像的对照返回 HTTP 200，产生多模态特征及 1959 个输入 token，保留 384-token 输出预算。两次均只走预处理，无生成。
+当前部署源码在请求解析阶段保留消息名称，下一步可在独立预处理实例验证模型侧模板适配，而不是改原请求；适配不等同于原 GPT-4V actor。
+
+候选模型侧模板可用
+`python scripts/prepare_visualwebarena_qwen35_som_template.py --source "$ORIGINAL_CHAT_TEMPLATE" --output "$NEW_SOM_TEMPLATE"`
+从已核验的模板生成；不覆盖源文件或现有输出。 只放行后续带原 `example_user` / `example_assistant` 名称的 `system` 消息，用同一 `system`
+角色标记序列化，并保留名称和内容顺序。 原三组示例经本地 `Qwen3VLProcessor` 在 CPU 上实际预处理，四图展开为 4000 个图像 token，共 5890 个输入
+token；普通支持的单图对照渲染逐字节不变，未命名的后续 `system` 仍被拒绝。随后以同一候选模板在无网络、无设备映射的独立 vLLM 0.23.0 容器实际通过 HTTP
+`/v1/chat/completions/render`： 原结构请求和单图对照都返回 HTTP 200；原结构 5890 个输入 token、四个顺序不重叠的图像区间（长度
+1120/880/880/1120），384-token 输出预算未变。 单图对照在该独立配置下为 1961 个输入 token，不与上一服务配置的 1959 混为相同。
+
+隔离配方为 `vllm launch render`、CPU platform、模型配置及 tokenizer/processor
+文件（不含权重）、本地候选模板、`--chat-template-content-format openai`、上下文 262144、图像上限 4、关闭 thinking。 同版 Ascend
+镜像的模型类导入仍有 Triton 架构探测；复用 vLLM 按源码 hash 校验的既有模型类元数据，在隔离环境设置 `TRITON_ASCEND_ARCH=Ascend910B2`
+并指定可写的独立缓存，避免探测真实设备。 首次启动超时与第二次导入失败的记录保留。运行完成后隔离容器已退出，原服务未变。仍需原 actor 的模型名称及分词器接入、真实生成、原站点和固定原题评分；不把
+HTTP 渲染成功计为原生交付。
+
+原 actor 接入可用
+`python scripts/check_visualwebarena_native_prerequisites.py --author-root "$AUTHOR_ROOT" --prepare-qwen35-actor "$NEW_ACTOR_OUTPUT"`
+生成两份适配文件和补丁； 只应用到隔离可写的作者树副本。以 `--provider openai --mode chat --model Qwen/Qwen3.5-9B`
+选择真实模型名，`VWA_QWEN35_TOKENIZER_ROOT` 指向该模型的已核验本地分词器目录，`OPENAI_BASE_URL` 指向已部署候选模板的私有兼容端点。 不把 Qwen 冒称
+GPT-4V，不修改原提示构造或发送函数。原 actor 的选定方法在 CPU 控制中使用真实本地 tokenizer，原始 4507-token 观察触发原 3840-token 上限；
+OpenAI SDK 的本地捕获保留 7 条 `system`、1 条 `user`、四图、temperature=1.0、top_p=0.9、384-token 输出预算。传输为
+MockTransport，没有浏览器、生成响应或评分。
+
+actor 与渲染端也已串接验证：将 SDK 实际序列化的请求字节原样转发给同配置的独立 CPU `/v1/chat/completions/render`，HTTP 200，得到 9759 个输入
+token 和四个顺序图像区间，384-token 输出预算不变。 输入含触发原观察截断的控制文本，因此不与前述短控制的 5890 token
+混用。全程不发生成请求、不伪造响应或动作；固定原题仍待真实站点和推理。
+
+固定三题可从原文件准备为原启动器可读配置，不依赖全量生成目录：
+
+```bash
+python scripts/check_visualwebarena_native_prerequisites.py \
+  --author-root "$AUTHOR_ROOT" --prepare-fixed-classifieds "$NEW_TASK_OUTPUT" \
+  --classifieds-origin "$AUTHORIZED_CLASSIFIEDS_ORIGIN"
+```
+
+该命令仅绑定原 `__CLASSIFIEDS__` 占位符并生成 `0.json`、`1.json`、`2.json`，不访问站点或写入作者树。
+在隔离目录运行未修改的作者生成器，三个文件逐字节一致。实际运行仍须在作者树副本中生成原登录态 `./.auth/classifieds_state.json`，并以
+`--test_config_base_dir "$NEW_TASK_OUTPUT" --test_start_idx 0 --test_end_idx 3` 交给原启动器。
+在原评价器路由上，合成最终页 URL 对照分别给出目标 URL 1/1/1、起始 URL 0/0/0，未执行站点登录、浏览器动作或真实任务评分。
+
+原站点就绪后，在隔离的作者树副本应用已生成的两组适配文件，按作者部署说明配置站点变量。固定三题的运行命令如下； 仅在专用、获授权的 Classifieds
+实例上执行作者重置流程，重置后重新取得登录态。确认模型地址是本地私有的兼容端点， 且结果目录为新的受控目录，不能沿用有 HTML 的目录（原启动器会据此跳过题目）。
+
+```bash
+python browser_env/auto_login.py --site_list classifieds --auth_folder ./.auth
+python run.py \
+  --instruction_path agent/prompts/jsons/p_som_cot_id_actree_3s.json \
+  --provider openai --mode chat --model Qwen/Qwen3.5-9B \
+  --test_config_base_dir "$NEW_TASK_OUTPUT" --test_start_idx 0 --test_end_idx 3 \
+  --action_set_tag som --observation_type image_som \
+  --max_steps 30 --max_obs_length 3840 --max_tokens 384 \
+  --temperature 1.0 --top_p 0.9 --repeating_action_failure_th 5 \
+  --eval_captioning_model_device npu:0 --result_dir "$NEW_PRIVATE_RESULT_DIR"
+```
+
+作者启动器可能捕获单题异常后继续，因此不能只核对进程退出码或平均分。按固定顺序核对原评价器确实对 0、1、2 三题各给出一条结果，核对实际模型请求及对应轨迹，并排除 API
+或浏览器异常。原评价器给出的 0 分是有效结果； 缺失评分不是 0 分。登录态、站点重置配置、原运行日志和轨迹留在私有目录，不提交到 PR。该命令尚未在真实站点执行。
+
+可在原运行退出后执行
+`python scripts/check_visualwebarena_native_prerequisites.py --audit-classifieds-results "$PRIVATE_AUTHOR_LOG" "$NEW_PRIVATE_RESULT_DIR"`
+检查固定三题的原结果行、错误和轨迹归档。输出只含题号和原二值分数；模型请求与站点仍须独立核验，不自动勾选。
+
+公共读取入口为 `iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`。已在服务器实际安装成功CPU
+CI的wheel，并逐条完成910条原任务的公共/未修改研究consumer回读与原字段无损重组；原图片引用与独立eval均保持不变。生产提交为`529cbbd6`，具体wheel摘要和研究代码摘要见机器清单。该实数据读取核验不包含Agent、模型调用或原生评分，来源仍未打勾。
+
+辅助模型兼容性已单独取得真实证据：[原BLIP-2函数NPU组件验证](validation/visualwebarena-blip2-npu-component-20261107.json)。固定发布方模型revision
+`0eb0d3b46c14c1f8c7680bca2693baafdb90bb28`的两份safetensors及配套文件已逐项核验，只保留一种权重格式。原`evaluation_harness/image_utils.py:get_captioning_fn`未修改，原示例图片、`prompt=None`、默认32-token上限，在FP32
+NPU参数驻留下生成非空结果，没有CPU神经推理回退。这是单图片组件控制，不是固定原任务、站点初始化或原生评分完成；原CLI尚须明确接入NPU设备，不能拿组件结果声称原启动器已完全适配。
+
+可复现的兼容环境为现有Python3.12.13、Torch2.10.0/torch_npu2.10.0.post4、Transformers5.5.4、NumPy1.26.4、SciPy1.13.1；不等同作者原Torch2.0.1/Transformers4.34.0。额外依赖用独立目录安装，不能升级正在运行的模型服务：
+
+```bash
+python -m pip install --target "$AUX_DEPS" --no-deps \
+  scikit-image==0.22.0 imageio==2.34.1 tifffile==2024.8.30 lazy-loader==0.4
+```
+
+其中scikit-image为作者原固定版本，后三项为显式兼容版本。先按发布方固定revision获取模型并核验本回执中的两份LFS
+SHA256；不要同时下载bin副本。使用空闲的已分配NPU，令`ASCEND_RT_VISIBLE_DEVICES`只指向该卡，启动独立Python进程，在其`sys.path`加入`AUX_DEPS`后通过`importlib.util.spec_from_file_location`加载原`image_utils.py`，调用`get_captioning_fn(torch.device("npu:0"), torch.float32, model_name=MODEL_ROOT)`，再对上述原示例图片调用返回函数。先`import torch_npu`；本地`MODEL_ROOT`路径须包含`blip2`，这是原helper的字符串分支条件。保留原模型config，不为消除权重绑定提示改配置。图片处理/分词在CPU不等于模型CPU回退；验证所有模型参数在NPU并实际得到输出，才可报告该组件通过。此操作需要完整模型权重和独立显存窗口，不能在CPU
+CI中执行。
+
+只需任务定义与参考字段时，可复用
+`python scripts/prepare_reused_research_assets.py VISUALWEBARENA --mode download --data-root "$AUTHOR_ROOT" --max-bytes 2000000`，取得5份固定原文件共1,376,415字节；`--mode verify`可核验已存在的原文件。此小包不包含目标输入图片、站点图片或原生运行环境；进行视觉实验和原生任务时，仍须按完整作者源码与原站点流程取得对应资产，不能用缺图请求替代。
+
+读取关系约定为
+`iter_workload("VISUALWEBARENA", data_root=AUTHOR_ROOT)`，亦可使用共用准备/回读接口。顺序为Classifieds、Reddit、Shopping各原文件内的任务顺序；包装标识为`classifieds:0`等“原split:原ID”，原整数ID仍完整保留在原任务对象内，避免不同任务集的同名ID冲突。全部原字段、图片路径/URL、站点占位符、登录/重置字段均不改写，原eval独立保存，可无损重组；交互任务不渲染成模型prompt。夹具测试不等于910题实数据交接，更不等于原生浏览器完成。
+
+原 Classifieds 镜像摘要已核验，单个应用层压缩后约 71.4 GiB，全镜像压缩 76,861,304,894 字节。2026-11-08 已在 150 GiB 专用 CPU
+客体开始拉取固定 AMD64 镜像。另用 5 GiB 对照客体直连转发请求最大层的一段 8 MiB 数据，HTTP 206 和摘要均与宿主对照一致，客体负载传输耗时 3.288
+秒。对照客体自然退出后已清理对照盘并保留回执。完整拉取、解包、站点登录及固定三题的原执行和评分仍待完成。另查的 BrowserGym
+VisualWebArena包是框架维护者提供的非原仓直接执行移植版，亦有提前加载BLIP-2行为，不能因为客户端注册成功就当成原生环境已就绪。
+
+原拉取于 04:03 因回环 SSH 转发断开而退出。最大层读取 23,140,130,332 字节后提前结束，核查时已无可续传数据。主客体按原时限退出后已清理任务盘，保留原拉取和失败回执。
+经授权已在新的 150 GiB 专用 CPU 客体启动单次重拉。客体核对了原官方镜像的非零偏移分段，并预先设置独立租约保护下载内容。原站点与原任务执行仍待验证。 随后结束重拉以优先验证
+MiniWoB++，复查原租约仍持有 32,471,252,992 字节的下载前缀。原站点未启动。
+
+[作者项目页](https://jykoh.com/vwa#try-the-environments-yourself)明确限制公共演示站仅供体验，不能用于正式评测。
+[作者部署说明](https://github.com/web-arena-x/visualwebarena/blob/main/environment_docker/README.md)
+另外提供预装环境的 AWS AMI；如团队已有授权的隔离实例，可复用其原 Classifieds 站点，但仍须核对原数据库初始化、登录及固定三题的站点状态。没有启动云资源。 2026-11-07
+只读检查三个可访问节点的 Docker 镜像列表和可读的 containerd 镜像名，未找到已登记的固定 Classifieds 镜像； 这不排除其他授权实例。部署 ZIP 的发布元数据为
+25,366,023 字节，该数值不包含镜像层，不可作为部署磁盘预算。
+
+2026-11-06已做独立用户态兼容控制：ARM64容器内QEMU7.2.22可执行原Debian的amd64 BusyBox，
+但PRoot5.1.0下的嵌套子进程在四组有限对照中均以signal11退出；单个ELF可运行不代表原站点可运行。
+控制未修改宿主binfmt、未增加容器特权、未接入NPU或下载大站点镜像，原始诊断留存在机器清单对应stage。 这条具体版本组合尚不具备原站点部署资格，不能按其单程序成功勾选WebArena。
+
+NatureBench（固定原CPU3协议已交付）：2026-11-06固定三题的原 Agent
+均已结束，分别有13、25、20次科学尝试。第一、第三题原有效性裁判返回`is_valid=true`；第三题最佳科学指标改进为0.03601942018477061，不代表引擎性能提升。第二题旧提交的最佳评分仍保留两组全部失败；对最终保存预测的只读复核中，32个子数据集通过原校验并计算指标，11个因缺文件或细胞数量不符被原校验拒绝，不与早先提交评分混报。第二题原裁判完整证据为336129输入token，使用独立1010000上下文NPU配置、原4096输出预算恢复，未截材料、未重跑Agent，返回`is_valid=true`。保存最终预测的原评分、可复用恢复入口和未改研究消费者三包回读已完成；第二题原Correlation及Accuracy仍为null，不补值。以[交付回执](validation/naturebench-fixed3-native-delivery-20261106.json)限定范围，不代表全90题或科学高分。
+`scripts/run_naturebench_original.py` 默认检查原 CPU3 组并输出计划； 安装 workload-data
+包后，提供固定源码、原数据、运行环境及模型端点。正式执行需 Docker、已运行的原 evaluator， 以及明确的 Agent 和裁判端点。传入实际部署上下文容量，不调整原输出预算；可用
+`--task-id` 单独定位尚缺证据的原题。 保留原任务退出、科学尝试次数、评分和有效性裁判各自的状态；正常退出但零科学尝试，不等于已验证科学评分。
+已有第二题裁判重放仅复用原材料，不替代原运行的最终评分记录。 第二题重放的留存响应已在共享盘回查：360,566 输入 tokens，`end_turn` 正常结束，响应 SHA-256 为
+`449f2d6185225df1998d1f1cec968fcf29d92b15c3cb737c0d5dbd78e4b65c74`。不需要重跑该裁判请求；第三题零科学尝试，不能从第二题借用评分。
+
+OSWorld（固定原前三题协议已交付）：[交付回执](validation/osworld-fixed3-native-delivery-20261106.json)汇总3个原题的真实操作、原评分、分段恢复、当前CI工件及未改研究消费者回读。三个原评分均为0，不代表任务成功；368个任务只做原始包/索引核验，未称全量原生运行。
+以下早期环境检查点按当时状态保留，当前交付状态以上述回执及机器清单为准。先在兼容的隔离环境内确认作者桌面镜像启动、原任务初始化和重置，再接独立NPU模型服务；
+作者支持关闭KVM不代表ARM64已验证。不能把其他代码任务的环境或评分器当作OSWorld桌面环境。
+现有ARM64软件模拟环境已取得完整桌面截图，并通过基线快照恢复的临时标记验证。固定第一题已进入未改的作者`DesktopEnv`和`lib_run_single`流程，原两步初始化通过；保留15步、32768-token预算，模型为现有NPU上的Qwen3.5-9B。连接虚拟机的Provider为明确披露的运行时兼容端口，不称作未修改的官方Docker环境。Agent终态、原评分、其余两题和研究侧接通仍须逐项核验。
+私有队列的`model_proxy(..., max_request_bytes=32*1024*1024)`仅放宽截图请求的字节上限；默认仍为1MiB，允许显式设置到64MiB。它不修改原消息、图像、token预算或计分，不代表已经完成视觉benchmark。
+首次原生尝试在初始化后因作者运行器向`Qwen3VLAgent.reset(_logger=None)`传入未支持的`vm_ip`而退出，尚未调用模型或计分。保留该失败后，使用`scripts/osworld_qwen3vl_reset_compat.py`的`reset_compatible_agent(Qwen3VLAgent)`创建兼容子类，再验证同一原题：只将原logger交给原reset，忽略该模型Agent未使用的vm_ip；其余Agent方法、题目、预算和评分器不改。兼容运行与未经修改的官方运行分开标注。
+第二次尝试因原10秒截图读取超时而未取得有效图像，仍未调用模型。失败后测得同一原接口可返回完整PNG，但耗时约118秒。第三次同题验证显式采用`scripts/osworld_screenshot_wait_compat.py`，把该回环截图接口的读取等待设为300秒；原图、重试次数、15步和32768-token预算均保留，不作为原始时序或性能成绩。后续终态与原评分恢复结果如下。
+第三次尝试完成15步后，原评分前置探活仍因终端接口失败退出。现已在保留的同一GUI状态上补跑原`evaluate()`：getter实际返回Google，按原参考答案得到0分；没有重置GUI或重跑模型。恢复时仅将截图模式下SetupController的状态探测改到真正返回HTTP200/Linux的`/platform`，不替换终端观测内容，也不修改postconfig、getter、参考答案或metric。录屏停止存在ffmpeg告警，未宣称完整录屏验证。
+
+- [x] 固定第一题：15步真实模型/GUI动作及原评分0分已核验；评分恢复单独披露，不称作未修改的单次运行。
+- [x] 固定第二题：15步真实模型/GUI动作及原评分0分已核验。原15秒CDP读取两次超时，延长到180秒后在保留GUI上恢复评分；无新增模型调用，兼容配置单列，不作为原时序复现。
+- [x] 固定第三题：两次原解析失败均保留。第二次保存7步操作及真实`terminate(success)`；确认作者仅在描述原生DONE时错误索引点号。对这一个描述表达式做守卫后，原解析得到DONE、原环境终止、原评分0分；保留GUI和原轨迹，无新增模型调用，分段兼容恢复单列。
+- [x] 固定协议交付：成功CI的软件包97项载荷已安装核验；368个原任务进入统一索引，公共与未修改研究消费者4个固定回读一致。使用独立精确依赖锁完成核验，未改研究仓默认锁；不是未经修改的单次官方运行或368题全跑。
+
+公开执行入口为`scripts/run_osworld_original.py`，默认只核验固定源码和原任务并输出计划。 默认使用作者Docker
+Provider，必须显式提供可丢弃VM路径；不会自动分配虚拟机。
+ARM64兼容环境可显式选择`--provider owned-qemu --owned-qemu-profile <profile.json> --slow-arm-tcg`，
+仅支持预先核验的前三个固定原题；profile须声明专用QEMU monitor、基线快照和回环端口。
+入口调用原Agent、`lib_run_single`和评分器，保留15步及32768-token预算； 兼容层不改题、图像或计分，不能用于宣称官方原始时序或性能复现。
+慢速兼容层还可将该回环Chrome CDP连接的15秒等待延长到180秒；只修改明确匹配的连接超时，
+仍由原getter读取实时cookies，不回退到磁盘快照或伪造状态；其他URL和显式不同超时不变。
+新入口及CDP兼容层20项夹具测试、相关68项回归通过；包括委派原任务、拒绝无评分终态及恢复环境的执行夹具。服务器断网计划验证已通过，真实执行和接通仍待验证。
+
+`scripts/osworld_sentinel_description_compat.py`仅复制已核验的原解析方法，守卫末尾动作文字描述的点号索引；
+原DONE/FAIL/WAIT和pyautogui代码均不变，不修补模型动作。该兼容层6项夹具通过，已用于真实第三题终止及评分恢复。
+原始任务读取API为`vllm_hust_workload_data.osworld.original_task_packages(author_root, manifest=...)`；
+可用`python -m vllm_hust_workload_data.osworld --author-root <原源码> --manifest configs/workload-native/osworld-author-source.json`
+核验完整任务列表；加`--output <新外部JSONL> --write`才写原始任务包。保留原顺序、任务/初始化字段和独立评分参考，不构造请求；
+新模块已在服务器核验完整368个原任务：顺序、原初始化字段（包括本来没有config的任务）及独立评分参考均逐项原样回读，前三题与原生验证选题一致。
+成功CI工件`13490040825`（生产提交`63104380`）现已通过安装及原研究依赖校验，公共和未修改研究消费者固定4项回读完全一致。
+统一入口配置为`{"sources":[{"source_id":"OSWORLD","data_root":"<原作者目录>","manifest":"<固定osworld-author-source.json>"}]}`；
+运行`python -m vllm_hust_workload_data.pipeline plan --config <配置>`，再用`run --config <配置> --output <新索引目录>`。
+通过`consumer.resolve_input`读取原任务和独立评分参考，不能调用`request_body()`伪装成现成prompt。
+
+2026-11-06：原始 Ubuntu 镜像已通过发布方压缩包 SHA256、完整解压 CRC 和解压后全文件 SHA256 核验。公开准备入口为
+`scripts/prepare_osworld_original_vm.py`；`verify-image` 可独立复核已解压镜像， 不要求保留重复压缩包。隔离 CPU 容器中的 ARM64
+QEMU/TCG 已开始启动原始镜像，基盘只读，使用新建写时复制盘和原始固件，未开放宿主端口或设备。 原始桌面 `/screenshot` 已返回 HTTP 200、`image/png` 和
+6539 字节内容；保留首次超时和连接重置记录。 任务初始化、重置及评分仍未验证。多线程 TCG 存在内存序兼容性警告，桌面接口就绪不等于完整任务可用。本项保持未勾选。
+
+后续实查：原始控制器可取得截图并执行可信诊断命令，但截图为黑底加鼠标；客户机日志确认 GNOME Shell 连续两次 signal 11 崩溃。因此保留首次写入盘及失败记录，另建写入盘测试单线程
+TCG，未改原始镜像、 四虚拟 CPU 或 4096MiB 客户机内存，原因尚未确认。作者 `Qwen3VLAgent` 支持显式
+`api_backend="openai"`；其导入、原始截图预处理和默认 32768-token/4 步历史配置已在无网络隔离 客户端中验证，尚无模型调用，也不代表完整桌面依赖或原题执行通过。
+
+单线程尝试另查到 QEMU 已用满 1024 个文件描述符；仅提高本任务进程软上限至 16384 后，截图接口恢复 HTTP 200，未更改宿主机或 Docker 全局策略。仍需排查描述符增长及
+GNOME 会话超时，不能宣布桌面稳定。 修正作者要求的 Pillow、psutil、pytz、tqdm 约束，并按作者锁文件固定 PyMuPDF/pdfplumber 后， 原始
+DesktopEnv、SetupController、Agent 和固定三题评分器的离线隔离导入检查通过；未实例化桌面环境、
+未执行神经模型或原题。环境导入通过、桌面服务就绪和原生任务交付是三个不同检查层次。
+
+客户端软件已新增 `osworld-client-requirements.lock`，记录实际通过导入检查的 ARM64 CPython3.11 环境中 179
+个包的版本。`check_osworld_author_client.py` 先校验完整作者源码身份，再检查全部锁定版本和 原始导入；默认仅输出计划，不启动桌面或模型。独立 Dockerfile
+已在服务器从零重建成功，并在新镜像内通过公开入口校验全部 179 个版本、完整原始源码和客户端/评分器 导入。实测平台为
+aarch64、Python3.11.18；该结果仍不证明桌面重置或原题执行通过。
+
+```bash
+docker build -f configs/workload-native/osworld-cpu-client.Dockerfile -t osworld-client:locked configs/workload-native
+docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges \
+  --read-only --cpus 2 --memory 3g --pids-limit 128 --tmpfs /tmp:rw,nosuid,nodev,size=128m \
+  -e HOME=/tmp \
+  --mount "type=bind,src=$PWD/scripts,dst=/benchmark/scripts,readonly" \
+  --mount "type=bind,src=$PWD/configs/workload-native,dst=/benchmark/configs/workload-native,readonly" \
+  --mount type=bind,src=/srv/osworld/author,dst=/author,readonly \
+  osworld-client:locked python /benchmark/scripts/check_osworld_author_client.py \
+  --author-root /author --action check-imports
+```
+
+上述路径指向已按 `osworld` profile 准备的完整作者源码，不是数据集目录；缺文件、源码身份不符或依赖 版本漂移均停止检查。仅导入 CPU 客户端及评分器定义，不在此执行模型或评分。CI
+只运行该入口的离线夹具， 不构建这套可选环境、不启动虚拟机、不占 NPU。
+
+原始 VM 准备命令如下；目录必须位于仓库外。预算分别覆盖完整压缩包和解压内容，不是抽样下载。 下载和解压峰值还需要预留磁盘空间，`verify-image` 不会启动虚拟机或运行原题。
+
+```bash
+python scripts/prepare_osworld_original_vm.py --action plan --output /srv/osworld/archive
+python scripts/prepare_osworld_original_vm.py --action acquire --output /srv/osworld/archive --max-bytes 12273896463
+python scripts/prepare_osworld_original_vm.py --action extract --output /srv/osworld/archive --extract-output /srv/osworld/prepared --max-unpacked-bytes 24460197888
+python scripts/prepare_osworld_original_vm.py --action verify-image --output /srv/osworld/prepared
+```
+
+已取得且校验有效的镜像直接执行最后一条，不重复下载。压缩包可在保留来源校验记录并确认解压镜像 校验通过后清理；原题运行仍需独立准备环境、原始任务初始化、重置与评分，不由上述命令替代。
+
+SWE-smith（固定三题已交付）：原固定前三题在明确披露ARM/健康检查兼容配置下完成原Agent和官方评分，resolved0/3、errors0、timeouts0。
+这是原生执行完成，不是补丁质量成功或原amd64/GPT4o复现。见[原生回执](validation/swesmith-fixed3-native-20261106.json)。 原资产入口为
+`scripts/prepare_swesmith_original_assets.py`，执行入口为 `scripts/run_swesmith_original_agent.py`；
+已审计的结果不重跑。11个原分片的读取与24条作者轨迹复用仍是单独证据，不能替代真实Agent运行。作者推理入口为
+[SWE-agent 批处理脚本](https://github.com/SWE-bench/SWE-smith/blob/9b74ac08118a85c39c356802f7961893af73e07f/agent/_infer_model.sh)。
+固定第三题的空题面原样保留；若入口拒绝该题，保留拒绝证据，不换题或补写题面。
+
+当前执行环境为 ARM64 和两张 NPU。WebArena、VisualWebArena、OSWorld 和 PaperBench 的原协议保留环境阻塞；
+同类替代项可在现有环境独立验证，登记实际覆盖和差异，不把未覆盖行为标成完成。WorkArena、MLE-bench 和 ToolBench 分别依赖 ServiceNow、Kaggle 和原工具后端；
+节点就绪不等于授权或数据已取得。NatureBench、MLAgentBench、BixBench 与 Full-Duplex-Bench 应分别处理长上下文、 隔离 NPU
+微调、原评分输入恢复和双工语音/ASR，不因共用硬件合并协议。
+
+Full-Duplex-Bench（已交付v1.0/v1.5固定27题/39会话）：用
+`scripts/prepare_full_duplex_original_scorers.py --include-reference --output <新目录> --download`
+获取固定作者v1.0/v1.5完整参考评分及Moshi/ASR源码共22文件；已有完整目录使用同一选项加`--verify-only`核对。默认11文件及`--include-client`的15文件入口保留，但不是完整原生评分链路的全部源码。上述入口只准备软件，不下载模型、不执行推理。评分应消费原双工服务生成的结果；作者样例、离线
+ASR 或文本对话都不能替代该结果。 可移植路径：SGLang-Omni 分别提供
+[MiniCPM-o 的 Ascend 配置](https://sgl-project.github.io/sglang-omni/get_started/installation_npu.html#minicpm-o)
+及
+[原 Full-Duplex-Bench 双工回放指南](https://sgl-project.github.io/sglang-omni/developer_reference/full_duplex_guide.html)。
+上述外部文档本身不是910B2实跑证据；本项目的`session`、真实音频、NPU
+ASR/VAD及适用原评分链路已按固定协议核验，见[最终交付回执](validation/full-duplex-fixed27-native-delivery-20261107.json)。
+
+2026-11-06最新固定协议结果：9类共27条原题/39会话、两个版本原观察窗导出、NPU Parakeet ASR、NPU Silero VAD和全部类别评分路径已完成；本地Qwen3.5-9B
+judge的结果单独标明，不是官方GPT成绩。公共原生入口、依赖/绑定核验和同批原题研究侧交接现已收口。以下镜像帮助和配置解析属于较早的准备记录，当前交付范围以[最终回执](validation/full-duplex-fixed27-native-delivery-20261107.json)为准。
+
+原始输入下载/解包到仓库外的新目录；已验证且仍保留的原包使用`--action verify`复核，不重复下载。
+以下Linux命令先按固定SHA、字节预算、路径/CRC/JSON检查取得原9份ZIP，再按版本原样解压，不改任何任务或音频：
+
+```bash
+set -e
+python scripts/prepare_full_duplex_original_assets.py \
+  --output "$ARCHIVE_ROOT" --action prepare --max-bytes 705372348
+mkdir "$ORIGINAL_TREE"
+for version in v1.0 v1.5; do
+  mkdir "$ORIGINAL_TREE/$version"
+  for archive in "$ARCHIVE_ROOT/$version/"*.zip; do
+    unzip -n "$archive" -d "$ORIGINAL_TREE/$version"
+  done
+done
+```
+
+`ARCHIVE_ROOT`和`ORIGINAL_TREE`须为仓库外的绝对路径；解压目标须全新，命令失败时停止，不合并旧任务目录。
+所需工具为Linux的`unzip`；目录按原ZIP内布局保留。临时原包和解压输入已在本次验证后按用户要求清理约2.01GiB；
+原生捕获/导出、ASR/评分、索引和回执仍保留。未来运行需先重新取得原输入，不能把历史已验证理解成服务器缓存常驻。
+
+固定原题回放入口（原始解压数据及独立SGLang-Omni环境就绪后）：
+
+```bash
+python scripts/run_full_duplex_original_capture.py \
+  --omni-root "$OMNI_SOURCE" --dataset-root "$ORIGINAL_TREE" \
+  --python "$OMNI_PYTHON" --output "$NEW_EXTERNAL_CAPTURE" \
+  --url ws://127.0.0.1:19480/v1/realtime \
+  --dataset-revision-v10 archive-set-sha256:103256ceb6f81b5f39052a357cdc801ceb3352a99819e0a53efd439077d2e3a2 \
+  --dataset-revision-v15 archive-set-sha256:a1a3cd0dad6d59b7959547008b8d9764fee7df4e2ab139276ae15ccb78e2e840 \
+  --model openbmb/MiniCPM-o-4_5 \
+  --model-revision eb4141de24550a3a1a4082f718be58f46b761728 \
+  --runtime "$ACTUAL_DISCLOSED_RUNTIME"
+```
+
+默认仅输出计划；`--verify-only`核验两个固定版本的原生CLI及27个原始输入路径，不访问模型。
+原始ZIP的SHA256/CRC应先由`prepare_full_duplex_original_assets.py --action verify`核验，路径检查不能替代内容核验。
+确认模型服务与资源就绪后加`--execute`，串行调用未改动的原生record CLI，保留v1.0单会话及v1.5的clean/overlap双会话。
+输出必须为仓库外新目录；首个失败保留日志并返回原错误码，不自动换题、重试或覆盖旧结果。
+SGLang-Omni源码固定到`272845a9caadb82f220d7f3d0b64fdd1098fbbca`，入口不安装环境、不启动服务、不执行ASR或评分。
+服务器已核验该入口生成的27条命令与已完成原生运行逐项完全相同，未重新推理；这不等于公共环境、评分和研究交接已全部完成。
+
+原始Parakeet ASR的NPU设备绑定入口为`run_full_duplex_original_asr_npu.py`：
+
+```bash
+ASCEND_RT_VISIBLE_DEVICES="$ALLOCATED_PHYSICAL_NPU" "$ASR_PYTHON" \
+  scripts/run_full_duplex_original_asr_npu.py --version v1.0 \
+  --omni-root "$OMNI_SOURCE" --reference-source "$AUTHOR_REFERENCE" \
+  --tree "$ORIGINAL_REFERENCE_EXPORT" --nemo "$PARAKEET_CHECKPOINT" \
+  --output "$NEW_EXTERNAL_ASR"
+```
+
+默认仅列计划；确认资源空闲后加`--execute`。v1.5使用同一入口，改`--version v1.5`并提供对应原始导出树。
+入口调用原`transcribe`或`run_asr`，固定原Parakeet权重摘要，加载后逐参数检查`npu:0`，没有CPU神经网络回退。
+v1.0原流程在导出树写入`asr.json`及各题转录；检测到已有`asr.json`即拒绝覆盖，应复用已有结果。
+v1.5在新输出目录保存原ASR缓存、词级时间戳和评分输入；不替换后续原时序/VAD或行为评分。
+该可移植包装器目前通过8项无模型夹具测试；既有NPU实跑证据来自同样的原函数及设备绑定，尚未将包装器本身计为新的模型实跑。
+
+实际已验证的ASR环境为ARM64、Python3.12.13、CANN9.1.0、910B2；独立venv通过`--system-site-packages`继承
+torch2.10.0+cpu、torch_npu2.10.0.post4、torchaudio2.10.0+cpu、torchvision0.25.0+cpu、numpy1.26.4和triton_ascend3.2.2。
+这里torch的`+cpu`是基础wheel标记，实际神经执行设备由torch_npu注册及参数检查确认，不表示执行在CPU。
+ASR私有层实际使用NeMo3.0.0、pyarrow21.0.0、datasets4.4.1、fsspec2025.10.0、multiprocess0.70.18、dill0.4.0、
+setuptools-scm9.2.2和vcs-versioning2.1.0。不要直接用最新依赖替换这些ABI相关版本，也不要向正在服务的vLLM环境安装。
+独立环境曾存在继承SDK、OpenCV等依赖声明冲突，实际原ASR执行已通过，但不能据此称全环境`pip check`通过；
+ASR私有层的66工件安装锁及公共准备入口已补充，服务器本地新环境的66包版本/位置、NeMo导入和六个核心包未变已核验。
+全环境11项依赖声明冲突与原基线逐项相同，无新增；不把ASR功能环境称为全局pip检查干净的通用镜像。神经阶段公共绑定资格核验继续单列。
+
+ASR重建锁见[固定工件及安装来源](validation/full-duplex-asr-overlay-lock-20261106.json)。
+其65个wheel和1个源码包均绑定原下载地址及SHA256，原安装的8508个RECORD文件摘要已核验。 它依赖现场分配镜像`vllm-ascend:v0.23.0-openeuler`的固定摘要
+`sha256:accc7dfc87b07670e9cadf0747cd9e3c5cbdf55cae4888b83ee06c38683fc09a`，
+并非宣称该现场镜像可在公网下载。运行前由平台核对镜像摘要；脚本检查ARM64、Python3.12.13和六个核心包版本，
+继承这些核心包、只在新venv安装私有层，不改服务环境。源码包构建使用原setuptools80.10.2及wheel0.48.0，不临时解析最新版构建依赖。
+
+```bash
+source /usr/local/Ascend/ascend-toolkit/set_env.sh
+"$BASE_PYTHON" scripts/prepare_full_duplex_asr_environment.py \
+  --lock docs/workload-data/validation/full-duplex-asr-overlay-lock-20261106.json \
+  --output "$NEW_EXTERNAL_ASR_ENVIRONMENT"
+```
+
+默认仅校验锁并列计划。加`--prepare`才按哈希安装66个私有工件，禁用依赖重新解析、全局卸载和核心包替换； 安装后检查NeMo导入、私有包版本/位置及核心包未变，不加载模型。
+已有环境可改用`--verify-only`复核，不下载、不重新安装、不覆盖原安装回执。
+调用前必须激活CANN动态库；公共入口现会在下载前检查`libhccl.so`，首个缺失库路径的重建检查失败保留，不能掩盖为依赖成功。
+锁中的Silero6.2.1为独立可选VAD包，原wheel摘要及来源另列，使用`--no-deps`安装到独立目标目录后加入进程`PYTHONPATH`，
+不把它混入66包的ASR安装完成数。上述环境检查不等于ASR/VAD神经执行，也不能代替双工服务运行时资格核验。
+
+双工模型运行时的可迁移绑定（已完成依赖/绑定核验并复用原生实跑证据，不重复整套服务运行）：
+
+官方vendor operator载荷可在独立外部目录准备，无需Docker或执行SDK安装器：
+
+```bash
+python scripts/prepare_full_duplex_operator_payloads.py \
+  --lock docs/workload-data/validation/full-duplex-model-runtime-lock-20261107.json \
+  --publisher-archive-root "$PINNED_KERNEL_RELEASE_ARCHIVES" \
+  --output "$NEW_EXTERNAL_OPERATORS"
+```
+
+默认只计划；加`--prepare`后核验ZIP、两个run成员和内嵌gzip的SHA，再直接读取固定Makeself封装中的tar。
+不执行shell、不接受安装条款、不运行`install.sh`，不写系统CANN；仅允许普通文件、目录和指向包内普通文件的库链接，拒绝路径穿越及其他链接类型。
+实际1126份普通文件与2个库链接均与原成功运行的载荷一致，新载荷组合导入8个关键模块通过。
+两份vendor根目录分别为`payload-0/packages/vendors/customize`、`payload-1/packages/vendors/custom_transformer`。
+
+部署时先激活CANN，按实际设备分配设置`ALLOCATED_NPU_ID`，然后在当前进程设置：
+
+```bash
+export ASCEND_RT_VISIBLE_DEVICES="$ALLOCATED_NPU_ID"
+export ASCEND_CUSTOM_OPP_PATH="$NEW_EXTERNAL_OPERATORS/payload-0/packages/vendors/customize:$NEW_EXTERNAL_OPERATORS/payload-1/packages/vendors/custom_transformer"
+export LD_LIBRARY_PATH="/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/lib:$NEW_EXTERNAL_OPERATORS/payload-0/packages/vendors/customize/op_api/lib:$NEW_EXTERNAL_OPERATORS/payload-1/packages/vendors/custom_transformer/op_api/lib:$LD_LIBRARY_PATH"
+export PYTHONPATH="$NEW_EXTERNAL_COMPAT/source:$NEW_EXTERNAL_COMPAT/runtime-helpers:$PINNED_SGLANG_SOURCE/python:$PYTHONPATH"
+export FULL_DUPLEX_NPU_SPEAKER_PROFILE="$QUALIFIED_SPEAKER_BUNDLE/profile.json"
+"$NEW_EXTERNAL_MODEL_ENVIRONMENT/env/bin/python" -m sglang_omni.cli serve \
+  --config "$EXTERNAL_DEPLOYMENT_YAML" --enable-realtime \
+  --host 127.0.0.1 --port 19480
+```
+
+`EXTERNAL_DEPLOYMENT_YAML`基于下文固定模板，并一致设置原MiniCPM模型和参考音色路径；不能让服务误用其他模型。
+`QUALIFIED_SPEAKER_BUNDLE`须包含匹配的OM、派生图和真实NPU资格回执，不能仅以图编译成功代替。
+
+首次部署无需借用旧回执；先用公开图准备入口生成并编译固定派生图，再按下列入口生成独立bundle：
+
+```bash
+python scripts/qualify_full_duplex_npu_speaker.py \
+  --original-model "$EXTERNAL_ORIGINAL_CAMPPLUS" \
+  --derived-graph "$EXTERNAL_COMPILED_GRAPH/campplus.reference-shape.pool-lowered.onnx" \
+  --model-om "$EXTERNAL_COMPILED_GRAPH/campplus.om" \
+  --reference-audio "$ORIGINAL_MINICPM_MODEL/assets/system_ref_audio.wav" \
+  --output "$NEW_QUALIFIED_SPEAKER_BUNDLE"
+```
+
+默认只计划；确认获分配的单张NPU空闲、激活CANN并设置`ASCEND_RT_VISIBLE_DEVICES`后，加`--execute`才执行一次小encoder控制。
+入口先核对原图、派生图、固定参考音色/特征，再使用与正式服务相同的ACL实现；固定输出SHA不符或资源释放失败都不产生合格profile。
+成功输出的`profile.json`可作为`FULL_DUPLEX_NPU_SPEAKER_PROFILE`；原服务构造器仍拒绝缺失/失败回执，没有放松检查。
+本次隔离环境下的真实控制通过，新回执被正式profile加载器接受。该控制不重跑39会话、不请求LLM，也不证明原全网络CPU数值等价。
+测试用临时bundle已在保留回执后清理；实际部署请保留服务正在使用的一份bundle，不反复复制。
+
+MiniCPM原模型固定为`openbmb/MiniCPM-o-4_5@eb4141de24550a3a1a4082f718be58f46b761728`；
+参考音色、图和原27份模型资产身份见模型回执，按原发布方权限在服务器取得，不入Git。 上述启动命令沿用已成功39会话的启动选项；新依赖/新载荷本次只检查导入，未重新启动服务或跑模型。
+
+模型依赖的独立重建入口（ARM64/Python3.12.13，先激活CANN）：
+
+```bash
+python scripts/prepare_full_duplex_model_environment.py \
+  --lock docs/workload-data/validation/full-duplex-model-runtime-lock-20261107.json \
+  --publisher-archive-root "$PINNED_KERNEL_RELEASE_ARCHIVES" \
+  --kernel-supplement "$PINNED_PUBLISHER_FUSED_SIGMOID_MUL_PY" \
+  --output "$NEW_EXTERNAL_MODEL_ENVIRONMENT"
+```
+
+默认只计划；加`--prepare`才创建新环境并安装固定177项公开依赖及5个原官方wheel。 归档先核对外层SHA256，再核对5个wheel成员；不执行归档中的SDK installer。
+补充Python kernel必须为锁中官方固定提交和SHA，不能用自己重写的算子；只写新环境缺失文件、不覆盖原文件。
+入口在独立venv安装依赖后物理复制6个核心包，再关闭system-site-packages，避免继承共享vLLM依赖；
+下载禁用pip缓存，成功后核对并删除5个临时解出的wheel。至少预留5GiB空间，6个核心包的基座版本必须原样匹配。
+`--verify-only`核对182项私有依赖版本/位置与核心版本，不安装或下载；两份固定源码仍需按后文单独绑定， 不伪造历史editable元数据，也不称该入口执行了原生模型。
+
+服务器本次先完成182项安装，再用同入口的`--bind-kernel-only`和`--isolate-core-only`补齐分阶段操作，
+19900份核心文件/1806502988字节与基座逐文件哈希一致，8个关键模块在隔离环境和公共兼容副本组合下导入通过。 已核验vendor
+operator载荷在该阶段复用；后续公共纯解包及启动说明已在上文补齐，1126份文件/2个链接一致。保留13条依赖声明冲突，不称全环境pip检查干净。临时5份wheel共52305767字节已删除；原安装回执、锁和核验日志保留。
+
+完整模型运行时依赖来源见
+`docs/workload-data/validation/full-duplex-model-runtime-lock-20261107.json`：177项公开wheel/源码包按URL和SHA256固定，
+5项NPU wheel按官方2026.9.0发布归档、成员路径及双层SHA256绑定，另2项绑定源码身份。 这是原成功运行环境的来源锁，不是通用pip
+requirements，也不是从零重建通过的声明。
+基座是记录digest的站点镜像，外部使用者须先取得匹配ARM64/Python3.12.13/CANN9.1.0环境；不能假设私有镜像地址可公网拉取。
+`sglang`安装元数据为`0.5.20+nativecompat1`，实际导入源码固定为`baa9befa381511cd4d56f83980951e5a45fffc6d`，
+不能仅按元数据版本重新安装PyPI包替代该源码。官方kernel补充文件的固定提交及SHA也在锁中，不修改二进制扩展。
+
+```bash
+python scripts/verify_full_duplex_model_runtime.py
+"$MODEL_ENV_PYTHON" scripts/verify_full_duplex_model_runtime.py --verify-installed
+```
+
+第一条只核验锁；第二条必须由目标模型环境Python运行，比较184项运行依赖及6项核心包版本，不导入Torch/ACL、不调用模型。
+原环境190项版本核对通过，公共兼容源码与这些依赖的8个关键模块导入通过，且Omni路径确认为新副本；
+来源仍等待完整模型环境的新建重装及剩余公共神经绑定核验。不要使用可写核心包符号链接后再执行pip安装； 不在现有共享服务环境升级核心包，也不在系统CANN目录安装或覆盖这些私有operator载荷。
+
+- `full_duplex_reference_audio.py`替代本机路径绑定，只接受固定发布方参考WAV哈希；PCM16转float32不改声道、样本或调用者流位置。
+  原269494个样本已与原SoundFile读取逐值核对。它只处理模型固定参考音色，不接管或改写任务音频。
+- `full_duplex_npu_speaker.py`通过`FULL_DUPLEX_NPU_SPEAKER_PROFILE`指定独立工件目录，
+  配置样例为`configs/workload-native/full-duplex-npu-speaker-profile.example.json`。
+  工件目录需含声明的派生图、编译OM和真实NPU控制回执；入口核验三者哈希、原固定输入/输出形状及特征摘要，
+  仅接受原参考特征，拒绝CPU回退或其他音频。实际复核已保留的图、OM和旧NPU回执通过，未重新执行神经网络。
+- 新ACL绑定已在获准空闲的物理1上完成一次真实小encoder控制：固定输入/输出哈希与旧NPU控制一致，
+  修改输入被执行前拒绝，显式释放成功，退出后物理1无进程且HBM恢复基线；物理0原服务未改。
+  没有回放旧benchmark或请求LLM。这只是派生图新绑定的验证，不称全原网络数值等价或完整模型服务重验。
+
+上游模型源码兼容副本可按以下方式准备：
+
+固定参考speaker的派生ONNX可用`prepare_full_duplex_speaker_graph.py`生成。 在独立转换环境使用`onnx==1.19.1`及NumPy，原始输入为
+`openbmb/MiniCPM-o-4_5@eb4141de24550a3a1a4082f718be58f46b761728/assets/token2wav/campplus.onnx`；
+必须匹配入口固定的原始SHA256，不接受其他模型或更改的参考形状。
+
+```bash
+python scripts/prepare_full_duplex_speaker_graph.py \
+  --original "$EXTERNAL_ORIGINAL_CAMPPLUS" --output "$NEW_EXTERNAL_SPEAKER_GRAPH"
+```
+
+默认只计划；`--execute`生成固定`[1,1682,80]`图，逐字节保留原参数并核对派生图摘要。
+额外加`--compile`才调用已激活CANN的ATC，目标固定Ascend910B2；不安装SDK、不执行神经推理。
+生成或编译图不等于NPU资格回执，不能直接替代`FULL_DUPLEX_NPU_SPEAKER_PROFILE`中的真实控制记录。
+服务器公共入口实际生成的图与原部署图SHA256一致；本次未重复编译或推理。 保存回执后已删除本次两份临时模型文件，原共享OM、派生图及NPU控制证据仍保留。
+
+模型源码副本准备命令：
+
+```bash
+python scripts/prepare_full_duplex_model_compat.py \
+  --omni-root "$ORIGINAL_OMNI_SOURCE" --output "$NEW_EXTERNAL_COMPAT"
+```
+
+默认仅核对原文件并列计划；加`--prepare`才创建新副本，不在原源码上补丁。 输入须为固定版本的未改原文件，不能把此前已改过的运行目录当作原版本； 入口核验MiniCPM
+code2wav、通信router、vocoder三文件的固定SHA256，其他复制文件逐一核对不变。 实际已用保留的原文件准备1029份源码，修改只涉及NPU设备识别、原固定参考音色读取及NPU
+speaker绑定， 没有改任务、采样预算或参考评分器，也未安装包、启动服务或下载LLM模型。 运行时将副本的`source`、`runtime-helpers`加入该进程`PYTHONPATH`，
+并设置`FULL_DUPLEX_NPU_SPEAKER_PROFILE`指向独立的已核验工件配置。
+启动模板为`configs/workload-native/full-duplex-minicpmo-npu.yaml`，按`/models`只读模型挂载布局编写；
+它与已成功服务配置在模型根路径重定位后逐字一致，保留原参考音色、单会话及Ascend后端设置，不改原采样预算。 非该挂载布局须一致指定模型根路径及其原参考音色路径，不能替换音色或任务音频。
+该源码准备入口不替代SGLang/算子依赖安装；完整依赖准备、导入/组合控制及固定原生执行证据已分别列明，不能把单独源码或配置准备冒称为神经执行。
+
+保存的原生回放应先用`export_full_duplex_original_capture.py`导出原观察窗，再进行ASR和评分：
+
+```bash
+"$ASR_PYTHON" scripts/export_full_duplex_original_capture.py --version v1.0 \
+  --omni-root "$OMNI_SOURCE" --capture-root "$COMPLETED_CAPTURE" \
+  --dataset-root "$ORIGINAL_TREE" --python "$ASR_PYTHON" \
+  --output "$NEW_EXTERNAL_EXPORT"
+```
+
+默认仅计划，加`--execute`调用未改原导出器；v1.5改版本参数即可，并显式锁定原12组clean/overlap，避免原工具默认扩大到全部任务。
+入口要求同一27条原题的`fixed-plan-public.json`与对应case目录；不更换回放、不平移观察窗、不补造迟到音频。
+导出CLI会导入Silero，即便导出本身不做神经推理。实测使用独立`silero-vad==6.2.1`包目录加入进程`PYTHONPATH`；
+不是在共享vLLM环境直接安装。缺包的第一次公共导出失败已保留，不能把退出码1当成功。
+
+评分入口为`run_full_duplex_original_scores.py`，仍默认只计划，显式加`--execute`才执行。公共参数为
+`--omni-root`、`--reference-source`、`--tree`及新的仓库外`--output`；各阶段参数如下：
+
+已有v1.5本地judge结果可先复制到独立目录，再传`--reuse-completed`与`--local-judge-output <副本>`。
+该模式仅适用于`v15-localjudge`，由原`run_custom`校验实验、请求及结果身份；任何缓存缺失均禁止发起新模型请求并使验证失败。
+原`--tree`、`--scores`及`--judge-config`须保持原运行身份，不得改写实验文件凑匹配。
+服务器实际复用12条valid结果，原目录和副本共24份请求/结果文件哈希不变；回执为
+`full-duplex-public-saved-judge-reuse-20261107-001/qualification-public.json`。新增模型调用0，本地judge结果不属于官方GPT成绩。
+
+| `--phase`                     | 原始处理及所需附加参数                                                                    | 神经执行      |
+| ----------------------------- | ----------------------------------------------------------------------------------------- | ------------- |
+| `v10-nonjudge`                | 原pause、smooth turn三类评分，消费原ASR导出树                                             | 无            |
+| `v10-backchannel-npu`         | 原backchannel函数；PCM16无损解码桥与固定Silero设备绑定                                    | NPU VAD       |
+| `v10-interruption-localjudge` | 原中断相关性提示与计分；显式`--base-url`、`--served-model`                                | 外部NPU judge |
+| `v15-timing-npu`              | 原时序公式与阈值；`--scores`为原ASR结果目录                                               | NPU VAD       |
+| `v15-localjudge`              | 原自定义judge协议；`--scores`、`--judge-config`、`--base-url`和新的`--local-judge-output` | 外部NPU judge |
+| `v15-summary`                 | 原ASR/时序汇总；`--scores`，bootstrap=2000、seed=20260925                                 | 无            |
+
+本地judge凭据只从`--api-key-env`指定的环境变量读取，默认名为`FULL_DUPLEX_LOCAL_JUDGE_API_KEY`，不要写入命令或配置。
+v1.5配置沿用上游custom-judge schema，需真实模型/分词器版本、精度、解码参数、seeds及启动回执摘要；不能用GPT别名替代本地模型身份。
+自定义judge输出目录必须独立于原ASR/时序结果，原GPT行为项保持未评状态，不将本地评分合并冒充GPT评分。
+VAD绑定只改变模型和输入张量的设备，核验6.2.1原TorchScript摘要；不改变原阈值、重采样及状态重置。
+上述公共评分入口已实际复用保存结果完成v1.0三类非神经评分及v1.5汇总，未调用模型； 神经阶段的公共包装器仍须与既有NPU实跑证据完成逐项资格核验，不能把默认计划或夹具测试当真实评分。
+
+2026-11-06 的独立环境准备已锁定官方 910B ARM64 镜像
+`swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang-omni@sha256:265387f87a6a97ad170a2c2a51f0ce3209e24e143d3048c97fe172b70f273938`。
+该镜像已下载，使用原镜像入口、只读驱动库且不映射设备、不联网时，原CLI帮助和原生双工配置解析均已通过。
+实际环境为Python3.11.15、torch/torch_npu2.10.0、SGLang0.5.20、sglang-omni0.1.9、Transformers5.12.1；
+不与当前上游main的另一套依赖混用。候选配置使用实际原类`MiniCPMODuplexPipelineConfig`，只为thinker和talker显式指定`ascend`注意力后端；
+解析后保留perception、thinker、talker、speech四阶段及原双工采样默认值。上述检查没有加载模型、处理音频或执行评分，仍不能作为来源完成证据。
+下一步核验NPU服务、原音频生成及原ASR/评分。不要在正在运行的 vLLM 环境直接升级依赖，也不要直接执行会下载模型和启动多套服务的 `fdb setup`。 官方普通语音 NPU 配置的
+`config_cls` 为 `MiniCPMOSpeechPipelineConfig`，不能据此认定已支持双工 `session`。 原 Moshi/NeMo 路径与 SGLang-Omni
+路径须分别记录软件版本、实际执行阶段及评分差异，不能混称未经修改的原实现。
+
+MLE-bench 已交付预先固定的 NOMAD 单竞赛。原 AIDE 到达 86,400 秒时限，46 次实际模型请求全部成功。冻结提交的 240 条预测与公开测试表 ID 原顺序一致，原评分器给出
+RMSLE 0.06022。竞赛作者的公开分发经原准备器产生四份官方校验和匹配的输出。交付范围覆盖该竞赛，Kaggle
+外层归档和其他竞赛未核验。[交付回执](validation/mlebench-nomad-native-delivery-20261108.json)
+
+固定作者源码推荐使用
+`scripts/prepare_swebench_author_source.py --profile mlebench --author-root <新目录> --action prepare --archive <原作者源码归档>`。2026-11-07已从固定提交的原codeload归档取得并逐文件核验758份原软件/公开leaderboard，prepare和verify均返回0；5,179,900字节临时归档已删除。这不包含Kaggle竞赛数据。归档入口保留原Git/LFS身份检查，不能用Git
+LFS指针文本冒充展开后的原文件。 同一入口改用 `--action plan` 可先核对固定版本及758个文件（约7.5MB）。ARM64 Python 3.12 的 CLI 依赖见
+`configs/workload-native/mlebench-arm64-client-py312.txt`。公开隔离CLI配方为
+`configs/workload-native/mlebench-arm64-cli.Dockerfile`，构建上下文仅含已核验的`author/`、依赖清单和配方本身。该配方复用已缓存的固定Ascend基础镜像，不是最小镜像，CLI本身不使用NPU。已在当前ARM64服务器重新构建并断网验证：Python3.12.13、MLE-bench1.0.0，130项依赖版本与原锁一致，680份安装包内原文件逐一匹配，82个原竞赛ID可注册；这不是82份竞赛数据已取得，也不是Agent/科学程序环境已验证。原CLI即使`--help`也会建立相对路径缓存，因此只读根运行时须提供可写临时工作目录。初次CANN路径污染venv及只读缓存失败均保留，最终配方清空继承PYTHONPATH并使用`/tmp`工作目录，原benchmark源码未改。
+在仓库外构建上下文放入已核验的`author/`、上述Dockerfile和依赖清单后，可用`docker build -f mlebench-arm64-cli.Dockerfile -t local/mlebench-cli .`构建。`docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --tmpfs /tmp:rw,nosuid,nodev,size=128m local/mlebench-cli --help`只做软件检查。真实竞赛输入应保存在显式挂载的外部目录，并用作者的`--data-dir`参数指向该目录，不存入临时目录或镜像。
+
+在隔离执行环境安装作者客户端后，由具备权限的操作者配置 Kaggle，并自行处理对应竞赛规则；凭据不进入仓库或镜像。 用 `mlebench prepare -c <已确认的原竞赛 ID>`
+获取和校验原始数据。即使已有 ZIP，原准备入口仍会检查授权； 不跳过作者校验，也不临时替换竞赛。准备成功后仍须运行 Agent、保留原提交并执行作者评分。 已核验低复杂度候选
+`nomad2018-predict-transparent-conductors` 的作者准备、校验和 RMSLE 评分定义；它尚未锁定为原验证样本，也未取得竞赛数据。 生成提交后，单赛道评分入口为
+`mlebench grade-sample <submission-path> <competition-id>`，使用作者准备出的私有评测标签。
+
+另核验了一条不依赖 Kaggle 登录的作者公开数据路线：[竞赛作者论文](https://doi.org/10.1038/s41524-019-0239-3)指向的公开发布包含同一竞赛的原 CSV
+和几何数据。 固定发布版本中核对了训练 2,400 个和测试 600 个原几何文件，不解包公开发布的有标签测试 CSV。按 MLE-bench
+原准备函数要求组装四份输入归档后，断网运行未修改的原准备函数， 生成的三份公开 CSV 和一份私有标签 CSV 均匹配固定版本的作者校验值。未验证 Kaggle 外层 ZIP，不能称作
+`mlebench prepare` 官方下载路径。官方 `grade-sample` 已对作者自带样例返回有效评分 0.21174；这是评分入口控制，不是 Agent 提交或竞赛成绩。
+现固定该原赛题为单赛题验证样本，选择发生在任何 Agent 运行之前。用 `python scripts/prepare_mlebench_nomad_author_data.py` 查看固定发布
+URL 和 SHA-256； 在已核验的 MLE-bench 环境内加 `--archive <作者发布ZIP> --data-dir <专用空目录>` 运行，脚本与对应
+`configs/workload-native/mlebench-author-source.json` 一起只读挂载。该入口已在断网 ARM64 容器实跑。Agent 只读挂载返回的
+`agent_mount_relative_to_data_dir`；研究侧也应只读这个公开目录，原始归档和私有标签继续与其隔离。已逐条核对准备后 2,400 个几何文件的 ID
+引用，测试表与原提交模板的 240 个 ID 顺序完全相同，且测试表不含目标列。已有准备结果可在同一隔离 MLE-bench 环境中运行
+`python scripts/prepare_mlebench_nomad_author_data.py --verify-public-dir <公开目录>`，无需重新解包。服务器已仅挂载公开目录断网实跑，并核对
+3 份官方公开表校验和。 整项仍未勾选。
+
+作者集成指定 [AIDE v6.3.3](https://github.com/thesofakillers/aideml/tree/v6.3.3)；已取得固定提交并逐一匹配 33 份原 Git
+对象，未将历史解题产物纳入工作区。 容器只读挂载 `prepared/public` 后实测仅能看到 2,160 条训练、240 条测试及等量几何文件，测试表不含标签，私有目录、原归档、Docker
+socket 和 NPU 不可见，网络仅回环。 这是输入边界检查，不是 Agent 运行。作者构建依赖 amd64、Miniconda，并默认安装 CUDA 依赖；在 ARM64 上需要单列兼容环境。
+固定 AIDE 对 Qwen 型号默认路由到 OpenRouter，不能只设置本地 OpenAI 兼容地址就认为模型已绑定；验证必须显式绑定本地模型并保留原请求和工具调用语义，不冒用 GPT
+型号或启用付费后端。
+
+`configs/workload-native/mlebench-aide-arm64-core.txt` 固定了导入和传输对照的 81 项依赖；它不是科学执行环境。 独立目标目录配合
+`python -S` 使用，不与评分客户端的包混用。服务器安装包装器原退出码 1 和基础包冲突日志保留；之后在断网容器独立核对全部 81 个实际安装版本并成功导入原 AIDE 入口。使用
+`scripts/mlebench_aide_local_model.py` 绑定一个实际模型标识和 IPv4 回环地址，原消息编排、预算、工具定义和结果解析保持不变。 固定版 AIDE 和
+OpenAI SDK 1.48.0 的文本、工具调用两条断网对照通过；响应由本地测试夹具提供，未发真实模型请求，也未执行科学代码、Agent 或评分。
+
+保留作者要求的 `http://localhost:5000/validate` 及原 `validate_submission.sh`。运行
+`scripts/mlebench_nomad_validation.py worker --socket <新套接字> --data-dir <评分目录>` 时仅评分工作容器挂载私有标签；
+Agent 容器以 `frontend --socket <同一套接字>` 提供回环 HTTP，只读挂载专用套接字目录和公开输入。两边均可禁用外部网络；需使用兼容的套接字访问权限。
+工作容器调用未修改的作者 `validate_submission`，只返回有效或无效，不返回分数、标签或异常明细。隔离双容器实跑已用原 Shell 工具接受原样例并拒绝无效 CSV；
+此项不替代最终独立评分，也不计 Agent 完成。
+
+NOMAD 的 ARM64 CPU 科学执行对照补齐了 `configs/workload-native/mlebench-aide-arm64-nomad-science.txt` 中的 6
+项依赖，独立于 AIDE 核心和评分客户端安装。 在断网、无 NPU、只读公开输入的容器内，通过未修改的 AIDE Interpreter 执行受信代码：读取全部 2,160 条训练记录、生成 240
+行预测； 独立容器随后以作者 `grade-sample` 和私有标签验证提交有效。该对照只证明固定赛题的 CPU 执行和评分链路，不是 Agent 生成的提交，不代表作者完整 CUDA
+镜像或其他科学包已适配。
+
+用 `scripts/run_mlebench_nomad_aide.py --author-root <固定MLE-bench源码> --model <实际模型ID>` 查看原 86,400
+秒、500 步与单步 32,400 秒配置。授权窗口内才加
+`--execute --output <空输出挂载> --queue <空私有队列> --validator-socket <评分工作容器套接字>`， 使用已核验的 AIDE
+源码与两组依赖，`python -S` 启动，并只读挂载原 `/home/instructions.txt`、公开输入及原校验脚本；ARM64 需提供 GNU `envsubst`。
+可信模型转发侧使用同一队列、实际回环端点和 `appworld_model_transport.py --expected-model <同一模型ID>`，按运行窗口设置显式等待和调用上限。
+启动脚本保留原指令拼接、时间、步数和输出链接，只替换 Conda 激活、去除 CUDA 库探测并传递原退出码。断网对照走到第一条原模型请求并在预设错误处退出； 未发真实推理、未生成提交，不能据此勾选。
+
+首个真实 27B 尝试因只有 system 消息被模型模板以 HTTP 400 拒绝，退出码 1、无提交；保存原请求与错误。 独立兼容配置加 `--convert-system-to-user`，使用
+AIDE 作者已提供的 `agent.convert_system_to_user=True`，不改原说明、预算、模型或评分。 新尝试已发出首条 user
+请求；除作者生成的剩余时间和包名顺序外，原提示内容未改，其他请求字段一致。仍须核查真实 Agent 终态、提交及原评分；不能把启动算作通过。
+
+同一兼容尝试前两条请求成功，第三条触及转发层 600 秒读取超时，转发进程退出。确认模型已无在途请求后，仅恢复转发进程，接收原 AIDE 自行排出的逐字节相同重试， 不重启
+Agent，也不重放已有成功响应。新运行可在启动器和可信转发侧设置相同的 `--request-timeout`，前端和 SDK 依次多留 15、20 秒；
+该设置只控制传输等待，不改作者的任务时限、步数、生成参数或评分。
+
+原生重试也达到 600 秒传输上限。确认无在途请求后结束该次尝试，容器退出码 143，未跑满原协议。观察器冻结了 Agent 已生成的 240 行提交， 原评分器确认有效，ID
+顺序、数值及冻结摘要也独立核对一致。仅保留为中断尝试的有效候选与评分证据，不勾选整项； 后续新运行使用独立的长等待配置，不用已有候选冒充新运行提交。
+
+独立长等待运行以 3,600 秒传输等待越过上次超时点。观察器在作者启动器退出后冻结该次提交并启动原评分。终态审计从同一日志识别作者 CLI 的 JSON 前缀，核对冻结提交摘要、原 ID
+顺序和官方分数。
+
+终态核对时先冻结 `submission.csv`，使用
+`scripts/audit_mlebench_nomad_submission.py --public-test <公开test.csv> --submission <冻结提交>`
+核对发布方测试表校验值、240 条 ID 原顺序和有限数值。作者评分函数按行比较，不会按 ID 重排；发现错序时保留原提交，不替 Agent 排序。再用作者 `grade-sample`
+评分，并核对评分文件与冻结提交摘要一致。运行中的候选提交即使通过结构检查，也不是终态验收。
+
+同一审计入口可加
+`--start-receipt <原启动回执> --terminal-receipt <终态回执> --grader-log <原评分器日志>`，核对作者启动器退出、真实响应、冻结提交摘要和有效官方分数。
+原时限退出码 124 须有至少 86,400 秒容器墙钟记录；手工中断或评分未通过会被拒绝。已用历史 240 行中断提交复核：行身份有效，但不满足终态交付条件。审计不自动勾选整项。
+
+### ResearchCodeBench 论文片段替代协议
+
+只在研究代码里读取任务时，用 `workload-data download-plan RESEARCHCODEBENCH` 获取所需文件清单和 SHA-256。 若 GitHub Raw
+下载中断，可从下方固定提交取得同路径文件，再核对清单中的字节数和 SHA-256。保留原目录结构，把实际的数据根写入 JSON 配置：
+
+```json
+{
+  "sources": [
+    {"source_id": "RESEARCHCODEBENCH", "data_root": "/path/to/author-tree"}
+  ]
+}
+```
+
+按[研究侧使用说明](../../workload-preparation/README.md#%E6%8C%89%E6%9D%A5%E6%BA%90%E6%89%BE%E5%88%B0%E5%87%86%E5%A4%87%E4%B8%8E%E6%89%A7%E8%A1%8C%E5%85%A5%E5%8F%A3)建索引。
+原生生成和评分使用下面的完整作者源码与隔离环境。
+
+检出
+[ResearchCodeBench 固定版本](https://github.com/PatrickHua/ResearchCodeBench/tree/db3d16d94cfa6b6785bef6f1db0263edfe6f1d34)。
+使用 Python 3.11 CPU 客户端，复用 PyTorch 2.6.0+cpu、NumPy 1.26.4 和 SciPy 1.17.1，并提供作者模块需要的
+PyYAML、Pydantic、Matplotlib 和 tqdm。固定三段分别来自 Diff-Transformer、GPS 和 LEN 的首个作者标记。
+
+```bash
+python scripts/run_researchcodebench_fixed3_native.py plan --author "$AUTHOR" --output "$RESULTS"
+python scripts/run_researchcodebench_fixed3_native.py generate --author "$AUTHOR" --output "$RESULTS" --queue "$QUEUE"
+python scripts/run_researchcodebench_fixed3_native.py score --author "$AUTHOR" --output "$RESULTS"
+```
+
+生成侧在断网容器挂载只读作者目录和专用文件队列。使用 `scripts/appworld_model_transport.py` 的
+`--watch --expected-model Qwen/Qwen3.5-9B` 在可信 NPU 主机转发请求，生成结束后向队列写入 `STOP`。 在独立断网 CPU
+容器内评分，只挂载作者目录和独立结果目录，给 `/tmp` 提供临时写空间。原评分器会执行生成的 Python。
+
+PaperBench（以下保留原整篇复现协议）：复用已核验的23个原始论文包。2026-11-07已使用原公共资产入口，在当前服务器恢复全部506份原文件、213,434,104字节论文/图片/rubric，并逐文件核验通过；材料位于机器清单记载的当前作者源码根，与已核验的195份软件共存。此次不接受条款、不调用模型，不把材料恢复算作Agent或评分完成。可用
+`prepare_paperbench_original_assets.py --action verify --output <资产目录>` 校验原包，再用
+`check_paperbench_native_prerequisites.py --author-root <源码目录>` 检查原生运行前置条件。源码目录应包含
+`project/paperbench`。两步均不占卡。原构建脚本指定 `linux/amd64`，应在经过验证的隔离执行节点上构建和运行；当前宿主机已有隔离 Docker，
+但该原始镜像和生成程序的跨架构执行仍未通过验证，Docker 可用不代表原生任务已就绪。构建前由操作者处理 Miniconda 软件条款；模型推理仍可由独立 NPU 服务承担。
+仅在旧包不可恢复时，用资产入口的 `--action plan --output <仓库外目录>` 先核对固定版本、506 个文件和约 213 MB 的下载量，再在服务器用
+`--action prepare` 恢复原包。该包不含论文复现实验另需的外部数据。 正式验证须保留同一原题的 Agent 提交、复现归档、原 rubric 和评分产物；默认 300 秒或开发用 60
+秒不等同于正式 24 小时协议。
+
+2026-11-07 在隔离 amd64 客体内使用未改动的原复现配方实际构建：第 3 步安装容器退出码为 0，随后外层驱动在等待 SSH 子进程 2460 秒后超时退出。超时后客体 Docker
+仍在线，当时未核验第 3 步镜像层已提交，未观察到第 4 步或完整镜像。随后原客体退出，磁盘完整性检查通过；恢复客体复用原磁盘，Docker 命中第 3 步缓存并完成原配方 6 步。 最终 amd64
+镜像通过断网运行核验：默认 Python 3.12.3、Python 3.11.18/3.12.3、x86-64 GCC 与 BLAS/LAPACK 动态加载均正常。
+续建外层脚本在成功标记后因尾部回车返回 127；原记录保留，同一镜像独立断网复验退出码为 0。镜像已在服务器侧导出为约 333 MB 的 Docker 归档，校验了 OCI 清单、镜像配置及 5
+层的压缩与解压摘要。随后在空的 amd64 `overlay2` 存储实际加载归档，核对镜像配置与全部 5 层顺序，复用已加载镜像断网运行，退出码为 0。 该镜像仅为复现环境，尚未执行原
+Agent、论文复现与 rubric 评分。
+
+复用归档时，在授权的隔离 amd64 Docker 节点先核对机器清单中的归档 SHA-256，再用 `docker image load --input <归档>` 加载。归档按镜像 ID
+保存，不含标签。传统 `overlay2` 存储返回配置摘要作为镜像 ID，不应把它与 OCI 清单摘要混用。 加载后用 `docker image inspect <加载返回的镜像ID>`
+核对机器清单记录的镜像身份、架构与原归档层顺序，确认目标标签未被其他任务使用，再用 `docker image tag <镜像ID> pb-reproducer:latest`
+恢复作者默认标签。原入口预检会区分 `pb-reproducer:latest`（复现）与 `pb-env:latest`（Agent
+和非本地评分）；不能把前者当作后者。评分默认本地执行，仍须具备原协议的评分模型。
+
+预检重新核验了 195 份原软件，从固定 README 读取正式命令：发布方使用 `all` 切分、Agent 和复现各 86,400 秒、`web_search`、运行器零重试。BasicAgent
+的默认工具名是 `web_search_preview`；不能将默认 5 分钟配置当作正式命令，也不能用它的工具名代替正式命令中的配置。
+
+当前两个 Qwen 服务的 OpenAPI 均注册 `POST /v1/responses`，但只读核查实际监听进程的启动参数及部署源码，确认均无工具服务器配置，未绑定原生浏览工具。
+不能用路由健康、纯聊天或无搜索的 Agent 代替原协议。该检查仅 GET，不发送生成或搜索；原容器的架构和条款限制仍单列。
+
+可在同一预检中加 `--vllm-source <部署版本的 vllm Python 包源码目录>`，静态对照正式命令的搜索类型与响应服务的浏览工具筛选。已部署源码的非 MCP
+工具提取保留原类型，而筛选只识别 `web_search_preview`；仅开启工具服务器不能证明正式命令的 `web_search` 会被分派。需用支持正式请求类型的隔离部署实测工具调用，
+不能把静态匹配或改用默认工具名当作原生验证。
+
+加 `--model-routing` 核对固定作者客户端：BasicAgent 走 `/v1/responses`，默认本地裁判走 `/v1/chat/completions`，使用
+SimpleJudge、`o3-mini-2025-01-31` 及 high reasoning。作者锁定的 OpenAI SDK 1.99.9 从 `OPENAI_BASE_URL`
+读取这两个默认客户端的地址，不读取 `GRADER_OPENAI_BASE_URL`；未设置时有外部默认地址。
+本地执行前须显式绑定受信回环端点，核验两个接口和实际模型身份。若更换裁判，须按独立配置记录，不能伪装成默认裁判成绩。当前仅做静态核对，没有发送模型或工具请求。
+
+调度端已在断网 ARM64/Python 3.11 容器安装：183 份锁定依赖逐件核对，8 份 wheel 由锁定源码构建，`pip check` 通过，作者 CLI 能显示帮助。实际用作者 Chz
+解析正式参数时，锁定的 SDK 1.99.9 拒绝 `web_search`；只覆盖 SDK 2.11.0 后，解析又拒绝原 CLI 的嵌套运行时参数。两个失败均保留。 独立兼容对照用 SDK
+覆盖层、作者原类型构造 Agent 和复现运行时对象，并从原 NanoEval 源路径加载记录器；未修改锁文件或切分。作者类成功构造 20 个原实例，首项为 `fre`，保留每阶段 86,400 秒和
+`runner.n_tasks=1`。未启动 Runner，不证明模型工具、裁判、镜像或原生评分可用。
+
+交付抽样在产生任何 Agent 结果前锁定：从发布方 `all.txt` 的 20 篇原始论文中，按原文件顺序取首篇 `fre`。用预检的 `--fixed-paper` 核对原切分和该篇 21
+个固定文件，包括原论文、附加说明和 rubric。固定作者 NanoEval 先取任务前缀再打乱，正式命令保留 `paperbench.paper_split=all`，加
+`runner.n_tasks=1 runner.shuffle=false runner.concurrency=1`；不改切分文件，使用新运行组。另设
+`runner.should_backup=false runner.enable_slackbot=false` 关闭外部报告。这个单篇样本不等同于整套 `all`
+成绩；实际运行仍须保留正式时限、原指令、复现和评分，并核验论文依赖的外部科学环境。
+
+`fre` 的外部数据与论文包分开。服务器已从
+[D4RL 发布方数据映射](https://github.com/Farama-Foundation/D4RL/blob/master/d4rl/infos.py) 对应的 Berkeley
+端点取得 `antmaze-large-diverse-v2` 和 `kitchen-complete-v0`，核对了实际大小、HDF5 文件签名和下载摘要；摘要是本次观测值。 在断网 ARM64
+CPU 容器使用已与 PyPI 核对摘要的 h5py 3.12.1 复验文件并读回结构：两份数据分别为 1,000,000 和 3,680
+条，观察、动作、奖励和终止标记行数一致，首尾记录可读且有限；未逐行解码。
+[ExORL 原下载脚本](https://github.com/denisyarats/exorl/blob/main/download.sh)对应的 Walker、Cheetah RND
+压缩包已在服务器取得，合计约 4.84 GB。 每份原 ZIP 目录有 10,000 条轨迹；在断网 CPU 容器中各读回首个原始 NPZ，按作者定义均为 1,000
+次转换，观察、动作、奖励、折扣和物理状态均可读。没有解压整包或运行科学训练，不把数据就绪等同于原生复现或评分。
+
+另在断网 ARM64 CPU 容器中，以 dm_control 1.0.20 和 MuJoCo 3.1.6 加载两条原始轨迹的首状态；Walker 与 Cheetah 的物理状态最大绝对误差均为
+0，恢复后的观察最大绝对误差分别小于 `5e-8` 和 `6e-9`，各推进一步后输出有限。26 份离线依赖已记录摘要，基础镜像有一条未使用的 datasets/fsspec
+版本警告。该兼容性对照不等同于 [ExORL 发布时的完整环境](https://github.com/denisyarats/exorl/blob/main/conda_env.yml)，也没有执行
+PaperBench 原生复现。
+
+[作者部署说明](https://github.com/openai/frontier-evals/blob/main/project/paperbench/README.md#build-docker-images)与固定版本构建脚本均指向本地构建
+`pb-env` 和 `pb-reproducer`；检查时当前宿主的 Docker 缓存无这两个镜像，作者仓库公开 Releases 为空。
+未核验到可直接复用的作者镜像摘要，不用第三方移植镜像代替。若提供已授权构建的镜像，先核对固定源码、构建记录和摘要，再核验隔离 amd64 执行。
+
+独立的原 reproducer Dockerfile 不使用 Conda。已从固定配方提取全部 22 个顶层包，使用
+[Ubuntu Noble](https://packages.ubuntu.com/noble/amd64/libatlas-base-dev/filelist)及[作者指定 PPA](https://ppa.launchpad.net/deadsnakes/ppa/ubuntu/dists/)的签名索引做
+amd64 APT 模拟； 从空包状态解析成功，含 Python 3.11 和 3.12，计划 365 个安装条目。没有安装软件、构建镜像或运行复现脚本。已保留签名发布文件和解析日志，清理约 234
+MiB 可重新获取的索引与缓存。 该检查不解决 Agent 镜像的条款、amd64 执行环境、搜索工具或原任务的科学资源要求。
+
 每个来源均未取得/适配/真实验证；归属仍需原生协议审查。
 
-- [ ] MULTIAGENTBENCH：multi-agent-collaboration；获取、许可、适配、验证、PR均待完成。
-- [ ] DEEPPLANNING：constraint-planning、application-api-workflow；获取、许可、适配、验证、PR均待完成。
-- [ ] STREAMINGBENCH：streaming-video-interaction、video-understanding；获取、许可、适配、验证、PR均待完成。
-- [ ] OVOBENCH：streaming-video-interaction；获取、许可、适配、验证、PR均待完成。
-- [ ] FULL_DUPLEX_BENCH：audio-streaming-interaction；获取、许可、适配、验证、PR均待完成。
-- [ ] LIBRITTS：text-to-speech-generation；获取、许可、适配、验证、PR均待完成。
-- [ ] LJSPEECH：text-to-speech-generation；获取、许可、适配、验证、PR均待完成。
-- [ ] BEIR_SCIFACT：embedding-retrieval、reranking；获取、许可、适配、验证、PR均待完成。
-- [ ] BEIR_NFCORPUS：embedding-retrieval、reranking；获取、许可、适配、验证、PR均待完成。
-- [ ] MSMARCO_PASSAGE：reranking、embedding-retrieval；获取、许可、适配、验证、PR均待完成。
-- [ ] STSB：embedding-retrieval；获取、许可、适配、验证、PR均待完成。
-- [ ] DOCVQA：visual-document-chart；获取、许可、适配、验证、PR均待完成。
-- [ ] CODEJUDGE_EVAL：code-evaluation；获取、许可、适配、验证、PR均待完成。
-- [ ] DRAGON_PUBLIC：evolving-corpus-rag；获取、许可、适配、验证、PR均待完成。
-- [ ] TEMPORALWIKI：evolving-corpus-rag；获取、许可、适配、验证、PR均待完成。
-- [ ] COPILOT_AGENT_2026：repository-agent-loop、observed-request-lifecycle、cache-and-tool-accounting；获取、许可、适配、验证、PR均待完成。
-- [ ] AZURE_LMM_2025：multimodal-arrivals、request-size-distribution；获取、许可、适配、验证、PR均待完成。
+- [x] MULTIAGENTBENCH：Research 固定前三题已用 Qwen3-4B-Instruct-2507 的 262,144-token NPU
+  服务跑通原生流程；最终任务评分已离线复核，规划和通信占位值不计分。 5 份原始 JSONL、500 条公共入口及研究侧回读已验证；其余四个场景未做原生验证。
+  [交付回执](validation/multiagentbench-research-fixed3-delivery.json)
+
+  在已隔离的 Agent 环境中，先以
+  `prepare_marble_original_configs.py --runtime-profile official-research --limit 3` 准备固定原题，再用
+  `bind_marble_research_local.py` 绑定已核验的 actor 和 judge。执行前确认关键词消费者可用，并使用新输出目录：
+
+  ```bash
+  python scripts/run_marble_original_research.py --author-root "$AUTHOR" \
+    --prepared-root "$PREPARED" --bound-root "$BOUND" --output "$NEW_RUN" \
+    --model-api-base "$LOOPBACK_V1" --execute
+  ```
+
+  仅当其他原题已有可核验的完整结果时，才追加 `--original-row 0`、`1` 或 `2` 补指定原题。旧队列不回放，原始结果与失败记录保留。
+
+- [x] DEEPPLANNING：constraint-planning、application-api-workflow；按机器清单所列交付口径核验，具体范围见[回执](validation/deepplanning-original-native-delivery-20261028.json)。
+
+- [x] STREAMINGBENCH：streaming-video-interaction、video-understanding；按机器清单所列交付口径核验，具体范围见[回执](validation/streamingbench-real-native-delivery-20261101.json)。
+
+- [x] OVOBENCH：streaming-video-interaction；按机器清单所列交付口径核验，具体范围见[回执](validation/ovobench-offline-native-delivery-20261031.json)。
+
+- [x] FULL_DUPLEX_BENCH：9份原始ZIP及原始关系读取已验证；27条固定原题、39个原生会话、NPU ASR/VAD和各类别评分路径已完成。本地9B
+  judge结果单独披露，不是官方GPT成绩；公共部署准备、完整所选协议入口、原结果复核和同27题研究接通已核验，代码CI通过。[交付回执](validation/full-duplex-fixed27-native-delivery-20261107.json)。
+  `scripts/run_full_duplex_original_capture.py`提供同一固定原题的原生回放计划及显式执行入口；默认不调用模型，
+  不缩短原超时、不改题、不替换失败题。原始软件使用`prepare_full_duplex_original_scorers.py --include-reference`准备。
+  音频输出、时序、ASR、评分和失败记录仍须分别保存；读取测试和计划输出不能代替真实执行。
+
+- [x] LIBRITTS：text-to-speech-generation；按机器清单所列交付口径核验，具体范围见[回执](validation/libritts-original-native-delivery-20261102.json)。
+
+- [x] LJSPEECH：text-to-speech-generation；按机器清单所列交付口径核验，具体范围见[回执](validation/ljspeech-native-fixed3-20261101.json)。
+
+- [x] BEIR_SCIFACT：embedding-retrieval、reranking；按机器清单所列交付口径核验，具体范围见[回执](validation/beir-native-delivery-20261025.json)。
+
+- [x] BEIR_NFCORPUS：embedding-retrieval、reranking；按机器清单所列交付口径核验，具体范围见[回执](validation/beir-native-delivery-20261025.json)。
+
+- [x] MSMARCO_PASSAGE：reranking、embedding-retrieval；按机器清单所列交付口径核验，具体范围见[回执](validation/msmarco-original-native-delivery-20261102.json)。
+
+- [x] STSB：embedding-retrieval；按机器清单所列交付口径核验，具体范围见[回执](validation/stsb-native-delivery-20261025.json)。
+
+- [x] DOCVQA：visual-document-chart；按机器清单所列交付口径核验，具体范围见[回执](validation/docvqa-original-native-delivery-20261027.json)。
+
+- [x] CODEJUDGE_EVAL：code-evaluation；按机器清单所列交付口径核验，具体范围见[回执](validation/codejudge-original-native-delivery-20261027.json)。
+
+- [x] DRAGON_PUBLIC：evolving-corpus-rag；按机器清单所列交付口径核验，具体范围见[回执](validation/dragon-original-preparation-20261028.json)。
+
+- [x] TEMPORALWIKI：evolving-corpus-rag；按机器清单所列交付口径核验，具体范围见[回执](validation/temporalwiki-base-probes-native-delivery-20261101.json)。
+
+- [x] COPILOT_AGENT_2026：原始会话元数据资产；606 个分片与 301,026 个会话已核验并建立索引，CI 工件下研究侧固定回读 42
+  条。不是原请求回放。[回执](validation/copilot-2026-metadata-delivery-20261027.json)
+
+- [x] AZURE_LMM_2025：原始多模态服务轨迹元数据；已核验并复用全部 100 万行索引，CI 工件下研究侧固定回读 6
+  条。不含原始请求正文，不生成替代提示词。[回执](validation/azure-lmm-2025-asset-delivery-20261027.json)
 
 ## 分批提交追踪
 

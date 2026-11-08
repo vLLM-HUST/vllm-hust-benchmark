@@ -1,0 +1,45 @@
+{
+  "source_id": "MLAGENTBENCH",
+  "status": "ORIGINAL_AGENT_LOCAL_PORT_PREPARATION_AND_RESTRICTED_CLI_IMPORT_PASSED_NOT_NATIVE_EXECUTION",
+  "original_files_verified": 138,
+  "public_entry": "scripts/prepare_mlagentbench_local_agent.py",
+  "entry_sha256": "31efce553be9a8195839882ddeb2dc1ea19f7fc374396674f353b8ce42b8b33a",
+  "entry_identity_note": "pragma: allowlist secret - actual qualified public entry digest",
+  "actions": ["plan", "prepare", "verify"],
+  "exit_codes": [0, 0, 0],
+  "ports": {
+    "MLAgentBench/LLM.py": "Disclosed explicit local OpenAI-chat transport; actual model ID, original supported chat defaults/overrides; not default Claude or CUDA HF backend",
+    "MLAgentBench/runner.py": "Lazy import of unselected optional LangChain backend only; original parser, task, ResearchAgent and tools unchanged"
+  },
+  "original_files_and_diffs_retained": true,
+  "task_or_prompt_modified": false,
+  "sdk": {
+    "official_index": "https://pypi.org/simple",
+    "all_wheels_verified_against_official_pypi_release_sha256": true,
+    "wheel_files": 25,
+    "wheel_bytes": 9912376,
+    "host_install": false,
+    "requirements": "configs/workload-native/mlagentbench-agent-cp310-arm64-requirements.txt",
+    "requirements_sha256": "f658624ecebdc5da8c9bcdbcf584a8f8cb2495ccbf1c521b5ee6b165e522cee1",
+    "identity_note": "pragma: allowlist secret - verified public SDK wheel lock digest",
+    "base_image_id": "sha256:0dde2b24fdc9f8bbb76ef9d12a952446244651b739cbc8b5b9e88bc969b31259",
+    "base_identity_note": "pragma: allowlist secret - existing dedicated task image unchanged",
+    "image_id": "sha256:71b5ac013c5f6645a6a50456da201b281c8eecccd4364cc2dc03ca6e792f092b",
+    "image_identity_note": "pragma: allowlist secret - actual isolated SDK extension image identity",
+    "offline_build_exit_code": 0,
+    "actual_anthropic_and_dacite_imports_passed": true
+  },
+  "original_runner_cli": {
+    "command": "python -m MLAgentBench.runner --help",
+    "exit_code": 0,
+    "network": "none",
+    "read_only_root": true,
+    "capabilities_dropped": "ALL",
+    "no_new_privileges": true,
+    "torch_imported": false,
+    "optional_autogpt_unavailable_warning_retained": true
+  },
+  "language_model_calls": 0,
+  "native_agent_tasks_run": 0,
+  "source_checkbox_eligible": false
+}

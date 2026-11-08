@@ -1,0 +1,19 @@
+{
+  "source_id": "NATUREBENCH",
+  "code_repository": "FrontisAI/NatureBench",
+  "code_revision": "f92b849bc8d64944184a19c32f084f640246b668", "code_identity_note": "pragma: allowlist secret - fixed official protocol revision",
+  "dataset_repository": "FrontisAI/NatureBench",
+  "dataset_revision": "27e2dc304464257d2884fa6996bc8ca5d4a2256b", "dataset_identity_note": "pragma: allowlist secret - fixed original public dataset revision",
+  "full_task_groups": {"all": 90, "cpu": 3, "gpu_high": 17, "gpu_low": 70},
+  "small_task_groups": {"all": 25, "cpu": 1, "gpu_high": 2, "gpu_low": 22},
+  "official_cpu_tasks": ["s41592-022-01709-7", "s41592-025-02870-5", "s43588-024-00689-2"],
+  "cpu_task_metadata": [
+    {"task": "s41592-022-01709-7", "files": 26, "bytes": 287250894, "license_note": "Publisher attribution calls upstream data Open-Access; not an unrestricted redistribution license."},
+    {"task": "s41592-025-02870-5", "files": 527, "bytes": 2381923896, "license_note": "Mixed CC-BY4.0 and publicly released research-use data with unspecified upstream license; retain attribution and do not claim MIT covers all data."},
+    {"task": "s43588-024-00689-2", "files": 23, "bytes": 85357338, "license_note": "Publisher attribution identifies BSD-2-Clause and accompanying task license file."}
+  ],
+  "license_boundary": "MIT covers original task specifications/code/harness only. Third-party input/ground-truth terms remain per task; gated:false is not an unrestricted redistribution grant.",
+  "official_download_entry": "run_naturebench.py --dataset-id FrontisAI/NatureBench --dataset-revision <pinned dataset revision> --tasks cpu --download-only",
+  "agent_visibility": "problem only; evaluation and hidden ground truth must not be exposed to the agent",
+  "execution_boundary": "Full scientific code workflow, isolated task environment, native evaluator and validity judge. Not static QA, synthetic prompt replay, host execution or a skip-judge replacement. Official source environment exports contain linux-64/MKL builds; ARM/NPU qualification is separate. No external paid agent or judge is authorized by metadata preparation."
+}

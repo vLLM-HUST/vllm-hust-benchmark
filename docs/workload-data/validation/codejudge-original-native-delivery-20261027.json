@@ -1,0 +1,82 @@
+{
+  "schema_version": "workload-native-delivery/v1",
+  "source_id": "CODEJUDGE_EVAL",
+  "status": "END_TO_END_EXECUTED_AND_SCORED",
+  "source_checkbox_eligible": true,
+  "official_sources": {
+    "paper": "https://aclanthology.org/2025.coling-main.7/",
+    "code": "https://github.com/CodeLLM-Research/CodeJudge-Eval",
+    "data": "https://huggingface.co/datasets/CodeResearch/CodeJudge-Eval",
+    "dataset_revision": "6541deb0c42e56ec1300d94d4e9ae7b3b4cc764a", "identity_note": "pragma: allowlist secret - verified public publisher revision"
+  },
+  "assets": {
+    "server_receipt": "codejudge-original-assets-32028-002/preparation-public.json",
+    "original_variants": 6,
+    "original_rows_each": 1860,
+    "configuration_rows_verified_and_indexed": 11160,
+    "configuration_rows_are_unique_base_questions": false,
+    "original_eight_fields_preserved": true,
+    "prompt_field_sent_verbatim": "input",
+    "reference_field_not_sent": "answer",
+    "first_http429_and_cooldown_preserved": true
+  },
+  "native_execution": {
+    "server_receipt": "codejudge-original-native-9b-32028-001/native-public.json",
+    "selection": "Original rows 0,1,2 independently in every published 0shot/1shot x easy/middle/hard JSON; no replacements",
+    "requests": 18,
+    "finish_reasons": {"stop": 18},
+    "model": "Qwen/Qwen3.5-9B",
+    "deployment": "Existing vLLM-Ascend bfloat16 TP1 NPU service",
+    "temperature": 0.0,
+    "max_output_tokens": 8192,
+    "disable_thinking": true,
+    "fallback_not_author_model_or_budget": true,
+    "extractor": "independent-strict-v1-not-author-regex",
+    "metrics": "Independent Accuracy and Macro-F1 over each original configuration label space; invalid extraction is failure, no additional failure label",
+    "per_configuration": [
+      {"setting": "0shot_easy", "samples": 3, "accuracy": 0.6666666666666666, "macro_f1": 0.26666666666666666},
+      {"setting": "0shot_hard", "samples": 3, "accuracy": 0.0, "macro_f1": 0.0},
+      {"setting": "0shot_middle", "samples": 3, "accuracy": 0.3333333333333333, "macro_f1": 0.08333333333333333},
+      {"setting": "1shot_easy", "samples": 3, "accuracy": 0.6666666666666666, "macro_f1": 0.26666666666666666},
+      {"setting": "1shot_hard", "samples": 3, "accuracy": 0.6666666666666666, "macro_f1": 0.2222222222222222},
+      {"setting": "1shot_middle", "samples": 3, "accuracy": 0.3333333333333333, "macro_f1": 0.08333333333333333}
+    ]
+  },
+  "saved_audit": {
+    "server_receipt": "codejudge-original-native-9b-32028-001/saved-audit-public.json",
+    "status": "ORIGINAL_SELECTION_REQUEST_RESPONSE_AND_DECLARED_PAPER_METRICS_VERIFIED_OFFLINE",
+    "original_selection_prompt_reference_ids_and_metrics_verified": true,
+    "cases": 18,
+    "new_model_calls": 0,
+    "native_runner_sha256": "112b2ce1c807cb5c80d0581cb9389e2591fa011b305edb5f2db02888e9460588", "runner_identity_note": "pragma: allowlist secret - verified public executed script checksum",
+    "saved_verifier_sha256": "cecaf0b512531adceae80f0aa6249234282744e3009c7cca3308f109f9f1c79f", "verifier_identity_note": "pragma: allowlist secret - verified public executed script checksum"
+  },
+  "actual_ci_consumer": {
+    "server_receipt": "codejudge-actual-ci-d8c85073-install-32028-001/audit-public.json",
+    "source_commit": "d8c850730f874a3b2cfd76c973b8bd63f9726db8", "revision_note": "pragma: allowlist secret - verified public CI source revision",
+    "wheel_sha256": "85de79a8287d842be8463b6bd336a00247d090d78cf2a3a33a5b4ce83f33a3af", "checksum_note": "pragma: allowlist secret - verified public software artifact checksum",
+    "cpu_ci_run": 40509111066,
+    "main_ci_run": 40509104849,
+    "artifact_id": 12735679183,
+    "both_ci_runs_success": true,
+    "installed_payloads_verified_against_wheel": true,
+    "configuration_rows_verified_and_indexed": 11160,
+    "fixed_research_readbacks": 18,
+    "research_default_dependency_updated": false,
+    "new_model_calls": 0
+  },
+  "public_entrypoints": {
+    "prepare": "scripts/prepare_reused_research_assets.py",
+    "native": "scripts/run_codejudge_original.py",
+    "saved_audit": "scripts/verify_codejudge_saved.py",
+    "environment": "Existing API service; native client and audit use Python standard library, no extra inference environment installed",
+    "full_supported": true
+  },
+  "boundaries": [
+    "Exact author extraction regex/runtime was not released; the strict extractor and metric implementation are explicitly independent, not an exact author harness or score reproduction.",
+    "All original prompts, few-shot examples, reference labels and identities are preserved. Default validation selects three rows per setting; --full supports all original rows.",
+    "Only usability and sampled native protocol delivery are qualified, not full-suite model quality, performance, author model or generation-budget reproduction.",
+    "No generated code execution, CPU inference, paid judge, raw data publication or research observation/analysis migration.",
+    "Zero-score configurations retained; no failed-question replacement or altered task to obtain passing answers."
+  ]
+}

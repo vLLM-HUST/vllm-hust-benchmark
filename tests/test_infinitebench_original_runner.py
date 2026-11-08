@@ -18,6 +18,55 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 
+def test_partial_original_positions_never_claim_native_completion(tmp_path):
+    rows, kwargs, calls = fixture(tmp_path)
+    result = runner.execute(rows, **kwargs, partial_positions=[1, 2])
+    assert result["selected_original_positions"] == [1, 2]
+    assert result["completed_original_positions"] == [1, 2]
+    assert result["status"] == "PARTIAL_ORIGINAL_EVIDENCE_ONLY"
+    assert result["native_execution_complete"] is False
+    assert result["source_checkbox_eligible"] is False
+    assert len(calls) == 2
+
+
+@pytest.mark.parametrize("positions", [[2, 1], [1, 1], [-1], [100]])
+def test_partial_selection_rejects_invalid_original_positions(positions):
+    with pytest.raises(ValueError, match="partial position"):
+        runner.select([{}, {}, {}], partial_positions=positions)
+
+
+@pytest.mark.parametrize("timeout", ["0", "-1", "nan", "inf"])
+def test_invalid_transport_timeout_rejected_before_source_or_model_access(
+    monkeypatch, tmp_path, timeout
+):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "runner",
+            "--official-checkout",
+            str(tmp_path),
+            "--data-root",
+            str(tmp_path),
+            "--output",
+            str(tmp_path / "out"),
+            "--task",
+            "math_calc",
+            "--model",
+            "local",
+            "--template",
+            "gpt4",
+            "--context-limit",
+            "131072",
+            "--request-timeout",
+            timeout,
+        ],
+    )
+    with pytest.raises(ValueError, match="positive finite request timeout"):
+        runner.main()
+    assert not (tmp_path / "out").exists()
+
+
 def fixture(tmp_path, *, tokens=10, fail=False):
     calls = []
 
@@ -70,6 +119,20 @@ def fixture(tmp_path, *, tokens=10, fail=False):
         for i in range(5)
     ]
     return rows, kwargs, calls
+
+
+def test_capacity_only_checks_all_rows_without_generation_or_scoring(tmp_path):
+    rows, kwargs, calls = fixture(tmp_path)
+    counts = iter([10, 51, 50])
+    kwargs.update(token_count=lambda _: next(counts), scorer=None)
+    result = runner.execute(rows, **kwargs, capacity_only=True)
+    assert result["status"] == "CAPACITY_ONLY_NO_GENERATION"
+    assert [c["fits"] for c in result["capacity_checks"]] == [True, False, True]
+    assert not result["all_selected_fit"]
+    assert not result["native_execution_complete"]
+    assert not result["source_checkbox_eligible"]
+    assert not calls
+    assert not (kwargs["output"] / "predictions-private.jsonl").exists()
 
 
 def test_original_positions_budget_prompt_and_scorer_preserved(tmp_path):
@@ -138,6 +201,15 @@ def test_full_and_minimum_selection_rules(tmp_path):
         runner.select(rows, count=2)
     with pytest.raises(ValueError):
         runner.select(rows, full=True, start=1)
+
+
+def test_final_incremental_tail_never_requires_replaying_completed_questions():
+    rows = [{"input": str(index)} for index in range(8)]
+    assert runner.select(rows, start=6, count=2) == list(enumerate(rows))[6:]
+    assert runner.select(rows, start=7, count=1) == list(enumerate(rows))[7:]
+    for start, count in [(0, 2), (3, 2), (6, 0), (7, 2)]:
+        with pytest.raises(ValueError):
+            runner.select(rows, start=start, count=count)
 
 
 def test_scorer_failure_preserves_predictions_without_completion(tmp_path):
