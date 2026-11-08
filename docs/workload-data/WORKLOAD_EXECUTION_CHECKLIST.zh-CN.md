@@ -1,7 +1,7 @@
 # Workload 分类执行清单
 
-当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，113 项已勾选；另有 5 项仅分类。
-下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
+当前交付以 [机器清单](dataset-validation-status.json) 的 `delivery_inventory` 为准：113 项应交付，113 项已勾选，0 项待完成；另有 5
+项仅分类。 下方分类表保留阶段性及全量验证记录，不能直接用其全量状态计算固定抽样交付进度。
 
 ## 轻量替代验证
 
