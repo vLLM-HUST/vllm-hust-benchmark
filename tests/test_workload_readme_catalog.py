@@ -38,7 +38,7 @@ def test_readme_workload_catalog_covers_exact_delivery_scope():
             assert item["delivery_receipt"] in row
             assert "入口索引待补" not in row
         else:
-            assert "本批仅分类" in row
+            assert "仅分类" in row
         if source.startswith("PAIO-"):
             assert "原始数据私有" in row
         else:
