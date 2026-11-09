@@ -8,15 +8,15 @@ import jsonschema
 import pytest
 
 from vllm_hust_benchmark.official_targets import (
-    _resolved_target_client_parameters,
     PUBLIC_CODE_MODEL,
     PUBLIC_TEXT_MODEL,
     PUBLIC_VISION_MODEL,
+    _resolved_target_client_parameters,
+    _target_contract_metadata,
     build_registry,
     generated_outputs,
     render_active_targets,
 )
-from vllm_hust_benchmark.official_targets import _target_contract_metadata
 from vllm_hust_benchmark.same_spec import PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
 from vllm_hust_benchmark.workload_config_contract import (
     _official_defaults_for_scenario,
@@ -48,16 +48,34 @@ def test_registry_generation_is_distinct_from_target_contract_version() -> None:
         == registry["source_set_sha256"]
     )
     # Unchanged targets inherit 1.3.5, the issue #179 910B3 specialty spec
-    # retains 1.3.6, random-online carries 1.3.7, and the issue #136 Dense
-    # targets carry the explicit temperature-zero 1.3.10 contract, and the
-    # communication-sensitive decode-heavy targets start at 1.3.11.
+    # retains 1.3.6, the issue #136 Dense targets carry the explicit
+    # temperature-zero 1.3.10 contract, the
+    # communication-sensitive decode-heavy targets start at 1.3.11, and the
+    # three leadership comparison targets carry pinned runtimes at 1.3.12.
     assert {target["target_version"] for target in registry["targets"]} == {
         "1.3.5",
         "1.3.6",
-        "1.3.7",
         "1.3.10",
         "1.3.11",
+        "1.3.12",
     }
+
+
+def test_leadership_comparison_runtimes_are_fully_pinned() -> None:
+    registry = build_registry(REPO_ROOT)
+    by_workload = {
+        target["workload"]["name"]: target
+        for target in registry["targets"]
+        if target["status"] == "active"
+    }
+    for workload in ("agent-research-online", "sharegpt-online", "random-online"):
+        runtimes = by_workload[workload]["compatibility_policy"]["comparison_runtimes"]
+        assert len(runtimes) == 1
+        runtime = runtimes[0]
+        assert runtime["engine"] == "vllm-hust"
+        assert runtime["github_repository"] == "vLLM-HUST/vllm-hust"
+        assert runtime["plugin_repository"] == "vLLM-HUST/vllm-ascend-hust"
+        assert len(runtime["git_commit"]) == len(runtime["plugin_commit"]) == 40
 
 
 def test_random_target_client_parameters_use_executable_names() -> None:

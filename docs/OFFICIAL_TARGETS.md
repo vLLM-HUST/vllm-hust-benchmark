@@ -2,8 +2,8 @@
 
 > This file is generated from the official specs. Do not edit it manually.
 
-- Registry version: `1.3.11`
-- Effective from: `2026-10-07`
+- Registry version: `1.3.12`
+- Effective from: `2026-11-09`
 
 `registry_version` identifies this generated registry snapshot. Each target's `target_version` is
 the immutable execution-contract version for that target; an unrelated target update must not change
