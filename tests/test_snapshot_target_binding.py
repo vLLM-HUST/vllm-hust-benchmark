@@ -129,6 +129,85 @@ def test_engine_mismatch_is_retained_but_never_marked_verified() -> None:
     assert "target_id" not in entry["metadata"]
 
 
+def test_fully_pinned_comparison_runtime_is_admitted() -> None:
+    entry = _entry()
+    entry.update(engine="vllm-hust", engine_version="0.31.0.dev+host.abc123")
+    entry["metadata"].update(
+        github_repository="vLLM-HUST/vllm-hust",
+        git_commit="a" * 40,
+        runtime_provenance={
+            "engine": {
+                "repository": "vLLM-HUST/vllm-hust",
+                "commit": "a" * 40,
+            },
+            "plugin": {
+                "engine": "vllm-ascend-hust",
+                "repository": "vLLM-HUST/vllm-ascend-hust",
+                "commit": "b" * 40,
+            },
+        },
+    )
+    target = _target()
+    target["compatibility_policy"] = {
+        "comparison_runtimes": [
+            {
+                "engine": "vllm-hust",
+                "engine_version": "0.31.0.dev+host.abc123",
+                "github_repository": "vLLM-HUST/vllm-hust",
+                "git_commit": "a" * 40,
+                "plugin_engine": "vllm-ascend-hust",
+                "plugin_repository": "vLLM-HUST/vllm-ascend-hust",
+                "plugin_commit": "b" * 40,
+            }
+        ]
+    }
+
+    verified, errors = bind_entry_to_official_target(entry, _registry(target))
+
+    assert verified is True
+    assert errors == []
+    assert entry["metadata"]["verified"] is True
+
+
+def test_comparison_runtime_rejects_unpinned_plugin_commit() -> None:
+    entry = _entry()
+    entry.update(engine="vllm-hust", engine_version="current")
+    entry["metadata"].update(
+        github_repository="vLLM-HUST/vllm-hust",
+        git_commit="a" * 40,
+        runtime_provenance={
+            "engine": {
+                "repository": "vLLM-HUST/vllm-hust",
+                "commit": "a" * 40,
+            },
+            "plugin": {
+                "engine": "vllm-ascend-hust",
+                "repository": "vLLM-HUST/vllm-ascend-hust",
+                "commit": "c" * 40,
+            },
+        },
+    )
+    target = _target()
+    target["compatibility_policy"] = {
+        "comparison_runtimes": [
+            {
+                "engine": "vllm-hust",
+                "engine_version": "current",
+                "github_repository": "vLLM-HUST/vllm-hust",
+                "git_commit": "a" * 40,
+                "plugin_engine": "vllm-ascend-hust",
+                "plugin_repository": "vLLM-HUST/vllm-ascend-hust",
+                "plugin_commit": "b" * 40,
+            }
+        ]
+    }
+
+    verified, errors = bind_entry_to_official_target(entry, _registry(target))
+
+    assert verified is False
+    assert "engine does not match target baseline runtime" in errors
+
+
 def test_server_drift_is_not_coerced_or_admitted() -> None:
     entry = _entry()
     entry["same_spec"]["resolved_server_parameters"]["gpu_memory_utilization"] = "0.6"
@@ -173,6 +252,45 @@ def test_snapshot_binding_writes_report_and_is_idempotent(tmp_path: Path) -> Non
     )
     assert report == first
     assert hashlib.sha256(first_bytes).hexdigest()
+
+
+def test_snapshot_binding_syncs_compare_admission_copies(tmp_path: Path) -> None:
+    entry = _entry()
+    (tmp_path / "leaderboard_single.json").write_text(json.dumps([entry]) + "\n")
+    (tmp_path / "leaderboard_multi.json").write_text("[]\n")
+    copied = {
+        "entry_id": entry["entry_id"],
+        "engine": entry["engine"],
+        "verified": False,
+        "official_admission_status": "stale",
+    }
+    (tmp_path / "leaderboard_compare.json").write_text(
+        json.dumps(
+            {
+                "groups": [
+                    {
+                        "engines": [dict(copied)],
+                        "preferred_pair": {
+                            "left": dict(copied),
+                            "right": dict(copied),
+                        },
+                    }
+                ]
+            }
+        )
+        + "\n"
+    )
+
+    report = bind_snapshot_set(tmp_path, _registry(_target()))
+
+    compare = json.loads((tmp_path / "leaderboard_compare.json").read_text())
+    copies = [
+        *compare["groups"][0]["engines"],
+        *compare["groups"][0]["preferred_pair"].values(),
+    ]
+    assert report["compare_members_synced"] == 3
+    assert all(item["verified"] is True for item in copies)
+    assert all("official_admission_status" not in item for item in copies)
 
 
 def test_dataset_matched_deployment_is_not_mislabeled_historical(

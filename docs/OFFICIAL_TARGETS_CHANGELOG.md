@@ -2,6 +2,14 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.12 — 2026-11-09
+
+- English: Admit exact vLLM-HUST comparison runtimes for the three leadership workloads, pinned to
+  the measured Host and Ascend plugin commits.
+- 中文：为三项领导汇报工作负载准入精确固定的 vLLM-HUST 对照运行时，并锁定实测 Host 与 Ascend 插件提交。
+- Source set: `201ff7ccb99a6f334696d8225939e1ecd5930863e8cb1e5d0a1d3b102ef0b644`
+- Supersedes: `1.3.11`
+
 ## 1.3.11 — 2026-10-07
 
 - English: Add executable issue #136 communication-sensitive TP1/TP2/TP4 targets using a standard
