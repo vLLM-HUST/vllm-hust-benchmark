@@ -6,6 +6,32 @@ from pathlib import Path
 import pytest
 
 
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_canonical_registries_are_current_in_website_publication():
+    publication = ROOT / "website-publication/data"
+    registry = ROOT / "leaderboard-data/official-targets.json"
+    checksum = ROOT / "leaderboard-data/official-targets.sha256"
+    assert (publication / "official_targets.json").read_bytes() == registry.read_bytes()
+    assert (
+        publication / "official_targets.sha256"
+    ).read_bytes() == checksum.read_bytes()
+
+    canonical_index = json.loads(
+        (
+            ROOT
+            / "leaderboard-data/dataset-validation/dataset_validation_index_v1.json"
+        ).read_text()
+    )
+    website_index = json.loads(
+        (publication / "dataset_validation_index_v1.json").read_text()
+    )
+    assert (
+        website_index["default_scenario_id"] == canonical_index["default_scenario_id"]
+    )
+
+
 def module(tmp_path):
     path = Path(__file__).resolve().parents[1] / "scripts/sync_website_publication.py"
     spec = importlib.util.spec_from_file_location("publication", path)
