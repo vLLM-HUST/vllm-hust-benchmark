@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust.sage.org.ai/data/schemas/mod_test_evidence_v1.schema.json",
+  "title": "MOD test evidence report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "updated_date",
+    "source",
+    "summary",
+    "scope",
+    "integration_records",
+    "combination_effects",
+    "negative_results"
+  ],
+  "properties": {
+    "schema_version": {"const": "mod-test-evidence/v1"},
+    "updated_date": {"type": "string", "format": "date"},
+    "title_en": {"type": "string"},
+    "title_zh": {"type": "string"},
+    "source": {"type": "object"},
+    "summary": {"type": "object"},
+    "scope": {"type": "object"},
+    "integration_records": {"type": "array", "items": {"type": "object"}},
+    "combination_effects": {"type": "array", "items": {"type": "object"}},
+    "negative_results": {"type": "array", "items": {"type": "object"}}
+  },
+  "additionalProperties": false
+}

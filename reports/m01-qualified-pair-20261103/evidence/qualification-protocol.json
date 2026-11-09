@@ -1,0 +1,91 @@
+{
+  "schema": "native-public-paired-protocol/v1",
+  "frozen_unix": 1793638631.8479264,
+  "scope": "Same archived200MMLU-Pro logical requests and max256 output protocol; common local public LLMEngine frontend for both arms.",
+  "input": {
+    "dataset_sha256": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+    "token_sha256": "c36b966384a220b9060c452e632ac636da59a92dce5a6ded9fe931794c187851",
+    "requests": 200,
+    "input_tokens": 282265,
+    "max_output_tokens": 256,
+    "ignore_eos": false,
+    "temperature": 0,
+    "seed": 0,
+    "n": 1,
+    "template": "Same archived client-template then server-template; verified all200input lengths. No quality improvement claim."
+  },
+  "protocol": {
+    "order": [
+      "B0",
+      "B1"
+    ],
+    "repetitions": 3,
+    "warmup": "First2actual inputs,max32; outside measurement",
+    "timing": "Add all200requests in source order after both-rank begin fences. Retain native public step outputs; synchronize both ranks after all public completions. No scheduler/runner counters, profilers, detailed MTP or file I/O inside measured window. Pending native futures are device-fenced inside interval then host-retired outside it.",
+    "cache": "Fresh compiler/run cache per arm; prefix reset plus unique request salt per repetition; no reused KV/answer state. Shared OS file cache unchanged.",
+    "frontend": "Public native InprocClient, async EngineCore and multiprocess TP2workers; HTTP transport and input tokenization excluded equally and explicitly.",
+    "audit": "One separate counted200request pass after all3timing repeats, same engine configuration/input/max256. Existing officialB0 minimal ledger reused; B1 actual native scheduler/raw output and host prefill capture. Never substitute its timing.",
+    "aggregation": "Report every repeat. Aggregate C=sum(F)/(2*sum(T)*1e12); eta=100*sum(Tref)/sum(T). No fastest-run selection. Only qualify if same-configuration/work/boundary correspondence is supported for each repeat; propagate all unresolved work/reference bounds, no midpoint substitution.",
+    "preconditions": "Existing B0/B1public-client native development independently audited. Own lease/card/memory guards apply. Failures retained, no automatic retry."
+  },
+  "arithmetic": "Existing necessary-work definition and source-specific arithmetic remain fixed: target matrix/scalar/GDN plus retained-draft dependency closure; exclude padding, unadopted drafts and redundant work. Do not infer F merely from final token totals. B1terminal prefix bound uses pre-fixed exhaustive branch enumeration; verify remaining prefill/worker-state correspondence.",
+  "reference": "Existing independently calibrated component/resource DAG method and source-specific necessity closure. No endpoint wallT enters calibration or reference construction. Old B0 56.1882/B1 47.5033 values are not assigned automatically to new dynamic paths. Rebind source/work geometry; reuse already qualified domains and only measure uncovered ones. Freeze any necessary new component protocol before sampling.",
+  "acceptance": {
+    "midterm_percent": 50,
+    "final_percent": 90,
+    "required": "Complete both B0/B1 calculations; B1conservative independently-supported efficiency meets50; source/work/quality scope explicit; benchmark+website publication verified. No baseline-relative replacement threshold."
+  },
+  "non_instrumentation": "post_timing_audit_r1 imported only after3uninstrumented windows; exact original runner source/rank identities retained by every boundary. No per-step engine internals read by timed loop.",
+  "source_sha256": [
+    {
+      "artifact": "public_pair_entry_r1.py",
+      "sha256": "52cefd4c0e8c6e18a913b8df0cb90ad1ef7ffc25d957b38aa2314cda6f6c85f9"
+    },
+    {
+      "artifact": "b0_minimal_accounting.py",
+      "sha256": "13ca755a151664d10250105a8d0dc9d217534860c41bfa78ac612f2b09b865da"
+    },
+    {
+      "artifact": "b0_native_minimal.py",
+      "sha256": "6a0ccac6f8863814f5751eafb4ca48bce7edb20f42b7258302e56db773306e6b"
+    },
+    {
+      "artifact": "b0_native_minimal_r3.py",
+      "sha256": "2d64a49dce4ffee2bc76c7eca24b27d5d763cfe7f9a814072aac9d5eac7d3a0f"
+    },
+    {
+      "artifact": "launch_public_pair_b1_r1.py",
+      "sha256": "8576858d0f30e4b4de403af0ed022a0d001a1fe157257e9db12404ccc9547e37"
+    },
+    {
+      "artifact": "post_timing_audit_r1.py",
+      "sha256": "a2de2ab193774105a89aea99903b12d69a2b69ee3e669624278c76d1574b6a45"
+    },
+    {
+      "artifact": "public_pair_b1_child_r1.py",
+      "sha256": "2ce2082e7893e9a35915697c86cf261177420a15a92d6481fa26712ffc3c40bc"
+    },
+    {
+      "artifact": "public_pair_client_r2.py",
+      "sha256": "8628553b0fc62ebf0d7ddd7262ae73914ddb012864dc8c0f85df22c368efaec8"
+    },
+    {
+      "artifact": "run_public_pair_r1.py",
+      "sha256": "5a418e5674f09f15f1e951b730f64e066ecaefbf32b0545190adcb62ad8008dd"
+    },
+    {
+      "artifact": "run_public_pair_r2.py",
+      "sha256": "3a738a90ec3c1ca584a91dde9b300d3d3fd614b9f6259419cdb5ddc45a127153"
+    },
+    {
+      "artifact": "tokenizer-input-audit-r2.json",
+      "sha256": "ea6f41d315173be7f2ae482566f6db3830f42e6f14924c6c44c38e43265d61ce"
+    }
+  ],
+  "prelaunch_correction": "r1source review caught controller B1 launch target still pointing to development launcher; no service/device run was started. r2 fixes target only; measurement and arithmetic policy unchanged.",
+  "export_provenance": {
+    "original_filename": "qualification-protocol-r2.json",
+    "original_sha256": "e253320a9767a3082107f7d04b3e1c8a609aab03cf8d414b74aaab679b0fb596",
+    "kind": "public_evidence_projection"
+  }
+}

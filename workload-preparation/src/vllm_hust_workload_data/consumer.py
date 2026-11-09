@@ -22,12 +22,33 @@ def resolve_input(database: Path, record_id: str, *, data_root: Path):
     if row is None:
         raise KeyError("unknown prepared record")
     source, task, spec = map(json.loads, row)
+    if source["source_id"] == "GAIA":
+        from .registry import source_spec
+
+        if (
+            source["revision"] != source_spec("GAIA")["revision"]
+            or spec.get("mapping") != "gaia_original_tasks"
+        ):
+            raise ValueError(
+                "pinned original GAIA source and task mapping required; no QBI fallback"
+            )
     reference = task["input_ref"]
+    if source["source_id"] == "APPWORLD":
+        assets = reference.get("native_task_assets")
+        if not isinstance(assets, list) or not assets:
+            raise ValueError("original AppWorld bundle references missing from index")
+        for asset in assets:
+            verify_file(data_root, asset)
     if source["source_id"] == "FLORES200" and spec["mapping"] == "source-mapping/v1":
         if reference.get("mapping_sha256") != spec["contract_sha256"]:
             raise ValueError("original translation direction/profile binding mismatch")
     verify_file(data_root, {"path": reference["file"], "sha256": reference["sha256"]})
-    rows = iter_source_rows(asset_path(data_root, reference["file"]), spec)
+    row_spec = (
+        {**spec, "diagnostic_query_limit": reference["row_index"] + 1}
+        if spec["mapping"] == "msmarco_original_dev_query_pools"
+        else spec
+    )
+    rows = iter_source_rows(asset_path(data_root, reference["file"]), row_spec)
     try:
         if spec.get("history_targets") is not None:
             from .conversations import history_record

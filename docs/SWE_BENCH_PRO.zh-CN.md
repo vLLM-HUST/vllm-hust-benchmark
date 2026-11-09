@@ -5,11 +5,26 @@ Controller 接入与验证；运行本指南不需要克隆或安装它。 这�
 
 ## 新用户推荐入口
 
+### 当前平台状态（2026-10-31）
+
+[Coder 9443 平台](https://coder.sage.org.ai:9443/)已完成普通账号的新工作区准备复验。经授权回收 7 个未绑定、无 Pod 的空 PVC 后， 释放 700
+GiB 申请额度；普通账号从 `swe-bench-pro-cpu` 模板重试创建新的 20 GiB 工作区成功。 此次核验后配额使用量为 3945 / 4625
+GiB，余量为当时快照，后续创建仍按平台实时容量准入。
+
+新工作区使用全新 PVC，初始 Docker 镜像数为 0；`dev` 与 `swe-pro-docker` 均 Ready。 本文固定 bootstrap
+的源码、客户端、依赖、Agent、benchmark、检查和输入准备全部通过，返回 `READY`； 固定 ARM64 任务镜像及 V1 数据通过校验，模型 API 可达，同路径只读 bind
+探针通过。 使用者在自己工作区终端填入模型 API、模型名及必要凭据即可执行下方命令，无需裸机权限或手工搭 Docker。
+
+独立评分目录挂载修复已发布为模板版本 `cpu-grade-bind-1031-1fd0da18`
+（`3eb13404-43e9-4b41-b270-0eb52cf8fd3f`）。已有本人工作区可通过 Coder 更新到该版本； 保存当前工作后更新会重建本工作区
+Pod，持久卷和历史结果保留。新工作区默认使用该版本。
+
 **模型服务与任务执行工作区是两个不同的东西。** 模型服务负责回答模型请求；本指南的 CPU 工作区负责运行 Agent、启动 Docker 任务容器、修改代码与测试。 有模型的 Ray
 地址，不代表已经有可运行任务的 Docker 环境。不要给模型工作区挂宿主机 Docker socket，也不要把客户端依赖装入模型环境。
 
-在 Coder 中选择管理员发布的 `swe-bench-pro-cpu` 模板，新建自己的 **CPU 工作区**。该模板提供独立 Docker 服务、客户端和 socket；Docker
-镜像、容器数据与 `/root` 共用所选持久卷额度。建议单任务选择 40 GiB，实际准入仍受平台可用额度约束。普通 `ascend-devbox` 和模型 Ray 模板不能替代这个模板。
+在 Coder 中选择 **Agent Benchmark · CPU** 模板（标识 `swe-bench-pro-cpu`），新建自己的 **CPU 工作区**。该模板提供独立 Docker
+服务、客户端和 socket；Docker 镜像、容器数据与 `/root` 共用所选持久卷额度。单题可使用模板默认 20 GiB（安装前至少 15 GiB 可用）；多任务请先确认平台存储额度。普通
+`ascend-devbox` 和模型 Ray 模板不能替代这个模板。
 
 模板不存在时，由管理员先按私有云仓库的
 [`scripts/create_swe_bench_workspace.py`](https://github.com/yancanmao/npu-private-cloud/blob/main/scripts/create_swe_bench_workspace.py)
@@ -22,26 +37,30 @@ Controller 接入与验证；运行本指南不需要克隆或安装它。 这�
 | 在模板配置数据下载源和镜像仓库地址          | 下载并校验 V1 数据、固定镜像摘要和代码起点                 | 模型需要鉴权时，提供密钥环境变量名             |
 | 验证仓库制品可拉取，不依赖节点缓存          | 启动一个真实 Agent，保存状态、轨迹与补丁，清理本次任务容器 | 不需要知道旧工作区名称、Docker 路径或手填 JSON |
 
-在新工作区的终端运行下列入口。通过 GitHub 官方 API 获取安装脚本，不要求预先安装 Git，也不下载仓库内的历史图表和实验归档：
+在新工作区终端填写模型 API 与模型名，执行以下固定版本入口。已验证的 9443 平台网关提供小型运行包与原版 ARM64 crane 制品， 全部按校验和验证；无需 GitHub
+token，也不依赖共享出口的 GitHub 匿名 API 配额。
 
 ```bash
-curl --fail --location \
-  -H 'Accept: application/vnd.github.raw+json' \
-  'https://api.github.com/repos/vLLM-HUST/vllm-hust-benchmark/contents/scripts/bootstrap_swe_bench_pro.py?ref=main' \
-  --output /root/bootstrap_swe_bench_pro.py
-
-python3 /root/bootstrap_swe_bench_pro.py \
-  --work /root/swe-pro-first \
-  --model-api http://MODEL_HOST:MODEL_PORT/v1 \
-  --model-name openai/SERVED_MODEL_NAME \
-  --run
+MODEL_API=https://MODEL_HOST/v1
+MODEL_NAME=openai/SERVED_MODEL_NAME
+export PIP_INDEX_URL="${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}"
+BASE=https://coder.sage.org.ai:9443/swe-bench-pro-artifacts
+REV=33efa2a4ce065bcd6d25ab387ddffd85b3826a3f # pragma: allowlist secret
+BUNDLE_SHA=fcf21b81bc91e569ab57ebb43791a0a4b7b1b8678dd5dc3487ad931c57e5e7b8 # pragma: allowlist secret
+curl --fail --location "$BASE/$REV/bootstrap_swe_bench_pro.py" --output bootstrap_swe_bench_pro.py
+echo 'f4700673883af8447442c89193881efa314649cb949b2fdca00bf8ea88fecea9  bootstrap_swe_bench_pro.py' | sha256sum --check # pragma: allowlist secret
+python3 bootstrap_swe_bench_pro.py --source-revision "$REV" \
+  --source-bundle-url "$BASE/$REV/runtime.tar.gz" \
+  --source-bundle-sha256 "$BUNDLE_SHA" \
+  --crane-archive-url "$BASE/crane-v0.20.3-linux-arm64.tar.gz" \
+  --work "$HOME/swe-pro-first" --model-api "$MODEL_API" --model-name "$MODEL_NAME" --run
 ```
 
-`MODEL_HOST:MODEL_PORT` 和 `SERVED_MODEL_NAME` 换成已有模型服务信息；脚本先检查 `/v1/models` 是否确实包含该模型。 需要认证时追加
+`MODEL_API` 和 `MODEL_NAME` 换成已有模型服务信息；脚本先检查 `/v1/models` 是否确实包含该模型。 需要认证时追加
 `--api-key-env MODEL_API_KEY`，密钥值只放工作区环境变量，不能写进 URL、命令参数或配置文件。 不加 `--run` 只准备环境，不发模型推理请求。
 
-安装脚本先将源码版本解析为一个固定 Git commit，下载小型运行文件，随后复用本仓库现有的 `check → prepare → verify-inputs → run`，没有第二套 Agent
-实现。 固定官方 Agent、V1 数据 SHA256 和社区 ARM 镜像来源仍以原锁定清单为准；入门任务的不可变 manifest/config 与工具下载摘要另见
+安装脚本验证指定 Git commit 的运行包 SHA256、文件清单与逐文件摘要，随后复用本仓库现有的 `check → prepare → verify-inputs → run`，没有第二套
+Agent 实现。 固定官方 Agent、V1 数据 SHA256 和社区 ARM 镜像来源仍以原锁定清单为准；入门任务的不可变 manifest/config 与工具下载摘要另见
 [`swe_bench_pro_bootstrap_lock.json`](../src/vllm_hust_benchmark/data/swe_bench_pro_bootstrap_lock.json)。
 镜像仓库返回不同摘要时，拒绝启动 Agent。现有客户端源码安装方式仍保留在后续章节。
 
@@ -71,7 +90,36 @@ python3 scripts/mirror_swe_bench_pro_image.py \
 [`http.compat: ["docker2s2"]`](https://zotregistry.dev/v2.1.18/admin-guide/admin-configuration/#compatibility-with-other-image-schema-types)。
 平台仓库提供 `configure_registry_compat.py`，按实际运行版本验证配置并备份；不能为绕过 415 错误转换清单后仍宣称摘要相同。
 
-### 干净工作区的实际验收
+### 2026-10-30—31 普通账号验收与评分修复
+
+2026-10-30，普通账号 `user`（roles=[]）从模板新建独立 20 GiB PVC，初始 Docker 为 0 images / 0 containers； `dev` 与
+`swe-pro-docker` 均 Ready，固定 ARM64 镜像、V1 数据与官方源码通过校验，模型 API 可达。 固定入口仍为本文的
+`33efa2a4ce065bcd6d25ab387ddffd85b3826a3f`，任务仍为入门 NodeBB V1 单题。
+
+| 阶段       | 实际结果                                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------- |
+| 环境就绪   | 10月31日配额回收后，普通账号第二个新工作区使用全新 PVC、空 Docker 数据目录，bootstrap READY、目录挂载探针通过 |
+| Agent 提交 | 61 次模型调用、1200.261 秒后达到既定时间预算；未 Submitted，保留 4165 字节未完成补丁                          |
+| 官方评分   | 10月31日仅复评原补丁，未新增模型调用；补丁应用退出码 0，取证完整，官方结果 0/1；解析输出 117 PASSED、4 FAILED |
+
+首次 `grade-001` 返回 127，缺失 `output.json`。文件探针证实 `dev` 中的评分目录在独立 daemon 中不存在。 模板修复为 `swe-pro-docker`
+挂载本工作区 home PVC 到与 `dev` 相同的路径；不挂宿主机 Docker socket， 不将整个 home 挂给 Agent 任务容器。使用普通账号更新验收工作区后，同一探针通过。
+
+`grade-002` 保留了原入口、官方评分源码、模型生成的补丁及固定任务镜像；评分前后 image ID 一致。 原始补丁与实际应用补丁 SHA256 均为
+`5d188aaa24ccb28a7dc2ac23bd9b33f4a5deab48b3ce13aab245b23f3bb4d1b6`。
+`grading_status=OUTPUTS_PRESENT`、`patch_application.status=applied`、`state_capture=complete`；
+这是未完成补丁的有效独立评分，不是 Agent 提交成功。
+
+本次私有原件保留在验收工作区 `/root/swe-pro-first/`：
+`run/task-000/report-private.json`、`run/task-000/patch-private.diff`、`grade-001/`、`grade-002/`、
+`grade-002-private.log` 和 `diagnostics-1031/`。 逐题 `grade-002/instance_*/workspace/` 包含
+`output.json`、`stdout.log`、`stderr.log`、 `hust-patch-apply.*` 及应用前后文件状态；私有题目、轨迹和补丁不公开。
+
+配额解除后的复验使用普通账号 `user`（roles=[]），新的 20 GiB PVC 和初始为空的独立 Docker 数据目录。
+从固定下载入口完成环境与输入准备；没有复制旧工作区的客户端、任务镜像或结果。 该复验只运行 bootstrap 准备和目录挂载探针，没有新增 Agent 或评分，未放宽预算或重启模型。 表中的
+Agent 与官方评分仍对应此前保存的同一份补丁，不能把新环境 `READY` 写成新 Agent 已提交或评分通过。
+
+### 2026-10-24 历史干净工作区验收
 
 2026-10-24，使用新建 CPU 工作区、新建 40 GiB 持久卷、初始 Docker 镜像数量 0， 从 GitHub 固定版本
 `820f6af85434367973c1131ea5e608845e328252` 下载安装入口， 自动建立客户端、下载校验数据与镜像，并复用既有模型 API 跑了一道真实 V1 任务。 结果为
@@ -106,9 +154,10 @@ NodeBB 的一道 V1 任务、一个独立 Agent。任务容器需要至少示例
 
 ![学生在 Coder 上的操作路径（示意，非页面截图）](images/swe-bench-pro-coder-workflow.svg)
 
-**不需要物理机 SSH 或 Kubernetes 管理员权限。** 管理员先发布带 Docker 执行能力的 `swe-bench-pro-cpu` 模板、准备固定 ARM
-任务镜像和下载源；学生创建该模板的 CPU 工作区， 再连接自己有权使用的模型 API。模型可运行在另一个 LLM 工作区，也可复用已授权的服务。 两个工作区之间的模型 API
-必须可达，服务需要鉴权时由 Agent 客户端提供凭据。 普通 CPU `ascend-devbox` 不保证具有 Docker 执行能力；安装 Docker 客户端本身不会提供 Docker 服务。
+**不需要物理机 SSH 或 Kubernetes 管理员权限。** 管理员先发布带 Docker 执行能力的 **Agent Benchmark · CPU** 模板（标识
+`swe-bench-pro-cpu`）、准备固定 ARM 任务镜像和下载源；学生创建该模板的 CPU 工作区， 再连接自己有权使用的模型 API。模型可运行在另一个 LLM
+工作区，也可复用已授权的服务。 两个工作区之间的模型 API 必须可达，服务需要鉴权时由 Agent 客户端提供凭据。 普通 CPU `ascend-devbox` 不保证具有 Docker
+执行能力；安装 Docker 客户端本身不会提供 Docker 服务。
 
 ### 从网页入口到物理机上的实际进程
 
@@ -127,6 +176,8 @@ NodeBB 的一道 V1 任务、一个独立 Agent。任务容器需要至少示例
 dockerd --host=unix:///run/swe-pro-docker/docker.sock \
   --data-root=/var/lib/docker --storage-driver=overlay2
 ```
+
+`dev` 与 `swe-pro-docker` 在相同 home 路径挂载本工作区自己的 PVC，使官方评分器的 bind mount 能解析评分工作目录。评分沙箱只挂本次评分目录。
 
 `dev` 容器通过 `DOCKER_HOST=unix:///run/swe-pro-docker/docker.sock` 访问它。 这与把物理机 `/var/run/docker.sock`
 挂入工作区、直接控制宿主 Docker 的方式不同。 该实现使用 **privileged 辅助容器**，不能据此宣称具备虚拟机级安全隔离；普通 devbox 不自动开放这项能力。 平台实现见
@@ -286,15 +337,20 @@ Qwen3.5-35B-A3B 已在保留的两张 Ascend 910B2、BF16 TP2、每卡16GiB KV�
 [原生上下文单 Agent 报告](../reports/swe-bench-pro-native-context-20261020/README.md)。
 这是特定部署的实测配置，通用入口仍只依赖你自己的模型API；不会自动替你重启模型或调整资源。
 
-## 5. 独立评分（可选）
+## 5. 对保存的补丁独立评分
+
+上面的 bootstrap 已安装本地官方评分所需 CPU 依赖。使用以下命令复验保存的补丁， 不用重跑 Agent，不会发送模型请求，也不需要模型 API 仍然在线：
 
 ```bash
-"$PYTHON" -m vllm_hust_benchmark.swe_bench_pro grade \
+WORK="$HOME/swe-pro-first"
+"$WORK/client/bin/python" -m vllm_hust_benchmark.swe_bench_pro grade \
   --settings "$WORK/settings-private.json" --inputs "$WORK/inputs" \
-  --batch-directory "$WORK/run-001" --output "$WORK/grade-001"
+  --batch-directory "$WORK/run" --output "$WORK/grade-001"
 ```
 
-此步骤在模型计时之外调用固定版本官方评分器，用独立容器复验保存的补丁，不发送模型请求。 评分器另有自己的 Python 依赖，按固定源码的 requirements 安装到专用 CPU 环境后执行。
+bootstrap 的实际输出目录为 `$WORK/run`；若使用前文手动配置流程，按实际目录改为 `run-001`。
+每次评分使用新的输出目录，保留此前失败证据。评分器使用固定官方源码和独立任务容器， 不修改官方测试、补丁过滤或计分逻辑。
+
 保存 `grading-status.json` 及评分原件；只有官方输出完整才能判定 resolved，缺失输出保留未决。
 
 新评分入口在固定官方脚本外增加补丁应用取证，不改官方补丁过滤、测试、解析器或计分规则：
@@ -328,6 +384,11 @@ Controller 可选实现 `integration.hook = "module:factory"`：`before_run`、`
 选择、会话释放和机制观测留在
 [request-throttling-controller](https://github.com/vLLM-HUST/request-throttling-controller)。
 通用入口不含模型部署、容量调参或政策实现。
+
+观测插件还可选择实现 `bind_runtime(config, folder, program, model, env)`。 它在 `before_program` 之后、入口自带的
+`instrument` 之前执行，收到本次真实创建的 模型和任务环境实例。可用它记录原生调用边界、返回用量和工具输出大小；不得替换 官方 Agent
+循环、改写提示词/结果、插入额外模型请求或变更评分逻辑。凭据仍留在实例中， 插件不得将它们写入日志。旧插件未实现这个方法时继续按原流程运行。 在 `after_program`
+中关闭插件自己的采样线程与文件。此接点本身不保证字段覆盖率， 必须另外核验 SDK、服务端和硬件的实际采集证据。
 
 通用准备/评分逻辑从 Controller 的历史 `ea13820` 提取，官方核心保持固定来源； Controller 历史脚本、配置和实验记录可以作为备份保留，但新用户入口以本仓库为准。
 本次迁移不改写历史运行、网站矩阵或已有实验成绩。

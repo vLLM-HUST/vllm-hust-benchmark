@@ -1,0 +1,83 @@
+{
+  "source_id": "WAVCAPS",
+  "status": "ORIGINAL_FIXED12_NATIVE_CAPTIONING_AND_CURRENT_CI_RESEARCH_HANDOFF_VERIFIED",
+  "source_checkbox_eligible": true,
+  "protocol": "Publisher captioning/test.py audio-captioning inference example, not paper test-set reproduction",
+  "public_entry": "scripts/run_wavcaps_original_captioning.py",
+  "protocol_configuration": "configs/workload-native/wavcaps-original-captioning-protocol.json",
+  "original_metadata": {
+    "components": 4,
+    "rows": 403050,
+    "bytes": 174782992,
+    "historical_full_adapter_and_fixed12_handoff_receipt": "docs/workload-data/validation/wavcaps-original-metadata-ci-handoff-20261031.json",
+    "original_index_reused_read_only": true
+  },
+  "native_execution": {
+    "selection": "Original first3 rows from each of four registered components,12 total; no replacement",
+    "completed_original_cases": 12,
+    "original_float32": true,
+    "original_num_beams": 3,
+    "original_max_length": 30,
+    "original_min_length": 2,
+    "unchanged_author_32000hz_mono_10second_signal_processing": true,
+    "raw_audio_unchanged": true,
+    "neural_execution_device": "Ascend NPU",
+    "first_valid_case_reused_not_rerun": true,
+    "fixed12_saved_audit_receipt": "wavcaps-original-fixed12-native-20261103-001/independent-audit-public.json",
+    "all12_original_input_sha_case_caption_stdout_bindings_verified": true,
+    "original_source_files_reverified": 29,
+    "extra_public_entry_case": {
+      "component": "SoundBible",
+      "original_id": "2215",
+      "original_position_zero_based": 3,
+      "selection_fixed_before_generation": true,
+      "prepare_exit_code": 0,
+      "execute_exit_code": 0,
+      "native_model_calls": 1,
+      "not_a_frozen12_replacement_or_pooled_quality_score": true,
+      "receipt": "wavcaps-public-native-entry-20261103-001/next-original-execution/state-public.json",
+      "saved_input_stdout_code_audit_receipt": "wavcaps-soundbible-original-archive-20261103-001/cleanup-public.json"
+    },
+    "executed_public_entry_sha256": "66621a463c168a2b64de3ca803311e1263199554ba4da0153fc9e8a47ef35082"
+  },
+  "current_public_and_research_handoff": {
+    "receipt": "/root/wavcaps-current-ci-handoff-20261103-001/qualification-public.json",
+    "producer_commit": "71a14281e8666ddd92758056b4d9548265463d5b",
+    "ci_run_id": 41544364309,
+    "ci_artifact_id": 13188276346,
+    "wheel_sha256": "a8030ecc10dc08c2a1607a1715868e38d06660e33557252d4a74abd99b1289de",
+    "git_wheel_installed_payloads_verified": 91,
+    "registered_native_entrypoints": 7,
+    "original_index_rows": 403050,
+    "fixed_original_id": "2215",
+    "original_row_reconstructed_exactly": true,
+    "references_separate_from_inputs": true,
+    "research_consumer_sha256": "21973a8e7c33670279d6c8a67ca432c1ba878be8d92d0e8825717292c2fcf23e",
+    "original_index_sha256": "abfd70dd1001ef6096c7d1f96c7a7fffb0a153119aaf0d26572853b9c914ff76",
+    "research_consumer_and_index_unchanged": true,
+    "research_observation_or_analysis_migrated": false,
+    "new_model_calls": 0
+  },
+  "software_checks": {
+    "local_related_regression_passed": 832,
+    "current_cpu_smoke_run": 41544364309,
+    "current_cpu_smoke_conclusion": "success",
+    "current_full_ci_run": 41544364424,
+    "current_full_ci_conclusion": "success",
+    "retained_previous_cpu_smoke_failure": "41543739054: checklist overview omitted the explicit12-audio wording;825passed,1failed. Fixed documentation without weakening test."
+  },
+  "retained_native_failures": [
+    "Transformers4.49.0 and4.40.2 incompatible with original explicit None decoder inputs; isolated4.36.2/tokenizers0.15.2 completed unchanged original generation",
+    "Early hook/deployment binding failures retained separately; no modification of original model implementation or task budget"
+  ],
+  "scope_limits": [
+    "Declared author inference example, not five-reference COCO evaluation or reproduction of paper scores",
+    "Fixed12 original audio plus one separately identified public-entry qualification case, not full403050 model execution",
+    "Offline audio captioning, not streaming speech or engine performance",
+    "Recorded compatible environment, not an author-published dependency lock"
+  ],
+  "raw_assets_or_weights_published": false,
+  "raw_windows_files_written": false,
+  "unused_temporary_original_archive_removed_bytes": 579522592,
+  "original_audio_models_results_and_download_identity_preserved": true
+}

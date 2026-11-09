@@ -5,6 +5,7 @@ import json
 import importlib.util
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -38,7 +39,8 @@ def test_container_flags_are_offline_nonroot_bounded_and_private(tmp_path):
     assert command[command.index("--user") + 1] == "65534:65534"
     assert command[command.index("--memory") + 1] == "32g"
     assert command[command.index("--pids-limit") + 1] == "1024"
-    assert "as=32212254720:32212254720" in command
+    assert not any(value.startswith("as=") for value in command)
+    assert "data=32212254720:32212254720" in command
     mounts = [command[i + 1] for i, x in enumerate(command) if x == "--mount"]
     assert len(mounts) == 3
     assert sum(m.endswith(",readonly") for m in mounts) == 2
@@ -56,6 +58,46 @@ def test_container_flags_are_offline_nonroot_bounded_and_private(tmp_path):
 def test_mutable_images_or_root_uid_rejected(tmp_path, image, uid):
     with pytest.raises(ValueError):
         launcher.container_command("docker", image, "fixture", tmp_path, uid, {})
+
+
+def test_named_volume_transport_never_mounts_client_host_paths(tmp_path):
+    name = "hust-bcb-" + "b" * 32
+    volumes = {key: name + "-" + key for key in ("inputs", "author", "output")}
+    command = launcher.container_command(
+        "docker", "sha256:" + "a" * 64, name, tmp_path, 65534, {}, volumes
+    )
+    mounts = [command[i + 1] for i, value in enumerate(command) if value == "--mount"]
+    assert all(value.startswith("type=volume,") for value in mounts)
+    assert sum(value.endswith(",readonly") for value in mounts) == 2
+    assert not any(str(tmp_path) in value for value in command)
+    volumes["output"] = "/host/path,readonly"
+    with pytest.raises(ValueError, match="owned named volumes"):
+        launcher.container_command(
+            "docker", "sha256:" + "a" * 64, name, tmp_path, 65534, {}, volumes
+        )
+
+
+def test_named_volume_staging_uses_copy_api_without_candidate_execution(
+    tmp_path, monkeypatch
+):
+    calls = []
+    monkeypatch.setattr(
+        launcher.subprocess,
+        "run",
+        lambda command, **kwargs: calls.append((command, kwargs)),
+    )
+    name = "hust-bcb-" + "b" * 32
+    volumes = launcher.stage_named_volumes(
+        "docker", "sha256:" + "a" * 64, name, tmp_path, 65534, None
+    )
+    assert len(volumes) == 3
+    assert len([cmd for cmd, _ in calls if cmd[1] == "cp"]) == 3
+    executed = [cmd for cmd, _ in calls if cmd[1] == "run"]
+    assert len(executed) == 1 and "--network=none" in executed[0]
+    assert "--evaluate" not in executed[0] and "--cap-add=CHOWN" in executed[0]
+    assert "--cap-add=FOWNER" in executed[0]
+    assert "os.chown('/output'" in executed[0][-1]
+    assert all(opts["check"] is True for _, opts in calls)
 
 
 def result():
@@ -99,6 +141,21 @@ def test_environment_or_coverage_failure_cannot_be_accepted(failure):
 def test_worker_refuses_current_unqualified_host_before_import():
     with pytest.raises(RuntimeError, match="private nonroot PID1"):
         worker.assert_isolation({})
+
+
+def test_address_space_budget_is_set_in_worker_not_unsupported_docker_flag(monkeypatch):
+    calls = []
+    resource = SimpleNamespace(
+        RLIMIT_AS=9,
+        setrlimit=lambda key, limits: calls.append((key, limits)),
+        getrlimit=lambda key: (30 * 1024**3, 30 * 1024**3),
+    )
+    monkeypatch.setitem(sys.modules, "resource", resource)
+    worker.set_address_space_limit()
+    assert calls == [(9, (32212254720, 32212254720))]
+    resource.getrlimit = lambda key: (1, 1)
+    with pytest.raises(RuntimeError, match="not enforced"):
+        worker.set_address_space_limit()
 
 
 def test_cli_import_probe_is_separate_from_candidate_execution(monkeypatch):
@@ -179,3 +236,67 @@ def test_dependency_probe_keeps_pins_and_pip_check(tmp_path, monkeypatch):
     versions["numpy"] = "newer-unqualified"
     with pytest.raises(RuntimeError, match="dependency version mismatch"):
         worker.qualify_environment(requirements)
+
+
+@pytest.mark.parametrize("actual", ["4.15", "4.15.0", "4.15.0.0"])
+def test_original_version_pin_uses_pep440_release_equality(
+    tmp_path, monkeypatch, actual
+):
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text("selenium==4.15\n")
+    monkeypatch.setattr(worker.sys, "version_info", (3, 10, 0))
+    monkeypatch.setattr(worker.metadata, "version", lambda name: actual)
+    monkeypatch.setattr(worker.subprocess, "run", lambda *args, **kwargs: None)
+    assert worker.qualify_environment(requirements) == {"selenium": actual}
+
+
+@pytest.mark.parametrize("actual", ["4.14.0", "4.15.1", "4.15.0rc1", "4.15.0+changed"])
+def test_original_version_pin_rejects_real_version_drift(tmp_path, monkeypatch, actual):
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text("selenium==4.15\n")
+    monkeypatch.setattr(worker.sys, "version_info", (3, 10, 0))
+    monkeypatch.setattr(worker.metadata, "version", lambda name: actual)
+    with pytest.raises(RuntimeError, match="selenium expected 4.15"):
+        worker.qualify_environment(requirements)
+
+
+def test_import_created_library_cache_does_not_impersonate_old_groundtruth(
+    tmp_path, monkeypatch
+):
+    cache = tmp_path / "fresh-cache"
+    monkeypatch.setattr(
+        worker, "qualify_environment", lambda path: {"selenium": "4.15.0"}
+    )
+
+    def imports():
+        hub = cache / "huggingface" / "hub"
+        hub.mkdir(parents=True)
+        (hub / "version.txt").write_text("1")
+
+    monkeypatch.setattr(worker, "qualify_author_entrypoints", imports)
+    assert worker.qualify_fresh_author_environment("original-requirements", cache) == {
+        "selenium": "4.15.0"
+    }
+
+
+def test_preexisting_cache_is_rejected_before_author_imports(tmp_path, monkeypatch):
+    cache = tmp_path / "old-cache"
+    cache.mkdir()
+    monkeypatch.setattr(
+        worker, "qualify_environment", lambda path: pytest.fail("must reject first")
+    )
+    with pytest.raises(RuntimeError, match="before author imports"):
+        worker.qualify_fresh_author_environment("original-requirements", cache)
+
+
+def test_import_created_groundtruth_pickle_is_rejected(tmp_path, monkeypatch):
+    cache = tmp_path / "fresh-cache"
+    monkeypatch.setattr(worker, "qualify_environment", lambda path: {})
+
+    def imports():
+        cache.mkdir()
+        (cache / "not-fresh.pkl").write_bytes(b"old-reference")
+
+    monkeypatch.setattr(worker, "qualify_author_entrypoints", imports)
+    with pytest.raises(RuntimeError, match="groundtruth cache populated"):
+        worker.qualify_fresh_author_environment("original-requirements", cache)

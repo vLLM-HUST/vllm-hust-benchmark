@@ -19,6 +19,15 @@ OUTPUT = "docs/data-entrypoints.json"
 REPO = "vLLM-HUST/vllm-hust-benchmark"
 WEBSITE = "vLLM-HUST/vllm-hust-website"
 PREFIX = "website-publication/data/"
+# Relocation metadata only: retired website snapshots can still name this file.
+# Results live exclusively in the destination repository's current tree.
+RELOCATED_PUBLICATIONS = {
+    "data/gennova-validation-v1.json": (
+        "https://github.com/GenNova-HUST/gennova-benchmark/blob/"
+        "af93ddcc5687dfddc7d4423d22dcc76f13b02a6c/"
+        "evidence/gennova-mmlu-pro-20261023/historical-summary.json"
+    ),
+}
 URL = re.compile(r"https?://[^\s\"'<>`\\]+")
 LOCAL = re.compile(r"[\"'`]((?:\./|/)?data/[^\s\"'<>`]+)")
 BENCHMARK_PATH = re.compile(
@@ -187,7 +196,7 @@ def publication_bytes(root, path, tracked):
         name = part["name"]
         if Path(name).name != name or name in (".", ".."):
             raise ValueError("Unsafe publication part")
-        source = str(Path(path).with_name(name))
+        source = Path(path).with_name(name).as_posix()
         if source not in tracked:
             raise ValueError(f"Untracked publication part: {source}")
         chunk = (root / source).read_bytes()
@@ -245,6 +254,15 @@ def build(root, paths, sources):
             not parsed.scheme or parsed.netloc == "vllm-hust.sage.org.ai"
         ):
             record["benchmark_path"] = by_website.get(unquote(local))
+            if unquote(local) in RELOCATED_PUBLICATIONS:
+                if record["benchmark_path"]:
+                    raise ValueError(
+                        f"Relocated publication must not be copied back: {local}"
+                    )
+                record["resolution"] = "relocated-to-external-repository"
+                record["destination"] = RELOCATED_PUBLICATIONS[unquote(local)]
+                links.append(record)
+                continue
             record["resolution"] = (
                 "mapped"
                 if record["benchmark_path"]
@@ -332,23 +350,23 @@ def main(argv=None):
         sources = refresh(args.website, args.revision)
         previous_path = ROOT / SOURCES
         if previous_path.exists():
-            previous = json.loads(previous_path.read_text())
+            previous = json.loads(previous_path.read_text(encoding="utf-8"))
             if previous.get("releases") and not sources["releases"]:
                 raise ValueError(
                     "Remote refresh returned no public Releases; refusing to erase the existing inventory. Verify the API response and retry."
                 )
-        (ROOT / SOURCES).write_text(render(sources))
+        (ROOT / SOURCES).write_text(render(sources), encoding="utf-8")
     else:
-        sources = json.loads((ROOT / SOURCES).read_text())
+        sources = json.loads((ROOT / SOURCES).read_text(encoding="utf-8"))
     catalog = build(ROOT, tracked_paths(ROOT), sources)
     if args.refresh or args.write:
-        (ROOT / OUTPUT).write_text(render(catalog))
+        (ROOT / OUTPUT).write_text(render(catalog), encoding="utf-8")
         print(render(catalog["counts"]))
         return 0
     if args.check:
-        if not (ROOT / OUTPUT).exists() or (ROOT / OUTPUT).read_text() != render(
-            catalog
-        ):
+        if not (ROOT / OUTPUT).exists() or (ROOT / OUTPUT).read_text(
+            encoding="utf-8"
+        ) != render(catalog):
             print(
                 "Entry-point index is stale: python scripts/data_entrypoints.py --write"
             )

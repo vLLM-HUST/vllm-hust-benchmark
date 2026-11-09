@@ -1,0 +1,60 @@
+{
+  "schema": "muxpd-q40-full-answer-recovery-cpu-validation-v2",
+  "passed": true,
+  "cpu_only": true,
+  "producer_map": {
+    "path": "/root/workspace/muxpd-q40-full-answer-batch7-v2-20261030/producer-map-v1.json",
+    "sha256": "64d19e4f3526c6dbbe960aabf21f1502339b021f405cc19ceb8d8e728516eda9"
+  },
+  "producer_count": 24,
+  "producer_bytes_unchanged_after_tests_and_root_preflight": true,
+  "root_preflight": {
+    "path": "/root/workspace/muxpd-q40-full-answer-batch7-v2-20261030/root-preflight-v1/preflight.json",
+    "sha256": "ec10b8ce6fcf9ea8a6023dd04f3609d4745a0891ad7371803a69b083d929fb9f"
+  },
+  "prior_failure_lineage": {
+    "path": "/root/workspace/muxpd-q40-full-answer-batch7-20261030/failure-lineage-v1.json",
+    "sha256": "7e37f193a37a8731be93880046820638b76fe7eee97b18ec21a3f555f82915e9"
+  },
+  "source_proofs": [
+    {
+      "path": "/root/workspace/muxpd-q40-full-answer-batch7-v2-20261030/harness-source-proof-v1.json",
+      "sha256": "7e6a68c5f8a983c36879bcf90f4428524229eb36cf123be192c6b2a84d5c2764"
+    },
+    {
+      "path": "/root/workspace/muxpd-q40-full-answer-batch7-v2-20261030/analyzer-label-proof-v1.json",
+      "sha256": "a005310c6bd1ffa8da97cd75cc9c5a5dae1345016ea9f65798c576efe54f6c30"
+    }
+  ],
+  "focused_test_runs": [
+    {
+      "artifact": {
+        "path": "/root/workspace/muxpd-q40-full-answer-batch7-v2-20261030/cpu-environment-controller-final-v2.log",
+        "sha256": "ae1ec72d67639d076d50df2407fa6860357711b4fc5aa82d3811bd3dede4e44e"
+      },
+      "result": "14 passed in2.12s",
+      "scope": "Exact env mismatches, real sourcedenv success without mutation, actual unsourcedCLI rejection beforeattempt, terminalgroupguards and declaredlabel/allocation."
+    },
+    {
+      "artifact": {
+        "path": "/root/workspace/muxpd-q40-full-answer-batch7-v2-20261030/cpu-analyzer-label-green-v1.log",
+        "sha256": "300e8bbe9cfe2c740c0027dbc4f1b9ceca2e96ab061ffbb44c223988f5c3cedc"
+      },
+      "result": "4 passed,19 deselected in1.16s",
+      "scope": "Newv2label acceptance, oldv1label rejection and actual qualified reference gate."
+    }
+  ],
+  "previous_full_cpu_validation": {
+    "path": "/root/workspace/muxpd-q40-full-answer-batch7-20261030/cpu-validation-v1.json",
+    "sha256": "b8ff2f2e75895b9e8b6045796d16d3a8402f89113c3c652fe1fe4d92bdbc58c1"
+  },
+  "test_policy": "Only affected focused tests rerun. Modeldriver/scorer/inputs/referenceprofile and21of24producerfiles byte-identical to frozenv1; original37CPUtests not rerun.",
+  "test_sources": {
+    "test_launch_environment_v2.py": "606038112f12bd510268e251302406e851c4647fd72d98cf5f09c7f0e340a81c",
+    "test_full_answer_controller_v1.py": "3c9192b88160e6e02d386fc2fcc328b22739c0aa3dab3de3a5da7b42db838276",
+    "test_batch7_full_analysis_v1.py": "9e90e28f3aa9ae789f48d94da2aa45afa4894d4f554f13302242581c59911471"
+  },
+  "lint": "Ruff check and format --check all5affectedPythonfiles PASS",
+  "environment_setup": "Root explicitly sources /root/workspace/runtime/env.sh beforepreflight andlaunch. Guard compares existing childenv to exact historical trackedkeys; no automaticrepair.",
+  "scope": "Preserved pre-modelv1 environment launch failure, zeroanswers; one newdeclaredv2 attempt. No model/rules/sourcecandidate change or selectedoutputretry."
+}

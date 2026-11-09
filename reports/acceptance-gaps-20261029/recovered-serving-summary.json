@@ -1,0 +1,87 @@
+{
+  "schema": "fixed018-serving-cost-reuse/v1",
+  "new_model_runs": 0,
+  "price_basis": "pricing-and-conditional-cost.json",
+  "price_basis_sha256": "cb01fe3b8953e260e3255a75172bad706e7afdb1ba5ac01252efd1b3ddc32ef9",
+  "arms": {
+    "B0": {
+      "run_id": "m01-b0-formal-storage-r1",
+      "requests": 200,
+      "successful_output_tokens": 51200,
+      "input_tokens": 282265,
+      "all_requests_in_interval": true,
+      "reserved_cards": 2,
+      "reserved_cards_verified": true,
+      "synchronized_seconds": 238.12670116312802,
+      "output_tokens_per_second": 215.01158731849054,
+      "equal_request_mean_TTFT_ms": 154605.0625457801,
+      "equal_request_mean_TPOT_ms": 66.59204496888846,
+      "compute_rental_CNY_per_million_output_tokens": 66.22525654755565,
+      "same_interval_ai_core_utilization": {
+        "status": "missing_same_run_wall_perf_bridge",
+        "mean_percent": null,
+        "per_card_percent": null,
+        "conditional_lifecycle_bounds": {
+          "mean_percent_lower": 9.424454803340906,
+          "mean_percent_upper": 16.717714255969835,
+          "possible_start_wall": [
+            1792839789.6316822,
+            1792839828.149779
+          ],
+          "latest_end_wall": 1792840066.2764802,
+          "assumptions": "No wall-clock jump; left-held command-completion NPU samples. Controller emits final starting sample before client launch and receipt ended after drain. Extremize all possible fixed-duration windows; unsampled tail ranges0..100%. Not physical-utilization confidence bounds or exact same-window measurement."
+        },
+        "reason": "Original monitor uses wall time, request/sync window uses perf_counter; no same-run clock bracket was retained. Do not borrow the B1 clock offset or label all measuring-stage samples as the exact window."
+      }
+    },
+    "B1": {
+      "run_id": "timing-b1-storage-r1",
+      "requests": 200,
+      "successful_output_tokens": 51200,
+      "input_tokens": 282265,
+      "all_requests_in_interval": true,
+      "reserved_cards": 2,
+      "reserved_cards_verified": true,
+      "synchronized_seconds": 127.59352582134306,
+      "output_tokens_per_second": 401.2742783806322,
+      "equal_request_mean_TTFT_ms": 86876.89058516175,
+      "equal_request_mean_TPOT_ms": 33.091566333108965,
+      "compute_rental_CNY_per_million_output_tokens": 35.48494956698292,
+      "same_interval_ai_core_utilization": {
+        "status": "retrospective_sample_estimate",
+        "mean_percent": 22.394554123946683,
+        "per_card_percent": {
+          "3": 22.690175659802147,
+          "6": 22.098932588091223
+        },
+        "wall_interval": [
+          1792808519.883537,
+          1792808647.477063
+        ],
+        "covered_seconds": 127.59352588653564,
+        "max_sampling_gap_seconds": 5.62919020652771,
+        "clock_offset_spread_seconds": 1.1920928955078125e-06,
+        "method": "Same-run clock-bracket median offset; command-completion timestamps, left-held samples clipped to the same synchronized cost interval. Sampling error is not a confidence interval."
+      }
+    }
+  },
+  "improvements_percent": {
+    "synchronized_window_output_throughput": 86.62914096170829,
+    "equal_request_mean_TTFT": 43.80721487730285,
+    "equal_request_mean_TPOT": 50.307027891140436,
+    "same_rate_compute_rental_cost": 46.417799768730895
+  },
+  "numeric_cost_reduction_at_least_10_percent": true,
+  "M06_pass": null,
+  "utilization_improvement_pass": null,
+  "limits": [
+    "Fixed B0 is0.18/0.18; current corrected B1 is0.28.1/Ascend0.25.1rc2 development, not a same-version ablation.",
+    "Both use the original same200 out256 workload and same two reserved physical cards; startup excluded, in-window host accounting and synchronization retained without subtracting overhead.",
+    "Cost interval is the original synchronized envelope, containing every successful request and end drain; request-only envelope is not silently substituted.",
+    "TTFT is independently averaged from all200 request values. All outputs are exactly256 tokens, so equal-request TPOT=(original meanE2E-recomputed meanTTFT)/255 exactly matches the original client aggregate. Chunk intervals only locate the last output, not final protocol completion.",
+    "Public cloud compute-rental estimate excludes separately billed disk/network and is not actual comprehensive cost.",
+    "B0 has no exact same-window wall/perf alignment. Conditional lifecycle bounds can test sensitivity under a stated sampling/no-clock-jump model; they do not invent a measured point or formal utilization verdict.",
+    "Out8192 quality scores remain a separate measurement. The combined quality/SLO and utilization acceptance is not inferred from positive scalar improvements."
+  ],
+  "public_input_sha256": "7fc2c33ac5c092605f71e89284ce83b0e83fe9bb253bc8b5bc2d46d63966aae0"
+}

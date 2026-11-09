@@ -141,6 +141,78 @@ def test_committed_snapshot_frontend_coverage():
     )
 
 
+def test_completed_archive_has_evidence_and_an_active_successor():
+    portfolio = json.loads(
+        (index.ROOT / "website-publication/data/repository-portfolio.json").read_text()
+    )
+    repositories = {
+        repository["name"]: repository for repository in portfolio["repositories"]
+    }
+    archived = [
+        repository
+        for repository in repositories.values()
+        if repository["lifecycle"] == "completed_archived"
+    ]
+
+    assert portfolio["scope"] == "active_public_repositories_and_completed_archives"
+    assert len(archived) == 1
+    historical = repositories["vllm-ascend-hust-bidkv"]
+    assert historical["repository_role"] == "completed_archive"
+    assert historical["archive_classification"] == "completed_and_migrated"
+    assert historical["successor"] == "vLLM-HUST/vllm-hust-bidkv"
+    assert historical["component_ids"] == []
+    assert historical["completion_evidence"] == {
+        "source_commit_short": "5ee80256",
+        "tests": "11 passed on 2026-11-05",
+        "wheel": "vllm-hust-ascend-bidkv 0.1.0 builds successfully",
+        "release_published": False,
+    }
+    successor = repositories["vllm-hust-bidkv"]
+    assert successor["lifecycle"] != "completed_archived"
+    assert successor["public_surface"] is True
+
+
+def test_upstream_forks_share_the_foundation_repository_domain():
+    portfolio = json.loads(
+        (index.ROOT / "website-publication/data/repository-portfolio.json").read_text()
+    )
+    upstream_forks = [
+        repository
+        for repository in portfolio["repositories"]
+        if repository["repository_role"] == "upstream_sync_fork"
+    ]
+
+    assert {repository["name"] for repository in upstream_forks} == {
+        "mooncake-hust",
+        "production-stack-hust",
+        "sglang-hust",
+        "triton-ascend-hust",
+        "vllm-ascend-hust",
+        "vllm-hust",
+        "vllm-metal-hust",
+    }
+    assert {repository["portfolio_domain"] for repository in upstream_forks} == {
+        "foundation_repositories"
+    }
+
+
+def test_state_scheduler_is_delisted_from_public_catalogs():
+    publication = index.ROOT / "website-publication/data"
+    ecosystem = json.loads((publication / "ecosystem.json").read_text())
+    taxonomy = json.loads((publication / "mod-taxonomy.json").read_text())
+    navigation = json.loads(
+        (publication / "plugin-workload-navigation.json").read_text()
+    )
+    workshop = json.loads((publication / "plugin-workshop-metadata.json").read_text())
+
+    assert "state-scheduler" not in {
+        component["id"] for component in ecosystem["components"]
+    }
+    assert "state-scheduler" not in taxonomy["components"]
+    assert "state-scheduler" not in navigation["plugins"]
+    assert "state-scheduler" not in workshop["plugins"]
+
+
 def test_offline_check_detects_stale_output(tmp_path, monkeypatch):
     (tmp_path / "docs").mkdir()
     (tmp_path / index.SOURCES).write_text(json.dumps(source_snapshot()))
@@ -248,3 +320,29 @@ def test_refresh_pagination_drafts_and_manifest_identity(
         == ("c" if production_available else "b") * 40
     )
     assert bool(snapshot["production_manifest_error"]) is not production_available
+
+
+def test_relocated_publication_is_not_a_missing_file_or_local_copy(tmp_path):
+    sources = source_snapshot()
+    sources["website_references"].append(
+        {
+            "target": "./data/gennova-validation-v1.json",
+            "consumers": ["assets/gennova.js"],
+        }
+    )
+    catalog = index.build(tmp_path, [], sources)
+    entry = next(
+        r for r in catalog["references"] if "gennova-validation" in r["target"]
+    )
+    assert entry["resolution"] == "relocated-to-external-repository"
+    assert entry["benchmark_path"] is None
+    assert entry["destination"].startswith("https://github.com/GenNova-HUST/")
+    assert any(
+        r["resolution"] == "unmapped-frontend-reference" for r in catalog["references"]
+    )
+    path = "website-publication/data/gennova-validation-v1.json"
+    p = tmp_path / path
+    p.parent.mkdir(parents=True)
+    p.write_text("{}")
+    with pytest.raises(ValueError, match="must not be copied back"):
+        index.build(tmp_path, [path], sources)

@@ -2,9 +2,19 @@
 
 ## Ecosystem catalog
 
-`ecosystem.json` is a published mirror of the canonical `vLLM-HUST/vllm-hust-docs` ecosystem
-registry. It classifies system role, integration contracts, execution planes, deployment topology,
-delivery model, ownership, maturity, and evidence independently.
+`ecosystem.json` is owned by `vLLM-HUST/vllm-hust-benchmark` at
+`website-publication/data/ecosystem.json`. The website receives a one-way projection of a reviewed,
+merged benchmark commit through `scripts/sync_website_publication.py`; it is not sourced from
+`vllm-hust-docs`. `benchmark-source-manifest.json` identifies the exact source commit and per-file
+SHA-256 digests. Publication CI rejects source or projection drift.
+
+The registry classifies system role, integration contracts, execution planes, deployment topology,
+delivery model, ownership, maturity, and evidence independently. Publication visibility,
+installation, activation, runtime effectiveness, recovery, and performance qualification remain
+separate decisions. See
+[the publication and rollback procedure](https://github.com/vLLM-HUST/vllm-hust-website/blob/main/docs/PERFORMANCE-DATA-PUBLICATION.md)
+in the website repository. Edit the canonical benchmark files first; do not commit generated website
+data or change public entries simply to make a sync succeed.
 
 `plugins.legacy.json` is retained only for migration and historical links. Its entry-point-centric
 categories MUST NOT be used to classify platform profiles, external KV systems, control planes, or

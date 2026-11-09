@@ -1,6 +1,6 @@
 {
   "schema": "m01-method-status/v1",
-  "method_version": "reference-revision-20261029",
+  "method_version": "reference-model-reassessment-20261029",
   "outline": {
     "path": "reports/vllm-hust-midterm-20261019/milestone-v15/project4-v1.5.txt",
     "bytes": 19177,
@@ -15,7 +15,7 @@
   "reference_effective_compute_formula": "C_reference = F / (k * T_reference * 10^12)",
   "reference_effective_compute_unit": "TFLOPS per participating chip",
   "efficiency_formula": "eta = C / C_reference * 100% = T_reference / T * 100%",
-  "reference_scope": "M01 reference under revision. Same-run reanalysis: B0 3.8407, B1 7.1042 TFLOPS/chip, a descriptive gain of 84.9705%. No qualified replacement C_ref is available; current eta and both midterm 50% / final 90% verdicts are unresolved. Independent repeats of the shared implementation do not establish workload-capacity strength. Raw measurements and historical methods are retained; no new experiment. Same-run accounting costs remain; timing is not strictly uninstrumented.",
+  "reference_scope": "M01 formal reference acceptance remains under revision. Same-run C: B0 3.8407, B1 7.1042 TFLOPS/chip. The independently calibrated B1 DAG was reproduced: modeled reference19.0819 TFLOPS/chip and diagnostic37.2302% against retained host-counted timing, not uninstrumented acceptance. B0 reference binding, matched uninstrumented timing and output-budget quality remain open. V1.5 does not impose a separate executable whole-chain witness or a three-run implementation median.",
   "equivalent_threshold": "C >= 0.9 * C_reference",
   "threshold_percent": 90,
   "current": {
@@ -39,7 +39,7 @@
     "timing": "Same-run effective F and synchronized T retain all accounting costs; no estimated overhead subtraction.",
     "reference": {
       "status": "reference_under_revision",
-      "path": "reports/vllm-hust-midterm-20261019/m01-reference-revision-20261029/method.md"
+      "path": "reports/acceptance-completion-20261029/reference-method.md"
     },
     "forbidden_reference_substitutes": [
       "global max(compute, HBM, communication)",
@@ -80,8 +80,9 @@
     "quality_and_performance_bind_actual_configuration": true
   },
   "pending_evidence": [
-    "Independently justified reference capacity with a whole-chain execution witness",
-    "Stronger existing candidate: own necessary-F/geometry, synchronized T endpoints and loaded-weight continuity"
+    "B0-specific necessary-work/path reference binding",
+    "Applicable uninstrumented synchronized timing matched to counted work",
+    "Same-output-budget task quality; out256 scores21/200 and19/200 cannot borrow out8192 scores"
   ],
   "existing_audit_path": "reports/vllm-hust-midterm-20261019/m01-recovery/method-v526-20261023/README.md",
   "historical_instrumented": {
@@ -211,7 +212,7 @@
       "strict_uninstrumented": false,
       "fresh_per_run_cache": true
     },
-    "scope": "M01 reference under revision. Same-run reanalysis: B0 3.8407, B1 7.1042 TFLOPS/chip, a descriptive gain of 84.9705%. No qualified replacement C_ref is available; current eta and both midterm 50% / final 90% verdicts are unresolved. Independent repeats of the shared implementation do not establish workload-capacity strength. Raw measurements and historical methods are retained; no new experiment. Same-run accounting costs remain; timing is not strictly uninstrumented.",
+    "scope": "M01 formal reference acceptance remains under revision. Same-run C: B0 3.8407, B1 7.1042 TFLOPS/chip. The independently calibrated B1 DAG was reproduced: modeled reference19.0819 TFLOPS/chip and diagnostic37.2302% against retained host-counted timing, not uninstrumented acceptance. B0 reference binding, matched uninstrumented timing and output-budget quality remain open. V1.5 does not impose a separate executable whole-chain witness or a three-run implementation median.",
     "supersedes": {
       "B0_r1_F": 1829506984194363,
       "reason": "Native Mamba aligned-block publication dependencies corrected; original timing and raw requests unchanged."
@@ -240,10 +241,11 @@
         "final": 90
       },
       "source_path": "reports/vllm-hust-midterm-20261019/m01-recovery/wholechain-reference-20261025/summary.json",
-      "method_path": "reports/vllm-hust-midterm-20261019/m01-reference-revision-20261029/method.md",
+      "method_path": "reports/acceptance-completion-20261029/reference-method.md",
       "pending_evidence": [
-        "Independently justified reference capacity with a whole-chain execution witness",
-        "Stronger existing candidate: own necessary-F/geometry, synchronized T endpoints and loaded-weight continuity"
+        "B0-specific necessary-work/path reference binding",
+        "Applicable uninstrumented synchronized timing matched to counted work",
+        "Same-output-budget task quality; out256 scores21/200 and19/200 cannot borrow out8192 scores"
       ],
       "new_measurements_started": false,
       "B0": {
@@ -266,7 +268,70 @@
         "midterm_target_met": null,
         "final_target_met": null
       },
-      "paired_C_gain_percent": 84.97046148366367
+      "paired_C_gain_percent": 84.97046148366367,
+      "model_diagnostic": {
+        "schema": "m01-reference-reassessment/v1",
+        "capsule_sha256": "78bb9be370824b9838e6355ac385b2e0ad9fa48c5c43813e33a97d4ff8d0f894",
+        "members_byte_verified": 61,
+        "graph_recomputation": [
+          {
+            "seed": 0,
+            "nodes": 359368,
+            "edges": 1014421,
+            "reference_seconds": 47.503348961177785,
+            "efficiency_percent": 37.23021889660151,
+            "reference_tflops_per_chip": 19.081866760274465
+          },
+          {
+            "seed": 1,
+            "nodes": 359368,
+            "edges": 1014437,
+            "reference_seconds": 47.53014786550325,
+            "efficiency_percent": 37.25122223838782,
+            "reference_tflops_per_chip": 19.071107838945064
+          },
+          {
+            "seed": 2,
+            "nodes": 359368,
+            "edges": 1014437,
+            "reference_seconds": 47.557189519622206,
+            "efficiency_percent": 37.27241583261204,
+            "reference_tflops_per_chip": 19.060263751919415
+          },
+          {
+            "status": "all_public_graphs_and_formulas_recomputed_without_private_payload",
+            "leaf_uses": 5394622
+          }
+        ],
+        "formal": {
+          "F": 1812905151088034,
+          "T_seconds": 127.59352582134306,
+          "C_TFLOPS_per_chip": 7.1042207644080255,
+          "chips": 2,
+          "identity": "Formal B1 development stack same r1; not official0.18 B0"
+        },
+        "primary_seed": 0,
+        "statistical_route_validation": {
+          "distinct_truth_points": 3711,
+          "error_groups": 20,
+          "max_p95": 0.1092930613814127,
+          "max_p99": 0.14424989607394206
+        },
+        "reference_kind": "Independently calibrated, resource-constrained semantic/statistical DAG model for the specified B1 necessary work. Not a chip peak or measured executable upper capacity.",
+        "contractual_correction": "V1.5 permits independently calibrated dependency/resource reference-time derivation with justified model applicability. An additional executed whole-chain witness and three-run median are not universal contractual gates.",
+        "accepted_for": "Reproducible B1 model scenario and diagnostic comparison to the retained same-run host-counted timing.",
+        "not_accepted_for": [
+          "Shared B0 reference without B0-specific workload/path binding",
+          "Strict uninstrumented V1.5 acceptance using the current host-counted T",
+          "A simultaneous uncertainty bound from three seeds or node P95/P99",
+          "Full task-quality qualification of out256 responses"
+        ],
+        "current_b0_reference_seconds": null,
+        "current_v15_efficiency_percent": null,
+        "current_v15_attainment": null,
+        "new_device_measurements": 0,
+        "original_records_modified": false
+      }
     },
     "scalar_reference_fields_arm": "B1"
   },
@@ -280,7 +345,7 @@
   },
   "whole_chain_method_revision": {
     "status": "reference_under_revision",
-    "method_path": "reports/vllm-hust-midterm-20261019/m01-reference-revision-20261029/method.md",
+    "method_path": "reports/acceptance-completion-20261029/reference-method.md",
     "external_acceptance_approval_record": null,
     "baseline_normalization_is_reference_attainment": false
   },
@@ -300,10 +365,11 @@
       "final": 90
     },
     "source_path": "reports/vllm-hust-midterm-20261019/m01-recovery/wholechain-reference-20261025/summary.json",
-    "method_path": "reports/vllm-hust-midterm-20261019/m01-reference-revision-20261029/method.md",
+    "method_path": "reports/acceptance-completion-20261029/reference-method.md",
     "pending_evidence": [
-      "Independently justified reference capacity with a whole-chain execution witness",
-      "Stronger existing candidate: own necessary-F/geometry, synchronized T endpoints and loaded-weight continuity"
+      "B0-specific necessary-work/path reference binding",
+      "Applicable uninstrumented synchronized timing matched to counted work",
+      "Same-output-budget task quality; out256 scores21/200 and19/200 cannot borrow out8192 scores"
     ],
     "new_measurements_started": false,
     "B0": {
@@ -326,9 +392,99 @@
       "midterm_target_met": null,
       "final_target_met": null
     },
-    "paired_C_gain_percent": 84.97046148366367
+    "paired_C_gain_percent": 84.97046148366367,
+    "model_diagnostic": {
+      "schema": "m01-reference-reassessment/v1",
+      "capsule_sha256": "78bb9be370824b9838e6355ac385b2e0ad9fa48c5c43813e33a97d4ff8d0f894",
+      "members_byte_verified": 61,
+      "graph_recomputation": [
+        {
+          "seed": 0,
+          "nodes": 359368,
+          "edges": 1014421,
+          "reference_seconds": 47.503348961177785,
+          "efficiency_percent": 37.23021889660151,
+          "reference_tflops_per_chip": 19.081866760274465
+        },
+        {
+          "seed": 1,
+          "nodes": 359368,
+          "edges": 1014437,
+          "reference_seconds": 47.53014786550325,
+          "efficiency_percent": 37.25122223838782,
+          "reference_tflops_per_chip": 19.071107838945064
+        },
+        {
+          "seed": 2,
+          "nodes": 359368,
+          "edges": 1014437,
+          "reference_seconds": 47.557189519622206,
+          "efficiency_percent": 37.27241583261204,
+          "reference_tflops_per_chip": 19.060263751919415
+        },
+        {
+          "status": "all_public_graphs_and_formulas_recomputed_without_private_payload",
+          "leaf_uses": 5394622
+        }
+      ],
+      "formal": {
+        "F": 1812905151088034,
+        "T_seconds": 127.59352582134306,
+        "C_TFLOPS_per_chip": 7.1042207644080255,
+        "chips": 2,
+        "identity": "Formal B1 development stack same r1; not official0.18 B0"
+      },
+      "primary_seed": 0,
+      "statistical_route_validation": {
+        "distinct_truth_points": 3711,
+        "error_groups": 20,
+        "max_p95": 0.1092930613814127,
+        "max_p99": 0.14424989607394206
+      },
+      "reference_kind": "Independently calibrated, resource-constrained semantic/statistical DAG model for the specified B1 necessary work. Not a chip peak or measured executable upper capacity.",
+      "contractual_correction": "V1.5 permits independently calibrated dependency/resource reference-time derivation with justified model applicability. An additional executed whole-chain witness and three-run median are not universal contractual gates.",
+      "accepted_for": "Reproducible B1 model scenario and diagnostic comparison to the retained same-run host-counted timing.",
+      "not_accepted_for": [
+        "Shared B0 reference without B0-specific workload/path binding",
+        "Strict uninstrumented V1.5 acceptance using the current host-counted T",
+        "A simultaneous uncertainty bound from three seeds or node P95/P99",
+        "Full task-quality qualification of out256 responses"
+      ],
+      "current_b0_reference_seconds": null,
+      "current_v15_efficiency_percent": null,
+      "current_v15_attainment": null,
+      "new_device_measurements": 0,
+      "original_records_modified": false
+    }
   },
   "identity": {
+    "kind": "original_v15_reference_model_reassessment",
+    "verification_date": "2026-10-29",
+    "authority_scope": "Original V1.5 method; not a new acceptance amendment or external approval",
+    "external_acceptance_approval_record": null,
+    "formal_indicator_amendment": false,
+    "original_v15": {
+      "threshold_percent": 50,
+      "reference": "independently derived reference",
+      "strict_uninstrumented_required": true,
+      "unchanged": true
+    },
+    "stage_thresholds_percent": {
+      "midterm": 50,
+      "final": 90
+    }
+  },
+  "stage_thresholds_percent": {
+    "midterm": 50,
+    "final": 90
+  },
+  "reference_binding": {
+    "method": "Independent calibration and dependency/resource model, V1.5 section3.4.1",
+    "separate_by_arm_when_work_precision_or_path_differs": true,
+    "additional_executable_witness_required": false,
+    "three_run_implementation_median_required": false
+  },
+  "historical_identity_v101": {
     "kind": "current_round_implementation_method",
     "frozen_date": "2026-10-24",
     "verification_date": "2026-10-25",
@@ -346,9 +502,5 @@
     "policy_sha256": "3389a75f94639f1970ade8f7662e1876ce53607e31bfddfb7592b2800008e420",
     "original_v15_method_snapshot": "milestone-v15/method-status.json",
     "snapshot_role": "historical pre-wholechain status; never current admission"
-  },
-  "stage_thresholds_percent": {
-    "midterm": 50,
-    "final": 90
   }
 }

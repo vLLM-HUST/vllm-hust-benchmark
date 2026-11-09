@@ -1,0 +1,86 @@
+{
+  "schema_version": "workload-first-use-samples/v1",
+  "date": "2026-11-08",
+  "scope": "README discovery, fresh public assets, isolated client installation and representative execution or research consumption.",
+  "cases": [
+    {
+      "source_id": "BBH",
+      "status": "ORIGINAL_SAMPLE_GENERATED_AND_SCORED",
+      "preparation": "Pinned publisher legacy ZIP verified and expanded into 27 task files and 27 prompt files.",
+      "task_id": "causal_judgement",
+      "original_rows": [0, 1, 2],
+      "model": "Qwen/Qwen3-0.6B",
+      "execution": "Windows CPU, cached publisher model weights, Transformers 4.57.3 and PyTorch 2.7.1+cpu behind a local tokenizer and chat adapter.",
+      "scorer": "Pinned lm-eval 0.4.11 BBH recipe",
+      "normal_stops": 3,
+      "exact_match_correct": 0,
+      "answers_extracted": 0,
+      "private_runner_receipt_sha256": "ed904dfcbbba06e8b2ed66162ce563db85f2962cc6cafb3228fbd750da9f1839"
+    },
+    {
+      "source_id": "SCHEMASTORE",
+      "status": "ORIGINAL_VALIDATION_PASSED",
+      "preparation": "The public preparation command downloaded and verified the pinned ZIP. The data reader loaded three original schemas with two positive and two negative example references.",
+      "runtime": "Windows x64 Node.js 22.14.0 and npm 10.9.2, 190 packages installed from the publisher lock with install hooks disabled.",
+      "original_full_check_exit_code": 0,
+      "original_full_check_tested_schemas": 976,
+      "original_full_check_files_verified_before_and_after": 4810,
+      "publisher_cli_single_schema_checks_passed": ["appveyor.json"],
+      "repository_single_schema_check": {
+        "schema_name": "all-contributors.json",
+        "exit_code": 0,
+        "author_positive_examples": 4,
+        "author_negative_examples": 6,
+        "files_verified_before_and_after": 4810
+      },
+      "model_calls": 0
+    },
+    {
+      "source_id": "RESEARCHCODEBENCH",
+      "delivery_slot": "PAPERBENCH",
+      "status": "RESEARCH_INPUTS_AND_REFERENCES_READ_BACK",
+      "preparation": "All 13 files matched the pinned sizes and SHA-256 values. GitHub Git blobs supplied files whose Raw downloads were interrupted.",
+      "provider_index_rows": 3,
+      "research_index_rows": 3,
+      "inputs_and_references_equal": 3,
+      "target_code_present_in_model_input": false,
+      "research_consumer_revision": "9933c1e3449a050238edc639d6439de14c761c69",
+      "model_calls": 0
+    },
+    {
+      "source_id": "WORKBENCH",
+      "delivery_slot": "WORKARENA",
+      "status": "MODEL_TRANSPORT_STARTED_WITHOUT_COMPLETED_NATIVE_SCORE",
+      "original_calendar_positions": [0, 10, 20],
+      "preparation": "Fresh pinned author archive and calendar CSV verified. Agent data root excluded author outcome tables.",
+      "windows_failure": "Author metrics import used sys.maxsize as a CSV field limit, exceeding Windows C long. The runner now loads the original module with a compatible bound.",
+      "live_run": "After the fix the author agent sent a real tool request through the queue. The local CPU model returned no response within the publisher client's 60-second read limit. The run was stopped without a new prediction or score.",
+      "scorer_control": "Original scorer ran against three explicit empty-action rows on Windows, with 0/3 correct states and zero scorer errors. This was a control, not an agent result.",
+      "fresh_gpu_rerun": {
+        "status": "FIXED_THREE_ORIGINAL_TASKS_GENERATED_AND_SCORED",
+        "preparation": "Downloaded a fresh pinned author ZIP, verified its digest, created a new Python 3.12.10 client, and staged an Agent directory without author outcomes.",
+        "source_archive_sha256": "2ce2d277eafe567c634bc29f2f131a90fecaaa2d01f3b5d4bb08051a84e5d214",
+        "model": "Qwen/Qwen3-4B-Q4_K_M",
+        "model_repository": "Qwen/Qwen3-4B-GGUF",
+        "model_revision": "bc640142c66e1fdd12af0bd68f40445458f3869b",
+        "model_file_sha256": "7485fe6f11af29433bc51cab58009521f205840f5b4ae3a32fa7f92e8534fdf5",
+        "runtime": "llama.cpp b12207, Windows Vulkan on RTX 4060 Laptop GPU, 12288 context tokens, single slot, thinking disabled",
+        "agent_exit_code": 0,
+        "score_exit_code": 0,
+        "http_200_responses": 25,
+        "normal_stop_responses": 25,
+        "longest_queue_roundtrip_seconds": 14.54,
+        "author_recorded_tool_attempts": [1, 2, 20],
+        "original_state_correct": [false, false, false],
+        "original_unwanted_side_effects": [false, false, false],
+        "original_task_errors": [false, false, true],
+        "failure_details": "The model passed an unsupported input keyword to the calendar tools. The third task used the author's 20-step limit.",
+        "saved_predictions_regrade_byte_equal": true,
+        "predictions_sha256": "f66b8fbd487749158902b35793e15749b099ae45dd9ea0a62d08429de161834e",
+        "score_receipt_sha256": "8c12914695d0814159e57f055f314ac0a4172b2e8b83f260d11934905df6263c"
+      }
+    }
+  ],
+  "environment_note": "The original NPU workspace was unreachable over SSH during this attempt. No remote service was restarted or reconfigured.",
+  "raw_assets_or_model_outputs_published": false
+}

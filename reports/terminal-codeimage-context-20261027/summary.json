@@ -1,0 +1,75 @@
+{
+  "status": "original_context_budget_failure_reviewed_unscored_null_preserved",
+  "task": "code-from-image",
+  "CPU_exit_code": 0,
+  "agent_seconds": 618.27289,
+  "trajectory_agent_steps": 34,
+  "Harbor_n_episodes": 35,
+  "completed_API_latency_entries": 34,
+  "HTTP_requests": 35,
+  "HTTP_success": 34,
+  "HTTP_rejected": 1,
+  "output_length_fallback": 0,
+  "accounting_boundary": "34 recorded successful responses and one final context rejection. Episodes/turns are not HTTP limit; no output-length fallback observed. Original nested retry caps remain3+3, not a zero-model-retry claim.",
+  "trajectory_usage": {
+    "total_prompt_tokens": 504349,
+    "total_completion_tokens": 9697,
+    "total_cached_tokens": 0
+  },
+  "API_metric_usage": {
+    "prompt_tokens": 504349.0,
+    "completion_tokens": 9697.0
+  },
+  "usage_delta": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0
+  },
+  "verifier": null,
+  "reward": null,
+  "CTRF": null,
+  "official_scored": false,
+  "exception_type": "ContextLengthExceededError",
+  "cause": "Original32768 context exceeded by at least28673 prompt+4096 reserved output=32769; original summarization disabled. Neither100turn nor1200s exhaustion. No runner/config defect demonstrated by this bound.",
+  "budget": {
+    "turns": 100,
+    "max_tokens": 4096,
+    "seed": 17,
+    "agent_timeout_sec": 1200,
+    "verifier_timeout_sec": 1200,
+    "whole_trial_retries": 0,
+    "litellm_sdk_retries": 0,
+    "harbor_llm_layer_attempts": 3,
+    "terminus_query_layer_attempts": 3
+  },
+  "context_tokens": 32768,
+  "answer_boundary": {
+    "status": "original_command_boundary_reviewed_no_answer_reconstruction",
+    "trajectory_agent_steps": 34,
+    "tool_calls": 38,
+    "quoted_python_heredocs": 21,
+    "other_commands_or_waits": 17,
+    "original_Agent_autonomously_attempted_OCR": true,
+    "operator_injected_OCR_or_answer": false,
+    "original_text_only_terminal_feedback_preserved": true,
+    "automatic_image_url_or_pixel_input_not_proven": true,
+    "source_effects": "Recorded Python heredocs read original PNG, transform images, save only two temporary PNG intermediates and print OCR text. Other shell commands inspect files or install/use OCR dependencies; no command writes required output artifact.",
+    "required_answer_artifact_written_in_recorded_commands": false,
+    "actual_final_answer_file_SHA": null,
+    "actual_final_answer_file_mode": null,
+    "complete_original_filesystem_snapshot": false,
+    "artifact_log_only_empty_manifest": true,
+    "recovery_decision": "No sufficient retained required answer artifact for verifier-only recovery. Do not execute OCR/transformations or synthesize an answer to manufacture one. Original unscored null retained; no recovery proposed or executed.",
+    "new_Agent_model_verifier_controls": 0
+  },
+  "Terminal_attempts": 6,
+  "Terminal_unattempted": 83,
+  "prior5_unchanged": true,
+  "V099_snapshot_unchanged": true,
+  "new_Agent_model_verifier_controls": 0,
+  "corrected_observation": {
+    "prior_steps0": "Wrong absent trajectory key read by owner/coordinator; original output preserved",
+    "actual_steps_field": 34,
+    "initial_user_steps": 1,
+    "not_zero_step_failure": true
+  }
+}

@@ -16,8 +16,48 @@ PINS = (
 )
 
 
+def git_lfs_pointer(item):
+    if "git_lfs" not in item:
+        return None
+    spec = item["git_lfs"]
+    if not isinstance(spec, dict) or set(spec) != {"pointer_bytes", "oid_sha256"}:
+        raise ValueError("explicit original Git LFS pointer identity required")
+    oid = spec["oid_sha256"]
+    if (
+        not isinstance(oid, str)
+        or len(oid) != 64
+        or any(char not in "0123456789abcdef" for char in oid)
+        or oid != item["sha256"]
+        or type(item["bytes"]) is not int
+        or item["bytes"] < 0
+    ):
+        raise ValueError("Git LFS OID must bind the unchanged payload SHA256")
+    pointer = (
+        f"version https://git-lfs.github.com/spec/v1\noid sha256:{oid}\nsize {item['bytes']}\n"
+    ).encode()
+    if len(pointer) != spec["pointer_bytes"]:
+        raise ValueError("original Git LFS pointer size differs")
+    return pointer
+
+
+def git_blob_for_payload(raw, item):
+    pointer = git_lfs_pointer(item)
+    if pointer is not None and (
+        len(raw) != item["bytes"] or hashlib.sha256(raw).hexdigest() != item["sha256"]
+    ):
+        raise ValueError("expanded Git LFS payload differs from the original OID")
+    value = raw if pointer is None else pointer
+    return hashlib.sha1(b"blob " + str(len(value)).encode() + b"\0" + value).hexdigest()
+
+
 def verify_git_blob(path, item):
     verify(path, item)
+    pointer = git_lfs_pointer(item)
+    if pointer is not None:
+        digest = hashlib.sha1(b"blob " + str(len(pointer)).encode() + b"\0" + pointer)
+        if digest.hexdigest() != item["git_blob"]:
+            raise ValueError("original publisher Git LFS pointer identity differs")
+        return
     prefix = b"blob " + str(item["bytes"]).encode() + b"\0"
     digest = hashlib.sha1(prefix)
     with path.open("rb") as stream:
@@ -28,6 +68,10 @@ def verify_git_blob(path, item):
 
 
 def acquire(path, item):
+    if "git_lfs" in item:
+        raise ValueError(
+            "expanded Git LFS payload requires the original publisher archive,not a pointer-only Git blob download"
+        )
     if path.exists() or path.with_name(path.name + ".partial").exists():
         raise ValueError("existing final/partial must be inspected, never overwritten")
     limit = item["bytes"] * 2 + 65536

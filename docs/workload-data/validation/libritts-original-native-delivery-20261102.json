@@ -1,0 +1,86 @@
+{
+  "source_id": "LIBRITTS",
+  "status": "ORIGINAL_FIXED3_TTS_NATIVE_DELIVERY_VERIFIED",
+  "source_checkbox_eligible": true,
+  "protocol": "Original test-other normalized text to publisher StyleTTS2 multispeaker reference-conditioned waveform",
+  "selection": "First3 original utterance IDs in official lexical order; no replacement of failures",
+  "original_data": {
+    "utterances": 5120,
+    "archive_bytes": 964502297,
+    "publisher_md5_and_torchaudio_sha256_verified": true,
+    "original_text_normalized_text_reference_waveforms_and_speaker_relations_preserved": true,
+    "raw_assets_redistributed": false
+  },
+  "model": {
+    "repo_id": "yl4579/StyleTTS2-LibriTTS",
+    "revision": "3aa7ba7f8f275ec13dce21682a61494c35089e2a",
+    "author_revision": "5cedc71c333f8d8b8551ca59378bdcc7af4c9529",
+    "strict_final_parameter_modules": 13,
+    "auxiliary_training_pickle_not_deserialized": true,
+    "no_random_parameter_fallback": true,
+    "dtype": "float32",
+    "device": "npu:0",
+    "alpha": 0.3,
+    "beta": 0.7,
+    "diffusion_steps": 5,
+    "embedding_scale": 1,
+    "seed": 0,
+    "unchanged_author_inference_definitions": true,
+    "author_tail_postprocessing_samples": 50,
+    "distinct_original_same_speaker_reference": "1688_142285_000059_000000"
+  },
+  "native_execution": {
+    "completed_original_records": 3,
+    "sample_rate": 24000,
+    "outputs": [
+      {"id": "1688_142285_000000_000000", "samples": 316150, "seconds": 13.172916666666667, "waveform_sha256": "d41c7e9e077622f706f2120b7aaaabc6118757748537594711d7ce52d9252751"},
+      {"id": "1688_142285_000000_000001", "samples": 215350, "seconds": 8.972916666666666, "waveform_sha256": "ff15d1c2a9c7f78a8741e4f61cc612b0371d953ff4bed801c4aff5143237a328"},
+      {"id": "1688_142285_000001_000001", "samples": 121150, "seconds": 5.047916666666667, "waveform_sha256": "018c5d04e8bd5c7496c020dd5f601a66074d6984c04f2a35a17b7d0d2accb26c"}
+    ],
+    "server_receipt": "libritts-original-fixed3-native-npu-20261102-002/qualification-public.json",
+    "execution_window": "libritts-public-native-entry-20261102-003/execution-window-002/state-public.json",
+    "protected_services_same_birth": true,
+    "temporary_process_terminal_and_lease_released": true
+  },
+  "saved_output_audit": {
+    "server_receipt": "libritts-original-fixed3-saved-audit-20261102-001/qualification-public.json",
+    "new_model_calls": 0,
+    "original_text_reference_and_waveform_hash_bindings_verified": true,
+    "finite_nonzero_mono_waveforms_verified": 3,
+    "runtime_files_match_public": true,
+    "native_runner_sha256": "d4d490ddb0c098c1fbe16a36c7160ce228743b1c4fbc8ec007e68b981dd36d56"
+  },
+  "public_and_research_handoff": {
+    "server_receipt": "libritts-registered-ci-research-handoff-20261102-001/qualification-public.json",
+    "ci_run": 41391678405,
+    "artifact": 13117267660,
+    "producer_commit": "a33bc2cba054827dcb759b01fdbb8afb85d08049",
+    "ci_payload_files_verified_against_git_wheel_and_installation": 87,
+    "registered_native_entrypoints": 4,
+    "fixed_original_public_and_unchanged_research_readbacks": 3,
+    "saved_native_input_bindings": 3,
+    "research_consumer_and_index_unchanged": true,
+    "new_model_calls": 0,
+    "research_observation_or_analysis_migrated": false
+  },
+  "ci": {
+    "cpu_run": 41391678405,
+    "cpu_conclusion": "success",
+    "full_run": 41391681328,
+    "full_conclusion": "success"
+  },
+  "public_entry": "scripts/run_libritts_styletts2_original_npu.py",
+  "retained_failures": [
+    "Exact codeload source tree lacks HEAD; source gate corrected to require pinned full tree and no file differences/untracked files, without weakening content verification",
+    "First reference encoding failed in NPU LSTM initialization because isolated PYTHONPATH omitted CANN tbe; original failure retained, existing vendor compiler paths restored without global package changes",
+    "One pre-launch window deferred while independent14B periodic requests were active; no neural task started in that window",
+    "Handoff SSH observation timed out; original worker completed and its terminal receipt was recovered without rerunning"
+  ],
+  "boundaries": [
+    "This is an explicitly declared original-corpus TTS protocol using a publisher-supported model, not an official LibriTTS quality leaderboard",
+    "Full5120 generation, additional speaker coverage, human MOS, ASR-based quality, latency/throughput and paper model quality are not established",
+    "Author preprocessing including Mel defaults, trim and50-sample tail handling preserved",
+    "NPU LSTM acl_op path is a vendor NPU implementation, not neural execution on CPU",
+    "Software dependency snapshot retained on server; a second clean-machine full environment rebuild is not claimed"
+  ]
+}

@@ -19,6 +19,7 @@ from prepare_longmemeval_v2_original import DATA_PINS, SOURCE_PINS, verify_asset
 from prepare_xsum_original_assets import verify as verify_file
 
 READER_PINS = SOURCE_PINS.with_name("longmemeval-v2-reader-pins.json")
+EMBEDDING_PINS = SOURCE_PINS.with_name("longmemeval-v2-embedding-pins.json")
 
 LOCAL_SCORERS = {
     "norm_phrase_set_match",
@@ -72,6 +73,9 @@ def execution_environment(output, *, judge_env=None):
     environment = dict(os.environ, PYTHONNOUSERSITE="1")
     for name in [
         "PYTHONPATH",
+        "HF_HUB_CACHE",
+        "HUGGINGFACE_HUB_CACHE",
+        "TRANSFORMERS_CACHE",
         "OPENAI_BASE_URL",
         "LME_DISABLED_EXTERNAL_JUDGE",
         "VLLM_LOCAL_READER_KEY",
@@ -222,6 +226,11 @@ def main():
         help="Pinned flat original reader model directory; execute requires this",
     )
     parser.add_argument(
+        "--embedding-assets",
+        type=Path,
+        help="Pinned flat original embedding model directory; RAG execute requires this",
+    )
+    parser.add_argument(
         "--method",
         choices=["no_retrieval", "rag_query_to_slice"],
         default="rag_query_to_slice",
@@ -289,6 +298,10 @@ def main():
     if judges and not os.environ.get(args.judge_api_key_env):
         raise ValueError(
             "explicit paid-judge opt-in requires a populated credential environment variable; no model call started"
+        )
+    if args.method != "no_retrieval" and args.embedding_assets is None:
+        raise ValueError(
+            "RAG execute requires pinned original embedding tokenizer assets"
         )
     if args.method != "no_retrieval" and importlib.util.find_spec("torch") is None:
         raise ValueError(
@@ -406,6 +419,14 @@ def main():
             output / "hf",
             json.loads(READER_PINS.read_text("utf-8")),
         )
+        if args.method != "no_retrieval":
+            receipt["verified_embedding_tokenizer_metadata_files"] = (
+                prepare_processor_cache(
+                    args.embedding_assets,
+                    output / "hf",
+                    json.loads(EMBEDDING_PINS.read_text("utf-8")),
+                )
+            )
         save()
         with (output / "original.private.log").open("xb") as log:
             result = subprocess.run(

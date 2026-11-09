@@ -50,10 +50,46 @@ def _binding(entry, catalog_root=None):
         else source_spec(sid, catalog_root)
     )
     spec = mapping_spec(mapping) if mapping else adapter_spec(sid, catalog_root)
+    if sid in {"WEBARENA", "VISUALWEBARENA"} and mapping is None:
+        from .webarena import pipeline_manifest, relation_spec
+
+        manifest = pipeline_manifest(manifest)
+        spec = relation_spec(manifest, spec)
+    if sid == "OSWORLD" and mapping is None and manifest.get("files"):
+        from .osworld import pipeline_manifest, relation_spec
+
+        manifest = pipeline_manifest(manifest)
+        spec = relation_spec(manifest, spec)
+    if sid == "MLAGENTBENCH" and mapping is None:
+        from .mlagentbench import relation_spec
+
+        spec = relation_spec(manifest, spec)
+    if sid == "NATUREBENCH" and mapping is None:
+        from .naturebench import relation_spec
+
+        spec = relation_spec(manifest, spec)
+    if sid == "FULL_DUPLEX_BENCH" and mapping is None:
+        from .full_duplex import relation_spec
+
+        spec = relation_spec(manifest, spec)
+    if sid == "PAPERBENCH" and mapping is None:
+        from .paperbench import relation_spec
+
+        spec = relation_spec(manifest, spec)
     if sid == "NARRATIVEQA" and mapping is None:
         from .narrativeqa import relation_spec
 
         spec = relation_spec(manifest, spec)
+    if sid == "GAIA" and mapping is None:
+        from .gaia import relation_spec
+
+        spec = relation_spec(manifest, spec)
+    if sid == "MSMARCO_PASSAGE" and mapping is None:
+        from .msmarco import relation_spec
+
+        spec = relation_spec(manifest, spec)
+        if entry.get("limit") is not None:
+            spec = {**spec, "diagnostic_query_limit": entry["limit"]}
     from .conversations import validate_history_targets
 
     validate_history_targets(sid, entry.get("history_targets"), mapping)
@@ -176,6 +212,10 @@ def run(config, *, output, allow_partial=False, catalog_root=None):
                             # One original parallel row has distinct directed
                             # task views. Do not collide their record identities.
                             reference["mapping_sha256"] = spec["contract_sha256"]
+                        if sid == "APPWORLD":
+                            from .appworld import record_assets
+
+                            reference["native_task_assets"] = record_assets(record)
                         if entry.get("history_targets") is not None:
                             reference["view"] = "original-parent-history/v1"
                         task = {

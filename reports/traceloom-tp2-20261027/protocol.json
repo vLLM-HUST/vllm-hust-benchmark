@@ -1,0 +1,32 @@
+{
+  "status": "frozen_before_capture",
+  "cells": [
+    {
+      "name": "c0-host",
+      "backend": "HOST"
+    },
+    {
+      "name": "c1-aiv",
+      "backend": "AIV"
+    },
+    {
+      "name": "c2-aiv",
+      "backend": "AIV"
+    },
+    {
+      "name": "c3-host",
+      "backend": "HOST"
+    }
+  ],
+  "runtime": "/workspace/traceloom-guidance-20261025/runtime-v2",
+  "model": "/models/Qwen3-0.6B",
+  "independent_unit": "engine process; ranks and replays are paired/nested observations",
+  "purpose": "Archive a complete current-runtime two-repetition structural comparison; not historical FFTS+ reproduction",
+  "configuration": "Same qualified TP2 pilot; two warmup and two profiled sequential requests per process",
+  "no_unprofiled_speedup_claim": true,
+  "scripts": {
+    "tp2_pilot.py": "2719a97c8e8a4c150b64e308fb0b1d2fbbcc73388efdae49102cc40cd4ea8477",
+    "run_tp2_formal.py": "ab7f62c304c43649b17df97c08cb03373f1d685c96d0a8f4a9de184b07782550",
+    "launch_tp2_pilot.py": "b3c2d93947ea72b267c075832e61ef9df056fa8ce77f76db7d004bbaaa0a3751"
+  }
+}

@@ -1,0 +1,25 @@
+qf-c1          {'gate': 151, 'scorer': 159, 'trunc': 18, 'invalid': 0, 'transport_fail': 0}
+qf-c2          {'gate': 151, 'scorer': 157, 'trunc': 18, 'invalid': 0, 'transport_fail': 0}
+qv2-n1         {'gate': 153, 'scorer': 157, 'trunc': 18, 'invalid': 0, 'transport_fail': 0}
+qv2-n2         {'gate': 154, 'scorer': 157, 'trunc': 17, 'invalid': 1, 'transport_fail': 0}
+native-q1      {'gate': 156, 'scorer': 159, 'trunc': 15, 'invalid': 1, 'transport_fail': 0}
+native-q2      {'gate': 150, 'scorer': 157, 'trunc': 21, 'invalid': 1, 'transport_fail': 0}
+native-q3      {'gate': 150, 'scorer': 156, 'trunc': 22, 'invalid': 1, 'transport_fail': 0}
+
+1_accuracy (75.5, 76.3, -0.8, True) PASS
+2_truncation (9.0, 9.3, -0.3, True) PASS
+3_transport (0, True) PASS
+4_systematic (['mmlu-pro-04748'], True) PASS
+bootstrap 95% CI of acc(C)-acc(N) pp: -2.7 1.1
+majority right->wrong 2 ['mmlu-pro-04748', 'mmlu-pro-04966']
+majority wrong->right 2 ['mmlu-pro-07288', 'mmlu-pro-11251']
+reverse systematic (all C right, all N wrong) []
+shared-scorer acc C 79.00 N 78.60 delta 0.40
+mmlu-pro-04748 C 00 N 11111
+mmlu-pro-06908 C 11 N 11111
+mmlu-pro-11119 C 00 N 00101
+mmlu-pro-00168 C 00 N 00100
+QUALITY_V2: PASS
+final-main-B1: delta -0.80 pp | run SD C 0.00 N 1.30 pp
+  two-level bootstrap 95%: [-3.10, +1.50] pp; share of resamples with delta < -2 pp = 16%
+  run-level Welch t 95% (df 4.0): [-2.42, +0.82] pp

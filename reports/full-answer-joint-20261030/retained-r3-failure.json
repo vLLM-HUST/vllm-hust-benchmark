@@ -1,0 +1,92 @@
+{
+  "schema": "packed-host-failed-qualification/v1",
+  "run": "continuous-b1-packed-r3",
+  "phases": {
+    "4096-formal": {
+      "total": 24,
+      "success": 16,
+      "failed": 8
+    },
+    "4096-warmup": {
+      "total": 24,
+      "success": 24,
+      "failed": 0
+    }
+  },
+  "sixteen_k_executed": false,
+  "full_answer_b1_started": false,
+  "host_budget_per_rank_bytes": 8589934592,
+  "successful_streams_reconstructed": 40,
+  "activation": {
+    "request_scoped_recompute_admissions": 48,
+    "reused_tokens": 0,
+    "microflow": {
+      "1": {
+        "split_events": 130,
+        "target_mtp_graph_replays": 569
+      },
+      "0": {
+        "split_events": 130,
+        "target_mtp_graph_replays": 570
+      }
+    },
+    "corrected_worker": "corrected_serving_runtime.CorrectedWorker",
+    "scope": "Actual activation and request admission, not general state-isolation proof"
+  },
+  "failure": {
+    "kind": "driver_pinned_host_allocation",
+    "code": 207001,
+    "requested_bytes": 33554432,
+    "rank": 1,
+    "driver_log_sha256": "2a7ab93ab80b1f0bdca607c378444f0d76fac0937c505c671679f0297b84b6eb",
+    "no_root_cause_claim_beyond_recorded_allocation_failure": true
+  },
+  "memory": {
+    "limit_bytes": 68719476736,
+    "max_current_bytes": 68715520000,
+    "initial_events": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0
+    },
+    "last_events": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0
+    },
+    "last_working_estimate_bytes": 49982595072,
+    "caveat": "Working-set estimate does not guarantee reclaimability for the driver pinned allocator. No cgroup OOM event is not proof of adequate pinned memory."
+  },
+  "receipt": {
+    "status": "failed",
+    "started": 1793333220.2076695,
+    "reserved_physical_cards": [
+      5,
+      6
+    ],
+    "children": [
+      {
+        "pid": 3914213,
+        "exit_code": 1
+      },
+      {
+        "pid": 3874589,
+        "exit_code": 130
+      }
+    ],
+    "model_run_started": true,
+    "service_pid": 3874589,
+    "client_pid": 3914213,
+    "client_exit": 1,
+    "error": "AssertionError: Client failed; no automatic retries",
+    "ended": 1793334315.3886356,
+    "all_reserved_devices_released": true,
+    "remaining_owned_pids": []
+  },
+  "source_manifest_sha256": "181df30c7ae466acb92da25198222cf8e4f8877e8f0ef1f0debb5549ddfaf604",
+  "acceptance": "failed; no completed300s formal4K or16K window; no paired full-answer performance/cost comparison"
+}

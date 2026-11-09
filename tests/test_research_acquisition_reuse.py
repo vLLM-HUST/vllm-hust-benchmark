@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import re
 import sys
 
 import pytest
@@ -15,6 +16,106 @@ spec = importlib.util.spec_from_file_location(
 )
 runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
+
+
+def test_webarena_original_task_assets_are_not_native_completion():
+    source, files = runner.selection("WEBARENA")
+    revision = "dce04686a56253aefba7b18a4fa0937cf1dc987b"  # pragma: allowlist secret
+    assert source["revision"] == revision
+    assert len(files) == 3 and sum(item["bytes"] for item in files) == 901850
+    assert {item["path"] for item in files} == {
+        "LICENSE",
+        "README.md",
+        "config_files/test.raw.json",
+    }
+    assert all(source["revision"] in item["url"] for item in files)
+    assert source["discovery_status"].endswith("NATIVE_WEBSITES_PENDING")
+
+
+def test_webarena_complete_original_harness_inventory():
+    pins = json.loads(
+        (ROOT / "configs/workload-native/webarena-author-source.json").read_text(
+            "utf-8"
+        )
+    )
+    source, _ = runner.selection("WEBARENA")
+    assert pins["revision"] == source["revision"]
+    assert pins["repository"] == source["repo_id"]
+    files = {item["path"]: item for item in pins["files"]}
+    assert len(files) == 88 and sum(item["bytes"] for item in files.values()) == 7550641
+    assert {
+        "run.py",
+        "requirements.txt",
+        "LICENSE",
+        "config_files/test.raw.json",
+        "browser_env/auto_login.py",
+        "evaluation_harness/evaluators.py",
+    } <= set(files)
+    assert all(
+        not Path(name).is_absolute() and ".." not in Path(name).parts for name in files
+    )
+
+
+def test_visualwebarena_original_task_acquisition_reuses_publisher_transport():
+    source, files = runner.selection("VISUALWEBARENA")
+    assert len(files) == 5
+    assert sum(row["bytes"] for row in files) == 1376415
+    prefix = (
+        f"https://raw.githubusercontent.com/{source['repo_id']}/{source['revision']}/"
+    )
+    assert all(row["url"] == prefix + row["path"] for row in files)
+    assert {row["path"] for row in files} == {
+        "LICENSE",
+        "README.md",
+        "config_files/vwa/test_classifieds.raw.json",
+        "config_files/vwa/test_reddit.raw.json",
+        "config_files/vwa/test_shopping.raw.json",
+    }
+    assert source["publisher_metadata_acquisition"]["registered_file_roles"] == [
+        "raw_source"
+    ]
+
+
+def test_webarena_framework_constraints_preserve_official_release_versions():
+    path = (
+        ROOT
+        / "configs/workload-native/webarena-agentlab-0.4.2-official-constraints.txt"
+    )
+    lines = [
+        line
+        for line in path.read_text("utf-8").splitlines()
+        if line and not line.startswith("#")
+    ]
+    assert len(lines) == 252 and len(set(lines)) == 252
+    assert {
+        "browsergym==0.14.2",
+        "openai==1.99.5",
+        "litellm==1.75.3",
+        "torch==2.2.2",
+        "contexttimer==0.3.3",
+    } <= set(lines)
+    assert all(
+        re.fullmatch(r"[A-Za-z0-9_.-]+==[A-Za-z0-9_.+!-]+", line) for line in lines
+    )
+
+
+def test_existing_public_source_baseline_positions_match_unchanged_digests():
+    """Bookkeeping check, not a substitute for the actual secret scanner."""
+    path = "workload-preparation/data/catalogs/source_manifests_v1.json"
+    lines = (ROOT / path).read_text("utf-8").splitlines()
+    baseline = json.loads((ROOT / ".secrets.baseline").read_text("utf-8"))
+    for item in baseline["results"][path]:
+        assert item["type"] == "Hex High Entropy String"
+        assert item["is_secret"] is False
+        assert type(item["is_verified"]) is bool
+        line = lines[item["line_number"] - 1]
+        tokens = re.findall(r"(?<![0-9a-f])[0-9a-f]{40,64}(?![0-9a-f])", line)
+        # SHA1 is the scanner's existing identifier, not a security guarantee.
+        assert item["hashed_secret"] in {
+            hashlib.sha1(token.encode()).hexdigest() for token in tokens
+        }, "Existing source digest moved: synchronize its baseline position only"
+
+
 EXPECTED = {
     "WILDCHAT": 14,
     "ULTRACHAT": 8,
@@ -27,6 +128,41 @@ EXPECTED = {
 }
 
 
+def test_streamingbench_original_question_variants_are_not_independent_tasks():
+    source, files = runner.selection("STREAMINGBENCH")
+    assert len(files) == 8
+    assert sum(item["bytes"] for item in files) == 9752155
+    assert all(item["role"] == "data" for item in files)
+    assert all(source["revision"] in item["url"] for item in files)
+    assert "not_disjoint_tasks" in source["provenance_kind"]
+    assert {item["rows"] for item in files} == {1500, 300, 248, 50, 2252, 498}
+
+
+def test_ovobench_metadata_is_accepted_by_public_acquisition_entry():
+    _, files = runner.selection("OVOBENCH")
+    assert len(files) == 1
+    assert files[0]["rows"] == 1640
+
+
+def test_azure_2023_serving_metadata_has_explicit_original_acquisition_profile():
+    source, files = runner.selection("AZURE_LLM")
+    assert source["publisher_metadata_acquisition"]["registered_file_roles"] == ["data"]
+    assert {item["path"] for item in files} == {
+        "AzureLLMInferenceTrace_code.csv",
+        "AzureLLMInferenceTrace_conv.csv",
+    }
+    assert sum(item["bytes"] for item in files) == 1039305
+    assert sum(item["rows"] for item in files) == 28185
+
+
+def test_mind2web_original_assets_use_existing_acquisition_roles():
+    source, files = runner.selection("MIND2WEB")
+    assert [item["path"] for item in files] == ["test.zip", "scores_all_data.pkl"]
+    assert sum(item["bytes"] for item in files) == 812936103
+    assert {item["role"] for item in files} == {"data", "raw_source"}
+    assert all(source["revision"] in item["url"] for item in files)
+
+
 def unique_object(pairs):
     result = {}
     for key, value in pairs:
@@ -34,6 +170,117 @@ def unique_object(pairs):
             raise ValueError("duplicate source key")
         result[key] = value
     return result
+
+
+def test_videomme_v2_small_asset_profile_is_separate_from_media_and_delivery():
+    source, files = runner.selection("VIDEOMME_V2")
+    assert {item["path"] for item in files} == {
+        "README.md",
+        "eval.yaml",
+        "test.parquet",
+        "subtitle.zip",
+    }
+    assert sum(item["bytes"] for item in files) == 9046844
+    assert all(source["revision"] in item["url"] for item in files)
+    assert not any(item["path"].startswith("videos/") for item in files)
+    receipt = json.loads(
+        (
+            ROOT
+            / "docs/workload-data/validation/videomme-v2-original-preparation-20261029.json"
+        ).read_text("utf-8")
+    )
+    assert receipt["original_rows"] == receipt["original_groups"] * 4 == 3200
+    assert len(receipt["original_fields"]) == 11 and receipt["subtitle_files"] == 800
+    assert sum(receipt["group_types"].values()) == 800
+    assert receipt["reference_controls_are_not_model_scores"]
+    assert (
+        receipt["original_metric_software_controls_not_model_scores"][
+            "first_wrong_sequential_logic"
+        ]
+        == 0
+    )
+    assert (
+        receipt["original_metric_software_controls_not_model_scores"][
+            "three_correct_relevance"
+        ]
+        == 56.25
+    )
+    assert (
+        receipt["official_recommended_frames"] > receipt["current_service_image_limit"]
+    )
+    assert receipt["model_calls"] == receipt["local_windows_raw_files_written"] == 0
+    assert not receipt["source_checkbox_eligible"]
+    assert receipt["videos_acquired"]
+    assert receipt["selected_original_video_files"] == 6
+    assert receipt["video_acquisition_scope"].endswith("not all800 videos")
+    assert not receipt["native_inference_and_scoring_completed"]
+    inventory = json.loads(
+        (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
+    )["delivery_inventory"]["VIDEOMME_V2"]
+    # Historical preparation remains ineligible. A later native delivery must
+    # cite separate real execution evidence, not keep the source forever open.
+    assert inventory["checked"] and inventory["status"] == "AVAILABLE"
+    assert (
+        inventory["delivery_receipt"]
+        != inventory["original_assets_preparation_receipt"]
+    )
+    delivery = json.loads((ROOT / inventory["delivery_receipt"]).read_text("utf-8"))
+    assert delivery["source_checkbox_eligible"]
+    assert (
+        delivery["original_questions_completed"]
+        == delivery["native_model_requests"]
+        == 24
+    )
+    assert delivery["frames_each_request"] == 64
+    assert delivery[
+        "all24_wire_images_generation_settings_answers_references_and_scores_verified"
+    ]
+    assert delivery["native_ci_conclusions"] == "success"
+    assert not delivery["quality_or_engine_performance_claim"]
+
+
+def test_livecodebench_original_assets_are_pinned_per_dataset_not_code_revision():
+    source, files = runner.selection("LIVECODEBENCH")
+    assert len(files) == 3
+    assert sum(item["bytes"] for item in files) == 9_375_789_400
+    assert source["access"]["license"] is None
+    assert all(item["publisher_revision"] in item["url"] for item in files)
+    assert all(item["publisher_repo_id"] in item["url"] for item in files)
+    assert all(source["revision"] != item["publisher_revision"] for item in files)
+    assert not any("lite" in item["url"] for item in files)
+    _, small = runner.selection(
+        "LIVECODEBENCH",
+        [
+            "execution-v2/data/test-00000-of-00001.parquet",
+            "test_generation/test.parquet",
+        ],
+    )
+    assert sum(item["bytes"] for item in small) == 144_814
+
+
+def test_livecodebench_default_byte_budget_rejects_full_download_before_io(
+    tmp_path, monkeypatch
+):
+    target = tmp_path / "must-not-be-created"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["prepare", "LIVECODEBENCH", "--mode", "download", "--data-root", str(target)],
+    )
+    with pytest.raises(ValueError, match="byte budget"):
+        runner.main()
+    assert not target.exists()
+
+
+def test_livecodebench_plan_is_offline_and_not_native_delivery(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["prepare", "LIVECODEBENCH"])
+    runner.main()
+    plan = json.loads(capsys.readouterr().out)
+    assert plan["status"] == "OFFLINE_ORIGINAL_ASSET_PLAN"
+    assert plan["bytes"] == 9_375_789_400
+    assert plan["model_calls"] == 0
+    assert not plan["native_execution_complete"]
+    assert not plan["source_checkbox_eligible"]
 
 
 def test_repobench_uses_fixed_original_resource_files():
@@ -76,8 +323,17 @@ def test_original_research_assets_are_registered_without_native_completion_claim
     sources = json.loads(
         runner.CATALOG.read_text("utf-8"), object_pairs_hook=unique_object
     )["sources"]
-    assert len(sources) == 104  # frozen100 plus four already-planned sources
+    assert (
+        len(sources) == 118
+    )  # Named replacement entries do not expand the118 delivery slots.
+    assert sum(x["rows"] for x in sources["FULL_DUPLEX_BENCH"]["files"]) == 1225
+    assert (
+        sources["LIBRITTS"]["asset_kind"]
+        == "original_multispeaker_text_reference_audio_pairs"
+    )
+    assert "TEMPORALWIKI" in sources
     assert sum(EXPECTED.values()) == 48
+
     ledger = json.loads(
         (ROOT / "docs/workload-data/dataset-validation-status.json").read_text("utf-8")
     )
@@ -365,3 +621,39 @@ def test_explicit_download_and_resume_reuse_verified_bytes_without_native_claim(
     assert json.loads((output / "source-preparation.private.json").read_text("utf-8"))[
         "verified_files"
     ] == [{"path": "original.jsonl", "reused": True}]
+
+
+def test_explicit_publisher_data_profile_reuses_existing_asset_preparer():
+    source, selected = runner.selection("CODEJUDGE_EVAL")
+    assert source["publisher_metadata_acquisition"]["registered_file_roles"] == ["data"]
+    assert len(selected) == 6
+    assert all(item["role"] == "data" for item in selected)
+
+
+def test_bigcodebench_getter_preserves_fixed_original_parquet_only():
+    source, selected = runner.selection("BIGCODEBENCH")
+    assert source["publisher_metadata_acquisition"]["registered_file_roles"] == ["data"]
+    assert len(selected) == 1
+    assert selected[0]["path"] == "data/v0.1.4-00000-of-00001.parquet"
+    assert selected[0]["bytes"] == 2362110
+    assert selected[0]["rows"] == 1140
+    assert source["revision"] in selected[0]["url"]
+
+
+def test_invalid_publisher_acquisition_roles_fail_closed(tmp_path, monkeypatch):
+    catalog = tmp_path / "catalog.json"
+    source = {
+        "publisher_metadata_acquisition": {
+            "identity_source": "fixture",
+            "registered_file_roles": [{}],
+        },
+        "files": [{"path": "fixture.json", "role": "data"}],
+    }
+    catalog.write_text(json.dumps({"sources": {"fixture": source}}))
+    monkeypatch.setattr(runner, "CATALOG", catalog)
+    with pytest.raises(ValueError, match="asset roles"):
+        runner.selection("fixture")
+    source["publisher_metadata_acquisition"].pop("registered_file_roles")
+    catalog.write_text(json.dumps({"sources": {"fixture": source}}))
+    with pytest.raises(ValueError, match="distinct original"):
+        runner.selection("fixture")

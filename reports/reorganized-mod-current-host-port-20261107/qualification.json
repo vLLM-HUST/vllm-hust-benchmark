@@ -1,0 +1,79 @@
+{
+  "schema_version": "reorganized-mod-current-host-port/v1",
+  "date": "2026-11-07",
+  "status": "npu_activation_qualified_performance_retest_pending",
+  "host": {
+    "core": {
+      "repository": "vLLM-HUST/vllm-hust",
+      "revision": "c4df37dfcc7f72ca41cd43801a468526ecf99a2b"
+    },
+    "ascend": {
+      "repository": "vLLM-HUST/vllm-ascend-hust",
+      "revision": "7602797593170da4c531f1d8882a7b82dce8a1bc"
+    }
+  },
+  "families": [
+    {
+      "repository": "vLLM-HUST/vllm-hust-runtime-micro-optimizations",
+      "revision": "210038bc250d2558c039f6c0874f403c4d89588e",
+      "source_qualification": {
+        "tests": {"passed": 10, "failed": 0},
+        "ruff": "passed",
+        "wheel_build": "passed",
+        "host_contract": "passed"
+      },
+      "candidates": {
+        "empty-padding": "npu_tp2_activated_performance_pending",
+        "qsl-reuse": "npu_tp2_activated_performance_pending",
+        "residual-scale": "npu_tp2_activated_performance_pending",
+        "rope-argument-repair": "retired_absorbed_by_host"
+      }
+    },
+    {
+      "repository": "vLLM-HUST/vllm-hust-gdn-optimizations",
+      "revision": "807d1b0d2295a438ec696fdfdc8c2ebd97b6b448",
+      "source_qualification": {
+        "tests": {"passed": 12, "failed": 0},
+        "ruff": "passed",
+        "wheel_build": "passed",
+        "host_contract": "passed"
+      },
+      "candidates": {
+        "static-decay": "npu_tp2_activated_performance_pending",
+        "native-delayed": "blocked_current_runner_rewrite_required",
+        "native-copy-compatibility": "retired_obsolete"
+      }
+    },
+    {
+      "repository": "vLLM-HUST/vllm-ascend-attention-optimizations",
+      "revision": "bc6bb4abeb05a7bf3d26d44400526d74f1a5f01a",
+      "source_qualification": {
+        "tests": {"passed": 8, "failed": 0},
+        "ruff": "passed",
+        "wheel_build": "passed",
+        "host_contract": "passed"
+      },
+      "candidates": {
+        "core-boundary": "retired_absorbed",
+        "persistent-matmul-empty": "retired_not_consumed",
+        "linear-swiglu-graph": "relocated_operator_family",
+        "pyramidkv": "blocked_current_runner_rewrite_required"
+      }
+    }
+  ],
+  "npu_activation_smoke": {
+    "summary": "npu-smoke/summary.json",
+    "hardware": "2x Ascend 910B2",
+    "runtime_micro_rank_receipts": 2,
+    "gdn_rank_receipts": 2,
+    "health_http_status": 200,
+    "response_content": "OK"
+  },
+  "formal_npu_measurement": {
+    "started": false,
+    "reason": "Activation is qualified, but three alternating Native/candidate pairs and the frozen quality workload have not run.",
+    "hardware_for_future_run": "verified Ascend 910B2",
+    "publication_state": "retest_pending",
+    "legacy_metrics_transferred": false
+  }
+}

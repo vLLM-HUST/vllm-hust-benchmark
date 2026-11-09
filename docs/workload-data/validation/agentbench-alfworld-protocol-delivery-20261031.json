@@ -1,0 +1,62 @@
+{
+  "schema_version": "workload-native-delivery/v1",
+  "source_id": "AGENTBENCH",
+  "status": "DECLARED_ALFWORLD_FC_NEW_STD_PROTOCOL_DELIVERED",
+  "source_checkbox_eligible": true,
+  "delivered_protocol": "Official Function Calling ALFWorld new_std, original PDDL interaction and scoring",
+  "official_source": "https://github.com/THUDM/AgentBench",
+  "author_revision": "d1e4a10db08c87075c78972e48ecc182be03e2d5", "revision_note": "pragma: allowlist secret - pinned original AgentBench FC source",
+  "public_entries": {
+    "asset_plan": "workload-data catalog download-plan AGENTBENCH",
+    "native_references": "workload-data agentbench-native-tasks",
+    "runtime_build": "scripts/build_agentbench_pddl_runtime_wheels.py",
+    "execution": "scripts/run_agentbench_alfworld_original.py",
+    "guide": "docs/workload-data/AGENTBENCH_ALFWORLD_ORIGINAL_PREPARATION.zh-CN.md",
+    "dependencies": "configs/workload-native/agentbench-alfworld-py39-dependencies.txt",
+    "complete_original_indices_supported": 109
+  },
+  "native_execution": {
+    "receipt": "docs/workload-data/validation/agentbench-alfworld-all109-native-20261024.json",
+    "original_unique_tasks": 109,
+    "previously_audited_tasks_reused": 41,
+    "additional_tasks_in_original_completion_run": 68,
+    "model_requests_audited": 1625,
+    "original_six_groups_complete": true,
+    "official_overall": {"total":109,"pass":46,"wrong":63,"success_rate":0.42201834862385323},
+    "original_steps": 20,
+    "original_generation_config": {"temperature":0,"max_tokens":2048},
+    "failed_or_budget_terminal_tasks_replaced": false,
+    "original_task_prompt_action_and_scoring_code_changed": false,
+    "explicit_model_binding_reference": "docs/workload-data/validation/agentbench-alfworld-public-handoff-npu-20261023.json",
+    "model_binding": "workload-qwen35-27b-128k-nonthinking, approved Ascend NPU service; not an official model quality reproduction",
+    "native_runtime": "Separate Python3.9.25 aarch64 environment; TextWorld1.3.2, ALFWorld0.2.2, agentrl-worker0.4.0, standard OpenCV4.11.0.86",
+    "compatibility_boundary": "PDDL-only Fast Downward build and disclosed unused Inform7/Glulx build-hook compatibility; original Python task/action/scoring code verified. Not visual THOR, not official Docker equivalence."
+  },
+  "current_saved_audit": {
+    "server_receipt": "agentbench-all109-protocol-delivery-audit-20261031-001/audit-public.json under the private shared task root",
+    "exit_code": 0,
+    "original_unique_tasks": 109,
+    "saved_model_responses_verified": 1625,
+    "official_task_python_files_verified": 84,
+    "original_episode_asset_and_result_hashes_verified": true,
+    "official_saved_scores_recomputed": true,
+    "new_game_episodes_or_model_calls": 0,
+    "retained_warning": "TorchVision optional image Python extension unavailable; text/PDDL original scorer completed. No visual task coverage inferred."
+  },
+  "public_and_research_handoff": {
+    "public_recipe_receipt": "docs/workload-data/validation/agentbench-alfworld-public-handoff-npu-20261023.json",
+    "research_receipt": "docs/workload-data/validation/agentbench-alfworld-research-handoff-20261024.json",
+    "installed_provider_payload_files_equal": 32,
+    "original_native_references_verified": 109,
+    "original_index_and_all_episode_asset_references_equal": true,
+    "research_prepare_and_verify_both_used": true,
+    "existing_shared_server_receipts_rechecked": true,
+    "new_game_episodes_or_model_calls": 0,
+    "research_observation_runtime_migrated_or_accepted": false
+  },
+  "unfinished_modes": "Other AgentBench domains and alternative/visual environments remain unverified; not covered by this source checkbox",
+  "all_agentbench_domains_claim": false,
+  "official_container_equivalence_claim": false,
+  "raw_task_payloads_redistributed": false,
+  "performance_or_scientific_conclusion": false
+}

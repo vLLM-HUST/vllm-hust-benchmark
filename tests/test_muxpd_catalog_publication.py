@@ -31,18 +31,22 @@ def test_muxpd_four_tables_join_without_expanding_qualification():
         if row["id"] == "muxpd"
     )
     assert component["maturity"] == "experimental"
-    assert component["maintainers"] == ["vLLM-HUST"]
+    assert component["maintainers"] == ["Irisuko"]
     assert component["evidence_level"] == "hardware_verified"
     assert "6/8" in component["public_effect_en"]
-    assert "No current-package performance gain" in component["public_effect_en"]
     assert (
-        component["qualification_report"]
-        == component["public_effect_url"]
-        == (
-            "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/"
-            + EVIDENCE_COMMIT
-            + "/reports/muxpd-ecpa-20261025/RELEASE-QUALIFICATION.md"
-        )
+        "current-package performance gain is established"
+        in component["public_effect_en"]
+    )
+    assert "5/8" in component["public_effect_en"]
+    assert component["public_effect_status"] == "not-beneficial-in-tested-cell"
+    assert component["public_effect_url"].endswith(
+        "/reports/muxpd-batch14-quota-control-20261030/README.md"
+    )
+    assert component["qualification_report"] == (
+        "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/"
+        + EVIDENCE_COMMIT
+        + "/reports/muxpd-ecpa-20261025/RELEASE-QUALIFICATION.md"
     )
     assert (
         read(DATA / "mod-taxonomy.json")["components"]["muxpd"]["kind"] == "runtime_mod"
@@ -52,7 +56,7 @@ def test_muxpd_four_tables_join_without_expanding_qualification():
         in read(DATA / "plugin-workload-navigation.json")["plugins"]["muxpd"]
     )
     metadata = read(DATA / "plugin-workshop-metadata.json")["plugins"]["muxpd"]
-    assert [row["login"] for row in metadata["maintainers"]] == ["vLLM-HUST"]
+    assert [row["login"] for row in metadata["maintainers"]] == ["Irisuko"]
     assert "muxpd" not in {
         row["id"] for row in read(DATA / "plugin-performance.json")["entries"]
     }
