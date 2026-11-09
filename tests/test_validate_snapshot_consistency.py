@@ -6,7 +6,6 @@ import sys
 import types
 from pathlib import Path
 
-
 SCRIPT_PATH = (
     Path(__file__).resolve().parents[1] / "scripts" / "validate_snapshot_consistency.py"
 )
@@ -108,14 +107,24 @@ def test_default_snapshot_set_covers_all_public_files() -> None:
 
 
 def test_compare_snapshot_scopes_the_018_baseline_by_version() -> None:
-    snapshot = (
-        Path(__file__).resolve().parents[1]
-        / "leaderboard-data"
-        / "snapshots"
-        / "leaderboard_compare.json"
-    ).read_text(encoding="utf-8")
-    assert "Version-specific vLLM 0.18.0 + vLLM-Ascend v0.18.0" in snapshot
-    assert "Official vLLM 0.18.0 + vllm-ascend v0.18.0" not in snapshot
+    snapshot = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "leaderboard-data"
+            / "snapshots"
+            / "leaderboard_compare.json"
+        ).read_text(encoding="utf-8")
+    )
+    groups = snapshot["groups"]
+    assert groups
+    for group in groups:
+        baseline = next(
+            member for member in group["engines"] if member["engine"] == "vllm"
+        )
+        assert baseline["engine_version"] == "0.18.0"
+        assert group["scope"]["setting_signature"].startswith(
+            "official-ascend-jan-2026-v0.18.0-"
+        )
 
 
 def test_missing_compare_or_last_updated_is_a_hard_error(

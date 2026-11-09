@@ -158,7 +158,7 @@ def test_official_entry_records_target_id_and_target_version(tmp_path: Path) -> 
         metadata["target_contract_id"]
         == "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2"
     )
-    assert metadata["target_contract_version"] == "1.3.5"
+    assert metadata["target_contract_version"] == "1.3.12"
     assert metadata["workload_config_contract"] == "explicit-effective/v1"
 
 

@@ -412,13 +412,13 @@ def test_canonical_target_contract_round_trip_resolves_exact_version() -> None:
             "target_contract_id": (
                 "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
             ),
-            "target_contract_version": "1.3.7",
+            "target_contract_version": "1.3.12",
         }
     )
 
     assert validate_explicit_workload_config(entry) == []
 
-    entry["metadata"]["target_contract_version"] = "1.3.4"
+    entry["metadata"]["target_contract_version"] = "1.3.7"
     errors = validate_explicit_workload_config(entry)
     assert any("target_contract_version" in error for error in errors)
 

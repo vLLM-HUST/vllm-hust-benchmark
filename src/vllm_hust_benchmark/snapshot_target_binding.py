@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 SNAPSHOT_FILES = ("leaderboard_single.json", "leaderboard_multi.json")
+COMPARE_SNAPSHOT_FILE = "leaderboard_compare.json"
 HISTORICAL_UNVERIFIED_PREFIX = (
     "valid historical result; strict baseline target admission not completed"
 )
@@ -198,6 +199,62 @@ def _projection_ignored_paths(policy: Mapping[str, Any] | None) -> frozenset[str
     return frozenset(translated[path] for path in policy["ephemeral_transport_fields"])
 
 
+def _comparison_runtime_authorized(
+    entry: Mapping[str, Any], target: Mapping[str, Any]
+) -> tuple[bool, list[str]]:
+    """Match a non-baseline engine only against a fully pinned registry record."""
+    raw = _mapping(target.get("compatibility_policy")).get("comparison_runtimes")
+    if raw is None:
+        return False, []
+    if not isinstance(raw, list):
+        return False, ["comparison runtime policy must be an array"]
+    required = {
+        "engine",
+        "engine_version",
+        "github_repository",
+        "git_commit",
+        "plugin_engine",
+        "plugin_repository",
+        "plugin_commit",
+    }
+    metadata = _mapping(entry.get("metadata"))
+    provenance = _mapping(metadata.get("runtime_provenance"))
+    runtime_engine = _mapping(provenance.get("engine"))
+    runtime_plugin = _mapping(provenance.get("plugin"))
+    observed = {
+        "engine": entry.get("engine"),
+        "engine_version": entry.get("engine_version"),
+        "github_repository": metadata.get("github_repository"),
+        "git_commit": metadata.get("git_commit"),
+        "plugin_engine": runtime_plugin.get("engine"),
+        "plugin_repository": runtime_plugin.get("repository"),
+        "plugin_commit": runtime_plugin.get("commit"),
+    }
+    errors: list[str] = []
+    policies: list[Mapping[str, Any]] = []
+    for index, policy in enumerate(raw):
+        if not isinstance(policy, Mapping) or set(policy) != required:
+            errors.append(f"comparison_runtimes[{index}] is malformed")
+            continue
+        if not all(isinstance(policy[key], str) and policy[key] for key in required):
+            errors.append(f"comparison_runtimes[{index}] has an empty field")
+            continue
+        policies.append(policy)
+    if errors:
+        return False, errors
+    for policy in policies:
+        if all(observed[key] == policy[key] for key in required):
+            if (
+                runtime_engine.get("repository") != policy["github_repository"]
+                or runtime_engine.get("commit") != policy["git_commit"]
+            ):
+                return False, [
+                    "comparison runtime engine provenance does not match its pinned commit"
+                ]
+            return True, []
+    return False, []
+
+
 def official_target_binding_errors(
     entry: Mapping[str, Any], target: Mapping[str, Any]
 ) -> list[str]:
@@ -205,9 +262,30 @@ def official_target_binding_errors(
     errors: list[str] = []
     projection, projection_errors = _binding_projection_policy(target)
     errors.extend(projection_errors)
-    ignored_paths = _projection_ignored_paths(projection)
+    comparison_authorized, comparison_errors = _comparison_runtime_authorized(
+        entry, target
+    )
+    errors.extend(comparison_errors)
+    ignored_paths = set(_projection_ignored_paths(projection))
+    if comparison_authorized:
+        ignored_paths.update(
+            {
+                "same_spec.resolved_server_parameters.host",
+                "same_spec.resolved_server_parameters.port",
+                "same_spec.resolved_client_parameters.host",
+                "same_spec.resolved_client_parameters.port",
+            }
+        )
+    ignored_paths = frozenset(ignored_paths)
     same_spec = _mapping(entry.get("same_spec"))
-    if projection is not None:
+    target_server = _mapping(target.get("server_parameters"))
+    target_client = _mapping(_mapping(target.get("workload")).get("client_parameters"))
+    validate_transport = projection is not None or (
+        comparison_authorized
+        and ("host" in target_server or "port" in target_server)
+        and ("host" in target_client or "port" in target_client)
+    )
+    if validate_transport:
         server_transport = _mapping(same_spec.get("resolved_server_parameters"))
         client_transport = _mapping(same_spec.get("resolved_client_parameters"))
         server_host = server_transport.get("host")
@@ -241,7 +319,7 @@ def official_target_binding_errors(
         errors.append("same_spec.scenario does not match registry workload")
 
     baseline = _mapping(target.get("baseline_runtime"))
-    if entry.get("engine") != baseline.get("engine"):
+    if entry.get("engine") != baseline.get("engine") and not comparison_authorized:
         aliases = projection.get("engine_aliases", []) if projection else []
         authorized = any(
             alias["observed"] == entry.get("engine")
@@ -250,7 +328,10 @@ def official_target_binding_errors(
         )
         if not authorized:
             errors.append("engine does not match target baseline runtime")
-    if entry.get("engine_version") != baseline.get("engine_version"):
+    if (
+        entry.get("engine_version") != baseline.get("engine_version")
+        and not comparison_authorized
+    ):
         errors.append("engine_version does not match target baseline runtime")
 
     target_model = _mapping(target.get("model"))
@@ -414,6 +495,65 @@ def bind_entry_to_official_target(
     return True, []
 
 
+def _sync_compare_admission(snapshot_dir: Path) -> int:
+    """Refresh copied compare-member admission fields after strict binding."""
+    compare_path = snapshot_dir / COMPARE_SNAPSHOT_FILE
+    if not compare_path.is_file():
+        return 0
+    entries: dict[str, Mapping[str, Any]] = {}
+    for file_name in SNAPSHOT_FILES:
+        path = snapshot_dir / file_name
+        if not path.is_file():
+            continue
+        payload = _load_json(path)
+        if not isinstance(payload, list):
+            raise TypeError(f"{path} must contain a JSON array")
+        for entry in payload:
+            if not isinstance(entry, Mapping):
+                raise TypeError(f"{path} contains a non-object entry")
+            entry_id = str(entry.get("entry_id") or "")
+            if entry_id:
+                entries[entry_id] = entry
+
+    compare = _load_json(compare_path)
+    if compare == []:
+        return 0
+    if isinstance(compare, dict) and compare.get("groups") is None:
+        return 0
+    if not isinstance(compare, dict) or not isinstance(compare.get("groups"), list):
+        raise TypeError(f"{compare_path} must contain groups")
+    synced = 0
+    for group in compare["groups"]:
+        if not isinstance(group, dict):
+            raise TypeError(f"{compare_path} contains a non-object group")
+        copies: list[Any] = list(group.get("engines") or [])
+        preferred_pair = group.get("preferred_pair")
+        if isinstance(preferred_pair, Mapping):
+            copies.extend((preferred_pair.get("left"), preferred_pair.get("right")))
+        for copied in copies:
+            if not isinstance(copied, dict):
+                continue
+            entry_id = str(copied.get("entry_id") or "")
+            source = entries.get(entry_id)
+            if source is None:
+                raise ValueError(
+                    f"{compare_path} references unknown snapshot entry_id {entry_id!r}"
+                )
+            metadata = _mapping(source.get("metadata"))
+            copied["verified"] = metadata.get("verified") is True
+            for field in ("official_admission_status", "official_admission_reason"):
+                value = metadata.get(field)
+                if value is None:
+                    copied.pop(field, None)
+                else:
+                    copied[field] = value
+            synced += 1
+    compare_path.write_text(
+        json.dumps(compare, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    return synced
+
+
 def bind_snapshot_set(
     snapshot_dir: Path, registry: OfficialTargetRegistry
 ) -> dict[str, Any]:
@@ -474,6 +614,7 @@ def bind_snapshot_set(
                 report["reason_counts"].get(reason, 0) + count
             )
     report["reason_counts"] = dict(sorted(report["reason_counts"].items()))
+    report["compare_members_synced"] = _sync_compare_admission(snapshot_dir)
     report_path = snapshot_dir / "target_binding_report.json"
     report_path.write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n",

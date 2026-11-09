@@ -9,8 +9,8 @@ from typing import Any
 from vllm_hust_benchmark.same_spec import PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
 
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.3.11"
-EFFECTIVE_FROM = "2026-10-07"
+REGISTRY_VERSION = "1.3.12"
+EFFECTIVE_FROM = "2026-11-09"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
 PUBLIC_VISION_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
@@ -66,6 +66,43 @@ def _load_spec(path: Path) -> dict[str, Any]:
     if missing:
         raise ValueError(f"spec {path} is missing: {', '.join(missing)}")
     return payload
+
+
+def _comparison_runtimes(spec: dict[str, Any], path: Path) -> list[dict[str, str]]:
+    """Return fully pinned non-baseline runtimes admitted for comparison."""
+    raw = spec.get("comparison_runtimes", [])
+    if not isinstance(raw, list):
+        raise TypeError(f"comparison_runtimes must be an array: {path}")
+    required = {
+        "engine",
+        "engine_version",
+        "github_repository",
+        "git_commit",
+        "plugin_engine",
+        "plugin_repository",
+        "plugin_commit",
+    }
+    normalized: list[dict[str, str]] = []
+    for index, runtime in enumerate(raw):
+        if not isinstance(runtime, dict) or set(runtime) != required:
+            raise ValueError(
+                f"comparison_runtimes[{index}] must contain exactly "
+                f"{sorted(required)}: {path}"
+            )
+        if not all(isinstance(runtime[key], str) and runtime[key] for key in required):
+            raise ValueError(f"comparison_runtimes[{index}] has an empty field: {path}")
+        for key in ("git_commit", "plugin_commit"):
+            value = runtime[key]
+            if len(value) != 40 or any(
+                character not in "0123456789abcdef" for character in value
+            ):
+                raise ValueError(
+                    f"comparison_runtimes[{index}].{key} must be a full lowercase commit: {path}"
+                )
+        normalized.append({key: runtime[key] for key in sorted(required)})
+    if len({tuple(runtime.items()) for runtime in normalized}) != len(normalized):
+        raise ValueError(f"comparison_runtimes contains duplicates: {path}")
+    return normalized
 
 
 def _classify_spec(path: Path, spec: dict[str, Any]) -> tuple[str, str, str]:
@@ -282,6 +319,7 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
     )
     for path in spec_paths:
         spec = _load_spec(path)
+        comparison_runtimes = _comparison_runtimes(spec, path)
         _validate_prefix_repetition_workload(spec, path)
         intended_use, status, profile = _classify_spec(path, spec)
         if status == "active":
@@ -292,6 +330,15 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
         relative_path = path.relative_to(repo_root).as_posix()
         source_sha256 = _sha256_bytes(path.read_bytes())
         contract = _target_contract_metadata(history, str(spec["id"]))
+        compatibility_policy: dict[str, Any] = {
+            "model": "exact",
+            "hardware": "exact",
+            "server_parameters": "exact",
+            "workload_parameters": "exact",
+            "exceptions": "new-target-version-required",
+        }
+        if comparison_runtimes:
+            compatibility_policy["comparison_runtimes"] = comparison_runtimes
         targets.append(
             {
                 "target_id": spec["id"],
@@ -329,13 +376,7 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
                     "path": relative_path,
                     "sha256": source_sha256,
                 },
-                "compatibility_policy": {
-                    "model": "exact",
-                    "hardware": "exact",
-                    "server_parameters": "exact",
-                    "workload_parameters": "exact",
-                    "exceptions": "new-target-version-required",
-                },
+                "compatibility_policy": compatibility_policy,
             }
         )
 
