@@ -1,0 +1,113 @@
+{
+  "pytest_exit": 0,
+  "parity": {
+    "baseline": {
+      "passed": true,
+      "counts": {
+        "requests": 24,
+        "schedules": 364,
+        "updates": 364,
+        "scheduled_tokens": 141280
+      },
+      "identity": {
+        "backend": "vllm",
+        "version": "0.23.0+empty",
+        "hash_seed": "17",
+        "scheduler_class": "vllm.v1.core.sched.scheduler.Scheduler",
+        "scheduler_source_sha256": "9ae1491f57a6294e32416b93ef2ea68107fa0d65c3a4d7f745f1261012f735e9",
+        "scheduler_options": {
+          "runner_type": "generate",
+          "max_num_scheduled_tokens": null,
+          "max_num_partial_prefills": 1,
+          "max_long_partial_prefills": 1,
+          "long_prefill_token_threshold": 0,
+          "enable_chunked_prefill": true,
+          "is_multimodal_model": false,
+          "policy": "fcfs",
+          "disable_chunked_mm_input": false,
+          "disable_hybrid_kv_cache_manager": false,
+          "scheduler_reserve_full_isl": true,
+          "stream_interval": 1
+        },
+        "scheduler_reserve_full_isl": true,
+        "execution": "native scheduler with simulated model outputs; no model kernel execution"
+      },
+      "connector": false,
+      "finish_callback_source": "observed callback",
+      "mismatches": [],
+      "scope": "Decision/state parity with recorded model outputs and connector results; excludes timing prediction"
+    },
+    "P": {
+      "passed": true,
+      "counts": {
+        "requests": 4,
+        "schedules": 33,
+        "updates": 33,
+        "scheduled_tokens": 51204
+      },
+      "identity": {
+        "backend": "vllm",
+        "version": "0.23.0+empty",
+        "hash_seed": "17",
+        "scheduler_class": "vllm.v1.core.sched.scheduler.Scheduler",
+        "scheduler_source_sha256": "9ae1491f57a6294e32416b93ef2ea68107fa0d65c3a4d7f745f1261012f735e9",
+        "scheduler_options": {
+          "runner_type": "generate",
+          "max_num_scheduled_tokens": null,
+          "max_num_partial_prefills": 1,
+          "max_long_partial_prefills": 1,
+          "long_prefill_token_threshold": 0,
+          "enable_chunked_prefill": true,
+          "is_multimodal_model": false,
+          "policy": "fcfs",
+          "disable_chunked_mm_input": false,
+          "disable_hybrid_kv_cache_manager": false,
+          "scheduler_reserve_full_isl": true,
+          "stream_interval": 1
+        },
+        "scheduler_reserve_full_isl": true,
+        "execution": "native scheduler with simulated model outputs; no model kernel execution"
+      },
+      "connector": true,
+      "finish_callback_source": "request retention in recorded update states",
+      "mismatches": [],
+      "scope": "Decision/state parity with recorded model outputs and connector results; excludes timing prediction"
+    },
+    "D": {
+      "passed": true,
+      "counts": {
+        "requests": 8,
+        "schedules": 290,
+        "updates": 290,
+        "scheduled_tokens": 256
+      },
+      "identity": {
+        "backend": "vllm",
+        "version": "0.23.0+empty",
+        "hash_seed": "17",
+        "scheduler_class": "vllm.v1.core.sched.scheduler.Scheduler",
+        "scheduler_source_sha256": "9ae1491f57a6294e32416b93ef2ea68107fa0d65c3a4d7f745f1261012f735e9",
+        "scheduler_options": {
+          "runner_type": "generate",
+          "max_num_scheduled_tokens": null,
+          "max_num_partial_prefills": 1,
+          "max_long_partial_prefills": 1,
+          "long_prefill_token_threshold": 0,
+          "enable_chunked_prefill": true,
+          "is_multimodal_model": false,
+          "policy": "fcfs",
+          "disable_chunked_mm_input": false,
+          "disable_hybrid_kv_cache_manager": false,
+          "scheduler_reserve_full_isl": true,
+          "stream_interval": 1
+        },
+        "scheduler_reserve_full_isl": true,
+        "execution": "native scheduler with simulated model outputs; no model kernel execution"
+      },
+      "connector": true,
+      "finish_callback_source": "request retention in recorded update states",
+      "mismatches": [],
+      "scope": "Decision/state parity with recorded model outputs and connector results; excludes timing prediction"
+    }
+  }
+}
