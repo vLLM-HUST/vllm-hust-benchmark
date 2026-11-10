@@ -115,3 +115,11 @@ REPORT_LINK_BASE=https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/review/ru
 Research notes retain narrower evidence boundaries and original source citations; they are not all
 independent replications. Later review changes should be versioned without overwriting this
 capsule's measurements.
+
+## Neutral gamma4 launch package
+
+[Launch instructions and readable sources](launch-package/README.md) include the complete final
+MTP4/vSpec six-run launch chain, frozen inputs, private compatibility adapter and plugin patch.
+[Download the standalone package](gamma4-launch-package.tar.gz), extract it into a fresh Linux
+workspace, and follow its README. This is a documented neutral derivative of the original capsule,
+not a new NPU measurement or a complete host environment image.
