@@ -3,6 +3,11 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## PegaFlow 本地缓存恢复慢尾归因（2026-11-10）
+
+[跨宿主机调查记录](reports/pegaflow-restore-causal-20261110/README.md)：四张 910B2 的 178 次固定缓冲区恢复，
+以及独立 CANN、内存来源、任务数量和模型保存失败对照；保留阶段证据，底层触发条件继续调查。
+
 ## PegaFlow 四卡模拟器标定（2026-10-29）
 
 [阶段报告与证据清单](reports/pegaflow-four-card-calibration-20261029/README.md)：81、91 各两张 910B2，包含 1,572
