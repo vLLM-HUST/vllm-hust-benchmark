@@ -1,0 +1,26 @@
+--- a/src/vllm_hust_vspec/adaptive/runtime.py
++++ b/src/vllm_hust_vspec/adaptive/runtime.py
+@@ -310,6 +310,10 @@
+         "num_accepted_tokens_per_pos",
+         "num_draft_tokens_per_pos",
+     ):
++        # Older hosts expose total draft counts but not per-position attempts.
++        # Do not invent counters: normalize only metrics actually provided.
++        if attribute == "num_draft_tokens_per_pos" and not hasattr(stats, attribute):
++            continue
+         values = getattr(stats, attribute)
+         if len(values) > configured_width:
+             raise RuntimeError(
+@@ -2568,6 +2572,12 @@
+                     )
+                 raise
+             if settings.adaptive_policy == "online":
++                if not scheduler_output.num_scheduled_tokens:
++                    # Empty scheduler steps never receive a gamma decision.
++                    controller.discard_step_feedback(
++                        completed_at_ms=time.perf_counter() * 1000.0,
++                    )
++                    return result
+                 gamma = int(scheduler_output.num_spec_tokens_to_schedule)
+                 stable_decode = (
+                     not bool(scheduler_output.scheduled_new_reqs)

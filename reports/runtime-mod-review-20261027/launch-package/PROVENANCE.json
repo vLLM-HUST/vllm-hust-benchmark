@@ -1,0 +1,19 @@
+{
+  "experiment_date": "2026-10-27",
+  "source_commit": "0ce4365692c335f31e2cbbb043d251e7f3d185ec",
+  "source_archive": "../raw/manifest.json",
+  "source_members_prefix": "research/speculative-mmlu-pro/",
+  "transformations": [
+    "Rename historical assistant-specific prefixes to BENCH/bench throughout derived files.",
+    "Remove disabled optional diagnostic branches from guard/sitecustomize.py; retain physical placement and compatibility bootstrap.",
+    "Allow BENCH_CARDS to select physical cards; default 0,1 retains the historical launch.",
+    "Normalize formatting and terminal newlines; preserve original capsule unchanged.",
+    "Project screen-manifest.json to performance_ids and dataset_revision only; keep exact frozen IDs/order, original selection metadata remains in source capsule."
+  ],
+  "vllm_core_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+  "vllm_ascend_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+  "vspec_commit": "4e17b6bb6f9957dd4427f112da0bfc3d08bf24ae",
+  "dataset_commit": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+  "hardware": "Ascend 910B2, two physical cards",
+  "validation": "CPU packaging checks only; no new accelerator run or performance qualification"
+}
