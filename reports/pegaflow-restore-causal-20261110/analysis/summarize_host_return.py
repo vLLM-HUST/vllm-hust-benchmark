@@ -59,15 +59,25 @@ def main():
         api = jsonl(path.parent/'raw/api.jsonl')
         totals = collections.defaultdict(collections.Counter)
         for row in api:
-            if row.get('event') not in ['retry_backoff', 'contended_unlock_control']:
+            if row.get('event') not in ['retry_backoff', 'contended_unlock_control',
+                                        'postwake_backoff', 'rw_batch', 'rw_slow_wait',
+                                        'native_pack', 'synchronous_pieces', 'piece_api_control']:
                 continue
-            key2 = f"{row['event']}/mode{row['mode']}"
+            inferred = {'native_pack': 20, 'synchronous_pieces': 21}
+            mode = row.get('mode', inferred.get(row['event'], 0))
+            key2 = f"{row['event']}/mode{mode}"
             group = totals[key2]
             group['calls'] += 1
             for field in ['seen_unlocks', 'waiter_unlocks', 'contended_unlocks',
-                          'queries', 'zero', 'one', 'above_one', 'pauses', 'pause_wall_ns']:
+                          'queries', 'zero', 'one', 'above_one', 'pauses', 'pause_wall_ns',
+                          'reads', 'writes', 'samples', 'sample_wait_ns',
+                          'input_descriptors', 'output_descriptors', 'bytes',
+                          'init_ns', 'pack_ns', 'api_ns', 'sync_ns', 'wall_ns', 'cpu_ns']:
                 if field in row:
                     group[field] += row[field]
+            if 'max_sample_wait_ns' in row:
+                group['max_sample_wait_ns'] = max(group['max_sample_wait_ns'],
+                                                  row['max_sample_wait_ns'])
         if totals:
             result['counters'][key] = dict(totals)
     for host in ['hust-zsx-81', 'hust-zsx-91']:
