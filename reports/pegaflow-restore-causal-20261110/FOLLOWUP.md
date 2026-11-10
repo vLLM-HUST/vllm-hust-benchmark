@@ -3,6 +3,9 @@
 本页接续 [跨宿主机归因记录](README.md)。证据固定在 `raw/followup-1837.tar.gz`；
 [逐次结果与队列采样摘要](analysis/followup-1837-summary.json)可供复算。
 
+后续已重新取得原宿主机，续测结果见 [原宿主机复现与设备任务时间线](HOST-RETURN.md)。
+本页下文保留 18:37 快照当时的实验范围和判断。
+
 ![固定数据对照与干预](restore-interventions.png)
 
 图 A/B/C 保留范围或逐次样本，图 D 按阶段取算术均值。
