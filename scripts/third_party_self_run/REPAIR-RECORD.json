@@ -1,0 +1,65 @@
+{
+  "status": "version_selection_corrected_formal_workflow_incomplete",
+  "correction": "Previously selected local August sources were not the test-qualified B1. They are no longer used by the default workflow; their failures do not establish a bug in the target B1 or current main.",
+  "authority": "version-authority/tested-runtime.json",
+  "current_b1_base_runtime": "/tmp/vllm-hust-test-family-rebuild-20261111-r1/venv-school-r1/bin/python",
+  "b1_base_packages_inspected": true,
+  "b1_complete_frozen_implementation_bound": false,
+  "actual_inference": {
+    "stock_023": "confirmed v3:10/10; unrelated to required B1",
+    "baseline018_compatibility": "r5:10/10, warmup and graph execution, 4K/16K probes; not the full formal workload",
+    "target_b1": "not executed after version correction"
+  },
+  "repairs": [
+    {
+      "file": "version_gate.py",
+      "fix": "Verify the named test package versions, import origins and original source capsule/manifest before bootstrap or NPU use; reject local-old/main substitution."
+    },
+    {
+      "file": "one_click.py",
+      "fix": "Default paired entry fails version admission before starting either arm and still emits four disposition charts; --verify-only is CPU metadata only."
+    },
+    {
+      "file": "pipeline/prepare.py",
+      "fix": "Remove hardcoded August B1 source paths and automatic legacy GDN overlay."
+    },
+    {
+      "file": "run_vllm_hust_tests.py",
+      "fix": "Preserve strict rejection; generate and seal four-target rejection reports."
+    },
+    {
+      "file": "inference_test_report.py",
+      "fix": "Missing evidence and unknown thresholds do not become zero measurements."
+    },
+    {
+      "file": "pipeline/measurements.py",
+      "fix": "Normalize native timing without mixing epoch and monotonic clocks."
+    },
+    {
+      "file": "run_native.py and pipeline/run_all.py",
+      "fix": "Stop and verify owned sessions including orphan children before sealing; retain physical device ownership and queue without preemption."
+    },
+    {
+      "file": "patch_baseline_runtime.py and patch_baseline_qwen35.py",
+      "fix": "Disclosed, isolated CANN9.1 host-header and text graph-input compatibility; r5 real model10/10. Not changes to HUST target engine main."
+    },
+    {
+      "file": "build_hust_overlay.py",
+      "fix": "Historical August GDN shape recipe guarded by source SHA; CPU-only equivalence tested, removed from active target-B1 bootstrap."
+    }
+  ],
+  "remaining": [
+    "Historical optimized B1 source capsule/manifest is not recovered. Explicit verified-SDK reconstruction is available and labelled as a new build; restore and validate the corresponding optimization components before claiming reference equivalence.",
+    "Replace the old10-request diagnostic backend with the frozen200-task/native-agent workflows, including independent scorers.",
+    "Close the report's independently documented FLOPs/reference, five-task coverage and cost/continuous-window evidence gaps."
+  ],
+  "publication": "Code fixes are intended for benchmark main; no target-engine defect is asserted or pushed without reproducing it on its qualified version.",
+  "reconstructed_base": {
+    "sdk_sha256": "c03e96929d7b061e5cd66aba22d02ba1cb2df270ddb7654f562f8c6202f2e805",
+    "protected_files": 4771,
+    "cpu_import": "Torch2.13 + LLM import successful; NPU not initialized by CPU check",
+    "historical_full_answer_equivalence": false,
+    "native_attempt_r1": "0/10; CANN acl Python path missing. Failure retained; explicit CANN path and general plugin selection added for r2.",
+    "native_r2": "running"
+  }
+}
