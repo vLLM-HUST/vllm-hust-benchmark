@@ -5,7 +5,7 @@ self-run-kit。默认入口首先核对指定测试的版本和实现身份，�
 
 ```bash
 python3 one_click.py --verify-only
-python3 one_click.py --rebuild-runtime /tmp/new-isolated-runtime --out /absolute/path/to/new-run
+python3 one_click.py --out /absolute/path/to/new-run
 python3 one_click.py --review /absolute/path/to/new-run
 ```
 
@@ -17,8 +17,9 @@ python3 one_click.py --review /absolute/path/to/new-run
 只选择本机安装位置，不提供合格证明。检查器读取实际解释器的包元数据和导入路径。reference 身份要求历史实现包及原安装源码清单；reconstructed 身份从固定 SHA256 的 SDK
 恢复并校验实际源码文件，明确作为新构建，不声称恢复历史优化组合。包版本相同不能替代组件激活验证。
 
-容器已重建 0.28.1/0.25.1rc2 基础环境并校验 4,771 个源码/库文件；当前默认本机配置明确采用 reconstructed 身份。完整历史 B1
-实现包与原源码回执尚未绑定。旧八月源码已从默认启动流程移除；针对它的 GDN 修复只保留历史诊断身份，不据此断言目标 B1 或最新引擎 main 有同样缺陷。
+容器已重建 0.28.1/0.25.1rc2 基础环境并校验 4,771 个源码/库文件；当前默认本机配置已切回 reference 身份，等待原包转入后核对安装源码；reconstructed
+只通过显式 `--rebuild-runtime /tmp/new-isolated-runtime` 选用。用户已找到 SHA256 匹配的 r4 原包和运行配置；当前 Linux
+执行器尚未读回，完整历史 B1 实现包与原源码回执尚未绑定。旧八月源码已从默认启动流程移除；针对它的 GDN 修复只保留历史诊断身份，不据此断言目标 B1 或最新引擎 main 有同样缺陷。
 
 [执行清单](EXECUTION-CHECKLIST.txt)列出固定输入、任务分母、四项门槛及缺项。既有 `pipeline/` 后端仍只执行每臂十个真实诊断请求，尚不能替代 V1.03 的 200
 题完整回答、高并发测试和五数据集原生任务。完整源码恢复后，还须接通对应冻结工作流，不能仅修改版本号后运行旧诊断负载。

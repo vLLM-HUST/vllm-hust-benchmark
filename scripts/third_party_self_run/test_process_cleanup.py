@@ -12,6 +12,34 @@ from run_native import cleanup_group
 
 
 class CleanupTests(unittest.TestCase):
+    def test_recorded_leader_can_exec_with_a_clean_environment(self):
+        from run_native import process_state
+
+        with tempfile.TemporaryDirectory() as folder:
+            out = Path(folder)
+            script = 'import os,sys; os.execve(sys.executable,[sys.executable,"-c","import time; time.sleep(10)"],{})'
+            process = subprocess.Popen(
+                [sys.executable, "-c", script],
+                start_new_session=True,
+                env=dict(os.environ, VLLM_HUST_TEST_OUTPUT=folder),
+            )
+            identity = process_state(process.pid)
+            deadline = time.monotonic() + 3
+            while (
+                b"VLLM_HUST_TEST_OUTPUT="
+                in Path(f"/proc/{process.pid}/environ").read_bytes()
+                and time.monotonic() < deadline
+            ):
+                time.sleep(0.02)
+            try:
+                actions = cleanup_group(identity, out, grace_s=1)
+                self.assertTrue(actions)
+                process.wait(timeout=3)
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait()
+
     def test_orphan_child_stops_before_sealing(self):
         with tempfile.TemporaryDirectory() as folder:
             out = Path(folder)

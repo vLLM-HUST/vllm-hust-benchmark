@@ -29,6 +29,8 @@ def cleanup_group(identity, output, grace_s=15):
 
     def members():
         found = []
+        anchored = False
+        unmarked = []
         for entry in Path("/proc").iterdir():
             if not entry.name.isdigit():
                 continue
@@ -45,13 +47,25 @@ def cleanup_group(identity, output, grace_s=15):
                     and state["start_ticks"] != identity["start_ticks"]
                 ):
                     raise RuntimeError("Recorded stage PID was reused")
-                if marker not in (entry / "environ").read_bytes().split(b"\0"):
-                    raise RuntimeError(
-                        f"Refusing to signal unowned stage member {entry.name}"
-                    )
+                marked = marker in (entry / "environ").read_bytes().split(b"\0")
+                # Exiting tasks can lose environ before their state becomes Z.
+                # The recorded live session leader remains an ownership anchor.
+                current = process_state(state["pid"])
+                if (
+                    current["state"] == "Z"
+                    or current["start_ticks"] != state["start_ticks"]
+                ):
+                    continue
+                if int(state["start_ticks"]) < int(identity["start_ticks"]):
+                    raise RuntimeError("Stage session contains an older process")
+                anchored = anchored or marked or state["pid"] == group
+                if not marked:
+                    unmarked.append(state["pid"])
                 found.append(state)
             except (FileNotFoundError, ProcessLookupError):
                 continue
+        if found and unmarked and not anchored:
+            raise RuntimeError("Refusing an unanchored reused process group")
         return found
 
     stopped = []
