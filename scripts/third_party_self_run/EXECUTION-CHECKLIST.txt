@@ -12,10 +12,22 @@
   V1.03完整回答工况：core 0.28.1.post1.dev143+gf18cf803c，
   plugin 0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909，
   Torch 2.13.0+cpu / torch-npu 2.13.0rc1，CANN9.1；
-  E24/R36、MTP2、KV逐请求重算、Microflow、每rank4GiB主机State及锁页合并分配。
+  worker必须实际加载corrected_serving_runtime.CorrectedWorker；
+  E24/R36、MTP2、FULL图、KV逐请求重算、Microflow；
+  每rank4GiB主机State，同一状态对象内按dtype合并锁页分配。
   吞吐/TTFT和TPOT的历史最优可属于不同配置，不能拼成一个部署。
   VERSION的实际来源、导入路径、包版本及冻结实现校验见version-check.json。
   runtime-profile.json只选择本机安装路径，不构成版本合格证明。
+
+原件接入状态：
+  用户已从180裸机shuhao-storage持久卷取回完整B1 r4；原PV路径：
+  /root/long-context-storage-20261029-r1/full-answer-frozen-sources-20261030-r4.tar.gz
+  同轮启动配置：joint-b1-r4-runtime-config.zip；原包固定SHA见version-authority/tested-runtime.json。
+  用户报告原包255个文件、计划引用246个文件均核验通过；当前Linux执行器尚未读回这两个文件，
+  不将用户提供的核验结果冒充本次执行回执。Windows下载链接不能直接作为容器内安装路径。
+  [待执行] 读回原包及配置；先核对原包SHA，再逐项验证原清单与计划引用。
+  [待执行] 隔离恢复原件，按原启动命令核对实际导入路径、worker及组件激活情况。
+  [待执行] 绑定原任务与评分器，以原预算执行；失败保留分母及日志，禁止退回旧诊断负载后宣称复现。
 
 先核验，再加载：
   默认配对入口先检查两臂；不通过则不安装、不应用补丁、不加载模型，仍生成四项报告和图。
