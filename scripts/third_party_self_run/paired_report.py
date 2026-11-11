@@ -77,17 +77,23 @@ def build(root):
         paired[group] = result
     reasons = {
         "3.4.1": "未采集与本轮同步时间对应的有效FLOPs及独立、适用、整链验证的参考算力；不能用AI Core利用率替代，也不借用历史59.7573%。",
-        "3.4.2": "下列是真实双卡、固定请求的轻负载诊断。正式高并发多轮/工具调用、同开放到达序列、独立质量与SLO门槛尚未完成；数值跨过门槛不等于完整目标达标。",
-        "3.4.3": "本次覆盖2个MMLU-Pro样本、4K/16K长度探测各4次；未执行五项数据集既定全任务与原生评分器，也未取得连续窗口/最小样本等正式阈值。",
+        "3.4.2": "表中仅按实际完成的原生诊断请求计算，未执行项保持缺失。正式高并发多轮/工具调用、同开放到达序列、独立质量与SLO门槛尚未完成；数值跨过门槛不等于完整目标达标。",
+        "3.4.3": "诊断后端仅计划2个MMLU-Pro样本、4K/16K长度探测各4次，实际完成数见请求分母；未执行五项数据集既定全任务与原生评分器，也未取得连续窗口/最小样本等正式阈值。",
         "3.4.4": "缺本机综合费用范围和费率依据，以及冻结的高负载利用率改善判据。下列卡时/输出token比是等费率假设下的资源代理，不能充当实际人民币账单。",
     }
     version_path = root / "version-check.json"
     version = json.loads(version_path.read_text()) if version_path.exists() else None
     if version and not version["passed"]:
+        requirements = {
+            "3.4.1": "须取得同轮有效FLOPs/时间及独立适用的整链参考算力。",
+            "3.4.2": "须执行相同任务与到达序列的B0/B1配对，并通过独立质量与SLO门槛。",
+            "3.4.3": "须执行五项数据集既定任务及4K/16K连续窗口，核验原生评分与尾时延阈值。",
+            "3.4.4": "须取得本机费用依据、单位token成本及冻结的高负载利用率比较。",
+        }
         reasons = {
-            key: "受测版本/实现身份预检未通过，未启动模型或应用补丁。详见version-check.json；"
-            + reason
-            for key, reason in reasons.items()
+            key: "受测版本/实现身份预检未通过，两臂均未启动模型或应用补丁，本轮没有实测数据。详见version-check.json；"
+            + requirement
+            for key, requirement in requirements.items()
         }
     summary = {
         "schema": "vllm-hust-paired-diagnostic/v1",
