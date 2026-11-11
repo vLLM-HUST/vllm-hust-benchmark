@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+"""Run locally installed, approved native clients and a receipt exporter."""
+
+import argparse
+import json
+import os
+import signal
+import subprocess
+from pathlib import Path
+
+
+def run_stage(step, index, output, values):
+    name = step["name"]
+    command = [word.format_map(values) for word in step["argv"]]
+    timeout = step["timeout_s"]
+    if not command or not isinstance(timeout, (int, float)) or timeout <= 0:
+        raise ValueError(f"{name}: invalid argv or timeout")
+    # Each step uses its own process group on the Linux test host.
+    with (output / f"stage-{index:02d}.log").open("wb") as log:
+        with subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT,
+                              start_new_session=(os.name == "posix")) as process:
+            try:
+                code = process.wait(timeout=timeout)
+            except (subprocess.TimeoutExpired, KeyboardInterrupt):
+                if os.name == "posix":
+                    os.killpg(process.pid, signal.SIGKILL)
+                else:
+                    process.kill()
+                process.wait()
+                raise
+    if code:
+        raise RuntimeError(f"{name}: exit {code}; see stage-{index:02d}.log")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("workflow", type=Path)
+    args = parser.parse_args()
+    workflow = json.loads(args.workflow.read_text(encoding="utf-8-sig"))
+    if workflow["schema"] != "vllm-hust-native-workflow/v1" or not workflow["steps"]:
+        raise ValueError("Supply an approved native workflow with at least one step")
+    values = {name.lower(): os.environ[f"VLLM_HUST_TEST_{name}"]
+              for name in ("OUTPUT", "CASE", "ARM", "REPEAT", "CONTRACT", "CONFIG")}
+    output = Path(values["output"])
+    try:
+        for index, step in enumerate(workflow["steps"], 1):
+            run_stage(step, index, output, values)
+    finally:
+        for index, step in enumerate(workflow.get("cleanup", []), len(workflow["steps"]) + 1):
+            run_stage(step, index, output, values)
+    if not (output / "receipt.json").is_file():
+        raise RuntimeError("The final stage must export receipt.json and referenced evidence")
+
+
+if __name__ == "__main__":
+    main()
+

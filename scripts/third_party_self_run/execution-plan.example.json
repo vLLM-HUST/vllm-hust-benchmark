@@ -1,0 +1,286 @@
+{
+  "schema": "vllm-hust-inference-test-plan/v1",
+  "project": "2025ZD0123800",
+  "version": null,
+  "approval_record": null,
+  "site": null,
+  "model": "Qwen3.5-35B-A3B",
+  "device": "Ascend 910B2",
+  "devices": 2,
+  "files": {
+    "run_native.py": null,
+    "export_receipt.py": null
+  },
+  "cases": [
+    {
+      "id": "effective-compute",
+      "kind": "compute",
+      "contract": null,
+      "sequence": null,
+      "rules": {},
+      "arms": {
+        "B0": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        },
+        "B1": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        }
+      }
+    },
+    {
+      "id": "throughput",
+      "kind": "throughput",
+      "contract": null,
+      "sequence": null,
+      "rules": {
+        "throughput_basis": null
+      },
+      "arms": {
+        "B0": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        },
+        "B1": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        }
+      }
+    },
+    {
+      "id": "latency",
+      "kind": "latency",
+      "contract": null,
+      "sequence": null,
+      "rules": {
+        "throughput_basis": null,
+        "min_samples": null,
+        "mixed_prefill_decode": null
+      },
+      "arms": {
+        "B0": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        },
+        "B1": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        }
+      }
+    },
+    {
+      "id": "stability-mmlu-pro",
+      "kind": "stability",
+      "contract": null,
+      "sequence": null,
+      "rules": {},
+      "arms": {
+        "B1": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        }
+      },
+      "dataset": "MMLU-Pro",
+      "observed_arm": "B1",
+      "task_ids": null
+    },
+    {
+      "id": "stability-hle-verified",
+      "kind": "stability",
+      "contract": null,
+      "sequence": null,
+      "rules": {},
+      "arms": {
+        "B1": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        }
+      },
+      "dataset": "HLE-Verified",
+      "observed_arm": "B1",
+      "task_ids": null
+    },
+    {
+      "id": "stability-swe-bench-pro",
+      "kind": "stability",
+      "contract": null,
+      "sequence": null,
+      "rules": {},
+      "arms": {
+        "B1": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        }
+      },
+      "dataset": "SWE-bench Pro V1",
+      "observed_arm": "B1",
+      "task_ids": null
+    },
+    {
+      "id": "stability-frontierscience",
+      "kind": "stability",
+      "contract": null,
+      "sequence": null,
+      "rules": {},
+      "arms": {
+        "B1": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        }
+      },
+      "dataset": "FrontierScience",
+      "observed_arm": "B1",
+      "task_ids": null
+    },
+    {
+      "id": "stability-terminal-bench",
+      "kind": "stability",
+      "contract": null,
+      "sequence": null,
+      "rules": {},
+      "arms": {
+        "B1": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        }
+      },
+      "dataset": "Terminal-Bench 2.1",
+      "observed_arm": "B1",
+      "task_ids": null
+    },
+    {
+      "id": "context-4k-16k",
+      "kind": "context",
+      "contract": null,
+      "sequence": null,
+      "rules": {
+        "throughput_basis": null,
+        "min_samples": null,
+        "min_window_s": null,
+        "short_min_tokens": null,
+        "short_max_tokens": null,
+        "min_long_requests": null,
+        "min_throughput_retention_ratio": null,
+        "max_tail_ratio": {
+          "ttft_p95_ms": null,
+          "ttft_p99_ms": null,
+          "tpot_p95_ms": null,
+          "tpot_p99_ms": null
+        },
+        "trend_window_s": null,
+        "trend_min_samples": null,
+        "max_consecutive_degraded_windows": null,
+        "trend_min_long_requests": null
+      },
+      "arms": {
+        "4K": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        },
+        "16K": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null
+        }
+      },
+      "context_engine": null
+    },
+    {
+      "id": "token-cost",
+      "kind": "cost",
+      "contract": null,
+      "sequence": null,
+      "rules": {
+        "days_per_month": null,
+        "min_util_gain_pp": null
+      },
+      "arms": {
+        "B0": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null,
+          "fee_per_card_month_cny": null
+        },
+        "B1": {
+          "config": null,
+          "argv": [
+            "python3",
+            "run_native.py",
+            null
+          ],
+          "timeout_s": null,
+          "fee_per_card_month_cny": null
+        }
+      }
+    }
+  ]
+}

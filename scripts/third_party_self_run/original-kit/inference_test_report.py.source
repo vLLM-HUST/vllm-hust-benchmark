@@ -1,0 +1,257 @@
+"""Render the four vLLM-HUST test targets from the recomputed result."""
+
+import csv
+from html import escape
+
+SECTIONS = (
+    ("3.4.1", "单芯片有效算力", ("compute",), "effective-compute.png"),
+    ("3.4.2", "吞吐与时延", ("throughput", "latency"), "throughput-latency.png"),
+    ("3.4.3", "数据集运行与长上下文稳定性", ("stability", "context"), "stability.png"),
+    ("3.4.4", "单位 Token 成本与利用率", ("cost",), "cost-utilization.png"),
+)
+LABELS = {
+    "criteria_met": "满足判据",
+    "criteria_not_met": "未满足判据",
+    "unassessable": "证据不足或执行失败",
+    "manual_repeat_review": "待按冻结规则人工复核",
+    "not_run": "未执行",
+    "partial": "仅运行所选用例",
+}
+OVERALL_LABELS = {**LABELS, "criteria_met": "四项测试目标均满足冻结判据",
+                  "criteria_not_met": "有测试目标未满足冻结判据"}
+COLORS = {"B0": "#8c9bac", "B1": "#18728e", "4K": "#697c99", "16K": "#18728e", "Observed": "#18728e"}
+
+
+def plotter():
+    try:
+        import matplotlib
+    except ModuleNotFoundError as error:
+        raise ValueError("Install report dependencies first: python3 -m pip install -r requirements-report.txt") from error
+    matplotlib.use("Agg")
+    from matplotlib import pyplot
+    return pyplot
+
+
+def disposition(rows):
+    states = {row["status"] for row in rows}
+    for state in ("criteria_not_met", "unassessable", "manual_repeat_review"):
+        if state in states:
+            return state
+    return "criteria_met" if states else "not_run"
+
+
+def label(row):
+    return f"{row['case']} / r{row['repeat']:03d}"
+
+
+def panels_for(section, rows, plan, limits):
+    def entries(kind):
+        return [row for row in rows if row["kind"] == kind]
+
+    def arms(kind, field, keys=("B0", "B1")):
+        return [(label(row), [(arm, row["arms"].get(arm, {}).get(field)) for arm in keys], None)
+                for row in entries(kind)]
+
+    def comparisons(kind, field, target, group=None):
+        return [
+            (label(row), [("Observed", (row.get("comparison", {}).get(group, {}) if group
+                                        else row.get("comparison", {})).get(field))], target(row))
+            for row in entries(kind)
+        ]
+
+    def fixed(value, symbol="≥"):
+        return lambda _: (value, symbol)
+
+    if section == "3.4.1":
+        reference = [(label(row), [("B0", row["arms"].get("B0", {}).get("reference_tflops_per_card")),
+                                   ("B1", row["arms"].get("B1", {}).get("reference_tflops_per_card"))], None)
+                     for row in entries("compute")]
+        efficiency = [(label(row), [("B1", row["arms"].get("B1", {}).get("efficiency_pct")
+                                    if row["arms"].get("B1", {}).get("reference_qualified") else None)],
+                       (limits["compute_efficiency_pct"], "≥")) for row in entries("compute")]
+        return [("Measured effective TFLOPS / card", arms("compute", "tflops_per_card")),
+                ("Reference TFLOPS / card", reference), ("B1 effective compute efficiency (%)", efficiency)]
+
+    if section == "3.4.2":
+        return [
+            ("Output throughput (token/s)", arms("throughput", "output_tps")),
+            ("Throughput gain (%)", comparisons("throughput", "throughput_gain_pct",
+                                               fixed(limits["throughput_gain_pct"]))),
+            ("Mean TTFT (ms)", arms("latency", "ttft_mean_ms")),
+            ("TTFT improvement (%)", comparisons("latency", "ttft_mean_ms",
+                                                 fixed(limits["latency_improvement_pct"]), "improvement_pct")),
+            ("Mean TPOT (ms)", arms("latency", "tpot_mean_ms")),
+            ("TPOT improvement (%)", comparisons("latency", "tpot_mean_ms",
+                                                 fixed(limits["latency_improvement_pct"]), "improvement_pct")),
+        ]
+
+    def rules(row):
+        return plan[row["case"]]["rules"]
+
+    if section == "3.4.3":
+        coverage = []
+        for row in entries("stability"):
+            case = plan[row["case"]]
+            result = row["arms"].get(case["observed_arm"], {})
+            total = result.get("tasks")
+            value = 100 * result["tasks_completed"] / total if total else None
+            coverage.append((f"{case['dataset']} / r{row['repeat']:03d}", [("Observed", value)], (100, "≥")))
+        tails = [(f"{metric.removesuffix('_ms').replace('_', ' ').upper()} / {label(row)}",
+                  [("Observed", row.get("comparison", {}).get("tail_ratios", {}).get(metric))],
+                  (rules(row)["max_tail_ratio"][metric], "≤"))
+                 for row in entries("context") for metric in rules(row)["max_tail_ratio"]]
+        return [
+            ("Frozen task list completed (%)", coverage),
+            ("Long / short throughput ratio", comparisons("context", "throughput_retention_ratio",
+                lambda row: (rules(row)["min_throughput_retention_ratio"], "≥"))),
+            ("Long / short tail latency ratio", tails),
+        ]
+
+    return [
+        ("CNY per million output tokens", arms("cost", "cny_per_million_output")),
+        ("Unit cost reduction (%)", comparisons("cost", "cost_reduction_pct", fixed(limits["cost_reduction_pct"]))),
+        ("Time-weighted AI Core utilization (%)", arms("cost", "ai_core_pct")),
+        ("AI Core improvement (percentage points)", comparisons("cost", "ai_core_gain_pp",
+                                                                lambda row: (rules(row)["min_util_gain_pp"], "≥"))),
+    ]
+
+
+def render_panels(plt, out, title, panels):
+    if not any(rows for _, rows in panels):
+        return False
+    heights = [max(1.9, 1.2 + .43 * len(rows)) for _, rows in panels]
+    fig, axes = plt.subplots(len(panels), figsize=(11.3, sum(heights) + .55),
+                             gridspec_kw={"height_ratios": heights}, squeeze=False, layout="constrained")
+    fig.suptitle(title, fontsize=17, fontweight="bold")
+    for ax, (metric, rows) in zip(axes[:, 0], panels):
+        ax.set_title(metric, loc="left", fontsize=11, fontweight="bold")
+        ax.set_axisbelow(True)
+        ax.grid(axis="x", color="#e4eaf1", linewidth=.8)
+        for spine in ("top", "right", "left"):
+            ax.spines[spine].set_visible(False)
+        if not rows:
+            ax.text(.5, .5, "No selected cases", ha="center", transform=ax.transAxes)
+            ax.set_yticks([])
+            continue
+        data = [value for _, values, target in rows for _, value in values if value is not None]
+        data.extend(target[0] for _, _, target in rows if target is not None)
+        low, high = min([0, *data]), max([0, *data])
+        spread = max(high - low, 1e-9)
+        ax.set_xlim(low - (.25 if low < 0 else .03) * spread, high + .28 * spread)
+        ax.axvline(0, color="#8692a2", linewidth=.8)
+        ax.set_yticks(range(len(rows)), [name for name, _, _ in rows], fontsize=8)
+        ax.invert_yaxis()
+        for index, (_, values, target) in enumerate(rows):
+            if all(value is None for _, value in values):
+                ax.annotate("No valid measurement", (0, index), xytext=(5, 0), textcoords="offset points",
+                            ha="left", va="center", color="#646b75", fontsize=8)
+            for position, (arm, value) in enumerate(values):
+                if value is None:
+                    continue
+                offset = .20 * (2 * position - len(values) + 1)
+                ax.barh(index + offset, value, height=.30, color=COLORS[arm])
+                side = 1 if value >= 0 else -1
+                caption = f"{arm} {value:.4g}" if arm != "Observed" else f"{value:.4g}"
+                ax.annotate(caption, (value, index + offset), xytext=(5 * side, 0),
+                            textcoords="offset points", ha="left" if side > 0 else "right",
+                            va="center", fontsize=8)
+            if target is not None:
+                threshold, symbol = target
+                ax.vlines(threshold, index - .41, index + .41, color="#813725", linestyle="--", linewidth=1.4)
+                ax.annotate(f"{symbol}{threshold:.4g}", (threshold, index + .33), xytext=(4, 0),
+                            textcoords="offset points", color="#813725", va="top", fontsize=7.5)
+    fig.savefig(out, dpi=165, facecolor="white")
+    plt.close(fig)
+    return True
+
+
+def render_context_trends(plt, path, row):
+    curves = {arm: run.get("trend_windows", []) for arm, run in row["arms"].items()}
+    if not any(curves.values()):
+        return False
+    fields = (("output_tps", "Output throughput (token/s)"), ("ttft_p95_ms", "TTFT P95 (ms)"),
+              ("ttft_p99_ms", "TTFT P99 (ms)"), ("tpot_p95_ms", "TPOT P95 (ms)"), ("tpot_p99_ms", "TPOT P99 (ms)"))
+    fig, axes = plt.subplots(len(fields), figsize=(9.4, 10.2), sharex=True, layout="constrained")
+    fig.suptitle(f"4K / 16K window trends • {label(row)}", fontsize=16, fontweight="bold")
+    for ax, (field, title) in zip(axes, fields):
+        for arm, windows in curves.items():
+            if not windows:
+                continue
+            origin = windows[0]["start_s"]
+            seconds = [(item["start_s"] + item["end_s"]) / 2 - origin for item in windows]
+            values = [item[field] if item[field] is not None else float("nan") for item in windows]
+            if arm == "4K":
+                ax.plot(seconds, values, "o--", markersize=6, markerfacecolor="none",
+                        linewidth=1.2, label=arm, color=COLORS[arm], zorder=3)
+            else:
+                ax.plot(seconds, values, ".-", linewidth=1.5, label=arm, color=COLORS[arm])
+        ax.set_title(title, loc="left", fontsize=10)
+        ax.grid(color="#e4eaf1")
+    axes[0].legend(loc="best", frameon=False)
+    axes[-1].set_xlabel("Seconds from measurement start")
+    fig.savefig(path, dpi=165, facecolor="white")
+    plt.close(fig)
+    return True
+
+
+def csv_rows(value, path=()):
+    if isinstance(value, dict):
+        for key, item in value.items():
+            yield from csv_rows(item, (*path, key))
+    elif isinstance(value, list):
+        for index, item in enumerate(value, 1):
+            yield from csv_rows(item, (*path, str(index)))
+    elif value is not None:
+        yield ".".join(path), value
+
+
+def write_report(out, cases, summary, plt):
+    charts = out / "charts"
+    charts.mkdir()
+    plan = {case["id"]: case for case in cases}
+    blocks = []
+    with (out / "metrics.csv").open("w", encoding="utf-8-sig", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(("section", "case", "repeat", "arm", "field", "value", "status"))
+        for section, title, kinds, file_name in SECTIONS:
+            rows = [row for row in summary["results"] if row["kind"] in kinds]
+            panels = panels_for(section, rows, plan, summary["thresholds"])
+            figures = []
+            if render_panels(plt, charts / file_name, section + "  vLLM-HUST", panels):
+                figures.append(file_name)
+            lines = []
+            for row in rows:
+                for arm, result in (*row["arms"].items(), ("comparison", row.get("comparison", {})),
+                                    ("criteria", row.get("checks", {}))):
+                    for metric, value in csv_rows(result):
+                        writer.writerow((section, row["case"], row["repeat"], arm, metric, value, row["status"]))
+                folder = f"{row['case']}/r{row['repeat']:03d}/"
+                reason = row.get("reason", "")
+                lines.append(f'<tr><td><a href="{folder}">{escape(label(row))}</a></td>'
+                             f'<td>{LABELS[row["status"]]}</td><td>{escape(reason)}</td></tr>')
+                if row["kind"] == "context":
+                    trend_name = f"{row['case']}-r{row['repeat']:03d}-windows.png"
+                    if render_context_trends(plt, charts / trend_name, row):
+                        figures.append(trend_name)
+            figure_html = "".join(f'<figure><a href="charts/{name}"><img src="charts/{name}" alt="{title}"></a></figure>'
+                                  for name in figures)
+            status = LABELS[summary["targets"][section]]
+            blocks.append(f'<section><h2>{section} {title}</h2><p>{status}</p>{figure_html}'
+                          '<table><thead><tr><th>用例与轮次</th><th>判定</th><th>原因</th></tr></thead>'
+                          f'<tbody>{"".join(lines)}</tbody></table></section>')
+    (out / "report.html").write_text(
+        '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        '<title>vLLM-HUST 推理测试结果</title>'
+        '<style>body{font:16px/1.55 system-ui,sans-serif;margin:30px auto;max-width:1080px;padding:0 18px;'
+        'color:#182331}section{margin:38px 0}img{display:block;width:100%;height:auto}'
+        'figure{margin:15px 0}table{border-collapse:collapse;width:100%;font-size:.9rem}'
+        'th,td{border:1px solid #dae1e9;text-align:left;padding:8px;overflow-wrap:anywhere}'
+        'th{background:#f1f4f8}a{color:#155775}code{overflow-wrap:anywhere}</style></head>'
+        '<body><h1>vLLM-HUST 推理测试结果</h1>'
+        f'<p><strong>{OVERALL_LABELS[summary["overall_status"]]}</strong>　执行清单 <code>{summary["plan_sha256"]}</code></p>'
+        '<p><a href="metrics.csv">指标表 CSV</a> · <a href="summary.json">完整指标 JSON</a> · '
+        '<a href="checksums.json">归档校验清单</a></p>'
+        + "".join(blocks) + '</body></html>\n', encoding="utf-8",
+    )
+
