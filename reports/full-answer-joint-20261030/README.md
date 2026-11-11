@@ -57,6 +57,9 @@ B0复用已封存原件；B1预热24/40、正式408/183，共655请求无失败�
 
 ## 原件、复算与历史
 
+- B1 r4 冻结原件与同轮运行配置可在私有仓库 `vLLM-HUST/vllm-hust-engine` 的 Release `full-answer-b1-20261030-r4` 调阅。原件为
+  `full-answer-frozen-sources-20261030-r4.tar.gz`，SHA256 为
+  `3b13f565c2b94c4c1ba7dbfa1a1a3ac6af222085ef4e74fefe50906a3bd9c961`，与[本轮汇总](joint-summary.json)一致。
 - [V1.03上线与归档回执](delivery-v103.json)：合并/CI、生产中英文/桌面移动/明暗浏览器、Release下载与存储SHA回验；保留本机HTTPS传输失败，不扩大线上字节核验范围。
 - [线上发布清单原始响应](production-manifest-v103.json)：独立生产浏览器留存的完整字节，采集流程与SHA见交付回执；不是本地重建替代。
 - [逐题标量及配对汇总](joint-summary.json)：完整200×2标量、每题原SSE哈希、实际版本、配置、双卡采样、报价与公式。公开标量由独立原SSE重建/原评分器复核产生，不包含题文、gold或全文回答。
