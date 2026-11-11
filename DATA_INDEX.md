@@ -5,6 +5,8 @@
 
 ## PegaFlow 本地缓存恢复慢尾归因（2026-11-10）
 
+统一交接入口：[PegaFlow 缓存恢复优化与实验交接](reports/pegaflow-restore-causal-20261110/HANDOFF-20261111.md)。
+
 [跨宿主机调查记录](reports/pegaflow-restore-causal-20261110/README.md)：四张 910B2 的 178 次固定缓冲区恢复， 以及独立
 CANN、内存来源、任务数量和模型保存失败对照；追加
 [IPC 与多 stream 干预](reports/pegaflow-restore-causal-20261110/FOLLOWUP.md)及完整模型验证。
