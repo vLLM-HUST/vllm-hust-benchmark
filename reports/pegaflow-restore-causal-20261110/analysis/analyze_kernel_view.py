@@ -16,23 +16,41 @@ def channel(text):
     hw = re.search(r"hw info: sq status (\d+) sq head (\d+) sq tail (\d+)", text)
     if not (sq and tx and hw):
         return None
-    return dict(sq=int(sq[1]), cached_head=int(sq[2]), cached_tail=int(sq[3]),
-                forwarded_entries=int(tx[1]), hardware_status=int(hw[1]),
-                hardware_head=int(hw[2]), hardware_tail=int(hw[3]))
+    return dict(
+        sq=int(sq[1]),
+        cached_head=int(sq[2]),
+        cached_tail=int(sq[3]),
+        forwarded_entries=int(tx[1]),
+        hardware_status=int(hw[1]),
+        hardware_head=int(hw[2]),
+        hardware_tail=int(hw[3]),
+    )
 
 
 def summarize(root):
     host = root / "hust-zsx-81"
     result = {"native": {}, "standalone": {}}
     for directory in sorted(host.glob("native-kernel-view-*-device1")):
-        ops = [row for row in jsonl(directory / "operations.jsonl")
-               if row["event"] == "restore"]
+        ops = [
+            row
+            for row in jsonl(directory / "operations.jsonl")
+            if row["event"] == "restore"
+        ]
         frames = jsonl(directory / "kernel-queue.jsonl")
         result["native"][directory.name] = {
             "completed": json.loads((directory / "done.json").read_text()),
-            "restores": [{k: r[k] for k in
-                          ["phase", "complete_s", "verified_tag_count", "descriptors"]}
-                         for r in ops],
+            "restores": [
+                {
+                    k: r[k]
+                    for k in [
+                        "phase",
+                        "complete_s",
+                        "verified_tag_count",
+                        "descriptors",
+                    ]
+                }
+                for r in ops
+            ],
             "frames": [],
         }
         for frame in frames:
@@ -42,11 +60,14 @@ def summarize(root):
                     parsed = channel(row.get("text", ""))
                     if parsed is not None:
                         channels.append({"path": path, **parsed})
-            result["native"][directory.name]["frames"].append({
-                "when": frame["when"],
-                "wall_read_ms": (frame["end_ns"] - frame["begin_ns"]) / 1e6,
-                "direct_channel_count": len(channels), "channels": channels,
-            })
+            result["native"][directory.name]["frames"].append(
+                {
+                    "when": frame["when"],
+                    "wall_read_ms": (frame["end_ns"] - frame["begin_ns"]) / 1e6,
+                    "direct_channel_count": len(channels),
+                    "channels": channels,
+                }
+            )
     for directory in sorted(host.glob("kernel-queue-calibration*-device0")):
         output = jsonl(directory / "stdout.jsonl")
         totals = [row for row in output if "wall_ns" in row][-1]
@@ -62,8 +83,9 @@ def summarize(root):
                     continue
                 item = {"begin_ns": row["begin_ns"], **parsed}
                 if queries:
-                    closest = min(queries, key=lambda q: abs(
-                        q["monotonic_ns"] - row["begin_ns"]))
+                    closest = min(
+                        queries, key=lambda q: abs(q["monotonic_ns"] - row["begin_ns"])
+                    )
                     delta = (closest["monotonic_ns"] - row["begin_ns"]) / 1e6
                     if abs(delta) <= 20:
                         item["nearest_hal_query"] = closest
@@ -71,7 +93,8 @@ def summarize(root):
                 matches.append(item)
         result["standalone"][directory.name] = {
             "completed": json.loads((directory / "done.json").read_text()),
-            "copy_result": totals, "channel_frames": matches,
+            "copy_result": totals,
+            "channel_frames": matches,
         }
     return result
 

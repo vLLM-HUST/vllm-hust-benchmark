@@ -5,22 +5,22 @@
 
 ## PegaFlow 本地缓存恢复慢尾归因（2026-11-10）
 
-[跨宿主机调查记录](reports/pegaflow-restore-causal-20261110/README.md)：四张 910B2 的 178 次固定缓冲区恢复，
-以及独立 CANN、内存来源、任务数量和模型保存失败对照；追加 [IPC 与多 stream 干预](reports/pegaflow-restore-causal-20261110/FOLLOWUP.md)及完整模型验证。
-[原宿主机续测与设备时间线](reports/pegaflow-restore-causal-20261110/HOST-RETURN.md)补充 98 次原生恢复：
-严重慢化重新出现，多 stream 未稳定修复；完整任务记录显示，恢复变慢主要伴随任务间空档增加。
+[跨宿主机调查记录](reports/pegaflow-restore-causal-20261110/README.md)：四张 910B2 的 178 次固定缓冲区恢复， 以及独立
+CANN、内存来源、任务数量和模型保存失败对照；追加
+[IPC 与多 stream 干预](reports/pegaflow-restore-causal-20261110/FOLLOWUP.md)及完整模型验证。
+[原宿主机续测与设备时间线](reports/pegaflow-restore-causal-20261110/HOST-RETURN.md)补充 98 次原生恢复： 严重慢化重新出现，多
+stream 未稳定修复；完整任务记录显示，恢复变慢主要伴随任务间空档增加。
 [异步路径续查](reports/pegaflow-restore-causal-20261110/ASYNC-PATH.md)再补充 90 次原生恢复及接口、NUMA、锁和设备队列对照；
-将空档定位到批次接口返回之后，并保留底层触发原因的开放状态。
-[驱动与队列推进](reports/pegaflow-restore-causal-20261110/QUEUES.md)补充 47 次恢复及独立队列标定，
-记录驱动接收后数秒驻留和测量影响，区分已定位的阶段与仍待确认的触发原因。
+将空档定位到批次接口返回之后，并保留底层触发原因的开放状态。 [驱动与队列推进](reports/pegaflow-restore-causal-20261110/QUEUES.md)补充 47
+次恢复及独立队列标定， 记录驱动接收后数秒驻留和测量影响，区分已定位的阶段与仍待确认的触发原因。
 [内核通道观测](reports/pegaflow-restore-causal-20261110/KERNEL-VIEW.md)补充正常节点的方法标定、
 六次全标记原生恢复及慢节点继续采集的判别标准。
-[2026-11-11 续查](reports/pegaflow-restore-causal-20261110/RESUME-20261111.md)补充 34 次原生恢复、118 项独立 C 对照，
-记录驱动接收至硬件下发的长驻留、暂停进程干预、主机内存来源及 4GiB 严重慢尾。
-[DMA 内存准备因果对照](reports/pegaflow-restore-causal-20261110/CONTAINER-DMA-20261111.md)再追加 212 次原生恢复、
-50 项 C payload 和 18 项纯 DMA 准备对照，包含四卡可逆开关、随机配对与注册后仍慢的例外。
-[同地址直接 HAL 对照](reports/pegaflow-restore-causal-20261110/DIRECT-DMA-20261111.md)追加 76 次正式大小恢复和 12 次 pilot，
-比较 CANN 异步与预准备描述符的同步旁路，单列成本并继续验证驱动接收后、硬件下发前的驻留。
+[2026-11-11 续查](reports/pegaflow-restore-causal-20261110/RESUME-20261111.md)补充 34 次原生恢复、118 项独立 C
+对照， 记录驱动接收至硬件下发的长驻留、暂停进程干预、主机内存来源及 4GiB 严重慢尾。
+[DMA 内存准备因果对照](reports/pegaflow-restore-causal-20261110/CONTAINER-DMA-20261111.md)再追加 212 次原生恢复、 50
+项 C payload 和 18 项纯 DMA 准备对照，包含四卡可逆开关、随机配对与注册后仍慢的例外。
+[同地址直接 HAL 对照](reports/pegaflow-restore-causal-20261110/DIRECT-DMA-20261111.md)追加 76 次正式大小恢复和 12 次
+pilot， 比较 CANN 异步与预准备描述符的同步旁路，单列成本并继续验证驱动接收后、硬件下发前的驻留。
 
 ## PegaFlow 四卡模拟器标定（2026-10-29）
 
