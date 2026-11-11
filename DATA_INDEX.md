@@ -19,6 +19,8 @@
 记录驱动接收至硬件下发的长驻留、暂停进程干预、主机内存来源及 4GiB 严重慢尾。
 [DMA 内存准备因果对照](reports/pegaflow-restore-causal-20261110/CONTAINER-DMA-20261111.md)再追加 212 次原生恢复、
 50 项 C payload 和 18 项纯 DMA 准备对照，包含四卡可逆开关、随机配对与注册后仍慢的例外。
+[同地址直接 HAL 对照](reports/pegaflow-restore-causal-20261110/DIRECT-DMA-20261111.md)追加 76 次正式大小恢复和 12 次 pilot，
+比较 CANN 异步与预准备描述符的同步旁路，单列成本并继续验证驱动接收后、硬件下发前的驻留。
 
 ## PegaFlow 四卡模拟器标定（2026-10-29）
 
