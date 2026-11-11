@@ -17,6 +17,8 @@
 六次全标记原生恢复及慢节点继续采集的判别标准。
 [2026-11-11 续查](reports/pegaflow-restore-causal-20261110/RESUME-20261111.md)补充 34 次原生恢复、118 项独立 C 对照，
 记录驱动接收至硬件下发的长驻留、暂停进程干预、主机内存来源及 4GiB 严重慢尾。
+[DMA 内存准备因果对照](reports/pegaflow-restore-causal-20261110/CONTAINER-DMA-20261111.md)再追加 212 次原生恢复、
+50 项 C payload 和 18 项纯 DMA 准备对照，包含四卡可逆开关、随机配对与注册后仍慢的例外。
 
 ## PegaFlow 四卡模拟器标定（2026-10-29）
 
