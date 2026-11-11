@@ -1,6 +1,7 @@
 """Separate request, connector, native-copy and staging waits in frozen replay."""
 
 import argparse
+import datetime
 import json
 import statistics
 from pathlib import Path
@@ -61,6 +62,20 @@ def main():
                 over_120s=sum(r["elapsed_s"] > 120 for r in selected),
             )
         )
+        warnings = []
+        for path in (raw / "services").glob("D*-engine.log"):
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if " WARN " not in line and " ERROR " not in line:
+                    continue
+                epoch = datetime.datetime.fromisoformat(line.split()[0]).timestamp()
+                if start <= epoch <= end:
+                    warnings.append(
+                        dict(node=path.name.split("-", 1)[0], epoch_s=epoch, line=line)
+                    )
+        output["native_by_condition"][-1]["native_warnings"] = warnings
+        output["native_by_condition"][-1]["pool_exhausted_records"] = sum(
+            "Pinned memory pool exhausted" in r["line"] for r in warnings
+        )
         for request in rows(directory / "requests.jsonl"):
             suffix = request["id"].rsplit("-", 1)[-1]
             focus = ("repeat" in directory.name and suffix in ("0110", "0185")) or (
@@ -91,6 +106,37 @@ def main():
                 and begin_s <= r["epoch_s"] <= complete_s
             ]
             job = min(jobs, key=lambda r: complete_s - r["epoch_s"]) if jobs else None
+            overlapping_syncs = []
+            for row in rows(raw / f"services/{node}-copy-api.jsonl"):
+                if row["event"] != "sync":
+                    continue
+                api_start = row["start_ns"] / 1e9 + mono_offset
+                api_end = row["end_ns"] / 1e9 + mono_offset
+                if (
+                    api_end - api_start >= 1
+                    and api_start <= complete_s
+                    and api_end >= begin_s
+                ):
+                    overlapping_syncs.append(row)
+            schedules = []
+            for trace in (raw / "traces" / node).glob("*.jsonl"):
+                schedules.extend(
+                    r
+                    for r in rows(trace)
+                    if r["event"] == "schedule"
+                    and begin_s <= r["epoch_ns"] / 1e9 <= complete_s + 1
+                )
+            schedules.sort(key=lambda r: r["epoch_ns"])
+            gaps = [
+                dict(
+                    start_ns=a["epoch_ns"],
+                    end_ns=b["epoch_ns"],
+                    duration_s=(b["epoch_ns"] - a["epoch_ns"]) / 1e9,
+                    preceding_running=a["running"],
+                )
+                for a, b in zip(schedules, schedules[1:])
+                if b["epoch_ns"] - a["epoch_ns"] > 1e9
+            ]
             calls = (
                 []
                 if job is None
@@ -135,6 +181,8 @@ def main():
                     ),
                     cpu_cgroup_delta=delta,
                     cgroup_sample_count=len(window),
+                    overlapping_native_syncs=overlapping_syncs,
+                    scheduler_gaps_over_1s=gaps,
                     interpretation="Event section includes synchronize, destroy and create; callback includes queue and polling.",
                 )
             )

@@ -5,42 +5,115 @@
       "jobs": 180,
       "bytes": 161010941952,
       "max_s": 3.57573,
-      "over_120s": 0
+      "over_120s": 0,
+      "native_warnings": [],
+      "pool_exhausted_records": 0
     },
     {
       "label": "random-dma-cap16-4sessions-rps3-s17",
       "jobs": 175,
       "bytes": 146314100736,
       "max_s": 4.45963,
-      "over_120s": 0
+      "over_120s": 0,
+      "native_warnings": [],
+      "pool_exhausted_records": 0
     },
     {
       "label": "random-dma-cap16-6sessions-rps3-s17",
       "jobs": 262,
       "bytes": 382369529856,
       "max_s": 128.08335,
-      "over_120s": 1
+      "over_120s": 1,
+      "native_warnings": [
+        {
+          "node": "D0",
+          "epoch_s": 1794379734.914883,
+          "line": "2026-11-11T06:48:54.914883+00:00  ERROR pegaflow_core::storage: mod.rs:402 Pinned memory pool exhausted; cannot satisfy allocation: requested=5.2 GiB used=16.5 GiB total=24.0 GiB numa=Some(NumaNode(6))"
+        },
+        {
+          "node": "D0",
+          "epoch_s": 1794379734.915074,
+          "line": "2026-11-11T06:48:54.915074+00:00   WARN pegaflow_core::backing::rdma_fetch: rdma_fetch.rs:331 RDMA transfer from 192.168.0.4:38750 failed: failed to allocate slab (5586812928 bytes) for NUMA6"
+        },
+        {
+          "node": "D0",
+          "epoch_s": 1794379902.184772,
+          "line": "2026-11-11T06:51:42.184772+00:00  ERROR pegaflow_core::storage: mod.rs:402 Pinned memory pool exhausted; cannot satisfy allocation: requested=10.7 GiB used=7.0 GiB total=24.0 GiB numa=Some(NumaNode(6))"
+        },
+        {
+          "node": "D0",
+          "epoch_s": 1794379902.185119,
+          "line": "2026-11-11T06:51:42.185119+00:00   WARN pegaflow_core::backing::rdma_fetch: rdma_fetch.rs:331 RDMA transfer from 192.168.0.4:38750 failed: failed to allocate slab (11525947392 bytes) for NUMA6"
+        },
+        {
+          "node": "D0",
+          "epoch_s": 1794380040.117706,
+          "line": "2026-11-11T06:54:00.117706+00:00  ERROR pegaflow_core::storage: mod.rs:402 Pinned memory pool exhausted; cannot satisfy allocation: requested=8.9 GiB used=13.2 GiB total=24.0 GiB numa=Some(NumaNode(0))"
+        },
+        {
+          "node": "D0",
+          "epoch_s": 1794380040.118048,
+          "line": "2026-11-11T06:54:00.118048+00:00   WARN pegaflow_core::backing::rdma_fetch: rdma_fetch.rs:331 RDMA transfer from 192.168.0.4:38751 failed: failed to allocate slab (9512681472 bytes) for NUMA0"
+        },
+        {
+          "node": "D0",
+          "epoch_s": 1794380170.73891,
+          "line": "2026-11-11T06:56:10.738910+00:00  ERROR pegaflow_core::storage: mod.rs:402 Pinned memory pool exhausted; cannot satisfy allocation: requested=7.6 GiB used=8.5 GiB total=24.0 GiB numa=Some(NumaNode(0))"
+        },
+        {
+          "node": "D0",
+          "epoch_s": 1794380170.740854,
+          "line": "2026-11-11T06:56:10.740854+00:00   WARN pegaflow_core::backing::rdma_fetch: rdma_fetch.rs:331 RDMA transfer from 192.168.0.4:38751 failed: failed to allocate slab (8204058624 bytes) for NUMA0"
+        },
+        {
+          "node": "D0",
+          "epoch_s": 1794380381.68811,
+          "line": "2026-11-11T06:59:41.688110+00:00  ERROR pegaflow_core::storage: mod.rs:402 Pinned memory pool exhausted; cannot satisfy allocation: requested=7.2 GiB used=11.0 GiB total=24.0 GiB numa=Some(NumaNode(6))"
+        },
+        {
+          "node": "D0",
+          "epoch_s": 1794380381.688363,
+          "line": "2026-11-11T06:59:41.688363+00:00   WARN pegaflow_core::backing::rdma_fetch: rdma_fetch.rs:331 RDMA transfer from 192.168.0.4:38750 failed: failed to allocate slab (7700742144 bytes) for NUMA6"
+        },
+        {
+          "node": "D0",
+          "epoch_s": 1794380467.332746,
+          "line": "2026-11-11T07:01:07.332746+00:00  ERROR pegaflow_core::storage: mod.rs:402 Pinned memory pool exhausted; cannot satisfy allocation: requested=6.0 GiB used=17.3 GiB total=24.0 GiB numa=Some(NumaNode(6))"
+        },
+        {
+          "node": "D0",
+          "epoch_s": 1794380467.332961,
+          "line": "2026-11-11T07:01:07.332961+00:00   WARN pegaflow_core::backing::rdma_fetch: rdma_fetch.rs:331 RDMA transfer from 192.168.0.4:38750 failed: failed to allocate slab (6392119296 bytes) for NUMA6"
+        }
+      ],
+      "pool_exhausted_records": 6
     },
     {
       "label": "random-dma-repeat-4sessions-rps3-s17",
       "jobs": 174,
       "bytes": 121978748928,
       "max_s": 14.50976,
-      "over_120s": 0
+      "over_120s": 0,
+      "native_warnings": [],
+      "pool_exhausted_records": 0
     },
     {
       "label": "random-dma-stage-4sessions-rps3-s17",
       "jobs": 177,
       "bytes": 101770592256,
       "max_s": 7.9025799999999995,
-      "over_120s": 0
+      "over_120s": 0,
+      "native_warnings": [],
+      "pool_exhausted_records": 0
     },
     {
       "label": "sticky-dma-stage-4sessions-rps3-s17",
       "jobs": 168,
       "bytes": 40315650048,
       "max_s": 10.17724,
-      "over_120s": 0
+      "over_120s": 0,
+      "native_warnings": [],
+      "pool_exhausted_records": 0
     }
   ],
   "focus": [
@@ -181,6 +254,74 @@
         "throttled_usec": 79421
       },
       "cgroup_sample_count": 125,
+      "overlapping_native_syncs": [
+        {
+          "event": "sync",
+          "epoch_ns": 1794379739998030905,
+          "start_ns": 4336272467492475,
+          "end_ns": 4336358515103349,
+          "thread_cpu_ns": 6140898840,
+          "pid": 11215,
+          "tid": 24136,
+          "cpu": 70,
+          "device": 0,
+          "stream": "0xfff8b4000ed8",
+          "copies": 0,
+          "bytes": 0,
+          "src_runs": 0,
+          "dst_runs": 0,
+          "minor_faults": 0,
+          "major_faults": 0,
+          "voluntary_switches": 797645,
+          "involuntary_switches": 33,
+          "src_first": "0x0",
+          "dst_first": "0x0",
+          "result": 0
+        },
+        {
+          "event": "sync",
+          "epoch_ns": 1794379861895066202,
+          "start_ns": 4336394364527042,
+          "end_ns": 4336398289421519,
+          "thread_cpu_ns": 301161910,
+          "pid": 11215,
+          "tid": 24136,
+          "cpu": 69,
+          "device": 0,
+          "stream": "0xfff8b4000ed8",
+          "copies": 0,
+          "bytes": 0,
+          "src_runs": 0,
+          "dst_runs": 0,
+          "minor_faults": 0,
+          "major_faults": 0,
+          "voluntary_switches": 36204,
+          "involuntary_switches": 0,
+          "src_first": "0x0",
+          "dst_first": "0x0",
+          "result": 0
+        }
+      ],
+      "scheduler_gaps_over_1s": [
+        {
+          "start_ns": 1794379734948562371,
+          "end_ns": 1794379736010247738,
+          "duration_s": 1.061685367,
+          "preceding_running": 2
+        },
+        {
+          "start_ns": 1794379736010247738,
+          "end_ns": 1794379826056071373,
+          "duration_s": 90.045823635,
+          "preceding_running": 2
+        },
+        {
+          "start_ns": 1794379826056071373,
+          "end_ns": 1794379865835067350,
+          "duration_s": 39.778995977,
+          "preceding_running": 2
+        }
+      ],
       "interpretation": "Event section includes synchronize, destroy and create; callback includes queue and polling."
     },
     {
@@ -320,6 +461,126 @@
         "throttled_usec": 0
       },
       "cgroup_sample_count": 65,
+      "overlapping_native_syncs": [
+        {
+          "event": "sync",
+          "epoch_ns": 1794380368355749052,
+          "start_ns": 4336900825209762,
+          "end_ns": 4336911903888728,
+          "thread_cpu_ns": 804862360,
+          "pid": 11215,
+          "tid": 24136,
+          "cpu": 29,
+          "device": 0,
+          "stream": "0xfff8b4000ed8",
+          "copies": 0,
+          "bytes": 0,
+          "src_runs": 0,
+          "dst_runs": 0,
+          "minor_faults": 0,
+          "major_faults": 0,
+          "voluntary_switches": 102680,
+          "involuntary_switches": 3,
+          "src_first": "0x0",
+          "dst_first": "0x0",
+          "result": 0
+        },
+        {
+          "event": "sync",
+          "epoch_ns": 1794380387045049158,
+          "start_ns": 4336919514510258,
+          "end_ns": 4336929982788473,
+          "thread_cpu_ns": 889925950,
+          "pid": 11215,
+          "tid": 24136,
+          "cpu": 93,
+          "device": 0,
+          "stream": "0xfff8b4000ed8",
+          "copies": 0,
+          "bytes": 0,
+          "src_runs": 0,
+          "dst_runs": 0,
+          "minor_faults": 0,
+          "major_faults": 0,
+          "voluntary_switches": 95594,
+          "involuntary_switches": 4,
+          "src_first": "0x0",
+          "dst_first": "0x0",
+          "result": 0
+        },
+        {
+          "event": "sync",
+          "epoch_ns": 1794380423986995865,
+          "start_ns": 4336956456456795,
+          "end_ns": 4336963035440945,
+          "thread_cpu_ns": 488626430,
+          "pid": 11215,
+          "tid": 24136,
+          "cpu": 79,
+          "device": 0,
+          "stream": "0xfff8b4000ed8",
+          "copies": 0,
+          "bytes": 0,
+          "src_runs": 0,
+          "dst_runs": 0,
+          "minor_faults": 0,
+          "major_faults": 0,
+          "voluntary_switches": 60797,
+          "involuntary_switches": 0,
+          "src_first": "0x0",
+          "dst_first": "0x0",
+          "result": 0
+        },
+        {
+          "event": "sync",
+          "epoch_ns": 1794380431205734249,
+          "start_ns": 4336963675195139,
+          "end_ns": 4336971668386618,
+          "thread_cpu_ns": 584270080,
+          "pid": 11215,
+          "tid": 24136,
+          "cpu": 72,
+          "device": 0,
+          "stream": "0xfff8b4000ed8",
+          "copies": 0,
+          "bytes": 0,
+          "src_runs": 0,
+          "dst_runs": 0,
+          "minor_faults": 0,
+          "major_faults": 0,
+          "voluntary_switches": 74006,
+          "involuntary_switches": 1,
+          "src_first": "0x0",
+          "dst_first": "0x0",
+          "result": 0
+        }
+      ],
+      "scheduler_gaps_over_1s": [
+        {
+          "start_ns": 1794380382196517260,
+          "end_ns": 1794380383235366966,
+          "duration_s": 1.038849706,
+          "preceding_running": 1
+        },
+        {
+          "start_ns": 1794380383235366966,
+          "end_ns": 1794380397523114278,
+          "duration_s": 14.287747312,
+          "preceding_running": 1
+        },
+        {
+          "start_ns": 1794380397523114278,
+          "end_ns": 1794380430575717216,
+          "duration_s": 33.052602938,
+          "preceding_running": 1
+        },
+        {
+          "start_ns": 1794380430575717216,
+          "end_ns": 1794380439209103990,
+          "duration_s": 8.633386774,
+          "preceding_running": 1
+        }
+      ],
       "interpretation": "Event section includes synchronize, destroy and create; callback includes queue and polling."
     },
     {
@@ -1064,6 +1325,51 @@
         "throttled_usec": 0
       },
       "cgroup_sample_count": 13,
+      "overlapping_native_syncs": [
+        {
+          "event": "sync",
+          "epoch_ns": 1794378758807556284,
+          "start_ns": 4335291277017084,
+          "end_ns": 4335303428608215,
+          "thread_cpu_ns": 1485091180,
+          "pid": 11215,
+          "tid": 24136,
+          "cpu": 160,
+          "device": 0,
+          "stream": "0xfff8b4000ed8",
+          "copies": 0,
+          "bytes": 0,
+          "src_runs": 0,
+          "dst_runs": 0,
+          "minor_faults": 0,
+          "major_faults": 0,
+          "voluntary_switches": 106496,
+          "involuntary_switches": 13,
+          "src_first": "0x0",
+          "dst_first": "0x0",
+          "result": 0
+        }
+      ],
+      "scheduler_gaps_over_1s": [
+        {
+          "start_ns": 1794378758807710056,
+          "end_ns": 1794378764373524179,
+          "duration_s": 5.565814123,
+          "preceding_running": 1
+        },
+        {
+          "start_ns": 1794378764373524179,
+          "end_ns": 1794378766555800208,
+          "duration_s": 2.182276029,
+          "preceding_running": 1
+        },
+        {
+          "start_ns": 1794378766555800208,
+          "end_ns": 1794378770977918178,
+          "duration_s": 4.42211797,
+          "preceding_running": 1
+        }
+      ],
       "interpretation": "Event section includes synchronize, destroy and create; callback includes queue and polling."
     },
     {
@@ -1831,6 +2137,39 @@
         "throttled_usec": 0
       },
       "cgroup_sample_count": 4,
+      "overlapping_native_syncs": [
+        {
+          "event": "sync",
+          "epoch_ns": 1794379050812703516,
+          "start_ns": 4335583282164376,
+          "end_ns": 4335589103342800,
+          "thread_cpu_ns": 1033688790,
+          "pid": 11215,
+          "tid": 24136,
+          "cpu": 40,
+          "device": 0,
+          "stream": "0xfff8b4000ed8",
+          "copies": 0,
+          "bytes": 0,
+          "src_runs": 0,
+          "dst_runs": 0,
+          "minor_faults": 0,
+          "major_faults": 0,
+          "voluntary_switches": 47779,
+          "involuntary_switches": 0,
+          "src_first": "0x0",
+          "dst_first": "0x0",
+          "result": 0
+        }
+      ],
+      "scheduler_gaps_over_1s": [
+        {
+          "start_ns": 1794379055464842175,
+          "end_ns": 1794379056639362427,
+          "duration_s": 1.174520252,
+          "preceding_running": 1
+        }
+      ],
       "interpretation": "Event section includes synchronize, destroy and create; callback includes queue and polling."
     }
   ]
