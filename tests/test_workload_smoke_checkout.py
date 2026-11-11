@@ -54,8 +54,16 @@ def test_real_git_sparse_patterns_preserve_inputs_and_complete_tracked_index(tmp
         "docs/workload-data/validation/example.json",
         "docs/reports/nested-software-reference.json",
         "src/example/__init__.py",
+        "reports/pegaflow-restore-causal-20261110/FOLLOWUP.md",
+        "reports/pegaflow-restore-causal-20261110/CONTAINER-DMA-20261111.md",
     ]
-    omit = ["reports/old.txt", "archive/old.txt", "submissions/old.txt"]
+    omit = [
+        "reports/old.txt",
+        "archive/old.txt",
+        "submissions/old.txt",
+        "reports/pegaflow-restore-causal-20261110/raw/README.md",
+        "reports/pegaflow-restore-causal-20261110/raw/data.tar.gz",
+    ]
     for name in keep + omit:
         path = repo / name
         path.parent.mkdir(parents=True, exist_ok=True)
