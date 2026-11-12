@@ -1,0 +1,136 @@
+"""Joint backend/wait phases with first-use initialization charged once.
+
+The outer seed chooses a whole source cohort for the run. This is a balanced
+source-cohort sensitivity ensemble, not an estimated population state law.
+Observed queues never enter the service draw. Unseparated RPC envelope is
+reported separately and applied after worker completion, outside its FIFO.
+"""
+from collections import defaultdict
+import math
+import random
+
+SOURCE_FILE='observed-restore-phases-v2-20261112.jsonl'
+
+
+class ObservedRestorePhases:
+    def __init__(self,rows,excluded,mode,seed):
+        self.groups=defaultdict(list)
+        selected=[r for r in rows if r['source_run'] not in excluded and r['mode']==mode]
+        sources=sorted({r['source_run'] for r in selected})
+        assert sources
+        self.source=sources[seed%len(sources)]
+        self.mode=mode
+        self.context_rounds=defaultdict(set)
+        for r in selected:
+            assert not r['request_latency_label_used'] and not r['observed_queue_resampled']
+            if 'source_save_open_at_load_dequeue' in r:
+                self.context_rounds[r['node'],r['source_save_open_at_load_dequeue']].add(r['source_run'])
+            if r['source_run']==self.source:self.groups[r['node']].append(r)
+        assert set(self.groups)=={'P0','P1','D0','D1'}
+        self.initialized=set()
+        self.rng={n:random.Random(f'joint-native-phases:{seed}:{n}') for n in self.groups}
+
+    def draw(self,node,size,*,save_open=None):
+        rows=self.groups[node]
+        distances=[abs(math.log2(size/r['byte_count'])) for r in rows]
+        radius=min(distances)+.5
+        eligible=[r for r,d in zip(rows,distances,strict=True) if d<=radius]
+        source=self.rng[node].choice(eligible);ratio=size/source['byte_count']
+        cold=sum(r['first_use_init_s'] for r in rows) if node not in self.initialized else 0.0
+        self.initialized.add(node)
+        aggregate=source.get('backend_warm_aggregate_s',source.get('host_submit_warm_s'))
+        assert aggregate is not None
+        phases=dict(descriptor_build_s=source['descriptor_build_s']*ratio)
+        if source.get('phase_schema',1)>=2:
+            phases.update(backend_other_s=source['backend_other_s']*ratio,
+                          staging_event_wait_s=source['staging_event_wait_s']*ratio,
+                          staging_CPU_copy_s=source['staging_CPU_copy_s']*ratio,
+                          staging_submit_s=source['staging_submit_s']*ratio)
+        else:
+            phases['backend_unseparated_s']=aggregate*ratio
+        phases.update(
+                    # Final synchronization is an observed completion/wait
+                    # envelope, never a claimed pure bandwidth measurement.
+                    final_sync_s=source['final_sync_s'],signal_completion_s=source['signal_completion_s'],
+                    other_worker_s=source['other_worker_s'],first_use_init_s=cold)
+        # Keep the old addition order and aggregate exactly. Reporting more
+        # phases must not perturb event ties or claim a timing improvement.
+        service=sum((source['descriptor_build_s']*ratio,aggregate*ratio,
+                     source['final_sync_s'],source['signal_completion_s'],source['other_worker_s'],cold))
+        assert math.isclose(sum(phases.values()),service,rel_tol=0,abs_tol=1e-8)
+        byte_support=min(r['byte_count'] for r in rows)<=size<=max(r['byte_count'] for r in rows)
+        rounds=sorted(self.context_rounds.get((node,save_open),())) if save_open is not None else []
+        matches=source.get('source_save_open_at_load_dequeue') is save_open if save_open is not None else True
+        state_support=(len(rounds)>=2 and matches) if save_open is not None else True
+        return dict(source=source,phases=phases,worker_service_s=service,
+                    in_feature_support=byte_support and state_support,in_byte_support=byte_support,
+                    opposite_direction_context=dict(simulated_native_save_open=save_open,
+                        independent_source_rounds=rounds,source_save_open=source.get('source_save_open_at_load_dequeue'),
+                        selected_source_matches_state=matches,state_supported=state_support,
+                        context_conditioning_used=False,source_future_save_completion_used=False),
+                    source_cohort=self.source,mode=self.mode)
+
+
+class PhaseSeparatedLoadSampler:
+    def __init__(self,bank,seed,*args,restore_phase_rows,restore_phase_mode,**kwargs):
+        super().__init__(bank,seed,*args,**kwargs)
+        self.restore_phases=ObservedRestorePhases(restore_phase_rows,bank.excluded,restore_phase_mode,seed)
+        self.phase_rpc_pending={}
+        self.phase_rpc_rng={n:random.Random(f'phase-rpc-envelope:{seed}:{n}') for n in self.restore_phases.groups}
+
+    def transform_restore_draw(self,node,size,now,request_ids,draw):
+        return draw
+
+    def independent_native(self,node,direction,size,now,request_ids):
+        if direction!='load' or size<=0:return super().independent_native(node,direction,size,now,request_ids)
+        # Only already assigned simulated operations define this state.
+        # No measured target elapsed time or future source completion is used.
+        draw=self.restore_phases.draw(node,size,save_open=(node,'save') in self.pending_native)
+        draw=self.transform_restore_draw(node,size,now,request_ids,draw)
+        overheads=self.gate.overhead[node]
+        assert overheads
+        distance=[abs(math.log2((1+r['byte_count'])/(1+size))) for r in overheads]
+        overhead=self.phase_rpc_rng[node].choice([r for r,d in zip(overheads,distance,strict=True) if d<=min(distance)+.5])
+        assert overhead['native_worker_queue_excluded']
+        assert node not in self.phase_rpc_pending
+        self.phase_rpc_pending[node]=overhead['overhead_s']
+        source=draw['source']
+        self.audit.append(dict(component='native_load',node=node,prediction_time_s=now,
+                               source_run=source['source_run'],source_pid=source['pid'],source_operation_id=source['operation_id'],
+                               source_bytes=source['byte_count'],bytes=size,in_feature_support=draw['in_feature_support'],
+                               predicted_service_s=draw['worker_service_s'],observed_queue_resampled=False,
+                               in_byte_support=draw['in_byte_support'],
+                               opposite_direction_context=draw['opposite_direction_context'],
+                               request_latency_label_used=False,stream_extra_wait_identified=False,
+                               native_restore_phases=dict(**draw['phases'],source_cohort=draw['source_cohort'],
+                                                          mode=draw['mode'],RPC_envelope_after_worker_s=overhead['overhead_s'],
+                                                          RPC_envelope_source_run=overhead['source_run'],
+                                                          population_state_probabilities_identified=False)))
+        if 'staging_completion_model' in draw:
+            self.audit[-1]['staging_completion_model']=draw['staging_completion_model']
+        return draw['worker_service_s']
+
+    def native(self,node,direction,size,now,request_ids=()):
+        result=super().native(node,direction,size,now,request_ids=request_ids)
+        if direction=='load' and size>0:
+            self.native_history_audit[-1]['history_distribution_enabled']=False
+            self.native_history_audit[-1]['service_scope']='worker_body_only; RPC envelope outside FIFO'
+        return result
+
+
+class PhaseSeparatedLoadCluster:
+    def native_load_post_worker_delay(self,node,tasks):
+        extra=self.components.phase_rpc_pending.pop(node,0.0)
+        for task in tasks:task['trace_row']['RPC_envelope_after_worker_s']=extra
+        return super().native_load_post_worker_delay(node,tasks)+extra
+
+    def run(self):
+        result=super().run()
+        assert not self.components.phase_rpc_pending
+        result['native_restore_phase_model']=dict(mode=self.components.restore_phases.mode,
+            source_cohort=self.components.restore_phases.source,observed_queues_resampled=False,
+            first_use_initialization_once_per_native_process=True,RPC_envelope_outside_worker_FIFO=True,
+            population_state_probabilities_identified=False,staging_GPU_event_wait_separated=True,
+            backend_remainder_is_not_exclusive_CPU_service=True,legacy_service_aggregate_preserved=True,
+            opposite_direction_context_conditioning_calibrated=False)
+        return result

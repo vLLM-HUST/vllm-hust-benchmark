@@ -1,0 +1,813 @@
+"""Reproducible initial forecasts using whole-run-excluded component evidence."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+from component_priors import AdmissionPriors, UnsupportedPrior
+from measured_components import ComponentBank
+from measured_cluster import MeasuredCluster
+from source_holdout import FAMILY_MANIFEST, InputFamilyHoldout
+
+ROOT = Path(__file__).resolve().parent
+DIRECTORY_TIE_RANDOM_OFFSET = 173000
+PRIMARY_INPUT_MANIFEST_SHA256 = "23a6d215a041ca56029d1e4e933baf09ee0c11e970e31a939748a7e6bc7ad4fc"
+ADMIT_CONTEXT_FILE = "p-ingress-recent-admit-exposures.jsonl"
+THROTTLE_CONTEXT_FILE = "p-prelaunch-throttle-context.jsonl"
+SAVE_THROTTLE_CONTEXT_FILE = "p-prelaunch-save-throttle-context.jsonl"
+COMPLETION_RANK_FILE = "endpoint-completion-ranks.jsonl"
+
+
+def read_rows(name):
+    return [json.loads(line) for line in (ROOT / "evidence" / name).open()]
+
+
+def host_limits(wire_rate_bps=None):
+    result = {}
+    for host in ("ascend-81", "ascend-91"):
+        p = ROOT.parent / f"shared-resources-{host}.json"
+        evidence = json.loads(p.read_text())
+        quota, period = map(int, evidence["limits"]["/sys/fs/cgroup/cpu.max"].split())
+        assert quota % period == 0
+        assert evidence["limits"]["/sys/class/infiniband/mlx5_2/ports/1/rate"].startswith("100 Gb/sec")
+        result[host] = dict(cpu_cores=quota // period, rnic_bits_per_second=100_000_000_000,
+                            source=str(p), sha256=hashlib.sha256(p.read_bytes()).hexdigest())
+    from rdma_wire_scenario import apply_wire_rate
+    return apply_wire_rate(result, wire_rate_bps)
+
+
+def calibration_shell():
+    # Compute/save/load services are overridden by measured component models.
+    # Zero shell coefficients cannot themselves contribute a synthetic cost.
+    result = dict(nodes={}, service={})
+    for node in ("P0", "P1", "D0", "D1"):
+        result["nodes"][node] = dict(prefill=dict(coefficients=[0.0] * 5),
+                                      decode=dict(coefficients=[0.0] * 3),
+                                      dispatch_s=0.0, cleanup_s=0.0, join_s=0.0)
+        for operation in ("save", "load"):
+            result["service"][node + "-" + operation] = dict(intercept_s=0.0, seconds_per_gib=0.0)
+        result["service"][node + "-fetch"] = dict(coefficients=[0.0, 8 * 2**30 / 100_000_000_000])
+    return result
+
+
+def sealed_primary_workloads(directory, protocol, protocol_sha256):
+    """Read the bound exogenous cohort without opening any measured outcome."""
+    root = directory.resolve(strict=True)
+    receipt = root / "input-manifest.json"
+    raw = receipt.read_bytes()
+    manifest_sha256 = hashlib.sha256(raw).hexdigest()
+    assert manifest_sha256 == PRIMARY_INPUT_MANIFEST_SHA256, "The independently sealed primary input manifest changed"
+    manifest = json.loads(raw)
+    assert manifest["protocol_sha256"] == protocol_sha256
+    assert manifest["sealed_for_independent_main_validation"] and not manifest["primary_outcome_files_opened"]
+    assert not manifest["prediction_frozen"] and not manifest["numerical_acceptance_evaluated"]
+    assert manifest["seeds"] == protocol["seeds"] == list(range(32))
+    assert manifest["fixed_thresholds"] == protocol["metrics"] and manifest["gates"] == protocol["gates"]
+    assert manifest["requests_per_trajectory"] == 95
+    groups = manifest["primary_groups"]
+    assert len(groups) == len(protocol["primary_runs"]) == 8 and manifest["required_trajectories"] == 256
+    workloads, hashes = {}, {}
+    for group, declared in zip(groups,protocol["primary_runs"],strict=True):
+        run = declared["run"]
+        assert group["run"] == run and group["case"] == declared["case"] and run not in workloads
+        assert group["independently_audited_replicas"] == 4 and group["requests"] == 95
+        assert group["workload_file"] == f"workloads/{run}.json"
+        path = (root / group["workload_file"]).resolve(strict=True)
+        assert path.is_relative_to(root)
+        data = path.read_bytes()
+        assert hashlib.sha256(data).hexdigest() == group["workload_sha256"]
+        workload = json.loads(data)
+        assert workload["topology"] == "2P2D" and workload["provenance"]["run"] == run
+        assert not workload["provenance"]["request_timings_read"]
+        rows = workload["requests"]
+        assert [r["index"] for r in rows] == list(range(95)) and len({r["id"] for r in rows}) == 95
+        assert all(r["P_slot"] in (0,1) and r["D_slot"] in (0,1) for r in rows)
+        workloads[run] = workload
+        hashes[run] = group["workload_sha256"]
+    seal = dict(input_manifest_sha256=manifest_sha256, protocol_sha256=protocol_sha256,
+                primary_outcome_files_opened=False, required_trajectories=256, workload_sha256=hashes)
+    return workloads, seal
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run", action="append")
+    parser.add_argument("--seeds", type=int, default=32)
+    parser.add_argument("--output", default="development-component-v01")
+    parser.add_argument("--sealed-primary-inputs", type=Path,
+                        help="Use the entire sealed primary workload cohort for prediction only.")
+    parser.add_argument("--check-sealed-primary-inputs", action="store_true",
+                        help="Verify the input seal and stop before running any simulation.")
+    parser.add_argument("--online-completed-feedback", action="store_true")
+    parser.add_argument("--run-level-native-prior", action="store_true")
+    parser.add_argument("--connector-polling", action="store_true")
+    parser.add_argument("--replica-control-streams", action="store_true")
+    parser.add_argument("--deferred-native-load", action="store_true")
+    parser.add_argument("--native-host-pool", action="store_true")
+    parser.add_argument("--worker-load-feedback", action="store_true")
+    parser.add_argument("--native-history-prior", action="store_true")
+    parser.add_argument("--chunked-prefill-saves", action="store_true")
+    parser.add_argument("--rdma-protocol-phases", action="store_true")
+    parser.add_argument("--seeded-directory-ties", action="store_true")
+    parser.add_argument("--request-keyed-rdma-control", action="store_true")
+    parser.add_argument("--rdma-connection-state", action="store_true")
+    parser.add_argument("--rdma-peer-share", action="store_true")
+    parser.add_argument("--rdma-wire-rate-bps", type=float,
+                        help="Hypothetical constrained inter-host payload rate; keeps measured hardware rate in provenance.")
+    parser.add_argument("--rdma-empty-on-extent-failure", action="store_true")
+    parser.add_argument("--d-frame-probe-spacing", type=float)
+    parser.add_argument("--final-save-ack-gate", action="store_true")
+    parser.add_argument("--endpoint-transport", action="store_true")
+    parser.add_argument("--request-keyed-endpoint", action="store_true")
+    parser.add_argument("--endpoint-completion-rank", action="store_true")
+    parser.add_argument("--async-restore-slots", action="store_true")
+    parser.add_argument("--audit-d-scheduler-gates", action="store_true")
+    parser.add_argument("--p-ingress-gate", action="store_true")
+    parser.add_argument("--p-ingress-admit-context", choices=("pooled", "conditioned"))
+    parser.add_argument("--independent-execution-budget", action="store_true")
+    parser.add_argument("--independent-p-execution-shapes", action="store_true")
+    parser.add_argument("--independent-legacy-p-restore", action="store_true")
+    parser.add_argument("--independent-full-p-restore", action="store_true")
+    parser.add_argument("--contiguous-native-pool", action="store_true")
+    parser.add_argument("--polled-prefetch-publication", action="store_true")
+    parser.add_argument("--frame-native-load-batches", action="store_true")
+    parser.add_argument("--negative-prefetch-poll", action="store_true")
+    parser.add_argument("--async-directory-lookup", action="store_true")
+    parser.add_argument("--p-load-episode-prior", action="store_true")
+    parser.add_argument("--save-publication-boundary", action="store_true")
+    parser.add_argument("--audit-native-cache-membership", action="store_true")
+    parser.add_argument("--deduplicate-save-directory", action="store_true")
+    parser.add_argument("--owner-step-barrier", action="store_true")
+    parser.add_argument("--core-input-fifo", action="store_true")
+    parser.add_argument("--request-keyed-admission", action="store_true")
+    parser.add_argument("--d-core-frame-edges", action="store_true")
+    parser.add_argument("--prefill-save-preparation", action="store_true")
+    parser.add_argument("--decode-save-preparation", action="store_true")
+    parser.add_argument("--prefill-owner-output", action="store_true")
+    parser.add_argument("--p-save-load-open", action="store_true")
+    parser.add_argument("--scoped-gap-components", action="store_true")
+    parser.add_argument("--p-restore-onset-credit", action="store_true")
+    parser.add_argument("--p-native-sync-credit", action="store_true")
+    parser.add_argument("--p-native-sync-peer-donors", action="store_true")
+    parser.add_argument("--request-keyed-native-service", action="store_true")
+    parser.add_argument("--p1-sync-round-balance", action="store_true")
+    parser.add_argument("--p0-save-sync-episode", action="store_true")
+    parser.add_argument("--p1-save-onset-ordinal", action="store_true")
+    parser.add_argument("--p0-completed-save-context", choices=("pooled", "conditioned"))
+    parser.add_argument("--p-prelaunch-throttle", choices=("pooled", "conditioned"))
+    parser.add_argument("--p-prelaunch-save-throttle", choices=("pooled", "conditioned"))
+    parser.add_argument("--replica-execution-streams", action="store_true",
+                        help="Sample execution with independent streams per replica and prior family.")
+    parser.add_argument("--no-target-feedback", action="store_true",
+                        help="Run the same component model with no measured target-round timing feedback.")
+    parser.add_argument("--whole-input-family-holdout", action="store_true",
+                        help="Exclude every timing source with the target input family across all component priors.")
+    parser.add_argument("--d-session-affinity", action="store_true",
+                        help="Keep each session on one D replica, balanced by previously bound sessions; exploratory policy intervention.")
+    parser.add_argument("--native-restore-phase-mode", choices=("baseline", "dma"),
+                        help="Use retained independent joint restore phases, with run-level source-cohort uncertainty.")
+    parser.add_argument("--native-save-phase-cohort", action="store_true",
+                        help="Draw save RPC phases from the same independent native cohort as load; diagnostic envelope model, not identified DMA physics.")
+    parser.add_argument('--d-ingress-per-replica',action='store_true',
+                        help='Preserve independently qualified marginal D listener closures; common-host dependence remains unsupported.')
+    parser.add_argument('--native-staging-slots',type=int,choices=(2,4),
+                        help='Optional bounded ordered-stream completion model; equal256MiB capacity,2x128 or4x64MiB.')
+    args = parser.parse_args()
+    assert not args.d_session_affinity or (args.no_target_feedback and args.sealed_primary_inputs is None)
+    assert not args.native_restore_phase_mode or (args.no_target_feedback and args.native_history_prior
+                                                 and args.endpoint_transport and args.scoped_gap_components
+                                                 and args.sealed_primary_inputs is None)
+    assert not args.native_save_phase_cohort or (args.native_restore_phase_mode and not args.p_native_sync_credit
+                                                and not args.save_publication_boundary and not args.request_keyed_native_service)
+    assert not args.d_ingress_per_replica or (args.endpoint_transport and args.no_target_feedback)
+    assert not args.native_staging_slots or (args.native_restore_phase_mode=='dma' and args.native_save_phase_cohort
+        and args.deferred_native_load and args.no_target_feedback and args.sealed_primary_inputs is None)
+    assert not args.whole_input_family_holdout or args.no_target_feedback
+    assert not args.request_keyed_native_service or (args.no_target_feedback and args.p_native_sync_credit
+        and args.sealed_primary_inputs is None and not args.p_load_episode_prior
+        and not getattr(args, "p0_save_sync_episode", False) and not getattr(args, "p1_save_onset_ordinal", False)
+        and not getattr(args, "p_prelaunch_throttle", None) and not getattr(args, "p_prelaunch_save_throttle", None))
+    assert args.rdma_wire_rate_bps is None or (args.no_target_feedback and args.rdma_protocol_phases
+                                             and args.sealed_primary_inputs is None)
+    assert not args.replica_control_streams or args.connector_polling
+    assert not args.deferred_native_load or args.connector_polling
+    assert not args.native_host_pool or args.deferred_native_load
+    assert not args.worker_load_feedback or args.online_completed_feedback
+    assert not args.worker_load_feedback or not args.run_level_native_prior
+    assert not args.native_history_prior or (args.worker_load_feedback and args.native_host_pool)
+    assert not args.chunked_prefill_saves or args.native_host_pool
+    assert not args.rdma_protocol_phases or (args.native_history_prior and args.chunked_prefill_saves)
+    assert not args.seeded_directory_ties or (args.rdma_protocol_phases and args.no_target_feedback
+                                               and args.sealed_primary_inputs is None)
+    assert not args.request_keyed_rdma_control or (args.rdma_protocol_phases and args.no_target_feedback
+        and not args.rdma_connection_state and args.sealed_primary_inputs is None)
+    assert not args.rdma_connection_state or (args.rdma_protocol_phases and args.no_target_feedback and args.sealed_primary_inputs is None)
+    assert not args.rdma_peer_share or (args.rdma_protocol_phases and args.endpoint_transport
+                                       and args.no_target_feedback and args.sealed_primary_inputs is None)
+    assert not args.rdma_empty_on_extent_failure or (args.rdma_protocol_phases and args.contiguous_native_pool
+        and args.polled_prefetch_publication and args.no_target_feedback and args.sealed_primary_inputs is None
+        and not args.rdma_connection_state)
+    assert args.d_frame_probe_spacing is None or (args.rdma_peer_share and args.async_restore_slots
+        and args.polled_prefetch_publication and not args.async_directory_lookup)
+    assert not args.final_save_ack_gate or (args.native_history_prior and args.chunked_prefill_saves)
+    assert not args.endpoint_transport or (args.final_save_ack_gate and args.rdma_protocol_phases)
+    assert not args.request_keyed_endpoint or (args.endpoint_transport and args.no_target_feedback
+        and args.sealed_primary_inputs is None and not args.endpoint_completion_rank)
+    assert not args.endpoint_completion_rank or (args.endpoint_transport and args.no_target_feedback
+                                                and args.sealed_primary_inputs is None)
+    assert not args.async_restore_slots or args.endpoint_transport
+    assert not args.audit_d_scheduler_gates or (args.async_restore_slots and args.no_target_feedback
+                                                 and args.sealed_primary_inputs is None)
+    assert not args.p_ingress_gate or args.async_restore_slots
+    assert not args.p_ingress_admit_context or (args.p_ingress_gate and args.no_target_feedback
+                                               and args.sealed_primary_inputs is None)
+    assert not args.independent_execution_budget or args.async_restore_slots
+    assert not args.independent_p_execution_shapes or args.async_restore_slots
+    assert not args.independent_legacy_p_restore or args.native_history_prior
+    assert not args.independent_full_p_restore or args.native_history_prior
+    assert not args.contiguous_native_pool or (args.native_host_pool and args.rdma_protocol_phases)
+    assert not args.polled_prefetch_publication or args.async_restore_slots
+    assert not args.frame_native_load_batches or args.polled_prefetch_publication
+    assert not args.negative_prefetch_poll or args.polled_prefetch_publication
+    assert not args.async_directory_lookup or args.negative_prefetch_poll
+    assert not args.p_load_episode_prior or args.native_history_prior
+    assert not args.save_publication_boundary or args.native_host_pool
+    assert not args.audit_native_cache_membership or args.native_host_pool
+    assert not args.deduplicate_save_directory or args.native_host_pool
+    assert not args.d_core_frame_edges or args.frame_native_load_batches
+    assert not args.prefill_save_preparation or args.final_save_ack_gate
+    assert not args.decode_save_preparation or args.final_save_ack_gate
+    assert not args.prefill_owner_output or (args.owner_step_barrier and args.connector_polling)
+    assert not args.core_input_fifo or (args.owner_step_barrier and args.no_target_feedback
+                                       and args.sealed_primary_inputs is None)
+    assert not args.request_keyed_admission or (args.no_target_feedback and args.sealed_primary_inputs is None)
+    assert not args.p_save_load_open or args.native_history_prior
+    assert not args.scoped_gap_components or (args.native_history_prior and args.prefill_owner_output
+                                              and args.no_target_feedback and not args.p_load_episode_prior)
+    assert not args.replica_execution_streams or args.scoped_gap_components
+    assert not args.p_restore_onset_credit or (args.scoped_gap_components and args.no_target_feedback)
+    assert not args.p_native_sync_credit or (args.scoped_gap_components and args.no_target_feedback and not args.p_restore_onset_credit)
+    assert not args.p1_sync_round_balance or (args.p_native_sync_peer_donors and args.no_target_feedback
+        and args.sealed_primary_inputs is None)
+    assert not args.p_native_sync_peer_donors or args.p_native_sync_credit
+    assert not (args.p0_save_sync_episode or args.p1_save_onset_ordinal) or (args.p_native_sync_peer_donors and args.no_target_feedback
+        and args.sealed_primary_inputs is None and not args.p_prelaunch_throttle and not args.p_prelaunch_save_throttle)
+    assert not args.p0_completed_save_context or (args.p1_save_onset_ordinal and not args.p0_save_sync_episode)
+    assert not (args.p_prelaunch_throttle or args.p_prelaunch_save_throttle) or (
+        args.p_native_sync_peer_donors and args.no_target_feedback and args.sealed_primary_inputs is None)
+    assert 1 <= args.seeds <= 32
+    protocol_raw = (ROOT / "validation-protocol.json").read_bytes()
+    protocol = json.loads(protocol_raw)
+    reserved = [r["run"] for r in protocol["primary_runs"]]
+    family_holdout = InputFamilyHoldout(ROOT / "evidence" / FAMILY_MANIFEST) if args.whole_input_family_holdout else None
+    primary_workloads, primary_seal = {}, None
+    if args.sealed_primary_inputs is not None:
+        assert args.no_target_feedback and args.seeds == len(protocol["seeds"]) and not args.run
+        primary_workloads, primary_seal = sealed_primary_workloads(args.sealed_primary_inputs, protocol,
+                                                                   hashlib.sha256(protocol_raw).hexdigest())
+    if args.check_sealed_primary_inputs:
+        assert primary_seal is not None
+        print(json.dumps(primary_seal))
+        return
+    execution, native, admissions = (read_rows(n) for n in
+                                    ("execution-components.jsonl", "native-operations.jsonl", "admission-components.jsonl"))
+    feedback = read_rows("completed-native-feedback.jsonl") if args.online_completed_feedback and not args.no_target_feedback else []
+    control_rows = read_rows("control-frame-components.jsonl") if args.connector_polling else []
+    worker_rows = read_rows("completed-worker-load-feedback.jsonl") if args.worker_load_feedback and not args.no_target_feedback else []
+    overhead_rows = read_rows("worker-to-rpc-overhead.jsonl") if args.worker_load_feedback else []
+    rdma_rows = read_rows("rdma-stage-components.jsonl") if args.rdma_protocol_phases else []
+    if args.rdma_connection_state:
+        from rdma_protocol import CONNECTION_RANDOM_OFFSET, CONNECTION_STATE_FILE, RdmaConnectionPriors
+        connection_rows = read_rows(CONNECTION_STATE_FILE)
+        connection_states = {(r["source_run"], r["node"], r["source_summary_line"]): r["state"] for r in connection_rows}
+        assert len(connection_states) == len(connection_rows) == len(rdma_rows)
+        assert set(connection_states) == {(r["source_run"], r["target_node"], r["source_summary_line"]) for r in rdma_rows}
+        connection_families = {r["source_run"]: tuple(r["family"]) for r in connection_rows}
+        assert all(connection_families[r["source_run"]] == tuple(r["family"]) and r["source_run"] in r["family"] for r in connection_rows)
+        assert set(reserved).isdisjoint(connection_families)
+    endpoint_rows = read_rows("endpoint-components.jsonl") if args.endpoint_transport else []
+    completion_ranks = None
+    if args.endpoint_completion_rank:
+        rank_rows = read_rows(COMPLETION_RANK_FILE)
+        completion_ranks = {(r["source_run"], r["node"], r["source_index"]): r["rank"] for r in rank_rows}
+        assert len(completion_ranks) == len(rank_rows) and all(type(rank) is int and rank >= 0 for rank in completion_ranks.values())
+        assert set(completion_ranks) == {(r["source_run"], r["node"], r["source_index"]) for r in endpoint_rows}
+        assert set(reserved).isdisjoint(run for run, _, _ in completion_ranks)
+    p_gate_rows = read_rows("p-ingress-gate-episodes.jsonl") if args.p_ingress_gate else []
+    p_gate_context = read_rows(ADMIT_CONTEXT_FILE) if args.p_ingress_admit_context else []
+    execution_budget_rows = read_rows("independent-execution-budget.jsonl") if args.independent_execution_budget else []
+    p_execution_shape_rows = read_rows("independent-p-execution-shapes.jsonl") if args.independent_p_execution_shapes else []
+    legacy_restore_rows = read_rows("legacy-p-restore-worker.jsonl") if args.independent_legacy_p_restore else []
+    full_restore_rows = read_rows("independent-full-p-restore.jsonl") if args.independent_full_p_restore else []
+    p_episode_rows = read_rows("independent-p-load-episode-workers.jsonl") if args.p_load_episode_prior else []
+    save_publication_rows = read_rows("save-publication-boundaries.jsonl") if args.save_publication_boundary else []
+    directory_rows = read_rows("directory-prefix-phases.jsonl") if args.async_directory_lookup else []
+    d_edge_rows = read_rows("d-core-frame-edges.jsonl") if args.d_core_frame_edges else []
+    p_prepare_rows = read_rows("prefill-save-preparation-positions.jsonl") if args.prefill_save_preparation else []
+    d_prepare_rows = read_rows("decode-save-preparation-positions.jsonl") if args.decode_save_preparation else []
+    p_owner_rows = read_rows("prefill-owner-output-components.jsonl") if args.prefill_owner_output else []
+    p_save_tags = read_rows("p-save-load-open.jsonl") if args.p_save_load_open else []
+    gap_rows = read_rows("scoped-gap-components.jsonl") if args.scoped_gap_components else []
+    if args.native_restore_phase_mode:
+        from observed_restore_phases import SOURCE_FILE as RESTORE_PHASE_FILE, PhaseSeparatedLoadSampler, PhaseSeparatedLoadCluster
+        restore_phase_rows = read_rows(RESTORE_PHASE_FILE)
+    if args.native_save_phase_cohort:
+        from cohort_native_save import SOURCE_FILE as SAVE_PHASE_FILE, CohortNativeSaveSampler
+        native_save_phase_rows = read_rows(SAVE_PHASE_FILE)
+    if args.native_staging_slots:
+        from staging_completion_model import SOURCE_FILE as STAGING_COMPLETION_FILE,StagingCompletionLoadSampler,StagingCompletionCluster
+        staging_completion_rows=read_rows(STAGING_COMPLETION_FILE)
+    if args.d_ingress_per_replica:
+        from d_ingress_closure import SOURCE_FILE as D_CLOSURE_FILE,DIngressClosurePrior,DIngressClosureCluster
+        d_closure_rows=read_rows(D_CLOSURE_FILE)
+    if args.p_restore_onset_credit:
+        from p_restore_onset_sampler import SOURCE_FILE, RestoreOnsetSampler
+        restore_onset_rows = read_rows(SOURCE_FILE)
+    if args.p_native_sync_credit:
+        from native_sync_credit_sampler import SOURCE_FILE as NATIVE_SYNC_SOURCE, NativeSyncCreditSampler
+        native_sync_rows = read_rows(NATIVE_SYNC_SOURCE)
+    if args.p_prelaunch_throttle:
+        from p_prelaunch_throttle import PPrelaunchThrottle
+        throttle_rows = read_rows(THROTTLE_CONTEXT_FILE)
+        assert set(reserved).isdisjoint(row["run"] for row in throttle_rows)
+    if args.p0_save_sync_episode or args.p1_save_onset_ordinal:
+        from p_save_sync_episode import EPISODE_FILE, law_for_run
+        episode_rows = read_rows(EPISODE_FILE)
+    if args.p_prelaunch_save_throttle:
+        from p_prelaunch_throttle import PPrelaunchSaveThrottle
+        save_throttle_rows = read_rows(SAVE_THROTTLE_CONTEXT_FILE)
+        assert set(reserved).isdisjoint(row["run"] for row in save_throttle_rows)
+    output = ROOT / "forecasts" / args.output
+    assert not output.exists(), "Preserve previous forecasts; use an independent version name"
+    output.mkdir(parents=True)
+    optional = {"observed-restore-phases-20261111.jsonl": False,
+                "observed-restore-phases-v2-20261112.jsonl": bool(args.native_restore_phase_mode),
+                "observed-save-phases-20261112.jsonl": args.native_save_phase_cohort,
+                'staging-completion-profiles-20261112.jsonl':bool(args.native_staging_slots),
+                'D-ingress-per-replica-closures-20261112.jsonl':args.d_ingress_per_replica,
+                ADMIT_CONTEXT_FILE: bool(args.p_ingress_admit_context),
+                "rdma-connection-states.jsonl": args.rdma_connection_state,
+                COMPLETION_RANK_FILE: args.endpoint_completion_rank,
+                THROTTLE_CONTEXT_FILE: bool(args.p_prelaunch_throttle),
+                SAVE_THROTTLE_CONTEXT_FILE: bool(args.p_prelaunch_save_throttle),
+                "independent-p-load-episode-workers.jsonl": args.p_load_episode_prior,
+                "save-publication-boundaries.jsonl": args.save_publication_boundary,
+                "directory-prefix-phases.jsonl": args.async_directory_lookup,
+                "d-core-frame-edges.jsonl": args.d_core_frame_edges,
+                "prefill-save-preparation-positions.jsonl": args.prefill_save_preparation,
+                "decode-save-preparation-positions.jsonl": args.decode_save_preparation,
+                "prefill-owner-output-components.jsonl": args.prefill_owner_output,
+                "p-save-load-open.jsonl": args.p_save_load_open,
+                "scoped-gap-components.jsonl": args.scoped_gap_components,
+                "p-restore-onset-credit-source.jsonl": args.p_restore_onset_credit,
+                "p-native-sync-credit-source.jsonl": args.p_native_sync_credit,
+                "p-save-sync-episode-source.jsonl": args.p0_save_sync_episode or args.p1_save_onset_ordinal,
+                "completed-native-feedback.jsonl": not args.no_target_feedback,
+                "completed-worker-load-feedback.jsonl": not args.no_target_feedback}
+    sources = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in (ROOT / "evidence").glob("*.jsonl")
+               if optional.get(p.name, True)}
+    if family_holdout is not None:
+        family_holdout.validate_catalogue_hashes(sources)
+        sources[FAMILY_MANIFEST] = family_holdout.sha256
+    source_code = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in ROOT.glob("*.py")}
+    (output / "source-manifest.json").write_text(json.dumps(dict(evidence=sources, code=source_code), indent=2))
+    if primary_seal is not None:
+        (output / "primary-input-receipt.json").write_text(json.dumps(primary_seal,indent=2))
+    summaries = []
+    development_paths = {} if primary_seal else {p.stem:p for p in sorted((ROOT / "workloads").glob("*.json"))}
+    for run in (primary_workloads if primary_seal else development_paths):
+        if args.run and run not in args.run:
+            continue
+        if primary_seal:
+            workload, workload_sha256 = primary_workloads[run], primary_seal["workload_sha256"][run]
+        else:
+            assert run not in reserved, "Primary prediction requires the bound sealed input cohort"
+            raw = development_paths[run].read_bytes()
+            workload, workload_sha256 = json.loads(raw), hashlib.sha256(raw).hexdigest()
+        run_reserved = reserved if family_holdout is None else family_holdout.reserved_for(run, reserved)
+        routing_intervention = None
+        if args.d_session_affinity:
+            from session_affinity_routing import route_D_session_affinity
+            workload, routing_intervention = route_D_session_affinity(workload)
+        try:
+            bank = ComponentBank(execution, native, target_run=run, reserved_runs=run_reserved,
+                                 execution_budget_rows=execution_budget_rows, p_execution_shape_rows=p_execution_shape_rows)
+        except UnsupportedPrior as error:
+            summaries.append(dict(run=run, status="unsupported_prior", reason=str(error)))
+            continue
+        if args.independent_legacy_p_restore:
+            from legacy_p_restore_prior import add_legacy_p_restores
+            legacy_scope = add_legacy_p_restores(bank, legacy_restore_rows, overhead_rows)
+        if args.independent_full_p_restore:
+            full_scope = bank.add_full_p_restores(full_restore_rows)
+        prelaunch_throttle = None
+        if args.p_prelaunch_throttle:
+            prelaunch_throttle = PPrelaunchThrottle(throttle_rows, run, args.p_prelaunch_throttle)
+            prelaunch_throttle.restrict_load_bank(bank)
+        prelaunch_save_throttle = (PPrelaunchSaveThrottle(save_throttle_rows, run, args.p_prelaunch_save_throttle, bank)
+                                   if args.p_prelaunch_save_throttle else None)
+        if args.native_history_prior:
+            from native_history import NativeHistoryCluster, NativeHistorySampler, build_native_history_prior
+            history_prior = build_native_history_prior(bank)
+            history_sampler = NativeHistorySampler
+            history_options = {}
+        if args.scoped_gap_components:
+            from scoped_gap_components import RANDOM_OFFSET as GAP_OFFSET, ScopedGapComponents, ScopedGapOwnerOutput, ScopedGapSampler
+            scoped_gaps = ScopedGapComponents(gap_rows, bank.excluded)
+            history_sampler = ScopedGapSampler
+            history_options = {"scoped_gaps": scoped_gaps, "replica_execution_streams": args.replica_execution_streams}
+            if args.p_restore_onset_credit:
+                history_sampler = RestoreOnsetSampler
+                history_options["restore_onset_rows"] = restore_onset_rows
+            if args.p_native_sync_credit:
+                history_sampler = NativeSyncCreditSampler
+                history_options["native_sync_rows"] = native_sync_rows
+                history_options["use_peer_donors"] = args.p_native_sync_peer_donors
+                history_options["p1_sync_round_balance"] = args.p1_sync_round_balance
+                if args.p0_save_sync_episode:
+                    history_options["p_save_sync_episode"] = law_for_run(episode_rows, run, run_reserved)
+                if args.p1_save_onset_ordinal:
+                    from p1_save_onset_sampler import P1SaveOnsetSampler
+                    from p_save_sync_episode import P1OrdinalOnsetLaw
+                    history_sampler = P1SaveOnsetSampler
+                    history_options["p1_save_onset"] = law_for_run(episode_rows, run, run_reserved, law_type=P1OrdinalOnsetLaw)
+                    if args.p0_completed_save_context:
+                        from p0_completed_save_context import P0CompletedSaveLaw
+                        from p0_completed_save_sampler import P0CompletedSaveSampler
+                        history_sampler = P0CompletedSaveSampler
+                        history_options["p0_save_law"] = law_for_run(episode_rows, run, run_reserved, law_type=P0CompletedSaveLaw)
+                        history_options["p0_context_mode"] = args.p0_completed_save_context
+                if prelaunch_throttle is not None:
+                    history_options["prelaunch_throttle"] = prelaunch_throttle
+                if prelaunch_save_throttle is not None:
+                    history_options["prelaunch_save_throttle"] = prelaunch_save_throttle
+        if args.native_restore_phase_mode:
+            class JointPhaseLoadSampler(PhaseSeparatedLoadSampler, history_sampler):
+                pass
+            history_sampler = JointPhaseLoadSampler
+            history_options.update(restore_phase_rows=restore_phase_rows,restore_phase_mode=args.native_restore_phase_mode)
+        if args.native_save_phase_cohort:
+            class JointNativeCohortSampler(CohortNativeSaveSampler, history_sampler):
+                pass
+            history_sampler = JointNativeCohortSampler
+            history_options['native_save_phase_rows']=native_save_phase_rows
+        if args.native_staging_slots:
+            class OrderedStagingSampler(StagingCompletionLoadSampler,history_sampler):
+                pass
+            history_sampler=OrderedStagingSampler
+            history_options.update(staging_completion_rows=staging_completion_rows,staging_slot_count=args.native_staging_slots)
+        p_load_episode = None
+        if args.p_load_episode_prior:
+            from p_load_episode_prior import PLoadEpisodePrior, RANDOM_OFFSET as P_LOAD_EPISODE_OFFSET
+            p_load_episode = PLoadEpisodePrior(p_episode_rows, bank.excluded, overhead_rows)
+        if args.save_publication_boundary:
+            from save_publication_boundary import SavePublicationPrior
+            save_publication_prior = SavePublicationPrior(save_publication_rows, bank.excluded)
+        if args.d_core_frame_edges:
+            from control_priors import DCoreFrameEdges
+            d_core_frame_edges = DCoreFrameEdges(d_edge_rows,bank.excluded)
+        if args.prefill_save_preparation:
+            from prefill_save_preparation import PrefillSavePreparationPrior
+            prefill_save_preparation = PrefillSavePreparationPrior(p_prepare_rows,bank.excluded)
+        if args.decode_save_preparation:
+            from prefill_save_preparation import PrefillSavePreparationPrior
+            decode_save_preparation = PrefillSavePreparationPrior(d_prepare_rows,bank.excluded,replicas=("D0","D1"))
+        if args.prefill_owner_output:
+            from prefill_owner_output import PrefillOwnerOutputPrior
+            if args.scoped_gap_components:
+                prefill_owner_output = ScopedGapOwnerOutput(p_owner_rows, bank.excluded, scoped_gaps)
+            else:
+                prefill_owner_output = PrefillOwnerOutputPrior(p_owner_rows, bank.excluded)
+        p_save_load_open = None
+        if args.p_save_load_open:
+            from native_history import P_SAVE_LOAD_RANDOM_OFFSET, operation_key
+            tags = [r for r in p_save_tags if r["source_run"] not in bank.excluded]
+            assert all(type(r["own_load_open"]) is bool and not r["used_service_duration_as_feature"] for r in tags)
+            p_save_load_open = {operation_key(r): r["own_load_open"] for r in tags}
+            assert len(p_save_load_open) == len(tags)
+        if args.request_keyed_native_service:
+            from keyed_native_service import RequestKeyedNativeService
+            class KeyedNativeSampler(RequestKeyedNativeService, history_sampler):
+                pass
+            history_sampler = KeyedNativeSampler
+        destination = output / run
+        destination.mkdir()
+        for seed in protocol["seeds"][:args.seeds]:
+            if args.native_history_prior:
+                sampler = history_sampler(bank, seed, feedback, worker_rows, overhead_rows, run, history_prior,
+                                          p_load_episode=p_load_episode, p_save_load_open=p_save_load_open, **history_options)
+            elif args.online_completed_feedback:
+                if args.worker_load_feedback:
+                    from worker_load_feedback import WorkerLoadOnlineSampler
+                    sampler = WorkerLoadOnlineSampler(bank,seed,feedback,worker_rows,overhead_rows,run)
+                elif args.run_level_native_prior:
+                    from run_level_components import OnlineRunLevelComponentSampler
+                    sampler = OnlineRunLevelComponentSampler(bank, seed, feedback, run)
+                else:
+                    from online_components import OnlineComponentSampler
+                    sampler = OnlineComponentSampler(bank, seed, feedback, run)
+            elif args.run_level_native_prior:
+                from run_level_components import RunLevelComponentSampler
+                sampler = RunLevelComponentSampler(bank, seed)
+            else:
+                sampler = bank.sampler(seed)
+            admission_options = {"request_keyed": True} if args.request_keyed_admission else {}
+            admission = AdmissionPriors(admissions, target_run=run, reserved_runs=run_reserved, seed=seed,
+                                        **admission_options)
+            options = dict(components=sampler,admission_provider=admission,host_limits=host_limits(args.rdma_wire_rate_bps))
+            if args.owner_step_barrier:
+                options["owner_step_barrier"] = True
+            if args.core_input_fifo:
+                options["core_input_fifo"] = True
+            if args.d_core_frame_edges:
+                options["d_core_frame_edges"] = d_core_frame_edges
+            if args.prefill_save_preparation:
+                options["prefill_save_preparation_prior"] = prefill_save_preparation
+            if args.decode_save_preparation:
+                options["decode_save_preparation_prior"] = decode_save_preparation
+            if args.prefill_owner_output:
+                options["prefill_owner_output"] = prefill_owner_output
+            if args.contiguous_native_pool:
+                options["contiguous_native_pool"] = True
+            if args.save_publication_boundary:
+                options["save_publication_prior"] = save_publication_prior
+            if args.audit_native_cache_membership:
+                options["audit_native_cache_membership"] = True
+            if args.deduplicate_save_directory:
+                options["deduplicate_save_directory"] = True
+            if args.connector_polling:
+                from control_priors import ControlPriors
+                from polling_cluster import PollingCluster
+                controls = ControlPriors(control_rows,target_run=run,reserved_runs=run_reserved,seed=seed,
+                                        replica_streams=args.replica_control_streams)
+                if args.rdma_protocol_phases:
+                    from rdma_protocol import RDMA_REQUEST_KEYED_OFFSET, RdmaProtocolCluster, RdmaProtocolPriors
+                    if args.seeded_directory_ties:
+                        options["directory_tie_seed"] = seed + DIRECTORY_TIE_RANDOM_OFFSET
+                    if args.rdma_empty_on_extent_failure:
+                        options["rdma_empty_on_extent_failure"] = True
+                    if args.rdma_connection_state:
+                        if family_holdout is None:
+                            assert run in connection_families
+                            eligible = connection_families.keys() - set(connection_families[run])
+                        else:
+                            eligible = connection_families.keys() - set(run_reserved) - {run}
+                        options["rdma_priors"] = RdmaConnectionPriors(rdma_rows, bank.excluded, seed,
+                            states=connection_states, eligible_state_runs=eligible)
+                    else:
+                        options["rdma_priors"] = RdmaProtocolPriors(rdma_rows, bank.excluded, seed,
+                                                                  request_keyed=args.request_keyed_rdma_control)
+                    if args.polled_prefetch_publication:
+                        options["polled_prefetch_publication"] = True
+                    if args.negative_prefetch_poll:
+                        options["negative_prefetch_poll"] = True
+                    if args.async_directory_lookup:
+                        from directory_lookup_prior import DirectoryLookupPrior
+                        options["directory_prior"] = DirectoryLookupPrior(directory_rows, bank.excluded, seed)
+                if args.endpoint_transport:
+                    from endpoint_transport import EndpointPriors, EndpointTransportCluster
+                    rank_options = {} if completion_ranks is None else {"completion_ranks": completion_ranks}
+                    endpoint_priors = EndpointPriors(endpoint_rows, bank.excluded, seed,
+                                                     request_keyed=args.request_keyed_endpoint, **rank_options)
+                    cluster = EndpointTransportCluster
+                    if args.async_restore_slots:
+                        from async_restore_slots import AsyncRestoreSlotsCluster
+                        cluster = AsyncRestoreSlotsCluster
+                        if args.audit_d_scheduler_gates:
+                            options["audit_d_scheduler_gates"] = True
+                        if args.frame_native_load_batches:
+                            options["frame_native_load_batches"] = True
+                    if args.p_ingress_gate:
+                        from p_ingress_gate import PIngressGateCluster, PIngressGatePrior
+                        cluster = PIngressGateCluster
+                        options["p_ingress_gate_prior"] = PIngressGatePrior(p_gate_rows, bank.excluded, seed,
+                            admit_context=args.p_ingress_admit_context, context_catalogue=p_gate_context)
+                    if args.rdma_peer_share:
+                        from rdma_peer_share import SharedPeerPayloads
+
+                        class PeerShareCluster(SharedPeerPayloads, cluster):
+                            pass
+
+                        cluster = PeerShareCluster
+                    if args.d_frame_probe_spacing is not None:
+                        from d_frame_probe_spacing import DFrameProbeSpacing
+
+                        class SpacedProbeCluster(DFrameProbeSpacing, cluster):
+                            pass
+
+                        cluster = SpacedProbeCluster
+                        options["d_frame_probe_spacing"] = args.d_frame_probe_spacing
+                    if args.native_restore_phase_mode:
+                        class JointPhaseRestoreCluster(PhaseSeparatedLoadCluster, cluster):
+                            pass
+                        cluster = JointPhaseRestoreCluster
+                    if args.native_staging_slots:
+                        class OrderedStagingCluster(StagingCompletionCluster,cluster):
+                            pass
+                        cluster=OrderedStagingCluster
+                    if args.d_ingress_per_replica:
+                        class DListenerClosureCluster(DIngressClosureCluster,cluster):
+                            pass
+                        cluster=DListenerClosureCluster
+                        options['d_ingress_closure_prior']=DIngressClosurePrior(d_closure_rows,bank.excluded,seed)
+                    simulation = cluster(workload, calibration_shell(), controls=controls,
+                                         endpoint_priors=endpoint_priors, **options)
+                elif args.final_save_ack_gate:
+                    from final_save_ack import FinalSaveAckCluster, FinalSaveAckRdmaCluster
+                    cluster = FinalSaveAckRdmaCluster if args.rdma_protocol_phases else FinalSaveAckCluster
+                    simulation = cluster(workload, calibration_shell(), controls=controls, **options)
+                elif args.rdma_protocol_phases:
+                    simulation = RdmaProtocolCluster(workload, calibration_shell(), controls=controls, **options)
+                elif args.chunked_prefill_saves:
+                    from chunked_prefill_save import ChunkedPrefillHistoryCluster, ChunkedPrefillSaveCluster
+                    cluster = ChunkedPrefillHistoryCluster if args.native_history_prior else ChunkedPrefillSaveCluster
+                    simulation = cluster(workload, calibration_shell(), controls=controls, **options)
+                elif args.native_history_prior:
+                    simulation = NativeHistoryCluster(workload, calibration_shell(), controls=controls, **options)
+                elif args.native_host_pool:
+                    from native_pooled_cluster import NativePooledCluster
+                    simulation = NativePooledCluster(workload,calibration_shell(),controls=controls,**options)
+                elif args.deferred_native_load:
+                    from deferred_load_cluster import DeferredLoadCluster
+                    simulation = DeferredLoadCluster(workload,calibration_shell(),controls=controls,**options)
+                else:
+                    simulation = PollingCluster(workload,calibration_shell(),controls=controls,**options)
+            else:
+                simulation = MeasuredCluster(workload,calibration_shell(),**options)
+            if args.online_completed_feedback:
+                sampler.bind(simulation)
+            try:
+                result = simulation.run()
+            except MemoryError as error:
+                if not args.native_host_pool:
+                    raise
+                # Retain every attempted seed and all 95 target identities.
+                # A failed trajectory is never averaged with successful ones.
+                failure=dict(run=run,seed=seed,status="simulation_failed",error_type=type(error).__name__,
+                    error=str(error),model_time_s=simulation.now,expected_requests=95,
+                    all_target_request_ids=[r["id"] for r in workload["requests"]],
+                    partial_requests=list(simulation.rows.values()),partial_counters=simulation.counters,
+                    native_host_pools={n:p.summary() for n,p in simulation.host.items()},
+                    accuracy_acceptance_ready=False,score_or_TTFT_labels_read=False)
+                (destination/f"seed-{seed:02d}.json").write_text(json.dumps(failure))
+                summaries.append(dict(run=run,seed=seed,status="simulation_failed",reason=str(error),
+                    complete_requests=sum("TTFT_s" in r for r in failure["partial_requests"]),accuracy_acceptance_ready=False))
+                print(json.dumps(summaries[-1]),flush=True)
+                continue
+            assert len(result["requests"]) == 95
+            assert {r["id"] for r in result["requests"]} == {r["id"] for r in workload["requests"]}
+            result.update(run=run, seed=seed, target_workload_sha256=workload_sha256,
+                          admission_prior_audit=admission.audit, score_or_TTFT_labels_read=False)
+            if primary_seal:
+                result["sealed_primary_input_manifest_sha256"] = primary_seal["input_manifest_sha256"]
+            if routing_intervention is not None:
+                result["routing_intervention"] = routing_intervention
+            result["online_completed_feedback_enabled"] = args.online_completed_feedback
+            result["run_level_native_prior_enabled"] = args.run_level_native_prior
+            result["connector_polling_enabled"] = args.connector_polling
+            result["deferred_native_load_enabled"] = args.deferred_native_load
+            result["native_host_pool_enabled"] = args.native_host_pool
+            result["worker_load_feedback_enabled"] = args.worker_load_feedback
+            if args.worker_load_feedback:
+                result["worker_to_RPC_scope_conversion_audit"] = sampler.gate.scope_audit
+                result["model_support_gaps"] += [
+                    "Legacy worker feedback assumes constant per-host wall/monotonic offset; possible-owner supersets were validated on full traces but exact legacy ownership is unavailable",
+                    "Worker-to-RPC overhead transfers independent observed pre/post work; it is not identified as exclusive CPU service",
+                ]
+            if args.run_level_native_prior:
+                result["shared_native_run_level_source"] = sampler.run_level_source
+                assert all(r["source_run"] == sampler.run_level_source for r in sampler.audit
+                           if r["component"].startswith("native_"))
+            result["fixed_random_streams"] = dict(admission=seed, compute=seed + 19000,
+                                                  native=seed + 20000, posterior=seed + 29000)
+            if args.request_keyed_admission:
+                from component_priors import ADMISSION_REQUEST_STREAM
+
+                result["fixed_random_streams"].pop("admission")
+                result["request_keyed_admission"] = dict(scheme=ADMISSION_REQUEST_STREAM, seed=seed)
+            if args.run_level_native_prior:
+                result["fixed_random_streams"]["native_run_level"] = seed + 31000
+            if args.connector_polling:
+                result["fixed_random_streams"]["connector_control"] = seed + 37000
+            if args.replica_control_streams:
+                result["replica_control_streams"] = controls.replica_control_seeds
+                result["unused_connector_poll_draws"] = dict(controls.unused_poll_draws)
+                result["fixed_random_streams"].pop("connector_control")
+            if args.worker_load_feedback:
+                result["fixed_random_streams"]["worker_RPC_overhead"] = seed + 43000
+            if args.native_history_prior:
+                result["native_history_prior_enabled"] = True
+                result["fixed_random_streams"]["native_history"] = seed + 47000
+            if args.native_save_phase_cohort:
+                result['native_save_source_cohort_enabled']=True
+                result['native_save_source_cohort']=sampler.restore_phases.source
+                result['native_save_scope']='Same-cohort save RPC envelope minus observed native queue; caller FIFO scope'
+                result['native_save_new_physical_engine_law_identified']=False
+            if args.p_save_load_open:
+                result["p_save_load_open_enabled"] = True
+                result["fixed_random_streams"]["p_save_load_open"] = seed + P_SAVE_LOAD_RANDOM_OFFSET
+            if args.p_load_episode_prior:
+                result["fixed_random_streams"]["p_load_episode"] = seed + P_LOAD_EPISODE_OFFSET
+            if args.rdma_protocol_phases:
+                offset = RDMA_REQUEST_KEYED_OFFSET if args.request_keyed_rdma_control else 51000
+                result["fixed_random_streams"]["rdma_protocol"] = seed + offset
+                if args.request_keyed_rdma_control:
+                    result["request_keyed_rdma_control_enabled"] = True
+            if args.seeded_directory_ties:
+                result["seeded_directory_ties_enabled"] = True
+                result["fixed_random_streams"]["directory_ties"] = seed + DIRECTORY_TIE_RANDOM_OFFSET
+            if args.rdma_connection_state:
+                result["rdma_connection_state_enabled"] = True
+                result["fixed_random_streams"]["rdma_connection_state"] = seed + CONNECTION_RANDOM_OFFSET
+            if args.async_directory_lookup:
+                from directory_lookup_prior import RANDOM_OFFSET as DIRECTORY_OFFSET
+                result["fixed_random_streams"]["directory_lookup"] = seed + DIRECTORY_OFFSET
+            if args.request_keyed_endpoint:
+                from endpoint_transport import ENDPOINT_REQUEST_STREAM
+
+                result["request_keyed_endpoint"] = dict(scheme=ENDPOINT_REQUEST_STREAM, seed=seed)
+            elif args.endpoint_transport:
+                result["fixed_random_streams"]["endpoint_transport"] = seed + 61000
+            if args.p_ingress_gate:
+                from p_ingress_gate import RANDOM_OFFSET
+                result["fixed_random_streams"]["p_ingress_gate"] = seed + RANDOM_OFFSET
+            if args.independent_execution_budget:
+                from execution_budget_prior import RANDOM_OFFSET as BUDGET_OFFSET
+                result["independent_execution_budget_enabled"] = True
+                result["execution_budget_source_runs"] = bank.execution_budget.sources
+                result["fixed_random_streams"]["execution_budget"] = seed + BUDGET_OFFSET
+            if args.independent_p_execution_shapes:
+                from execution_budget_prior import P_SHAPE_RANDOM_OFFSET
+                result["independent_p_execution_shapes_enabled"] = True
+                result["p_execution_shape_source_runs"] = bank.p_execution_shape.sources
+                result["fixed_random_streams"]["p_execution_shape"] = seed + P_SHAPE_RANDOM_OFFSET
+            if args.independent_legacy_p_restore:
+                result["independent_legacy_p_restore_enabled"] = True
+                result["legacy_p_restore_prior"] = legacy_scope
+            if args.independent_full_p_restore:
+                result["independent_full_p_restore_enabled"] = True
+                result["full_p_restore_prior"] = full_scope
+            if args.scoped_gap_components:
+                result["scoped_gap_sources"] = sorted(scoped_gaps.sources)
+                result["fixed_random_streams"]["scoped_gap_components"] = seed + GAP_OFFSET
+            if prelaunch_throttle is not None:
+                result["P_prelaunch_throttle"] = dict(mode=prelaunch_throttle.mode,
+                    excluded_same_input_family=sorted(prelaunch_throttle.same_family),
+                    only_prelaunch_state=True,
+                    streams={node: f"2p2d-prelaunch-throttle-v1:{seed}:{node}" for node in ("P0", "P1")})
+            if prelaunch_save_throttle is not None:
+                result["P_prelaunch_save_throttle"] = dict(mode=prelaunch_save_throttle.mode,
+                    excluded_same_input_family=sorted(prelaunch_save_throttle.same_family),
+                    only_prelaunch_state=True, streams=sampler.prelaunch_save_streams)
+            if args.p_restore_onset_credit:
+                result["p_restore_onset_credit_enabled"] = True
+                result["p_restore_onset_credit_audit"] = sampler.restore_onset_audit
+            if args.p_native_sync_credit:
+                assert not sampler.pending_save_sync
+                result["native_sync_credit_streams"] = sampler.sync_streams
+            if args.p_native_sync_peer_donors:
+                result["native_sync_peer_streams"] = sampler.peer_streams
+            if args.p1_sync_round_balance:
+                result["p1_sync_round_balance_enabled"] = True
+            if args.p0_save_sync_episode:
+                result["P0_save_sync_episode_streams"] = sampler.p_save_episode_streams
+            if args.p1_save_onset_ordinal:
+                result["P1_save_onset_ordinal_streams"] = sampler.p1_save_onset_streams
+            if args.p0_completed_save_context:
+                result["P0_completed_save_context"] = dict(mode=sampler.p0_context_mode, streams=sampler.p0_context_streams)
+            if args.replica_execution_streams:
+                result["replica_execution_streams"] = sampler.replica_execution_seeds
+                result["fixed_random_streams"].pop("compute")
+                if args.independent_execution_budget:
+                    result["fixed_random_streams"].pop("execution_budget")
+                if args.independent_p_execution_shapes:
+                    result["fixed_random_streams"].pop("p_execution_shape")
+            if args.p_save_load_open:
+                streams = result["fixed_random_streams"]
+                assert len(set(streams.values())) == len(streams)
+            if args.no_target_feedback:
+                assert not result.get("completed_feedback_consumption_audit")
+                assert not result.get("online_native_prediction_audit")
+                result["target_feedback_disabled"] = True
+            if args.request_keyed_native_service:
+                result["request_keyed_native_service_enabled"] = True
+                result["native_service_coupling_audit"] = sampler.native_service_coupling_audit
+            if family_holdout is not None:
+                consumed = family_holdout.validate_consumed_sources(result, run, reserved)
+                receipt = family_holdout.receipt(run, reserved, consumed)
+                receipt["consumed_source_ids"] = consumed
+                receipt["consumed_donor_exclusion_verified"] = True
+                result["whole_input_family_holdout"] = receipt
+            (destination / f"seed-{seed:02d}.json").write_text(json.dumps(result))
+            summaries.append(dict(run=run, seed=seed, requests=95, status="forecast_written",
+                                   accuracy_acceptance_ready=False))
+            print(json.dumps(summaries[-1]), flush=True)
+    (output / "forecast-status.json").write_text(json.dumps(summaries, indent=2))
+    if primary_seal is not None:
+        expected = {(run, seed) for run in primary_workloads for seed in protocol["seeds"]}
+        complete = {(r["run"], r["seed"]) for r in summaries if r["status"] == "forecast_written" and r["requests"] == 95}
+        assert len(summaries) == len(expected) and complete == expected, "The primary prediction cohort is incomplete"
+
+
+if __name__ == "__main__":
+    main()

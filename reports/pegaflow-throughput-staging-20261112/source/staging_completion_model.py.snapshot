@@ -1,0 +1,110 @@
+"""Optional staging geometry with an independently projected completion stream.
+
+The stream is process-local and ordered, not a claim about physical copy-engine
+count. Its effective increments carry the source envelope's unseparated state;
+future D2H completions are not consulted or reserved on a fictitious shared GPU.
+"""
+from collections import defaultdict
+import math
+from staging_slot_resource import StagingSlotResource,Submission
+
+SOURCE_FILE='staging-completion-profiles-20261112.jsonl'
+CAPACITY=256*2**20
+CHUNK=64*2**20
+
+
+class StagingCompletionLoadSampler:
+    def __init__(self,*args,staging_completion_rows,staging_slot_count,**kwargs):
+        super().__init__(*args,**kwargs)
+        assert staging_slot_count in (2,4) and self.restore_phases.mode=='dma'
+        self.staging_count=staging_slot_count;self.staging_bytes=CAPACITY//staging_slot_count
+        self.staging_profiles={}
+        for r in staging_completion_rows:
+            if r['source_run'] in self.bank.excluded or r['source_run']!=self.restore_phases.source:continue
+            assert not r['target_latency_label_used'] and not r['observed_native_queue_resampled']
+            self.staging_profiles[r['source_run'],r['pid'],r['operation_id']]=r
+        assert set(r['node'] for r in self.staging_profiles.values())=={'P0','P1','D0','D1'}
+        self.staging_pools={};self.staging_stream_tail=defaultdict(float);self.staging_operations=[]
+
+    def transform_restore_draw(self,node,size,now,request_ids,draw):
+        draw=super().transform_restore_draw(node,size,now,request_ids,draw)
+        source=draw['source'];profile=self.staging_profiles[source['source_run'],source['pid'],source['operation_id']]
+        assert profile['node']==node
+        cold=draw['phases']['first_use_init_s']
+        if node not in self.staging_pools:
+            self.staging_pools[node]=StagingSlotResource(self.staging_bytes,self.staging_count,initialization_s=cold)
+        else:assert cold==0
+        pool=self.staging_pools[node]
+        # Every previous load's final sync completed before this FIFO starts.
+        # No later load, save or compute reserves this isolated completion lane.
+        assert pool.completion_s()<=now+1e-8
+        ratio=size/profile['byte_count'];phases=defaultdict(float)
+        phases['descriptor_build_s']=profile['descriptor_build_s']*ratio
+        phases['worker_other_s']=profile['pre_backend_other_s']
+        clock=now+phases['descriptor_build_s']+phases['worker_other_s']
+        original=profile['chunks'];count=math.ceil(size/CHUNK);remaining=size;first_sequence=pool.sequence
+        demands=0.0;adjustments=0
+        for i in range(count):
+            amount=min(remaining,CHUNK,self.staging_bytes);remaining-=amount
+            index=min(len(original)-1,i*len(original)//count);mark=original[index]
+            if amount>2*mark['bytes']:
+                close=[(abs(math.log2(amount/b['bytes'])),abs(j-index),j) for j,b in enumerate(original)]
+                next_index=min(close)[2];adjustments+=next_index!=index;mark=original[next_index]
+            scale=amount/mark['bytes'];clock+=mark['lead_gap_s'];phases['worker_other_s']+=mark['lead_gap_s']
+            wait_API=mark['event_wait_API_s'] if mark['source_had_previous_event'] else profile['completed_wait_API_fallback_s']
+            destroy=mark['event_destroy_s'] if mark['source_had_previous_event'] else profile['event_destroy_fallback_s']
+            demand=mark['completion_demand_s']*scale;SDK=mark['SDK_submit_s']*scale;demands+=demand
+            def submit(bytes,entry):
+                self.staging_stream_tail[node]=max(entry,self.staging_stream_tail[node])+demand
+                return Submission(entry+SDK,self.staging_stream_tail[node])
+            r=pool.copy(amount,clock,CPU_copy_s=mark['CPU_copy_s']*scale,submit=submit,
+                pre_event_s=mark['pre_event_s'],event_create_s=mark['event_create_s'],
+                event_record_s=mark['event_record_s'],retire_API_s=wait_API+destroy)
+            clock=r['returned_s']
+            phases['first_use_init_s']+=r['initialization_s']
+            phases['staging_event_wait_s']+=r['fence_wait_s']
+            phases['staging_CPU_copy_s']+=r['CPU_copy_end_s']-r['CPU_copy_start_s']
+            phases['staging_submit_s']+=r['SDK_submit_return_s']-r['SDK_submit_enter_s']
+            phases['staging_other_API_s']+=r['gate_wait_s']+r['pre_event_s']+r['retire_API_s']+mark['event_create_s']+mark['event_record_s']
+            if r['previous_fence_complete_s'] is not None:assert r['CPU_copy_start_s']>=r['previous_fence_complete_s']-1e-9
+        assert remaining==0 and sum(r['bytes'] for r in pool.trace[-count:])==size
+        clock+=profile['pre_sync_other_s'];phases['worker_other_s']+=profile['pre_sync_other_s']
+        phases['final_sync_wait_s']=max(0.0,pool.completion_s()-clock)
+        phases['final_sync_API_s']=profile['sync_API_s']
+        phases['signal_completion_s']=profile['signal_gap_s']+profile['signal_completion_s']
+        clock+=phases['final_sync_wait_s']+phases['final_sync_API_s']+phases['signal_completion_s']
+        service=clock-now
+        assert math.isclose(sum(phases.values()),service,abs_tol=1e-8)
+        operation=dict(node=node,request_ids=list(request_ids),source_run=source['source_run'],source_pid=source['pid'],
+            source_operation_id=source['operation_id'],source_bytes=profile['byte_count'],bytes=size,
+            ready_s=now,worker_done_s=clock,slot_count=self.staging_count,slot_bytes=self.staging_bytes,
+            first_sequence=first_sequence,batches=count,source_chunk_geometry_adjustments=adjustments,
+            stream_effective_completion_demand_s=demands,phases=dict(phases),
+            source_flat_worker_service_s=draw['worker_service_s'],new_worker_service_s=service,
+            completion_point_convention='latest feasible independent source fence envelope',
+            dynamic_cross_stream_contention_identified=False,target_timing_used=False)
+        self.staging_operations.append(operation)
+        result=dict(draw);result.update(phases=dict(phases),worker_service_s=service,staging_completion_model=operation)
+        return result
+
+    def staging_completion_receipt(self):
+        return dict(enabled=True,slot_count=self.staging_count,slot_bytes=self.staging_bytes,
+            registered_bytes_per_native_process=CAPACITY,native_API_chunk_bytes=CHUNK,
+            source_cohort=self.restore_phases.source,operations=self.staging_operations,
+            pools={node:dict(sequence=p.sequence,gate_free_s=p.gate_free_s,completion_s=p.completion_s(),batches=p.trace)
+                for node,p in self.staging_pools.items()},
+            source_fence_projection_is_not_unique_physical_identification=True,
+            dynamic_shared_load_save_device_service_identified=False,
+            first_use_cost_assumption='Equal256MiB registered capacity has same source initialization cost; fixed per-registration overhead unknown',
+            isolated_ordered_load_stream=True,source_native_queue_resampled=False,target_timing_feedback_used=False)
+
+
+class StagingCompletionCluster:
+    def run(self):
+        result=super().run()
+        receipt=self.components.staging_completion_receipt()
+        assert all(p['completion_s']<=self.now+1e-7 for p in receipt['pools'].values())
+        result['native_staging_completion_model']=receipt
+        result['native_restore_phase_model'].update(legacy_service_aggregate_preserved=False,
+            ordered_staging_completion_enabled=True,staging_GPU_event_wait_separated=True)
+        return result
