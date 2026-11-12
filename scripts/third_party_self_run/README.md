@@ -29,9 +29,9 @@ HLE/Frontier 沿用固定原客户程序、原提示与裁判解析，两臂统�
 `--continuous-evidence`。
 
 工具固定
-[Engine主分支f55ecfc](https://github.com/vLLM-HUST/vllm-hust-engine/commit/f55ecfc38e05b4f6921beea3fd593ae997e50adc)
+[Engine主分支fafec75](https://github.com/vLLM-HUST/vllm-hust-engine/commit/fafec75763ec7acecd7a1323398b7dea1dd73d27)
 与
-[r4.3.4 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4.3.4)
+[r4.3.5 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4.3.5)
 的附件 id、大小、SHA256，以及独立固定的源码清单 SHA256。离线缓存仍逐文件核验，不能修改本地清单来放行任意源码。原 r4 四个附件及历史原始记录保留。
 
 私有仓库凭据读取 `GH_TOKEN`/`GITHUB_TOKEN`，或当前目录、父目录、用户主目录 `.env` 中的这两个键；也支持 `--env-file /absolute/.env`。不执行
@@ -49,7 +49,7 @@ python3 one_click.py --b1-python /absolute/fixed-sdk/bin/python --out /absolute/
 配对已有记录，默认自动校验复算；它们不能冒充本次新结果。三数据集成功也不能标记五数据集整体验收完成。失败、长度终止、非法答案、未返回项和原始 SSE 均保留；不自动重试发题、缩短预算或降级
 eager。中断后等本次服务清理及租约释放完成才封存。
 
-既有内存与磁盘准入修复通过52项Engine回归；本次新增的3项报告回归核验TPOT排除usage/HTTP收尾、末块时间篡改与乱序时钟。Ruff通过。原始SSE可用于另存修订报告；运行中的冻结代码和原报告保留。
+既有内存与磁盘准入修复通过52项Engine回归；本次3项报告回归核验大纲TPOT的请求完成边界、末块时间篡改与乱序时钟。Ruff通过。原始SSE可用于另存修订报告；运行中的冻结代码和原报告保留。
 
 两臂C8已完成（B0 247/247、B1
 618/618）。原self-run-kit/one_click.py实际执行的新MMLU配对，两臂各200请求成功，正确150/149、长度终止25/18、0未解析；吞吐465.78→935.99
@@ -60,4 +60,6 @@ SWE731/Terminal89原任务范围已冻结，尚未执行。CPU工作区应由模
 旧诊断仅显式 `--legacy-diagnostic` 可进入，仍需对应旧部署配置；旧档案只读复核使用 `--review`。`original-kit/` 保留上传原件，`.py.source`
 防止格式化改写。这些历史脚本及分数均不作为默认正式执行入口。
 
-本轮实际推理使用启动前封存的r4.3.2源码；r4.3.4新增报告修复，保持固定B1 r4引擎和原生成协议。
+本轮实际推理使用启动前封存的r4.3.2源码；r4.3.5核验原始流首末时钟，严格保留大纲的请求完成TPOT；保持固定B1 r4引擎和原生成协议。
+
+r4.3.4曾错误改用末文本块计算正式TPOT，已撤回。V1.5大纲3.4.2明确为`(请求完成时刻−首token时刻)/(输出token数−1)`，逐请求等权平均。首末文本块间隔仅作为独立辅助指标，不参与正式目标判定。运行中的r4.3.2及MMLU配对原报告已采用正确边界，不受影响。
