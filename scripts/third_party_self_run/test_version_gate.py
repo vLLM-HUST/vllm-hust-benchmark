@@ -102,7 +102,7 @@ class VersionAdmission(unittest.TestCase):
         with (
             patch.object(version_gate, "check", return_value={"passed": False}),
             patch.object(one_click.subprocess, "run") as run,
-            patch("sys.argv", ["one_click.py", "--verify-only"]),
+            patch("sys.argv", ["one_click.py", "--legacy-diagnostic", "--verify-only"]),
             contextlib.redirect_stdout(io.StringIO()),
         ):
             self.assertEqual(one_click.main(), 2)

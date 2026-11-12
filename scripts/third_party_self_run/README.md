@@ -1,42 +1,54 @@
-# 第三方测试复现工具：先核对受测版本
+# 第三方一键推理测试
 
-本目录修复上传的
-self-run-kit。默认入口首先核对指定测试的版本和实现身份，再允许模型启动；预检不通过也生成四项目标的报告和图表。当前仍未完成整套正式复现，不能把工具修复或十请求诊断称为验收通过。
+默认 `one_click.py` 现在调用固定的 vLLM-HUST Engine 三数据集入口，首先校验工具、原件、SDK、模型及完整任务清单，再启动真实 NPU
+推理并自动评分、出图。旧的每臂十条诊断不再是默认测试。
 
 ```bash
+python3 one_click.py --model /absolute/Qwen3.5-35B-A3B --b1-python /absolute/fixed-sdk/bin/python --physical-devices 5,6 --out /absolute/new-run
+```
+
+首次需要两张可独占的 Ascend 910B2、模型 BF16 权重、宿主驱动及 CANN9.1/ATB、固定 B1
+SDK（Torch2.13、torch-npu2.13rc1、Transformers5.14.1）。B1 运行时及 MOD 从私有 r4 冻结原件恢复；已有部署可把 `--b1-python` 换成
+`--deployment /absolute/b1-r4`。B0 自动按官方 ARM64 镜像 digest 恢复
+Python3.11.14、Torch2.9.0+cpu、torch-npu2.9.0.post1+gitee7ba04、Triton3.2.0.dev20260322、CANN8.5.1
+及原文本补丁，不使用旧 pip/CANN9.1 兼容基线，也不要求 Docker 服务。已有固定 B0 可传 `--baseline-deployment`。
+
+默认执行清单在模型启动前冻结为 11 个阶段：两臂 C8 资格、MMLU-Pro 原固定200题配对、FrontierScience 两臂推理与共同 B1 裁判、HLE 两臂推理与共同 B1 裁判。
+
+| 数据集                          | 本轮任务范围                                                       |
+| ------------------------------- | ------------------------------------------------------------------ |
+| MMLU-Pro                        | 原固定200题，max8192、温度0、seed0、原评分器                       |
+| HLE-Verified                    | Gold668 + Revision1143，保留全部211道图像题，solver16384/judge8192 |
+| FrontierScience                 | Olympiad100 + Research60，solver16384/judge8192                    |
+| SWE-bench-Pro、TerminalBench2.1 | 按本轮范围延期，保留在报告未完成项中                               |
+
+HLE/Frontier 沿用固定原客户程序、原提示与裁判解析，两臂统一使用同一 B1 Qwen 替代裁判，未决裁判单列。小样本诊断须显式加
+`--smoke-evaluators`（HLE4、Frontier2；MMLU仍原200），不能充当全量成绩。首次第三方测试应重新执行本机 C8，省略
+`--continuous-evidence`。
+
+工具固定
+[Engine主分支4e860cd](https://github.com/vLLM-HUST/vllm-hust-engine/commit/4e860cd1b55a68dbb6420812edeb6c59082d5892)
+与
+[r4.3.1 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4.3.1)
+的附件 id、大小、SHA256，以及独立固定的源码清单 SHA256。离线缓存仍逐文件核验，不能修改本地清单来放行任意源码。原 r4 四个附件及历史原始记录保留。
+
+私有仓库凭据读取 `GH_TOKEN`/`GITHUB_TOKEN`，或当前目录、父目录、用户主目录 `.env` 中的这两个键；也支持 `--env-file /absolute/.env`。不执行
+`.env`、不输出凭据，跨主机下载重定向去掉认证头。已有完整工具缓存可离线使用；原件和数据也须缓存完整。`--tools-cache` 指定工具缓存，`--cache`
+指定运行时/数据缓存，`--dataset-assets` 指定含 `hle/`、`frontier/` 的已有数据根目录。
+
+```bash
+# 只验证固定工具：不表示 SDK 或模型已合格
 python3 one_click.py --verify-only
-python3 one_click.py --out /absolute/path/to/new-run
-python3 one_click.py --review /absolute/path/to/new-run
+# 完整准备、生成11阶段清单和四目标报告，明确标记未执行
+python3 one_click.py --b1-python /absolute/fixed-sdk/bin/python --out /absolute/new-preparation --prepare-only
 ```
 
-版本依据是 benchmark 固定提交 `d67aea6eb3eb0dee271a01b4d66acce8b65bd034` 中的《项目里程碑测试大纲》V1.5 课题四及中期报告 V1.03。B0
-固定 0.18/0.18；B1 按数据集、工况和指标选择实际受测的优化组合，不能用容器里的任意旧版本或当前 main 代替。网站版本页也明确把 main 快照与通过验证的运行组合分开。
+报告逐项显示四个目标是否达标及原因，区分本次运行与历史合格参考。原 M01 和正式 B0/B1
+配对已有记录，默认自动校验复算；它们不能冒充本次新结果。三数据集成功也不能标记五数据集整体验收完成。失败、长度终止、非法答案、未返回项和原始 SSE 均保留；不自动重试发题、缩短预算或降级
+eager。中断后等本次服务清理及租约释放完成才封存。
 
-[版本依据](version-authority/tested-runtime.json)保存 V1.03 完整回答工况的实际版本、配置、原源码清单和私有源码包 SHA256。该工况使用
-0.28.1/0.25.1rc2、Torch 2.13、BetterScale E24/R36、MTP2、KV 重算及 Microflow 等组合。`runtime-profile.json`
-只选择本机安装位置，不提供合格证明。检查器读取实际解释器的包元数据和导入路径。reference 身份要求历史实现包及原安装源码清单；reconstructed 身份从固定 SHA256 的 SDK
-恢复并校验实际源码文件，明确作为新构建，不声称恢复历史优化组合。包版本相同不能替代组件激活验证。
+当前修复通过50项
+Engine回归、Ruff、完整开发目录任务准备及实际双卡锁页传输预检。首轮原镜像启动在发题前暴露文本配置M-RoPE遗留问题，生成器已订正，原B0已完成MTP图编译及健康检查，真实C8客户端已开始运行，三数据集全量实机复测仍在进行；不宣称新的全量结果已通过。
 
-容器已重建 0.28.1/0.25.1rc2 基础环境并校验 4,771 个源码/库文件；当前默认本机配置已切回 reference 身份，等待原包转入后核对安装源码；reconstructed
-只通过显式 `--rebuild-runtime /tmp/new-isolated-runtime` 选用。用户已找到 SHA256 匹配的 r4 原包和运行配置；当前 Linux
-执行器尚未读回，完整历史 B1 实现包与原源码回执尚未绑定。旧八月源码已从默认启动流程移除；针对它的 GDN 修复只保留历史诊断身份，不据此断言目标 B1 或最新引擎 main 有同样缺陷。
-
-[执行清单](EXECUTION-CHECKLIST.txt)列出固定输入、任务分母、四项门槛及缺项。既有 `pipeline/` 后端仍只执行每臂十个真实诊断请求，尚不能替代 V1.03 的 200
-题完整回答、高并发测试和五数据集原生任务。完整源码恢复后，还须接通对应冻结工作流，不能仅修改版本号后运行旧诊断负载。
-
-本容器依赖 Python 3.12、用于 B0 的 Python 3.11 与开发头文件、CANN、物理 NPU 5/6、同一份本地 Qwen3.5-35B-A3B
-权重及既有私有物化输入。源目录里的绝对路径记录此次部署，不附带模型、题文、gold 或完整答案。不会在通用 CPU 主机上自动产生真实 NPU 结果。
-
-每次使用新目录；失败、未执行请求和原异常均保留。先确认本轮全部写入进程停止，再封存校验清单。`--review` 重算文件清单、哈希、请求分母、回执和配对指标。退出 0
-只表示对应执行与归档成功；四项正式结论以报告字段为准。
-
-```bash
-.report-venv/bin/python -m unittest test_failure_reporting test_native_timing test_process_cleanup test_version_gate
-python3 -m unittest test_hust_shape
-```
-
-第一组验证失败报告、时钟归一化、孤儿进程清理及版本拒绝；第二组需要本容器 PyTorch，只验证旧版 reshape 的数值等价和动态编译。B0 兼容补丁已完成 10/10 实机诊断；目标 B1
-尚未完成版本订正后的实机执行。详见 `REPAIR-RECORD.json`。
-
-`original-kit/` 保留上传脚本的原始字节。仓库副本中的 `.py.source` 对应原 `.py` 文件，以免格式化器改写原件；旧 SHA256SUMS
-保留原文件名。当前源码校验清单与旧清单分开。
+旧诊断仅显式 `--legacy-diagnostic` 可进入，仍需对应旧部署配置；旧档案只读复核使用 `--review`。`original-kit/` 保留上传原件，`.py.source`
+防止格式化改写。这些历史脚本及分数均不作为默认正式执行入口。

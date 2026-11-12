@@ -25,6 +25,10 @@ def digest(p):
 
 
 def main():
+    if os.environ.get("VLLM_HUST_ALLOW_LEGACY_DIAGNOSTIC") != "1":
+        raise RuntimeError(
+            "Legacy ten-request diagnostic is disabled; use one_click.py for fixed three-dataset execution"
+        )
     if (ROOT / "execution-plan.json").exists():
         raise RuntimeError("Already frozen; use a new campaign directory")
     now = datetime.now(ZoneInfo("Asia/Shanghai")).isoformat()

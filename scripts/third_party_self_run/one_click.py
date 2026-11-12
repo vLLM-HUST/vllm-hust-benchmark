@@ -177,7 +177,7 @@ def review(out):
     return 0
 
 
-def main():
+def legacy_main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--out",
@@ -457,6 +457,19 @@ def main():
         "Formal acceptance is reported separately from successful diagnostic execution."
     )
     return 0 if data["completed"] == data["planned"] and data["receipt_exported"] else 1
+
+
+def main():
+    # Retain read-only inspection of the original diagnostic archives.
+    if "--review" in sys.argv[1:]:
+        return legacy_main()
+    if "--legacy-diagnostic" in sys.argv[1:]:
+        sys.argv.remove("--legacy-diagnostic")
+        os.environ["VLLM_HUST_ALLOW_LEGACY_DIAGNOSTIC"] = "1"
+        return legacy_main()
+    from engine_bootstrap import main as execute_engine
+
+    return execute_engine()
 
 
 if __name__ == "__main__":
