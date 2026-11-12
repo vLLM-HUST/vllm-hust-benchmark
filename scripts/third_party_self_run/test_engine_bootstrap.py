@@ -25,6 +25,20 @@ class EngineBootstrapTests(unittest.TestCase):
             self.assertEqual(one_click.main(), 17)
             run.assert_called_once_with()
 
+    def test_verified_tools_launch_engine_root_entrypoint(self):
+        root = Path("/synthetic/verified-engine")
+        args = ["--model", "/synthetic/model", "--out", "/synthetic/run"]
+        with (
+            patch.object(engine, "ensure", return_value=root),
+            patch.object(engine.os, "execve") as execute,
+        ):
+            engine.main(args)
+        self.assertEqual(
+            execute.call_args.args[1],
+            [sys.executable, str(root / "one_click.py"), *args],
+        )
+        self.assertEqual(execute.call_args.args[2]["PYTHONDONTWRITEBYTECODE"], "1")
+
     def test_dotenv_is_parsed_without_execution(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

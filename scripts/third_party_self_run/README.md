@@ -1,7 +1,8 @@
 # 第三方一键推理测试
 
-默认 `one_click.py` 现在调用固定的 vLLM-HUST Engine 三数据集入口，首先校验工具、原件、SDK、模型及完整任务清单，再启动真实 NPU
-推理并自动评分、出图。旧的每臂十条诊断不再是默认测试。
+一键测试已集成到[vLLM-HUST Engine根目录one_click.py](https://github.com/vLLM-HUST/vllm-hust-engine/blob/main/one_click.py)。版本恢复、任务冻结、推理、评分和出图实现由Engine维护；本目录入口仅负责核验下载并转交Engine根入口，保留原上传诊断的显式兼容选项。
+
+推荐从Engine仓库根目录运行下列命令；本目录兼容入口接受相同参数。
 
 ```bash
 python3 one_click.py --model /absolute/Qwen3.5-35B-A3B --b1-python /absolute/fixed-sdk/bin/python --physical-devices 5,6 --out /absolute/new-run
@@ -29,9 +30,9 @@ HLE/Frontier 沿用固定原客户程序、原提示与裁判解析，两臂统�
 `--continuous-evidence`。
 
 工具固定
-[Engine主分支fafec75](https://github.com/vLLM-HUST/vllm-hust-engine/commit/fafec75763ec7acecd7a1323398b7dea1dd73d27)
+[Engine主分支dbbb2a7](https://github.com/vLLM-HUST/vllm-hust-engine/commit/dbbb2a76f69590d76aff965b2fa8e00290fb624c)
 与
-[r4.3.5 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4.3.5)
+[r4.3.6 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4.3.6)
 的附件 id、大小、SHA256，以及独立固定的源码清单 SHA256。离线缓存仍逐文件核验，不能修改本地清单来放行任意源码。原 r4 四个附件及历史原始记录保留。
 
 私有仓库凭据读取 `GH_TOKEN`/`GITHUB_TOKEN`，或当前目录、父目录、用户主目录 `.env` 中的这两个键；也支持 `--env-file /absolute/.env`。不执行
@@ -60,6 +61,8 @@ SWE731/Terminal89原任务范围已冻结，尚未执行。CPU工作区应由模
 旧诊断仅显式 `--legacy-diagnostic` 可进入，仍需对应旧部署配置；旧档案只读复核使用 `--review`。`original-kit/` 保留上传原件，`.py.source`
 防止格式化改写。这些历史脚本及分数均不作为默认正式执行入口。
 
-本轮实际推理使用启动前封存的r4.3.2源码；r4.3.5核验原始流首末时钟，严格保留大纲的请求完成TPOT；保持固定B1 r4引擎和原生成协议。
+本轮实际推理使用启动前封存的r4.3.2源码；r4.3.6集成Engine根一键入口并明确冻结200题范围；保留正确TPOT、固定B1 r4引擎和原生成协议。
 
 r4.3.4曾错误改用末文本块计算正式TPOT，已撤回。V1.5大纲3.4.2明确为`(请求完成时刻−首token时刻)/(输出token数−1)`，逐请求等权平均。首末文本块间隔仅作为独立辅助指标，不参与正式目标判定。运行中的r4.3.2及MMLU配对原报告已采用正确边界，不受影响。
+
+MMLU-Pro为固定200题子集，源test12,032题、14学科；不是本轮随机抽样。逐题ID、学科、源行/prompt哈希和参数见[大纲执行补充](https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/vllm-hust-midterm-20261019/milestone-v15/MMLU200-SCOPE.md)及[冻结清单](https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/vllm-hust-midterm-20261019/milestone-v15/mmlu-fixed200.json)。生成seed0不作为抽样seed；结果仅适用于该冻结子集，不能称为官方全集成绩。Engine在准备阶段保存mmlu-task-scope.json，并将范围与哈希绑定到执行计划。
