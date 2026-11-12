@@ -399,7 +399,17 @@ Controller 可选实现 `integration.hook = "module:factory"`：`before_run`、`
 各仓库按最大余数法分配题数，仓库内按 `SHA256("swe-bench-pro-v1-200:" + instance_id)` 排序选取。清单固定实例 ID、原始数据 SHA256 和每道题的 Linux ARM64 镜像摘要。
 运行结果应标为此 200 题子集。
 
-先让目标工作区的镜像源具备这 200 个镜像并核对可用存储。准备、运行沿用同一个入口和绝对工作目录：
+先让目标工作区的镜像源具备这 200 个镜像并核对可用存储。平台操作者可以用原镜像发布入口按摘要检查或分批补齐。以下命令只检查目标仓库，输出逐摘要回执：
+
+```bash
+python3 scripts/mirror_swe_bench_pro_image.py --cohort v1-200 --max-new-images 0 \
+  --crane "$CRANE" --destination-prefix "$REGISTRY" --output "$MIRROR_RECEIPT"
+```
+
+明确使用 HTTP 的私有仓库追加 `--insecure`。核算源端缓存和目标仓库存储后，
+用新的回执路径及实际允许的 `--max-new-images` 执行发布。已存在且摘要匹配的镜像会跳过。
+
+准备、运行沿用同一个入口和绝对工作目录：
 
 ```bash
 python3 scripts/bootstrap_swe_bench_pro.py \
