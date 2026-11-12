@@ -65,3 +65,7 @@ No new hardware runs, original-file search or changes to active tasks are author
 ## MMLU-Pro 固定200题范围补充
 
 第三方执行时同时使用[固定200题范围附件](MMLU200-SCOPE.md)和[逐题冻结清单](mmlu-fixed200.json)。源test12,032题，本工况仅复用14学科固定200题，生成seed0不是抽样seed；执行计划、脚本及报告均须标明子集范围。该补充说明既有任务，不改写原文、阈值或历史实测结果。
+
+## HLE本轮固定分层200题
+
+见[HLE200执行补充](HLE200-SCOPE.md)及[逐题冻结清单](hle-fixed200.json)：Gold文本64/图像10、Revision文本113/图像13；原回答/裁判预算及四项验收阈值保留，历史611性能负载与本轮质量子集明确区分。
