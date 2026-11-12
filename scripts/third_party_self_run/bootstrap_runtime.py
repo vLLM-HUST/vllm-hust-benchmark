@@ -8,6 +8,10 @@ import sys
 ROOT = Path(__file__).resolve().parent
 profile = sys.argv[1]
 if profile == "baseline":
+    if os.environ.get("VLLM_HUST_ALLOW_LEGACY_DIAGNOSTIC") != "1":
+        raise RuntimeError(
+            "Legacy pip/CANN9.1 baseline is disabled; one_click.py restores the fixed018/CANN8.5.1 SDK"
+        )
     python = ROOT / "runtime-b0/bin/python"
     if not python.exists():
         subprocess.run(
