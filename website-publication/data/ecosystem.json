@@ -1593,9 +1593,9 @@
       ],
       "deployment_topology": "mixed",
       "delivery_model": "python_distribution",
-      "ownership": "organization_maintained",
+      "ownership": "original_contributor_maintained",
       "maintainers": [
-        "ShuhaoZhangTony"
+        "machuanhu"
       ],
       "advisors": [
         {
@@ -1608,8 +1608,8 @@
       "maturity": "experimental",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-unified-comm",
       "upstream_repository": null,
-      "summary_en": "Organization-maintained, device-neutral communication MOD. The current vLLM-HUST host contract delegates selected collectives above the existing device communicator, and the Ascend adapter reuses the host-owned HCCL process group without creating a second communication lifecycle.",
-      "summary_zh": "由组织接管维护的设备中立统一通信 MOD。当前 vLLM-HUST 宿主合同在既有 device communicator 之上委派集合通信；昇腾适配复用宿主拥有的 HCCL process group，不创建第二套通信生命周期。",
+      "summary_en": "Device-neutral communication MOD. The current vLLM-HUST host contract delegates selected collectives above the existing device communicator, and the Ascend adapter reuses the host-owned HCCL process group without creating a second communication lifecycle.",
+      "summary_zh": "设备中立统一通信 MOD。当前 vLLM-HUST 宿主合同在既有 device communicator 之上委派集合通信；昇腾适配复用宿主拥有的 HCCL process group，不创建第二套通信生命周期。",
       "public_effect_en": "The host contract is merged in vllm-hust #74 and covers all-reduce, all-gather, reduce-scatter, broadcast, explicit native fallback, visible failures, and ordered teardown. The HCCL adapter is implemented in vllm-ascend-hust #71. This is functional integration, not a measured speedup claim; multi-device hardware validation remains pending.",
       "public_effect_zh": "宿主合同已通过 vllm-hust #74 合并，覆盖 all-reduce、all-gather、reduce-scatter、broadcast、显式原生回退、异常可见性与有序销毁；HCCL 适配已在 vllm-ascend-hust #71 实现。这是功能接入，不代表已测得性能提升，多卡硬件验收仍待完成。",
       "public_effect_status": "validated",
