@@ -69,3 +69,7 @@ No new hardware runs, original-file search or changes to active tasks are author
 ## HLE本轮固定分层200题
 
 见[HLE200执行补充](HLE200-SCOPE.md)及[逐题冻结清单](hle-fixed200.json)：Gold文本64/图像10、Revision文本113/图像13；原回答/裁判预算及四项验收阈值保留，历史611性能负载与本轮质量子集明确区分。
+
+## SWE / Terminal公开轨迹推理性能固定抽样
+
+按本轮用户确认的执行方式，SWE与Terminal改用公开真实请求轨迹测推理性能。见[来源、固定抽样与验收边界](PUBLIC-AGENT-TRACE-SCOPE.md)、[逐请求机器清单](public-agent-trace-fixed32-v1.json)及[抽样构建输入](public-agent-trace-source-selection-v1.json)。SWE按可用任务的仓库比例固定32任务/64请求；Terminal固定32任务/48请求；完整输入≤16384、max2048/并发8，失败及未返回保留。两臂实际生成，不执行工具或引用作者解决率。原三项质量协议与四目标阈值保持，公开轨迹回放不能自动证明五项端到端质量或连续16K窗口稳定性。
