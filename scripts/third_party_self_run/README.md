@@ -20,16 +20,16 @@ Python3.11.14、Torch2.9.0+cpu、torch-npu2.9.0.post1+gitee7ba04、Triton3.2.0.d
 | MMLU-Pro                        | 原固定200题，max8192、温度0、seed0、原评分器                       |
 | HLE-Verified                    | Gold668 + Revision1143，保留全部211道图像题，solver16384/judge8192 |
 | FrontierScience                 | Olympiad100 + Research60，solver16384/judge8192                    |
-| SWE-bench-Pro、TerminalBench2.1 | 按本轮范围延期，保留在报告未完成项中                               |
+| SWE-bench-Pro、TerminalBench2.1 | 需另建CPU任务工作区，当前入口尚未接入                              |
 
 HLE/Frontier 沿用固定原客户程序、原提示与裁判解析，两臂统一使用同一 B1 Qwen 替代裁判，未决裁判单列。小样本诊断须显式加
 `--smoke-evaluators`（HLE4、Frontier2；MMLU仍原200），不能充当全量成绩。首次第三方测试应重新执行本机 C8，省略
 `--continuous-evidence`。
 
 工具固定
-[Engine主分支4e860cd](https://github.com/vLLM-HUST/vllm-hust-engine/commit/4e860cd1b55a68dbb6420812edeb6c59082d5892)
+[Engine主分支e0f0824](https://github.com/vLLM-HUST/vllm-hust-engine/commit/e0f08249c7d587458e707a0bc16af7db9387aacd)
 与
-[r4.3.1 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4.3.1)
+[r4.3.2 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4.3.2)
 的附件 id、大小、SHA256，以及独立固定的源码清单 SHA256。离线缓存仍逐文件核验，不能修改本地清单来放行任意源码。原 r4 四个附件及历史原始记录保留。
 
 私有仓库凭据读取 `GH_TOKEN`/`GITHUB_TOKEN`，或当前目录、父目录、用户主目录 `.env` 中的这两个键；也支持 `--env-file /absolute/.env`。不执行
@@ -47,8 +47,8 @@ python3 one_click.py --b1-python /absolute/fixed-sdk/bin/python --out /absolute/
 配对已有记录，默认自动校验复算；它们不能冒充本次新结果。三数据集成功也不能标记五数据集整体验收完成。失败、长度终止、非法答案、未返回项和原始 SSE 均保留；不自动重试发题、缩短预算或降级
 eager。中断后等本次服务清理及租约释放完成才封存。
 
-当前修复通过50项
-Engine回归、Ruff、完整开发目录任务准备及实际双卡锁页传输预检。首轮原镜像启动在发题前暴露文本配置M-RoPE遗留问题，生成器已订正，原B0已完成MTP图编译及健康检查，真实C8客户端已开始运行，三数据集全量实机复测仍在进行；不宣称新的全量结果已通过。
+当前修复通过51项 Engine回归和Ruff。本机两臂C8已完成（B0 247/247、B1
+618/618）；MMLU原200题B0独立复核为140正确、20长度终止、0未解析。B1在发题前因内核file_writeback计数下溢被控制器停止，现已修复为按全部实际占用检查原4GiB余量，不扣缓存且保留OOM检查。失败记录保留，新目录重新执行完整配对；尚未完成本轮全量结果或五数据集验收。用户已要求自行启动swe-bench-pro-cpu工作区，SWE/Terminal当前待CPU执行环境就绪，不能写成已测或用户延期。
 
 旧诊断仅显式 `--legacy-diagnostic` 可进入，仍需对应旧部署配置；旧档案只读复核使用 `--review`。`original-kit/` 保留上传原件，`.py.source`
 防止格式化改写。这些历史脚本及分数均不作为默认正式执行入口。
