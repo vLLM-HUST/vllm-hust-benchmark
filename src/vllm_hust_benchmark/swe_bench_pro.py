@@ -75,6 +75,27 @@ def validate(configuration):
     ids = batch.get("instance_ids")
     if ids is not None and (len(ids) != batch["size"] or len(set(ids)) != len(ids)):
         raise ValueError("Explicit task ids must match batch size, without duplicates")
+    repository = batch.get("repository")
+    if repository is None and not ids:
+        raise ValueError("A cross-repository batch requires explicit task ids")
+    image_digests = batch.get("image_manifest_digests")
+    if image_digests is not None and (
+        not ids
+        or not isinstance(image_digests, dict)
+        or set(image_digests) != set(ids)
+        or any(
+            not isinstance(value, str)
+            or not re.fullmatch(r"sha256:[a-f0-9]{64}", value)
+            for value in image_digests.values()
+        )
+    ):
+        raise ValueError("Pinned ARM64 manifest digests must cover every selected task")
+    image_workers = batch.get("image_prepare_workers", 1)
+    if type(image_workers) is not int or not 1 <= image_workers <= 8:
+        raise ValueError("Image preparation workers must be an integer from 1 to 8")
+    startup_timeout = batch.get("startup_timeout_seconds", 180)
+    if type(startup_timeout) is not int or startup_timeout <= 0:
+        raise ValueError("Agent startup timeout must be a positive integer")
     if c["agent"]["automatic_retries"] != 0:
         raise ValueError("Automatic model retries must be zero")
     instructions = c["agent"].get("task_instructions")
@@ -318,6 +339,11 @@ def verify_inputs(c, folder):
         if (
             all_rows.get(row["instance_id"]) != row
             or row["instance_id"] != task["instance_id"]
+            or (
+                c["batch"].get("image_manifest_digests") is not None
+                and c["batch"]["image_manifest_digests"][row["instance_id"]]
+                != task["manifest_digest"]
+            )
         ):
             raise ValueError("Prepared row is not the frozen dataset row")
         inspected = json.loads(
@@ -511,7 +537,7 @@ def _agent_task(c, row, image, folder, barrier):
             folder / "ready.json",
             {"instance_id": row["instance_id"], "ready_monotonic": time.monotonic()},
         )
-        barrier.wait(timeout=180)
+        barrier.wait(timeout=c["batch"].get("startup_timeout_seconds", 180))
         began = time.monotonic()
         save(
             folder / "arrival.json",
@@ -664,7 +690,7 @@ def run(c, inputs, output):
     try:
         for process in processes:
             process.start()
-        barrier.wait(timeout=180)
+        barrier.wait(timeout=c["batch"].get("startup_timeout_seconds", 180))
         save(
             output / "batch-start.json",
             {

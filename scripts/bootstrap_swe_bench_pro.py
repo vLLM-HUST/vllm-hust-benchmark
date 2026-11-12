@@ -35,6 +35,7 @@ RUNTIME_SOURCE_FILES = [
     "src/vllm_hust_benchmark/swe_submodule_fixture.py",
     "src/vllm_hust_benchmark/swe_patch_state.py",
     "src/vllm_hust_benchmark/data/swe_bench_pro_v1_lock.json",
+    "src/vllm_hust_benchmark/data/swe_bench_pro_v1_200.json",
     "src/vllm_hust_benchmark/data/swe_bench_pro_bootstrap_lock.json",
     "docs/examples/swe-bench-pro/client-requirements.txt",
     "docs/examples/swe-bench-pro/single-agent.json",
@@ -384,10 +385,37 @@ def main():
     p.add_argument(
         "--run",
         action="store_true",
-        help="run ONE real Agent after preparation; no automatic resubmission",
+        help="run the selected Agents after preparation; no automatic resubmission",
     )
+    p.add_argument(
+        "--cohort", choices=["v1-200"], help="run the fixed 200-task V1 subset"
+    )
+    p.add_argument("--image-prepare-workers", type=int, choices=range(1, 9), default=1)
+    p.add_argument("--agent-wall-budget-seconds", type=int)
+    p.add_argument("--task-cpus", type=int, default=2)
+    p.add_argument("--task-memory-gib", type=int, default=4)
     args = p.parse_args()
     work = args.work.expanduser().absolute()
+    if min(args.task_cpus, args.task_memory_gib) <= 0 or (
+        args.agent_wall_budget_seconds is not None
+        and args.agent_wall_budget_seconds <= 0
+    ):
+        p.error("task resources and Agent wall budget must be positive")
+    cohort = None
+    if args.cohort:
+        cohort_path = LOCK.with_name("swe_bench_pro_v1_200.json")
+        cohort = json.loads(cohort_path.read_text())
+        if (
+            cohort["dataset_sha256"]
+            != json.loads(LOCK.read_text())["dataset"]["parquet_sha256"]
+            or len(set(cohort["instance_ids"])) != 200
+            or len(cohort["instance_ids"]) != 200
+        ):
+            raise ValueError("Invalid pinned V1 200-task cohort")
+    expected_tasks = 200 if cohort else 1
+    wall_budget = args.agent_wall_budget_seconds or (10800 if cohort else 1200)
+    startup_timeout = 600 if cohort else 180
+
     if not args.model_name.startswith("openai/"):
         p.error(
             "model-name must use openai/<served-model-name> for this OpenAI-compatible entry"
@@ -416,6 +444,19 @@ def main():
         "api_key_env": args.api_key_env,
         "image_registry_insecure": args.insecure_image_registry,
     }
+    if (
+        cohort
+        or args.image_prepare_workers != 1
+        or wall_budget != 1200
+        or (args.task_cpus, args.task_memory_gib) != (2, 4)
+    ):
+        identity["execution"] = {
+            "cohort_sha256": sha256(cohort_path) if cohort else None,
+            "image_prepare_workers": args.image_prepare_workers,
+            "agent_wall_budget_seconds": wall_budget,
+            "task_cpus": args.task_cpus,
+            "task_memory_gib": args.task_memory_gib,
+        }
     if work.exists():
         old = json.loads(marker.read_text()) if marker.is_file() else {}
         old_identity = old.get("identity", {})
@@ -451,7 +492,7 @@ def main():
     save()
     env = dict(os.environ, DOCKER_HOST=args.docker_host, PYTHONPATH=str(ROOT / "src"))
 
-    def command(step, command_args):
+    def command(step, command_args, timeout=1800):
         if step in state["completed"]:
             return
         print("START " + step, flush=True)
@@ -463,7 +504,7 @@ def main():
                 cwd=ROOT,
                 stdout=log,
                 stderr=subprocess.STDOUT,
-                timeout=1800,
+                timeout=timeout,
             )
         if result.returncode:
             state.update(status="FAILED", failed_step=step)
@@ -607,6 +648,21 @@ def main():
                 (ROOT / "docs/examples/swe-bench-pro/single-agent.json").read_text()
             )
             settings["run_id"] = "swe-pro-" + work.name
+            if cohort:
+                settings["batch"].update(
+                    repository=None,
+                    selection=args.cohort,
+                    size=expected_tasks,
+                    program_instances=expected_tasks,
+                    instance_ids=cohort["instance_ids"],
+                    image_manifest_digests=cohort["arm64_manifest_digests"],
+                    startup_timeout_seconds=startup_timeout,
+                )
+            settings["batch"]["image_prepare_workers"] = args.image_prepare_workers
+            settings["agent"]["wall_budget_seconds"] = wall_budget
+            settings["container"].update(
+                cpus=args.task_cpus, memory=f"{args.task_memory_gib}g"
+            )
             settings["paths"].update(
                 dataset_parquet=str(dataset),
                 agent_source=str(work / "sources/agent"),
@@ -647,16 +703,20 @@ def main():
             "prepare",
             runner
             + ["prepare", "--settings", settings_path, "--output", work / "inputs"],
+            timeout=10800 if cohort else 1800,
         )
         image_pin = artifact_lock["single_task_image"]
         selection = json.loads((work / "inputs/input-selection.json").read_text())
-        if len(selection["tasks"]) != 1 or any(
-            selection["tasks"][0][k] != image_pin[v]
-            for k, v in [
-                ("instance_id", "instance_id"),
-                ("manifest_digest", "manifest_digest"),
-                ("image_id", "config_digest"),
-            ]
+        if not cohort and (
+            len(selection["tasks"]) != 1
+            or any(
+                selection["tasks"][0][k] != image_pin[v]
+                for k, v in [
+                    ("instance_id", "instance_id"),
+                    ("manifest_digest", "manifest_digest"),
+                    ("image_id", "config_digest"),
+                ]
+            )
         ):
             raise ValueError(
                 "introductory task image differs from pinned upstream manifest/config; no Agent submitted"
@@ -699,13 +759,14 @@ def main():
                     "--output",
                     work / "run",
                 ],
+                timeout=wall_budget + startup_timeout + 600,
             )
             state["status"] = "RUN_RECORDED"
             state["result"] = json.loads((work / "run/batch-report.json").read_text())
             save()
-            if state["result"]["submitted"] != 1:
+            if state["result"]["submitted"] != expected_tasks:
                 raise RuntimeError(
-                    "real Agent did not submit; see the preserved task result, not a deployment PASS"
+                    "One or more Agents did not submit; see the preserved task results"
                 )
         print(
             "STATUS " + state["status"] + "; private evidence: " + str(marker),
