@@ -23,7 +23,7 @@ Python3.11.14、Torch2.9.0+cpu、torch-npu2.9.0.post1+gitee7ba04、Triton3.2.0.d
 | MMLU-Pro                        | 原固定200题，max8192、温度0、seed0、原评分器                       |
 | HLE-Verified                    | Gold668 + Revision1143，保留全部211道图像题，solver16384/judge8192 |
 | FrontierScience                 | Olympiad100 + Research60，solver16384/judge8192                    |
-| SWE-bench-Pro、TerminalBench2.1 | 需另建CPU任务工作区，当前入口尚未接入                              |
+| SWE-bench-Pro、TerminalBench2.1 | 本轮CPU连接已核验，任务调度尚未接入                                |
 
 HLE/Frontier 沿用固定原客户程序、原提示与裁判解析，两臂统一使用同一 B1 Qwen 替代裁判，未决裁判单列。小样本诊断须显式加
 `--smoke-evaluators`（HLE4、Frontier2；MMLU仍原200），不能充当全量成绩。首次第三方测试应重新执行本机 C8，省略
@@ -56,7 +56,8 @@ eager。中断后等本次服务清理及租约释放完成才封存。
 618/618）。原self-run-kit/one_click.py实际执行的新MMLU配对，两臂各200请求成功，正确150/149、长度终止25/18、0未解析；吞吐465.78→935.99
 tokens/s（+100.95%），平均TTFT/TPOT改善51.73%/50.16%。不据此推断统计质量等价。此前140正确的旧B0和启动失败记录独立保留。当前Frontier/HLE整轮仍在进行，尚未完成五数据集验收。
 
-SWE731/Terminal89原任务范围已冻结，尚未执行。CPU工作区应由模型侧平台控制入口创建，再向NPU容器交回连接信息；当前会话未提供此入口。容器Agent的401只说明没有用户创建权限，不能据此称Coder禁止这种流程。用户已要求全部五项，不能写成用户延期。
+SWE731/Terminal89原任务范围已冻结，尚未执行。CPU工作区已由平台侧完成并交回连接；本轮已核验SSH、ARM64
+Python3.12.13、Docker29.9.1及CPU至NPU的只读health200（生成请求数0）。先前“CPU工作区未创建、需要向NPU提供用户token”的状态已过时并撤回。两项尚需接入任务调度、原任务镜像/资源核验和评分，不能将环境连通写成任务已完成。用户已要求全部五项，不能写成用户延期。
 
 旧诊断仅显式 `--legacy-diagnostic` 可进入，仍需对应旧部署配置；旧档案只读复核使用 `--review`。`original-kit/` 保留上传原件，`.py.source`
 防止格式化改写。这些历史脚本及分数均不作为默认正式执行入口。
