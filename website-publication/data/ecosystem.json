@@ -479,7 +479,14 @@
         "requirements_en": "The Manifest 0.3 wheel is discoverable and clean-wheel tested. ECPA may express enable intent, but launch still requires the exact runtime-qualification profile; packaging does not widen the published performance result or make ADM a recovery protocol.",
         "requirements_zh": "Manifest 0.3 wheel 已可发现并通过 clean-wheel 测试。ECPA 可表达启用意图，但启动仍要求精确匹配 runtime-qualification profile；打包不会扩大既有性能结论，也不会把 ADM 变成恢复协议。"
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "bidkv",
@@ -562,7 +569,14 @@
         "requirements_en": "The Qwen3.5 result used Core f18cf803, Ascend 249ac12 plus the recorded build patch, FULL_AND_PIECEWISE graph, C12 and 512 MiB KV/NPU. Do not pool it with the TP2/SWE five-point observation or the older Qwen3.8 matrix. Functional compatibility, per-cell effectiveness, and live runtime-effective state are separate facts.",
         "requirements_zh": "Qwen3.5 结果使用 Core f18cf803、Ascend 249ac12 加已记录构建补丁、FULL_AND_PIECEWISE graph、C12 与每 NPU 512 MiB KV。不得与 TP2/SWE 五点观察或旧 Qwen3.8 矩阵合并。功能兼容、逐单元效果与当前实例 runtime-effective 状态是不同事实。"
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "diffspec",
@@ -634,7 +648,14 @@
         "requirements_en": "Use the pinned target/draft revisions with PP1, prefix caching and async scheduling disabled, native linear verification and PIECEWISE graph execution. Installed, configured and enabled are intent states; runtime effectiveness and performance require fresh TP4 benchmark custody.",
         "requirements_zh": "必须使用固定 target/draft revision、PP1、关闭 prefix caching 与 async scheduling，并采用 native linear verification 和 PIECEWISE graph。installed、configured、enabled 仅表示意图；runtime effectiveness 与性能结论需要新的 TP4 benchmark 托管证据。"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "advisors": [
+        {
+          "name_zh": "黄禹",
+          "name_en": "Yu Huang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "vspec",
@@ -796,7 +817,14 @@
         "requirements_en": "The current 0.3.0 package scope and the historical TP4 performance artifact are different qualifications. The -87.65% card result belongs only to artifact 63781f3d on Qwen3-30B-A3B BF16 TP4 PIECEWISE graph with max_num_seqs=4; it must not be transferred to the TP1 release package.",
         "requirements_zh": "当前 0.3.0 包范围与历史 TP4 性能制品是两项不同资格。卡片中的 -87.65% 仅属于制品 63781f3d 在 Qwen3-30B-A3B BF16、TP4 PIECEWISE、max_num_seqs=4 下的结果，不得转移到 TP1 发行包。"
       },
-      "evidence_level": "hardware_verified"
+      "evidence_level": "hardware_verified",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "opfuse",
@@ -866,7 +894,14 @@
         "requirements_en": "Scaffold stage: default-off register(), enable via VLLM_HUST_OPFUSE_ENABLE=1, kill switch wins. Loading through dev-hub optimization profiles is planned via .vllm-hust/optimization.json.",
         "requirements_zh": "脚手架阶段：默认关闭，需 VLLM_HUST_OPFUSE_ENABLE=1 启用，kill switch 优先。计划通过 dev-hub 的 .vllm-hust/optimization.json 接入优化 profile。"
       },
-      "evidence_level": "scaffold_only"
+      "evidence_level": "scaffold_only",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "ascend-adaptive-quantized-kv",
@@ -1192,7 +1227,14 @@
         "requirements_zh": "合并后的 ECPA 0.3 包及 clean-wheel 检查仅恢复预览展示。历史测量保留其精确运行清单；当前 main 在激活前仍需完成宿主契约、存储一致性与恢复验收。",
         "followup_url": "https://github.com/vLLM-HUST/vllm-hust-kv-tiering/issues/1"
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "advisors": [
+        {
+          "name_zh": "赵进",
+          "name_en": "Jin Zhao",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "knorm-migration",
@@ -1246,7 +1288,19 @@
         "requirements_zh": "Manifest 0.3 与 clean-wheel 发现已验证。算子正确性、当前宿主兼容性、恢复以及与 prefix caching 和其他 KV 修改方的安全组合得到证明前，激活继续 fail closed。",
         "followup_url": "https://github.com/vLLM-HUST/vllm-hust-knorm/issues/1"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "advisors": [
+        {
+          "name_zh": "万瑶",
+          "name_en": "Yao Wan",
+          "relationship": "internal"
+        },
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "pyramidkv-ascend-migration",
@@ -1502,7 +1556,19 @@
         "followup_url": "https://github.com/vLLM-HUST/vllm-ascend-quantized-kv-cache-hust/issues/2"
       },
       "evidence_level": "hardware_verified",
-      "repository_visibility": "private"
+      "repository_visibility": "private",
+      "advisors": [
+        {
+          "name_zh": "姚鹏程",
+          "name_en": "Pengcheng Yao",
+          "relationship": "internal"
+        },
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "simllm-migration",
@@ -1765,7 +1831,14 @@
         "requirements_zh": "在已合入的宿主契约上可完成激活和关联恢复校验。发布资格仍需合入 Ascend 调用点，并补齐 descriptor 顺序、多 rank、V2 runner、设备正确性与资源释放、开销和性能证据。",
         "followup_url": "https://github.com/vLLM-HUST/vllm-hust-kv-transfer-observability/issues/2"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "layered-prefill-migration",
@@ -2094,7 +2167,14 @@
         "requirements_en": "ECPA enable/plan/render/run and process-owned callback evidence are verified on the pinned CPU host. Native-current NPU execution, blind custody/reveal evaluation, counterfactual validation and performance remain required.",
         "requirements_zh": "ECPA enable/plan/render/run 与进程自有回调证据已在固定 CPU host 上验证。仍需原生当前版 NPU 执行、盲测 custody/reveal、反事实验证与性能证据。"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "tricard-clm-lifecycle",
@@ -2156,7 +2236,14 @@
         "requirements_en": "The controller is external and operator-owned. Runtime effectiveness requires a process-owned observer receipt; clean-wheel activation and import do not establish it.",
         "requirements_zh": "controller 是外部 operator-owned 服务。runtime_effective 必须来自进程自有 observer receipt；clean-wheel 启用与 import 不能证明生效。"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "quality-bounded-inference",
@@ -2410,7 +2497,14 @@
         "requirements_en": "Keep the Qwen3.5 unified observation and Qwen2.5-7B-Instruct M2 controller study separate. The Qwen3.5 runtime exercised recompute, partial-reuse and full-reuse decisions; the M2 controller direction stopped after its preregistered negative result.",
         "requirements_zh": "必须分开 Qwen3.5 统一观察与 Qwen2.5-7B-Instruct M2 controller 研究。Qwen3.5 运行时执行了 recompute、partial-reuse 与 full-reuse 决策；M2 controller 方向则依据预注册负向结果停止。"
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "vllm-hust-benchmark",
@@ -2538,7 +2632,14 @@
         "requirements_en": "The +42.39% Qwen3.5 card result is pinned to source capsule f7598b9 on Core 752a3a5 / Ascend 9bf964c and five shared-host smoke observations; it is not a result for the current package or the DeepSeek configuration. vllm-betterscale 0.5.1 requires an existing pinned Ascend runtime and model weights and is not an Extension Manager bundle.",
         "requirements_zh": "卡片中的 Qwen3.5 +42.39% 固定属于源码胶囊 f7598b9、Core 752a3a5 / Ascend 9bf964c 与五个共享主机 smoke 单次观察；它不是当前软件包或 DeepSeek 配置的结果。vllm-betterscale 0.5.1 仍需固定 Ascend 运行时和模型权重，且不是 Extension Manager bundle。"
       },
-      "evidence_level": "hardware_verified"
+      "evidence_level": "hardware_verified",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "ascend-attention-boundary",
@@ -3021,7 +3122,14 @@
         "requirements_en": "Use the repository's pinned compatibility profile and run vllm-hust-opset plus vllm-hust-ext extension check before enabling. The linear-SwiGLU fused kernel covers M <= 128; larger M falls back. Ordinary ACLNN MatMul, unrelated linear kernels, and other runtime versions are not qualified.",
         "requirements_zh": "按仓库固定的兼容配置安装，启用前运行 vllm-hust-opset 和 vllm-hust-ext extension check。Linear–SwiGLU 融合内核只覆盖 M ≤ 128，较大 M 回退；普通 ACLNN MatMul、其他 linear 内核和其他运行时版本不在本次验收范围。"
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "traceloom",
@@ -3085,7 +3193,14 @@
         "requirements_en": "Scheduler injection is patch-free. Step/device correlation requires the explicit transport-worker patch and supported profiler evidence. Not an Extension Manager bundle. TP1 and TP2 captures have separate bounded evidence; other revisions need a source audit. Universal graph/distributed coverage and instrumentation overhead remain unqualified.",
         "requirements_zh": "Scheduler 注入无需源码补丁；step/device 关联需显式 transport-worker 补丁及受支持的 profiler 证据。不是 Extension Manager bundle。TP1 与 TP2 采集分别有独立的限定证据；其他版本需源码审计，普适 graph/分布式覆盖与记录开销仍未验收。"
       },
-      "repository_visibility": "private"
+      "repository_visibility": "private",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "request-throttling-controller",
@@ -3545,7 +3660,14 @@
         "requirements_en": "The package intentionally refuses activation until a real host implementation is qualified.",
         "requirements_zh": "在真实宿主实现通过验收前，包会有意拒绝启用。"
       },
-      "evidence_level": "integration_scaffold"
+      "evidence_level": "integration_scaffold",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "prefill-microflow",
@@ -3599,7 +3721,14 @@
         "requirements_en": "Requires the pinned BetterScale shared host and remains disabled by default.",
         "requirements_zh": "依赖固定的 BetterScale 共享宿主，且保持默认关闭。"
       },
-      "evidence_level": "performance_measured"
+      "evidence_level": "performance_measured",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     }
   ]
 }
