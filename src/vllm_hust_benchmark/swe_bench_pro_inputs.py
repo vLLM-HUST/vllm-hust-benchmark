@@ -3,6 +3,7 @@
 Migrated from request-throttling-controller at ea13820; upstream cores unchanged.
 """
 
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import os
@@ -106,16 +107,20 @@ def prepare(configuration, output):
     helper = runpy.run_path(str(official / "helper_code/image_uri.py"))
     rows = parquet.read_table(paths["dataset_parquet"]).to_pylist()
     selected = c["batch"].get("instance_ids")
+    repository = c["batch"].get("repository")
     rows = sorted(
         (
             x
             for x in rows
-            if x["repo"] == c["batch"]["repository"]
+            if (repository is None or x["repo"] == repository)
             and (not selected or x["instance_id"] in selected)
         ),
         key=lambda x: x["instance_id"],
     )[: c["batch"]["size"]]
-    assert len(rows) == c["batch"]["size"]
+    if len(rows) != c["batch"]["size"] or (
+        selected is not None and {row["instance_id"] for row in rows} != set(selected)
+    ):
+        raise ValueError("The exact batch selection is missing from the pinned dataset")
     grading_sources = validate_grading_sources(official, rows, lock)
     os.environ["DOCKER_HOST"] = paths["docker_host"]
     case_bytes = "".join(
@@ -130,38 +135,44 @@ def prepare(configuration, output):
         "official_sources": grading_sources,
     }
     save(output / "input-selection.json", manifest)
-    for index, row in enumerate(rows):
+
+    def resolve_image(index, row):
         identifier = row["instance_id"]
         uri = helper["get_dockerhub_image_uri"](
             identifier, lock["community_images"]["dockerhub_username"], row["repo"]
         )
         mirror = c["image_mirror_prefix"] + uri
-        raw = command(
-            [
-                paths["crane"],
-                *registry_args,
-                "manifest",
-                "--platform=linux/arm64",
-                mirror,
-            ],
-            output / f"image-{index}-manifest-command.json",
+        frozen_manifest = c["batch"].get("image_manifest_digests", {}).get(identifier)
+        if frozen_manifest is None:
+            frozen_manifest = command(
+                [
+                    paths["crane"],
+                    *registry_args,
+                    "digest",
+                    "--platform=linux/arm64",
+                    mirror,
+                ],
+                output / f"image-{index}-digest-command.json",
+            ).strip()
+        immutable = mirror.rsplit(":", 1)[0] + "@" + frozen_manifest
+        image_manifest = json.loads(
+            command(
+                [paths["crane"], *registry_args, "manifest", immutable],
+                output / f"image-{index}-manifest-command.json",
+            )
         )
-        image_manifest = json.loads(raw)
-        frozen_manifest = (
-            "sha256:" + hashlib.sha256(raw.encode().rstrip(b"\n")).hexdigest()
-        )
-        # crane digest reads the registry's actual selected-platform digest.
-        frozen_manifest = command(
-            [
-                paths["crane"],
-                *registry_args,
-                "digest",
-                "--platform=linux/arm64",
-                mirror,
-            ],
-            output / f"image-{index}-digest-command.json",
-        ).strip()
         image_id = image_manifest["config"]["digest"]
+        return {
+            "instance_id": identifier,
+            "base_commit": row["base_commit"],
+            "image_uri": uri,
+            "manifest_digest": frozen_manifest,
+            "image_id": image_id,
+            "immutable_reference": immutable,
+        }
+
+    def prepare_image(index, task):
+        image_id = task["image_id"]
         inspected = subprocess.run(
             [paths["docker"], "image", "inspect", image_id],
             capture_output=True,
@@ -169,14 +180,13 @@ def prepare(configuration, output):
         )
         if inspected.returncode:
             archive = output / f"image-{index}.tar"
-            immutable = mirror.rsplit(":", 1)[0] + "@" + frozen_manifest
             command(
                 [
                     paths["crane"],
                     *registry_args,
                     "pull",
                     "--platform=linux/arm64",
-                    immutable,
+                    task["immutable_reference"],
                     str(archive),
                 ],
                 output / f"image-{index}-download.json",
@@ -200,7 +210,8 @@ def prepare(configuration, output):
         )[0]
         assert info["Architecture"] == "arm64" and info["Os"] == "linux"
         command(
-            [paths["docker"], "tag", image_id, uri], output / f"image-{index}-tag.json"
+            [paths["docker"], "tag", image_id, task["image_uri"]],
+            output / f"image-{index}-tag.json",
         )
         identity = command(
             [
@@ -217,25 +228,49 @@ def prepare(configuration, output):
             ],
             output / f"image-{index}-base-check.json",
         )
-        assert "aarch64" in identity and row["base_commit"] in identity
-        for name in ("parser.py", "run_script.sh"):
-            relative = f"run_scripts/{identifier}/{name}"
-            actual = digest(official / relative)
-            assert (
-                actual == lock["official_v1"]["nodebb_task_source_sha256"][relative]
-            ), relative
-            manifest["official_sources"][relative] = actual
-        task = {
-            "instance_id": identifier,
-            "base_commit": row["base_commit"],
-            "image_uri": uri,
-            "manifest_digest": frozen_manifest,
-            "image_id": image_id,
-            "download_archive_sha256": archive_hash,
-        }
-        manifest["tasks"].append(task)
-        save(output / "input-selection.json", manifest)
-        print("TASK_IMAGE_READY", json.dumps(task), flush=True)
+        assert identity.splitlines() == ["aarch64", task["base_commit"]]
+        return {**task, "download_archive_sha256": archive_hash}
+
+    with ThreadPoolExecutor(
+        max_workers=c["batch"].get("image_prepare_workers", 1)
+    ) as pool:
+        resolved = []
+        failures = []
+        futures = [
+            pool.submit(resolve_image, index, row) for index, row in enumerate(rows)
+        ]
+        for row, future in zip(rows, futures):
+            try:
+                resolved.append(future.result())
+            except (
+                OSError,
+                ValueError,
+                RuntimeError,
+                KeyError,
+                subprocess.TimeoutExpired,
+            ) as error:
+                failures.append(
+                    {"instance_id": row["instance_id"], "error": str(error)}
+                )
+        save(
+            output / "arm-image-preflight.json",
+            {"resolved": resolved, "failures": failures},
+        )
+        if failures:
+            raise RuntimeError(
+                f"{len(failures)} of {len(rows)} ARM images failed preflight; "
+                f"see {output / 'arm-image-preflight.json'}"
+            )
+        # Receipts retain input order independently of image download order.
+        futures = [
+            pool.submit(prepare_image, index, task)
+            for index, task in enumerate(resolved)
+        ]
+        for future in futures:
+            task = future.result()
+            manifest["tasks"].append(task)
+            save(output / "input-selection.json", manifest)
+            print("TASK_IMAGE_READY", json.dumps(task), flush=True)
     manifest["status"] = "PREPARED"
     save(output / "input-selection.json", manifest)
     return manifest

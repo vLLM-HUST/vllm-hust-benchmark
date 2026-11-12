@@ -49,6 +49,33 @@ def test_standalone_without_controller_or_deployment(tmp_path):
     assert runner.hooks(configuration()) is None
 
 
+def test_fixed_cohort_has_exact_tasks_and_requires_a_digest_for_each():
+    path = ROOT / "src/vllm_hust_benchmark/data/swe_bench_pro_v1_200.json"
+    cohort = json.loads(path.read_text())
+    identifiers = cohort["instance_ids"]
+    assert len(identifiers) == len(set(identifiers)) == 200
+    assert len(cohort["repository_counts"]) == 11
+    assert sum(cohort["repository_counts"].values()) == 200
+    assert (
+        cohort["dataset_sha256"]
+        == runner.read(runner.LOCK_PATH)["dataset"]["parquet_sha256"]
+    )
+    settings = configuration()
+    settings["batch"].update(
+        repository=None,
+        size=200,
+        program_instances=200,
+        instance_ids=identifiers,
+        image_manifest_digests=cohort["arm64_manifest_digests"],
+        image_prepare_workers=4,
+        startup_timeout_seconds=600,
+    )
+    runner.validate(settings)
+    settings["batch"]["image_manifest_digests"].pop(identifiers[0])
+    with pytest.raises(ValueError, match="must cover every selected task"):
+        runner.validate(settings)
+
+
 @pytest.mark.parametrize(
     "section,key,value",
     [

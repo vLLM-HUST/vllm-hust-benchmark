@@ -292,6 +292,7 @@ def test_standalone_installer_pins_source_and_refuses_changed_files(
         ],
         "src/vllm_hust_benchmark/data": [
             "swe_bench_pro_v1_lock.json",
+            "swe_bench_pro_v1_200.json",
             "swe_bench_pro_bootstrap_lock.json",
         ],
         "docs": ["examples/"],

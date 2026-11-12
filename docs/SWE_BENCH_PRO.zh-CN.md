@@ -392,3 +392,26 @@ Controller 可选实现 `integration.hook = "module:factory"`：`before_run`、`
 
 通用准备/评分逻辑从 Controller 的历史 `ea13820` 提取，官方核心保持固定来源； Controller 历史脚本、配置和实验记录可以作为备份保留，但新用户入口以本仓库为准。
 本次迁移不改写历史运行、网站矩阵或已有实验成绩。
+
+## 固定 200 题的 SWE-bench Pro V1 子集
+
+[固定清单](../src/vllm_hust_benchmark/data/swe_bench_pro_v1_200.json)从锁定的 731 道 V1 题中按 11 个仓库的原始比例抽取 200 道。
+各仓库按最大余数法分配题数，仓库内按 `SHA256("swe-bench-pro-v1-200:" + instance_id)` 排序选取。清单固定实例 ID、原始数据 SHA256 和每道题的 Linux ARM64 镜像摘要。
+运行结果应标为此 200 题子集。
+
+先让目标工作区的镜像源具备这 200 个镜像并核对可用存储。准备、运行沿用同一个入口和绝对工作目录：
+
+```bash
+python3 scripts/bootstrap_swe_bench_pro.py \
+  --work "$WORK" --model-api "$MODEL_API" --model-name "$MODEL_NAME" \
+  --cohort v1-200 --image-prepare-workers 4
+
+python3 scripts/bootstrap_swe_bench_pro.py \
+  --work "$WORK" --model-api "$MODEL_API" --model-name "$MODEL_NAME" \
+  --cohort v1-200 --image-prepare-workers 4 --resume --run
+```
+
+`--image-prepare-workers` 控制镜像准备并行度，需结合镜像缓存、网络和存储余量。
+所有 Agent 仍一起到达；`--task-cpus` 和 `--task-memory-gib` 仅调单沙箱规格，外层 Docker 预算由 Coder 模板控制。
+200 题默认单 Agent 运行上限是三小时，可用 `--agent-wall-budget-seconds` 显式固定。
+记录准备墙钟、Agent 批次墙钟和提交数。缩短超时会增加未完成数，不能按完整批次提速计入。官方评分为单独步骤。
