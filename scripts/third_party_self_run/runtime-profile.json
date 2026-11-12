@@ -5,21 +5,21 @@
     "identity_mode": "reference",
     "reconstruction_manifest": "/tmp/vllm-hust-test-family-rebuild-20261111-r1/source-manifest.json",
     "reconstruction_manifest_sha256": "5ff0526a9b583aa8d9d190d05321972880cefb3629255edb2944ffe6a65edc21",
-    "qualification": "Legacy diagnostic location only; default one_click delegates to fixed Engine r4.3.6, which restores and verifies original r4 assets and SDK. No longer waiting for an unknown capsule path.",
+    "qualification": "Legacy diagnostic location only; default one_click delegates to fixed Engine r4.3.7, which restores and verifies original r4 assets and SDK. No longer waiting for an unknown capsule path.",
     "source_capsule": "/root/vllm-hust-third-party-verify-20261111-c9c974/self-run-kit/full-answer-frozen-sources-20261030-r4.tar.gz",
     "installed_source_manifest": "/root/vllm-hust-third-party-verify-20261111-c9c974/self-run-kit/installed-b1-source-manifest.json"
   },
   "third_party": {
     "entrypoint": "benchmark one_click.py -> verified Engine root one_click.py -> scripts/third_party.py",
-    "release": "full-answer-b1-20261030-r4.3.6",
+    "release": "full-answer-b1-20261030-r4.3.7",
     "datasets": [
       "MMLU-Pro fixed200",
-      "HLE Gold668/Revision1143,211 images",
+      "HLE fixed stratified200,23images,source1811",
       "FrontierScience100+60"
     ],
     "runtime_locations": "Use --b1-python or --deployment; B0 restored by pinned OCI digest",
     "native_full_validation": "ongoing, not accepted",
-    "engine_commit_short": "dbbb2a7",
+    "engine_commit_short": "5babcfa",
     "cpu_executor_required": [
       "SWE-bench-Pro",
       "TerminalBench2.1"
@@ -27,6 +27,7 @@
     "requested_datasets": 5,
     "cpu_provisioning": "Platform-managed swe-bench-pro-cpu handed off; SSH, ARM64 Python3.12.13, Docker29.9.1 and CPU-to-NPU health200 verified with zero generation requests. SWE731/Terminal89 scheduling, original image/resource admission and scoring are not wired into current controller; tasks not executed. No NPU user-session request required.",
     "canonical_repository": "vLLM-HUST/vllm-hust-engine",
-    "mmlu_scope": "Fixed200 ordered subset of source test12032,14subjects; generation seed0 is not sampling seed"
+    "mmlu_scope": "Fixed200 ordered subset of source test12032,14subjects; generation seed0 is not sampling seed",
+    "hle_profile": "fixed200-v1"
   }
 }
