@@ -1,0 +1,93 @@
+吞吐优先的研究进度与优化复核
+
+用户已明确：吞吐为主指标，TTFT为次要指标。本次只重新分析已有实测和冻结预测，不新增NPU运行、不删慢样本、不重新调参。
+吞吐口径：实际输出token总数 /（最后D完整响应 - 最早名义到达），包含输入到达跨度及收尾；该值不是饱和最大容量。
+
+已做优化的吞吐变化：
+DMA staging：+9.923%, -0.058%；4-slot B repeats share one control; fourth control failed. P-only has one pair. DMA has a different workload family.
+D affinity：-5.068%, -3.265%；Two ABBA pairs; host state and order effects remain possible.
+P prestarted：-11.759%；4-slot B repeats share one control; fourth control failed. P-only has one pair. DMA has a different workload family.
+4 staging slots：+1.502%, +2.268%；4-slot B repeats share one control; fourth control failed. P-only has one pair. DMA has a different workload family.
+D prestarted：-0.601%, -5.130%；Two ABBA pairs; host state and order effects remain possible.
+
+冻结主验证v42的8组：仅吞吐数值6/8误差≤10%，中位误差2.681%；r11/r12仍分别高估25.583%/25.913%。
+低负载组可受输入到达跨度主导；不能用这类吞吐吻合替代高负载服务容量验证。
+原有缓存/字节/先验支持门槛并未全部通过，主验证科学检查通过0/8；吞吐数值通过不能据此宣称模型整体验收。
+开发集v48b吞吐数值13/15误差≤10%，中位误差0.975%；最差61.169%。这是回顾性开发集结果，不能替代留出验证。
+
+重复实测共用一个吞吐预测点的下界：
+r09-2p2d-observed-300-RR/r13-2p2d-observed-300-RR：最坏相对误差至少0.199%；这不是状态感知/分布模型的不可能性结论。
+r10-2p2d-observed-600-RR/r14-2p2d-observed-600-RR：最坏相对误差至少3.234%；这不是状态感知/分布模型的不可能性结论。
+r11-2p2d-observed-1200-RR/r15-2p2d-observed-1200-RR：最坏相对误差至少11.734%；这不是状态感知/分布模型的不可能性结论。
+r12-2p2d-observed-2400-RR/r16-2p2d-observed-2400-RR：最坏相对误差至少9.262%；这不是状态感知/分布模型的不可能性结论。
+
+整轮结束时间梳理（秒）：
+dma-v2-oneshot-01-A：104.710 tokens/s，整轮116.130s，末尾会话dna-insert；{"initial_ready_offset_s": 1.325802554, "between_turn_ready_gaps_s": 15.984329336, "P_full_s": 45.370986859, "handoff_and_D_to_first_s": 10.161806065, "D_first_to_full_response_s": 43.28718954}
+  D副本完成分布 {"D0": {"requests": 43, "output_tokens": 5504, "last_completion_s": 113.040980988, "finished_before_whole_round_s": 3.089133366}, "D1": {"requests": 52, "output_tokens": 6656, "last_completion_s": 116.130114354, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 1.325802554, "between_turn_ready_gaps_s": 15.984329336, "P_to_frontend_done_s": 41.649530559, "P_frontend_to_native_done_s": 3.3985647859999997, "P_response_tail_s": 0.32289151399999994, "D_accept_to_owner_first_s": 9.315511754000001, "D_owner_first_to_frontend_done_s": 42.895986390999994, "D_frontend_to_native_done_s": 0.153846618, "D_transport_and_handoff_s": 1.0836508420000002}
+dma-v2-oneshot-02-B：115.100 tokens/s，整轮105.647s，末尾会话dna-insert；{"initial_ready_offset_s": 1.325802554, "between_turn_ready_gaps_s": 41.594153448, "P_full_s": 11.433244594, "handoff_and_D_to_first_s": 7.111961668, "D_first_to_full_response_s": 44.181895746}
+  D副本完成分布 {"D0": {"requests": 43, "output_tokens": 5504, "last_completion_s": 102.638544385, "finished_before_whole_round_s": 3.008513625}, "D1": {"requests": 52, "output_tokens": 6656, "last_completion_s": 105.64705801, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 1.325802554, "between_turn_ready_gaps_s": 41.594153448, "P_to_frontend_done_s": 6.596735357, "P_frontend_to_native_done_s": 4.667482933, "P_response_tail_s": 0.16902630400000002, "D_accept_to_owner_first_s": 6.335070755, "D_owner_first_to_frontend_done_s": 43.761344750999996, "D_frontend_to_native_done_s": 0.23469423900000003, "D_transport_and_handoff_s": 0.962747669}
+dma-v2-oneshot-03-B：115.596 tokens/s，整轮105.194s，末尾会话dna-insert；{"initial_ready_offset_s": 1.325802554, "between_turn_ready_gaps_s": 42.791155845, "P_full_s": 7.907899383, "handoff_and_D_to_first_s": 7.779885531, "D_first_to_full_response_s": 45.389007444}
+  D副本完成分布 {"D0": {"requests": 43, "output_tokens": 5504, "last_completion_s": 102.169857673, "finished_before_whole_round_s": 3.023893084}, "D1": {"requests": 52, "output_tokens": 6656, "last_completion_s": 105.193750757, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 1.325802554, "between_turn_ready_gaps_s": 42.791155845, "P_to_frontend_done_s": 7.250203518999999, "P_frontend_to_native_done_s": 0.447631414, "P_response_tail_s": 0.21006445000000004, "D_accept_to_owner_first_s": 7.5190147099999995, "D_owner_first_to_frontend_done_s": 44.942609177, "D_frontend_to_native_done_s": 0.242021849, "D_transport_and_handoff_s": 0.465247239}
+dma-v2-oneshot-04-A：115.663 tokens/s，整轮105.133s，末尾会话dna-insert；{"initial_ready_offset_s": 1.325802554, "between_turn_ready_gaps_s": 43.144794147, "P_full_s": 7.548412262, "handoff_and_D_to_first_s": 7.851619459, "D_first_to_full_response_s": 45.262533279}
+  D副本完成分布 {"D0": {"requests": 43, "output_tokens": 5504, "last_completion_s": 102.148701432, "finished_before_whole_round_s": 2.984460269}, "D1": {"requests": 52, "output_tokens": 6656, "last_completion_s": 105.133161701, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 1.325802554, "between_turn_ready_gaps_s": 43.144794147, "P_to_frontend_done_s": 6.852419851999999, "P_frontend_to_native_done_s": 0.482829834, "P_response_tail_s": 0.21316257600000002, "D_accept_to_owner_first_s": 7.684954607, "D_owner_first_to_frontend_done_s": 44.78360465, "D_frontend_to_native_done_s": 0.261362363, "D_transport_and_handoff_s": 0.38423111800000004}
+d-affinity-01-RR：215.944 tokens/s，整轮56.311s，末尾会话dna-insert；{"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_full_s": 4.007569443, "handoff_and_D_to_first_s": 9.585631708, "D_first_to_full_response_s": 42.386155633}
+  D副本完成分布 {"D0": {"requests": 43, "output_tokens": 5504, "last_completion_s": 53.038752062, "finished_before_whole_round_s": 3.272055361}, "D1": {"requests": 52, "output_tokens": 6656, "last_completion_s": 56.310807423, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 3.0965964790000005, "P_frontend_to_native_done_s": 0.6841750890000001, "P_response_tail_s": 0.226797875, "D_accept_to_owner_first_s": 9.072823871, "D_owner_first_to_frontend_done_s": 41.833158496, "D_frontend_to_native_done_s": 0.33521327, "D_transport_and_handoff_s": 0.7305917040000001}
+d-affinity-02-DA：205.000 tokens/s，整轮59.317s，末尾会话dna-insert；{"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_full_s": 15.231429602, "handoff_and_D_to_first_s": 2.637698481, "D_first_to_full_response_s": 41.116617624}
+  D副本完成分布 {"D0": {"requests": 51, "output_tokens": 6528, "last_completion_s": 55.523760178, "finished_before_whole_round_s": 3.793436168}, "D1": {"requests": 44, "output_tokens": 5632, "last_completion_s": 59.317196346, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 9.487289364999999, "P_frontend_to_native_done_s": 5.560983759999999, "P_response_tail_s": 0.183156477, "D_accept_to_owner_first_s": 2.489452762, "D_owner_first_to_frontend_done_s": 40.688981348000006, "D_frontend_to_native_done_s": 0.25035653, "D_transport_and_handoff_s": 0.32552546499999996}
+d-affinity-03-DA：202.842 tokens/s，整轮59.948s，末尾会话dna-insert；{"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_full_s": 14.724289817, "handoff_and_D_to_first_s": 3.58636847, "D_first_to_full_response_s": 41.305995976}
+  D副本完成分布 {"D0": {"requests": 51, "output_tokens": 6528, "last_completion_s": 56.585330433, "finished_before_whole_round_s": 3.362774469}, "D1": {"requests": 44, "output_tokens": 5632, "last_completion_s": 59.948104902, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 10.811600289, "P_frontend_to_native_done_s": 3.727350544, "P_response_tail_s": 0.185338984, "D_accept_to_owner_first_s": 2.752135518, "D_owner_first_to_frontend_done_s": 40.968206589, "D_frontend_to_native_done_s": 0.181601474, "D_transport_and_handoff_s": 0.9904208649999999}
+d-affinity-04-RR：209.689 tokens/s，整轮57.991s，末尾会话distribution-search；{"initial_ready_offset_s": 0.0, "between_turn_ready_gaps_s": 0.0, "P_full_s": 9.917504344, "handoff_and_D_to_first_s": 8.168620873, "D_first_to_full_response_s": 39.904516361}
+  D副本完成分布 {"D0": {"requests": 43, "output_tokens": 5504, "last_completion_s": 57.990641578, "finished_before_whole_round_s": 0.0}, "D1": {"requests": 52, "output_tokens": 6656, "last_completion_s": 56.567323212, "finished_before_whole_round_s": 1.423318366}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.0, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 6.8171138419999995, "P_frontend_to_native_done_s": 2.8922913169999998, "P_response_tail_s": 0.20809918499999996, "D_accept_to_owner_first_s": 8.033173454, "D_owner_first_to_frontend_done_s": 39.498251870000004, "D_frontend_to_native_done_s": 0.242212964, "D_transport_and_handoff_s": 0.299498946}
+P-dispatch-01-per_request：238.473 tokens/s，整轮50.991s，末尾会话dna-insert；{"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_full_s": 6.124537577, "handoff_and_D_to_first_s": 2.765203742, "D_first_to_full_response_s": 41.769859592}
+  D副本完成分布 {"D0": {"requests": 51, "output_tokens": 6528, "last_completion_s": 48.058824497, "finished_before_whole_round_s": 2.932227053}, "D1": {"requests": 44, "output_tokens": 5632, "last_completion_s": 50.99105155, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 4.192720287999999, "P_frontend_to_native_done_s": 1.753752309, "P_response_tail_s": 0.17806498, "D_accept_to_owner_first_s": 2.6585520590000002, "D_owner_first_to_frontend_done_s": 41.407740927000006, "D_frontend_to_native_done_s": 0.199237123, "D_transport_and_handoff_s": 0.26953322500000004}
+P-dispatch-02-prestarted：210.430 tokens/s，整轮57.786s，末尾会话dna-insert；{"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_full_s": 14.469249914, "handoff_and_D_to_first_s": 2.548943919, "D_first_to_full_response_s": 40.436780626}
+  D副本完成分布 {"D0": {"requests": 51, "output_tokens": 6528, "last_completion_s": 57.051536527, "finished_before_whole_round_s": 0.734888571}, "D1": {"requests": 44, "output_tokens": 5632, "last_completion_s": 57.786425098, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 8.629419651999997, "P_frontend_to_native_done_s": 5.616413742999999, "P_response_tail_s": 0.223416519, "D_accept_to_owner_first_s": 2.401624936, "D_owner_first_to_frontend_done_s": 39.978561417, "D_frontend_to_native_done_s": 0.26845315399999997, "D_transport_and_handoff_s": 0.337085038}
+staging-slots-01-two128：244.283 tokens/s，整轮49.778s，末尾会话dna-insert；{"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_full_s": 5.32667279, "handoff_and_D_to_first_s": 2.916141244, "D_first_to_full_response_s": 41.204142119}
+  D副本完成分布 {"D0": {"requests": 51, "output_tokens": 6528, "last_completion_s": 47.060320929, "finished_before_whole_round_s": 2.718085863}, "D1": {"requests": 44, "output_tokens": 5632, "last_completion_s": 49.778406792, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 3.413149314, "P_frontend_to_native_done_s": 1.7014198440000003, "P_response_tail_s": 0.21210363200000004, "D_accept_to_owner_first_s": 2.7017255369999997, "D_owner_first_to_frontend_done_s": 40.808075576, "D_frontend_to_native_done_s": 0.229638382, "D_transport_and_handoff_s": 0.38084386800000003}
+staging-slots-02-four64：247.952 tokens/s，整轮49.042s，末尾会话dna-insert；{"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_full_s": 5.206919799, "handoff_and_D_to_first_s": 2.694531498, "D_first_to_full_response_s": 40.808861748}
+  D副本完成分布 {"D0": {"requests": 51, "output_tokens": 6528, "last_completion_s": 47.501205574, "finished_before_whole_round_s": 1.54055811}, "D1": {"requests": 44, "output_tokens": 5632, "last_completion_s": 49.041763684, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 3.743426614, "P_frontend_to_native_done_s": 1.2315230000000001, "P_response_tail_s": 0.23197018499999997, "D_accept_to_owner_first_s": 2.5975873220000003, "D_owner_first_to_frontend_done_s": 40.384702762, "D_frontend_to_native_done_s": 0.259854447, "D_transport_and_handoff_s": 0.26124871499999996}
+staging-slots-03-four64：249.822 tokens/s，整轮48.675s，末尾会话dna-insert；{"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_full_s": 4.096488417, "handoff_and_D_to_first_s": 2.709104642, "D_first_to_full_response_s": 41.537575288}
+  D副本完成分布 {"D0": {"requests": 51, "output_tokens": 6528, "last_completion_s": 47.790986211, "finished_before_whole_round_s": 0.883632775}, "D1": {"requests": 44, "output_tokens": 5632, "last_completion_s": 48.674618986, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 3.1709511320000003, "P_frontend_to_native_done_s": 0.73158236, "P_response_tail_s": 0.19395492500000003, "D_accept_to_owner_first_s": 2.606084332, "D_owner_first_to_frontend_done_s": 41.088087306, "D_frontend_to_native_done_s": 0.258801412, "D_transport_and_handoff_s": 0.29370688}
+D-dispatch-01-per_request：246.524 tokens/s，整轮49.326s，末尾会话dna-insert；{"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_full_s": 6.033993089, "handoff_and_D_to_first_s": 2.563039085, "D_first_to_full_response_s": 40.397282872}
+  D副本完成分布 {"D0": {"requests": 51, "output_tokens": 6528, "last_completion_s": 46.147232567, "finished_before_whole_round_s": 3.178533118}, "D1": {"requests": 44, "output_tokens": 5632, "last_completion_s": 49.325765685, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 3.145700574, "P_frontend_to_native_done_s": 2.723174069, "P_response_tail_s": 0.16511844599999997, "D_accept_to_owner_first_s": 2.457508789, "D_owner_first_to_frontend_done_s": 40.005955598, "D_frontend_to_native_done_s": 0.23784242200000003, "D_transport_and_handoff_s": 0.259015148}
+D-dispatch-02-prestarted：245.043 tokens/s，整轮49.624s，末尾会话dna-insert；{"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_full_s": 6.005978341, "handoff_and_D_to_first_s": 2.701046789, "D_first_to_full_response_s": 40.58538148}
+  D副本完成分布 {"D0": {"requests": 51, "output_tokens": 6528, "last_completion_s": 46.8110937, "finished_before_whole_round_s": 2.812763549}, "D1": {"requests": 44, "output_tokens": 5632, "last_completion_s": 49.623857249, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 4.979581761, "P_frontend_to_native_done_s": 0.817621048, "P_response_tail_s": 0.20877553199999999, "D_accept_to_owner_first_s": 2.610653356, "D_owner_first_to_frontend_done_s": 40.246339084, "D_frontend_to_native_done_s": 0.20232277299999996, "D_transport_and_handoff_s": 0.227113056}
+D-dispatch-03-prestarted：227.570 tokens/s，整轮53.434s，末尾会话dna-insert；{"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_full_s": 9.640239938, "handoff_and_D_to_first_s": 2.81399273, "D_first_to_full_response_s": 40.648438864}
+  D副本完成分布 {"D0": {"requests": 51, "output_tokens": 6528, "last_completion_s": 52.172290916, "finished_before_whole_round_s": 1.261831255}, "D1": {"requests": 44, "output_tokens": 5632, "last_completion_s": 53.434122171, "finished_before_whole_round_s": 0.0}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.331450639, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 6.639102029, "P_frontend_to_native_done_s": 2.840559609, "P_response_tail_s": 0.1605783, "D_accept_to_owner_first_s": 2.714185394, "D_owner_first_to_frontend_done_s": 40.251454938, "D_frontend_to_native_done_s": 0.239222727, "D_transport_and_handoff_s": 0.257568535}
+D-dispatch-04-per_request：239.875 tokens/s，整轮50.693s，末尾会话distribution-search；{"initial_ready_offset_s": 0.0, "between_turn_ready_gaps_s": 0.0, "P_full_s": 9.068675859, "handoff_and_D_to_first_s": 2.631182258, "D_first_to_full_response_s": 38.993185892}
+  D副本完成分布 {"D0": {"requests": 51, "output_tokens": 6528, "last_completion_s": 50.693044009, "finished_before_whole_round_s": 0.0}, "D1": {"requests": 44, "output_tokens": 5632, "last_completion_s": 47.833719724, "finished_before_whole_round_s": 2.859324285}}
+  前端输出/原生完成分离 {"initial_ready_offset_s": 0.0, "between_turn_ready_gaps_s": 0.0, "P_to_frontend_done_s": 7.189668321, "P_frontend_to_native_done_s": 1.7331396110000004, "P_response_tail_s": 0.145867927, "D_accept_to_owner_first_s": 2.532867907, "D_owner_first_to_frontend_done_s": 38.542902889000004, "D_frontend_to_native_done_s": 0.259485971, "D_transport_and_handoff_s": 0.28911138299999994}
+
+本轮冻结候选的吞吐预测（32条已冻结DA轨迹，不新增模拟）：
+D-dispatch-01-per_request：吞吐误差0.574%；配置机制覆盖True，所有种子字节一致True，每种子缓存匹配请求数最少95/95。
+D-dispatch-02-prestarted：吞吐误差0.026%；配置机制覆盖False，所有种子字节一致True，每种子缓存匹配请求数最少95/95。
+D-dispatch-03-prestarted：吞吐误差7.707%；配置机制覆盖False，所有种子字节一致True，每种子缓存匹配请求数最少95/95。
+D-dispatch-04-per_request：吞吐误差2.182%；配置机制覆盖True，所有种子字节一致True，每种子缓存匹配请求数最少95/95。
+预建D线程两组虽数值也接近，但冻结候选未表示该干预；不得将它们计为该机制已获验证。
+
+本轮吞吐机制定位：
+D-dispatch-01-per_request：末尾会话D首token→前端完成累计占整轮81.11%；该包络包括生成和调度，不能称为纯NPU计算利用率。
+D-dispatch-02-prestarted：末尾会话D首token→前端完成累计占整轮81.10%；该包络包括生成和调度，不能称为纯NPU计算利用率。
+D-dispatch-03-prestarted：末尾会话D首token→前端完成累计占整轮75.33%；该包络包括生成和调度，不能称为纯NPU计算利用率。
+D-dispatch-04-per_request：末尾会话D首token→前端完成累计占整轮76.03%；该包络包括生成和调度，不能称为纯NPU计算利用率。
+
+每个末尾会话时间账均与整轮结束时间精确闭合；这些是依赖等待包络，不能当作互斥的物理服务成本相加或认定唯一瓶颈。
+下一步优先定位高负载吞吐高估、末尾解码/前置工作依赖、双D负载不均和RDMA方向约束。TTFT只有在影响整轮完成时间或辅助机制解释时优先处理。
+四槽位为目前观察到小幅吞吐正向变化的候选，但匹配对照未完成；原生DMA及D亲和策略在现有100Gb/s实测中均未证明跨重复稳定吞吐收益。
+RDMA受限条件下的亲和/负载权衡仍需模拟器验证；记录中的1Gb/s payload下界是数学约束，不是实际限速实验。

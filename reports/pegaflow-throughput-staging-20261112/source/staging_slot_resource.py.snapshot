@@ -1,0 +1,69 @@
+"""Causal process-local staging ownership, independent of a device service law.
+
+The device/credit model supplies its own submission return and data completion.
+No observed target duration, future real save completion, engine count, or
+bandwidth is inferred by this component. It is not enabled in accepted models.
+"""
+from dataclasses import dataclass
+import math
+
+
+@dataclass(frozen=True)
+class Submission:
+    returned_s: float
+    data_complete_s: float
+
+
+class StagingSlotResource:
+    def __init__(self,slot_bytes,slot_count,*,initialization_s=0.0):
+        assert slot_bytes>0 and slot_count>0
+        assert math.isfinite(initialization_s) and initialization_s>=0
+        self.slot_bytes=slot_bytes;self.slot_count=slot_count
+        self.initialization_s=initialization_s;self.initialized=False
+        self.gate_free_s=0.0;self.sequence=0
+        self.fences=[None]*slot_count
+        self.trace=[]
+
+    def copy(self,bytes,ready_s,*,CPU_copy_s,submit,event_create_s=0.0,
+             event_record_s=0.0,retire_API_s=0.0,pre_event_s=0.0,post_record_s=0.0):
+        """Submit is called only after this simulated slot can safely be reused.
+
+        submit(bytes, entry_s) must reserve work in a separate modeled resource
+        and return Submission. It may model shared load/save completion state.
+        retire_API_s excludes the modeled unfinished-fence wait; old aggregate
+        observed event_wait values must not be added as another device demand.
+        """
+        assert 0<bytes<=self.slot_bytes
+        assert all(math.isfinite(x) and x>=0 for x in [ready_s,CPU_copy_s,event_create_s,event_record_s,retire_API_s,pre_event_s,post_record_s])
+        sequence=self.sequence;slot=sequence%self.slot_count
+        gate_enter=max(ready_s,self.gate_free_s)
+        init=self.initialization_s if not self.initialized else 0.0
+        reuse_enter=gate_enter+init+pre_event_s
+        previous=self.fences[slot]
+        fence_wait=max(0.0,previous-reuse_enter) if previous is not None else 0.0
+        retire=retire_API_s if previous is not None else 0.0
+        copy_start=reuse_enter+fence_wait+retire+event_create_s
+        issue=copy_start+CPU_copy_s
+        reservation=submit(bytes,issue)
+        assert isinstance(reservation,Submission)
+        assert math.isfinite(reservation.returned_s) and reservation.returned_s>=issue
+        assert math.isfinite(reservation.data_complete_s) and reservation.data_complete_s>=issue
+        # RecordEvent follows SDK submission return. Its captured fence can
+        # complete during the host API, not necessarily at the API return.
+        fence_done=max(reservation.data_complete_s,reservation.returned_s)
+        returned=reservation.returned_s+event_record_s+post_record_s
+        self.fences[slot]=fence_done
+        self.gate_free_s=returned;self.sequence+=1;self.initialized=True
+        row=dict(sequence=sequence,slot=slot,bytes=bytes,ready_s=ready_s,
+            gate_wait_s=gate_enter-ready_s,initialization_s=init,
+            pre_event_s=pre_event_s,post_record_s=post_record_s,
+            previous_fence_complete_s=previous,fence_wait_s=fence_wait,
+            retire_API_s=retire,CPU_copy_start_s=copy_start,CPU_copy_end_s=issue,
+            SDK_submit_enter_s=issue,SDK_submit_return_s=reservation.returned_s,
+            event_fence_complete_s=fence_done,returned_s=returned)
+        self.trace.append(row)
+        return row
+
+    def completion_s(self):
+        """When all modeled slots and host staging work are complete."""
+        return max([self.gate_free_s,*[x for x in self.fences if x is not None]])
