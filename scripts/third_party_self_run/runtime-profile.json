@@ -5,29 +5,35 @@
     "identity_mode": "reference",
     "reconstruction_manifest": "/tmp/vllm-hust-test-family-rebuild-20261111-r1/source-manifest.json",
     "reconstruction_manifest_sha256": "5ff0526a9b583aa8d9d190d05321972880cefb3629255edb2944ffe6a65edc21",
-    "qualification": "Legacy diagnostic location only; default one_click delegates to fixed Engine r4.3.7, which restores and verifies original r4 assets and SDK. No longer waiting for an unknown capsule path.",
+    "qualification": "Legacy diagnostic location only; default one_click delegates to fixed Engine r4.3.8, which restores and verifies original r4 assets and SDK. No longer waiting for an unknown capsule path.",
     "source_capsule": "/root/vllm-hust-third-party-verify-20261111-c9c974/self-run-kit/full-answer-frozen-sources-20261030-r4.tar.gz",
     "installed_source_manifest": "/root/vllm-hust-third-party-verify-20261111-c9c974/self-run-kit/installed-b1-source-manifest.json"
   },
   "third_party": {
     "entrypoint": "benchmark one_click.py -> verified Engine root one_click.py -> scripts/third_party.py",
-    "release": "full-answer-b1-20261030-r4.3.7",
+    "release": "full-answer-b1-20261030-r4.3.8",
     "datasets": [
       "MMLU-Pro fixed200",
       "HLE fixed stratified200,23images,source1811",
-      "FrontierScience100+60"
+      "FrontierScience100+60",
+      "SWE-bench Pro public trace fixed32tasks/64requests",
+      "TerminalBench2.1 public trace fixed32tasks/48requests"
     ],
     "runtime_locations": "Use --b1-python or --deployment; B0 restored by pinned OCI digest",
     "native_full_validation": "ongoing, not accepted",
-    "engine_commit_short": "5babcfa",
-    "cpu_executor_required": [
+    "engine_commit_short": "448362c",
+    "cpu_executor_required": [],
+    "requested_datasets": 5,
+    "cpu_provisioning": "Platform CPU workspace SSH/Docker/health verified; default public trace inference needs no task Docker execution. End-to-end task solve rates remain unmeasured; no NPU user-session request.",
+    "canonical_repository": "vLLM-HUST/vllm-hust-engine",
+    "mmlu_scope": "Fixed200 ordered subset of source test12032,14subjects; generation seed0 is not sampling seed",
+    "hle_profile": "fixed200-v1",
+    "end_to_end_quality_cpu_executor_required": [
       "SWE-bench-Pro",
       "TerminalBench2.1"
     ],
-    "requested_datasets": 5,
-    "cpu_provisioning": "Platform-managed swe-bench-pro-cpu handed off; SSH, ARM64 Python3.12.13, Docker29.9.1 and CPU-to-NPU health200 verified with zero generation requests. SWE731/Terminal89 scheduling, original image/resource admission and scoring are not wired into current controller; tasks not executed. No NPU user-session request required.",
-    "canonical_repository": "vLLM-HUST/vllm-hust-engine",
-    "mmlu_scope": "Fixed200 ordered subset of source test12032,14subjects; generation seed0 is not sampling seed",
-    "hle_profile": "fixed200-v1"
+    "public_trace_protocol": "public-agent-trace-fixed32-v1",
+    "public_trace_protocol_sha256": "eacf3628cda8d7accc2e39b20fce687b1deb1cb0b0f470e8b11c8dd4517f71f8",
+    "public_trace_native_status": "not_started; current frozen HLE campaign retains device ownership"
   }
 }

@@ -1,17 +1,17 @@
 第三方执行清单（2026-11-12）
 
-[工具完成] 默认one_click下载并核验Engine固定主分支5babcfa及r4.3.7工具；旧每臂10条诊断改为显式选项。
+[工具完成] 默认one_click下载并核验Engine固定主分支448362c及r4.3.8工具；旧每臂10条诊断改为显式选项。
 [工具完成] 私有Release从GH_TOKEN/GITHUB_TOKEN、.env或--env-file读取凭据；工具附件及源码清单使用独立固定哈希。
 [工具完成] B0恢复官方原0.18镜像digest：Python3.11.14/Torch2.9.0+cpu/torch-npu2.9.0.post1+gitee7ba04/Triton3.2.0.dev20260322/CANN8.5.1，文本采用原backport，多模态采用原来源。
 [工具完成] B1恢复原r4 CorrectedWorker、E24/R36、MTP2、FULL、逐请求KV重算、Microflow、4GiB/rank，HLE另做图像接口资格。
-[运行前冻结] 原始权重SHA、物理卡与逻辑映射、SDK源码、客户程序、题目任务、参数、评分器、11个阶段及执行源码。
+[运行前冻结] 原始权重SHA、物理卡与逻辑映射、SDK源码、客户程序、题目任务、参数、评分器、15个阶段及执行源码。
 [执行] B0、B1各自C8：原4K/16K、各60秒预热和300秒正式窗口。
 [执行] MMLU-Pro：两臂同原固定200题、max8192、温度0/seed0、同时提交、原评分器、全部分母保留。
 [执行] FrontierScience：两臂各100 Olympiad + 60 Research；两侧答案由共同B1替代裁判，solver16384/judge8192。
 [执行] HLE-Verified固定分层200：Gold文本64/图像10、Revision文本113/图像13，共23图像题；两臂同题同序及共同B1替代裁判，solver16384/judge8192不缩短。固定200原题哈希与抽样清单在发题前核验；其余1611题明确标为范围外。
 [出图] 每阶段报告、汇总报告、四目标逐项状态、图表、原始SSE、遥测、清理回执和封存哈希。
 [失败策略] 不自动重试发题、不替换样本、不缩短预算、不降级eager；失败保留并停止后续阶段，报告未执行及卡点。
-[连接已核验，任务待接入] SWE-bench-Pro731、TerminalBench2.1共89题均为本轮必测。平台侧已交接swe-bench-pro-cpu；SSH/Docker及CPU到NPU只读health200通过，未发生成请求。待接入任务调度、原镜像/资源核验及评分；两项未执行，不算五项通过。
+[执行] SWE/Terminal公开真实trace固定抽样：SWE官方源32任务/64请求、Terminal2.1作者provider记录32任务/48请求；max2048/并发8、完整输入≤16384、不改写历史、不执行工具，不测解决率。运行前校验源版本、原文件SHA、任务/请求清单；实际服务tokenization一致后才生成，B1与封存B0逐条token ID相同。
 
 现有正式证据并非缺少：固定benchmark53541118中，M01原工况效率下界59.7573%；原MMLU200/max8192配对吞吐+90.4811%，TTFT/TPOT改善52.3374%/48.7757%；同费率类比成本降低47.5014%，原遥测33.5844%→62.9772%。均按原工况与估算范围展示，不替代本次新结果。
 
@@ -23,3 +23,7 @@
 
 [主入口] 实现位于vLLM-HUST/vllm-hust-engine根目录one_click.py；benchmark只保留大纲、证据及核验下载后转交根入口的兼容引导器。
 [固定子集] MMLU-Pro源test12,032题，本工况14学科固定200题；复用既有ID及顺序，不重新抽题，生成seed0不是抽样seed。准备时输出mmlu-task-scope.json并绑定题号/输入/清单SHA，报告和图注标明子集范围。
+
+[trace来源] SWE官方claude-sonnet-4-paper目录637/731可用；Terminal公开请求88/89可用。固定哈希/比例抽32任务，不按成绩或速度挑选；无效/过长/重复快照排除原因与原分母保留，单条请求不复制。
+[trace报告] 两项独立吞吐/TTFT/TPOT、样本P95/P99、失败/未返回/长度终止、实际16K覆盖及PNG/SVG；quality_measured=false，不用作者成绩，不替代连续窗口。
+[已验证] 83项Engine CPU回归、Ruff、64份公开原件、112条独立输入编码、真实数据prepare与准备HTML/PNG/SVG；本机trace配对尚未执行，当前HLE冻结运行保持。
