@@ -18,21 +18,21 @@ Python3.11.14、Torch2.9.0+cpu、torch-npu2.9.0.post1+gitee7ba04、Triton3.2.0.d
 
 默认执行清单在模型启动前冻结为 11 个阶段：两臂 C8 资格、MMLU-Pro 原固定200题配对、FrontierScience 两臂推理与共同 B1 裁判、HLE 两臂推理与共同 B1 裁判。
 
-| 数据集                          | 本轮任务范围                                                       |
-| ------------------------------- | ------------------------------------------------------------------ |
-| MMLU-Pro                        | 原固定200题，max8192、温度0、seed0、原评分器                       |
-| HLE-Verified                    | Gold668 + Revision1143，保留全部211道图像题，solver16384/judge8192 |
-| FrontierScience                 | Olympiad100 + Research60，solver16384/judge8192                    |
-| SWE-bench-Pro、TerminalBench2.1 | 本轮CPU连接已核验，任务调度尚未接入                                |
+| 数据集                          | 本轮任务范围                                                                  |
+| ------------------------------- | ----------------------------------------------------------------------------- |
+| MMLU-Pro                        | 原固定200题，max8192、温度0、seed0、原评分器                                  |
+| HLE-Verified                    | 固定分层200：Gold文本64/图像10，Revision文本113/图像13；solver16384/judge8192 |
+| FrontierScience                 | Olympiad100 + Research60，solver16384/judge8192                               |
+| SWE-bench-Pro、TerminalBench2.1 | 本轮CPU连接已核验，任务调度尚未接入                                           |
 
 HLE/Frontier 沿用固定原客户程序、原提示与裁判解析，两臂统一使用同一 B1 Qwen 替代裁判，未决裁判单列。小样本诊断须显式加
 `--smoke-evaluators`（HLE4、Frontier2；MMLU仍原200），不能充当全量成绩。首次第三方测试应重新执行本机 C8，省略
 `--continuous-evidence`。
 
 工具固定
-[Engine主分支dbbb2a7](https://github.com/vLLM-HUST/vllm-hust-engine/commit/dbbb2a76f69590d76aff965b2fa8e00290fb624c)
+[Engine主分支5babcfa](https://github.com/vLLM-HUST/vllm-hust-engine/commit/5babcfa1ecc01f19a95bd17dbe5248f62921cf23)
 与
-[r4.3.6 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4.3.6)
+[r4.3.7 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4.3.7)
 的附件 id、大小、SHA256，以及独立固定的源码清单 SHA256。离线缓存仍逐文件核验，不能修改本地清单来放行任意源码。原 r4 四个附件及历史原始记录保留。
 
 私有仓库凭据读取 `GH_TOKEN`/`GITHUB_TOKEN`，或当前目录、父目录、用户主目录 `.env` 中的这两个键；也支持 `--env-file /absolute/.env`。不执行
@@ -62,8 +62,10 @@ Python3.12.13、Docker29.9.1及CPU至NPU的只读health200（生成请求数0）
 旧诊断仅显式 `--legacy-diagnostic` 可进入，仍需对应旧部署配置；旧档案只读复核使用 `--review`。`original-kit/` 保留上传原件，`.py.source`
 防止格式化改写。这些历史脚本及分数均不作为默认正式执行入口。
 
-本轮实际推理使用启动前封存的r4.3.2源码；r4.3.6集成Engine根一键入口并明确冻结200题范围；保留正确TPOT、固定B1 r4引擎和原生成协议。
+本轮实际推理使用启动前封存的r4.3.2源码；r4.3.7集成Engine根一键入口并明确冻结200题范围；保留正确TPOT、固定B1 r4引擎和原生成协议。
 
 r4.3.4曾错误改用末文本块计算正式TPOT，已撤回。V1.5大纲3.4.2明确为`(请求完成时刻−首token时刻)/(输出token数−1)`，逐请求等权平均。首末文本块间隔仅作为独立辅助指标，不参与正式目标判定。运行中的r4.3.2及MMLU配对原报告已采用正确边界，不受影响。
 
 MMLU-Pro为固定200题子集，源test12,032题、14学科；不是本轮随机抽样。逐题ID、学科、源行/prompt哈希和参数见[大纲执行补充](https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/vllm-hust-midterm-20261019/milestone-v15/MMLU200-SCOPE.md)及[冻结清单](https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/vllm-hust-midterm-20261019/milestone-v15/mmlu-fixed200.json)。生成seed0不作为抽样seed；结果仅适用于该冻结子集，不能称为官方全集成绩。Engine在准备阶段保存mmlu-task-scope.json，并将范围与哈希绑定到执行计划。
+
+HLE默认采用本轮确认的固定分层200题，全部ID、原任务哈希、抽样规则及完整回答/裁判预算见[HLE200大纲执行补充](../../reports/vllm-hust-midterm-20261019/milestone-v15/HLE200-SCOPE.md)。23道真实图像题保留，两臂同题同序；显式`--hle-profile full1811`可选全集，诊断HLE4另列。历史611题是短输出性能负载，不称历史质量抽样。旧全量HLE受控停止并保留全部部分输出；新200题重新执行，不以先返回的题目构造子集。
