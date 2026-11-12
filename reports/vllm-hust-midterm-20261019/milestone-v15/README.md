@@ -61,3 +61,7 @@ clearly improved high-load utilization; full lifecycle cost is historical only.
 | Cost        | Historical request resource coefficients and card samples                  | Fee basis, representative fixed-B0 pairing, same request population and weighted interval utilization | Evidence/recalculation thread; fee basis from environment support |
 
 No new hardware runs, original-file search or changes to active tasks are authorized by this audit.
+
+## MMLU-Pro 固定200题范围补充
+
+第三方执行时同时使用[固定200题范围附件](MMLU200-SCOPE.md)和[逐题冻结清单](mmlu-fixed200.json)。源test12,032题，本工况仅复用14学科固定200题，生成seed0不是抽样seed；执行计划、脚本及报告均须标明子集范围。该补充说明既有任务，不改写原文、阈值或历史实测结果。

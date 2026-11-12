@@ -17,11 +17,11 @@ import urllib.request
 import uuid
 
 REPOSITORY = "vLLM-HUST/vllm-hust-engine"
-COMMIT = "fafec75763ec7acecd7a1323398b7dea1dd73d27"  # pragma: allowlist secret
-ASSET_ID = 739039785
-ASSET_BYTES = 216552
-ASSET_SHA256 = "e92fa8463f08436278b1b83d6d96b3cc194c8bedeab57f30e2affb454d780d37"  # pragma: allowlist secret
-MANIFEST_SHA256 = "32b2fc67a443d4cba11ed2e6236f57f5e36df1c437d08c00c94e36ebfc702027"  # pragma: allowlist secret
+COMMIT = "dbbb2a76f69590d76aff965b2fa8e00290fb624c"  # pragma: allowlist secret
+ASSET_ID = 739433620
+ASSET_BYTES = 240634
+ASSET_SHA256 = "89f41d82949961f814edc353b406ee8b6389b437a80bd47b347383d03fcfb361"  # pragma: allowlist secret
+MANIFEST_SHA256 = "bd8eba73a6424dd346fbbe398481853a94e4e0fc1aa7f9b1a7af7004cd2ecbef"  # pragma: allowlist secret
 PREFIX = "vllm-hust-engine-b1-r4"
 
 
@@ -173,7 +173,10 @@ def ensure(cache, env_file=None, explicit=None):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        epilog="Canonical inference entrypoint: vLLM-HUST/vllm-hust-engine/one_click.py. MMLU-Pro is the frozen200 subset of source test12032; generation seed0 is not a sampling seed.",
+    )
     parser.add_argument(
         "--engine-tools",
         type=Path,
@@ -218,7 +221,7 @@ def main(argv=None):
     env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", PYTHONPATH="")
     os.execve(
         sys.executable,
-        [sys.executable, str(root / "scripts/third_party.py"), *forwarded],
+        [sys.executable, str(root / "one_click.py"), *forwarded],
         env,
     )
 
