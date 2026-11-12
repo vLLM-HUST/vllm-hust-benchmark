@@ -1,27 +1,40 @@
 # 第三方一键推理测试
 
-默认 `one_click.py` 现在调用固定的 vLLM-HUST Engine 三数据集入口，首先校验工具、原件、SDK、模型及完整任务清单，再启动真实 NPU 推理并自动评分、出图。旧的每臂十条诊断不再是默认测试。
+默认 `one_click.py` 现在调用固定的 vLLM-HUST Engine 三数据集入口，首先校验工具、原件、SDK、模型及完整任务清单，再启动真实 NPU
+推理并自动评分、出图。旧的每臂十条诊断不再是默认测试。
 
 ```bash
 python3 one_click.py --model /absolute/Qwen3.5-35B-A3B --b1-python /absolute/fixed-sdk/bin/python --physical-devices 5,6 --out /absolute/new-run
 ```
 
-首次需要两张可独占的 Ascend 910B2、模型 BF16 权重、宿主驱动及 CANN9.1/ATB、固定 B1 SDK（Torch2.13、torch-npu2.13rc1、Transformers5.14.1）。B1 运行时及 MOD 从私有 r4 冻结原件恢复；已有部署可把 `--b1-python` 换成 `--deployment /absolute/b1-r4`。B0 自动按官方 ARM64 镜像 digest 恢复 Python3.11.14、Torch2.9.0+cpu、torch-npu2.9.0.post1+gitee7ba04、Triton3.2.0.dev20260322、CANN8.5.1 及原文本补丁，不使用旧 pip/CANN9.1 兼容基线，也不要求 Docker 服务。已有固定 B0 可传 `--baseline-deployment`。
+首次需要两张可独占的 Ascend 910B2、模型 BF16 权重、宿主驱动及 CANN9.1/ATB、固定 B1
+SDK（Torch2.13、torch-npu2.13rc1、Transformers5.14.1）。B1 运行时及 MOD 从私有 r4 冻结原件恢复；已有部署可把 `--b1-python` 换成
+`--deployment /absolute/b1-r4`。B0 自动按官方 ARM64 镜像 digest 恢复
+Python3.11.14、Torch2.9.0+cpu、torch-npu2.9.0.post1+gitee7ba04、Triton3.2.0.dev20260322、CANN8.5.1
+及原文本补丁，不使用旧 pip/CANN9.1 兼容基线，也不要求 Docker 服务。已有固定 B0 可传 `--baseline-deployment`。
 
 默认执行清单在模型启动前冻结为 11 个阶段：两臂 C8 资格、MMLU-Pro 原固定200题配对、FrontierScience 两臂推理与共同 B1 裁判、HLE 两臂推理与共同 B1 裁判。
 
-| 数据集 | 本轮任务范围 |
-| --- | --- |
-| MMLU-Pro | 原固定200题，max8192、温度0、seed0、原评分器 |
-| HLE-Verified | Gold668 + Revision1143，保留全部211道图像题，solver16384/judge8192 |
-| FrontierScience | Olympiad100 + Research60，solver16384/judge8192 |
-| SWE-bench-Pro、TerminalBench2.1 | 按本轮范围延期，保留在报告未完成项中 |
+| 数据集                          | 本轮任务范围                                                       |
+| ------------------------------- | ------------------------------------------------------------------ |
+| MMLU-Pro                        | 原固定200题，max8192、温度0、seed0、原评分器                       |
+| HLE-Verified                    | Gold668 + Revision1143，保留全部211道图像题，solver16384/judge8192 |
+| FrontierScience                 | Olympiad100 + Research60，solver16384/judge8192                    |
+| SWE-bench-Pro、TerminalBench2.1 | 按本轮范围延期，保留在报告未完成项中                               |
 
-HLE/Frontier 沿用固定原客户程序、原提示与裁判解析，两臂统一使用同一 B1 Qwen 替代裁判，未决裁判单列。小样本诊断须显式加 `--smoke-evaluators`（HLE4、Frontier2；MMLU仍原200），不能充当全量成绩。首次第三方测试应重新执行本机 C8，省略 `--continuous-evidence`。
+HLE/Frontier 沿用固定原客户程序、原提示与裁判解析，两臂统一使用同一 B1 Qwen 替代裁判，未决裁判单列。小样本诊断须显式加
+`--smoke-evaluators`（HLE4、Frontier2；MMLU仍原200），不能充当全量成绩。首次第三方测试应重新执行本机 C8，省略
+`--continuous-evidence`。
 
-工具固定 [Engine主分支5049f45](https://github.com/vLLM-HUST/vllm-hust-engine/commit/5049f45f91587c149895d6254c993b889f792163) 与 [r4.3 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4.3) 的附件 id、大小、SHA256，以及独立固定的源码清单 SHA256。离线缓存仍逐文件核验，不能修改本地清单来放行任意源码。原 r4 四个附件及历史原始记录保留。
+工具固定
+[Engine主分支4e860cd](https://github.com/vLLM-HUST/vllm-hust-engine/commit/4e860cd1b55a68dbb6420812edeb6c59082d5892)
+与
+[r4.3.1 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4.3.1)
+的附件 id、大小、SHA256，以及独立固定的源码清单 SHA256。离线缓存仍逐文件核验，不能修改本地清单来放行任意源码。原 r4 四个附件及历史原始记录保留。
 
-私有仓库凭据读取 `GH_TOKEN`/`GITHUB_TOKEN`，或当前目录、父目录、用户主目录 `.env` 中的这两个键；也支持 `--env-file /absolute/.env`。不执行 `.env`、不输出凭据，跨主机下载重定向去掉认证头。已有完整工具缓存可离线使用；原件和数据也须缓存完整。`--tools-cache` 指定工具缓存，`--cache` 指定运行时/数据缓存，`--dataset-assets` 指定含 `hle/`、`frontier/` 的已有数据根目录。
+私有仓库凭据读取 `GH_TOKEN`/`GITHUB_TOKEN`，或当前目录、父目录、用户主目录 `.env` 中的这两个键；也支持 `--env-file /absolute/.env`。不执行
+`.env`、不输出凭据，跨主机下载重定向去掉认证头。已有完整工具缓存可离线使用；原件和数据也须缓存完整。`--tools-cache` 指定工具缓存，`--cache`
+指定运行时/数据缓存，`--dataset-assets` 指定含 `hle/`、`frontier/` 的已有数据根目录。
 
 ```bash
 # 只验证固定工具：不表示 SDK 或模型已合格
@@ -30,8 +43,12 @@ python3 one_click.py --verify-only
 python3 one_click.py --b1-python /absolute/fixed-sdk/bin/python --out /absolute/new-preparation --prepare-only
 ```
 
-报告逐项显示四个目标是否达标及原因，区分本次运行与历史合格参考。原 M01 和正式 B0/B1 配对已有记录，默认自动校验复算；它们不能冒充本次新结果。三数据集成功也不能标记五数据集整体验收完成。失败、长度终止、非法答案、未返回项和原始 SSE 均保留；不自动重试发题、缩短预算或降级 eager。中断后等本次服务清理及租约释放完成才封存。
+报告逐项显示四个目标是否达标及原因，区分本次运行与历史合格参考。原 M01 和正式 B0/B1
+配对已有记录，默认自动校验复算；它们不能冒充本次新结果。三数据集成功也不能标记五数据集整体验收完成。失败、长度终止、非法答案、未返回项和原始 SSE 均保留；不自动重试发题、缩短预算或降级
+eager。中断后等本次服务清理及租约释放完成才封存。
 
-当前修复通过48项 Engine回归、Ruff、完整开发目录任务准备及实际双卡锁页传输预检。首轮原镜像启动在发题前暴露文本配置M-RoPE遗留问题，生成器已订正，三数据集全量实机复测仍在进行；不宣称新的全量结果已通过。
+当前修复通过50项
+Engine回归、Ruff、完整开发目录任务准备及实际双卡锁页传输预检。首轮原镜像启动在发题前暴露文本配置M-RoPE遗留问题，生成器已订正，原B0已完成MTP图编译及健康检查，真实C8客户端已开始运行，三数据集全量实机复测仍在进行；不宣称新的全量结果已通过。
 
-旧诊断仅显式 `--legacy-diagnostic` 可进入，仍需对应旧部署配置；旧档案只读复核使用 `--review`。`original-kit/` 保留上传原件，`.py.source` 防止格式化改写。这些历史脚本及分数均不作为默认正式执行入口。
+旧诊断仅显式 `--legacy-diagnostic` 可进入，仍需对应旧部署配置；旧档案只读复核使用 `--review`。`original-kit/` 保留上传原件，`.py.source`
+防止格式化改写。这些历史脚本及分数均不作为默认正式执行入口。
