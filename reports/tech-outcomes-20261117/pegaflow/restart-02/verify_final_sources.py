@@ -40,21 +40,52 @@ def verify():
             data = package.extractfile(item["path"]).read()
             assert len(data) == item["bytes"]
             assert hashlib.sha256(data).hexdigest() == item["sha256"]
-        prepared = package.extractfile("root/prepared-qwen35.json").read()
-        assert (
-            hashlib.sha256(prepared).hexdigest()
-            == descriptor["prepared_workload_sha256"]
-            == plan["prepared_workload_sha256"]
-        )
-        workload = json.loads(prepared)
-        assert len(workload["sessions"]) == 8
-        assert sum(len(session["turns"]) for session in workload["sessions"]) == 360
-        long_prompts = json.load(
-            package.extractfile("root/diagnostic-long-prompts.json")
-        )
-        assert [len(item["input_ids"]) for item in long_prompts] == plan[
-            "qualification"
-        ]["long_prompt_tokens"]
+        controlled = descriptor.get("schema") == "pegaflow-final-source-custody/v2"
+        if controlled:
+            assert "root/prepared-qwen35.json" not in members
+            assert "root/diagnostic-long-prompts.json" not in members
+            custody = json.load(
+                package.extractfile("root/prepared-workload-custody.json")
+            )
+            assert (
+                custody["prepared_workload_sha256"]
+                == descriptor["prepared_workload_sha256"]
+                == plan["prepared_workload_sha256"]
+            )
+            assert custody["sessions"] == 8 and custody["turns"] == 360
+            assert custody["long_diagnostic_tokens"] == [7551, 8712]
+            assert custody["public_input_reconstruction"] is False
+            assert (
+                custody["controlled_original_archive"]
+                == descriptor["controlled_originals"]
+            )
+            assert {item["path"] for item in custody["restricted_members"]} == {
+                "root/prepared-qwen35.json",
+                "root/diagnostic-long-prompts.json",
+            }
+            # The public verifier checks the binding and custody index; it does
+            # not claim to read back the restricted original input bytes.
+            restricted = {item["path"]: item for item in custody["restricted_members"]}
+            assert (
+                restricted["root/prepared-qwen35.json"]["sha256"]
+                == plan["prepared_workload_sha256"]
+            )
+        else:
+            prepared = package.extractfile("root/prepared-qwen35.json").read()
+            assert (
+                hashlib.sha256(prepared).hexdigest()
+                == descriptor["prepared_workload_sha256"]
+                == plan["prepared_workload_sha256"]
+            )
+            workload = json.loads(prepared)
+            assert len(workload["sessions"]) == 8
+            assert sum(len(session["turns"]) for session in workload["sessions"]) == 360
+            long_prompts = json.load(
+                package.extractfile("root/diagnostic-long-prompts.json")
+            )
+            assert [len(item["input_ids"]) for item in long_prompts] == plan[
+                "qualification"
+            ]["long_prompt_tokens"]
         assert json.load(package.extractfile("root/formal-plan.json")) == plan
         status = json.load(package.extractfile("root/campaign-status.json"))
         assert status["phase"] == "complete"
@@ -73,6 +104,8 @@ def verify():
         "sessions": 8,
         "turns": 360,
         "owned_npus_released": True,
+        "original_workload_bytes_publicly_reverified": not controlled,
+        "original_workload_custody_index_verified": controlled,
     }
 
 

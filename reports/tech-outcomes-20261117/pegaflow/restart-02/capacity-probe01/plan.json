@@ -1,0 +1,70 @@
+{
+  "schema": "pegaflow-capacity-diagnostic/v1",
+  "profile": "ascend91-kv3g-c16-20261114-01",
+  "scope": "Separate SWE prefix-reuse mechanism diagnostic, not frozen-five-datasets or acceptance evidence",
+  "reason": "Initial matched KV20GiB/rank cohort had no Native preemptions. At C8 Native APC hit8,798,208/10,524,398 tokens while current HMA safety guard forces Pega local hits0, moving96.9GB from host. Test a capacity boundary without disabling this safety guard. Use the smallest whole-GiB cache budget expected to admit the original262144 context,3GiB/rank, without modifying original workloads or their declared caps.",
+  "parent_plan_sha256": "0ad643d75735b327a649fc0023b29682bdefbd1c45effec687f968287832d3f5",
+  "workload_sha256": "c716290e07468920aa27084d423d0c7ff169bf71f8b58e81112bd2ec2e219e64",
+  "model": "Qwen3.5-35B-A3B BF16",
+  "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+  "vllm_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+  "ascend_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+  "pegaflow_commit": "e2cdc2f7b32d8294b54a74545c05d103e5a5ecaf",
+  "physical_npus": [
+    3,
+    4
+  ],
+  "logical_npus": [
+    0,
+    1
+  ],
+  "parallelism": {
+    "tensor": 2,
+    "pipeline": 1,
+    "data": 1,
+    "expert": false
+  },
+  "kv_bytes_per_rank": 3221225472,
+  "max_model_len": 262144,
+  "change_from_initial_cohort": "Only both-arm KV20GiB->3GiB/rank. Original context262144, client server-max-context262144, declared workload caps and original source bytes/hash unchanged; separate cache/salt/evidence directories. 2GiB draft was rejected before model start because capacity cannot support the original declared context. No draft results exist.",
+  "max_num_seqs": 16,
+  "max_num_batched_tokens": 4096,
+  "host_pool_gib_candidate": 30,
+  "seed": 17,
+  "mtp_tokens": 2,
+  "graph": "FULL_AND_PIECEWISE sizes3,6,12,24,48",
+  "initial_arm_order": [
+    "native",
+    "pegaflow"
+  ],
+  "initial_windows": {
+    "concurrency": 16,
+    "seconds_each": 180,
+    "classification": "exploratory capacity probe, not 900s formal cohort"
+  },
+  "long_prefix_qualification": {
+    "input_tokens": [
+      7551,
+      8712
+    ],
+    "output_tokens": 32,
+    "modes": [
+      "cold",
+      "warm",
+      "local-reset-replay"
+    ],
+    "cross_arm_exact_tokens": true,
+    "real_external_restore_required": true,
+    "short_repeatability_limits": "Retain limitations from original cohort; not universal equality or SWE task quality"
+  },
+  "conditional_confirmation": "If both zero-failure180s points complete, Native engine preemption counter delta is positive, and candidate throughput is positive vs Native, run fresh Candidate then fresh Native C16/900s. Otherwise no expansion; proceed to frozen-five execution. Retain all outcomes and report this limited scope.",
+  "eos_scope": "Unchanged original SWE-prefix-reuse fixed-output-budget protocol; distinct from five actual datasets, all of which preserve EOS.",
+  "no_inference_retries": true,
+  "no_hma_safety_change": true,
+  "no_task_selection_or_replacement": true,
+  "throughput": "Actual streamed tokens in[0,duration)/duration with full drain separately reported; old protocol only.",
+  "execution_sources_sha256": {
+    "runtime.py": "41c30818161c53392400710f8d579a07db4e257b383e8a99551624a7a8c87d27",
+    "driver.py": "1ec081a2bc2061701b2ac40ec35b62ab75cbc9bb4bea66d9803ad02fb6bedc72"
+  }
+}
