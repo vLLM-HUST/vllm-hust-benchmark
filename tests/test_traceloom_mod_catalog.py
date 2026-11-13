@@ -1,9 +1,27 @@
 """Keep independent MOD identities and explicitly declared public ownership."""
 
+import importlib.util
 import json
 from pathlib import Path
 
 DATA = Path(__file__).resolve().parents[1] / "website-publication/data"
+
+
+def test_independent_public_cards_keep_bilingual_summaries_after_projection():
+    root = DATA.parents[1]
+    spec = importlib.util.spec_from_file_location(
+        "public_projection", root / "scripts/build_public_site.py"
+    )
+    projection = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(projection)
+    source = json.loads((DATA / "ecosystem.json").read_text(encoding="utf-8"))
+    public = projection.project_json(source, set())
+    components = {item["id"]: item for item in public["components"]}
+    for key in ("graph-coverage", "prefill-admission", "sglang-prepared-dispatch"):
+        item = components[key]
+        assert item["summary_en"] and item["summary_zh"]
+        assert item["maintainers"] == ["ShuhaoZhangTony"]
+        assert item["advisors"] == []
 
 
 def test_three_independent_traceloom_optimizations_have_declared_ownership():
