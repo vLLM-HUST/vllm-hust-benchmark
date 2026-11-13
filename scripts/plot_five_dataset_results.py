@@ -102,3 +102,9 @@ fig.savefig(a.out / "quality-coverage.png", dpi=170)
 fig.savefig(a.out / "quality-coverage.svg", metadata={"Date": None})
 plt.close(fig)
 print("PASS: paired performance and denominator-preserving quality plots")
+
+# Canonical SVG copies follow the repository text-format rules.
+for svg in a.out.glob("*.svg"):
+    svg.write_text(
+        "\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n"
+    )
