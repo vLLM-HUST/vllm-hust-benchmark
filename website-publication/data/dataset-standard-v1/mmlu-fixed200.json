@@ -1,0 +1,1263 @@
+{
+  "schema": "vllm-hust-mmlu-fixed200-scope/v1",
+  "dataset": "TIGER-Lab/MMLU-Pro",
+  "dataset_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+  "full_test_tasks": 12032,
+  "validation_tasks": 70,
+  "source_parquet_sha256": {
+    "test": "0e24a191921c2f453518a537a8b2117bd137e7714d4ef1565e9ba06c1ecb9ad8",
+    "validation": "139423c23722e480c807ac4a191409a710cfce4eba744c1d641cf88e730e2078"
+  },
+  "workload_name": "MMLU-Pro frozen 200-case subset",
+  "tasks_per_arm": 200,
+  "category_count": 14,
+  "category_counts": {
+    "biology": 12,
+    "business": 14,
+    "chemistry": 18,
+    "computer science": 7,
+    "economics": 14,
+    "engineering": 16,
+    "health": 14,
+    "history": 6,
+    "law": 19,
+    "math": 22,
+    "other": 15,
+    "philosophy": 9,
+    "physics": 21,
+    "psychology": 13
+  },
+  "selection_policy": "Reuse the already frozen 200-case list and request order from the original r4 full-answer pair. No new sampling, replacement, reordering or score-dependent selection. The original initial sampling algorithm/seed is not asserted by this scope note.",
+  "selection_seed": null,
+  "selection_reason": "Preserve exact task comparability with the 2026-10-30 frozen B0/B1 original200 protocol",
+  "case_id_semantics": "mmlu-pro-<source question_id padded to five digits>; not a zero-based test row index",
+  "ordered_case_ids_sha256": "40c5d0764886da6418fd2862d24824079bfd59691566a6589e398b3157bee20f",
+  "frozen_files_sha256": {
+    "inputs/verified-mmlu-quality-inputs.json": "708056e54a5a50a78a3f794fb6f5ec70f50d18384d938d8d67b45d7f1d405959",
+    "inputs/recovered-mmlu-cases.json": "0fe202235190be0d1143ba68f7264ae263d13c004a474843ac9c8a6245e2415e",
+    "inputs/mmlu-quality018-r2/quality-request-plan.json": "f4ed4ce5956c9ed08f360400b5a996ef92a217ce295d50648d4dc06443db768e",
+    "inputs/mmlu-quality018-r2/quality-tokenize-preflight.json": "5851407b052fd600a8d425057667c24b478777609652c2b7a0cd3887fae6b57d",
+    "scorers/mmlu_pro_pyramidkv.py": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801"
+  },
+  "generation": {
+    "max_completion_tokens": 8192,
+    "temperature": 0,
+    "request_seed": 0,
+    "request_seed_is_not_sampling_seed": true,
+    "eos_enabled": true,
+    "thinking": "Original unchanged server default and exact frozen prompt bytes",
+    "arrival": "one simultaneous batch of 200, request_rate=inf",
+    "additional_task_warmups": 0,
+    "inference_retries": 0
+  },
+  "scoring": {
+    "denominator": 200,
+    "extractor": "Original extract_answer: answer-is, Answer:, final standalone A-J fallback; no random guessing",
+    "invalid_out_of_range_failed_unreturned": "incorrect; preserve planned denominator",
+    "length_stops": "Report separately and apply the unchanged original answer extractor; do not remove cases or silently alter the scoring rule"
+  },
+  "result_scope": "Descriptive fixed-subset results only; not the full12032 official test score, not an official leaderboard replication, not statistical quality equivalence or full-five-dataset acceptance",
+  "source_release": "full-answer-b1-20261030-r4",
+  "cases": [
+    {
+      "case_id": "mmlu-pro-02804",
+      "category": "biology",
+      "source_row_sha256": "7ffd67cfa3c9ac065ed19304e3174276d12087eb78b2f95721adeecc2fff0ab2",
+      "prompt_sha256": "186dc5d9c54b913f845d68d345115ada42979586212a7bec6e575fef8a21b93d"
+    },
+    {
+      "case_id": "mmlu-pro-02866",
+      "category": "biology",
+      "source_row_sha256": "627b1f3ce86072f0ea43a445cd94e58549bc343d8e18fcac8392f8b7fafff48f",
+      "prompt_sha256": "a1d70606b150cd25367aa70d224ba1e8ecd5c4817d63c13707209871bf8ba6cb"
+    },
+    {
+      "case_id": "mmlu-pro-02926",
+      "category": "biology",
+      "source_row_sha256": "ba25e16a902e6ca8a4c3faa80898bce2b0b8110c0e545c6a0990a4ecb37ba3a8",
+      "prompt_sha256": "b9c7a75802eb19e8d6532ce1966a37276216f11691e22bc0cd75c0bbec5c7666"
+    },
+    {
+      "case_id": "mmlu-pro-02986",
+      "category": "biology",
+      "source_row_sha256": "094b2c9ce67bb4e61edb78e04cda04a1db693f5cebfd88d8a811f472c3d4279c",
+      "prompt_sha256": "49a375400463ebf15f0b17a945278ef30b42426dbeb493edb43f280862b3195b"
+    },
+    {
+      "case_id": "mmlu-pro-03046",
+      "category": "biology",
+      "source_row_sha256": "1313f174ea4d4ea890bd58db4ea1a9751a214cdc3c1e608b892dd73705eee1b9",
+      "prompt_sha256": "4bda13bd63010fec2f5996dd693019e963900a4afaa8ef2e0a089f26bf58b8fc"
+    },
+    {
+      "case_id": "mmlu-pro-03108",
+      "category": "biology",
+      "source_row_sha256": "d4194e43521333c4d6a7598494b3e2d93663be909a519d1705524c8ebaf5620f",
+      "prompt_sha256": "6b9e2bb9f6601613583248c6a835959a71a28bc81afdcbd2999682960547764c"
+    },
+    {
+      "case_id": "mmlu-pro-03168",
+      "category": "biology",
+      "source_row_sha256": "db7712722f4b333c497f839ad1a2fa323e6937a9914ffd101321fa44cb672f66",
+      "prompt_sha256": "32470e89241780c78d31f9ba5392f6deb34812a73a918c286563b3889fc5f19f"
+    },
+    {
+      "case_id": "mmlu-pro-03230",
+      "category": "biology",
+      "source_row_sha256": "4ffdc59d23f1bbf4cd95d79458185301ec5a425c19c57edc3987c25fdbd31aa1",
+      "prompt_sha256": "7a471eb3ffae4e8ffeccb32e17412fddfae352c467d09c9fa6e5b1456b37ba03"
+    },
+    {
+      "case_id": "mmlu-pro-03290",
+      "category": "biology",
+      "source_row_sha256": "4c9fa831905eb4e4ee8301195a178a100ea639bf2d0cca9ecef1fd511a322649",
+      "prompt_sha256": "f5c0a16af6d6a29e352bf70567216c666bae81f4278288e378fb06dcc884b478"
+    },
+    {
+      "case_id": "mmlu-pro-03350",
+      "category": "biology",
+      "source_row_sha256": "e3416f6a300d121323b6760a915d9d6d149f7c1eb1ed350d46792754fd41da83",
+      "prompt_sha256": "11058a226093220f89706ff65a7bc6b3e87d819495fd0a80b69e663607dc7096"
+    },
+    {
+      "case_id": "mmlu-pro-03410",
+      "category": "biology",
+      "source_row_sha256": "72cc87c76b36478b306816ccd790fb17c62982c827d8095f628065922bcb3fdd",
+      "prompt_sha256": "3732a46902f58c9ac5ab83d0081d8f94f121a317b8fc19c2b3f5d7d9a0ab34fa"
+    },
+    {
+      "case_id": "mmlu-pro-03470",
+      "category": "biology",
+      "source_row_sha256": "69e27884d5f953b21241af28e88de73aa515e477873d20826d5b9d964fb3acc4",
+      "prompt_sha256": "6e2ed6bae557b0882e293847346506cc12d36b8551baa363f03af15b50379d71"
+    },
+    {
+      "case_id": "mmlu-pro-00074",
+      "category": "business",
+      "source_row_sha256": "3abc194dfa8f6b2fc31df5faaebef02cd00a44943bc5476b915e22d5f4cbe077",
+      "prompt_sha256": "95616fdb5a5043fb3e8153db5f8f36a956c0efc50ae596f4367c4cfd02f8f1bc"
+    },
+    {
+      "case_id": "mmlu-pro-00136",
+      "category": "business",
+      "source_row_sha256": "d91468efd6dd7d2ba2abcca9c3d88bc605d7e4df083c4ecbbb1343a8274457c8",
+      "prompt_sha256": "ff45f52c8ee4eca24d1bd45dd2e5aaf3b11f0131a1a7d02b078af7fba913d513"
+    },
+    {
+      "case_id": "mmlu-pro-00196",
+      "category": "business",
+      "source_row_sha256": "78464a97a37bf8a4e4094b570d91a2f5288753ab151099a8fda4deb828b2dfd7",
+      "prompt_sha256": "98e66a0889e345028c77edd5e082dff709166d9a40fdb915b6154ffa5cb8f2a3"
+    },
+    {
+      "case_id": "mmlu-pro-00257",
+      "category": "business",
+      "source_row_sha256": "f42e58fe84f4b6ec5a0f96d5f467d1ca37855f457015f3d9cd5d12665480e751",
+      "prompt_sha256": "83a0bffea7ba2452fa6fa9b6cc269c54903f8cdb89f4f029b99aced26ce2ef3d"
+    },
+    {
+      "case_id": "mmlu-pro-00317",
+      "category": "business",
+      "source_row_sha256": "122a81e7a1e963041ec3216d6a0fbf09253cef04e082640eae9fca85f6d7a902",
+      "prompt_sha256": "13cd49a9f255394ca2777dd14d629ed5ded52a9c683947fd33a3bf75b73076ed"
+    },
+    {
+      "case_id": "mmlu-pro-00378",
+      "category": "business",
+      "source_row_sha256": "295907574af971c5e2b23ef5ec0c11bc03aa9d0bb188cee21f601d39f4da163b",
+      "prompt_sha256": "54c7b3d818ce6a52fa12d74d879d193c125f1992f0468ff845272b5719222d1c"
+    },
+    {
+      "case_id": "mmlu-pro-00439",
+      "category": "business",
+      "source_row_sha256": "c690d7d1591831d21e3cde6da1dcc16e41a9621c24f82b615364037874b1f534",
+      "prompt_sha256": "0da38b76c00300288a199a9204b9504928303200a3e03b6fa9b6e0b2bdf0ad10"
+    },
+    {
+      "case_id": "mmlu-pro-00500",
+      "category": "business",
+      "source_row_sha256": "54daef5ed69143a986cb347f7a915fb47b63b3a824759d5310665af419df472f",
+      "prompt_sha256": "0af5cb10b4c6a9ac37eeaed682d58c5eb31d91b9f8b1a312476f9f4a96b2bedf"
+    },
+    {
+      "case_id": "mmlu-pro-00561",
+      "category": "business",
+      "source_row_sha256": "11f0f81a375747ceaf205bd0609add87b9743c66d12f12257807c1af86661c4d",
+      "prompt_sha256": "49392bc13be0084e1612f1f8c7be5d989bfae5fcf71dd7313989cf24d71bf125"
+    },
+    {
+      "case_id": "mmlu-pro-00621",
+      "category": "business",
+      "source_row_sha256": "7e807824f1c089c1ff2026de17265a653aed8ace8bffa4aec9a9dc0928d7481c",
+      "prompt_sha256": "1698620e0e4892b070783d0f18e0af0cba5f210bcd7ad54ec31d7ab974864b95"
+    },
+    {
+      "case_id": "mmlu-pro-00682",
+      "category": "business",
+      "source_row_sha256": "9768dea0bdee69020e34a34017710f17f7031bb5c13078459f7e4aa9224441ea",
+      "prompt_sha256": "72b4a387473a09f441a49919c2a5940abd1684ea38c98a2f34d9d4711dafa65e"
+    },
+    {
+      "case_id": "mmlu-pro-00743",
+      "category": "business",
+      "source_row_sha256": "b132c7b209581795c2c7468fa01dd8cf52dedb533c454f1d892ef560fd30f9f4",
+      "prompt_sha256": "babd0d4c250e1b71a58e962e991849f52ee8eaec71b3c8d29dedf3557c1fc5ee"
+    },
+    {
+      "case_id": "mmlu-pro-00803",
+      "category": "business",
+      "source_row_sha256": "cd42b4424bbe64948bdba4ffb4bb683d33224c59de6e900bf50d4883d400d35f",
+      "prompt_sha256": "7fade334b9ad4359993729de944ced064a3f3f24c3c2fe8a5f98113d18718d27"
+    },
+    {
+      "case_id": "mmlu-pro-00864",
+      "category": "business",
+      "source_row_sha256": "c73bc406ceefc0027ff4bf1cf7f61f38128ede15f58735de4c918338ff29c933",
+      "prompt_sha256": "5b407692590995187e722f2140e2fc19926aa70e4aa6b52022089c578f3fa99e"
+    },
+    {
+      "case_id": "mmlu-pro-03584",
+      "category": "chemistry",
+      "source_row_sha256": "a2536d078fdfa9710118ce49954e7f3c25c6911290014c6c145e209607a9a239",
+      "prompt_sha256": "2ba9941f197ab60f027376a5671df294fcfef28f56ed9a9ddca627d36cad13f9"
+    },
+    {
+      "case_id": "mmlu-pro-03644",
+      "category": "chemistry",
+      "source_row_sha256": "e15c03034ab3903a41e9debb57fa7becf0407297650141e08de8f42992def5bb",
+      "prompt_sha256": "d87c5c78fafa46611aeba1a1a89fb07a817b5a143a0bc54962d675fe59755f49"
+    },
+    {
+      "case_id": "mmlu-pro-03706",
+      "category": "chemistry",
+      "source_row_sha256": "2c80974ce85149ea5020acd5fb4ca3501fe4ab0ee324cf78b3d19701bcd51120",
+      "prompt_sha256": "a620d0e44e13ea6dbccd360810a0bed8c5d104c153d4310632f83cbff6330547"
+    },
+    {
+      "case_id": "mmlu-pro-03766",
+      "category": "chemistry",
+      "source_row_sha256": "3f47a8be729af4e7f94423132416f0e18b52002621b12bacc9aa29e6559caa46",
+      "prompt_sha256": "b3de5a6d25999d78152cdc3f464db1bc4b4aa1a4743e04a782823be81b34f4de"
+    },
+    {
+      "case_id": "mmlu-pro-03826",
+      "category": "chemistry",
+      "source_row_sha256": "b7731660fe8e03a592491c45f17e9fdcfb5ef648abecc3f697cafd26d8ec2241",
+      "prompt_sha256": "d610058908f46583f9a3d76ab76c2d99cc2298d87a9ca85e71d5647707bada78"
+    },
+    {
+      "case_id": "mmlu-pro-03886",
+      "category": "chemistry",
+      "source_row_sha256": "f7df83a9146933fd3d74f728359fcadf78b55fd3a6f45ef3366972282c546eb0",
+      "prompt_sha256": "5cc3a980f3bb3773fdb537aee4d7d98d4ba92a05a77d6d83fce2839103bac651"
+    },
+    {
+      "case_id": "mmlu-pro-03947",
+      "category": "chemistry",
+      "source_row_sha256": "1b87ffd7074239dc6b483f9658ae494cc001efa59b78ecd62c3459b95b209a0c",
+      "prompt_sha256": "092381547e247715ff5253a24a4ebcd4eaa32f08b6cdf41a504b12c5339e10fe"
+    },
+    {
+      "case_id": "mmlu-pro-04008",
+      "category": "chemistry",
+      "source_row_sha256": "b6aeeea9aaa7cd6ab828768259f901a8ec5aeaec4705b6c59179d7cc22c2296b",
+      "prompt_sha256": "33b5bac4ccc1ef2613144b3aed9c96647eddf7e14457f08e2ac0b45e6793365b"
+    },
+    {
+      "case_id": "mmlu-pro-04069",
+      "category": "chemistry",
+      "source_row_sha256": "9a3d9e4cdefdd5a599111e827deb86d7f93ca0ec2c9e4d4dbd0f362ff8ababc2",
+      "prompt_sha256": "1ca70064f027b28a6fab60631537820a9f9d5cf3868618b66aa4a4eb542b98c3"
+    },
+    {
+      "case_id": "mmlu-pro-04130",
+      "category": "chemistry",
+      "source_row_sha256": "d5ca1d7d07e50f4ce95edcc769beb3aad24046c8ed2641e87f4441fd0949a96f",
+      "prompt_sha256": "c0ec6d7f3f972a118a0ce988cbe69ffc69279305ffdd15367ef0eb0a06a96374"
+    },
+    {
+      "case_id": "mmlu-pro-04190",
+      "category": "chemistry",
+      "source_row_sha256": "f87a63589429e15dca9b84622303ed106365342384d5f41d5ed90aff1c103ea8",
+      "prompt_sha256": "f59b5e235cd3336a8964970bddd8cddbcd4630d35505026f709495e447b78584"
+    },
+    {
+      "case_id": "mmlu-pro-04251",
+      "category": "chemistry",
+      "source_row_sha256": "f55f6eb2426418bec51e365acabce0905a71348bd7ab7a1fb93b3821f63b7cc9",
+      "prompt_sha256": "2e6aabfdd16a54ec985453d21ab45d43db133f923383fc371833622af058572e"
+    },
+    {
+      "case_id": "mmlu-pro-04312",
+      "category": "chemistry",
+      "source_row_sha256": "caf9dcc3ce1c88aa98144c1859786e248bb78115ec921837ae22d9f2285ee793",
+      "prompt_sha256": "00a42a9eaaea9250fdf0b4e57064cbb5e341d157f330a513dc2f7dd776a81279"
+    },
+    {
+      "case_id": "mmlu-pro-04372",
+      "category": "chemistry",
+      "source_row_sha256": "1beda8b72af9aab4f8537b98444decf79402597f6233a81ff7ff40a290e1a37b",
+      "prompt_sha256": "701a4ca310855f62b4355f9a58ae49f059b4897177247f9bea02f46110df4e85"
+    },
+    {
+      "case_id": "mmlu-pro-04435",
+      "category": "chemistry",
+      "source_row_sha256": "f7ca2dcd2a258a944fbeb0ed3abd5f5022231aa39b1abf04a49b94ebab2d0c9c",
+      "prompt_sha256": "067f53c39f5201d6452a13eaca14eede5f3d07de66a3bdffa3fb3e07382197a3"
+    },
+    {
+      "case_id": "mmlu-pro-04497",
+      "category": "chemistry",
+      "source_row_sha256": "255618bfb130d2d24b0dfd00cce854418fdf2eb7d0c44abf5811c6b3dcb71188",
+      "prompt_sha256": "b3dc69eb871773e9f0e5af6d5ed903ee117b1cfaf32e28907b3961b3300e9f60"
+    },
+    {
+      "case_id": "mmlu-pro-04557",
+      "category": "chemistry",
+      "source_row_sha256": "2dd4e8d1f4ac6ceee8702c2756b01994e047d45755202b54c86e0f670c818136",
+      "prompt_sha256": "0dec3a7a0f69a79c78127349266d36d8cbcc5f147a4fd3daebfc878e2d86db97"
+    },
+    {
+      "case_id": "mmlu-pro-04617",
+      "category": "chemistry",
+      "source_row_sha256": "a0c5e4f1e3febcfe441afd24fe0f2aee77c85985c118c3dca8a6bf9253b78fb6",
+      "prompt_sha256": "2b6fa777ae6ec1d2487a8a343e466068328c5f2e99a0447b86d61db430a96906"
+    },
+    {
+      "case_id": "mmlu-pro-10365",
+      "category": "computer science",
+      "source_row_sha256": "3ec3b95b55cb6dab07141bfccff79dce67f27a36ce7e17b5c47ec22520a245b6",
+      "prompt_sha256": "8905ef3a1a2a124eff7bf1ad851fda16fec1f453fbf94f9670e09ed88e3a4dd7"
+    },
+    {
+      "case_id": "mmlu-pro-10428",
+      "category": "computer science",
+      "source_row_sha256": "fb76a9381d4898277354e8b5514ba484d163d75d340206027b9dba97827e3fca",
+      "prompt_sha256": "d014925f8ebf0656c7a90311b877ec685474fdb37195cfd9ecca5b81c2391c4a"
+    },
+    {
+      "case_id": "mmlu-pro-10488",
+      "category": "computer science",
+      "source_row_sha256": "b47ce8040e4e6708e2216042c66f040138521e428d7d94fd8f523f5e85eb9cbe",
+      "prompt_sha256": "b734f1a060c1aa20ca33cdc2dd0806a84a013feaf456acd4047d8b7dd5dc1849"
+    },
+    {
+      "case_id": "mmlu-pro-10549",
+      "category": "computer science",
+      "source_row_sha256": "2040c139cc4d194434a4820fa3975698b5234ed118e7d3921efd2ccd19a20a3d",
+      "prompt_sha256": "8e1c07a06a79445f7645e65d78a62266b0f57144ea563a35dea29b086e68c341"
+    },
+    {
+      "case_id": "mmlu-pro-10611",
+      "category": "computer science",
+      "source_row_sha256": "8d2be9b57043c1bdf57a52d1f2c7e2a650523ef11d62319b96c9fe9b1c5c4433",
+      "prompt_sha256": "b4ebb8a681b2586437cec82f29ea43411391fad1dcf4b9d52921defcec1a81ab"
+    },
+    {
+      "case_id": "mmlu-pro-10672",
+      "category": "computer science",
+      "source_row_sha256": "433dd84d3899227aa3eb53664e4c38db827a2b9f55a48ed8c2d6ce5470ece18d",
+      "prompt_sha256": "b7b205fe3e9d54fb5dbc1d7f7c5d1baa1a98c4598631e6879eb5ebd254d336c6"
+    },
+    {
+      "case_id": "mmlu-pro-10734",
+      "category": "computer science",
+      "source_row_sha256": "6b5fb87b08538ec7e20656189706105403918fc4a82aa450b5f12b4dfd139abd",
+      "prompt_sha256": "b01a61ab5bf8b03484b8da80dc925dc5ef7693a65acb7a9f3a173bb308caeaa6"
+    },
+    {
+      "case_id": "mmlu-pro-06847",
+      "category": "economics",
+      "source_row_sha256": "88e064d9780cc730ab9912dcf2c7025993e94841c758f8b4e4409966c7acbb18",
+      "prompt_sha256": "ac690d59bae9939ff888632fdec099f9f924e6fb889b1f695c030142d572e322"
+    },
+    {
+      "case_id": "mmlu-pro-06907",
+      "category": "economics",
+      "source_row_sha256": "abdb38abf124316b366b1709d196f0762eb5b388fd1f50ceb5770f7ae4cbb57b",
+      "prompt_sha256": "e9dca2578eb9d3d28fd9b61f0ef7aa7ca8444412a4854f29aeda005d2d61efbc"
+    },
+    {
+      "case_id": "mmlu-pro-06967",
+      "category": "economics",
+      "source_row_sha256": "1e56c44d0c1faed1d87069e5b17fb18e5773dd662c8b255cf764cb9bf94691cf",
+      "prompt_sha256": "dc3debb29a86d30a13a0baf1a257b0526ddadce0e94bd1fba707fa580392a0cc"
+    },
+    {
+      "case_id": "mmlu-pro-07028",
+      "category": "economics",
+      "source_row_sha256": "13ac1af8476dbd2a5ab2035b07c5d9a9e16da3aaab4342e32eeef2857e5d26c1",
+      "prompt_sha256": "71efe3090981a1a1e9c7478072cc21378da3cc379aa0d8a7307af565bd1f97f7"
+    },
+    {
+      "case_id": "mmlu-pro-07090",
+      "category": "economics",
+      "source_row_sha256": "a80f3adde58a6644622c1eeacbb406d7bc6d4d7334eca9a19492b76dfc6d244d",
+      "prompt_sha256": "5dee3573693f1846d4fcc2e271947a78cc5d67fcc62d4c0404588ba367b4c2c8"
+    },
+    {
+      "case_id": "mmlu-pro-07151",
+      "category": "economics",
+      "source_row_sha256": "522be42472b38c3a813733d74fea85c9e0d03e9fe77b9e965bb8b99752fce9c8",
+      "prompt_sha256": "1cd6b9f2d9be97f8d541ca4ef3a01774b1629a7a438dc5088036a350c9661283"
+    },
+    {
+      "case_id": "mmlu-pro-07213",
+      "category": "economics",
+      "source_row_sha256": "4a074cd35ef737f7988a659224117ad42ea62317adccc4dce171a3bf01d21102",
+      "prompt_sha256": "bdb62f91f1ab258b9460486a4f23964fbe788e1cebad3da6d47df7fd2ffdf811"
+    },
+    {
+      "case_id": "mmlu-pro-07275",
+      "category": "economics",
+      "source_row_sha256": "831f7eace7c570620015e59476775729f74a6215f633a2d7f99f195f83ce8200",
+      "prompt_sha256": "b85ea14d3ce214144505649f055234f62121989ec1f871fd98f50c324805c520"
+    },
+    {
+      "case_id": "mmlu-pro-07338",
+      "category": "economics",
+      "source_row_sha256": "2fe39353ae0e2687bf24b58ec2448efbe9884a5809f771fd156e2137d72f1786",
+      "prompt_sha256": "e920d97b97e4a735edb41c6368b798716485747d1bcfda76a8cb108b7574e74d"
+    },
+    {
+      "case_id": "mmlu-pro-07401",
+      "category": "economics",
+      "source_row_sha256": "d86114ca31074d9a3fffe6749b10ae3dc53a88992742417ead2d04cd7e6d042e",
+      "prompt_sha256": "39eb861e38451162d99f688597f17ce2ee462a890e051a559175dce2643836d7"
+    },
+    {
+      "case_id": "mmlu-pro-07461",
+      "category": "economics",
+      "source_row_sha256": "f2147ac3fa4266e2e1b77ced055cc673c12606dc89b39302f0287b217ae8c065",
+      "prompt_sha256": "34ddad1b0fd3d0de088128786e6e2b426798c44ddecee6a2feb1fab689c07f89"
+    },
+    {
+      "case_id": "mmlu-pro-07524",
+      "category": "economics",
+      "source_row_sha256": "c6c4310d3e09721f98cafde4ea724cd1c0c30a73906e6121e148cbb1a9cfedc3",
+      "prompt_sha256": "73fd22f6d7e7cde6b4fa764664dd687c58468909b6b2b2b92cfddfeec70292e7"
+    },
+    {
+      "case_id": "mmlu-pro-07585",
+      "category": "economics",
+      "source_row_sha256": "e1dc32b3e970d8c393c3ab07f464811318dcae644f0af2ca63e757c13ffc90a9",
+      "prompt_sha256": "825795569e509476236c2a9fa467b1527cba675d8f758f629fe36be2cd9612eb"
+    },
+    {
+      "case_id": "mmlu-pro-07645",
+      "category": "economics",
+      "source_row_sha256": "9ba79c1a9df67f718e4c694fdf56e15daacb07fb85169dc48b5f2b9c05c2c17d",
+      "prompt_sha256": "c738299c97a14f5a56c5651a4c181a226fc32ae959c1b918c9c040299f3322f9"
+    },
+    {
+      "case_id": "mmlu-pro-11303",
+      "category": "engineering",
+      "source_row_sha256": "c4735ebb155bb781914b792f207a12fe748e9e63230a7c4a0a4d40c89b009767",
+      "prompt_sha256": "6a6716f28ddb925091022a5866b9168bc10855188a2d99722c3817a2e4be6f7d"
+    },
+    {
+      "case_id": "mmlu-pro-11363",
+      "category": "engineering",
+      "source_row_sha256": "8e009143d31d4b80506c8513917619a519c9712a3d2b4c54ddc68c6dbd9294e8",
+      "prompt_sha256": "9ad528ebc11624c691d694234fcb015d71b0732d7edda5e8f33830cada5158ea"
+    },
+    {
+      "case_id": "mmlu-pro-11424",
+      "category": "engineering",
+      "source_row_sha256": "aeba34e229c38f8ad6e79e55c792674531fb493d3b8d14bc8d8a3d2c4b63365a",
+      "prompt_sha256": "a3303daf6ebf1d459f26bed4494a5d64b39e771235ae165dd3c299aa02c1149a"
+    },
+    {
+      "case_id": "mmlu-pro-11485",
+      "category": "engineering",
+      "source_row_sha256": "82e2f3d68fdfc1a9e09c800ec1d75ec6b1ea689b508fa8ad6d46bacb3324ebf5",
+      "prompt_sha256": "dc2e3c70e1353a086e7c538bba3d4c7988e4c20586cc82110bbfd464a69c9cfd"
+    },
+    {
+      "case_id": "mmlu-pro-11546",
+      "category": "engineering",
+      "source_row_sha256": "7553d84d7eaf3bdca21152406d916c24bbe4eff571745848fc5cfda3366c7757",
+      "prompt_sha256": "5a2aac8bc73177b83ab91ae37ab15e852be7513ad9c61378faf4c6c9be5d298e"
+    },
+    {
+      "case_id": "mmlu-pro-11606",
+      "category": "engineering",
+      "source_row_sha256": "217e956c9b8ce12e0dbe950fc5a8d78f0f03dcf6f69f04192128785b4530005e",
+      "prompt_sha256": "99c9088b8e824f98b173f64ed878f5a350203f193992f622bb96417d59f7bb9d"
+    },
+    {
+      "case_id": "mmlu-pro-11666",
+      "category": "engineering",
+      "source_row_sha256": "0744172fd232d75c2f0bbb67adae36241e497e374917ce552e00bfd01cb29fd1",
+      "prompt_sha256": "e475c59103a76392042f3cf1310ae3f0af1312d5e460b7d0490d066d5f5e27c8"
+    },
+    {
+      "case_id": "mmlu-pro-11726",
+      "category": "engineering",
+      "source_row_sha256": "febf8ccba30db204980baaf7c30a621221dc4a3662d02185c53cbbccc6196dd4",
+      "prompt_sha256": "8724b0b8c9797c644f8f7c05715804f73187012c8750d2addfcb17fecd4ff695"
+    },
+    {
+      "case_id": "mmlu-pro-11786",
+      "category": "engineering",
+      "source_row_sha256": "95bd3d04f8cbee8e1ff87be1f7dfafe34afff45251e3febcae34bd5147dfffd3",
+      "prompt_sha256": "a4118098481c0bfaf7268a59230b21ff0b182df219f0f5e58393542e05cb0b40"
+    },
+    {
+      "case_id": "mmlu-pro-11846",
+      "category": "engineering",
+      "source_row_sha256": "4229da4f40dcd1b6d97a551fdface1602a9fff4b59c788f2f3d0dcc65a8c142a",
+      "prompt_sha256": "59a73b931bde120d7503d8b8d6585909a1ada700390ab9335568139280d8d74c"
+    },
+    {
+      "case_id": "mmlu-pro-11908",
+      "category": "engineering",
+      "source_row_sha256": "56fc3966a8032255702540a88415b6c72bf70bf233d685a756e04fda753960f1",
+      "prompt_sha256": "eb348a400e05b3827094a9fb8f968ffe783740260daec8f5c910af208e7d1db9"
+    },
+    {
+      "case_id": "mmlu-pro-11968",
+      "category": "engineering",
+      "source_row_sha256": "4237c59e911afe40e358b8daa3f4d58ad903331075c49b7f70b3e4d6ded7f599",
+      "prompt_sha256": "395b4e8414f0305ce623c8a336841be3466d700dc087d6d11884ba867ce08b67"
+    },
+    {
+      "case_id": "mmlu-pro-12028",
+      "category": "engineering",
+      "source_row_sha256": "2ef21e9a001bbcc66e7fe4a42dd3c09288a894f3856bdc25dd1a9a197cb22631",
+      "prompt_sha256": "cdb0487f99017aad01685bc936886b1d8bb9354c5e83fd877e057b60830341a1"
+    },
+    {
+      "case_id": "mmlu-pro-12088",
+      "category": "engineering",
+      "source_row_sha256": "2df3177064a1dd8b7d2fa5f5d02e56be6be8f3b79e435b15db6807e7e3571a03",
+      "prompt_sha256": "e5e5184f5c1b28354c712f3a8d8a7755ca6ec784340fd1451b3184a2e30635a8"
+    },
+    {
+      "case_id": "mmlu-pro-12148",
+      "category": "engineering",
+      "source_row_sha256": "9f7abe478624c99a4c948f3a58e6ad409b744426344b7665e5b556c00c8db53b",
+      "prompt_sha256": "601665a7cc1c6908540f44be82c558571862c747e88dd11926dfaec796ba0f21"
+    },
+    {
+      "case_id": "mmlu-pro-12208",
+      "category": "engineering",
+      "source_row_sha256": "a4a494560dff31f0b3493527d54043439cd33ee185f5342d3616f5854bbf675c",
+      "prompt_sha256": "36f12f23d7d165215a89019c7d7d63a6b843b54a5c4e6850bc3a572220616357"
+    },
+    {
+      "case_id": "mmlu-pro-06012",
+      "category": "health",
+      "source_row_sha256": "61f13288da2730a404e1175dae14e49754499ede37b5ee413bc9700fe071bc12",
+      "prompt_sha256": "260ab3c2e3db8882042163fdc975c0dc3d5a6dd6545f031636c84fd0dc1ddfd3"
+    },
+    {
+      "case_id": "mmlu-pro-06074",
+      "category": "health",
+      "source_row_sha256": "ff95978fa897c4935886410c6fffaa7f718d9d436d834bd8ae285173a5aca2de",
+      "prompt_sha256": "a01701206ddf944d5f14d639916a023ffcc15cdfa1c909f2a8aceaaa39aed3aa"
+    },
+    {
+      "case_id": "mmlu-pro-06135",
+      "category": "health",
+      "source_row_sha256": "9b55b3a539d595ace13c086f9e9d1ff022a19b5edb7081e75fc745403f6b5dc5",
+      "prompt_sha256": "a9ae3e2b9204b4e9178516758c4f0a402a5987534af40b38eb381379348a3a9a"
+    },
+    {
+      "case_id": "mmlu-pro-06196",
+      "category": "health",
+      "source_row_sha256": "e6e9f8fce4500149effcb73538c82390e524ecf0f21b1b337c8d1179a00c6119",
+      "prompt_sha256": "c55634e8ddca87ce9441fd556d201354b43bcd96968eb59e26c6a19dfaa49fbe"
+    },
+    {
+      "case_id": "mmlu-pro-06256",
+      "category": "health",
+      "source_row_sha256": "771b7f42d9ae2f594ebb33e9d1ecf8d36eca6ff4713cfbd2a7a7450dfefd87d2",
+      "prompt_sha256": "9e4b58385e3d69845ba7ff631c4cd8c60f4f3f7d4f85a854926900e729f54e60"
+    },
+    {
+      "case_id": "mmlu-pro-06317",
+      "category": "health",
+      "source_row_sha256": "e4db0bc3cbdd6deee64a69538f28c1999d136f05a5267489cd4f3771cd5353ae",
+      "prompt_sha256": "e88a321821682fd85ae7d50495ca5a1a9201292f73bcf6e5a78c01ae8b52df19"
+    },
+    {
+      "case_id": "mmlu-pro-06378",
+      "category": "health",
+      "source_row_sha256": "295e5a7d4f78a855c6ea231e1c2855b4877b8193dc32e51c8575451d0aa221f1",
+      "prompt_sha256": "192e15ee6e30fe48c33fb4e4c57be0440221e926d7940fb49b18b26a850994c9"
+    },
+    {
+      "case_id": "mmlu-pro-06439",
+      "category": "health",
+      "source_row_sha256": "3caa1921a75cd949990381d1e6089421c799b9f431658d8d527b3814b420e7fd",
+      "prompt_sha256": "e540198c789a2884a07580014ce3b7ee7452213c397a0c7d0d2317a0971d0d2b"
+    },
+    {
+      "case_id": "mmlu-pro-06499",
+      "category": "health",
+      "source_row_sha256": "086323e11f8f4ccbea659fbe3bb7aba1c66a9fd13f7c6a56f93057634a1afb63",
+      "prompt_sha256": "37902f47ea3940ba1845062d4c9b0949e8a1176639642421801aa31a5c714dab"
+    },
+    {
+      "case_id": "mmlu-pro-06560",
+      "category": "health",
+      "source_row_sha256": "b7ec11537aba564ae3c4520a48ce6af91e7983f89b690102928d9bf1e5f87080",
+      "prompt_sha256": "52e38696ce373d125f90c4c64b723a8e863b75f5a806c171471b49c42b7a416f"
+    },
+    {
+      "case_id": "mmlu-pro-06620",
+      "category": "health",
+      "source_row_sha256": "e1afa4f5c67b84a7b60c645f6f56a94ebae48ac1011e7c797f38030c31379a0f",
+      "prompt_sha256": "15c13b7112cb6ed06f76fc92438006f094da82b75e364e90153a2e0f4b8ef3e6"
+    },
+    {
+      "case_id": "mmlu-pro-06680",
+      "category": "health",
+      "source_row_sha256": "1140be1ebc808b2933abedc35251b65a0af15d0c7aa8bb2da5c1998a433ab614",
+      "prompt_sha256": "bb4ff81d6245b2381fc857e2fb792ba2cdff9e4aecde4532e9c8cfc778e5d1e5"
+    },
+    {
+      "case_id": "mmlu-pro-06741",
+      "category": "health",
+      "source_row_sha256": "d9df4d505ca94dc0a75d5844fd931b31d229d5379012b134de14e1132df56fa9",
+      "prompt_sha256": "7da7cc61540c852ff36ec509a8faa9c9de9de1288d0780f34bd6681674036397"
+    },
+    {
+      "case_id": "mmlu-pro-06802",
+      "category": "health",
+      "source_row_sha256": "5161f100b2fa956ad2efdb7d0261d6f45f810e6d57b9f5faa33de1129679fbac",
+      "prompt_sha256": "9fe5262137ace30783293288210084003d3287cb3191c1cd166abf38fcfc5a97"
+    },
+    {
+      "case_id": "mmlu-pro-04705",
+      "category": "history",
+      "source_row_sha256": "66ea631f4918eab4a0566f311ea60a9bfa743d99841463dc95b6af333810c368",
+      "prompt_sha256": "01b36ea4d61ba453ab09fb2c3d3161691e3a58763614987200621f17d203ae50"
+    },
+    {
+      "case_id": "mmlu-pro-04768",
+      "category": "history",
+      "source_row_sha256": "0e0a93a0672411e62446f4dce0ecd6f629c0c624431ef58bc96e9824e6bacb90",
+      "prompt_sha256": "72ca4f3aed8a871af0de66036792539e3d7186462cbc64773dc016f426fbfa62"
+    },
+    {
+      "case_id": "mmlu-pro-04832",
+      "category": "history",
+      "source_row_sha256": "9e256230fa53c2ae00332210eb9ba7d6810a19a45fe2e664135c1c57b108caf6",
+      "prompt_sha256": "da2665b14ab4cce021764212e35f12e2518b81e842460ecac655b0f9b2e207e8"
+    },
+    {
+      "case_id": "mmlu-pro-04892",
+      "category": "history",
+      "source_row_sha256": "16688a201a96441f0a93db294f626c3a20e64575cdf999880e95e9ea80137088",
+      "prompt_sha256": "d7765350ecce2cbece342f5b1d65b093705e46402cc9338a07c241464ecf1d77"
+    },
+    {
+      "case_id": "mmlu-pro-04952",
+      "category": "history",
+      "source_row_sha256": "48264c4dc97dcb3951271a9f86ab20382c31e6ed7db5a8da20528d2474030563",
+      "prompt_sha256": "4420665a267a81cde9f176fe4e139025b2d197785f1f15d1f2e204ed13064e77"
+    },
+    {
+      "case_id": "mmlu-pro-05014",
+      "category": "history",
+      "source_row_sha256": "fa528661648d0d295eb9977439ca4ad836e468b38650504f148fec9201ddcdef",
+      "prompt_sha256": "fdac83d1f69efa12986910d6feb8ceaf46ca61d0897b3ace0683b1055fde0f16"
+    },
+    {
+      "case_id": "mmlu-pro-00882",
+      "category": "law",
+      "source_row_sha256": "0aeb09d72c685fcf7209d2d5eb1361e8f97c5659e6f3f0f92fb2dd3278d7fa58",
+      "prompt_sha256": "7a4a7fd7104faeadd6400ea8965083fbd706c4242e6847068ead4569b44efa1a"
+    },
+    {
+      "case_id": "mmlu-pro-00942",
+      "category": "law",
+      "source_row_sha256": "e1ed9ec1ce8df53eb685ac7bb2a3f2af4ba04fbd64d4f308bebac2492d97cd14",
+      "prompt_sha256": "dd9cf6a58947dcd761d027b665b04a30072409c4470537e7d2760f8b48562fc7"
+    },
+    {
+      "case_id": "mmlu-pro-01004",
+      "category": "law",
+      "source_row_sha256": "eb16867b5da2ca4e66ba0c2a7d31f3363de84fa946e7b8b0a2bac9cd0b293443",
+      "prompt_sha256": "7e9ac5adc5a2e01feda9ec1a8d1d22ca271294681808a8ecb645a16da9b10ff2"
+    },
+    {
+      "case_id": "mmlu-pro-01065",
+      "category": "law",
+      "source_row_sha256": "0ff8b84016ba85915856ea02c76a03bbc13f4d6571d09953e640c356053edf67",
+      "prompt_sha256": "fdb1e520d8c23a10e0f12ea2893bdde06d8d6a94699a0ba4619eb578ecc3d5ba"
+    },
+    {
+      "case_id": "mmlu-pro-01126",
+      "category": "law",
+      "source_row_sha256": "a8577a430af6eee38a1398700a937f3357e06b03629925fbfdbcde05d09fe795",
+      "prompt_sha256": "7b45413ffc05bea9dc144cd6d9ac4878911539d4b93f214d6ffe3103af836f13"
+    },
+    {
+      "case_id": "mmlu-pro-01188",
+      "category": "law",
+      "source_row_sha256": "25270e29997fd3751dc1d8c381121384c97a0329ddb39de812c76755fbdaeb02",
+      "prompt_sha256": "e65ee7f64973ccd1c36954ee49644671cea50f8d50523e0f0504d089594619ac"
+    },
+    {
+      "case_id": "mmlu-pro-01250",
+      "category": "law",
+      "source_row_sha256": "e4b93042a397ef94e452dcd12406a32ba3f5b496a93ee71670de1671662aa51b",
+      "prompt_sha256": "251b3de461fd87d4c42ac97df30c7ffab75ce17078173996a1e34f458b9213c6"
+    },
+    {
+      "case_id": "mmlu-pro-01310",
+      "category": "law",
+      "source_row_sha256": "a4f4f3685b3a5df6d1d326cdff5f69fb2ae14c2ec32ef7fec56720f98a032bb8",
+      "prompt_sha256": "6674db9a4902570f980ae0aba6fd24087a4376bca1a4db72fb65e6b98a18dfbc"
+    },
+    {
+      "case_id": "mmlu-pro-01371",
+      "category": "law",
+      "source_row_sha256": "9ed78bc0a0171b03f8bd852af6307cc8a9f2cce7d8ab6db37f2b76f824412147",
+      "prompt_sha256": "4d9e5e97277ed8fc83ed47310f061c5062f723fddbf0dd5fa10b45164f980736"
+    },
+    {
+      "case_id": "mmlu-pro-01436",
+      "category": "law",
+      "source_row_sha256": "8121628901dd9b3ab57dadf7759d608a4da1e80d9381bd68618c80618e5297be",
+      "prompt_sha256": "6b9594245e59ef122961b2a05566006973dde721865970dca2bde93db37b0ede"
+    },
+    {
+      "case_id": "mmlu-pro-01497",
+      "category": "law",
+      "source_row_sha256": "0e24f4110d1d7158ef81f7073e90c7380fb9054b289c9fd598eb7602a9c8018b",
+      "prompt_sha256": "eeb060638e64a3ff46005cc242773a1416c17abc2e3825f9bbc566563915e146"
+    },
+    {
+      "case_id": "mmlu-pro-01557",
+      "category": "law",
+      "source_row_sha256": "2e31cc4d82501982cfa78dcd04b485f5ce3c572f3d0416bf836c4a004732c962",
+      "prompt_sha256": "81dda22eb440d3b4c4e6ad90c37017be0d69797337c122476f60ed8e246d47de"
+    },
+    {
+      "case_id": "mmlu-pro-01619",
+      "category": "law",
+      "source_row_sha256": "daba7e48b4c74e994eaadae25c8ebcac5d778227bfb6863983fefdbdc61a6edd",
+      "prompt_sha256": "d0db8b62346e2ca20b39fd3f5cdbe372ad7db9a107ed15915ad48c636ee7c9b3"
+    },
+    {
+      "case_id": "mmlu-pro-01680",
+      "category": "law",
+      "source_row_sha256": "f1aeb660a6760b3c176b3f30267c0dfb4c42d962db72d60885ef082360ce0386",
+      "prompt_sha256": "710f9529e31aa469b77ca6c6215bd13e3f77d8f72e10a1bbfb6f112deed09e39"
+    },
+    {
+      "case_id": "mmlu-pro-01741",
+      "category": "law",
+      "source_row_sha256": "dcc9658e71a0ae4227306f1d94361039eaad112a8cbbce6f1d9fd7c1a72559b5",
+      "prompt_sha256": "2048aaf53f0ef13f3ce4c79e8d7565d89525c0b7e3b856a874d5666178c1b657"
+    },
+    {
+      "case_id": "mmlu-pro-01802",
+      "category": "law",
+      "source_row_sha256": "35d06040c9727fdaecff6c16720bbf5743db96e8c2dcd3d580fecec1cb2db11f",
+      "prompt_sha256": "f487951f80738c2dfcb9bbe7527f832300f7e32de4b0503c99653a788bee4f57"
+    },
+    {
+      "case_id": "mmlu-pro-01862",
+      "category": "law",
+      "source_row_sha256": "46b010f5035fcefb9c9a3210ad34b9294bfadaa1434616c2d0d3897eae7881de",
+      "prompt_sha256": "d28792da2a9c27ac6c1a9f0196788613f189f493d1b3fdb50ec126f6ca98d93d"
+    },
+    {
+      "case_id": "mmlu-pro-01923",
+      "category": "law",
+      "source_row_sha256": "8acc7f9cdc5ec0e390ea1a65d50d6c0a57010c8ef55a6e5ea4e357ccca6d0b88",
+      "prompt_sha256": "17c266c7b455b7052ffe75cb47935f91e92ed7964bc114d31acbdf82366cf78e"
+    },
+    {
+      "case_id": "mmlu-pro-01984",
+      "category": "law",
+      "source_row_sha256": "7e0b0ceb1278b4913e10306bf722348940e4e1b67d5abbea1a5d997a03bd039c",
+      "prompt_sha256": "f4c0919773a291ea9c912b2e1d78b2ae87ccc36b7cb7be2f581d11463e635c67"
+    },
+    {
+      "case_id": "mmlu-pro-07745",
+      "category": "math",
+      "source_row_sha256": "6933e3635bbb18f5d3c02387a5b159d114e883d32d754323bb09d744bb49f0b7",
+      "prompt_sha256": "c823534b3463a095b9e3d54c28b95f02bf5f2fd43762724b3645c0792b0d06a6"
+    },
+    {
+      "case_id": "mmlu-pro-07805",
+      "category": "math",
+      "source_row_sha256": "2a6c57fa5baa13f44488e7b84a1c017ef21f468cb44a2880ac56e397a610a175",
+      "prompt_sha256": "da0d34da08dba3877ec8369213baa0ef85dc16972346f3a7630061b6ef550c0a"
+    },
+    {
+      "case_id": "mmlu-pro-07865",
+      "category": "math",
+      "source_row_sha256": "29d45f5653b2c671e0369c86a9a4b6f0b6a5fb459ba47021c7777613cd286abb",
+      "prompt_sha256": "d4db6af591d3e0e312d4a8a0463bfd0014f83b311364873d91f902543e05eba2"
+    },
+    {
+      "case_id": "mmlu-pro-07925",
+      "category": "math",
+      "source_row_sha256": "3ba329999707f66a110c15c2149dfb2cce2ad47558fc110227961d57fe1ab843",
+      "prompt_sha256": "4dbd03c3df2aa855e638db4d433f61a5e7fafc380cc1c2ee88e4c9af09994672"
+    },
+    {
+      "case_id": "mmlu-pro-07985",
+      "category": "math",
+      "source_row_sha256": "04efb4e2c82777d2d1115cd6c4341e3ca955b8cbd1e86d28c72375188f595181",
+      "prompt_sha256": "68ae69bc37da390d4150fcfc585bcfe4e4edc8dfb04207e30f51cd06e5e3ce52"
+    },
+    {
+      "case_id": "mmlu-pro-08047",
+      "category": "math",
+      "source_row_sha256": "98e57fd771d1593272651e09ec6373f3829bed9948c0128f4417bf859848c988",
+      "prompt_sha256": "0d3b20128453252ab194297eea1a54c287a4e6e9dcdc395b1ef06105f8b28ace"
+    },
+    {
+      "case_id": "mmlu-pro-08107",
+      "category": "math",
+      "source_row_sha256": "5701664382d6107d8b316b800eac6a72302bb3ecd85a85e9771dd988f899177c",
+      "prompt_sha256": "28bfdf975f9d59be17790f385dbc84664693af0ee3b7176ddd6efe73ddc41c76"
+    },
+    {
+      "case_id": "mmlu-pro-08168",
+      "category": "math",
+      "source_row_sha256": "0511b1b90f913453841d0735269447b526ac7c2698fc74655c59200544464f66",
+      "prompt_sha256": "84ea299846e312a5d22a7fd0cc456d56695165839ac888a6c6bb647f04b0fb17"
+    },
+    {
+      "case_id": "mmlu-pro-08228",
+      "category": "math",
+      "source_row_sha256": "967aad471c97a7dbe50e1c315c6392e805fa1f0366386c93468203ea538f5ee9",
+      "prompt_sha256": "ab720934c0077563b1f9cfd0abe1c86a759e4eabd87708423b30d49b7bad089f"
+    },
+    {
+      "case_id": "mmlu-pro-08289",
+      "category": "math",
+      "source_row_sha256": "baa345db414a1c3bc44071b5c1226b62b5db9e51e1f75d0cd7d9401306f0e5da",
+      "prompt_sha256": "f776f7f029fa32580963e664028c16293f3070cd07cae109e9414a57539a3333"
+    },
+    {
+      "case_id": "mmlu-pro-08350",
+      "category": "math",
+      "source_row_sha256": "07a3b70e9bf9d87ee4d9d929b726107e1454175bf1a332858acbaf3e8704f4ee",
+      "prompt_sha256": "ea07c07abdea3dbac4a1d756b12f13b0dded4b0f1bfd3d36c99cc9b9a75b94cb"
+    },
+    {
+      "case_id": "mmlu-pro-08410",
+      "category": "math",
+      "source_row_sha256": "1f92bc8817cd7d5b7fe381c7ecf694e5950dcb2fe3c912dccc67382d15aae2c6",
+      "prompt_sha256": "b96957700610a38546aa9801100c8e56b786f086af7899f00920b4d23c61ff26"
+    },
+    {
+      "case_id": "mmlu-pro-08471",
+      "category": "math",
+      "source_row_sha256": "13eda3fc07fc11939caefa4c458223953466c8319e405ba76f3eb9d27d6aa39c",
+      "prompt_sha256": "cc1fd7b298cfe8d405d00294123d84c44d719cef1d0091f444e90d552d285415"
+    },
+    {
+      "case_id": "mmlu-pro-08531",
+      "category": "math",
+      "source_row_sha256": "ea7422639922c8595f3296c624bdb0342b47d4ecfe8a4bc03c33b257abb5124f",
+      "prompt_sha256": "564206d212f6753ca691ca4b6dcc10d6b21cfc79a27ad52c4ceb49344e3385c6"
+    },
+    {
+      "case_id": "mmlu-pro-08591",
+      "category": "math",
+      "source_row_sha256": "adba4793465446da1941d5e741bc3cc10ff2298ec0e84e632e48d6cfc1a46a0e",
+      "prompt_sha256": "b65630a479cb1e2ca2cd650f8a7914127754995daaadfd63ce5b5498c43b0614"
+    },
+    {
+      "case_id": "mmlu-pro-08651",
+      "category": "math",
+      "source_row_sha256": "dab25129015e9f5b62802404e0f51733798bb31833fbbca38ee37689deba2b7e",
+      "prompt_sha256": "051e4741832bf0d47d16727cc1893a476e9dfaf7e22a1b2f42f21e42196c42b9"
+    },
+    {
+      "case_id": "mmlu-pro-08712",
+      "category": "math",
+      "source_row_sha256": "e5b4a8cdf71d3b42922511bd38aadf4afedfb043c4f770ec74bf08b90cacf002",
+      "prompt_sha256": "85d764a9befed4888a523af6a19875c32e78b2cf6cacde68b2163286301e7a20"
+    },
+    {
+      "case_id": "mmlu-pro-08772",
+      "category": "math",
+      "source_row_sha256": "0b7ea3f825ab3fa0bb76bfa2a644c2323a7331e9d58b814f63ca317479d838d2",
+      "prompt_sha256": "280b5ec447575f1594589d036c9bedbb40ed1c7d285f8975befac1ef20fd0a6d"
+    },
+    {
+      "case_id": "mmlu-pro-08833",
+      "category": "math",
+      "source_row_sha256": "dac4df85240766c5d25678b8457a6f6f0e9e5f023eadb03c1965d6ae7db60136",
+      "prompt_sha256": "9ce23bcf44b6d8a651ac0e792aa38292acb78c4efbad1b32172f7eafaec251cc"
+    },
+    {
+      "case_id": "mmlu-pro-08893",
+      "category": "math",
+      "source_row_sha256": "194786ae18714f11468d99ab7a64ef64f0ed4bdeca959ab1e9615b2f6ada87f7",
+      "prompt_sha256": "96dfe016182a7d9ec9be62ac65faed9613415d78e6f375533199b1c3c7a761f6"
+    },
+    {
+      "case_id": "mmlu-pro-08954",
+      "category": "math",
+      "source_row_sha256": "96b46342ea390e88ef8c53a9d6accef5e975c66f5620d0ef9687afbb75d15f3b",
+      "prompt_sha256": "5bcb4d4c711a2e3fa683d65a9e48558a6449b9b0cb5e33d8d61e2d3a3d8f3147"
+    },
+    {
+      "case_id": "mmlu-pro-09014",
+      "category": "math",
+      "source_row_sha256": "f0dbfc0e250e111b2c612e8d7114ab6761fad308d6c1904e580ceb625f48ec68",
+      "prompt_sha256": "00f158c3d06fa3e1589d437777bdc854056b477f4555bd5abf832521a1ec03f0"
+    },
+    {
+      "case_id": "mmlu-pro-05090",
+      "category": "other",
+      "source_row_sha256": "b069336efd7ec248c8edaa544606ab37d66aa3be5cc23cea7a330d7344cbd127",
+      "prompt_sha256": "054d0b8565069f3cd7341c477e1b1ba0402bf7d7baf2629ec78d863032528837"
+    },
+    {
+      "case_id": "mmlu-pro-05150",
+      "category": "other",
+      "source_row_sha256": "ca47495a6025970c9dad98de8ce3000e12b4a3b56446e35203bd9793b8ac9f8c",
+      "prompt_sha256": "5432884995a2dafbc4b341bb9cd1aa012580679bc0cd8e9a17bbc975dd110b3d"
+    },
+    {
+      "case_id": "mmlu-pro-05211",
+      "category": "other",
+      "source_row_sha256": "89fbf2136e3836184606d6f81234c1cc06bf193fe4d62ba937eae0d2fc89702b",
+      "prompt_sha256": "64d3254354f0a5b32b14349c908b41a5b28618419afeffec4d1dca40ac131c43"
+    },
+    {
+      "case_id": "mmlu-pro-05271",
+      "category": "other",
+      "source_row_sha256": "c45c986a5e3d9268e2dde7e423ee0343279a1beb502a12dcabaa0eab7d339a8c",
+      "prompt_sha256": "58eda8e0420c83818e3f043c6c66d30f6b9d4169c6cf6daa1bfa177de55b6867"
+    },
+    {
+      "case_id": "mmlu-pro-05331",
+      "category": "other",
+      "source_row_sha256": "fa3026c1cd78a2b96bad54c13ea0cbfd2cfdd8fe10ae816f51610287b03f0834",
+      "prompt_sha256": "ef863932e9acb669a8a729a0d4f41c2d9368807116f7b091d3a86dbc15e4ccc6"
+    },
+    {
+      "case_id": "mmlu-pro-05393",
+      "category": "other",
+      "source_row_sha256": "a2ad313a8d4569f5ce17d59980a1a61e0418c0b58f20b6b9192e946972b42c69",
+      "prompt_sha256": "99315c2cfde53e745a9a9c54a5fb8a4bf3649f7f89d7d4d8f151d385a365e4cf"
+    },
+    {
+      "case_id": "mmlu-pro-05453",
+      "category": "other",
+      "source_row_sha256": "8a77d23f4100bd2fef214f2bc05271b46af015e465823dc94f97c9356a92d3c4",
+      "prompt_sha256": "e381d8fdd9a43c734512d96dd3a9ed1c1b10e14d59260a5533cc9a1290b3e32d"
+    },
+    {
+      "case_id": "mmlu-pro-05516",
+      "category": "other",
+      "source_row_sha256": "3f1589ad44ca3a6f8f1ab5c10c146e5f8d0357a0dab7db405055c59c149cd8ed",
+      "prompt_sha256": "92b203b84d652948557f7d1d2f06dc44d191438f20817d4550f8d59baf771faf"
+    },
+    {
+      "case_id": "mmlu-pro-05579",
+      "category": "other",
+      "source_row_sha256": "85d710fc585479faf4ca0ec844f129f79e3fb8a70f5f6ff5a777b9df6f809f38",
+      "prompt_sha256": "efb541b7f04e6a8704c21620c64630c77f27d944641d8dcec72e503f4b807719"
+    },
+    {
+      "case_id": "mmlu-pro-05641",
+      "category": "other",
+      "source_row_sha256": "bf9bed339a68753da575dc04584009f57ac829aa659077f38db77b341ac6a373",
+      "prompt_sha256": "e317c49c797c80c64fe4a624ad290679992ca77485622554ba6ebc210b4f4cf1"
+    },
+    {
+      "case_id": "mmlu-pro-05704",
+      "category": "other",
+      "source_row_sha256": "4ed22c60d705aba4e305fa00cc1059040f57dff4ae1502982d3df4df10e86ce0",
+      "prompt_sha256": "ebb0a5a6a0d06ace11a25d8825331f904185a1bba639a0f6ba794a284e12d40e"
+    },
+    {
+      "case_id": "mmlu-pro-05765",
+      "category": "other",
+      "source_row_sha256": "bf5a329abacc46c3d1899e3a6d38b9fbb5e5b1e8960bfc382b030aa4b94c1a17",
+      "prompt_sha256": "d6c37b5820a1e1ef6ed8cda9fc03fa50dc32747d86f1092b8e7d9f70af819236"
+    },
+    {
+      "case_id": "mmlu-pro-05827",
+      "category": "other",
+      "source_row_sha256": "caaf9b8606610bab4b0f3eab18c68c26547387bc790bb445eec2258676d077b2",
+      "prompt_sha256": "e9f38e78c7f05cfd8d2740a85cce2c2eb44494b1a6e79b7491fd32c0fc0e7d24"
+    },
+    {
+      "case_id": "mmlu-pro-05888",
+      "category": "other",
+      "source_row_sha256": "6f39cc2c5fabac42343f42969df1c816272378d4e8775fda46c724f20f4a0c2f",
+      "prompt_sha256": "f16ded2475a74097c7b3fdba28a636d64b1e3272eb66c3cb7d2d9d490297d4b3"
+    },
+    {
+      "case_id": "mmlu-pro-05949",
+      "category": "other",
+      "source_row_sha256": "ac2df47520789fd52644d8322f5de07eb67114f32e2c72308f02d8334b0b3e9e",
+      "prompt_sha256": "b8d577377f7377050b2cbffd197fd141422d7a51afdbbdca665f78f1ba7f93c4"
+    },
+    {
+      "case_id": "mmlu-pro-10783",
+      "category": "philosophy",
+      "source_row_sha256": "573351f5789658698d97bbb48cf96450ad18d19ef45262ae9298b5874a815e50",
+      "prompt_sha256": "da7e3475773b8e4f9d696974ddd0e4e21f95f06fd643cca73dcb954f109521ff"
+    },
+    {
+      "case_id": "mmlu-pro-10846",
+      "category": "philosophy",
+      "source_row_sha256": "625e3ece12b45f0d6850670ecf9f5e4665745fa7c376f5e9d02d7c55f09347c5",
+      "prompt_sha256": "9dc0992f96b63d332a9f5f35a21b1f455e75573e8a35664e38780b923cdb2e89"
+    },
+    {
+      "case_id": "mmlu-pro-10906",
+      "category": "philosophy",
+      "source_row_sha256": "9e597bd5e2395ec852e82338f4d4098d4953b702a2b0448147fb46b73fc89df8",
+      "prompt_sha256": "891a97177bfc05ab09524e7acb97a3c027acb9a0a65ea7ac47265b3cb6a48feb"
+    },
+    {
+      "case_id": "mmlu-pro-10967",
+      "category": "philosophy",
+      "source_row_sha256": "e45429c80c371b71a09afd4d05eb23f9df5415663c4f2d01cd9874165336750d",
+      "prompt_sha256": "715a6eb7d171ca250b3fbdbfdb725f357777ea935a99485dac46a4c1f209ceca"
+    },
+    {
+      "case_id": "mmlu-pro-11030",
+      "category": "philosophy",
+      "source_row_sha256": "24ac7d9a57da9b5236cdaa18c754486d8e20ec38763bdf87b2a0cf2d62d4d08b",
+      "prompt_sha256": "55b8b93d8b626ae6f1f99f5bd7117dc2508678aa4c4a7798610ec2d47bc1a253"
+    },
+    {
+      "case_id": "mmlu-pro-11090",
+      "category": "philosophy",
+      "source_row_sha256": "d719b6304e1ad1c66e813a926893ff28d5785ff0ba14ece14935ddad6fbf4e50",
+      "prompt_sha256": "7a90e10f16259392cbd8320a9a36a9f1c267c0a702cc9b09fa1539cffa5de5c0"
+    },
+    {
+      "case_id": "mmlu-pro-11155",
+      "category": "philosophy",
+      "source_row_sha256": "7f4cc7c87b744477788507e0a6b14c99807e0a7f7df0eaa593d81f41907df70b",
+      "prompt_sha256": "858320ec1f86ac8354b1434e516c4d4bb9b55c514b8638df5b8aeec4f094e014"
+    },
+    {
+      "case_id": "mmlu-pro-11215",
+      "category": "philosophy",
+      "source_row_sha256": "570b41112bd272b46de3209af1f7a2fd47ec3921b9d54efb62360e91c91cb945",
+      "prompt_sha256": "63aca3e0bc3dc6914369fac5f5ebe35d3ceab16d35ff1eba6e83876cd547455f"
+    },
+    {
+      "case_id": "mmlu-pro-11275",
+      "category": "philosophy",
+      "source_row_sha256": "be70e5972213ede93b6b46eca07fffdb60685994fb012cf6686f81062d034c6a",
+      "prompt_sha256": "5a56f3562c6445c147fa11cf770007314b3c4dbe6d5c22c55a2f14917ff7ad37"
+    },
+    {
+      "case_id": "mmlu-pro-09095",
+      "category": "physics",
+      "source_row_sha256": "ba5ea94688858e80a8fbf371a69c544b1c1eb92bd0040758df035e2ca7ed9b55",
+      "prompt_sha256": "cee97e4e03fe861d82de2c5f833efdea8135af75582a22a1920c801cf37e6448"
+    },
+    {
+      "case_id": "mmlu-pro-09155",
+      "category": "physics",
+      "source_row_sha256": "b9b5d0559e171e926bc3032e6cfecaca3dec4c12baf41c977cf947a99c6c45c8",
+      "prompt_sha256": "b394175fc7d69fac4a182272111cdf62c74f5d5c477f1bbc12b73af11d76ce21"
+    },
+    {
+      "case_id": "mmlu-pro-09215",
+      "category": "physics",
+      "source_row_sha256": "9eac7d00b840a649cdf061d832ffe187a4ee957a66e0cc06aa8afa7eb52d3136",
+      "prompt_sha256": "9a3a013d409c14fc2f95723b47aad962f441bcf86194a34b3151ff3ef8b9cbdf"
+    },
+    {
+      "case_id": "mmlu-pro-09276",
+      "category": "physics",
+      "source_row_sha256": "a4d991463738a9109a9e3f7e3ac03371f81daa29a4789e51364b8e463ff6359e",
+      "prompt_sha256": "ad5c9b10de42359a824876fae999f76cb48204d25420162d960928c0810cd33d"
+    },
+    {
+      "case_id": "mmlu-pro-09336",
+      "category": "physics",
+      "source_row_sha256": "b74616669b3a3665e06192238c81ef79d8863748508781d02b2efbeed921608f",
+      "prompt_sha256": "51706cff68f3cc9a3049bfc03c1dc02bcea11dc989167b12e7185e6aedcea1b7"
+    },
+    {
+      "case_id": "mmlu-pro-09396",
+      "category": "physics",
+      "source_row_sha256": "48675e3189e5cb2ebb1c6b85dce39b0a2d9485cd76b48672e8d66cb3e4eaf741",
+      "prompt_sha256": "50e46992ff9381a93ecd8862bf9227d41c14226e51bbe65898c0f5a814e837a7"
+    },
+    {
+      "case_id": "mmlu-pro-09456",
+      "category": "physics",
+      "source_row_sha256": "60c744fd172182e6cf252d2247bfe2320041ab0e7cf98d9e1d7415f7b8b393ba",
+      "prompt_sha256": "82e2f24544a3cf67091e6b29aa76fc0ee9acc4d686a949d73c84f984e5c48a95"
+    },
+    {
+      "case_id": "mmlu-pro-09516",
+      "category": "physics",
+      "source_row_sha256": "122a651685ea01dbbf686bd967ca1b1e9e420a45090818bca1d7e9cfd8334cf8",
+      "prompt_sha256": "8718001e3827f7e33938f415e8614290931b024ede5f6107711b22d908a9085f"
+    },
+    {
+      "case_id": "mmlu-pro-09576",
+      "category": "physics",
+      "source_row_sha256": "ea9d258dcf1fe5059878d295421ef853a8c60fa5d11dd80ea4e54f37bc1ec51a",
+      "prompt_sha256": "745a1dcda90e1d56e6880e22d8361bccd9ca694d3bd2962e1595b1f9275418ce"
+    },
+    {
+      "case_id": "mmlu-pro-09637",
+      "category": "physics",
+      "source_row_sha256": "1df8d19e29ccc3e0cf6af646fea44e30ec0b5861658b01db908d7cd34772c4e5",
+      "prompt_sha256": "9617214c1c60acde801465be7ce46ba51825c2c96d627e5bbb01be31348b7ba9"
+    },
+    {
+      "case_id": "mmlu-pro-09698",
+      "category": "physics",
+      "source_row_sha256": "38f47654185b792a787b5e673596a00be620d77f5c071a66e7056e18fc19dccb",
+      "prompt_sha256": "9ca5286e00bf7f543ca92f0bdf229484811c375b44de066f546d753352e4ee32"
+    },
+    {
+      "case_id": "mmlu-pro-09758",
+      "category": "physics",
+      "source_row_sha256": "e4ad58c817572c0a6294d8c50506df4338ed2aef1ebc24f9ccc20d761865dd0a",
+      "prompt_sha256": "42d02e3f4c6325ad82c75d072fe338d41e30d7574e474836cb2d07a970c3358e"
+    },
+    {
+      "case_id": "mmlu-pro-09819",
+      "category": "physics",
+      "source_row_sha256": "25de8143d0bffe40394c22ee947897e4e51c56441f1759baf93795402bebbf2b",
+      "prompt_sha256": "2b5600df73061685725692876eb7957deea5fa152e646867bfe2251712c53c58"
+    },
+    {
+      "case_id": "mmlu-pro-09880",
+      "category": "physics",
+      "source_row_sha256": "271c2ff69d611fb6643a447d6bd0c1cb96d4a9c49c0845e3a6827b66182a9cd8",
+      "prompt_sha256": "7461f2177a9f4c101c5dc11dfab8076437f720a283be125ecb859cdec6cce1bb"
+    },
+    {
+      "case_id": "mmlu-pro-09941",
+      "category": "physics",
+      "source_row_sha256": "26a52c97284752aa0d26cd07696764a62d8d44a7210bb6f441ed560f47de9b78",
+      "prompt_sha256": "89d9eb8786ceff83229807487c4c0899cf4a45ba05507174e33e9d26246143f0"
+    },
+    {
+      "case_id": "mmlu-pro-10002",
+      "category": "physics",
+      "source_row_sha256": "d99cb6534e17e4510058204782011cf801da79ce7742a72773a8d110efd55603",
+      "prompt_sha256": "c60e87feaa68559abc73d0097096085d287863cf2c68843dcc31a6d4db0d860a"
+    },
+    {
+      "case_id": "mmlu-pro-10063",
+      "category": "physics",
+      "source_row_sha256": "62e80b6a8345b9ee13d96f582840dba1b6297d3e81b1b68839be3bd3e213db84",
+      "prompt_sha256": "d75269eca1971d0e9974bf8cf3aa74ec8d0b965a5e75e4c5b95e9e19b5e6b2c1"
+    },
+    {
+      "case_id": "mmlu-pro-10127",
+      "category": "physics",
+      "source_row_sha256": "c9ab198757ad32978de2de0881c98ba0ceb3cdbb19b80c4de62a281282bef4dd",
+      "prompt_sha256": "30e3e32456abda70471bdafa4b33ccb5d7b63656915ab11f748c0ffd66f62bdd"
+    },
+    {
+      "case_id": "mmlu-pro-10189",
+      "category": "physics",
+      "source_row_sha256": "d94cbd74bc8904130d49db7a05c64c5cea06252578d7bc6bf256c8782d217d2b",
+      "prompt_sha256": "0326fbee9e5bb3430da39ad3986b39bfdbed9db79a6be99c4c0f68550f289767"
+    },
+    {
+      "case_id": "mmlu-pro-10250",
+      "category": "physics",
+      "source_row_sha256": "dda9ba0edcd77c3b6e169d56f0ba1970f645abea27382115f363a896b24f4204",
+      "prompt_sha256": "cbfaca4310d7c5e2961ea7490c0ba184d66c890c8e7501d5f5589e3544f51da9"
+    },
+    {
+      "case_id": "mmlu-pro-10311",
+      "category": "physics",
+      "source_row_sha256": "0f26bc87a133d301704c8730e77951075797b2d829d6645082dc2b1cd408a772",
+      "prompt_sha256": "83402009ecdcb4a162d9acbae46e754eea628cb1e50e853d4f293c0e5a5837a2"
+    },
+    {
+      "case_id": "mmlu-pro-02001",
+      "category": "psychology",
+      "source_row_sha256": "c19c8dde2f12a20c1e9a33a4c193f7d9be5d18c73dc6e1080a47233446611f6d",
+      "prompt_sha256": "2a2f41f90a733a81ced431b645dda36e398943e25065152057c22b427e404675"
+    },
+    {
+      "case_id": "mmlu-pro-02065",
+      "category": "psychology",
+      "source_row_sha256": "91837cc67969a5cfa8f507dce49f909f8ae7c4c8d69da4566d8e7efd97be253a",
+      "prompt_sha256": "3ddf714fe6f933f6c185c24cca1d1aef14dd957fc2d88a05c0a699212b379c86"
+    },
+    {
+      "case_id": "mmlu-pro-02126",
+      "category": "psychology",
+      "source_row_sha256": "30b6137a6d1797c512164b2985c8057161b46e25056c7ff6e981ed01d33cd72b",
+      "prompt_sha256": "279c3bb270d2ede7af71ac30a968ee1248c4a81fc8d12dfd27ce109867913906"
+    },
+    {
+      "case_id": "mmlu-pro-02186",
+      "category": "psychology",
+      "source_row_sha256": "f641ca7fcf82e180c51ccb176deb20553e8d405c358f2f75ec432a116aa3cab5",
+      "prompt_sha256": "be33012f77edac301279f071a88d5d186d34a58b72d2373fca0cca1929f6f438"
+    },
+    {
+      "case_id": "mmlu-pro-02246",
+      "category": "psychology",
+      "source_row_sha256": "96f56f373dc3dcd9772853a32cfe6a28733817de4289f4f87c800a679c5704d3",
+      "prompt_sha256": "3564947a09eb459072d85439d8268bc9193850405aa24ff93e93f31711e39604"
+    },
+    {
+      "case_id": "mmlu-pro-02307",
+      "category": "psychology",
+      "source_row_sha256": "3788d96a919f5054d7b1ca115c275ea2aed7f1326546795bbefd0572f0de3325",
+      "prompt_sha256": "ffe3d728cdc065cf952de8f2cee47657f479229d4c9e8b816debeb6c18ee1ebe"
+    },
+    {
+      "case_id": "mmlu-pro-02367",
+      "category": "psychology",
+      "source_row_sha256": "e5a8818d9dee7853cdf752d0f6f876ce43a94cf452e00b1477791ddb4f0b898e",
+      "prompt_sha256": "c04daf7239309870e7982e818a232baf09cc8dfa0fdbe473ecf416091a186fa9"
+    },
+    {
+      "case_id": "mmlu-pro-02429",
+      "category": "psychology",
+      "source_row_sha256": "c1edb20f8da08ee054184e98152764377785ba46cc4ec543a5c8efaa00a176e2",
+      "prompt_sha256": "ee183dcd1fdef29c1a735ab52568022229c4a5333896cb5c52bab11e7d46237c"
+    },
+    {
+      "case_id": "mmlu-pro-02490",
+      "category": "psychology",
+      "source_row_sha256": "ab237a983f2ee032a1dbb59641efbd7cae08e8aa283076b4f1a558f287a45d91",
+      "prompt_sha256": "2afc89027f889cd08831811259a79fd4e84cdf5a82c7a229f3d0f240ca494dd5"
+    },
+    {
+      "case_id": "mmlu-pro-02550",
+      "category": "psychology",
+      "source_row_sha256": "2b9b9f3567cb0ea2dd124f071127f479f4277094948b5c55c9048adffefba21e",
+      "prompt_sha256": "6680f1a3a1dd2fa54447cf7eb5f1120e783fe187ff58070085144ea8a34c6d41"
+    },
+    {
+      "case_id": "mmlu-pro-02611",
+      "category": "psychology",
+      "source_row_sha256": "1f90ef7ecff24de17b752cf029f549c65721bc9fc51fe5c7d86a61af248a0d07",
+      "prompt_sha256": "4916aa7b7f5642e3a0d418e784789d049b4bf4903e770d897aa686894a7acb6b"
+    },
+    {
+      "case_id": "mmlu-pro-02675",
+      "category": "psychology",
+      "source_row_sha256": "c10d6809479e4fc2bd8fe4f911ad86a20ba70cc9c21203fb6ed7f6f771a59297",
+      "prompt_sha256": "c714268fc760d9b064e30fa951dcbbcc6cd0a8f6d73e78e92333e68a848d8776"
+    },
+    {
+      "case_id": "mmlu-pro-02739",
+      "category": "psychology",
+      "source_row_sha256": "b9811cf8ed6af5fcd410af681dc4dbce1004abd70779c828cade4cfa49d439ed",
+      "prompt_sha256": "5d0803ff39a846830faf800f6add702150937712405b1636e1adb9320d689d74"
+    }
+  ]
+}

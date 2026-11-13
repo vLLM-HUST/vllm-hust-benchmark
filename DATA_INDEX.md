@@ -205,3 +205,9 @@ python -m pytest -q tests/test_data_index.py
 ## #326 收尾入口
 
 [活跃消费者收尾与历史保留清单](docs/issue326-closeout.md)区分已验证入口、历史保留、缺失和外部阻塞；不再以逐篇迁移旧数字作为开放式任务。
+
+## 五数据集共享标准（2026-11-13）
+
+标准固定在 `docs/dataset-standards/five-datasets-v1`，两项目使用字节相同的 v1；运行目录中的旧协议不覆盖。
+`python docs/dataset-standards/five-datasets-v1/verify.py` 校验所有附件。新样本、预算、评分或 tokenizer 必须另发版本。
+网站只发布协议与来源索引，不分发题目、答案和原始研究用途 trace，也不把协议冻结当实测。
