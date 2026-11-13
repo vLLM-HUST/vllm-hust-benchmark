@@ -151,14 +151,21 @@ def verify(archive=None, native_part=None):
     restart_result = (
         runpy.run_path(str(restart))["verify"]() if restart.is_file() else None
     )
+    windows = ROOT / "restart-02/verify_windows.py"
+    window_result = (
+        runpy.run_path(str(windows))["verify"]()
+        if windows.is_file()
+        else {"formal_900s_points": 0}
+    )
     return {
         "public_files_verified": len(expected),
         "historical_candidate_requests_recomputed": requests,
         "native_public_metadata_verified": native_part is not None,
         "native_full_request_stream_verified": False,
-        "new_formal_900s_points": 0,
+        "new_formal_900s_points": window_result["formal_900s_points"],
         "new_speedup_claim": False,
         "restart02_diagnostics": restart_result,
+        "restart02_windows": window_result,
     }
 
 
