@@ -1,4 +1,5 @@
 """Keep independent MOD identities and explicitly declared public ownership."""
+
 import json
 from pathlib import Path
 
@@ -39,9 +40,12 @@ def test_three_independent_traceloom_optimizations_have_declared_ownership():
         ]
         assert public["advisors"] == []
         assert navigation["plugins"][key]
-        record, = [r for r in portfolio["repositories"] if r["name"] == repository]
+        (record,) = [r for r in portfolio["repositories"] if r["name"] == repository]
         assert record["component_ids"] == [key]
         assert record["url"] == url
     assert taxonomy["components"]["graph-coverage"]["kind"] == "tool_mod"
     assert taxonomy["components"]["prefill-admission"]["kind"] == "tool_mod"
-    assert taxonomy["components"]["sglang-prepared-dispatch"]["lifecycle"] == "qualification_pending"
+    assert (
+        taxonomy["components"]["sglang-prepared-dispatch"]["lifecycle"]
+        == "qualification_pending"
+    )
