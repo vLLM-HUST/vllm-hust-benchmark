@@ -878,3 +878,9 @@ pre-push hook additionally re-checks whitespace / conflict markers on main-bound
 <!-- workload-catalog:end -->
 
 StructEval的[原始数据、官方源码获取与独立客户端安装说明](docs/workload-data/STRUCTURED_ORIGINAL_SOURCES.zh-CN.md#%E8%BF%90%E8%A1%8C)已补齐，获取入口为[prepare_structeval_original_assets.py](scripts/prepare_structeval_original_assets.py)。它复用既有固定哈希下载器；获取/核验与原生任务、官方评分分别执行。非渲染完整协议与未完成的渲染/VQA模式分开登记，精确交付状态仍以唯一清单为准。
+
+## 五数据集固定标准
+
+[five-datasets-20261113-v1](docs/dataset-standards/five-datasets-v1/README.md)：MMLU 200、HLE 分层
+200、Frontier 160， SWE / Terminal 各 32 任务的公开 trace；固定 ID、顺序、来源、生成预算和统计口径。 质量与 trace
+推理性能分别报告；此入口不表示已有该标准的新实测成绩。

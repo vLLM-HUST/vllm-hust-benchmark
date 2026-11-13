@@ -1,0 +1,152 @@
+{
+  "schema": "shared-five-dataset-standard/v1",
+  "standard_id": "five-datasets-20261113-v1",
+  "title_zh": "五数据集固定评测标准",
+  "title_en": "Frozen five-dataset evaluation standard",
+  "published_date": "2026-11-13",
+  "status": "frozen_protocol_not_measurement",
+  "ownership": "Project-defined shared standard; upstream dataset ownership and licenses remain unchanged.",
+  "change_policy": "Immutable v1: changes to membership, order, source revisions, budgets, scoring, tokenizer or metrics require a new version. Never silently resample or relabel historical results.",
+  "datasets": [
+    {
+      "id": "mmlu",
+      "name": "MMLU-Pro",
+      "mode": "quality_and_inference",
+      "tasks": 200,
+      "source_tasks": 12032,
+      "requests_per_arm": 200,
+      "protocol": "mmlu-fixed200.json",
+      "selection_zh": "沿用原包固定 200 题及顺序，覆盖 14 学科；不重新抽样。",
+      "selection_en": "Reuse the frozen 200 cases and order across 14 subjects.",
+      "max_output_tokens": 8192,
+      "concurrency": 200,
+      "temperature": 0,
+      "seed": 0
+    },
+    {
+      "id": "hle",
+      "name": "HLE-Verified",
+      "mode": "quality_and_inference",
+      "tasks": 200,
+      "source_tasks": 1811,
+      "requests_per_arm": 200,
+      "protocol": "hle-fixed200.json",
+      "selection_zh": "Gold 文本 64 / 图像 10；Revision 文本 113 / 图像 13。按比例分配后，层内确定性系统抽样。",
+      "selection_en": "Gold text/image 64/10; Revision text/image 113/13. Proportional allocation followed by deterministic systematic selection.",
+      "max_output_tokens": 16384,
+      "judge_max_tokens": 8192,
+      "concurrency": 16,
+      "temperature": 0,
+      "seed": 17
+    },
+    {
+      "id": "frontier",
+      "name": "FrontierScience",
+      "mode": "quality_and_inference",
+      "tasks": 160,
+      "source_tasks": 160,
+      "requests_per_arm": 160,
+      "protocol": "frontier-full160.json",
+      "selection_zh": "固定版本 Olympiad 100 + Research 60，保留全部题目及原始顺序。",
+      "selection_en": "All 100 Olympiad and 60 Research cases at the pinned revision.",
+      "max_output_tokens": 16384,
+      "judge_max_tokens": 8192,
+      "concurrency": 16,
+      "temperature": 0,
+      "seed": 17
+    },
+    {
+      "id": "swe",
+      "name": "SWE-bench Pro public traces",
+      "mode": "inference_only",
+      "tasks": 32,
+      "source_tasks": 731,
+      "available_source_tasks": 637,
+      "requests_per_arm": 64,
+      "protocol": "public-agent-trace-fixed32-v1.json",
+      "selection_zh": "官方公开轨迹：按仓库分层固定 32 任务，每任务首尾各一条有效请求；原数据缺失 94 任务。",
+      "selection_en": "Official public trajectories: 32 repository-stratified tasks, first/last eligible requests; 94 source tasks unavailable.",
+      "max_output_tokens": 2048,
+      "concurrency": 8,
+      "temperature": 0,
+      "seed": 17
+    },
+    {
+      "id": "terminal",
+      "name": "Terminal-Bench 2.1 public traces",
+      "mode": "inference_only",
+      "tasks": 32,
+      "source_tasks": 89,
+      "available_source_tasks": 88,
+      "requests_per_arm": 48,
+      "protocol": "public-agent-trace-fixed32-v1.json",
+      "selection_zh": "公开作者抓取的原始请求：匹配 2.1 任务后固定 32 任务；16 任务仅一条有效请求，不补齐或复制。",
+      "selection_en": "Author-published raw requests: 32 frozen tasks matching 2.1; 16 tasks have one eligible request. No duplication.",
+      "max_output_tokens": 2048,
+      "concurrency": 8,
+      "temperature": 0,
+      "seed": 17
+    }
+  ],
+  "artifacts": {
+    "frontier-full160.json": {
+      "sha256": "aefdc72f23240d59ba5b54e1b1294cec31937ed993fac2617daec61258d04311",
+      "bytes": 61808
+    },
+    "hle-fixed200.json": {
+      "sha256": "ffcdd5e27b0822937b0f60aea1ca7c88eac82a39fd9d55c50f41c797ba676282",
+      "bytes": 49204
+    },
+    "mmlu-fixed200.json": {
+      "sha256": "8124492d6c59f53817116e27b32cd86c7b06c5ce59a45d1d77df56c080772c87",
+      "bytes": 55590
+    },
+    "public-agent-trace-fixed32-v1.json": {
+      "sha256": "eacf3628cda8d7accc2e39b20fce687b1deb1cb0b0f470e8b11c8dd4517f71f8",
+      "bytes": 381603
+    },
+    "public-agent-trace-source-selection-v1.json": {
+      "sha256": "f88229564ca29589608055c08859aaaab04d6e6f6259d6be4e88919b44eef08f",
+      "bytes": 202763
+    },
+    "swe-agent-v110-tools.json": {
+      "sha256": "95c0546bbc92c4a6a9e6780ae825d78e05e2c436211603790502303b7f74fcf8",
+      "bytes": 6980
+    }
+  },
+  "execution": {
+    "reference_implementation_repository": "vLLM-HUST/vllm-hust-engine",
+    "reference_implementation_commit": "448362c7565597c8963c970dcfea0b235fd5fcf7",
+    "reference_release": "full-answer-b1-20261030-r4.3.8",
+    "public_bootstrap_repository": "vLLM-HUST/vllm-hust-benchmark",
+    "public_bootstrap_commit": "80e7efc9f7357bafb5ea502fe0838c340def5092",
+    "public_bootstrap_path": "scripts/third_party_self_run",
+    "access": "Reference engine tools require private repository access; public protocols do not grant dataset, engine or redistribution rights.",
+    "engine_binding": "Record actual baseline/candidate/model/hardware independently for every campaign. This workload standard does not replace either project runtime or baseline contracts.",
+    "trace_model_binding": "Trace token IDs and 16K eligibility are frozen for Qwen3.5-35B-A3B BF16 tokenizer files in the trace protocol. Another tokenizer/model requires a new profile, not silent recalc.",
+    "judge": "HLE and Frontier use one identical frozen judge for both arms; record model, actual runtime, prompts, parser and budgets. Judge traffic is excluded from solver performance and cost."
+  },
+  "metrics": {
+    "throughput": "Accepted generated output tokens divided by whole solver batch wall time, first request submission to last response completion; never sum overlapping durations.",
+    "ttft": "Per-request submission to first content-token event; retain raw SSE and timestamps.",
+    "tpot": "Per request (response completion - first content-token event)/(output_tokens - 1), defined only for output_tokens > 1; report excluded metric count. Mean gives each defined request equal weight.",
+    "percentiles": "Finite-sample linear interpolation at (n-1)*q; report sample count. Finite batches do not establish continuous 16K P95/P99 stability.",
+    "quality": "Use unchanged per-dataset graders and planned denominators. Report each HLE stratum and Frontier track. Errors, missing answers, truncation and unresolved judges remain visible.",
+    "trace_quality": "Not measured: no task execution, completion rate, solve rate or historical author scores."
+  },
+  "invariants": [
+    "Exact same frozen tasks, request order, prompt content and generation budgets for both arms; no outcome-based filtering, retries, padding or task replacement.",
+    "Preserve EOS; no force-length decode or silent short-output fallback. Preserve original trace histories/tools as inputs, tool_choice=none; execute no historical commands.",
+    "Trace generation uses fresh cache_salt and zero KV reuse; both arms must pass /tokenize with identical frozen token ID hashes before generation.",
+    "Historical trace timestamps are provenance only; concurrency8 closed-loop batch is not historical arrival replay.",
+    "Publish protocol, input identity and actual execution identity separately. A frozen plan or CPU check is not a completed model experiment.",
+    "Quality subsets do not establish population equivalence, full official leaderboard replication or all four acceptance targets. Continuous 4K/16K C8 and four-target gates remain separate."
+  ],
+  "licensing": {
+    "raw_questions_answers": "Not redistributed in this bundle; restore from original sources subject to their terms.",
+    "raw_terminal_traces": "Author-published research-only capture; runtime fetches pinned original source bytes into user cache. No raw conversations distributed here.",
+    "raw_swe_traces": "Restore public original trajectories with source license; no raw conversations distributed here.",
+    "swe_tool_schema": "Official SWE-agent 1.1.0 tool schemas and MIT license retained in swe-agent-v110-tools.json."
+  },
+  "results": "No benchmark scores or performance measurements are included. Adoption does not retroactively certify earlier experiments."
+}
