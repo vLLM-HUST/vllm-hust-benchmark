@@ -1,0 +1,3043 @@
+{
+  "schema": "sealed-five-dataset-comparison/v1",
+  "run_id": "five-datasets-standard-reuse-20261113-r2",
+  "standard_id": "five-datasets-20261113-v1",
+  "scope": "all_five_frozen_profiles_not_all_upstream_items",
+  "report_date": "2026-11-13",
+  "aggregation_engine_commit": "b0ceaec7cb33c940665207fb979472cda8193dd1",
+  "evidence_mode": "composition_of_sealed_native_runs",
+  "single_new_native_run": false,
+  "execution_complete": true,
+  "formal_acceptance_complete": false,
+  "reused_stages": 15,
+  "new_inference_stages": 0,
+  "hardware": {
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "BF16",
+    "accelerator": "Ascend910B2",
+    "cards": 2,
+    "parallelism": "TP2"
+  },
+  "runtime": {
+    "B0": {
+      "vllm": "0.18.0+empty",
+      "vllm-ascend": "0.18.0",
+      "torch": "2.9.0+cpu",
+      "torch-npu": "2.9.0.post1+gitee7ba04",
+      "transformers": "4.57.6",
+      "triton-ascend": "3.2.0.dev20260322",
+      "source_map_sha256": "a357ad8cf1ff6f8797fb2d6476e71a0deef5ee0899a55ea32ed65f07fe7773bc"
+    },
+    "B1": {
+      "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+      "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+      "torch": "2.13.0+cpu",
+      "torch-npu": "2.13.0rc1",
+      "transformers": "5.14.1"
+    },
+    "actual_worker": "corrected_serving_runtime.CorrectedWorker",
+    "hle_configuration_note": "HLE uses the separately recorded multimodal configuration; other profiles remain text/trace. Original per-stage source/version identities are retained, not rewritten to the aggregation commit."
+  },
+  "datasets": [
+    {
+      "id": "mmlu",
+      "name": "MMLU-Pro fixed200",
+      "tasks_per_arm": 200,
+      "mode": "quality_and_inference",
+      "arms": {
+        "B0": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "length_stops": 25,
+          "successful_output_tokens": 703345,
+          "duration_seconds": 1510.049247412011,
+          "output_tokens_per_second": 465.7761998195911,
+          "mean_ttft_ms": 646003.3777688071,
+          "mean_tpot_ms": 44.16557903465291,
+          "ttft_p50_ms": 633619.0578495152,
+          "ttft_p95_ms": 1232741.2717118857,
+          "ttft_p99_ms": 1273040.5659521278,
+          "tpot_p50_ms": 42.84611819384537,
+          "tpot_p95_ms": 53.0251471374269,
+          "tpot_p99_ms": 60.924432668924396,
+          "input_tokens_sum": 282265,
+          "input_tokens_min": 925,
+          "input_tokens_max": 2502,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 0,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 29.887874866475954,
+              "6": 31.45525321902738
+            },
+            "mean_percent": 30.67156404275167,
+            "covered_seconds": 1510.049247412011,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 8.40881212707609,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 30.570899793461876,
+          "source_stage_seal_sha256": "7745d35dc3c901a727cf0e7ffc22e08e030372896daacad99dc2ca84fff0602b",
+          "runtime_identity_sha256": "0a0f4356421a660a2d0b7b2c6d355ccc616422c6274f11cb0e0e8d1f027a1b07"
+        },
+        "B1": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "length_stops": 18,
+          "successful_output_tokens": 701247,
+          "duration_seconds": 749.2032230962068,
+          "output_tokens_per_second": 935.9903673424952,
+          "mean_ttft_ms": 311833.6988884071,
+          "mean_tpot_ms": 22.010449119856958,
+          "ttft_p50_ms": 298132.1002282202,
+          "ttft_p95_ms": 605256.7091603763,
+          "ttft_p99_ms": 629489.6262441669,
+          "tpot_p50_ms": 21.943196608391986,
+          "tpot_p95_ms": 24.48352960907514,
+          "tpot_p99_ms": 28.117407199800358,
+          "input_tokens_sum": 282265,
+          "input_tokens_min": 925,
+          "input_tokens_max": 2502,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 0,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 63.3703698482962,
+              "6": 62.41883243461918
+            },
+            "mean_percent": 62.89460114145769,
+            "covered_seconds": 749.2032230962068,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 7.527029227465391,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 15.21297443615018,
+          "source_stage_seal_sha256": "df8eca7bbc635cdb88edac922394001c38de80a65198b39e0fd8db54f54f20d9",
+          "runtime_identity_sha256": "bb67015df99b7bf10cf200037af0799009b4a20783a6242bc6755716c26246b1"
+        }
+      },
+      "changes_percent": {
+        "output_tokens_per_second": 100.95281117949608,
+        "mean_ttft_ms": -51.728781981693174,
+        "mean_tpot_ms": -50.163793612697205,
+        "unit_cost_change_percent": -50.23707336411556,
+        "ai_core_utilization_gain_pp": 32.22303709870602
+      },
+      "quality": {
+        "B0": {
+          "planned_denominator": 200,
+          "recorded": 200,
+          "correct": 150,
+          "accuracy_pct_of_planned200": 75.0,
+          "truncated_recorded": 25,
+          "unparsed_recorded": 0,
+          "unreturned": 0,
+          "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801",
+          "scope": "Descriptive MMLU200 only; not the five-dataset acceptance suite"
+        },
+        "B1": {
+          "planned_denominator": 200,
+          "recorded": 200,
+          "correct": 149,
+          "accuracy_pct_of_planned200": 74.5,
+          "truncated_recorded": 18,
+          "unparsed_recorded": 0,
+          "unreturned": 0,
+          "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801",
+          "scope": "Descriptive MMLU200 only; not the five-dataset acceptance suite"
+        }
+      },
+      "judge_phases": null
+    },
+    {
+      "id": "hle",
+      "name": "HLE stratified200",
+      "tasks_per_arm": 200,
+      "mode": "quality_and_inference",
+      "arms": {
+        "B0": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 200,
+          "transport_completed": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 0,
+          "length_stops": 119,
+          "successful_output_tokens": 2147057,
+          "duration_seconds": 3829.5257082479075,
+          "output_tokens_per_second": 560.6587247542793,
+          "mean_ttft_ms": 530.4749458422884,
+          "mean_tpot_ms": 27.611673146177914,
+          "actual_context_16k_cases": 119,
+          "ttft_p50_ms": 454.88500827923417,
+          "ttft_p95_ms": 996.0330994799733,
+          "ttft_p99_ms": 1008.788941809906,
+          "tpot_p50_ms": 27.675062209668585,
+          "tpot_p95_ms": 28.93028744611316,
+          "tpot_p99_ms": 29.85719581016493,
+          "input_tokens_sum": 79752,
+          "input_tokens_min": 80,
+          "input_tokens_max": 3314,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 119,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 63.82570710770446,
+              "6": 62.88400804412414
+            },
+            "mean_percent": 63.354857575914295,
+            "covered_seconds": 3829.5257082479075,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 8.421698558144271,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 25.397263793771923,
+          "source_stage_seal_sha256": "910bb6ff3632be309b3573ae8a629335b1a748e220acb2165edd236950d96e73",
+          "runtime_identity_sha256": "12e067e5eb6815a369ddd14fdeaa6fec5b7c719363348052eff2c98b8ffeba7d"
+        },
+        "B1": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 200,
+          "transport_completed": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 0,
+          "length_stops": 124,
+          "successful_output_tokens": 2227878,
+          "duration_seconds": 2650.673270026222,
+          "output_tokens_per_second": 840.4951395529637,
+          "mean_ttft_ms": 899.3172840122133,
+          "mean_tpot_ms": 18.97793938169684,
+          "actual_context_16k_cases": 124,
+          "ttft_p50_ms": 252.4282024241984,
+          "ttft_p95_ms": 9283.064011996612,
+          "ttft_p99_ms": 9299.544379040599,
+          "tpot_p50_ms": 18.370657574813123,
+          "tpot_p95_ms": 22.178223382289772,
+          "tpot_p99_ms": 23.978868568334637,
+          "input_tokens_sum": 79732,
+          "input_tokens_min": 80,
+          "input_tokens_max": 3313,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 124,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 65.90216897877158,
+              "6": 66.24264356394278
+            },
+            "mean_percent": 66.07240627135718,
+            "covered_seconds": 2650.673270026222,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 8.409243065863848,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 16.941439469165324,
+          "source_stage_seal_sha256": "39d7975f0cff2208896356689e79c160217c6d6dc066ed9ace1d60ec3b2f523a",
+          "runtime_identity_sha256": "247e4c7381dc2117e63a9e90e73c95a691d32f5f0aa181aeb256bf67aca6447f"
+        }
+      },
+      "changes_percent": {
+        "output_tokens_per_second": 49.91207706993745,
+        "mean_ttft_ms": 69.53058595147728,
+        "mean_tpot_ms": -31.268419406435644,
+        "unit_cost_change_percent": -33.29423355708181,
+        "ai_core_utilization_gain_pp": 2.7175486954428862
+      },
+      "quality": {
+        "B0": {
+          "protocol": "HLE original evaluation prompts/schema on HLE-Verified; Qwen substitute; single trial; not official leaderboard replication",
+          "scoring_policy": "strict_json",
+          "selection": {
+            "subsets": [
+              "gold",
+              "revision"
+            ],
+            "modality": "all",
+            "excluded": 1611,
+            "profile": "fixed200-v1",
+            "selected": 200
+          },
+          "scope": "complete_selected_plan",
+          "judge_model": "qwen3.5-35b",
+          "solver_model": "qwen3.5-35b",
+          "contract_sha256": "5180b7a25764de206525fb9a9bba3ea9c55c7cf3aeebad898d2004ad5636f60c",
+          "solver_index_sha256": "572001484d3edfcf3c5f9112f3ca72dc17a2fa9d814842e166e31db8cecc250f",
+          "judge_index_sha256": "280f33dd01485f425b1e20ac7c8044313ed6d0e5da292a236dd442eca572bcd0",
+          "tracks": {
+            "gold": {
+              "total": 74,
+              "graded": 33,
+              "successes": 6,
+              "accuracy": 0.08108108108108109,
+              "unresolved": 41,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.06219257997485465,
+              "solver_failures": 0,
+              "judge_invalid": 41,
+              "judge_transport_failures": 0,
+              "solver_truncated": 39,
+              "judge_truncated": 41
+            },
+            "revision": {
+              "total": 126,
+              "graded": 61,
+              "successes": 27,
+              "accuracy": 0.21428571428571427,
+              "unresolved": 65,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.07164728420068225,
+              "solver_failures": 0,
+              "judge_invalid": 65,
+              "judge_transport_failures": 0,
+              "solver_truncated": 80,
+              "judge_truncated": 65
+            }
+          },
+          "groups": {
+            "gold/text": {
+              "total": 64,
+              "graded": 24,
+              "successes": 4,
+              "accuracy": 0.0625,
+              "unresolved": 40,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.05930505748880107,
+              "solver_failures": 0,
+              "judge_invalid": 40,
+              "judge_transport_failures": 0,
+              "solver_truncated": 38,
+              "judge_truncated": 40
+            },
+            "gold/image": {
+              "total": 10,
+              "graded": 9,
+              "successes": 2,
+              "accuracy": 0.2,
+              "unresolved": 1,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.24792256855720096,
+              "solver_failures": 0,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "solver_truncated": 1,
+              "judge_truncated": 1
+            },
+            "revision/text": {
+              "total": 113,
+              "graded": 53,
+              "successes": 24,
+              "accuracy": 0.21238938053097345,
+              "unresolved": 60,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.07541175194407836,
+              "solver_failures": 0,
+              "judge_invalid": 60,
+              "judge_transport_failures": 0,
+              "solver_truncated": 78,
+              "judge_truncated": 60
+            },
+            "revision/image": {
+              "total": 13,
+              "graded": 8,
+              "successes": 3,
+              "accuracy": 0.23076923076923078,
+              "unresolved": 5,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.22903490301738305,
+              "solver_failures": 0,
+              "judge_invalid": 5,
+              "judge_transport_failures": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 5
+            }
+          },
+          "subjects": {
+            "gold/Biology/Medicine": {
+              "total": 14,
+              "graded": 11,
+              "successes": 2,
+              "accuracy": 0.14285714285714285,
+              "unresolved": 3,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.1833030277982336,
+              "solver_failures": 0,
+              "judge_invalid": 3,
+              "judge_transport_failures": 0,
+              "solver_truncated": 3,
+              "judge_truncated": 3
+            },
+            "gold/Chemistry": {
+              "total": 2,
+              "graded": 1,
+              "successes": 1,
+              "accuracy": 0.5,
+              "unresolved": 1,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.6929646455628166,
+              "solver_failures": 0,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "solver_truncated": 0,
+              "judge_truncated": 1
+            },
+            "gold/Computer Science/AI": {
+              "total": 7,
+              "graded": 5,
+              "successes": 1,
+              "accuracy": 0.14285714285714285,
+              "unresolved": 2,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.25922962793631443,
+              "solver_failures": 0,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "solver_truncated": 3,
+              "judge_truncated": 2
+            },
+            "gold/Engineering": {
+              "total": 5,
+              "graded": 1,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 4,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 4,
+              "judge_transport_failures": 0,
+              "solver_truncated": 3,
+              "judge_truncated": 4
+            },
+            "gold/Humanities/Social Science": {
+              "total": 12,
+              "graded": 6,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 6,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 6,
+              "judge_transport_failures": 0,
+              "solver_truncated": 6,
+              "judge_truncated": 6
+            },
+            "gold/Math": {
+              "total": 24,
+              "graded": 6,
+              "successes": 2,
+              "accuracy": 0.08333333333333333,
+              "unresolved": 18,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.11057718939643389,
+              "solver_failures": 0,
+              "judge_invalid": 18,
+              "judge_transport_failures": 0,
+              "solver_truncated": 19,
+              "judge_truncated": 18
+            },
+            "gold/Other": {
+              "total": 7,
+              "graded": 3,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 4,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 4,
+              "judge_transport_failures": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 4
+            },
+            "gold/Physics": {
+              "total": 3,
+              "graded": 0,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 3,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 3,
+              "judge_transport_failures": 0,
+              "solver_truncated": 3,
+              "judge_truncated": 3
+            },
+            "revision/Biology/Medicine": {
+              "total": 16,
+              "graded": 12,
+              "successes": 9,
+              "accuracy": 0.5625,
+              "unresolved": 4,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.24307840170405925,
+              "solver_failures": 0,
+              "judge_invalid": 4,
+              "judge_transport_failures": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 4
+            },
+            "revision/Chemistry": {
+              "total": 13,
+              "graded": 5,
+              "successes": 1,
+              "accuracy": 0.07692307692307693,
+              "unresolved": 8,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.14485439144214035,
+              "solver_failures": 0,
+              "judge_invalid": 8,
+              "judge_transport_failures": 0,
+              "solver_truncated": 7,
+              "judge_truncated": 8
+            },
+            "revision/Computer Science/AI": {
+              "total": 14,
+              "graded": 10,
+              "successes": 4,
+              "accuracy": 0.2857142857142857,
+              "unresolved": 4,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.23664319132398465,
+              "solver_failures": 0,
+              "judge_invalid": 4,
+              "judge_transport_failures": 0,
+              "solver_truncated": 10,
+              "judge_truncated": 4
+            },
+            "revision/Math": {
+              "total": 81,
+              "graded": 32,
+              "successes": 13,
+              "accuracy": 0.16049382716049382,
+              "unresolved": 49,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.07993825718722707,
+              "solver_failures": 0,
+              "judge_invalid": 49,
+              "judge_transport_failures": 0,
+              "solver_truncated": 61,
+              "judge_truncated": 49
+            },
+            "revision/Physics": {
+              "total": 2,
+              "graded": 2,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 0,
+              "judge_truncated": 0
+            }
+          },
+          "calibration_error": null,
+          "calibration_note": "not implemented: pinned upstream binning omits final bin and crashes below 100 grades; raw confidence preserved; no silent replacement metric"
+        },
+        "B1": {
+          "protocol": "HLE original evaluation prompts/schema on HLE-Verified; Qwen substitute; single trial; not official leaderboard replication",
+          "scoring_policy": "strict_json",
+          "selection": {
+            "subsets": [
+              "gold",
+              "revision"
+            ],
+            "modality": "all",
+            "excluded": 1611,
+            "profile": "fixed200-v1",
+            "selected": 200
+          },
+          "scope": "complete_selected_plan",
+          "judge_model": "qwen3.5-35b",
+          "solver_model": "qwen3.5-35b",
+          "contract_sha256": "5180b7a25764de206525fb9a9bba3ea9c55c7cf3aeebad898d2004ad5636f60c",
+          "solver_index_sha256": "9b82bd8ef9b8f7c901e9995912706b09c155249ddc31cdd7a2d4342ea5c7d42d",
+          "judge_index_sha256": "8ee7e38eb3095974e852f83377741869acaab98357eff16c2332ee9f26138497",
+          "tracks": {
+            "gold": {
+              "total": 74,
+              "graded": 38,
+              "successes": 8,
+              "accuracy": 0.10810810810810811,
+              "unresolved": 36,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.07074983853086177,
+              "solver_failures": 0,
+              "judge_invalid": 36,
+              "judge_transport_failures": 0,
+              "solver_truncated": 41,
+              "judge_truncated": 36
+            },
+            "revision": {
+              "total": 126,
+              "graded": 56,
+              "successes": 26,
+              "accuracy": 0.20634920634920634,
+              "unresolved": 70,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.07066216306792189,
+              "solver_failures": 0,
+              "judge_invalid": 70,
+              "judge_transport_failures": 0,
+              "solver_truncated": 83,
+              "judge_truncated": 70
+            }
+          },
+          "groups": {
+            "gold/text": {
+              "total": 64,
+              "graded": 31,
+              "successes": 6,
+              "accuracy": 0.09375,
+              "unresolved": 33,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.07141274587521125,
+              "solver_failures": 0,
+              "judge_invalid": 33,
+              "judge_transport_failures": 0,
+              "solver_truncated": 41,
+              "judge_truncated": 33
+            },
+            "gold/image": {
+              "total": 10,
+              "graded": 7,
+              "successes": 2,
+              "accuracy": 0.2,
+              "unresolved": 3,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.24792256855720096,
+              "solver_failures": 0,
+              "judge_invalid": 3,
+              "judge_transport_failures": 0,
+              "solver_truncated": 0,
+              "judge_truncated": 3
+            },
+            "revision/text": {
+              "total": 113,
+              "graded": 48,
+              "successes": 23,
+              "accuracy": 0.20353982300884957,
+              "unresolved": 65,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.07423754112341283,
+              "solver_failures": 0,
+              "judge_invalid": 65,
+              "judge_transport_failures": 0,
+              "solver_truncated": 80,
+              "judge_truncated": 65
+            },
+            "revision/image": {
+              "total": 13,
+              "graded": 8,
+              "successes": 3,
+              "accuracy": 0.23076923076923078,
+              "unresolved": 5,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.22903490301738305,
+              "solver_failures": 0,
+              "judge_invalid": 5,
+              "judge_transport_failures": 0,
+              "solver_truncated": 3,
+              "judge_truncated": 5
+            }
+          },
+          "subjects": {
+            "gold/Biology/Medicine": {
+              "total": 14,
+              "graded": 8,
+              "successes": 2,
+              "accuracy": 0.14285714285714285,
+              "unresolved": 6,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.1833030277982336,
+              "solver_failures": 0,
+              "judge_invalid": 6,
+              "judge_transport_failures": 0,
+              "solver_truncated": 4,
+              "judge_truncated": 6
+            },
+            "gold/Chemistry": {
+              "total": 2,
+              "graded": 1,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 1,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "solver_truncated": 0,
+              "judge_truncated": 1
+            },
+            "gold/Computer Science/AI": {
+              "total": 7,
+              "graded": 6,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 1,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "solver_truncated": 4,
+              "judge_truncated": 1
+            },
+            "gold/Engineering": {
+              "total": 5,
+              "graded": 3,
+              "successes": 2,
+              "accuracy": 0.4,
+              "unresolved": 2,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.4294144850840502,
+              "solver_failures": 0,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 2
+            },
+            "gold/Humanities/Social Science": {
+              "total": 12,
+              "graded": 6,
+              "successes": 1,
+              "accuracy": 0.08333333333333333,
+              "unresolved": 6,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.15637976093353523,
+              "solver_failures": 0,
+              "judge_invalid": 6,
+              "judge_transport_failures": 0,
+              "solver_truncated": 7,
+              "judge_truncated": 6
+            },
+            "gold/Math": {
+              "total": 24,
+              "graded": 8,
+              "successes": 2,
+              "accuracy": 0.08333333333333333,
+              "unresolved": 16,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.11057718939643389,
+              "solver_failures": 0,
+              "judge_invalid": 16,
+              "judge_transport_failures": 0,
+              "solver_truncated": 19,
+              "judge_truncated": 16
+            },
+            "gold/Other": {
+              "total": 7,
+              "graded": 5,
+              "successes": 1,
+              "accuracy": 0.14285714285714285,
+              "unresolved": 2,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.25922962793631443,
+              "solver_failures": 0,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 2
+            },
+            "gold/Physics": {
+              "total": 3,
+              "graded": 1,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 2,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "solver_truncated": 3,
+              "judge_truncated": 2
+            },
+            "revision/Biology/Medicine": {
+              "total": 16,
+              "graded": 9,
+              "successes": 6,
+              "accuracy": 0.375,
+              "unresolved": 7,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.23722022995520428,
+              "solver_failures": 0,
+              "judge_invalid": 7,
+              "judge_transport_failures": 0,
+              "solver_truncated": 1,
+              "judge_truncated": 7
+            },
+            "revision/Chemistry": {
+              "total": 13,
+              "graded": 5,
+              "successes": 1,
+              "accuracy": 0.07692307692307693,
+              "unresolved": 8,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.14485439144214035,
+              "solver_failures": 0,
+              "judge_invalid": 8,
+              "judge_transport_failures": 0,
+              "solver_truncated": 7,
+              "judge_truncated": 8
+            },
+            "revision/Computer Science/AI": {
+              "total": 14,
+              "graded": 8,
+              "successes": 3,
+              "accuracy": 0.21428571428571427,
+              "unresolved": 6,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.21494185260204676,
+              "solver_failures": 0,
+              "judge_invalid": 6,
+              "judge_transport_failures": 0,
+              "solver_truncated": 11,
+              "judge_truncated": 6
+            },
+            "revision/Math": {
+              "total": 81,
+              "graded": 33,
+              "successes": 15,
+              "accuracy": 0.18518518518518517,
+              "unresolved": 48,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.08459528158080235,
+              "solver_failures": 0,
+              "judge_invalid": 48,
+              "judge_transport_failures": 0,
+              "solver_truncated": 64,
+              "judge_truncated": 48
+            },
+            "revision/Physics": {
+              "total": 2,
+              "graded": 1,
+              "successes": 1,
+              "accuracy": 0.5,
+              "unresolved": 1,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.6929646455628166,
+              "solver_failures": 0,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "solver_truncated": 0,
+              "judge_truncated": 1
+            }
+          },
+          "calibration_error": null,
+          "calibration_note": "not implemented: pinned upstream binning omits final bin and crashes below 100 grades; raw confidence preserved; no silent replacement metric"
+        }
+      },
+      "judge_phases": {
+        "B0": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 94,
+          "transport_completed": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 106,
+          "length_stops": 106,
+          "successful_output_tokens": 879869,
+          "duration_seconds": 3646.078928442672,
+          "output_tokens_per_second": 241.31924109931796,
+          "mean_ttft_ms": 6312.1946943691,
+          "mean_tpot_ms": 79.78200429754229,
+          "actual_context_16k_cases": 125,
+          "ttft_p50_ms": 2616.371767129749,
+          "ttft_p95_ms": 43605.722521757685,
+          "ttft_p99_ms": 59388.81793544623,
+          "tpot_p50_ms": 65.04605251348832,
+          "tpot_p95_ms": 122.64601231957484,
+          "tpot_p99_ms": 242.03531687788194,
+          "input_tokens_sum": 2252882,
+          "input_tokens_min": 440,
+          "input_tokens_max": 18665,
+          "input_at_least16384_cases": 119,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 125,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 22.790823862271647,
+              "6": 22.137990178393757
+            },
+            "mean_percent": 22.4644070203327,
+            "covered_seconds": 3646.078928442672,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 8.054017732851207,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 59.005645244027086
+        },
+        "B1": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 94,
+          "transport_completed": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 106,
+          "length_stops": 106,
+          "successful_output_tokens": 880663,
+          "duration_seconds": 3647.0583030004054,
+          "output_tokens_per_second": 241.47214736750593,
+          "mean_ttft_ms": 6517.02939751558,
+          "mean_tpot_ms": 85.31273534070587,
+          "actual_context_16k_cases": 128,
+          "ttft_p50_ms": 2657.6076187193394,
+          "ttft_p95_ms": 47757.11513208223,
+          "ttft_p99_ms": 61156.90415307879,
+          "tpot_p50_ms": 63.63128832391435,
+          "tpot_p95_ms": 163.42969965720118,
+          "tpot_p99_ms": 244.59601999986884,
+          "input_tokens_sum": 2333999,
+          "input_tokens_min": 432,
+          "input_tokens_max": 18665,
+          "input_at_least16384_cases": 124,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 128,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 24.28844505104859,
+              "6": 21.600671787331923
+            },
+            "mean_percent": 22.94455841919026,
+            "covered_seconds": 3647.0583030004054,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 8.476863102987409,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 58.96828137778144
+        }
+      }
+    },
+    {
+      "id": "frontier",
+      "name": "FrontierScience160",
+      "tasks_per_arm": 160,
+      "mode": "quality_and_inference",
+      "arms": {
+        "B0": {
+          "planned": 160,
+          "recorded": 160,
+          "successful": 160,
+          "transport_completed": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 0,
+          "length_stops": 44,
+          "successful_output_tokens": 1297197,
+          "duration_seconds": 3726.769669276662,
+          "output_tokens_per_second": 348.07544203604516,
+          "mean_ttft_ms": 9014.530933520291,
+          "mean_tpot_ms": 39.466718389177096,
+          "actual_context_16k_cases": 44,
+          "ttft_p50_ms": 657.2396345436573,
+          "ttft_p95_ms": 83864.57982496358,
+          "ttft_p99_ms": 89889.48901658878,
+          "tpot_p50_ms": 38.52721055974885,
+          "tpot_p95_ms": 44.55425977552149,
+          "tpot_p99_ms": 45.93947246701404,
+          "input_tokens_sum": 61451,
+          "input_tokens_min": 94,
+          "input_tokens_max": 1660,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 44,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 28.490637669307752,
+              "6": 27.26741097374851
+            },
+            "mean_percent": 27.87902432152813,
+            "covered_seconds": 3726.769669276662,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 7.749182637780905,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 40.908365863368346,
+          "source_stage_seal_sha256": "c619363eed903127b6d40466bb9652e820e0a2282830c7c91393c27c737b9a36",
+          "runtime_identity_sha256": "474dc5dcfc3529c5fdf0ca24a8b501daed89b6c4fc72d06c63a197dc82a8dde8"
+        },
+        "B1": {
+          "planned": 160,
+          "recorded": 160,
+          "successful": 160,
+          "transport_completed": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 0,
+          "length_stops": 40,
+          "successful_output_tokens": 1176959,
+          "duration_seconds": 1487.0720964847133,
+          "output_tokens_per_second": 791.4606176675704,
+          "mean_ttft_ms": 4403.485229058424,
+          "mean_tpot_ms": 18.39119745784154,
+          "actual_context_16k_cases": 40,
+          "ttft_p50_ms": 246.85739818960428,
+          "ttft_p95_ms": 43005.78869073652,
+          "ttft_p99_ms": 43191.72948447056,
+          "tpot_p50_ms": 18.173626234738947,
+          "tpot_p95_ms": 20.45895583458469,
+          "tpot_p99_ms": 21.261036519917603,
+          "input_tokens_sum": 61451,
+          "input_tokens_min": 94,
+          "input_tokens_max": 1660,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 40,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 63.03924984820805,
+              "6": 63.61013544298768
+            },
+            "mean_percent": 63.324692645597864,
+            "covered_seconds": 1487.0720964847133,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 7.408737259916961,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 17.991037346655382,
+          "source_stage_seal_sha256": "f59b1bde8b8de7de9a330a27d1577cac5e0d3b95ad60a87c8907a211630e1c54",
+          "runtime_identity_sha256": "3987c6203411406867f7bea66de7e319888d51fd3b87e820c6f99244cfc0d112"
+        }
+      },
+      "changes_percent": {
+        "output_tokens_per_second": 127.38191842491729,
+        "mean_ttft_ms": -51.151254995596254,
+        "mean_tpot_ms": -53.4007431869863,
+        "unit_cost_change_percent": -56.02112925570177,
+        "ai_core_utilization_gain_pp": 35.44566832406973
+      },
+      "quality": {
+        "B0": {
+          "protocol": "hust-qwen-judge-v3; Appendix B prompts; Qwen substitute; single trial; scoring_policy=mmlu_extract_first; not official replication",
+          "scoring_policy": "mmlu_extract_first",
+          "denominator_policy": "all_cases_invalid_as_nonsuccess",
+          "judge_model": "qwen3.5-35b",
+          "solver_model": "qwen3.5-35b",
+          "same_model_name": true,
+          "scope": "full_gold",
+          "contract_sha256": "863e66e8b39b885bab59ebaf94085b8c7a563eda76501e43cd0646075b28c239",
+          "solver_index_sha256": "ff9081d05921f9d7a1056eafcc9b09335348c1ff5a6aa91a8e9b57520658ecd6",
+          "judge_index_sha256": "6fa804adba669be777ef7f32986a8e16d386b7f05c652ce6c4b9c286931e5af7",
+          "tracks": {
+            "olympiad": {
+              "total": 100,
+              "graded": 98,
+              "successes": 60,
+              "solver_failures": 0,
+              "judge_unresolved": 2,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 3,
+              "judge_audit_flagged": 3,
+              "solver_truncated": 38,
+              "judge_truncated": 5,
+              "success_rate": 0.6,
+              "observed_success_lower_bound": 0.6,
+              "mean_research_score_valid_only": null
+            },
+            "research": {
+              "total": 60,
+              "graded": 55,
+              "successes": 5,
+              "solver_failures": 0,
+              "judge_unresolved": 5,
+              "judge_invalid": 5,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 5,
+              "judge_audit_flagged": 7,
+              "solver_truncated": 6,
+              "judge_truncated": 10,
+              "success_rate": 0.08333333333333333,
+              "observed_success_lower_bound": 0.08333333333333333,
+              "mean_research_score_valid_only": 2.714545454545455
+            }
+          },
+          "subjects": {
+            "olympiad/biology": {
+              "total": 10,
+              "graded": 10,
+              "successes": 3,
+              "solver_failures": 0,
+              "judge_unresolved": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 0,
+              "judge_audit_flagged": 0,
+              "solver_truncated": 4,
+              "judge_truncated": 0,
+              "success_rate": 0.3,
+              "observed_success_lower_bound": 0.3,
+              "mean_research_score_valid_only": null
+            },
+            "olympiad/chemistry": {
+              "total": 40,
+              "graded": 38,
+              "successes": 26,
+              "solver_failures": 0,
+              "judge_unresolved": 2,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 1,
+              "judge_audit_flagged": 1,
+              "solver_truncated": 19,
+              "judge_truncated": 3,
+              "success_rate": 0.65,
+              "observed_success_lower_bound": 0.65,
+              "mean_research_score_valid_only": null
+            },
+            "olympiad/physics": {
+              "total": 50,
+              "graded": 50,
+              "successes": 31,
+              "solver_failures": 0,
+              "judge_unresolved": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 2,
+              "judge_audit_flagged": 2,
+              "solver_truncated": 15,
+              "judge_truncated": 2,
+              "success_rate": 0.62,
+              "observed_success_lower_bound": 0.62,
+              "mean_research_score_valid_only": null
+            },
+            "research/biology": {
+              "total": 20,
+              "graded": 18,
+              "successes": 1,
+              "solver_failures": 0,
+              "judge_unresolved": 2,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 1,
+              "judge_audit_flagged": 1,
+              "solver_truncated": 1,
+              "judge_truncated": 3,
+              "success_rate": 0.05,
+              "observed_success_lower_bound": 0.05,
+              "mean_research_score_valid_only": 2.7416666666666667
+            },
+            "research/chemistry": {
+              "total": 20,
+              "graded": 19,
+              "successes": 3,
+              "solver_failures": 0,
+              "judge_unresolved": 1,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 4,
+              "judge_audit_flagged": 6,
+              "solver_truncated": 1,
+              "judge_truncated": 5,
+              "success_rate": 0.15,
+              "observed_success_lower_bound": 0.15,
+              "mean_research_score_valid_only": 3.378947368421053
+            },
+            "research/physics": {
+              "total": 20,
+              "graded": 18,
+              "successes": 1,
+              "solver_failures": 0,
+              "judge_unresolved": 2,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 0,
+              "judge_audit_flagged": 0,
+              "solver_truncated": 4,
+              "judge_truncated": 2,
+              "success_rate": 0.05,
+              "observed_success_lower_bound": 0.05,
+              "mean_research_score_valid_only": 1.9861111111111112
+            }
+          }
+        },
+        "B1": {
+          "protocol": "hust-qwen-judge-v3; Appendix B prompts; Qwen substitute; single trial; scoring_policy=mmlu_extract_first; not official replication",
+          "scoring_policy": "mmlu_extract_first",
+          "denominator_policy": "all_cases_invalid_as_nonsuccess",
+          "judge_model": "qwen3.5-35b",
+          "solver_model": "qwen3.5-35b",
+          "same_model_name": true,
+          "scope": "full_gold",
+          "contract_sha256": "863e66e8b39b885bab59ebaf94085b8c7a563eda76501e43cd0646075b28c239",
+          "solver_index_sha256": "e6bf5e1e17229e75e4db45b703da0819c49d789ec7208c5918e5763dbe4db28a",
+          "judge_index_sha256": "2be26c1dc459d6a709eda0259535e47973ae66e2d8c967698b11ea7cfca28e62",
+          "tracks": {
+            "olympiad": {
+              "total": 100,
+              "graded": 97,
+              "successes": 61,
+              "solver_failures": 0,
+              "judge_unresolved": 3,
+              "judge_invalid": 3,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 1,
+              "judge_audit_flagged": 1,
+              "solver_truncated": 32,
+              "judge_truncated": 3,
+              "success_rate": 0.61,
+              "observed_success_lower_bound": 0.61,
+              "mean_research_score_valid_only": null
+            },
+            "research": {
+              "total": 60,
+              "graded": 58,
+              "successes": 3,
+              "solver_failures": 0,
+              "judge_unresolved": 2,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 3,
+              "judge_audit_flagged": 5,
+              "solver_truncated": 8,
+              "judge_truncated": 5,
+              "success_rate": 0.05,
+              "observed_success_lower_bound": 0.05,
+              "mean_research_score_valid_only": 2.4468965517241377
+            }
+          },
+          "subjects": {
+            "olympiad/biology": {
+              "total": 10,
+              "graded": 8,
+              "successes": 1,
+              "solver_failures": 0,
+              "judge_unresolved": 2,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 0,
+              "judge_audit_flagged": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 1,
+              "success_rate": 0.1,
+              "observed_success_lower_bound": 0.1,
+              "mean_research_score_valid_only": null
+            },
+            "olympiad/chemistry": {
+              "total": 40,
+              "graded": 40,
+              "successes": 28,
+              "solver_failures": 0,
+              "judge_unresolved": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 1,
+              "judge_audit_flagged": 1,
+              "solver_truncated": 14,
+              "judge_truncated": 1,
+              "success_rate": 0.7,
+              "observed_success_lower_bound": 0.7,
+              "mean_research_score_valid_only": null
+            },
+            "olympiad/physics": {
+              "total": 50,
+              "graded": 49,
+              "successes": 32,
+              "solver_failures": 0,
+              "judge_unresolved": 1,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 0,
+              "judge_audit_flagged": 0,
+              "solver_truncated": 16,
+              "judge_truncated": 1,
+              "success_rate": 0.64,
+              "observed_success_lower_bound": 0.64,
+              "mean_research_score_valid_only": null
+            },
+            "research/biology": {
+              "total": 20,
+              "graded": 20,
+              "successes": 1,
+              "solver_failures": 0,
+              "judge_unresolved": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 2,
+              "judge_audit_flagged": 3,
+              "solver_truncated": 1,
+              "judge_truncated": 2,
+              "success_rate": 0.05,
+              "observed_success_lower_bound": 0.05,
+              "mean_research_score_valid_only": 2.6285
+            },
+            "research/chemistry": {
+              "total": 20,
+              "graded": 20,
+              "successes": 1,
+              "solver_failures": 0,
+              "judge_unresolved": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 0,
+              "judge_audit_flagged": 0,
+              "solver_truncated": 3,
+              "judge_truncated": 0,
+              "success_rate": 0.05,
+              "observed_success_lower_bound": 0.05,
+              "mean_research_score_valid_only": 2.9074999999999998
+            },
+            "research/physics": {
+              "total": 20,
+              "graded": 18,
+              "successes": 1,
+              "solver_failures": 0,
+              "judge_unresolved": 2,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 1,
+              "judge_audit_flagged": 2,
+              "solver_truncated": 4,
+              "judge_truncated": 3,
+              "success_rate": 0.05,
+              "observed_success_lower_bound": 0.05,
+              "mean_research_score_valid_only": 1.7333333333333334
+            }
+          }
+        }
+      },
+      "judge_phases": {
+        "B0": {
+          "planned": 160,
+          "recorded": 160,
+          "successful": 153,
+          "transport_completed": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 7,
+          "length_stops": 15,
+          "successful_output_tokens": 337501,
+          "duration_seconds": 585.7738144090399,
+          "output_tokens_per_second": 576.162661590616,
+          "mean_ttft_ms": 6658.028839156032,
+          "mean_tpot_ms": 26.307141606750157,
+          "actual_context_16k_cases": 49,
+          "ttft_p50_ms": 1049.123932607472,
+          "ttft_p95_ms": 60021.89404116943,
+          "ttft_p99_ms": 63605.7172277011,
+          "tpot_p50_ms": 24.610945769411458,
+          "tpot_p95_ms": 35.34258863118614,
+          "tpot_p99_ms": 67.46197535300836,
+          "input_tokens_sum": 1470584,
+          "input_tokens_min": 1217,
+          "input_tokens_max": 19683,
+          "input_at_least16384_cases": 45,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 49,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 66.44057397073338,
+              "6": 65.55624038413701
+            },
+            "mean_percent": 65.9984071774352,
+            "covered_seconds": 585.7738144090399,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 7.809922903776169,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 24.713849890157668
+        },
+        "B1": {
+          "planned": 160,
+          "recorded": 160,
+          "successful": 155,
+          "transport_completed": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 5,
+          "length_stops": 8,
+          "successful_output_tokens": 316312,
+          "duration_seconds": 549.3271113457158,
+          "output_tokens_per_second": 575.8172015670475,
+          "mean_ttft_ms": 6465.663645439781,
+          "mean_tpot_ms": 25.43184987953596,
+          "actual_context_16k_cases": 45,
+          "ttft_p50_ms": 984.9310587160289,
+          "ttft_p95_ms": 58064.367814408586,
+          "ttft_p99_ms": 63183.25055183843,
+          "tpot_p50_ms": 23.17546667565709,
+          "tpot_p95_ms": 36.355681285782964,
+          "tpot_p99_ms": 52.57888281712325,
+          "input_tokens_sum": 1350335,
+          "input_tokens_min": 988,
+          "input_tokens_max": 19683,
+          "input_at_least16384_cases": 40,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 45,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 63.68212007480988,
+              "6": 66.7157201440385
+            },
+            "mean_percent": 65.1989201094242,
+            "covered_seconds": 549.3271113457158,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 8.00882538035512,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 24.72867689974038
+        }
+      }
+    },
+    {
+      "id": "swe",
+      "name": "SWE-bench Pro trace32",
+      "tasks_per_arm": 32,
+      "mode": "inference_only",
+      "arms": {
+        "B0": {
+          "planned": 64,
+          "recorded": 64,
+          "successful": 64,
+          "transport_completed": null,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": null,
+          "length_stops": 2,
+          "successful_output_tokens": 8174,
+          "duration_seconds": 252.5516904545948,
+          "output_tokens_per_second": 32.36565150400199,
+          "mean_ttft_ms": 13635.670358373318,
+          "mean_tpot_ms": 133.00448861795414,
+          "actual_context_16k_cases": 4,
+          "ttft_p50_ms": 2944.827878382057,
+          "ttft_p95_ms": 91923.07184953243,
+          "ttft_p99_ms": 97815.82285504787,
+          "tpot_p50_ms": 126.63394622375361,
+          "tpot_p95_ms": 156.8408994370007,
+          "tpot_p99_ms": 387.3066186607382,
+          "input_tokens_sum": 509607,
+          "input_tokens_min": 1519,
+          "input_tokens_max": 16350,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 4,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 18.691805722584185,
+              "6": 18.236973262799047
+            },
+            "mean_percent": 18.464389492691616,
+            "covered_seconds": 252.5516904545948,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 8.858827648684382,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 439.9478110027703,
+          "source_stage_seal_sha256": "8c2e69d720967571fbf90faf1f7354a4200400a87a35d5bdc2c9d57cf5da9d14",
+          "runtime_identity_sha256": "277f7c3a761bbcd881965bce495f9583f0d5ddd8044cb04e477cf94c0f5c3abc"
+        },
+        "B1": {
+          "planned": 64,
+          "recorded": 64,
+          "successful": 64,
+          "transport_completed": null,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": null,
+          "length_stops": 2,
+          "successful_output_tokens": 8183,
+          "duration_seconds": 121.88504518289119,
+          "output_tokens_per_second": 67.13703053332941,
+          "mean_ttft_ms": 8159.40847969614,
+          "mean_tpot_ms": 60.417042345508435,
+          "actual_context_16k_cases": 4,
+          "ttft_p50_ms": 1570.5212317407131,
+          "ttft_p95_ms": 59491.93647741339,
+          "ttft_p99_ms": 61111.634866613895,
+          "tpot_p50_ms": 56.46799059752543,
+          "tpot_p95_ms": 76.66055433756598,
+          "tpot_p99_ms": 238.55725876250767,
+          "input_tokens_sum": 509607,
+          "input_tokens_min": 1519,
+          "input_tokens_max": 16350,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 4,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 39.68926038598141,
+              "6": 39.54706906292485
+            },
+            "mean_percent": 39.61816472445313,
+            "covered_seconds": 121.88504518289119,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 8.12885753531009,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 212.09155987015706,
+          "source_stage_seal_sha256": "1cf9a2ab44c4865baed6a7e435fd6306da57ab009b9238ecc944213d694fb398",
+          "runtime_identity_sha256": "dc1e9ea9cc5d9ab347ac427164944168337417a06d7efac0c2409750701a2da7"
+        }
+      },
+      "changes_percent": {
+        "output_tokens_per_second": 107.43296492897096,
+        "mean_ttft_ms": -40.161295592734426,
+        "mean_tpot_ms": -54.57518541419151,
+        "unit_cost_change_percent": -51.791654699511284,
+        "ai_core_utilization_gain_pp": 21.153775231761514
+      },
+      "quality": null,
+      "judge_phases": null
+    },
+    {
+      "id": "terminal",
+      "name": "Terminal-Bench2.1 trace32",
+      "tasks_per_arm": 32,
+      "mode": "inference_only",
+      "arms": {
+        "B0": {
+          "planned": 48,
+          "recorded": 48,
+          "successful": 48,
+          "transport_completed": null,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": null,
+          "length_stops": 2,
+          "successful_output_tokens": 14276,
+          "duration_seconds": 258.4051098721102,
+          "output_tokens_per_second": 55.24658551475811,
+          "mean_ttft_ms": 19019.56480417478,
+          "mean_tpot_ms": 105.04528352263974,
+          "actual_context_16k_cases": 5,
+          "ttft_p50_ms": 3638.9877893961966,
+          "ttft_p95_ms": 101542.0802003704,
+          "ttft_p99_ms": 106084.88699899986,
+          "tpot_p50_ms": 72.68753707975299,
+          "tpot_p95_ms": 160.77192657741776,
+          "tpot_p99_ms": 706.2874280268338,
+          "input_tokens_sum": 462869,
+          "input_tokens_min": 2065,
+          "input_tokens_max": 16294,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 5,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 16.998335789477487,
+              "6": 18.90022420834587
+            },
+            "mean_percent": 17.949279998911678,
+            "covered_seconds": 258.4051098721102,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 8.604646010324359,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 257.7389606650072,
+          "source_stage_seal_sha256": "a429104ac616c9fa3213c8a42c649066f8301e887039ac4e257de770073a5e40",
+          "runtime_identity_sha256": "04984fe01747c9c011708038e570826f33d111145f28b42e2f88161871701dd1"
+        },
+        "B1": {
+          "planned": 48,
+          "recorded": 48,
+          "successful": 48,
+          "transport_completed": null,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": null,
+          "length_stops": 3,
+          "successful_output_tokens": 14097,
+          "duration_seconds": 122.8422020599246,
+          "output_tokens_per_second": 114.75697898286806,
+          "mean_ttft_ms": 8385.14507280585,
+          "mean_tpot_ms": 63.75942178541595,
+          "actual_context_16k_cases": 4,
+          "ttft_p50_ms": 1572.0033240504563,
+          "ttft_p95_ms": 46706.605716003105,
+          "ttft_p99_ms": 48491.56918342225,
+          "tpot_p50_ms": 37.602940387690914,
+          "tpot_p95_ms": 195.88713152023652,
+          "tpot_p99_ms": 477.19816636923497,
+          "input_tokens_sum": 462869,
+          "input_tokens_min": 2065,
+          "input_tokens_max": 16294,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 4,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "5": 32.22178984595268,
+              "6": 34.50787339221178
+            },
+            "mean_percent": 33.364831619082224,
+            "covered_seconds": 122.8422020599246,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 9.213196556083858,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 124.08132086668078,
+          "source_stage_seal_sha256": "09661b2d3fe77a964b1355c8438026cbd901bcbbed0fc4cb6808bb369c29689f",
+          "runtime_identity_sha256": "5e388c05fe77e3d1959540ac76526acce75ccfc9d81cdbb13e7742ca85ba1277"
+        }
+      },
+      "changes_percent": {
+        "output_tokens_per_second": 107.71777642658628,
+        "mean_ttft_ms": -55.91305500867551,
+        "mean_tpot_ms": -39.30291808706071,
+        "unit_cost_change_percent": -51.85775540239186,
+        "ai_core_utilization_gain_pp": 15.415551620170547
+      },
+      "quality": null,
+      "judge_phases": null
+    }
+  ],
+  "continuous": {
+    "B0": {
+      "source_seal_sha256": "22bf065873a214948f0267863775352af4fc33947a9bf1747dbf6aa70e45e80e",
+      "groups": {
+        "16384-formal": {
+          "recorded": 73,
+          "successful": 73,
+          "failed": 0,
+          "successful_output_tokens": 18688,
+          "mean_ttft_ms": 6028.12966459418,
+          "mean_tpot_ms": 111.44584134709378,
+          "cohort_wall_seconds": 317.7941208742559,
+          "output_tokens_per_second": 58.805367288070215
+        },
+        "16384-warmup": {
+          "recorded": 16,
+          "successful": 16,
+          "failed": 0,
+          "successful_output_tokens": 4096,
+          "mean_ttft_ms": 10263.289674418047,
+          "mean_tpot_ms": 96.79857082482354,
+          "cohort_wall_seconds": 73.04170440975577,
+          "output_tokens_per_second": 56.07755231205859
+        },
+        "4096-formal": {
+          "recorded": 150,
+          "successful": 150,
+          "failed": 0,
+          "successful_output_tokens": 38400,
+          "mean_ttft_ms": 1746.9276327639818,
+          "mean_tpot_ms": 57.141103821471816,
+          "cohort_wall_seconds": 310.5188029939309,
+          "output_tokens_per_second": 123.6640088450635
+        },
+        "4096-warmup": {
+          "recorded": 8,
+          "successful": 8,
+          "failed": 0,
+          "successful_output_tokens": 2048,
+          "mean_ttft_ms": 89480.12368695345,
+          "mean_tpot_ms": 61.970111684800656,
+          "cohort_wall_seconds": 106.13222029153258,
+          "output_tokens_per_second": 19.296684780308823
+        }
+      },
+      "all_requests_recorded": 247,
+      "failed_requests": 0,
+      "formal_seconds_per_context": 300,
+      "warmup_seconds_per_context": 60,
+      "concurrency": 8,
+      "input_context_tokens": [
+        4096,
+        16384
+      ]
+    },
+    "B1": {
+      "source_seal_sha256": "dd172d50299a7793624fcfa911cff2ec06107d941634f6f62bc00da2c35b1fd0",
+      "groups": {
+        "16384-formal": {
+          "recorded": 179,
+          "successful": 179,
+          "failed": 0,
+          "successful_output_tokens": 45824,
+          "mean_ttft_ms": 3316.4451563231355,
+          "mean_tpot_ms": 40.102398055757085,
+          "cohort_wall_seconds": 304.84804167225957,
+          "output_tokens_per_second": 150.31751474810235
+        },
+        "16384-warmup": {
+          "recorded": 39,
+          "successful": 39,
+          "failed": 0,
+          "successful_output_tokens": 9984,
+          "mean_ttft_ms": 5882.905480714563,
+          "mean_tpot_ms": 30.091259885221614,
+          "cohort_wall_seconds": 68.00376186147332,
+          "output_tokens_per_second": 146.81540736434332
+        },
+        "4096-formal": {
+          "recorded": 378,
+          "successful": 378,
+          "failed": 0,
+          "successful_output_tokens": 96768,
+          "mean_ttft_ms": 732.7227688975947,
+          "mean_tpot_ms": 22.203095620400475,
+          "cohort_wall_seconds": 306.7336163679138,
+          "output_tokens_per_second": 315.47895253818854
+        },
+        "4096-warmup": {
+          "recorded": 22,
+          "successful": 22,
+          "failed": 0,
+          "successful_output_tokens": 5632,
+          "mean_ttft_ms": 16074.642538220029,
+          "mean_tpot_ms": 27.174542116336593,
+          "cohort_wall_seconds": 64.41156275384128,
+          "output_tokens_per_second": 87.43771706833999
+        }
+      },
+      "all_requests_recorded": 618,
+      "failed_requests": 0,
+      "formal_seconds_per_context": 300,
+      "warmup_seconds_per_context": 60,
+      "concurrency": 8,
+      "input_context_tokens": [
+        4096,
+        16384
+      ]
+    }
+  },
+  "stability_assessment": {
+    "schema": "v15-stability-evidence-audit/v1",
+    "criterion": "3.4.3",
+    "execution_complete": true,
+    "profiles": {
+      "mmlu": {
+        "B0": {
+          "recorded": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 0,
+          "length_stops": 25,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 0,
+            "tpot_requests": 0,
+            "ttft_p95_ms": null,
+            "ttft_p99_ms": null,
+            "tpot_p95_ms": null,
+            "tpot_p99_ms": null
+          },
+          "source_seal_sha256": "7745d35dc3c901a727cf0e7ffc22e08e030372896daacad99dc2ca84fff0602b"
+        },
+        "B1": {
+          "recorded": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 0,
+          "length_stops": 18,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 0,
+            "tpot_requests": 0,
+            "ttft_p95_ms": null,
+            "ttft_p99_ms": null,
+            "tpot_p95_ms": null,
+            "tpot_p99_ms": null
+          },
+          "source_seal_sha256": "df8eca7bbc635cdb88edac922394001c38de80a65198b39e0fd8db54f54f20d9"
+        }
+      },
+      "hle": {
+        "B0": {
+          "recorded": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 119,
+          "length_stops": 119,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 119,
+            "tpot_requests": 119,
+            "ttft_p95_ms": 982.5769981369375,
+            "ttft_p99_ms": 1001.8657656013966,
+            "tpot_p95_ms": 27.78195896921704,
+            "tpot_p99_ms": 27.816588955967237
+          },
+          "source_seal_sha256": "910bb6ff3632be309b3573ae8a629335b1a748e220acb2165edd236950d96e73"
+        },
+        "B1": {
+          "recorded": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 124,
+          "length_stops": 124,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 124,
+            "tpot_requests": 124,
+            "ttft_p95_ms": 4771.457964461297,
+            "ttft_p99_ms": 9296.806646818295,
+            "tpot_p95_ms": 18.68907006822462,
+            "tpot_p99_ms": 18.8862982633069
+          },
+          "source_seal_sha256": "39d7975f0cff2208896356689e79c160217c6d6dc066ed9ace1d60ec3b2f523a"
+        }
+      },
+      "frontier": {
+        "B0": {
+          "recorded": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 44,
+          "length_stops": 44,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 44,
+            "tpot_requests": 44,
+            "ttft_p95_ms": 819.7463701013478,
+            "ttft_p99_ms": 87079.7219442483,
+            "tpot_p95_ms": 38.82495812030975,
+            "tpot_p99_ms": 40.79409025541902
+          },
+          "source_seal_sha256": "c619363eed903127b6d40466bb9652e820e0a2282830c7c91393c27c737b9a36"
+        },
+        "B1": {
+          "recorded": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 40,
+          "length_stops": 40,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 40,
+            "tpot_requests": 40,
+            "ttft_p95_ms": 43190.06435000338,
+            "ttft_p99_ms": 43195.465645659715,
+            "tpot_p95_ms": 18.2210108826729,
+            "tpot_p99_ms": 18.365024106347036
+          },
+          "source_seal_sha256": "f59b1bde8b8de7de9a330a27d1577cac5e0d3b95ad60a87c8907a211630e1c54"
+        }
+      },
+      "swe": {
+        "B0": {
+          "recorded": 64,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 4,
+          "length_stops": 2,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 4,
+            "tpot_requests": 4,
+            "ttft_p95_ms": 82739.39226618965,
+            "ttft_p99_ms": 93834.52632809986,
+            "tpot_p95_ms": 122.28040258512999,
+            "tpot_p99_ms": 129.95328458953014
+          },
+          "source_seal_sha256": "8c2e69d720967571fbf90faf1f7354a4200400a87a35d5bdc2c9d57cf5da9d14"
+        },
+        "B1": {
+          "recorded": 64,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 4,
+          "length_stops": 2,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 4,
+            "tpot_requests": 4,
+            "ttft_p95_ms": 52038.66014936937,
+            "ttft_p99_ms": 58771.59053968264,
+            "tpot_p95_ms": 48.257045169849604,
+            "tpot_p99_ms": 51.15335156226945
+          },
+          "source_seal_sha256": "1cf9a2ab44c4865baed6a7e435fd6306da57ab009b9238ecc944213d694fb398"
+        }
+      },
+      "terminal": {
+        "B0": {
+          "recorded": 48,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 5,
+          "length_stops": 2,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 5,
+            "tpot_requests": 5,
+            "ttft_p95_ms": 79189.3237652257,
+            "ttft_p99_ms": 94064.27804771811,
+            "tpot_p95_ms": 91.59992052363393,
+            "tpot_p99_ms": 92.42827068755557
+          },
+          "source_seal_sha256": "a429104ac616c9fa3213c8a42c649066f8301e887039ac4e257de770073a5e40"
+        },
+        "B1": {
+          "recorded": 48,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 4,
+          "length_stops": 3,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 4,
+            "tpot_requests": 4,
+            "ttft_p95_ms": 41488.92752383834,
+            "ttft_p99_ms": 46952.864894131184,
+            "tpot_p95_ms": 42.4874361753499,
+            "tpot_p99_ms": 42.778174050706156
+          },
+          "source_seal_sha256": "09661b2d3fe77a964b1355c8438026cbd901bcbbed0fc4cb6808bb369c29689f"
+        }
+      }
+    },
+    "stage_logs": {
+      "continuous-B0": {
+        "service_log_sha256": "e268037235ae299e5083827d1fb673367332366d5269c26e38052d2edb8219c1",
+        "receipt_sha256": "c569b08943819a9249a51ae9dfb0a6b21c5c89d9872e3ee68145ab0e1a6dbbbb",
+        "cleanup_sha256": "d00b4c5ad8f6d727e8b9c9aaf192acf4473e521a482067615eb52efff7d41991",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1239,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "continuous-B1": {
+        "service_log_sha256": "1e0c439bb85e047764e230c00fe6128f412ac794106e2a3d025eefd2928f158f",
+        "receipt_sha256": "d263e4b6ec1a302b4de4bdee037af7dee5f46c9b3bdf01db11dfa3c3ed4d5b71",
+        "cleanup_sha256": "49c22bbab246553eac4a8607dedbc8e8e9606a5fec9cfbcabc9393960d5bb69e",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 1304,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          1318,
+          1319,
+          1320,
+          1321,
+          1322,
+          1323,
+          1324,
+          1325
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "frontier-solver-B0": {
+        "service_log_sha256": "2ff8fad0c1c820a158d9ae3cca0e8ec6c327be03afe83154587c35bef678191f",
+        "receipt_sha256": "e1fd6393296d4937ed881a2b841f2d4fbaf0600bf5e88f11fd73d8a8e6aa30aa",
+        "cleanup_sha256": "3b8c7e9765991f7a697ebb1c6c86b37be0a6a3a55b45d8a1d1a3a1bf88bc0e0b",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1723,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "frontier-solver-B1": {
+        "service_log_sha256": "cad79ac903dc8597bf740e436f37e7dfe5fdcfe6296f7b9b47d6ae548f9ef036",
+        "receipt_sha256": "3f12087525105909aee4b9dc5b7cbbcb0be25f17547a69f11dc97c7c2d90e5ad",
+        "cleanup_sha256": "09e001bffcb56d88d54fa2b9e7b1d259eb71321ce85d1f298a8f331b1944aa16",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 980,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          994,
+          995,
+          996,
+          997,
+          998,
+          999,
+          1000,
+          1001
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "frontier-judge-B0": {
+        "service_log_sha256": "a07e9a4f44a15e062f4233acb662f4c751b51feb361e2029f3ce0b08ba8c2be0",
+        "receipt_sha256": "5cde64d7614e0539a52522cd19e4e21e9c8e5e7163711de820a8314dcd93b079",
+        "cleanup_sha256": "133b7d4c9f4e13d26e7083ec03a542a8a08936bb8a0cf6870369852f8da0a838",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 799,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          813,
+          814,
+          815,
+          816,
+          817,
+          818,
+          819,
+          820
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "frontier-judge-B1": {
+        "service_log_sha256": "743c910f5c05598b6b5afec90d2a19e0f139c33fccad7b0ef4949f42ce8cee06",
+        "receipt_sha256": "e5cc1cace07bfc4c079f6edebd804d75d4340a14d43d4f1923a5d8eda3e50b2c",
+        "cleanup_sha256": "dd7820914935897f145ccca52008e7777641addc1e0b5ddb49b5eb40f22a034a",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 791,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "hle-solver-B0": {
+        "service_log_sha256": "f04edb7f70e133a2d55a210ecda6d6941aab81bf39b6c8ef4bfd33d9654af07f",
+        "receipt_sha256": "11122ed5bbb79e0816b738895d76a5b5527464b20a0fc93e9e76e4c17aec6192",
+        "cleanup_sha256": "368e7abf0804ae4057b7605d2993275988328f9a84dbfe42cca331a890000926",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 815,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "hle-solver-B1": {
+        "service_log_sha256": "0f34b54852b642f70c7f20f237d67321b30bb7266d618aacd3b74538182a25cc",
+        "receipt_sha256": "5811c7c633aa1cd0c2ab9fbffd9544f19c4bafdefe6c8befaec1177a846a4700",
+        "cleanup_sha256": "1910da8d2391a854a904013c0ea32fb587d0a441197ca875cae8fc860f78e049",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 1261,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          1275,
+          1276,
+          1277,
+          1278,
+          1279,
+          1280,
+          1281,
+          1282
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "hle-judge-B0": {
+        "service_log_sha256": "7c4f3482c7e437dc17e5e7cf644c26d075fa1a8ce42465a02718d9c606149a73",
+        "receipt_sha256": "b5662b2561155ee944a4ad3528c0c3563d941dd99b2257212fa21e8e045e2093",
+        "cleanup_sha256": "46d0485838fb571fd894999d29db2c59b1906fd1c807424361df528220d907ac",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1459,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          1473,
+          1474,
+          1475,
+          1476,
+          1477,
+          1478,
+          1479,
+          1480
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "hle-judge-B1": {
+        "service_log_sha256": "6412859b991c311e988eaf2cec02230a7b57b70268f0b1acb24eac9c744ee5ed",
+        "receipt_sha256": "e3a65e3a3220f116806ead77d012c92cc70794322be60299786bcbc9af0c6b4f",
+        "cleanup_sha256": "ffd3947932310970bb349f0feb87e8963d21c31567f98e2b52f933dd0d47b113",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1462,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          1476,
+          1477,
+          1478,
+          1479,
+          1480,
+          1481,
+          1482,
+          1483
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "swe-trace-B0": {
+        "service_log_sha256": "c7a755f576d65bda4e8c08448aaacfa74e979e4b15087387706234a5e329ee97",
+        "receipt_sha256": "2791fe8db023107e903e20f5360ceee1de70cce71674b52365434e867049f776",
+        "cleanup_sha256": "5330b57ae2904668b9229752d3fbc33a949fc4c9503263e904e6af3ae6048c26",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 990,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "swe-trace-B1": {
+        "service_log_sha256": "efcee7906ef861e91555c473d237e11a95792ea05b78e88315e7117e0ea6d5df",
+        "receipt_sha256": "e6871716ed0e9ef3eef5a976bbc133741c074531b3a31c63fd8e215317303ba2",
+        "cleanup_sha256": "fa24cfa91ca490c99f7892d1158dd08ed84aa499dd16d94db4e9789df18e54c0",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 656,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "terminal-trace-B0": {
+        "service_log_sha256": "a6e06b1bde58982e40e58b78949bb0e1a245d255a1c5b04b473d4fd3d460e6bf",
+        "receipt_sha256": "9438efd21b68fbef3cc419105afb5b8d7029cd095541ef19e98ce7a5c83c5b83",
+        "cleanup_sha256": "a7fc6c4337dd432d9ca425afb0aca3b77b207d31e43dd2c5efce3fbfd3d82ef7",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 961,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "terminal-trace-B1": {
+        "service_log_sha256": "e8962be73f6f1f5421442a764c3207aa929faf08caa1ccd1219b67b350e96e1f",
+        "receipt_sha256": "47009f2a92eae3f8ce29deffc3cdbc473df665019a8c93cac9d7442e9de883a7",
+        "cleanup_sha256": "2169ba06705f1f6a9c152ead72232f48de3ede88664c26301b9528ba72760b0b",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 637,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          651,
+          652,
+          653,
+          654,
+          655,
+          656,
+          657,
+          658
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "mmlu-B0": {
+        "service_log_sha256": "d7b7524b892ba0eca9a1e9a1fc1ca24249f233dd86952de0a97d7676aa184795",
+        "receipt_sha256": "19760f1bd6b6eb82cbb5cf18d9e3d636fcf2444e20bfcc5ade04550fbbb4f4aa",
+        "cleanup_sha256": "03b72bd03dcc7115f97314b73775b01577c90418d9a157e778dea98bac21188f",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1518,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "mmlu-B1": {
+        "service_log_sha256": "b06a3501539599b85b855bc69ff5343b973ef5f7b2c44c1f04d68414598eac3f",
+        "receipt_sha256": "015fd38f84d87205f3403359bfc3e82fb9dc41e8874bfffef60688bf77f20356",
+        "cleanup_sha256": "2bd768dd43db610253aa1efeccff6321ee648f458807d5be5310b19258121ff3",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1079,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          1093,
+          1094,
+          1095,
+          1096,
+          1097,
+          1098,
+          1099,
+          1100
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      }
+    },
+    "continuous": {
+      "B0": {
+        "source_seal_sha256": "22bf065873a214948f0267863775352af4fc33947a9bf1747dbf6aa70e45e80e",
+        "continuous_phase_sha256": "9694ea4e52983deabfa9b4ce5eb0948f65542fda2f7d4f0cf07f00d8152f9a9e",
+        "all_recorded_requests": 247,
+        "failed_requests": 0,
+        "groups": {
+          "4096-formal": {
+            "requests": 150,
+            "tpot_requests": 150,
+            "ttft_p95_ms": 3154.7571397852116,
+            "ttft_p99_ms": 6131.8013398814865,
+            "tpot_p95_ms": 61.38905764886123,
+            "tpot_p99_ms": 62.52965210491389,
+            "input_at_least16384": 0,
+            "input_plus_output_at_least16384": 0,
+            "duration_including_drain_seconds": 310.5188029939309,
+            "output_tokens_per_second": 123.6640088450635,
+            "submission_cohorts": [
+              {
+                "start_seconds": 0,
+                "end_seconds": 60,
+                "requests": 32,
+                "tpot_requests": 32,
+                "ttft_p95_ms": 6076.930146245285,
+                "ttft_p99_ms": 7207.419962342829,
+                "tpot_p95_ms": 61.13302724527232,
+                "tpot_p99_ms": 63.22927028295018
+              },
+              {
+                "start_seconds": 60,
+                "end_seconds": 120,
+                "requests": 31,
+                "tpot_requests": 31,
+                "ttft_p95_ms": 3013.9402518980205,
+                "ttft_p99_ms": 3187.976362835616,
+                "tpot_p95_ms": 61.4937112465793,
+                "tpot_p99_ms": 62.1751645846548
+              },
+              {
+                "start_seconds": 120,
+                "end_seconds": 180,
+                "requests": 28,
+                "tpot_requests": 28,
+                "ttft_p95_ms": 2818.1872411631048,
+                "ttft_p99_ms": 2919.61263214238,
+                "tpot_p95_ms": 60.18560511735724,
+                "tpot_p99_ms": 60.29284715641509
+              },
+              {
+                "start_seconds": 180,
+                "end_seconds": 240,
+                "requests": 29,
+                "tpot_requests": 29,
+                "ttft_p95_ms": 2318.960399366915,
+                "ttft_p99_ms": 2361.995413713157,
+                "tpot_p95_ms": 61.071604318624615,
+                "tpot_p99_ms": 62.265852819909064
+              },
+              {
+                "start_seconds": 240,
+                "end_seconds": 300,
+                "requests": 30,
+                "tpot_requests": 30,
+                "ttft_p95_ms": 1994.0748191438613,
+                "ttft_p99_ms": 2034.972975095734,
+                "tpot_p95_ms": 60.66156664278869,
+                "tpot_p99_ms": 61.625884242648006
+              }
+            ]
+          },
+          "16384-formal": {
+            "requests": 73,
+            "tpot_requests": 73,
+            "ttft_p95_ms": 14655.635738186507,
+            "ttft_p99_ms": 25083.756345584992,
+            "tpot_p95_ms": 121.4992857052415,
+            "tpot_p99_ms": 121.96724698531861,
+            "input_at_least16384": 73,
+            "input_plus_output_at_least16384": 73,
+            "duration_including_drain_seconds": 317.7941208742559,
+            "output_tokens_per_second": 58.805367288070215,
+            "submission_cohorts": [
+              {
+                "start_seconds": 0,
+                "end_seconds": 60,
+                "requests": 16,
+                "tpot_requests": 16,
+                "ttft_p95_ms": 24974.238756345585,
+                "ttft_p99_ms": 27164.590541133657,
+                "tpot_p95_ms": 119.39851798610215,
+                "tpot_p99_ms": 120.29698348932845
+              },
+              {
+                "start_seconds": 60,
+                "end_seconds": 120,
+                "requests": 14,
+                "tpot_requests": 14,
+                "ttft_p95_ms": 7155.624259635806,
+                "ttft_p99_ms": 7556.117659136652,
+                "tpot_p95_ms": 121.17500762984741,
+                "tpot_p99_ms": 122.03571154608154
+              },
+              {
+                "start_seconds": 120,
+                "end_seconds": 180,
+                "requests": 13,
+                "tpot_requests": 13,
+                "ttft_p95_ms": 6204.826966673135,
+                "ttft_p99_ms": 6409.823736697435,
+                "tpot_p95_ms": 121.60566913584869,
+                "tpot_p99_ms": 121.73506077276726
+              },
+              {
+                "start_seconds": 180,
+                "end_seconds": 240,
+                "requests": 14,
+                "tpot_requests": 14,
+                "ttft_p95_ms": 6019.361942866817,
+                "ttft_p99_ms": 6231.805603178218,
+                "tpot_p95_ms": 119.59019889488962,
+                "tpot_p99_ms": 120.00203699235091
+              },
+              {
+                "start_seconds": 240,
+                "end_seconds": 300,
+                "requests": 16,
+                "tpot_requests": 16,
+                "ttft_p95_ms": 8562.665621517226,
+                "ttft_p99_ms": 8961.715625738725,
+                "tpot_p95_ms": 121.5903231618451,
+                "tpot_p99_ms": 121.80361849712389
+              }
+            ]
+          }
+        },
+        "ratio_16k_to_4k": {
+          "output_tokens_per_second": 0.4755253192684902,
+          "ttft_p95_ms": 4.645567024276335,
+          "ttft_p99_ms": 4.0907646799382125,
+          "tpot_p95_ms": 1.979168443995415,
+          "tpot_p99_ms": 1.9505505448947447
+        },
+        "scope": "Original synthetic closed-loop C8; not a five-dataset task window"
+      },
+      "B1": {
+        "source_seal_sha256": "dd172d50299a7793624fcfa911cff2ec06107d941634f6f62bc00da2c35b1fd0",
+        "continuous_phase_sha256": "27694322a1a10bbc1cb4028944b4502e45e188911d4a5c1c26e6ebcb34ea15d2",
+        "all_recorded_requests": 618,
+        "failed_requests": 0,
+        "groups": {
+          "4096-formal": {
+            "requests": 378,
+            "tpot_requests": 378,
+            "ttft_p95_ms": 1537.934489129111,
+            "ttft_p99_ms": 2621.701100403443,
+            "tpot_p95_ms": 23.93664995336211,
+            "tpot_p99_ms": 24.772652016149145,
+            "input_at_least16384": 0,
+            "input_plus_output_at_least16384": 0,
+            "duration_including_drain_seconds": 306.7336163679138,
+            "output_tokens_per_second": 315.47895253818854,
+            "submission_cohorts": [
+              {
+                "start_seconds": 0,
+                "end_seconds": 60,
+                "requests": 79,
+                "tpot_requests": 79,
+                "ttft_p95_ms": 2621.7002152465284,
+                "ttft_p99_ms": 2621.747323051095,
+                "tpot_p95_ms": 24.31529158288065,
+                "tpot_p99_ms": 24.816537036396127
+              },
+              {
+                "start_seconds": 60,
+                "end_seconds": 120,
+                "requests": 73,
+                "tpot_requests": 73,
+                "ttft_p95_ms": 1039.4391641020773,
+                "ttft_p99_ms": 1064.0791685506701,
+                "tpot_p95_ms": 24.104557337568085,
+                "tpot_p99_ms": 24.56982990018293
+              },
+              {
+                "start_seconds": 120,
+                "end_seconds": 180,
+                "requests": 75,
+                "tpot_requests": 75,
+                "ttft_p95_ms": 1006.482334434986,
+                "ttft_p99_ms": 1031.6505783423781,
+                "tpot_p95_ms": 23.59247958579776,
+                "tpot_p99_ms": 24.393592747183998
+              },
+              {
+                "start_seconds": 180,
+                "end_seconds": 240,
+                "requests": 75,
+                "tpot_requests": 75,
+                "ttft_p95_ms": 1040.6104768626392,
+                "ttft_p99_ms": 1098.0321239121265,
+                "tpot_p95_ms": 23.795679609711264,
+                "tpot_p99_ms": 23.937556003311684
+              },
+              {
+                "start_seconds": 240,
+                "end_seconds": 300,
+                "requests": 76,
+                "tpot_requests": 76,
+                "ttft_p95_ms": 812.4622374307364,
+                "ttft_p99_ms": 825.9240228217095,
+                "tpot_p95_ms": 23.459653633957107,
+                "tpot_p99_ms": 24.952034610232303
+              }
+            ]
+          },
+          "16384-formal": {
+            "requests": 179,
+            "tpot_requests": 179,
+            "ttft_p95_ms": 8757.41437152028,
+            "ttft_p99_ms": 9827.093990407884,
+            "tpot_p95_ms": 47.29230793631252,
+            "tpot_p99_ms": 47.89895456759076,
+            "input_at_least16384": 179,
+            "input_plus_output_at_least16384": 179,
+            "duration_including_drain_seconds": 304.84804167225957,
+            "output_tokens_per_second": 150.31751474810235,
+            "submission_cohorts": [
+              {
+                "start_seconds": 0,
+                "end_seconds": 60,
+                "requests": 37,
+                "tpot_requests": 37,
+                "ttft_p95_ms": 9820.926729403434,
+                "ttft_p99_ms": 10131.329192481935,
+                "tpot_p95_ms": 45.16096799470046,
+                "tpot_p99_ms": 45.79540288229199
+              },
+              {
+                "start_seconds": 60,
+                "end_seconds": 120,
+                "requests": 36,
+                "tpot_requests": 36,
+                "ttft_p95_ms": 6172.4740790668875,
+                "ttft_p99_ms": 6395.511087216437,
+                "tpot_p95_ms": 46.7757805889728,
+                "tpot_p99_ms": 47.095230047901474
+              },
+              {
+                "start_seconds": 120,
+                "end_seconds": 180,
+                "requests": 35,
+                "tpot_requests": 35,
+                "ttft_p95_ms": 5136.17374105379,
+                "ttft_p99_ms": 5213.051861207932,
+                "tpot_p95_ms": 47.738333403991135,
+                "tpot_p99_ms": 47.951692980075
+              },
+              {
+                "start_seconds": 180,
+                "end_seconds": 240,
+                "requests": 37,
+                "tpot_requests": 37,
+                "ttft_p95_ms": 3908.023928850889,
+                "ttft_p99_ms": 3958.159515708685,
+                "tpot_p95_ms": 47.25666110129917,
+                "tpot_p99_ms": 47.41095903632688
+              },
+              {
+                "start_seconds": 240,
+                "end_seconds": 300,
+                "requests": 34,
+                "tpot_requests": 34,
+                "ttft_p95_ms": 3011.7758020758624,
+                "ttft_p99_ms": 3151.9925770163536,
+                "tpot_p95_ms": 47.38014002330601,
+                "tpot_p99_ms": 47.85407009099921
+              }
+            ]
+          }
+        },
+        "ratio_16k_to_4k": {
+          "output_tokens_per_second": 0.4764739883238534,
+          "ttft_p95_ms": 5.69427009630258,
+          "ttft_p99_ms": 3.748365513099732,
+          "tpot_p95_ms": 1.975727933042272,
+          "tpot_p99_ms": 1.933541654578029
+        },
+        "scope": "Original synthetic closed-loop C8; not a five-dataset task window"
+      }
+    },
+    "quality_is_a_separate_assessment": true,
+    "total_context_includes_output": true,
+    "each_dataset_input_16k_is_not_required": true,
+    "cohort_method": "60 s bins by request submission; include complete request latency, including drain. All five bins retained. Percentiles interpolate at (n-1)q. These are diagnostic bins, not new acceptance thresholds.",
+    "limitations": [
+      "Task counts use terminal input+output length. They do not establish how long live context remained above16K; final usage alone cannot timestamp the crossing.",
+      "C8 keeps all original 60 s warmups and 300 s formal phases; it is separate synthetic evidence, not a replacement for the task-based continuous-window conclusion in V1.5.",
+      "No new numerical definition of abnormal steep rise is imposed. Observed 4K/16K ratios and consecutive cohorts are disclosed for review, not automatically labelled pass or engine failure.",
+      "Budget length termination is explicit, not silent truncation. Raw stream checks and successful transport do not prove semantic answer completeness."
+    ],
+    "status": "execution_complete_long_context_assessment_open"
+  },
+  "formal_targets": {
+    "3.4.1": {
+      "name": "有效算力效率 ≥50%",
+      "status": "历史原工况范围内达标；参考已重新核验",
+      "accepted": true,
+      "accepted_scope": "Existing qualified M01 fixed200/out256, three synchronized uninstrumented repetitions per arm",
+      "measured_value": 59.7572618332167,
+      "display_value": "≥59.76%",
+      "source_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/53541118b3461705f1e61532710ff0a759d59af0/reports/m01-qualified-pair-20261103/README.md",
+      "reason": "已有独立合格参考，原脚本已重新核验算量、三轮计时及关键路径。B1保守效率下界达到50%；适用于原out256工况，不套用到新out8192运行。"
+    },
+    "3.4.2": {
+      "name": "吞吐 ≥10%，TTFT/TPOT 各改善 ≥5%",
+      "status": "复用已封存配对重新核验：本次数值达标（原固定200题范围）",
+      "accepted": true,
+      "accepted_scope": "This new prospectively frozen original200 pair; observed quality reported with original scorer",
+      "measured_value": 100.95281117949608,
+      "display_value": "+100.95%",
+      "source_url": "summary.json",
+      "reason": "本次新配对吞吐变化100.95%，平均TTFT/TPOT改善51.73%/50.16%；两侧各200完整请求、零失败，正确数差-1/200。保留单次固定子集、长度终止与原服务协议，不推断统计质量等价。"
+    },
+    "3.4.3": {
+      "name": "五数据集与16K稳定性",
+      "accepted": false,
+      "status": "固定五项执行完成；16K稳定性结论待复核",
+      "display_value": "Executed; 16K assessment open",
+      "reason": "固定五项两臂均已完成，无失败或未返回请求。按输入+输出计实际16K覆盖：hle119/124、frontier44/40、swe4/4、terminal5/4、mmlu0/0（B0/B1）。裁判未决与准确率另列，不作为本项稳定性失败。独立C8两臂4K/16K正式窗口均完成：B1吞吐315.48→150.32 token/s，TTFT P99为2.622→9.827秒；16K五个连续提交区间的TTFT P99为10.131、6.396、5.213、3.958、3.152秒。尚需完成大纲所要求的真实任务实际16K区间、可比负载和尾时延的联合判读；有限终态长度计数或合成C8不能单独替代该结论。未将其判成已证实的引擎稳定性失败。",
+      "evidence_path": "stability-audit-v1.json",
+      "quality_is_a_separate_assessment": true
+    },
+    "3.4.4": {
+      "name": "单位token成本降低 ≥10%及高负载利用率改善",
+      "status": "复用已封存配对重新核验：本次数值达标（披露的同费率估算范围）",
+      "accepted": true,
+      "numeric_threshold_met": true,
+      "accepted_scope": "This new pair, same reserved two cards and same fixed published price basis",
+      "measured_value": 50.23707336411556,
+      "display_value": "-50.24%",
+      "source_url": "summary.json",
+      "reason": "本次两侧同费率估算单位输出token成本变化-50.24%；实际采样AI Core均值差+32.22个百分点。保留原费用范围、报价日期与利用率统计规则，不冒充实际账单。"
+    }
+  },
+  "price_basis": {
+    "schema": "public-analogous-machine-price/v1",
+    "checked_date": "2026-10-29",
+    "timezone": "Asia/Shanghai",
+    "basis": "public_list_price_estimate_not_actual_invoice",
+    "provider": "天翼云",
+    "price_url": "https://www.ctyun.cn/document/10029787/10047957",
+    "billing_scope_url": "https://www.ctyun.cn/document/10029787/10030140",
+    "sku": "pak3.8xlarge.8",
+    "accelerator": "Ascend 910B",
+    "accelerator_count": 2,
+    "accelerator_memory_gb_each": 64,
+    "vcpu": 32,
+    "host_memory_gb": 256,
+    "currency": "CNY",
+    "instance_monthly_price": 36908,
+    "card_monthly_equivalent": 18454,
+    "billing_mode": "monthly_prepaid",
+    "included": [
+      "CPU",
+      "host memory",
+      "accelerator and accelerator memory"
+    ],
+    "separately_billed_not_in_this_estimate": [
+      "cloud disks",
+      "public network bandwidth"
+    ],
+    "month_days_for_analysis": 30,
+    "month_days_source": "explicit analytical convention, not provider billing-cycle claim",
+    "hardware_scope": "Analogous 910B 64GB cloud instance, not proof of identical 910B2 subtype, host or purchase terms.",
+    "policy": "Apply the same rate and accounting scope to both arms; do not infer actual allocation from TP degree. Price is not selected to meet a reduction target.",
+    "verification": "Provider HTML fetched and price table plus billing-scope text inspected on 2026-10-29; web price-page fetch failures retained in conversation, terminal HTTP fetch succeeded."
+  },
+  "source_provenance": {
+    "campaign_seal_sha256": "26a2bea8d0dc8b2512930e73255eb549634381d15ba83d6154ac2a1d143be6aa",
+    "report_summary_sha256": "33b2de1d204eecb72882d73ef430cd49fbc730e8072907cc819be178ecfb9218",
+    "report_seal_sha256": "3c464dd9a4df4d862f93e69143aabf1dd9f775eaa511eb4d0de1c340bc61a8a9",
+    "reused_origins": [
+      {
+        "campaign_sha256": "4072da95880f9087da0e71e19b7b7eb95a1aaf7aaf4cf44794b455e2064c067e",
+        "campaign_seal_sha256": "128476a5c8da69d82f7be835523d3677ab212421483a99cb583cfe3b71a8b01d",
+        "plan_sha256": "8e4776d683d5f44f6b259048768a1b2412070d0dfba8b9f0d158f7cb13bd3201",
+        "parent_status": "failed",
+        "stages": [
+          "continuous-B0",
+          "continuous-B1"
+        ]
+      },
+      {
+        "campaign_sha256": "478a6430a345fb04e02afa2d4a8e161c06ffe74f1a8b3146e50f02ae3579f7e9",
+        "campaign_seal_sha256": "64b1dfebae914043d8d78033851fe8f85f26dce3150d323a8f0794f25da512fc",
+        "plan_sha256": "7d17208adf299b3229fb7d55ff57a0f2d9f45032db139a0e80cf00d8e3f08fcd",
+        "parent_status": "failed",
+        "stages": [
+          "mmlu-pair",
+          "frontier-solver-B0",
+          "frontier-solver-B1",
+          "frontier-judge-B0",
+          "frontier-judge-B1"
+        ]
+      },
+      {
+        "campaign_sha256": "0f50fa5ab688cc68da9e363ad99a4fd27ae9aa0bad7a4c193e35c634c7aaec03",
+        "campaign_seal_sha256": "b5c60bd811a546b12117abe18ddbd3f75d02fa72d5d5cb4d3fb3bb711b3663d0",
+        "plan_sha256": "7213a1d41dd2f11dfd2ad6320f846d8ecca6dfdf31dbb9501366478c400755d4",
+        "parent_status": "completed",
+        "stages": [
+          "hle-solver-B0",
+          "hle-solver-B1",
+          "hle-judge-B0",
+          "hle-judge-B1"
+        ]
+      },
+      {
+        "campaign_sha256": "a4f89e532e467a4f439e24a228cb1bbd8f6918397f58785ef000134f8cdae2c5",
+        "campaign_seal_sha256": "e407faf49b0668cd422010d440b1b8d998b49dc6677a5fdbf13c45128ef1e6a2",
+        "plan_sha256": "f8144a4c590be4f3e7fbd9dd20ae6126000d3c9e4bc249a9fd081a4b2ab9b928",
+        "parent_status": "completed",
+        "stages": [
+          "swe-trace-B0",
+          "swe-trace-B1",
+          "terminal-trace-B0",
+          "terminal-trace-B1"
+        ]
+      }
+    ],
+    "stages": [
+      {
+        "name": "continuous-B0",
+        "source_index": 0,
+        "original_started": 1794459833.3157713,
+        "original_ended": 1794461608.327597,
+        "status": "reused_verified"
+      },
+      {
+        "name": "continuous-B1",
+        "source_index": 0,
+        "original_started": 1794461609.1451058,
+        "original_ended": 1794463608.6468189,
+        "status": "reused_verified"
+      },
+      {
+        "name": "mmlu-pair",
+        "source_index": 1,
+        "original_started": 1794469278.7070465,
+        "original_ended": 1794473813.896592,
+        "status": "reused_verified"
+      },
+      {
+        "name": "frontier-solver-B0",
+        "source_index": 1,
+        "original_started": 1794473815.8482645,
+        "original_ended": 1794478435.7784107,
+        "status": "reused_verified"
+      },
+      {
+        "name": "frontier-solver-B1",
+        "source_index": 1,
+        "original_started": 1794478436.3523567,
+        "original_ended": 1794481046.6223838,
+        "status": "reused_verified"
+      },
+      {
+        "name": "frontier-judge-B0",
+        "source_index": 1,
+        "original_started": 1794481046.9230862,
+        "original_ended": 1794482720.5284543,
+        "status": "reused_verified"
+      },
+      {
+        "name": "frontier-judge-B1",
+        "source_index": 1,
+        "original_started": 1794482720.770232,
+        "original_ended": 1794484310.931605,
+        "status": "reused_verified"
+      },
+      {
+        "name": "hle-solver-B0",
+        "source_index": 2,
+        "original_started": 1794491277.669925,
+        "original_ended": 1794496052.9922876,
+        "status": "reused_verified"
+      },
+      {
+        "name": "hle-solver-B1",
+        "source_index": 2,
+        "original_started": 1794496053.1995661,
+        "original_ended": 1794499903.7003522,
+        "status": "reused_verified"
+      },
+      {
+        "name": "hle-judge-B0",
+        "source_index": 2,
+        "original_started": 1794499903.9101975,
+        "original_ended": 1794504635.7258213,
+        "status": "reused_verified"
+      },
+      {
+        "name": "hle-judge-B1",
+        "source_index": 2,
+        "original_started": 1794504635.9697695,
+        "original_ended": 1794509355.4526992,
+        "status": "reused_verified"
+      },
+      {
+        "name": "swe-trace-B0",
+        "source_index": 3,
+        "original_started": 1794509629.3582067,
+        "original_ended": 1794510647.5107713,
+        "status": "reused_verified"
+      },
+      {
+        "name": "swe-trace-B1",
+        "source_index": 3,
+        "original_started": 1794510647.5379307,
+        "original_ended": 1794511917.3334327,
+        "status": "reused_verified"
+      },
+      {
+        "name": "terminal-trace-B0",
+        "source_index": 3,
+        "original_started": 1794511917.3620465,
+        "original_ended": 1794513075.9460378,
+        "status": "reused_verified"
+      },
+      {
+        "name": "terminal-trace-B1",
+        "source_index": 3,
+        "original_started": 1794513075.973371,
+        "original_ended": 1794514327.083286,
+        "status": "reused_verified"
+      }
+    ]
+  },
+  "metric_notes": {
+    "throughput": "Actual successful/completed output tokens divided by solver batch wall time. Judge traffic is separate.",
+    "tpot": "Per-request (completion-first content token)/(output_tokens-1), equal-weight mean; output_tokens>1 only.",
+    "percentiles": "Linear interpolation at (n-1)*q; finite samples, not continuous stability.",
+    "quality": "Original graders and planned denominators. Unresolved are nonsuccess, not confirmed incorrect; no statistical equivalence claim.",
+    "cost": "Same fixed historical public analogous-machine rate; sample estimate, not actual invoice.",
+    "reuse": "Every reused stage re-audited by the one-click runner; original source dates/controllers/failed parent statuses retained. No duplicated inference."
+  },
+  "milestone_assessment": {
+    "profile": "milestone-v1.5",
+    "targets": {
+      "3.4.1": {
+        "name": "有效算力效率 ≥50%",
+        "status": "历史原工况范围内达标；参考已重新核验",
+        "accepted": true,
+        "accepted_scope": "Existing qualified M01 fixed200/out256, three synchronized uninstrumented repetitions per arm",
+        "measured_value": 59.7572618332167,
+        "display_value": "≥59.76%",
+        "source_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/53541118b3461705f1e61532710ff0a759d59af0/reports/m01-qualified-pair-20261103/README.md",
+        "reason": "已有独立合格参考，原脚本已重新核验算量、三轮计时及关键路径。B1保守效率下界达到50%；适用于原out256工况，不套用到新out8192运行。"
+      },
+      "3.4.2": {
+        "name": "吞吐 ≥10%，TTFT/TPOT 各改善 ≥5%",
+        "status": "复用已封存配对重新核验：本次数值达标（原固定200题范围）",
+        "accepted": true,
+        "accepted_scope": "This new prospectively frozen original200 pair; observed quality reported with original scorer",
+        "measured_value": 100.95281117949608,
+        "display_value": "+100.95%",
+        "source_url": "summary.json",
+        "reason": "本次新配对吞吐变化100.95%，平均TTFT/TPOT改善51.73%/50.16%；两侧各200完整请求、零失败，正确数差-1/200。保留单次固定子集、长度终止与原服务协议，不推断统计质量等价。"
+      },
+      "3.4.3": {
+        "name": "五数据集与16K稳定性",
+        "accepted": false,
+        "status": "固定五项执行完成；16K稳定性结论待复核",
+        "display_value": "Executed; 16K assessment open",
+        "reason": "固定五项两臂均已完成，无失败或未返回请求。按输入+输出计实际16K覆盖：hle119/124、frontier44/40、swe4/4、terminal5/4、mmlu0/0（B0/B1）。裁判未决与准确率另列，不作为本项稳定性失败。独立C8两臂4K/16K正式窗口均完成：B1吞吐315.48→150.32 token/s，TTFT P99为2.622→9.827秒；16K五个连续提交区间的TTFT P99为10.131、6.396、5.213、3.958、3.152秒。尚需完成大纲所要求的真实任务实际16K区间、可比负载和尾时延的联合判读；有限终态长度计数或合成C8不能单独替代该结论。未将其判成已证实的引擎稳定性失败。",
+        "evidence_path": "stability-audit-v1.json",
+        "quality_is_a_separate_assessment": true
+      },
+      "3.4.4": {
+        "name": "单位token成本降低 ≥10%及高负载利用率改善",
+        "status": "复用已封存配对重新核验：本次数值达标（披露的同费率估算范围）",
+        "accepted": true,
+        "numeric_threshold_met": true,
+        "accepted_scope": "This new pair, same reserved two cards and same fixed published price basis",
+        "measured_value": 50.23707336411556,
+        "display_value": "-50.24%",
+        "source_url": "summary.json",
+        "reason": "本次两侧同费率估算单位输出token成本变化-50.24%；实际采样AI Core均值差+32.22个百分点。保留原费用范围、报价日期与利用率统计规则，不冒充实际账单。"
+      }
+    },
+    "scope": "V1.5里程碑四项要求；本表不构成项目最终目标验收。"
+  },
+  "project_final_assessment": {
+    "schema": "project-final-goals-assessment/v1",
+    "profile": "project-final",
+    "goal_contract_id": "project4-final-20261113-v1",
+    "fully_specified": true,
+    "acceptance_established": false,
+    "confirmed_interpretation": {
+      "original_compute_term": "理论峰值",
+      "operational_compute_denominator": "同工况独立参考",
+      "confirmation": "理论峰值就解释为同工况参考，否则不可能实现。",
+      "formula": "eta_ref = 100 * C / C_ref = 100 * T_ref / T",
+      "same_effective_work_and_card_count_required": true,
+      "vendor_peak_is_not_used": true,
+      "model": "Qwen3.5-35B-A3B",
+      "model_scope_explanation_already_confirmed": true,
+      "original_model_wording": "代表性7B–13B模型（与主责单位确定）",
+      "model_explanation_source": "V1.5课题四35B调整及用户再次确认模型差异已解释；不重新设为阻塞项。"
+    },
+    "criterion_source": {
+      "kind": "user_supplied_document_excerpt_and_explicit_interpretation",
+      "document_pages": [
+        13,
+        14,
+        15
+      ],
+      "document_total_pages": 217,
+      "source_document_binary_available": false,
+      "source_excerpt": "reports/project-final-goals-20261113/source-excerpt.txt",
+      "source_excerpt_sha256": "b9ed0ea98970ee560e60ca3aa702d0f313421ca21135fb7cc177d6ae6d32825f",
+      "text_fidelity": "Normalized excerpt of the user-pasted text; not an independently verified source document or verbatim binary extract."
+    },
+    "targets": {
+      "3.4.1": {
+        "name": "单芯片有效算力",
+        "requirement": "同工况参考效率 ≥90%",
+        "requirement_en": "Workload-reference efficiency ≥90%",
+        "threshold_percent": 90,
+        "formula": "eta_ref = 100 * C / C_ref = 100 * T_ref / T",
+        "milestone_threshold_percent": 50,
+        "evidence_lower_bound_percent": "59.75726183321670061341678705592882024036",
+        "evidence_summary": "历史out256保守下界 ≥59.76%",
+        "evidence_summary_en": "Historical out256 lower bound ≥59.76%",
+        "lower_bound_distance_to_target_pp": "30.24273816678329938658321294",
+        "source_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/53541118b3461705f1e61532710ff0a759d59af0/reports/m01-qualified-pair-20261103/summary.json",
+        "source_sha256": "95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0",
+        "criterion_source_verified": true,
+        "attainment": "not_demonstrated",
+        "reason": "原文“理论峰值”按用户确认解释为同工况独立参考，模型沿用已确认35B。历史out256的B1保守下界约59.76%，未证明90%；下界距离不是实际效率差距，不反推真实效率必低90%，不套用于本轮完整回答或全五项。"
+      },
+      "3.4.2": {
+        "name": "吞吐与时延",
+        "throughput_ratio_min": 2,
+        "throughput_gain_percent_min": 100,
+        "mean_ttft_reduction_percent_min": 20,
+        "mean_tpot_reduction_percent_min": 20,
+        "quality_and_service_requirements_unchanged": true,
+        "scenarios": "既定多轮对话、工具调用等典型场景；基准与可比资源沿用已确认配置。",
+        "requirement": "吞吐 ≥2×；平均TTFT/TPOT分别降低 ≥20%",
+        "requirement_en": "Throughput ≥2×; mean TTFT/TPOT each reduced ≥20%",
+        "evidence_summary": "按五项逐一核算；HLE吞吐/TTFT不满足，质量仍在复核",
+        "evidence_summary_en": "Per-profile numbers; HLE throughput/TTFT miss; quality under review",
+        "criterion_source_verified": true,
+        "attainment": "not_demonstrated",
+        "numeric_results_by_profile": [
+          {
+            "dataset": "mmlu",
+            "throughput_ratio": 2.009528111794961,
+            "mean_ttft_reduction_percent": 51.728781981693174,
+            "mean_tpot_reduction_percent": 50.163793612697205,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "hle",
+            "throughput_ratio": 1.4991207706993745,
+            "mean_ttft_reduction_percent": -69.53058595147728,
+            "mean_tpot_reduction_percent": 31.268419406435644,
+            "numeric_threshold_met": false
+          },
+          {
+            "dataset": "frontier",
+            "throughput_ratio": 2.273819184249173,
+            "mean_ttft_reduction_percent": 51.151254995596254,
+            "mean_tpot_reduction_percent": 53.4007431869863,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "swe",
+            "throughput_ratio": 2.0743296492897096,
+            "mean_ttft_reduction_percent": 40.161295592734426,
+            "mean_tpot_reduction_percent": 54.57518541419151,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "terminal",
+            "throughput_ratio": 2.077177764265863,
+            "mean_ttft_reduction_percent": 55.91305500867551,
+            "mean_tpot_reduction_percent": 39.30291808706071,
+            "numeric_threshold_met": true
+          }
+        ],
+        "all_profile_numeric_thresholds_met": false,
+        "reason": "沿用既定可比B0/B1与统一质量/服务要求。MMLU和两项trace等部分负载数值达到最终吞吐/时延门槛，但不能用这些通过覆盖HLE退化或未解决的质量/Schema问题；不拼接不同负载的最优值。"
+      },
+      "3.4.3": {
+        "name": "长上下文稳定性",
+        "context_tokens_min": 32768,
+        "requires_stable_throughput_curve": true,
+        "requires_stable_ttft_tpot_p95_p99": true,
+        "requires_no_obvious_performance_degradation": true,
+        "invented_numeric_tail_tolerance": null,
+        "requirement": "≥32K：吞吐平稳，TTFT/TPOT P95/P99稳定、无明显退化",
+        "requirement_en": "≥32K: stable throughput and TTFT/TPOT P95/P99, no obvious regression",
+        "evidence_summary": "本轮独立C8仅4K/16K；无可验收32K连续窗口",
+        "evidence_summary_en": "Current C8 covers4K/16K; no qualified32K continuous window",
+        "criterion_source_verified": true,
+        "attainment": "not_demonstrated",
+        "observed_input_at_least32768_cases": 0,
+        "observed_input_plus_output_at_least32768_cases": 0,
+        "continuous_32k_stability_verified": false,
+        "reason": "16K里程碑窗口不证明32K最终目标；偶发总上下文长度也不能代替连续吞吐曲线与P95/P99尾延迟稳定性证据。保留原文定性要求，不自行增加尾延迟阈值。"
+      },
+      "3.4.4": {
+        "name": "单位token成本与利用率",
+        "unit_token_cost_reduction_percent_min": 30,
+        "comparator": "国际主流开源框架；本项目按已确认B0配对及可比条件复核。",
+        "requires_high_multi_tenant_utilization": true,
+        "invented_numeric_utilization_threshold": null,
+        "requirement": "单位token成本降低 ≥30%；多租户场景维持较高利用率",
+        "requirement_en": "Unit token cost reduced ≥30%; high utilization with multiple tenants",
+        "evidence_summary": "MMLU同费率估算约降低50.24%；多租户证据未完成",
+        "evidence_summary_en": "MMLU equal-rate estimate about−50.24%; multi-tenant evidence incomplete",
+        "criterion_source_verified": true,
+        "attainment": "not_demonstrated",
+        "numeric_cost_results_by_profile": [
+          {
+            "dataset": "mmlu",
+            "equal_rate_unit_cost_reduction_percent": 50.23707336411556,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "hle",
+            "equal_rate_unit_cost_reduction_percent": 33.29423355708181,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "frontier",
+            "equal_rate_unit_cost_reduction_percent": 56.02112925570177,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "swe",
+            "equal_rate_unit_cost_reduction_percent": 51.791654699511284,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "terminal",
+            "equal_rate_unit_cost_reduction_percent": 51.85775540239186,
+            "numeric_threshold_met": true
+          }
+        ],
+        "multi_tenant_utilization_verified": false,
+        "reason": "保留已确认国际主流开源框架B0与可比条件，费用为历史公开报价同费率估算，不是本机账单。单服务高负载利用率不能自动证明多租户要求；未发明“较高利用率”的数值门槛。"
+      }
+    },
+    "limits": "已确认同工况参考和35B模型解释；最终目标单独展示，里程碑通过不等于最终验收通过。"
+  },
+  "merge_requirements": {
+    "milestone_and_final_sections_required": true,
+    "both_sections_present": true,
+    "final_goal_sources_complete": true,
+    "reference_interpretation_recorded": true,
+    "model_scope_explanation_recorded": true,
+    "runtime_and_quality_review_resolved": false,
+    "ready_to_merge": false,
+    "blockers": [
+      "MMLU质量优势未复现、HLE首批延迟和裁判未决问题仍在复核；4例开发诊断不替代正式验收。"
+    ]
+  },
+  "revision": {
+    "version": 2,
+    "supersedes": "summary-public-v1.json",
+    "supersedes_sha256": "1bff029a2a6f8441cf4386e6af69f7db6a20aa92471304fe3cfd9b79d9b85890",
+    "reason": "Separate answer quality from V1.5 stability; count total context and expose continuous C8 tails. Original measurements and v1 remain unchanged."
+  }
+}

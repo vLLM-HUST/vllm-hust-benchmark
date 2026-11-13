@@ -56,6 +56,7 @@ def test_real_git_sparse_patterns_preserve_inputs_and_complete_tracked_index(tmp
         "src/example/__init__.py",
         "reports/pegaflow-restore-causal-20261110/FOLLOWUP.md",
         "reports/pegaflow-restore-causal-20261110/CONTAINER-DMA-20261111.md",
+        "reports/five-datasets-standard-20261113/STABILITY-AUDIT-v1.md",
     ]
     omit = [
         "reports/old.txt",
@@ -63,6 +64,7 @@ def test_real_git_sparse_patterns_preserve_inputs_and_complete_tracked_index(tmp
         "submissions/old.txt",
         "reports/pegaflow-restore-causal-20261110/raw/README.md",
         "reports/pegaflow-restore-causal-20261110/raw/data.tar.gz",
+        "reports/five-datasets-standard-20261113/stability-audit-v1.json",
     ]
     for name in keep + omit:
         path = repo / name

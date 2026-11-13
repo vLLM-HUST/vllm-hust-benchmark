@@ -55,6 +55,13 @@ GenNova 与 GenNova Autotune 产品级独立结果已迁往
 
 ## 常用问题入口
 
+- **固定五项与16K稳定性订正：** [复核与未决范围](reports/five-datasets-standard-20261113/STABILITY-AUDIT-v1.md)，
+  区分已完成执行、实际总上下文覆盖、预算终止、合成C8及真实任务连续窗口；v1原投影保留，v2追加审计。
+
+- **项目最终目标与里程碑区别：** [最终目标及已确认解释](reports/project-final-goals-20261113/README.md)，
+  列出90%同工况参考、吞吐2×/时延20%、32K及成本30%/多租户四项最终要求；
+  [本轮双阶段判定](reports/five-datasets-standard-20261113/README.md)不复用里程碑通过标记来代替最终验收。
+
 - **GenNova MOD 单项、组合与负结果：** [2026-11-05 固定快照](reports/gennova-mod-evidence-20261105/README.md)整理
   107 个结果入口、55 项接入记录、 29 项组合影响和 90 项带重开条件的负结果。沿 manifest 的固定提交链接回到源证据；局部加速、有限配对和组合结果
   不自动成为正式榜单成绩，也不发布到网站。
@@ -211,3 +218,8 @@ python -m pytest -q tests/test_data_index.py
 标准固定在 `docs/dataset-standards/five-datasets-v1`，两项目使用字节相同的 v1；运行目录中的旧协议不覆盖。
 `python docs/dataset-standards/five-datasets-v1/verify.py` 校验所有附件。新样本、预算、评分或 tokenizer 必须另发版本。
 网站只发布协议与来源索引，不分发题目、答案和原始研究用途 trace，也不把协议冻结当实测。
+
+## 固定五项完整结果（2026-11-13）
+
+[一键执行与完整公开指标](reports/five-datasets-standard-20261113/README.md)：
+15阶段由封存原件重新核验，新增推理0阶段；保留原日期、失败父批次与负结果。 五项范围已执行完成；HLE/Frontier评分未决及真实trace的16K输入覆盖限制仍阻止整体验收。
