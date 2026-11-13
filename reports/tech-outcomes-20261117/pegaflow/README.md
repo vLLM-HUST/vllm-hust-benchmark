@@ -87,3 +87,10 @@ python reports/tech-outcomes-20261117/pegaflow/verify_public_evidence.py --archi
 ## 重启后的独立批次
 
 91 已恢复，当前批次的诊断原件及正式窗口预注册计划见 [restart-02](restart-02/README.md)。 原批次失败记录保留，不与新物理卡 3/4 的数据混合。
+
+<!-- restart02-live-start -->
+
+重启后的独立批次已公开 0 个 900s 观察点；最新原件和配对状态见
+[restart-02/RESULTS.md](restart-02/RESULTS.md)。本页初次中断记录与历史索引保留，不能代替新批次结果。
+
+<!-- restart02-live-end -->
