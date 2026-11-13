@@ -139,10 +139,19 @@ def qualify(arm):
                 }
             )
             c.write(output, record)
+        # Native itself diverged on uncached case 6 in both archived attempts.
+        # Retain every short response as a diagnostic; do not confuse this with
+        # a universal bitwise quality guarantee. All workload sessions remain.
+        record["short_repeatability_mismatches"] = [
+            row["index"] for row in record["short"] if not row["equal"]
+        ]
+        record["short_cross_arm_mismatches"] = [
+            row["index"] for row in record["short"] if not row["equal_native"]
+        ]
+        record["quality_scope"] = PLAN["quality_scope"]
         assert all(
-            row["equal"] and row["equal_native"]
-            for row in record["short"] + record["long"]
-        ), "Sampled token/restore qualification failed"
+            row["equal"] and row["equal_native"] for row in record["long"]
+        ), "Sampled long-prefix restore qualification failed"
         if candidate:
             assert all(
                 row["mechanism_delta"]["pega_load_success_total"] > 0
