@@ -1,0 +1,382 @@
+"""Matched 900-second SWE windows, gated by sampled token/restore qualification."""
+
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import tarfile
+import time
+import traceback
+import urllib.request
+
+import formal_runtime as c
+
+ROOT = c.ROOT
+PLAN = json.loads((ROOT / "formal-plan.json").read_text())
+PLAN_SHA = hashlib.sha256((ROOT / "formal-plan.json").read_bytes()).hexdigest()
+STATUS = c.STATE
+STATUS.update(plan_sha256=PLAN_SHA, diagnostic_source="repetition-and-restore")
+
+
+def update(phase, **fields):
+    c.update(phase, **fields)
+    c.write(ROOT / "durable/metadata/campaign-status.json", STATUS)
+
+
+def post(path, body=None):
+    request = urllib.request.Request(
+        f"http://127.0.0.1:{c.PORT}" + path,
+        data=b"" if body is None else json.dumps(body).encode(),
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(request, timeout=300) as response:
+        content = response.read()
+        return json.loads(content) if content else None
+
+
+def probe(prompt, salt):
+    body = {
+        "model": "pegaflow-techoutcomes-qwen35",
+        "prompt": prompt,
+        "max_tokens": 32,
+        "temperature": 0,
+        "seed": 17,
+        "ignore_eos": True,
+        "return_token_ids": True,
+        "cache_salt": salt,
+        "stream": False,
+    }
+    response = post("/v1/completions", body)
+    assert (
+        len(response["choices"][0]["token_ids"])
+        == response["usage"]["completion_tokens"]
+        == 32
+    )
+    assert response["usage"]["prompt_tokens"] == len(prompt)
+    return {"request": body, "response": response}
+
+
+def ids(record):
+    return record["response"]["choices"][0]["token_ids"]
+
+
+def qualify(arm):
+    candidate = arm.startswith("pegaflow")
+    folder = c.EVIDENCE / arm
+    output = folder / "qualification-oracle.json"
+    workload = json.loads((ROOT / "prepared-qwen35.json").read_text())
+    record = {"arm": arm, "started_unix": time.time(), "short": [], "long": []}
+    golden = (
+        None
+        if arm == "native"
+        else json.loads((c.EVIDENCE / "native/qualification-oracle.json").read_text())
+    )
+    c.metrics(folder, "oracle-before", candidate)
+    try:
+        for index, session in enumerate(workload["sessions"]):
+            prompt = session["turns"][0]["input_ids"]
+            salt = f"formal02-short-{index}"
+            cold = probe(prompt, salt)
+            warm = probe(prompt, salt)
+            equal = ids(cold) == ids(warm)
+            equal_native = golden is None or ids(cold) == ids(
+                golden["short"][index]["cold"]
+            ) == ids(warm)
+            record["short"].append(
+                {
+                    "index": index,
+                    "cold": cold,
+                    "warm": warm,
+                    "equal": equal,
+                    "equal_native": equal_native,
+                }
+            )
+            c.write(output, record)
+        long_prompts = json.loads((ROOT / "diagnostic-long-prompts.json").read_text())
+        for index, case in enumerate(long_prompts):
+            prompt = case["input_ids"]
+            salt = f"formal02-long-{index}"
+            cold = probe(prompt, salt)
+            time.sleep(1)
+            warm = probe(prompt, salt)
+            time.sleep(1)
+            c.metrics(folder, f"oracle-long{index}-before-reset", candidate)
+            post("/reset_prefix_cache?reset_external=false")
+            restored = probe(prompt, salt)
+            c.metrics(folder, f"oracle-long{index}-after-reset", candidate)
+            before = (
+                folder / f"vllm-metrics-oracle-long{index}-before-reset.txt"
+            ).read_text()
+            after = (
+                folder / f"vllm-metrics-oracle-long{index}-after-reset.txt"
+            ).read_text()
+            delta = {
+                name: c.counter(after, name) - c.counter(before, name)
+                for name in [
+                    "pega_load_success_total",
+                    "pega_save_success_total",
+                    "pega_load_failure_total",
+                    "pega_save_failure_total",
+                ]
+            }
+            equal = ids(cold) == ids(warm) == ids(restored)
+            equal_native = golden is None or ids(cold) == ids(
+                golden["long"][index]["cold"]
+            ) == ids(restored)
+            record["long"].append(
+                {
+                    "index": index,
+                    "prompt_sha256": case["prompt_sha256"],
+                    "cold": cold,
+                    "warm": warm,
+                    "restored": restored,
+                    "equal": equal,
+                    "equal_native": equal_native,
+                    "mechanism_delta": delta,
+                }
+            )
+            c.write(output, record)
+        assert all(
+            row["equal"] and row["equal_native"]
+            for row in record["short"] + record["long"]
+        ), "Sampled token/restore qualification failed"
+        if candidate:
+            assert all(
+                row["mechanism_delta"]["pega_load_success_total"] > 0
+                for row in record["long"]
+            ), "Forced external restore did not exercise a real load"
+            assert all(
+                row["mechanism_delta"]["pega_load_failure_total"]
+                == row["mechanism_delta"]["pega_save_failure_total"]
+                == 0
+                for row in record["long"]
+            ), "Restore failure counter increased"
+        record.update(valid=True, completed_unix=time.time())
+        c.write(output, record)
+    except BaseException as error:
+        record.update(
+            valid=False,
+            error=type(error).__name__ + ": " + str(error),
+            completed_unix=time.time(),
+        )
+        c.write(output, record)
+        raise
+    finally:
+        c.metrics(folder, "oracle-after", candidate)
+    result = c.point(arm, 2, 180, qualification=True)
+    if candidate:
+        assert (
+            result["mechanism_delta"]["pega_load_success_total"] > 0
+            and result["mechanism_delta"]["pega_save_success_total"] > 0
+        )
+    return result
+
+
+def checkpoint(arm, folder):
+    """Freeze each completed window before starting the next; local mirror sends ACK."""
+    root = ROOT / "durable"
+    label = arm + "-" + folder.name
+    archive = root / "archives" / (label + ".tar.gz")
+    selected = [path for path in folder.rglob("*") if path.is_file()]
+    common = c.EVIDENCE / arm
+    for relative in [
+        "server/command.json",
+        "server/process.json",
+        "server/service.log",
+        "sidecar/command.json",
+        "sidecar/process.json",
+        "sidecar/service.log",
+        "qualification-oracle.json",
+        "npu-admission.txt",
+        "memory-admission.json",
+    ]:
+        path = common / relative
+        if path.is_file():
+            selected.append(path)
+    manifest = {
+        "schema": "pegaflow-window-capsule/v1",
+        "window": label,
+        "captured_unix": time.time(),
+        "service_log_scope": "Byte-preserved prefix through the completed window; the serving process may continue later.",
+        "files": [],
+    }
+    with tarfile.open(archive, "w:gz", compresslevel=6) as package:
+        for path in sorted(set(selected)):
+            assert (
+                path.resolve().is_relative_to(root.resolve()) and not path.is_symlink()
+            )
+            raw = path.read_bytes()
+            name = path.resolve().relative_to(root.resolve()).as_posix()
+            manifest["files"].append(
+                {
+                    "path": name,
+                    "bytes": len(raw),
+                    "sha256": hashlib.sha256(raw).hexdigest(),
+                }
+            )
+            info = tarfile.TarInfo(name)
+            info.size, info.mtime = len(raw), 0
+            package.addfile(info, io.BytesIO(raw))
+        raw = json.dumps(manifest, indent=2).encode()
+        info = tarfile.TarInfo("manifest.json")
+        info.size, info.mtime = len(raw), 0
+        package.addfile(info, io.BytesIO(raw))
+    receipt = {
+        "window": label,
+        "path": str(archive.resolve()),
+        "bytes": archive.stat().st_size,
+        "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
+        "completed_unix": time.time(),
+    }
+    c.write(folder / "checkpoint-receipt.json", receipt)
+    c.write(root / "metadata/checkpoint-pending.json", receipt)
+    update("waiting-local-checkpoint", checkpoint=receipt)
+    acknowledgement = root / "acks" / (receipt["sha256"] + ".json")
+    deadline = time.monotonic() + 300
+    while not acknowledgement.is_file():
+        if time.monotonic() > deadline:
+            raise TimeoutError(
+                "Local exact-byte checkpoint not acknowledged within 300s"
+            )
+        time.sleep(2)
+    assert json.loads(acknowledgement.read_text())["sha256"] == receipt["sha256"]
+    update("checkpoint-acknowledged", checkpoint=receipt)
+    time.sleep(15)
+
+
+def run_arm(arm, cells):
+    candidate = arm.startswith("pegaflow")
+    folder = c.EVIDENCE / arm
+    folder.mkdir(parents=True, exist_ok=False)
+    assert (
+        c.npu(folder / "npu-admission.txt").count("No running processes found in NPU")
+        == 2
+    )
+    memory = c.memory()
+    file_cache = next(
+        int(line.split()[1])
+        for line in memory["memory.stat"].splitlines()
+        if line.startswith("file ")
+    )
+    if file_cache > 16 * 1024**3:
+        for item in json.loads((ROOT / "model-expected-weights.json").read_text()):
+            descriptor = os.open(Path(c.MODEL) / item["path"], os.O_RDONLY)
+            try:
+                os.posix_fadvise(descriptor, 0, 0, os.POSIX_FADV_DONTNEED)
+            finally:
+                os.close(descriptor)
+    c.write(
+        folder / "memory-admission.json",
+        {
+            "before": memory,
+            "after": c.memory(),
+            "method": "Task-model file-cache advice before startup only; no file deletion or global drop_caches.",
+        },
+    )
+    try:
+        if candidate:
+            update("starting-pegaflow", arm=arm)
+            c.SIDECAR = c.start(
+                arm + "-sidecar",
+                [
+                    str(ROOT / ".venv/bin/pegaflow-server"),
+                    "--addr",
+                    "127.0.0.1:33892",
+                    "--http-addr",
+                    "127.0.0.1:33893",
+                    "--pool-size",
+                    "30gb",
+                    "--devices",
+                    "0,1",
+                    "--log-level",
+                    "info",
+                ],
+                folder / "sidecar",
+            )
+            c.health(c.SIDECAR, "http://127.0.0.1:33893/health", maximum=300)
+        update("starting-vllm", arm=arm)
+        c.SERVER = c.start(
+            arm + "-vllm", c.server_command(candidate), folder / "server"
+        )
+        c.health(c.SERVER, f"http://127.0.0.1:{c.PORT}/health")
+        update("sampled-quality-qualification", arm=arm)
+        qualification = qualify(arm)
+        checkpoint(arm, Path(qualification["folder"]))
+        for concurrency in cells:
+            result = c.point(arm, concurrency, 900)
+            checkpoint(arm, Path(result["folder"]))
+    finally:
+        update("stopping-owned-services", arm=arm)
+        c.stop(c.SERVER)
+        c.stop(c.SIDECAR)
+        c.SERVER = c.SIDECAR = None
+        c.npu(folder / "npu-release.txt")
+
+
+try:
+    update("waiting-plan-publication")
+    deadline = time.monotonic() + 900
+    publication = ROOT / "plan-publication.json"
+    while not publication.is_file():
+        assert time.monotonic() < deadline, "Frozen plan was not published within 900s"
+        time.sleep(2)
+    receipt = json.loads(publication.read_text())
+    assert receipt["plan_sha256"] == PLAN_SHA and receipt["commit"]
+    assert (
+        json.loads((ROOT / "diagnostic-status.json").read_text())["phase"] == "complete"
+    )
+    c.BASE_IDENTITY = c.snapshot_runtime()
+    c.write(c.EVIDENCE / "formal-runtime-identity.json", c.BASE_IDENTITY)
+    (ROOT / "durable/provenance/formal-plan.json").write_bytes(
+        (ROOT / "formal-plan.json").read_bytes()
+    )
+    run_arm("native", PLAN["cells"])
+    run_arm("pegaflow", PLAN["cells"])
+    baseline = {
+        row["concurrency"]: row
+        for row in STATUS["completed_points"]
+        if row["arm"] == "native" and not row["qualification"]
+    }
+    treatment = {
+        row["concurrency"]: row
+        for row in STATUS["completed_points"]
+        if row["arm"] == "pegaflow" and not row["qualification"]
+    }
+    gains = {
+        key: (
+            treatment[key]["output_tokens_per_second"]
+            / baseline[key]["output_tokens_per_second"]
+            - 1
+        )
+        * 100
+        for key in PLAN["cells"]
+    }
+    c.write(
+        c.EVIDENCE / "formal-initial-comparison.json",
+        {"gain_percent": gains, "baseline": baseline, "treatment": treatment},
+    )
+    confirmation = 8 if gains[8] > 0 else 16 if gains[16] > 0 else None
+    if confirmation:
+        run_arm("pegaflow-confirm", [confirmation])
+        run_arm("native-confirm", [confirmation])
+    update(
+        "complete",
+        gains_percent=gains,
+        confirmation_concurrency=confirmation,
+        completed_unix=time.time(),
+    )
+except BaseException as error:
+    traceback.print_exc()
+    update(
+        "failed",
+        error=type(error).__name__ + ": " + str(error),
+        completed_unix=time.time(),
+    )
+    for item in reversed(c.OWNED):
+        try:
+            c.stop(item)
+        except BaseException:
+            traceback.print_exc()
+    c.npu(ROOT / "durable/metadata/formal-failure-npu-release.txt")
+    raise

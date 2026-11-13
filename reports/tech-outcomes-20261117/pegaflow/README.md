@@ -83,3 +83,7 @@ python reports/tech-outcomes-20261117/pegaflow/verify_public_evidence.py --archi
 继续需要：确认 91 仍分配可用（2 卡、64 GiB 容器 RAM、30 GiB host pool）；恢复后先复核持久目录、 设备映射及全部源/模型身份，完成 Native/Candidate
 重复性诊断和真实 load/save 检查。 改动确定性、图模式或 MTP 必须两臂一致并重新固定计划。随后五档同期计时本身需 150 分钟， 加启动、资格检查、条件触发的反向复测预留约 3–4
 小时；资源与正确性检查通过前不能承诺完成时间。 完整原件恢复后另行增补，不修改本次已公开的失败记录。此提交不关闭旧 T1–T5、TailGuard/RDMA 或 SWE 质量验收。
+
+## 重启后的独立批次
+
+91 已恢复，当前批次的诊断原件及正式窗口预注册计划见 [restart-02](restart-02/README.md)。 原批次失败记录保留，不与新物理卡 3/4 的数据混合。
