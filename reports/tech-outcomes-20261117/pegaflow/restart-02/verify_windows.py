@@ -1,6 +1,7 @@
 """Recompute completed 180s qualifications and 900s observations from raw chunks."""
 
 import hashlib
+import io
 import json
 from pathlib import Path, PurePosixPath
 import tarfile
@@ -19,13 +20,21 @@ def verify():
     plan = json.loads((ROOT / "formal-plan.json").read_text(encoding="utf-8"))
     count = qualifications = requests = 0
     for item in json.loads(index.read_text(encoding="utf-8"))["windows"]:
-        archive = ROOT / item["file"]
-        raw = archive.read_bytes()
+        if "parts" in item:
+            chunks = []
+            for part in item["parts"]:
+                content = (ROOT / part["file"]).read_bytes()
+                assert len(content) == part["bytes"]
+                assert hashlib.sha256(content).hexdigest() == part["sha256"]
+                chunks.append(content)
+            raw = b"".join(chunks)
+        else:
+            raw = (ROOT / item["file"]).read_bytes()
         assert (
             len(raw) == item["bytes"]
             and hashlib.sha256(raw).hexdigest() == item["sha256"]
         )
-        with tarfile.open(archive) as package:
+        with tarfile.open(fileobj=io.BytesIO(raw), mode="r:gz") as package:
             members = {member.name: member for member in package.getmembers()}
             assert all(
                 member.isfile()

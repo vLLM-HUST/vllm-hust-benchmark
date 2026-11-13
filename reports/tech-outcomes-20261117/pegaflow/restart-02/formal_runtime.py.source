@@ -166,7 +166,33 @@ def stop(item):
 
 def health(item, url, maximum=1200):
     began = time.monotonic()
+    reclaim_records = []
     while time.monotonic() - began < maximum:
+        if item["label"].endswith("-vllm"):
+            file_cache = next(
+                int(line.split()[1])
+                for line in memory()["memory.stat"].splitlines()
+                if line.startswith("file ")
+            )
+            if file_cache > 16 * 1024**3:
+                for entry in json.loads(
+                    (ROOT / "model-expected-weights.json").read_text()
+                ):
+                    descriptor = os.open(Path(MODEL) / entry["path"], os.O_RDONLY)
+                    try:
+                        os.posix_fadvise(descriptor, 0, 0, os.POSIX_FADV_DONTNEED)
+                    finally:
+                        os.close(descriptor)
+                reclaim_records.append(
+                    {
+                        "elapsed_seconds": time.monotonic() - began,
+                        "file_cache_before_bytes": file_cache,
+                        "memory_after": memory(),
+                    }
+                )
+                write(
+                    item["folder"] / "startup-model-cache-advice.json", reclaim_records
+                )
         if not alive(item):
             raise RuntimeError(
                 f"{item['label']} exited {item['process'].returncode}; inspect service.log"

@@ -134,10 +134,19 @@ def verify():
                     json.load(package.extractfile("campaign-status.json"))["phase"]
                     == "failed"
                 )
-                oracle = json.load(
-                    package.extractfile("evidence/native/qualification-oracle.json")
-                )
-                assert oracle["valid"] is False and oracle["short"][6]["equal"] is False
+                if "evidence/native/qualification-oracle.json" in package.getnames():
+                    oracle = json.load(
+                        package.extractfile("evidence/native/qualification-oracle.json")
+                    )
+                    assert (
+                        oracle["valid"] is False
+                        and oracle["short"][6]["equal"] is False
+                    )
+                else:
+                    log = package.extractfile(
+                        "evidence/native/server/service.log"
+                    ).read()
+                    assert b"207001" in log and b"aclrtMallocHostWithCfg" in log
     return {
         "capsules": counts,
         "cross_arm_sampled_tokens_equal": True,

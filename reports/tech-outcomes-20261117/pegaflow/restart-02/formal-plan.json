@@ -269,8 +269,8 @@
     "MKL_NUM_THREADS": "2",
     "VLLM_SERVER_DEV_MODE": "1"
   },
-  "driver_sha256": "40623f770d10493e0dcd3034840be4dbab88b2ed367b9cb71b2f69b9e36d7fcf",
-  "runtime_helper_sha256": "bfd6999e15ea622f88a8fff69d7a0e50164fe1b962f289a62394343dcd26a31f",
+  "driver_sha256": "4af35c1baa65b03aefb5291d9009ffaabc0450d7af5ca8af58c3391ad4cfbd85",
+  "runtime_helper_sha256": "2e085ff9e338a739a596809e27a03e32690a3d36067a5aaec9a915031f1af5de",
   "ownership_monitor_interval_seconds": 60,
   "checkpoint_policy": "Each completed qualification/window is frozen with SHA-256 member manifest and mirrored to E: before the next window; controller waits up to 300s for byte-verified local ACK and then settles for 15s. Checkpoint work is outside timed windows.",
   "stop_on": [
@@ -286,7 +286,8 @@
   "no_eager_fallback": true,
   "rdma_enabled": false,
   "history_boundary": "Initial 0/7 workspace logs are unavailable through the rebuilt overlay. Old single-case discrepancy remains unresolved and was not reproduced in the current 20+20 short probes; two real long restores matched Native. Do not pool cohorts or promote 60s qualification throughput to a 900s result.",
-  "supersedes_plan_sha256": "24ee5f3207b110c325803d795fd7734e53af7fe04778c4346c77550154856fce",
-  "amendment_reason": "Before any 900s observation, Native case 6 still differed after the 1s wait; no external connector or cache hit was involved. Preserve both failures. Treat all short outputs as retained diagnostics and gate only actual long-prefix restore samples plus unchanged strict SWE checks. Do not tune server flags, remove workload inputs, or infer semantic equivalence.",
-  "amended_unix": 1794577831.206372
+  "supersedes_plan_sha256": "655ab63f3eab8651ef64dc9869f5a62dcc233d6dcde1ab60fc63cb4fe7db4222",
+  "amendment_reason": "Still zero formal points: Native failed CANN host allocation207001 after weight loading filled file cache despite clean pre-start admission. Preserve startup failure. Apply the same model-only readiness cache advice to both arms without changing inference flags or workload.",
+  "amended_unix": 1794578350.3422906,
+  "startup_memory_policy": "On both arms, while waiting for vLLM health only, advise POSIX_FADV_DONTNEED for the 14 task-model shards if cgroup file cache exceeds 16GiB. Record each attempt. No file deletion/global drop_caches and no such work after health or inside timed windows."
 }
