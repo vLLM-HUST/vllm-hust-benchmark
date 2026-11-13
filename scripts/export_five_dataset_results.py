@@ -37,6 +37,22 @@ for name, digest in json.loads((report / "checksums.json").read_text()).items():
 sys.path.insert(0, str(args.engine_tools / "scripts"))
 from telemetry_audit import utilization  # noqa: E402 - supplied fixed Engine tools
 
+from third_party_report import verify_campaign_bindings  # noqa: E402 - fixed Engine tools
+
+# Recheck the actual files consumed below, not merely the earlier report JSON.
+verify_campaign_bindings(run)
+reuse_binding = json.loads((run / "reused-stages.json").read_bytes())
+for origin in reuse_binding["origins"]:
+    source_root = Path(origin["source_root"])
+    for filename, field in (
+        ("campaign.json", "campaign_sha256"),
+        ("campaign-checksums.json", "campaign_seal_sha256"),
+        ("frozen-execution-plan.json", "plan_sha256"),
+    ):
+        if sha(source_root / filename) != origin[field]:
+            raise ValueError("Reused source changed before public export: " + filename)
+    verify_campaign_bindings(source_root)
+
 stage_roots = {k: Path(v) for k, v in data["reused_stage_sources"].items()}
 
 
