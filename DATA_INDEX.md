@@ -211,3 +211,8 @@ python -m pytest -q tests/test_data_index.py
 标准固定在 `docs/dataset-standards/five-datasets-v1`，两项目使用字节相同的 v1；运行目录中的旧协议不覆盖。
 `python docs/dataset-standards/five-datasets-v1/verify.py` 校验所有附件。新样本、预算、评分或 tokenizer 必须另发版本。
 网站只发布协议与来源索引，不分发题目、答案和原始研究用途 trace，也不把协议冻结当实测。
+
+## 固定五项完整结果（2026-11-13）
+
+[一键执行与完整公开指标](reports/five-datasets-standard-20261113/README.md)：
+15阶段由封存原件重新核验，新增推理0阶段；保留原日期、失败父批次与负结果。 五项范围已执行完成；HLE/Frontier评分未决及真实trace的16K输入覆盖限制仍阻止整体验收。
