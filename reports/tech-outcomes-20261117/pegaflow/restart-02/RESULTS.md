@@ -15,6 +15,7 @@ parts 顺序连接，所得大小/SHA 必须等于顶层 bytes/sha256。 验证�
 资格样本的质量边界（index 从 0 起）：
 
 - native: 短输入臂内不重复 index=[]；跨 Native 不同 index=[]；两个长前缀冷/热/恢复逐 token 一致=True。
+- pegaflow: 短输入臂内不重复 index=[]；跨 Native 不同 index=[]；两个长前缀冷/热/恢复逐 token 一致=True。
 
 短输入存在 Native 自身的不重复记录；上述短输入差异不被改写为通过或从 SWE 输入中删除。 长前缀检查仅覆盖两个 32-token 样本，不能证明完整输出的数值等价或答案正确性。 SWE
 多轮请求按各臂实际生成的 token 续接；两臂 prepared 输入与预算相同，完整动态 prompt 流仍可能随输出差异而不同。
