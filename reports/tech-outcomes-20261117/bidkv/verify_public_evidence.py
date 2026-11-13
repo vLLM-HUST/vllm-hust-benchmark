@@ -113,6 +113,20 @@ def verify():
         == (json.loads(original_manifest)["files"]["campaign81.py"])
         == correction["prior_campaign_sha256"]
     )
+    admission_path = ROOT / "native05-admission-v1/actual-admission.json"
+    if admission_path.is_file():
+        admission_raw = admission_path.read_bytes()
+        assert hashlib.sha256(admission_raw).hexdigest() == (
+            "d6d46e552b8b60e1d5450f04be1c062ebf6db213fb3a32cd594f5c7d40e0e9a6"
+        )
+        actual = json.loads(admission_raw)
+        assert actual["model_generation_requests"] == 0
+        assert actual["tokenizations_passed"] == 128
+        assert actual["binding_requested_default_true"] is True
+        assert actual["binding_warning_or_skip_seen"] is False
+        assert len(actual["actual_worker_thread_affinity"]) == 2
+        assert len(actual["controlled_originals_manifest"]) == 139
+        assert len(actual["telemetry_numeric"]) == 57
     folder = ROOT / "c8-results-v1"
     custody = read(folder / "policy-custody-index.json")
     count = 0
@@ -232,6 +246,7 @@ def verify():
         "c8_numeric_requests_recomputed": count,
         "default_mod_frozen_source_files_verified": frozen_sources,
         "zero_generation_native04_failure_receipt_verified": True,
+        "actual_native05_zero_generation_admission_verified": admission_path.is_file(),
         "original_sse_publicly_read_back": False,
         "controlled_sse_independent_verification_receipts_indexed": True,
         "aborted_cohort_receipt_counts_verified": True,

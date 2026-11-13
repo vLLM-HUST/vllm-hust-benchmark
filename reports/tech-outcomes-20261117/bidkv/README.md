@@ -11,6 +11,6 @@ solver、另共同Native judge720计划输入；模型与标准身份见计划�
 
 [旧False配置双臂C8数值原件与受控索引](c8-results-v1/README.md)已通过685条原始SSE的独立复算：Native342、Candidate343，四phase零失败，两臂均零策略调用/决策，不能据此宣称BidKV机制收益。此阶段为单独合成C8资格，不能作为新默认True配置资格、完整五项或32K稳定性通过。
 
-旧False完整流程已中止，Native发出200条、44成功、156未完成，后续两臂与judge未执行；见[逐项计数与中止原因更正](aborted-cohort01/README.md)。新默认True配置尚未完成C8或正式五项；共同稀疏卡绑定修复的首个运行包在0生成预检漏复制CANN算子资源，[失败原件与真实退出状态](native04-failure-v1/README.md)保留。资源复制修复使用原依赖与二进制，模型健康与实际绑定仍须验证。
+旧False完整流程已中止，Native发出200条、44成功、156未完成，后续两臂与judge未执行；见[逐项计数与中止原因更正](aborted-cohort01/README.md)。新默认True配置尚未完成C8或正式五项；共同稀疏卡绑定修复的首个运行包在0生成预检漏复制CANN算子资源，[失败原件与真实退出状态](native04-failure-v1/README.md)保留。资源复制修复使用原依赖与二进制，随后[Native05实际健康、128个token ID与CPU绑定](native05-admission-v1/README.md)已通过；该0生成准入不等于正式成绩。
 
 问题、答案、对话和完整SSE受控保存；公共只提交配置、数值记录、校验和及受控位置索引。所有失败及尚未执行部分保留。
