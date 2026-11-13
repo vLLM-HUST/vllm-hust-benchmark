@@ -1,7 +1,17 @@
-# PegaFlow 技术成果补证：历史索引与 2026-11-13 中断记录
+# PegaFlow 技术成果补证：重启实测与历史归档
 
-本次提交是**增补归档和失败披露**。新增正式 900 秒对照点为 **0**，没有新增可引用的吞吐提升结果。 历史五档数值可复算，但 Native/Candidate 的 seed、prepared
-workload hash、记录的 tokenizer 软件版本不同， 且测量不在同期；不能把历史发布比值升级为严格匹配的 A/B 因果收益。
+**当前按MOD专用提示词执行。**
+已发现旧配置覆盖了上游CPU绑定默认值，新profile恢复默认true并重新取得资格；旧记录保留限定配置，残批不补齐。见[MOD身份/默认优化/中止记录审计](mod-evaluation-audit.md)。
+
+重启批次已完成两臂 C1/C2/C4/C8/C16 各900秒，共 **10个正式观察点、2702条正式请求，协议失败0**。本配置各点吞吐全部回退，primary C8为
+**−43.3959%**，没有取得新增提升。
+
+[完成报告（HTML）](restart-02/completed-cohort/report.html)、[完整报告](restart-02/completed-cohort/REPORT.md)、[机器可读摘要](restart-02/completed-cohort/summary.json)、[逐窗口原件](restart-02/windows.json)、[最终运行身份/退出记录/受控输入索引](restart-02/final-sources.json)。原SWE复用负载与新增冻结五数据集分开；后续[独立容量验证计划](restart-02/capacity-probe01/README.md)只检验内存压力适用边界，不能改写本组结果。
+
+按用户新增的冻结标准，BidKV与PegaFlow均需新一轮完整五项；历史豁免不代表符合新标准。见[审计](five-datasets-v1-audit.md)、[原C8执行适配器](five-datasets-c8-driver-v1/README.md)、[完整五项执行源与固定计划](finite-driver-v1/README.md)。源码已在正式生成前公开并独立逐字节读回；CPU/C8检查不能代替五项正式完成。
+
+历史五档数值可复算，但 Native/Candidate 的 seed、prepared workload hash、记录的 tokenizer
+软件版本不同，且不在同期；历史发布比值保留，不能升级为当前配置的因果收益。初次中断与全部失败记录继续保留在下文。
 
 任务：[benchmark #664](https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/664)、
 [PegaFlow #18](https://github.com/vLLM-HUST/pegaflow-hust/issues/18)。
