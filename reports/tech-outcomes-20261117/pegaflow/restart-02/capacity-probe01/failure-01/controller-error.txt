@@ -1,0 +1,22 @@
+{"phase": "waiting-public-plan"}
+{"phase": "starting-vllm", "arm": "native"}
+{"phase": "stopping-owned-services", "arm": "native"}
+Traceback (most recent call last):
+  File "/workspace/pegaflow-capacity-probe-20261114-01/driver.py", line 119, in <module>
+    baseline=run_arm('native',180)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/pegaflow-capacity-probe-20261114-01/driver.py", line 85, in run_arm
+    c.health(c.SERVER,f'http://127.0.0.1:{c.PORT}/health')
+  File "/data/shared_upload/cybber695/pegaflow-capacity-probe-20261114-01/runtime.py", line 225, in health
+    raise TimeoutError(f"{item['label']} readiness deadline exceeded")
+TimeoutError: native-vllm readiness deadline exceeded
+{"phase": "failed", "error": "TimeoutError: native-vllm readiness deadline exceeded", "completed_unix": 1794591676.195426}
+Traceback (most recent call last):
+  File "/workspace/pegaflow-capacity-probe-20261114-01/driver.py", line 119, in <module>
+    baseline=run_arm('native',180)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/pegaflow-capacity-probe-20261114-01/driver.py", line 85, in run_arm
+    c.health(c.SERVER,f'http://127.0.0.1:{c.PORT}/health')
+  File "/data/shared_upload/cybber695/pegaflow-capacity-probe-20261114-01/runtime.py", line 225, in health
+    raise TimeoutError(f"{item['label']} readiness deadline exceeded")
+TimeoutError: native-vllm readiness deadline exceeded

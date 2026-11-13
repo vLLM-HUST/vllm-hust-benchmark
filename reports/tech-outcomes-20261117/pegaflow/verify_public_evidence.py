@@ -157,6 +157,16 @@ def verify(archive=None, native_part=None):
         if windows.is_file()
         else {"formal_900s_points": 0}
     )
+    execution_sources = {}
+    for name in ["finite-driver-v1", "pegaflow91-v1", "driver-mod-v2"]:
+        folder = ROOT / name
+        if not (folder / "source-manifest.json").is_file():
+            continue
+        sources = read(name + "/source-manifest.json")["files"]
+        for path, checksum in sources.items():
+            candidate = folder / (path + ".source" if path.endswith(".py") else path)
+            assert digest(candidate) == checksum, candidate
+        execution_sources[name] = len(sources)
     return {
         "public_files_verified": len(expected),
         "historical_candidate_requests_recomputed": requests,
@@ -164,6 +174,7 @@ def verify(archive=None, native_part=None):
         "native_full_request_stream_verified": False,
         "new_formal_900s_points": window_result["formal_900s_points"],
         "new_speedup_claim": False,
+        "frozen_execution_sources_verified": execution_sources,
         "restart02_diagnostics": restart_result,
         "restart02_windows": window_result,
         "restart02_final_sources": runpy.run_path(

@@ -1,0 +1,14 @@
+# BidKV 冻结五数据集补跑与受控证据索引
+
+**当前按MOD专用提示词执行。**
+已发现旧配置覆盖了上游CPU绑定默认值，新profile恢复默认true并重新取得资格；旧记录保留限定配置，残批不补齐。见[MOD身份/默认优化/中止记录审计](../pegaflow/mod-evaluation-audit.md)。
+
+这是用户新增指定`five-datasets-20261113-v1`后的独立实验。Issue664对历史固定成果免于重测的归档范围保留；历史EvoScientist/抢占压力成果不能替代这次五项。原历史汇总可见[固定公共记录](https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/a3d96977005f7257502ded2938a051c70de60b02/website-publication/data/dataset_validation_qwen35_bidkv.json)。
+
+两张910B2，在重启后的81物理6/7、逻辑0/1，使用官方0.23隔离实验载体[BidKV PR28](https://github.com/vLLM-HUST/vllm-hust-bidkv/pull/28)，非已发布的通用兼容路径。两臂相同prepared
+scheduler与模型预算，仅启用/关闭策略。完整五项计划与执行源见[预注册驱动](../pegaflow/finite-driver-v1/README.md)，每臂672
+solver、另共同Native judge720计划输入；模型与标准身份见计划。
+
+[本机双臂C8数值原件与受控索引](c8-results-v1/README.md)已通过685条原始SSE的独立复算：Native342、Candidate343，四phase零失败，两臂均零策略调用/决策，不能据此宣称BidKV机制收益。此阶段为单独合成C8资格，不能算完整五项或32K稳定性通过。
+
+完整五项controller已按公开源码和固定配置启动，等待/通过资格与输入门闩后自动执行。具体正式结果后续增补，不把模型加载、CPU准备或C8当作正式完成。问题、答案、对话和完整SSE受控保存；公共只提交配置、数值记录、校验和及受控位置索引。所有失败及尚未执行部分保留。

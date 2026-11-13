@@ -1,5 +1,9 @@
 # 独立的小规模容量压力验证
 
+本探针已在Native启动准入失败，未提交任何生成或计时窗口。实际HMA
+padding后262144上下文至少需3.07GiB，给定3.0GiB不足；原估算过低。API父进程未退出，旧health控制未即时识别已见fatal，最终触发1200秒timeout。完整[失败摘要](failure-01/failure-summary.json)、[fatal/准备日志摘录](failure-01/fatal-and-preparation-extract.txt)、[受控原件索引](failure-01/controlled-originals-index.json)保留；吞吐未测为null。旧detached
+launcher未捕获实际wait exit code，明确保留未知，不推填1。原计划/源码不改写，不追加旧false4GiB重跑；先按用户新MOD要求保留默认CPU绑定true另做资格与五项。
+
 本计划在取得结果前公开，不能改写已完成的 KV20GiB/rank 五档负结果，也不替代冻结五数据集。原模型、运行时、TP2、prepared 输入和全部声明的 context262144
 保持一致；仅两臂 KV20GiB/rank 改为3GiB/rank，继续启用当前 HMA 安全逻辑，Candidate host pool30GiB。
 

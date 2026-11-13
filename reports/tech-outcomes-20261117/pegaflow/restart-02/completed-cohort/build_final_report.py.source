@@ -1,0 +1,197 @@
+"""Derive the completed original SWE cohort report from byte-verified windows."""
+import argparse
+import hashlib
+import html
+import io
+import json
+import math
+from pathlib import Path
+import re
+import runpy
+import statistics
+import tarfile
+
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[2]/'work/benchmark-pr'
+PARSER = argparse.ArgumentParser(description=__doc__)
+PARSER.add_argument('--input', type=Path, default=REPO/'reports/tech-outcomes-20261117/pegaflow/restart-02')
+PARSER.add_argument('--out', type=Path, default=HERE/'final-report-stage')
+ARGS = PARSER.parse_args()
+INPUT = ARGS.input
+OUT = ARGS.out
+OUT.mkdir(exist_ok=True)
+
+
+def write(name, value):
+    (OUT/name).write_text(value, encoding='utf-8', newline='\n')
+
+
+def metrics(raw):
+    result = {}
+    for line in raw.decode().splitlines():
+        found = re.match(r'^([^#\s{]+)(?:\{.*\})?\s+([-+\d.eE]+)$', line)
+        if found:
+            key, value = found.groups()
+            result[key] = result.get(key, 0.)+float(value)
+    return result
+
+
+def delta(package, before, after):
+    left, right = (metrics(package.extractfile(name).read()) for name in [before, after])
+    return {key: right[key]-left[key] for key in right if key in left and key.endswith(('_total', '_sum', '_count'))}
+
+
+verification = runpy.run_path(str(INPUT/'verify_windows.py'))['verify']()
+assert verification['formal_900s_points'] == 10 and verification['qualification_points'] == 2
+custody = json.loads((INPUT/'final-sources.json').read_bytes())
+final_bytes = b''.join((INPUT/part['file']).read_bytes() for part in custody['parts'])
+assert hashlib.sha256(final_bytes).hexdigest() == custody['sha256']
+with tarfile.open(fileobj=io.BytesIO(final_bytes)) as final_archive:
+    status = json.load(final_archive.extractfile('root/campaign-status.json'))
+assert status['phase'] == 'complete' and status['confirmation_concurrency'] is None
+index = json.loads((INPUT/'windows.json').read_bytes())
+plan = json.loads((INPUT/'formal-plan.json').read_bytes())
+records, mechanisms = {}, []
+for item in index['windows']:
+    result = item['result']
+    if result['qualification']:
+        continue
+    raw = b''.join((INPUT/part['file']).read_bytes() for part in item['parts']) if item.get('parts') else (INPUT/item['file']).read_bytes()
+    assert hashlib.sha256(raw).hexdigest() == item['sha256']
+    with tarfile.open(fileobj=io.BytesIO(raw)) as archive:
+        name = next(member.name for member in archive.getmembers() if member.name.endswith('/result-receipt.json'))
+        prefix = name.removesuffix('result-receipt.json')
+        requests = [json.loads(line) for line in archive.extractfile(prefix+'client/requests.jsonl') if line.strip()]
+        completed = [row for row in requests if row['end'] <= 900]
+        assert len(completed) == result['requests_completed_in_window']
+        first = [row['ttft_seconds'] for row in completed]
+        tpot = [(row['end']-row['first_token'])/(row['usage']['completion_tokens']-1) for row in completed if row['usage']['completion_tokens'] > 1]
+        row = {**result, 'mean_ttft_seconds_completed_in_window': statistics.mean(first),
+               'mean_tpot_seconds_completed_in_window': statistics.mean(tpot),
+               'tpot_samples': len(tpot), 'tpot_excluded_le_one': len(completed)-len(tpot),
+               'raw_sha256': item['sha256'], 'raw_bytes': item['bytes']}
+        records[(row['arm'], row['concurrency'])] = row
+        counters = delta(archive, prefix+'vllm-metrics-before.txt', prefix+'vllm-metrics-after.txt')
+        selected = {key: value for key, value in counters.items() if any(tag in key for tag in ['prefix_cache_', 'num_preemptions', 'pega_load_', 'pega_save_'])}
+        mechanism = {'arm': row['arm'], 'concurrency': row['concurrency'], 'engine_metric_deltas': selected,
+                     'raw_window_sha256': item['sha256']}
+        if row['arm'] == 'pegaflow':
+            mechanism['sidecar_metric_deltas'] = delta(archive, prefix+'pegaflow-metrics-before.txt', prefix+'pegaflow-metrics-after.txt')
+        mechanisms.append(mechanism)
+
+comparison = []
+for concurrency in [1, 2, 4, 8, 16]:
+    native, candidate = records['native', concurrency], records['pegaflow', concurrency]
+    ratio = candidate['output_tokens_per_second']/native['output_tokens_per_second']
+    comparison.append({'concurrency': concurrency, 'native': native, 'pegaflow': candidate,
+                       'throughput_ratio': ratio, 'throughput_change_percent': 100*(ratio-1),
+                       'same_rate_generated_token_cost_ratio': 1/ratio,
+                       'ttft_mean_change_percent': 100*(candidate['mean_ttft_seconds_completed_in_window']/native['mean_ttft_seconds_completed_in_window']-1),
+                       'tpot_mean_change_percent': 100*(candidate['mean_tpot_seconds_completed_in_window']/native['mean_tpot_seconds_completed_in_window']-1)})
+
+summary = {'schema': 'pegaflow-original-swe-completed-cohort/v1', 'profile': plan['experiment'],
+           'scope': 'Original SWE cache-reuse study only; not frozen five-dataset standard',
+           'common_configuration_difference_from_upstream_defaults': {
+               'enable_cpu_binding': {'upstream_default': True, 'actual_both_arms': False,
+                                      'necessity_established': False,
+                                      'scope': 'Disclosed custom configuration; does not qualify the corrected default-enabled MOD profile'}},
+           'plan_sha256': hashlib.sha256((INPUT/'formal-plan.json').read_bytes()).hexdigest(),
+           'expected_900s_windows': 10, 'completed_900s_windows': 10, 'failed_900s_windows': 0,
+           'formal_requests_retained': sum(row['requests_started'] for row in records.values()),
+           'protocol_failed_requests': 0, 'independent_raw_verification': verification,
+           'comparison': comparison, 'mechanism_deltas': mechanisms,
+           'geometric_mean_throughput_change_percent': 100*(math.exp(statistics.mean(math.log(row['throughput_ratio']) for row in comparison))-1),
+           'reverse_confirmation': {'triggered': False, 'reason': 'Neither predeclared C8 nor C16 gain was positive'},
+           'limits': [plan['quality_scope'],
+                      'Within-session histories continue each arm actual generated tokens; the dynamic prompt streams need not be identical.',
+                      'One window per point, Native cohort before Candidate, no confidence interval or repeatability claim.',
+                      'TTFT/TPOT summaries here use successful requests completed inside the old900s window, not the new finite-batch population.',
+                      'No SWE solving accuracy, full five-dataset quality, 32K stability or universal cache numeric-equivalence claim.'],
+           'cost': {'absolute_CNY_estimate': None, 'quote_basis': 'No new quote or actual bill established for this cohort',
+                    'relative_only': 'Same two-card allocation, equal rate,900s serving-window token cost ratio is Native tok/s divided by Candidate tok/s; excludes startup, judge and other billing periods.',
+                    'multi_tenant_utilization_verified': False},
+           'four_target_scope': {'3.4.1': 'unverified: no same-effective-work FLOP/reference admission',
+                                 '3.4.2': 'this workload provides no throughput-improvement support; all five ratios below1',
+                                 '3.4.3': 'unverified: observed long prompts and finite window tails do not establish the separate>=32K stability gate',
+                                 '3.4.4': 'this equal-rate serving-window calculation worsens per-token cost; applicable quote and multi-tenant utilization remain unverified'},
+           'controller_wall_seconds': status['completed_unix']-status['started_unix']}
+write('summary.json', json.dumps(summary, ensure_ascii=False, indent=2)+'\n')
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+matplotlib.rcParams.update({'svg.hashsalt': 'pegaflow-restart02-final', 'font.size': 10})
+figure, axes = plt.subplots(1, 2, figsize=(11.4, 4.6), layout='constrained', gridspec_kw={'width_ratios': [1.4, 1]})
+x = list(range(5))
+axes[0].plot(x, [row['native']['output_tokens_per_second'] for row in comparison], marker='o', color='#245b91', label='Native')
+axes[0].plot(x, [row['pegaflow']['output_tokens_per_second'] for row in comparison], marker='s', color='#ba612c', label='PegaFlow')
+axes[0].set(xticks=x, xticklabels=['1', '2', '4', '8', '16'], xlabel='Closed-loop concurrency', ylabel='Accepted output tokens/s', ylim=(0, 325), title='Original SWE reuse workload;900s per point')
+axes[0].legend(frameon=False)
+axes[0].grid(axis='y', alpha=.2)
+bars = axes[1].bar(x, [row['throughput_change_percent'] for row in comparison], color='#b14949', width=.65)
+axes[1].set(xticks=x, xticklabels=['C1', 'C2', 'C4', 'C8', 'C16'], ylim=(-53, 3), ylabel='Throughput change (%)', title='Every paired point regressed')
+axes[1].axhline(0, color='#555', linewidth=.8)
+for bar, row in zip(bars, comparison):
+    axes[1].text(bar.get_x()+bar.get_width()/2, bar.get_height()-2, f"{row['throughput_change_percent']:.1f}%", ha='center', va='top', fontsize=9)
+figure.suptitle('Qwen3.5-35B-A3B BF16 |2x910B2,TP2 |KV20GiB/rank', fontsize=12)
+figure.savefig(OUT/'throughput.png', dpi=160)
+figure.savefig(OUT/'throughput.svg', metadata={'Date': None})
+plt.close(figure)
+
+rows = []
+for row in comparison:
+    native, candidate = row['native'], row['pegaflow']
+    rows.append(f"| C{row['concurrency']} | {native['output_tokens_per_second']:.6f} | {candidate['output_tokens_per_second']:.6f} | {row['throughput_change_percent']:+.4f}% | {native['ttft_seconds_p95']:.3f} / {candidate['ttft_seconds_p95']:.3f} | {native['requests_started']} / {candidate['requests_started']} |")
+table = '\n'.join(['| 并发 | Native tok/s | PegaFlow tok/s | 变化 | TTFT P95秒 Native/Pega | 保留请求数 Native/Pega |', '| --- | ---: | ---: | ---: | ---: | ---: |']+rows)
+text = f'''# restart-02 原 SWE 复用实验完成报告
+
+本配置完成两臂 C1/C2/C4/C8/C16 各900秒，共10个观察点、{summary['formal_requests_retained']}条正式请求，协议失败0。全部吞吐比值为负，primary C8下降43.3959%；没有取得可引用的提升。预注册规则只在C8、否则C16正向时倒序确认，两者均负，因此未触发该确认。后续容量探针另立profile，不能改写本组结果。
+
+[可下载HTML报告](report.html)、[机器可读摘要](summary.json)、[原件索引](../windows.json)、[完整逐点表](../RESULTS.md)、[最终环境/退出证据与受控输入索引](../final-sources.json)。全部12个原始窗口（含两资格）的{verification['requests_verified']}条请求已重新核验token数量、usage、预算和流完成，正式窗口吞吐从chunk时间重算。完整输入只保存在受控原件中，公共验证器明确区分SHA/清单核验和原输入字节复核。
+
+{table}
+
+![本轮全部吞吐与比值](throughput.png)
+
+## 身份、负载与计量
+
+模型Qwen3.5-35B-A3B BF16，修订`{plan['model_revision']}`；两张Ascend910B2，物理3/4、逻辑0/1，TP2/PP1/DP1、EP关闭，容器64GiB/8CPU；每rank KV20GiB、Pega host pool30GiB、context262144、maxseq16、batch4096、MTP2、FULL_AND_PIECEWISE。两臂官方vLLM`{plan['runtime_identity']['vllm']['commit']}`、Ascend`{plan['runtime_identity']['vllm_ascend']['commit']}`，PegaFlow执行源码`{plan['pegaflow_commit']}`，精确命令、包版本和二进制SHA在原件中。
+
+两臂均显式设置enable_cpu_binding=false。后来按用户提供的MOD专用提示词核对，确认上游默认是true，且8CPU只是quota、实际affinity仍0–191，没有必须关闭的证据。因此本组只代表已披露的自定义配置，不当作保留默认优化的新MOD profile；新defaultTrue profile另取C8资格并独立执行，不改写本组原件或分数。
+
+原SWE多轮复用协议有8会话、360轮，保持原prepared输入及逐轮输出预算，按各臂实际输出token续接历史。吞吐分母固定900秒，分子仅chunk时间落在[0,900)的实际生成token；在途请求另行排空。TTFT P95沿原协议仅统计窗口内完成请求。summary另给同一旧总体的平均TTFT/TPOT；不能将它们当作新冻结五数据集的全有限批次统计。
+
+## 质量、性能机制与边界
+
+两组长前缀7551/8712-token的32-token冷/热/真实外部恢复样本逐token一致，实际外部加载与零save/load失败门槛均通过。此前两次Native未命中缓存短输入不重复的失败仍保留；在任何正式成绩前已把短样本改为完整保留的诊断项。有限样本通过不证明普遍数值等价或SWE解题正确率。完整动态prompt流可能随各臂输出不同；该观测不是固定输出逐token回放或重复统计实验。
+
+源码为保证HMA安全性关闭Pega本地前缀命中。C8 Native本地prefix命中8,798,208/10,524,398；Candidate本地命中0，外部命中3,657,728/4,771,028，并加载约96.9GB host数据。两臂原配置Native实际抢占为0。这些计数和源码说明外部恢复成本与本地APC收益的差异，属于有证据支持的机制解释，尚不是把单一因素隔离出来的因果实验。全部逐窗口计数由原metrics重新求差，见summary。
+
+## 费用与验收范围
+
+仅假设两臂卡数/费率相同、只计各900秒服务窗口，则单位生成token成本比值等于Native吞吐/Pega吞吐；C8约1.767，即成本上升约76.7%。没有据此虚构本机账单或新报价，未把启动、judge或其它租用区间计入该窗口。高多租户利用率未验证。
+
+3.4.1单芯片有效算力：未建立同有效工作参考/FLOP证据，未验证。3.4.2吞吐/时延目标：本负载全部吞吐回退，不支持吞吐提升目标。3.4.3长上下文稳定性：观测到长prompt不等于通过单独的>=32K稳定性门槛，未验证。3.4.4成本/利用率：本窗口同价token成本恶化；报价适用性和高多租户利用率仍未验证。此报告不关闭T1–T5、RDMA/TailGuard或五数据集验收。
+
+本报告的原SWE复用实验与`five-datasets-20261113-v1`完整五项分开。后者按用户新增要求在81/91各自项目内进行Native/插件比较，不能继承本报告或Engine历史成绩。
+
+复算本目录：将`build_final_report.py.source`恢复为`.py`，安装Matplotlib3.10.8后执行`python build_final_report.py --input .. --out rebuilt`。只读取公共窗口、验证器及最终元数据包，不需要受控原始问题。
+'''
+write('REPORT.md', text)
+html_rows = ''.join('<tr>'+''.join('<td>'+html.escape(value.strip())+'</td>' for value in row.strip('|').split('|'))+'</tr>' for row in rows)
+page = f'''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PegaFlow restart-02 结果报告</title>
+<style>body{{font:15px/1.7 system-ui,"Microsoft YaHei",sans-serif;color:#1b2939;background:#f2f5f8;margin:0}}main{{max-width:1100px;margin:32px auto;background:white;padding:32px;border-radius:12px}}h1{{font-size:26px;line-height:1.4}}h2{{font-size:19px;margin-top:28px}}.badge{{color:#9c3535;background:#fce9e9;display:inline-block;padding:4px 12px;border-radius:4px}}img{{width:100%;height:auto}}table{{border-collapse:collapse;width:100%;font-size:14px}}td,th{{border-bottom:1px solid #dae1e8;padding:9px;text-align:right}}td:first-child,th:first-child{{text-align:left}}a{{color:#245b91}}code{{overflow-wrap:anywhere}}.note{{color:#526174}}@media(max-width:700px){{main{{margin:0;padding:18px}}table{{font-size:12px}}td,th{{padding:5px}}}}</style>
+<main><span class="badge">全部五档吞吐回退 · 完整保留</span><h1>PegaFlow：原 SWE 多轮复用实验<br>restart-02 完成报告</h1>
+<p>10个900秒观察点；{summary['formal_requests_retained']}条正式请求；协议失败0。C8：289.576667 →163.912222 tok/s（−43.3959%）。C8与C16均负，未触发预注册的正向倒序确认。</p>
+<p class="note">Qwen3.5-35B-A3B BF16 · 双卡910B2/TP2 · KV20GiB/rank · Candidate host pool30GiB。单窗观察，未随机交错，无重复置信区间。</p>
+<p class="note">两臂显式关闭CPU绑定，与上游默认true不同，缺少必要性证据；本报告限定该自定义配置，不替代按新MOD要求恢复默认绑定后的实验资格或结果。</p>
+<img src="throughput.svg" alt="Native与PegaFlow五档吞吐及全部负比值"><table><thead><tr><th>并发</th><th>Native tok/s</th><th>PegaFlow tok/s</th><th>变化</th><th>TTFT P95秒 N/P</th><th>请求数 N/P</th></tr></thead><tbody>{html_rows}</tbody></table>
+<h2>原件与计量</h2><p>吞吐从原始chunk时间[0,900)内的实际生成token重算，完整排空另计。TTFT P95使用原协议的窗口内完成请求总体；新五数据集使用独立的有限批次定义。两资格与正式窗口共{verification['requests_verified']}条请求已逐条核验。配置、原始包、SHA和验证器可追溯。</p>
+<p><a href="../windows.json">逐窗口原件清单</a> · <a href="summary.json">机器可读结果</a> · <a href="REPORT.md">完整报告与命令身份</a> · <a href="../final-sources.json">最终环境、退出记录及受控输入索引</a></p>
+<h2>质量与机制解释</h2><p>两个长前缀冷/热/真实外部恢复样本逐token一致，零save/load失败。此前Native短样本不重复的失败保留；32-token样本不能证明普遍数值等价或SWE解题质量。各臂按实际生成token续接历史，动态prompt可能不同。</p>
+<p>当前HMA安全逻辑关闭Pega本地前缀命中；C8 Native本地命中约83.6%，Candidate本地0、外部约76.7%，从host加载约96.9GB。原Native没有抢占，外部恢复在该负载下增加成本。该解释有源码/计数支持，单因果机制仍需独立容量实验确认。</p>
+<h2>费用与四项目标</h2><p>同卡数、同费率且只计900秒服务窗口，C8单位生成token成本约为Native的1.767倍；没有据此声称本机账单。有效算力参考、>=32K长稳、报价适用性和多租户利用率未验证；本轮吞吐回退不支持提升目标。完整执行不等于四目标通过。</p>
+<p class="note">本报告仅覆盖原SWE复用协议；不替代冻结五数据集，也不关闭T1–T5或RDMA/TailGuard验收。原始题目和对话受控保存，公共清单核对其身份，不宣称公开读回受限输入。</p></main></html>'''
+write('report.html', page+'\n')
+print(json.dumps({'formal_requests': summary['formal_requests_retained'], 'raw_requests_verified': verification['requests_verified'],
+                  'geometric_mean_change_percent': summary['geometric_mean_throughput_change_percent'], 'output': str(OUT)}))
