@@ -1,0 +1,65 @@
+import json
+from pathlib import Path
+import time
+import urllib.error
+import urllib.request
+
+
+def run(root, evidence, arm, port):
+    base = f'http://127.0.0.1:{port}'
+    record = {'arm': arm, 'started_unix': time.time(), 'results': [], 'reset_results': []}
+    output = evidence / arm / 'token-oracle.json'
+
+    def post(path, body=None):
+        data = b'' if body is None else json.dumps(body).encode()
+        request = urllib.request.Request(base + path, data=data, headers={'Content-Type': 'application/json'}, method='POST')
+        with urllib.request.urlopen(request, timeout=180) as response:
+            content = response.read()
+            return json.loads(content) if content else None
+
+    def complete(prompt, salt):
+        response = post('/v1/completions', {'model': 'pegaflow-techoutcomes-qwen35', 'prompt': prompt, 'max_tokens': 32,
+            'temperature': 0, 'seed': 17, 'ignore_eos': True, 'return_token_ids': True, 'cache_salt': salt, 'stream': False})
+        choice = response['choices'][0]
+        tokens = choice.get('token_ids')
+        assert isinstance(tokens, list) and len(tokens) == 32, 'Missing or incomplete oracle output IDs'
+        assert response['usage']['completion_tokens'] == 32
+        return {'token_ids': tokens, 'usage': response['usage'], 'finish_reason': choice['finish_reason']}
+
+    try:
+        with urllib.request.urlopen(base + '/metrics', timeout=10) as response:
+            record['metrics_before'] = response.read().decode()
+        sessions = json.loads((root / 'prepared-qwen35.json').read_text())['sessions']
+        golden_file = evidence / 'native-qualification/token-oracle.json'
+        golden = None if arm == 'native-qualification' else json.loads(golden_file.read_text())
+        for index, session in enumerate(sessions):
+            prompt = session['turns'][0]['input_ids']
+            salt = f'pegaflow-techoutcomes-oracle-20261113-{index}'
+            cold = complete(prompt, salt)
+            try:
+                post('/reset_prefix_cache')
+                reset = {'supported': True}
+            except urllib.error.HTTPError as error:
+                if error.code not in [403, 404, 405]:
+                    raise
+                reset = {'supported': False, 'http_status': error.code}
+            record['reset_results'].append(reset)
+            time.sleep(1)
+            warm = complete(prompt, salt)
+            result = {'index': index, 'prompt_tokens': len(prompt), 'cold': cold, 'warm': warm, 'equal_cold_warm': cold['token_ids'] == warm['token_ids']}
+            if golden:
+                result['equal_native'] = cold['token_ids'] == golden['results'][index]['cold']['token_ids'] == warm['token_ids']
+            record['results'].append(result)
+            output.write_text(json.dumps(record, indent=2))
+            assert result['equal_cold_warm'], f'Cold/warm token disagreement in oracle case {index}'
+            if golden:
+                assert result['equal_native'], f'Native/candidate token disagreement in oracle case {index}'
+        with urllib.request.urlopen(base + '/metrics', timeout=10) as response:
+            record['metrics_after'] = response.read().decode()
+        record.update(valid=True, completed_unix=time.time())
+        output.write_text(json.dumps(record, indent=2))
+        return record
+    except BaseException as error:
+        record.update(valid=False, error=type(error).__name__ + ': ' + str(error), completed_unix=time.time())
+        output.write_text(json.dumps(record, indent=2))
+        raise

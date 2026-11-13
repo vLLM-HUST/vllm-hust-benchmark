@@ -1,0 +1,68 @@
+--- a/pegaflow-common/src/numa.rs
++++ b/pegaflow-common/src/numa.rs
+@@ -493,6 +493,23 @@
+             .collect();
+     }
+ 
++    // Container device nodes retain physical IDs while CANN exposes a dense
++    // logical index set. Resolve topology using the leased physical devices.
++    if let Ok(entries) = fs::read_dir("/dev") {
++        let devices = npu_device_ids_from_nodes(
++            entries
++                .filter_map(Result::ok)
++                .map(|entry| entry.file_name().to_string_lossy().into_owned()),
++        );
++        if !devices.is_empty() {
++            return devices
++                .into_iter()
++                .enumerate()
++                .map(|(logical, physical)| (logical as u32, get_npu_numa_node(physical)))
++                .collect();
++        }
++    }
++
+     let count = match get_npu_device_count() {
+         Some(n) => n,
+         None => return Vec::new(),
+@@ -501,6 +518,41 @@
+     (0..count)
+         .map(|device_id| (device_id, get_npu_numa_node(device_id)))
+         .collect()
++}
++
++fn npu_device_ids_from_nodes<I, S>(names: I) -> Vec<u32>
++where
++    I: IntoIterator<Item = S>,
++    S: AsRef<str>,
++{
++    let mut devices: Vec<u32> = names
++        .into_iter()
++        .filter_map(|name| name.as_ref().strip_prefix("davinci")?.parse().ok())
++        .collect();
++    devices.sort_unstable();
++    devices.dedup();
++    devices
++}
++
++#[cfg(test)]
++mod sparse_container_device_tests {
++    use super::npu_device_ids_from_nodes;
++
++    #[test]
++    fn sparse_device_nodes_preserve_physical_ids_and_ignore_control_nodes() {
++        assert_eq!(
++            npu_device_ids_from_nodes([
++                "davinci7",
++                "davinci_manager",
++                "davinci0",
++                "davinci7",
++                "davinci0_mng",
++                "unrelated",
++            ]),
++            vec![0, 7]
++        );
++        assert!(npu_device_ids_from_nodes(["davinci_manager", "davinci"]).is_empty());
++    }
+ }
+ 
+ // ============================================================================
