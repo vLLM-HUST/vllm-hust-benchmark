@@ -4,6 +4,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import runpy
 import statistics
 
 ROOT = Path(__file__).resolve().parent
@@ -80,6 +81,18 @@ def verify():
             )
             assert hashlib.sha256(candidate.read_bytes()).hexdigest() == checksum
         frozen_sources[source_directory.name] = len(sources)
+    analysis_sources = read(ROOT / "analysis-v2/analysis-manifest.json")["files"]
+    for name, checksum in analysis_sources.items():
+        stored_name = "original-README.md.source" if name == "README.md" else name
+        assert (
+            hashlib.sha256(
+                (ROOT / "analysis-v2" / stored_name).read_bytes()
+            ).hexdigest()
+            == checksum
+        )
+    current_c8 = runpy.run_path(str(ROOT / "verify_current_c8.py"))["verify"](
+        ROOT / "c8-results-v2", ROOT / "driver-mod-v4"
+    )
     failure_raw = (ROOT / "native04-failure-v1/failure-capsule.json").read_bytes()
     assert hashlib.sha256(failure_raw).hexdigest() == (
         "39b6fc5658aa892b16ee511cb963e87351f4eaf5f4acad7f54237664a4a5888b"
@@ -247,6 +260,8 @@ def verify():
         "default_mod_frozen_source_files_verified": frozen_sources,
         "zero_generation_native04_failure_receipt_verified": True,
         "actual_native05_zero_generation_admission_verified": admission_path.is_file(),
+        "analysis_only_frozen_members_verified": len(analysis_sources),
+        "default_true_c8": current_c8,
         "original_sse_publicly_read_back": False,
         "controlled_sse_independent_verification_receipts_indexed": True,
         "aborted_cohort_receipt_counts_verified": True,

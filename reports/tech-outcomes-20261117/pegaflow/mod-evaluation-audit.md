@@ -57,3 +57,7 @@ CPU测试通过。原安装树不改、不重建算子、不换SDK；CPU准备�
 
 [81 Native05真实零生成准入](../bidkv/native05-admission-v1/README.md)随后通过健康和128个token
 ID核验，两worker实际绑定且无warning/skip；初始化约598秒、57次10秒间隔的数值采样及139份受控原件索引公开。此项只覆盖Native05模型准入，不提前宣称双臂C8或完整五项通过，也不把利用率当有效FLOP、把迁移尝试日志当迁移成功。
+
+后续截至2026-11-14
+07:30+08，81双臂C8已通过实际生命周期门闩；[新True数字快照](../bidkv/c8-results-v2/README.md)当前先公开Native334条独立复算，Candidate另审。Native全部672
+solver与BidKV前三项560条已完成stage，剩余回放和共同judge继续；尚未独立复算的初步数值不写成正式机制收益。原HLE每臂2条额外synthetic视觉资格另计，不放入672/720或solver窗口，说明见[分析合同](../bidkv/analysis-v2/README.md)。
