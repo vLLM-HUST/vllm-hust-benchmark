@@ -371,6 +371,66 @@
         }
       ],
       "storage": "Concatenate parts in manifest order to recover the byte-identical original .tar.gz; the file field names the reconstructed archive."
+    },
+    {
+      "window": "pegaflow-qualification-c2-180s",
+      "file": "windows/pegaflow-qualification-c2-180s.tar.gz",
+      "bytes": 402108,
+      "sha256": "fb608c6d14b56f9dd4027c9c6d31616a41d52653bb0285c47e6419089b1ff61a",
+      "classification": "qualification-only",
+      "result": {
+        "arm": "pegaflow",
+        "concurrency": 2,
+        "qualification": true,
+        "valid": true,
+        "measurement_seconds": 180.0,
+        "requests_started": 53,
+        "max_prompt_tokens_observed": 20311,
+        "prompt_tokens_p50": 9605.0,
+        "max_turn_index_reached": 16,
+        "distinct_trajectories_started": 4,
+        "sessions_completed": 2,
+        "requests_completed_in_window": 51,
+        "requests_drained": 2,
+        "failed_requests": 0,
+        "observed_output_tokens_in_window": 22359,
+        "output_tokens_per_second": 124.21666666666667,
+        "output_tokens_per_second_per_chip": 62.108333333333334,
+        "decode_tokens_per_second_p90": 103.61000913973312,
+        "decode_speed_samples": 51,
+        "ttft_seconds_p95": 2.073856450999301,
+        "client_inflight_seconds": {
+          "0": 0.00012231400251039304,
+          "1": 0.1235316649908782,
+          "2": 179.8763460210066
+        },
+        "mean_client_inflight": 1.9993123539278006,
+        "full_concurrency_fraction": 0.9993130334500367,
+        "drain_seconds": 7.3791349140010425,
+        "aborted": false,
+        "planned_measurement_seconds": 180.0,
+        "mechanism_delta": {
+          "pega_load_success_total": 76.0,
+          "pega_save_success_total": 222.0,
+          "pega_load_failure_total": 0.0,
+          "pega_save_failure_total": 0.0
+        }
+      },
+      "local_verification": {
+        "window": "pegaflow-qualification-c2-180s",
+        "sha256": "fb608c6d14b56f9dd4027c9c6d31616a41d52653bb0285c47e6419089b1ff61a",
+        "bytes": 402108,
+        "verified_unix": 1794584358.392288,
+        "files_verified": 28,
+        "requests_verified": 53,
+        "tokens_recomputed": 22359
+      },
+      "sampled_quality": {
+        "short_repeatability_mismatches": [],
+        "short_cross_arm_mismatches": [],
+        "long_prefix_samples_equal": true,
+        "quality_scope": "Strict SWE prompt/token-budget/stream checks and two bitwise-equal long-prefix restore samples with real external loads. Native-only uncached short case 6 was nonrepeatable in both archived attempts, including with 1s settling. All 8 short cases remain in the diagnostic and timed workload. Their differences are disclosed; no universal token equivalence, SWE solving accuracy, or causal explanation is established. Throughput is an observation under these quality limits."
+      }
     }
   ]
 }
