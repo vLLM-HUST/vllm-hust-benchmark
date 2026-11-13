@@ -1,0 +1,182 @@
+{
+  "scope": "Trace-ahead Azure Code schedule; selected peak cohort and full-window comparison reported separately",
+  "mechanism_pass": true,
+  "checks": {
+    "valid_request_and_resource_evidence": true,
+    "one_tick_with_three_new_jobs": true,
+    "all_ready_by_limit": true,
+    "slots_3_and_4_each_served_minimum": true,
+    "has_verified_release": true,
+    "within_model_npu_seconds": true
+  },
+  "budget": {
+    "upper_bound_npu_seconds": 2418.101861000061,
+    "accounting": "conservative-submission-to-confirmed-release",
+    "device_seconds_upper_bound": 2418.101861000061,
+    "average_devices_upper_bound": 1.8318953492424705,
+    "peak_devices_upper_bound": 4,
+    "unclosed_intervals": 1,
+    "window_seconds": 1320.0,
+    "exact_scheduler_allocation": "NOT_MEASURED"
+  },
+  "first_four_ready_elapsed_seconds": 894.478413105011,
+  "batch_ticks": [
+    {
+      "elapsed": 800.7840173244476,
+      "jobs": [
+        {
+          "replica": "scheduled-inference-model-replica-2",
+          "replica_job_id": "myc-instance-schedule-r2-scheduled-inference-model-replica-2-execution-2"
+        },
+        {
+          "replica": "scheduled-inference-model-replica-3",
+          "replica_job_id": "myc-instance-schedule-r2-scheduled-inference-model-replica-3-execution-1"
+        },
+        {
+          "replica": "scheduled-inference-model-replica-4",
+          "replica_job_id": "myc-instance-schedule-r2-scheduled-inference-model-replica-4-execution-1"
+        }
+      ]
+    }
+  ],
+  "confirmed_releases": [
+    {
+      "job": "myc-instance-schedule-r2-scheduled-inference-model-replica-2-execution-1",
+      "elapsed": 505.2345507144928
+    },
+    {
+      "job": "myc-instance-schedule-r2-scheduled-inference-model-replica-4-execution-1",
+      "elapsed": 992.7973597049713
+    },
+    {
+      "job": "myc-instance-schedule-r2-scheduled-inference-model-replica-3-execution-1",
+      "elapsed": 995.856347322464
+    },
+    {
+      "job": "myc-instance-schedule-r2-scheduled-inference-model-replica-2-execution-2",
+      "elapsed": 1007.0630433559418
+    }
+  ],
+  "all_release_envelopes_met": true,
+  "peak": {
+    "arrival_interval_seconds": [
+      930,
+      960
+    ],
+    "slot_routes": {
+      "3": 89,
+      "4": 78
+    },
+    "all_routes_by_job": {
+      "myc-instance-schedule-r2-scheduled-inference-model-replica-2-execution-2": 86,
+      "myc-instance-schedule-r2-scheduled-inference-model-replica-3-execution-1": 89,
+      "myc-instance-schedule-r2-scheduled-inference-model-replica-1-execution-1": 81,
+      "myc-instance-schedule-r2-scheduled-inference-model-replica-4-execution-1": 78
+    },
+    "scheduled": {
+      "requests": 334,
+      "successful_requests": 334,
+      "completion_fraction": 1.0,
+      "request_throughput_per_second": 11.133333333333333,
+      "output_tokens_per_second": 304.93333333333334,
+      "slo_satisfying_requests": 191,
+      "slo_goodput_per_second": 6.366666666666666,
+      "inter_token_latency_seconds": {
+        "samples": 8737,
+        "mean": 0.09244469954797765,
+        "p50": 0.06490396335721016,
+        "p95": 0.3210605658590793,
+        "p99": 0.4823906964808702
+      },
+      "arrival_lag_seconds": {
+        "samples": 334,
+        "mean": 0.006181730481678854,
+        "p50": 0.005829453468322754,
+        "p95": 0.00840610265731809,
+        "p99": 0.01460359096527101
+      },
+      "latency_seconds": {
+        "samples": 334,
+        "mean": 2.9276664208085417,
+        "p50": 1.9938556170091033,
+        "p95": 7.483829222060733,
+        "p99": 15.663030154816846
+      },
+      "ttft_seconds": {
+        "samples": 334,
+        "mean": 0.5086432077592897,
+        "p50": 0.38311288971453905,
+        "p95": 1.2562830879352984,
+        "p99": 1.4881247067078949
+      },
+      "tpot_seconds": {
+        "samples": 334,
+        "mean": 0.10597713620154026,
+        "p50": 0.09061732434335797,
+        "p95": 0.20442425424646998,
+        "p99": 0.26957463110005514
+      }
+    },
+    "historical_fixed_two": {
+      "requests": 334,
+      "successful_requests": 334,
+      "completion_fraction": 1.0,
+      "request_throughput_per_second": 11.133333333333333,
+      "output_tokens_per_second": 304.93333333333334,
+      "slo_satisfying_requests": 58,
+      "slo_goodput_per_second": 1.9333333333333333,
+      "inter_token_latency_seconds": {
+        "samples": 8704,
+        "mean": 0.16231788656124777,
+        "p50": 0.06809771712869406,
+        "p95": 0.5183199137449265,
+        "p99": 0.5471539675444365
+      },
+      "arrival_lag_seconds": {
+        "samples": 334,
+        "mean": 0.005513506735156396,
+        "p50": 0.005067706108093262,
+        "p95": 0.00650172233581543,
+        "p99": 0.018883340358734138
+      },
+      "latency_seconds": {
+        "samples": 334,
+        "mean": 6.001973163130175,
+        "p50": 5.455877173691988,
+        "p95": 14.084770134091375,
+        "p99": 20.496739112064258
+      },
+      "ttft_seconds": {
+        "samples": 334,
+        "mean": 1.7697878953314827,
+        "p50": 1.3376193884760141,
+        "p95": 4.763505535479634,
+        "p99": 5.501602043081076
+      },
+      "tpot_seconds": {
+        "samples": 334,
+        "mean": 0.22787925329305192,
+        "p50": 0.17070967484361088,
+        "p95": 0.5130592400394379,
+        "p99": 0.5167659301877332
+      }
+    }
+  },
+  "whole_window": {
+    "slo_goodput_ratio": 0.7355973317161916,
+    "p95_latency_ratio": 1.1083695252016124,
+    "budget_pass": true,
+    "budget_measured": true,
+    "tail_pass": false,
+    "correctness_pass": true,
+    "eligible": false,
+    "final_acceptance": "NOT_ESTABLISHED_BY_SINGLE_PAIR"
+  },
+  "whole_window_status": "NO_GAIN_AT_FROZEN_GATES",
+  "source_sha256": {
+    "performance-analysis-gates.json": "b68ae9592f5eb61ce59889501339a9e77453aa85c00170e412bf7dce8b2be701",
+    "comparison.json": "63b677deac56b654526dfaab71f355a61c124140e5196eac05a611f214556613",
+    "scheduled-instance-decisions.json": "c93e868e39f48f4e704c44d7e2fbe7bcc3c2f45ee7776b340291619a064fe69d",
+    "scheduled-router-observation.json": "8931d0b59518ee52e466d91bd3cccb20efa217809292f42ee0f9a46674e58848"
+  }
+}
