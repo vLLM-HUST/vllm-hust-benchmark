@@ -77,3 +77,10 @@ ID一致；不符则零生成停止。
 
 83项Engine CPU回归、Ruff、真实数据prepare
 CLI和准备报告HTML/PNG/SVG通过；准备未执行SDK/NPU验收。本机新trace配对尚未执行，须在当前HLE释放设备后运行；不能把工具准备写成实测结果。
+
+## 2026-11-13 固定五项执行结果
+
+当前引导器固定到 Engine r4.3.10 的完整100文件工具包。根目录 `one_click.py` 已完成冻结五项的封存归并：15阶段核验复用，新增推理0阶段，原始日期与失败父批次保留。
+完整指标、负结果与验收限制见 [五项结果](../../reports/five-datasets-standard-20261113/README.md)。 `REPAIR-RECORD.json`
+与 `LATE-LOG-AUDIT.json` 是早期修复/失败历史，不代表此处当前执行状态。 同机已有封存结果时可显式重复传
+`--reuse-completed-campaign <原目录>`；只补跑缺项， 不把归档副本改写成新的原始运行，也不将全部执行完成写成质量/长稳验收通过。
