@@ -50,3 +50,7 @@ workload，以 `PEGAFLOW_RUN_ROOT` 指定独立运行根目录；发布计划后
 其后的 Native 服务在权重加载后、资格探针前又因 CANN host-pinned 分配 207001 失败，当时文件缓存约 58 GiB。 完整原件在
 `failed-startup-filecache.tar.gz`。新的启动策略对两臂一致：仅等待 vLLM 健康检查期间，文件缓存超过 16 GiB 时对本任务 14 个模型分片 执行
 POSIX_FADV_DONTNEED，并保存每次内存收据；服务就绪后停止。没有全局清缓存或删文件，也不在正式计时内清理。
+
+## 已完成的计时窗口
+
+[已完成窗口与原件](RESULTS.md) 持续增补；资格检查与 900s 数据分别标记。

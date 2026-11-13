@@ -19,6 +19,7 @@ def verify():
         }
     plan = json.loads((ROOT / "formal-plan.json").read_text(encoding="utf-8"))
     count = qualifications = requests = 0
+    native_long_ids = None
     for item in json.loads(index.read_text(encoding="utf-8"))["windows"]:
         if "parts" in item:
             chunks = []
@@ -56,6 +57,45 @@ def verify():
                 name for name in members if name.endswith("/result-receipt.json")
             )
             result = json.load(package.extractfile(name))
+            oracle = json.load(
+                package.extractfile(
+                    "evidence/" + result["arm"] + "/qualification-oracle.json"
+                )
+            )
+            assert oracle["valid"] and len(oracle["short"]) == 8
+            assert len(oracle["long"]) == 2
+            assert oracle["quality_scope"] == plan["quality_scope"]
+            actual_short_mismatches = []
+            for row in oracle["short"]:
+                cold = row["cold"]["response"]["choices"][0]["token_ids"]
+                warm = row["warm"]["response"]["choices"][0]["token_ids"]
+                assert row["equal"] == (cold == warm)
+                if cold != warm:
+                    actual_short_mismatches.append(row["index"])
+            assert actual_short_mismatches == oracle["short_repeatability_mismatches"]
+            assert (
+                actual_short_mismatches
+                == item["sampled_quality"]["short_repeatability_mismatches"]
+            )
+            long_ids = []
+            for row in oracle["long"]:
+                samples = [
+                    row[mode]["response"]["choices"][0]["token_ids"]
+                    for mode in ["cold", "warm", "restored"]
+                ]
+                assert samples[0] == samples[1] == samples[2]
+                assert len(samples[0]) == 32
+                long_ids.append(samples[0])
+                if result["arm"].startswith("pegaflow"):
+                    assert row["mechanism_delta"]["pega_load_success_total"] > 0
+                    assert (
+                        row["mechanism_delta"]["pega_load_failure_total"]
+                        == row["mechanism_delta"]["pega_save_failure_total"]
+                        == 0
+                    )
+            if result["arm"] == "native" and native_long_ids is None:
+                native_long_ids = long_ids
+            assert long_ids == native_long_ids
             prefix = name.removesuffix("result-receipt.json")
             metadata = json.load(package.extractfile(prefix + "server-metadata.json"))
             assert metadata["runtime_identity"] == plan["runtime_identity"]
