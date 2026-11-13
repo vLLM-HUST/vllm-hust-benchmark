@@ -1,0 +1,88 @@
+{
+  "label": "historical controlled device measurement",
+  "description": "At a fixed 32-token step budget, expanding [1,2,4] to [1,2,4,8,16,32] reduced median batch completion by approximately 57.0% in the reference workload. A separate 128-token-budget factorial campaign measured 38.7%; the two campaigns are distinct.",
+  "workload": "Four simultaneous prompts of 8/48/96/160 tokens, 16 output tokens each; Qwen3-0.6B FP16, TP1, Ascend 910B2. Ten fresh engine processes and 80 unprofiled batches in the 32-token reference campaign; corresponding output tokens matched.",
+  "source_result_sha256": "d8a20a67d566caca4e7880027311a319441ef84d18273460a5132f160037c366",
+  "package_validation": "CPU configuration tests and distribution build; no new device campaign during extraction",
+  "service": {
+    "processes": [
+      {
+        "name": "b0-default",
+        "block": 0,
+        "arm": "default",
+        "batch_ms": 962.2324725,
+        "observations_sha256": "1073ea09cbc2fcf34a6b64d1befa0784012a84d6b0f7d1e182fd97fe4b2b1d63"
+      },
+      {
+        "name": "b0-expanded",
+        "block": 0,
+        "arm": "expanded",
+        "batch_ms": 432.2541625,
+        "observations_sha256": "a2b8309e036ac32cd33b79b6ac6ea922eb1f0e794ac193dc212057d91aafbb6c"
+      },
+      {
+        "name": "b1-expanded",
+        "block": 1,
+        "arm": "expanded",
+        "batch_ms": 421.4474365,
+        "observations_sha256": "08e6965be4d6626e855ca3991401cf7e6542d534984313bd3be2bc7ada3b4f17"
+      },
+      {
+        "name": "b1-default",
+        "block": 1,
+        "arm": "default",
+        "batch_ms": 1014.9735965,
+        "observations_sha256": "ef283a9388b954a48ce4ae317573c86112f84567153f5596e342ddb54eaca00b"
+      },
+      {
+        "name": "b2-default",
+        "block": 2,
+        "arm": "default",
+        "batch_ms": 996.8206825,
+        "observations_sha256": "d08aa602f6690687359804b7ec8938d4fdbf78d257d1c4b6e2ad049c948b8394"
+      },
+      {
+        "name": "b2-expanded",
+        "block": 2,
+        "arm": "expanded",
+        "batch_ms": 420.659321,
+        "observations_sha256": "8807996380e6fc442305954a3b47cdb57f2710ad5644df2aa09732218d646f21"
+      },
+      {
+        "name": "b3-expanded",
+        "block": 3,
+        "arm": "expanded",
+        "batch_ms": 415.165995,
+        "observations_sha256": "53c4dfd9f9caec5313a332280a13e4bdf1c5b154233f717b539a46085146a82a"
+      },
+      {
+        "name": "b3-default",
+        "block": 3,
+        "arm": "default",
+        "batch_ms": 965.121216,
+        "observations_sha256": "6053cb83372f90ac4d0f77492764b9d4bfa74e6acea9fcb700799041c5a268b7"
+      },
+      {
+        "name": "b4-default",
+        "block": 4,
+        "arm": "default",
+        "batch_ms": 978.6602995000001,
+        "observations_sha256": "1469ae1954abac51ea97165cf52896b2f7462e8692bf9f9cfcd6254d8523640c"
+      },
+      {
+        "name": "b4-expanded",
+        "block": 4,
+        "arm": "expanded",
+        "batch_ms": 412.8691055,
+        "observations_sha256": "7962631db06ac68f80680784d797648e1bc36a89eda4df6a85f21dba1152ed06"
+      }
+    ],
+    "median_batch_ms": {
+      "default": 978.6602995000001,
+      "expanded": 420.659321
+    },
+    "reduction_percent": 57.01681970598828,
+    "plan_sha256": "865314aa3d0eecfd443cbfc1d7c4f74587f9d9db6c9ccd571e279c58229dc77f",
+    "exact_token_agreement": true
+  }
+}

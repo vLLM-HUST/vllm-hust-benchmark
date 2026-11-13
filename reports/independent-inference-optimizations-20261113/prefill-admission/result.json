@@ -1,0 +1,91 @@
+{
+  "label": "historical controlled device measurement",
+  "description": "Short first-token latency changed from126.746 to40.342 ms (68.17% lower); batch completion changed from505.131 to515.347 ms (2.02% higher).",
+  "workload": "One2048-token prompt arrives at0 ms; three8-token prompts at50 ms; all request32 output tokens. Qwen3-0.6B FP16, TP1, Ascend910B2; five independent process pairs and60 unprofiled batches. Corresponding output tokens matched.",
+  "source_result_sha256": "d6fcd4aa2cd9a6814bfa3eae3f4c21d1226cadf9d61e4c509c012e864cf03a7d",
+  "package_validation": "CPU configuration tests and distribution build; no new device campaign during extraction",
+  "service": {
+    "metrics": {
+      "short_first_output_ms": {
+        "baseline": 126.74615616666667,
+        "candidate": 40.34233233333333
+      },
+      "batch_completion_ms": {
+        "baseline": 505.1310925,
+        "candidate": 515.347439
+      },
+      "long_completion_ms": {
+        "baseline": 503.870885,
+        "candidate": 515.3282790000001
+      }
+    },
+    "paired": [
+      {
+        "baseline": {
+          "short_first_output_ms": 123.69697333333333,
+          "batch_completion_ms": 482.2955035,
+          "long_completion_ms": 481.04465500000003
+        },
+        "candidate": {
+          "short_first_output_ms": 41.19020733333333,
+          "batch_completion_ms": 524.3684499999999,
+          "long_completion_ms": 524.3520599999999
+        }
+      },
+      {
+        "baseline": {
+          "short_first_output_ms": 126.74615616666667,
+          "batch_completion_ms": 505.1310925,
+          "long_completion_ms": 503.870885
+        },
+        "candidate": {
+          "short_first_output_ms": 40.34233233333333,
+          "batch_completion_ms": 508.694923,
+          "long_completion_ms": 508.6775775
+        }
+      },
+      {
+        "baseline": {
+          "short_first_output_ms": 132.49392633333332,
+          "batch_completion_ms": 515.487739,
+          "long_completion_ms": 514.2116035
+        },
+        "candidate": {
+          "short_first_output_ms": 40.847767833333336,
+          "batch_completion_ms": 533.484277,
+          "long_completion_ms": 533.4675070000001
+        }
+      },
+      {
+        "baseline": {
+          "short_first_output_ms": 128.64856383333333,
+          "batch_completion_ms": 505.9657895,
+          "long_completion_ms": 504.6114335
+        },
+        "candidate": {
+          "short_first_output_ms": 39.88020383333333,
+          "batch_completion_ms": 510.78788499999996,
+          "long_completion_ms": 510.77239
+        }
+      },
+      {
+        "baseline": {
+          "short_first_output_ms": 123.98171433333333,
+          "batch_completion_ms": 497.83498,
+          "long_completion_ms": 496.54260250000004
+        },
+        "candidate": {
+          "short_first_output_ms": 40.317029500000004,
+          "batch_completion_ms": 515.347439,
+          "long_completion_ms": 515.3282790000001
+        }
+      }
+    ],
+    "independent_processes": 10,
+    "unprofiled_batches": 60,
+    "exact_token_agreement": true,
+    "short_ttft_reduction_percent": 68.17076465791625,
+    "batch_completion_increase_percent": 2.022513888313049,
+    "passes_frozen_utility_gate": true
+  }
+}
