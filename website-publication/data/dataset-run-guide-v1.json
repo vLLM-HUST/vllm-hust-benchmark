@@ -1,0 +1,111 @@
+{
+  "schema": "dataset-run-guide/v1",
+  "guide_id": "five-datasets-run-guide-20261113-v1",
+  "standard_id": "five-datasets-20261113-v1",
+  "standard_sha256": "66c050b7c6d705853f10bc437e6ace1707a9b46d43b6bdb7159724045045b756",
+  "modes": [
+    {
+      "id": "quick",
+      "title_zh": "快速测试",
+      "title_en": "Quick test",
+      "datasets": [
+        "mmlu"
+      ],
+      "scope_zh": "仅 MMLU-Pro 固定 200 题；B0/B1 各跑同一组 200 题。",
+      "scope_en": "MMLU-Pro fixed200 only; the same 200 questions in each of B0 and B1.",
+      "hours": [
+        2,
+        3
+      ],
+      "qualified_hours": [
+        1,
+        2
+      ],
+      "datasets_flag": "mmlu"
+    },
+    {
+      "id": "full",
+      "title_zh": "全量测试",
+      "title_en": "Full test",
+      "datasets": [
+        "mmlu",
+        "hle",
+        "frontier",
+        "swe",
+        "terminal"
+      ],
+      "scope_zh": "跑完冻结标准的全部五项：MMLU200、HLE 分层 200、Frontier160、SWE trace 32 任务（64 请求/臂）、Terminal trace 32 任务（48 请求/臂）。",
+      "scope_en": "All five frozen profiles: MMLU200, HLE stratified200, Frontier160, SWE trace32 tasks (64 requests/arm), Terminal trace32 tasks (48 requests/arm).",
+      "hours": [
+        12,
+        16
+      ],
+      "qualified_hours": [
+        10,
+        14
+      ],
+      "datasets_flag": "mmlu,hle,frontier,swe,terminal"
+    }
+  ],
+  "scope_zh": "“全量”指本项目冻结的五项测试范围，不是五个上游数据集的原始全集。快速测试是单数据集检查，不能替代五项验收。SWE/Terminal 仅回放公开 trace 测推理性能，不执行历史工具命令，不报告任务解决率。",
+  "scope_en": "Full means all five project-frozen profiles, not every item in the five upstream datasets. Quick is a single-dataset check and cannot replace five-profile acceptance. SWE/Terminal replay public traces for inference only; no historical tool commands are executed and no task success rate is reported.",
+  "timing": {
+    "kind": "planning_estimate_not_end_to_end_measurement",
+    "reference_zh": "参考条件：单机双卡 Ascend 910B2、Qwen3.5-35B-A3B BF16、B0 0.18 / B1 冻结 r4，串行配对执行，保持标准生成与评分预算。其他引擎、模型或硬件需重新估时。",
+    "reference_en": "Reference: one host, two Ascend 910B2 cards, Qwen3.5-35B-A3B BF16, B0 0.18 / frozen B1 r4, serial paired execution with unchanged generation and grading budgets. Re-estimate for other engines, models or hardware.",
+    "includes_zh": "主时间范围含本机首次 C8 资格检查、B0/B1 配对、模型加载/图编译、HLE/Frontier 评分（全量）及报告生成。",
+    "includes_en": "Main ranges include local first-run C8 qualification, both arms, model loading/graph compilation, HLE/Frontier grading (full mode), and report generation.",
+    "excludes_zh": "不含首次模型/附件下载、环境安装、资源排队、网络故障或失败后重跑；这些时间另计。",
+    "excludes_en": "Exclude first-time model/artifact downloads, environment installation, resource queues, network failures and failed-run repeats; budget these separately.",
+    "basis_zh": "这是根据 2026-11-12/13 已完成阶段耗时合计后留出余量的排期估算，不是一轮五项一键执行的实测总时长，也不是运行时间保证。",
+    "basis_en": "Planning ranges sum completed stages from 2026-11-12/13 and add allowance. They are not a measured wall time of one all-five invocation or a runtime guarantee.",
+    "qualified_zh": "仅在同机同配置已有有效、封存的 C8 资格证据并通过脚本校验时，才可显式传 --continuous-evidence 复用；新第三方机器应重跑。复用后快速约 1–2 小时，全量约 10–14 小时。",
+    "qualified_en": "Reuse C8 only with valid sealed evidence for the same host/configuration, explicitly supplied through --continuous-evidence and verified by the runner. New third-party hosts must rerun it. With valid reuse: quick about 1–2 h; full about 10–14 h.",
+    "observed_components": [
+      {
+        "id": "qualification",
+        "completed_stage_minutes": 62.91,
+        "campaign_sha256": "4072da95880f9087da0e71e19b7b7eb95a1aaf7aaf4cf44794b455e2064c067e",
+        "campaign_status": "failed",
+        "basis": "Completed selected stages only; failed/unselected stages are not counted. Source campaigns are retained unchanged."
+      },
+      {
+        "id": "mmlu",
+        "completed_stage_minutes": 75.59,
+        "campaign_sha256": "478a6430a345fb04e02afa2d4a8e161c06ffe74f1a8b3146e50f02ae3579f7e9",
+        "campaign_status": "failed",
+        "basis": "Completed selected stages only; failed/unselected stages are not counted. Source campaigns are retained unchanged."
+      },
+      {
+        "id": "frontier",
+        "completed_stage_minutes": 174.9,
+        "campaign_sha256": "478a6430a345fb04e02afa2d4a8e161c06ffe74f1a8b3146e50f02ae3579f7e9",
+        "campaign_status": "failed",
+        "basis": "Completed selected stages only; failed/unselected stages are not counted. Source campaigns are retained unchanged."
+      },
+      {
+        "id": "hle",
+        "completed_stage_minutes": 301.29,
+        "campaign_sha256": "0f50fa5ab688cc68da9e363ad99a4fd27ae9aa0bad7a4c193e35c634c7aaec03",
+        "campaign_status": "completed",
+        "basis": "Completed selected stages only; failed/unselected stages are not counted. Source campaigns are retained unchanged."
+      },
+      {
+        "id": "traces",
+        "completed_stage_minutes": 78.29,
+        "campaign_sha256": "a4f89e532e467a4f439e24a228cb1bbd8f6918397f58785ef000134f8cdae2c5",
+        "campaign_status": "completed",
+        "basis": "Completed selected stages only; failed/unselected stages are not counted. Source campaigns are retained unchanged."
+      }
+    ]
+  },
+  "execution": {
+    "engine_repository": "vLLM-HUST/vllm-hust-engine",
+    "verified_runner_commit": "448362c7565597c8963c970dcfea0b235fd5fcf7",
+    "command_template": "python one_click.py --model /path/to/model --out /path/to/new-results --datasets {datasets}",
+    "note_zh": "命令适用于 vLLM-HUST Engine 已恢复的执行环境；部署、数据访问和设备参数按其执行清单配置，输出目录须全新。其他引擎沿用同一数据范围，使用各自执行器。不要用 --smoke-evaluators 或 --hle-profile full1811 代替本标准。",
+    "note_en": "Commands apply to the restored vLLM-HUST Engine environment. Configure deployment, data access and devices using its checklist; use a fresh output directory. Other engines use their own runners with the same dataset scope. Neither --smoke-evaluators nor --hle-profile full1811 represents this standard.",
+    "acceptance_zh": "完成所选测试范围不等于所有目标达标；报告仍须逐项判定质量、性能、长稳和成本，并保留失败、截断及未完成项。",
+    "acceptance_en": "Completing the selected scope does not imply all targets passed. Reports must still judge quality, performance, stability and cost separately and retain failures, truncations and unfinished items."
+  }
+}
