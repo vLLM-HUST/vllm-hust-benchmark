@@ -136,6 +136,8 @@ for bar, row in zip(bars, comparison):
 figure.suptitle('Qwen3.5-35B-A3B BF16 |2x910B2,TP2 |KV20GiB/rank', fontsize=12)
 figure.savefig(OUT/'throughput.png', dpi=160)
 figure.savefig(OUT/'throughput.svg', metadata={'Date': None})
+svg = (OUT/'throughput.svg').read_text(encoding='utf-8')
+(OUT/'throughput.svg').write_text('\n'.join(line.rstrip() for line in svg.splitlines())+'\n', encoding='utf-8', newline='\n')
 plt.close(figure)
 
 rows = []
