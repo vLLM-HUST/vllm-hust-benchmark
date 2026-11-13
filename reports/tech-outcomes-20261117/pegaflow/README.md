@@ -8,7 +8,7 @@
 
 [完成报告（HTML）](restart-02/completed-cohort/report.html)、[完整报告](restart-02/completed-cohort/REPORT.md)、[机器可读摘要](restart-02/completed-cohort/summary.json)、[逐窗口原件](restart-02/windows.json)、[最终运行身份/退出记录/受控输入索引](restart-02/final-sources.json)。原SWE复用负载与新增冻结五数据集分开；后续[独立容量验证计划](restart-02/capacity-probe01/README.md)只检验内存压力适用边界，不能改写本组结果。
 
-按用户新增的冻结标准，BidKV与PegaFlow均需新一轮完整五项；历史豁免不代表符合新标准。见[审计](five-datasets-v1-audit.md)、[原C8执行适配器](five-datasets-c8-driver-v1/README.md)、[完整五项执行源与固定计划](finite-driver-v1/README.md)。源码已在正式生成前公开并独立逐字节读回；CPU/C8检查不能代替五项正式完成。
+按用户新增的冻结标准，BidKV与PegaFlow均需新一轮完整五项；历史豁免不代表符合新标准。见[审计](five-datasets-v1-audit.md)、[新默认True准备源v3](driver-mod-v3/README.md)、[旧False执行源与固定计划](finite-driver-v1/README.md)。新v3仅为准备稿，91被admin停止后尚未执行其SDK恢复、Linux准入或模型请求，等待物理资源恢复确认；81的Linux检查不能替代91实测。CPU/C8检查不能代替五项正式完成。
 
 历史五档数值可复算，但 Native/Candidate 的 seed、prepared workload hash、记录的 tokenizer
 软件版本不同，且不在同期；历史发布比值保留，不能升级为当前配置的因果收益。初次中断与全部失败记录继续保留在下文。

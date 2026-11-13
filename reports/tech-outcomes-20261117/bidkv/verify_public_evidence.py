@@ -27,15 +27,92 @@ def verify():
         raw = path.read_bytes()
         assert len(raw) == item["bytes"]
         assert hashlib.sha256(raw).hexdigest() == item["sha256"]
+    aborted_raw = (ROOT / "aborted-cohort01/correction-and-counts.json").read_bytes()
+    assert hashlib.sha256(aborted_raw).hexdigest() == (
+        "e81bec941b94bd9cb1a40b8df5223a776ec12516269d5f3ecffc3458df32aa98"
+    )
+    aborted = json.loads(aborted_raw)
+    assert aborted["status"] == "aborted_by_parent_pre_audit"
+    assert aborted["records_unchanged"] is True
+    assert aborted["native"] == {
+        "planned": 672,
+        "submitted": 200,
+        "completed_success": 44,
+        "returned_failures": 0,
+        "cancelled_unfinished": 156,
+        "not_executed": 472,
+        "returned_length_stops": 2,
+        "accepted_output_tokens_in_completed_records": 113977,
+        "accepted_output_tokens_unfinished": None,
+    }
+    assert aborted["bidkv"] == {
+        "planned": 672,
+        "submitted": 0,
+        "completed_success": 0,
+        "not_executed": 672,
+    }
+    assert aborted["judge"] == {
+        "planned_inputs": 720,
+        "submitted": 0,
+        "not_executed": 720,
+    }
+    assert aborted["standard_batch_throughput"] is None
+    assert aborted["formal_quality_score"] is None
+    assert aborted["controller_exit"]["actual_os_returncode"] is None
+    assert aborted["client_exit"]["actual_os_returncode"] is None
+    assert aborted["api_exit"]["exit_code"] == 0
+    captures = aborted["unbound_cancelled_streams"]
+    assert len(captures) == len({item["file"] for item in captures}) == 156
+    for item in captures:
+        assert item["bytes"] == item["observed_wire_lines"] == 0
+        assert item["observed_done"] is False
+        assert item["observed_final_usage"] is None
+        assert item["sha256"] == hashlib.sha256(b"").hexdigest()
     frozen_sources = {}
-    source_directory = ROOT / "driver-mod-v2"
-    if (source_directory / "source-manifest.json").is_file():
-        frozen_sources = read(source_directory / "source-manifest.json")["files"]
-        for path, checksum in frozen_sources.items():
+    for version in (2, 3, 4):
+        source_directory = ROOT / f"driver-mod-v{version}"
+        if not (source_directory / "source-manifest.json").is_file():
+            continue
+        sources = read(source_directory / "source-manifest.json")["files"]
+        for path, checksum in sources.items():
             candidate = source_directory / (
                 path + ".source" if path.endswith(".py") else path
             )
             assert hashlib.sha256(candidate.read_bytes()).hexdigest() == checksum
+        frozen_sources[source_directory.name] = len(sources)
+    failure_raw = (ROOT / "native04-failure-v1/failure-capsule.json").read_bytes()
+    assert hashlib.sha256(failure_raw).hexdigest() == (
+        "39b6fc5658aa892b16ee511cb963e87351f4eaf5f4acad7f54237664a4a5888b"
+    )
+    failure = json.loads(failure_raw)
+    assert failure["attempt"] == "native-04"
+    assert failure["model_generation_requests"] == 0
+    assert failure["owned_preflight_wait_receipt"]["actual_returncode"] == -2
+    assert failure["owned_api_wait_receipt"]["exit_code"] == -9
+    assert len(failure["fatal_extract"]) == 5
+    assert len(failure["raw_originals_manifest"]) == 9
+    assert len(failure["installed_operator_asset_inventory"]) == 804
+    assert any(
+        "binary_info_config.json" in item["path"] and not item["present_in_failed_copy"]
+        for item in failure["installed_operator_asset_inventory"]
+    )
+    original_manifest = (
+        ROOT / "v4-pre-generation-correction/source-manifest.json"
+    ).read_bytes()
+    assert hashlib.sha256(original_manifest).hexdigest() == (
+        "291cac4d77050c7f90e5f4da2d6a296af3a979813cd7066abff9288e27a0e804"
+    )
+    correction = read(ROOT / "v4-pre-generation-correction/correction-receipt.json")
+    assert correction["generation_requests_before_correction"] == 0
+    assert correction["startup_model_reloaded"] is False
+    original_campaign = (
+        ROOT / "v4-pre-generation-correction/campaign81.py.source"
+    ).read_bytes()
+    assert (
+        hashlib.sha256(original_campaign).hexdigest()
+        == (json.loads(original_manifest)["files"]["campaign81.py"])
+        == correction["prior_campaign_sha256"]
+    )
     folder = ROOT / "c8-results-v1"
     custody = read(folder / "policy-custody-index.json")
     count = 0
@@ -153,9 +230,12 @@ def verify():
     return {
         "public_files_verified": len(manifest["files"]),
         "c8_numeric_requests_recomputed": count,
-        "default_mod_frozen_source_files_verified": len(frozen_sources),
+        "default_mod_frozen_source_files_verified": frozen_sources,
+        "zero_generation_native04_failure_receipt_verified": True,
         "original_sse_publicly_read_back": False,
         "controlled_sse_independent_verification_receipts_indexed": True,
+        "aborted_cohort_receipt_counts_verified": True,
+        "aborted_cohort_controlled_answers_publicly_reverified": False,
         "five_dataset_formal_completion_established_by_this_capsule": False,
         "selector_mechanism_gain_established": False,
     }
