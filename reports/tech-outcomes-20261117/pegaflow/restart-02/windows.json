@@ -217,6 +217,79 @@
         "long_prefix_samples_equal": true,
         "quality_scope": "Strict SWE prompt/token-budget/stream checks and two bitwise-equal long-prefix restore samples with real external loads. Native-only uncached short case 6 was nonrepeatable in both archived attempts, including with 1s settling. All 8 short cases remain in the diagnostic and timed workload. Their differences are disclosed; no universal token equivalence, SWE solving accuracy, or causal explanation is established. Throughput is an observation under these quality limits."
       }
+    },
+    {
+      "window": "native-c8-900s",
+      "file": "windows/native-c8-900s.tar.gz",
+      "bytes": 1205331,
+      "sha256": "52e44472ded393cc368eff46a0f8d311904bda5b12c714768221329b73c9765c",
+      "classification": "completed 900s observation; pairing/confirmation may still be pending",
+      "result": {
+        "arm": "native",
+        "concurrency": 8,
+        "qualification": false,
+        "valid": true,
+        "measurement_seconds": 900.0,
+        "requests_started": 433,
+        "max_prompt_tokens_observed": 77163,
+        "prompt_tokens_p50": 20697.0,
+        "max_turn_index_reached": 56,
+        "distinct_trajectories_started": 8,
+        "sessions_completed": 8,
+        "requests_completed_in_window": 425,
+        "requests_drained": 8,
+        "failed_requests": 0,
+        "observed_output_tokens_in_window": 260619,
+        "output_tokens_per_second": 289.57666666666665,
+        "output_tokens_per_second_per_chip": 144.78833333333333,
+        "decode_tokens_per_second_p90": 60.39249779890158,
+        "decode_speed_samples": 425,
+        "ttft_seconds_p95": 2.4863581334000604,
+        "client_inflight_seconds": {
+          "0": 0.00017951399968296755,
+          "1": 0.0010940709998976672,
+          "2": 0.0007524550001107855,
+          "3": 0.0006655830002273433,
+          "4": 0.0006777739999961341,
+          "5": 0.0007102840008883504,
+          "6": 0.0010006289994635154,
+          "7": 2.2040618019964313,
+          "8": 897.7908578880033
+        },
+        "mean_client_inflight": 7.9975246197088925,
+        "full_concurrency_fraction": 0.997545397653337,
+        "drain_seconds": 67.08233693399961,
+        "aborted": false,
+        "planned_measurement_seconds": 900.0
+      },
+      "local_verification": {
+        "window": "native-c8-900s",
+        "sha256": "52e44472ded393cc368eff46a0f8d311904bda5b12c714768221329b73c9765c",
+        "bytes": 1205331,
+        "verified_unix": 1794582807.990567,
+        "files_verified": 35,
+        "requests_verified": 433,
+        "tokens_recomputed": 260619
+      },
+      "sampled_quality": {
+        "short_repeatability_mismatches": [],
+        "short_cross_arm_mismatches": [],
+        "long_prefix_samples_equal": true,
+        "quality_scope": "Strict SWE prompt/token-budget/stream checks and two bitwise-equal long-prefix restore samples with real external loads. Native-only uncached short case 6 was nonrepeatable in both archived attempts, including with 1s settling. All 8 short cases remain in the diagnostic and timed workload. Their differences are disclosed; no universal token equivalence, SWE solving accuracy, or causal explanation is established. Throughput is an observation under these quality limits."
+      },
+      "parts": [
+        {
+          "file": "windows/native-c8-900s.tar.gz.part-000",
+          "bytes": 921600,
+          "sha256": "98fb426ae9d12ad314609ca8bc566cb09541b52b176b643b0360d84a04754916"
+        },
+        {
+          "file": "windows/native-c8-900s.tar.gz.part-001",
+          "bytes": 283731,
+          "sha256": "8f0123f5545b86a2b3aad992a6666d242ab6ae3f274687fa214ffa4202c8e933"
+        }
+      ],
+      "storage": "Concatenate parts in manifest order to recover the byte-identical original .tar.gz; the file field names the reconstructed archive."
     }
   ]
 }
