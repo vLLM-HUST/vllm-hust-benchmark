@@ -3786,6 +3786,190 @@
           "relationship": "internal"
         }
       ]
+    },
+    {
+      "id": "graph-coverage",
+      "name": "Graph Capture Coverage",
+      "name_en": "Graph Capture Coverage",
+      "name_zh": "图捕获覆盖配置",
+      "artifact_type": "runtime_component",
+      "system_role": "graph_execution_policy",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "vLLM LLM kwargs: compilation_config.cudagraph_capture_sizes"
+      ],
+      "execution_planes": [
+        "offline",
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
+      "maturity": "experimental",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-graph-coverage",
+      "repository_visibility": "public",
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-graph-coverage/blob/40e9ce1e52185ffc7b1bab09d99e09e11d3a1851/README.md",
+      "public_surface": true,
+      "summary_en": "A configuration MOD: expand stock vLLM graph capture sizes to cover realized query-token batches. Apply checked LLM kwargs explicitly before engine startup.",
+      "summary_zh": "配置型 MOD：扩展 vLLM 原生图捕获尺寸，覆盖实际 query-token 批次；启动引擎前显式应用经过检查的 LLM 参数。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: at fixed budget 32, capture sizes [1,2,4] → [1,2,4,8,16,32] reduced median batch completion by 57.0% across five process pairs. Package CPU checks pass; capture memory/startup costs also increase.",
+      "public_effect_zh": "历史 Qwen3-0.6B FP16 / Ascend 910B2 TP1：保持总预算 32，捕获尺寸从 [1,2,4] 扩至 [1,2,4,8,16,32]，五组独立进程配对的批次完成时间中位数下降 57.0%。封装 CPU 检查通过；图内存与启动开销会增加。",
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/d3e46c425b2093aeb6e45ef602afb7ec225ba7ec/reports/independent-inference-optimizations-20261113/graph-coverage/README.md",
+      "evidence_level": "hardware_verified",
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM + vLLM-Ascend",
+        "versions": [
+          "MOD 0.1.0 @ 40e9ce1e52185ffc7b1bab09d99e09e11d3a1851",
+          "vLLM 0fc695fc / vLLM-Ascend f4a08bdd; TorchNPU 2.10.0.post4"
+        ],
+        "platforms": [
+          "Ascend 910B2 · TP1 · graph"
+        ],
+        "models": [
+          "Qwen3-0.6B · FP16, bounded mixed-request workload"
+        ],
+        "python": [
+          ">=3.10; CPU CI on 3.10/3.12"
+        ],
+        "requirements_en": "Stock configuration recipe, default inert. Pass enabled=True before LLM construction; restore original kwargs and restart to roll back. Qualified budgets 32/128, max_num_seqs=4, chunked prefill on and prefix caching off. No Extension Manager activation.",
+        "requirements_zh": "使用原生配置，默认不生效；构造 LLM 前显式传入 enabled=True，恢复原参数并重启即可回滚。适配预算 32/128、max_num_seqs=4、开启 chunked prefill、关闭 prefix caching；无需 Extension Manager 激活。"
+      }
+    },
+    {
+      "id": "prefill-admission",
+      "name": "Prefill Admission",
+      "name_en": "Prefill Admission",
+      "name_zh": "短请求准入配置",
+      "artifact_type": "runtime_component",
+      "system_role": "scheduler_policy_research",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "vLLM LLM kwargs: long_prefill_token_threshold"
+      ],
+      "execution_planes": [
+        "offline",
+        "scheduler"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
+      "maturity": "experimental",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-prefill-admission",
+      "repository_visibility": "public",
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-prefill-admission/blob/28544ba9638f4b901b08924195c4c4eeb60eef3e/README.md",
+      "public_surface": true,
+      "summary_en": "A configuration MOD: use the stock per-request long-prefill threshold to admit short requests while retaining the global step-token budget and graph capture configuration.",
+      "summary_zh": "配置型 MOD：使用原生单请求 long-prefill 阈值，让短请求及时进入执行，同时保留全局 step token 预算和图捕获配置。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: cap 224 at unchanged global budget 256 reduced short-request first-token latency by 68.17% (126.746 → 40.342 ms); batch completion increased 2.02%. Five process pairs, 60 unprofiled batches; exact token agreement.",
+      "public_effect_zh": "历史 Qwen3-0.6B FP16 / Ascend 910B2 TP1：全局预算保持 256、单请求 prefill 上限设为 224，短请求首字延迟下降 68.17%（126.746 → 40.342 ms），批次完成时间增加 2.02%。五组独立进程配对、60 个无 profiler 批次，输出 token 一致。",
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/d3e46c425b2093aeb6e45ef602afb7ec225ba7ec/reports/independent-inference-optimizations-20261113/prefill-admission/README.md",
+      "evidence_level": "hardware_verified",
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM + vLLM-Ascend",
+        "versions": [
+          "MOD 0.1.0 @ 28544ba9638f4b901b08924195c4c4eeb60eef3e",
+          "vLLM 0fc695fc / vLLM-Ascend f4a08bdd; TorchNPU 2.10.0.post4"
+        ],
+        "platforms": [
+          "Ascend 910B2 · TP1 · graph"
+        ],
+        "models": [
+          "Qwen3-0.6B · FP16, bounded mixed-request workload"
+        ],
+        "python": [
+          ">=3.10; CPU CI on 3.10/3.12"
+        ],
+        "requirements_en": "Stock configuration recipe, default inert. Explicitly apply long_prefill_token_threshold 224 before LLM construction; preserve budget 256 and capture sizes [1,2,4,...,256]. max_num_seqs=4, chunked prefill on, prefix caching off. Restore original kwargs to roll back.",
+        "requirements_zh": "使用原生配置，默认不生效；构造 LLM 前显式设置 long_prefill_token_threshold=224，保留预算 256 与捕获尺寸 [1,2,4,...,256]。max_num_seqs=4、开启 chunked prefill、关闭 prefix caching；恢复原参数即可回滚。"
+      }
+    },
+    {
+      "id": "sglang-prepared-dispatch",
+      "name": "SGLang Prepared Dispatch",
+      "name_en": "SGLang Prepared Dispatch",
+      "name_zh": "SGLang 预封装派发",
+      "artifact_type": "runtime_component",
+      "system_role": "operator_dispatch",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "SGLang NPUCudaGraphBackend.capture_one: explicit source mount",
+        "TorchNPU registered npu_fused_infer_attention_score.out typed dispatcher"
+      ],
+      "execution_planes": [
+        "worker",
+        "native"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
+      "maturity": "experimental",
+      "canonical_repository": "https://github.com/vLLM-HUST/sglang-hust-prepared-dispatch",
+      "repository_visibility": "public",
+      "documentation_url": "https://github.com/vLLM-HUST/sglang-hust-prepared-dispatch/blob/615dfd7d5b9eade24123d37b8fb3e86090c52f97/README.md",
+      "public_surface": true,
+      "summary_en": "Prepare fixed FIA arguments once per graph record and dispatch through the registered typed C++ operator with live KV lengths. Keep SGLang worker, ordinary update stream, graph replay and event dependencies.",
+      "summary_zh": "按图记录一次性预封装 FIA 固定参数，以实时 KV 长度调用已注册的 C++ typed operator；保留 SGLang worker、普通更新 stream、图重放及事件依赖。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Historical measured core: median throughput +9.35% over the accepted batch-copy baseline, four independent pairs, exact token/top1-ID/logprob agreement. The packaged adapter passes CPU tests; its separate device requalification is pending.",
+      "public_effect_zh": "历史核心实现相对已接受的 batch-copy 基线，四组独立配对的吞吐提升中位数为 9.35%，token、top1 ID 与 logprob 一致。当前封装适配层已通过 CPU 测试，独立设备复验正在推进。",
+      "public_effect_status": "preview",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/d3e46c425b2093aeb6e45ef602afb7ec225ba7ec/reports/independent-inference-optimizations-20261113/sglang-prepared-dispatch/README.md",
+      "evidence_level": "code_available",
+      "compatibility": {
+        "status": "experimental",
+        "host": "SGLang + TorchNPU",
+        "versions": [
+          "MOD 0.1.0 @ 615dfd7d5b9eade24123d37b8fb3e86090c52f97",
+          "SGLang 0.5.23 @297e54fd; Torch 2.10.0+cpu; TorchNPU 2.10.0.post6 @38e483ee; CANN 9.1"
+        ],
+        "platforms": [
+          "Ascend 910B2 · TP1 · graph"
+        ],
+        "models": [
+          "Qwen3-0.6B · BF16, batch5/in128/out64; dynamic batch3→2→1 qualification"
+        ],
+        "python": [
+          ">=3.10; CPU CI on 3.10/3.12"
+        ],
+        "requirements_en": "Explicit mount into a dedicated pinned SGLang checkout, native rebuild and ENABLE=1 in every worker. Exact source/runtime/schema checks; startup kill switch wins. Only 28 FIA records and one live actual_seq_lengths_kv update. Stop workers and unmount to restore exact source bytes. Not a vLLM Extension Manager bundle.",
+        "requirements_zh": "在独立的固定版本 SGLang 源码副本中显式 mount，重建 native 扩展，并向每个 worker 传入 ENABLE=1；校验源码、运行时及 schema，启动时 kill switch 优先。仅支持 28 条 FIA 记录和单组实时 actual_seq_lengths_kv 更新；停止 worker 后 unmount 精确恢复源文件。不是 vLLM Extension Manager bundle。"
+      }
     }
   ]
 }

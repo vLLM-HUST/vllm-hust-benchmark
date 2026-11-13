@@ -1,0 +1,37 @@
+{
+  "model": "Qwen3-0.6B",
+  "dtype": "bfloat16",
+  "tp": 1,
+  "hardware": "Ascend910B2",
+  "cann": "9.1",
+  "graph_buckets": [
+    1,
+    2,
+    4,
+    8
+  ],
+  "batch": 5,
+  "input_tokens": 128,
+  "output_tokens": 64,
+  "warmup_cohorts": 2,
+  "timed_cohorts": 6,
+  "return_logprob": true,
+  "top_logprobs_num": 1,
+  "temperature": 0,
+  "ignore_eos": true,
+  "pair_order": [
+    "AB",
+    "BA",
+    "BA",
+    "AB"
+  ],
+  "profiler": false,
+  "observer": false,
+  "qualification_cases": [
+    "bs5/in128/out64",
+    "bs2/in64/out48",
+    "heterogeneous bs3->2->1, inputs64/96/160 outputs16/24/32"
+  ],
+  "qualification": "check all28records liveKV payloads and exact token/top1-ID/logprob outputs",
+  "dirty_state": "dedicated source overlay; accepted batch-copy in both arms, dispatch hook in candidate only"
+}

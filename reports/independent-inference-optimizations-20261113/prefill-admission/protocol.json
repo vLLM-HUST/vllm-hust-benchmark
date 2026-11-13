@@ -1,0 +1,39 @@
+{
+  "model": "Qwen3-0.6B",
+  "dtype": "float16",
+  "tp": 1,
+  "hardware": "Ascend 910B2",
+  "vllm_revision": "0fc695f",
+  "ascend_revision": "f4a08bd",
+  "torch_npu": "2.10.0.post4",
+  "measurement": "independent unprofiled engine processes; process medians are the replication units",
+  "dirty_state": "historical observer overlays present; runtime source identities retained in the sealed campaign",
+  "historical_command": "frozen capture driver, explicit model path, fixed vectors and budget; not the smoke example",
+  "new_qualification": "retain all pairs, compare exact tokens, retain effective kwargs, commands, source revisions and dirty diff",
+  "warmup_batches": 2,
+  "timed_batches_per_process": 6,
+  "pairs": 5,
+  "graph_execution": true,
+  "async_scheduling": true,
+  "prefix_caching": false,
+  "prompts": [
+    2048,
+    8,
+    8,
+    8
+  ],
+  "arrivals_ms": [
+    0,
+    50,
+    50,
+    50
+  ],
+  "output_tokens": 32,
+  "total_budget": 256,
+  "baseline": {
+    "long_prefill_token_threshold": 0
+  },
+  "candidate": {
+    "long_prefill_token_threshold": 224
+  }
+}
