@@ -90,7 +90,7 @@ python reports/tech-outcomes-20261117/pegaflow/verify_public_evidence.py --archi
 
 <!-- restart02-live-start -->
 
-重启后的独立批次已公开 6 个 900s 观察点；最新原件和配对状态见
+重启后的独立批次已公开 7 个 900s 观察点；最新原件和配对状态见
 [restart-02/RESULTS.md](restart-02/RESULTS.md)。本页初次中断记录与历史索引保留，不能代替新批次结果。
 
 <!-- restart02-live-end -->
