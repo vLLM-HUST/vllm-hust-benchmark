@@ -149,9 +149,9 @@ def qualify(arm):
             row["index"] for row in record["short"] if not row["equal_native"]
         ]
         record["quality_scope"] = PLAN["quality_scope"]
-        assert all(
-            row["equal"] and row["equal_native"] for row in record["long"]
-        ), "Sampled long-prefix restore qualification failed"
+        assert all(row["equal"] and row["equal_native"] for row in record["long"]), (
+            "Sampled long-prefix restore qualification failed"
+        )
         if candidate:
             assert all(
                 row["mechanism_delta"]["pega_load_success_total"] > 0
@@ -195,6 +195,7 @@ def checkpoint(arm, folder):
         "server/command.json",
         "server/process.json",
         "server/service.log",
+        "server/startup-model-cache-advice.json",
         "sidecar/command.json",
         "sidecar/process.json",
         "sidecar/service.log",
