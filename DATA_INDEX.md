@@ -55,6 +55,10 @@ GenNova 与 GenNova Autotune 产品级独立结果已迁往
 
 ## 常用问题入口
 
+- **项目最终目标与里程碑区别：** [最终目标及已确认解释](reports/project-final-goals-20261113/README.md)，
+  列出90%同工况参考、吞吐2×/时延20%、32K及成本30%/多租户四项最终要求；
+  [本轮双阶段判定](reports/five-datasets-standard-20261113/README.md)不复用里程碑通过标记来代替最终验收。
+
 - **GenNova MOD 单项、组合与负结果：** [2026-11-05 固定快照](reports/gennova-mod-evidence-20261105/README.md)整理
   107 个结果入口、55 项接入记录、 29 项组合影响和 90 项带重开条件的负结果。沿 manifest 的固定提交链接回到源证据；局部加速、有限配对和组合结果
   不自动成为正式榜单成绩，也不发布到网站。

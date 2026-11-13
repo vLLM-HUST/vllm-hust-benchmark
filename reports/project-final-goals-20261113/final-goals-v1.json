@@ -1,0 +1,61 @@
+{
+  "schema": "project-final-goals/v1",
+  "id": "project4-final-20261113-v1",
+  "source": {
+    "kind": "user_supplied_document_excerpt_and_explicit_interpretation",
+    "document_pages": [
+      13,
+      14,
+      15
+    ],
+    "document_total_pages": 217,
+    "source_document_binary_available": false,
+    "source_excerpt": "reports/project-final-goals-20261113/source-excerpt.txt",
+    "source_excerpt_sha256": "b9ed0ea98970ee560e60ca3aa702d0f313421ca21135fb7cc177d6ae6d32825f",
+    "text_fidelity": "Normalized excerpt of the user-pasted text; not an independently verified source document or verbatim binary extract."
+  },
+  "confirmed_interpretation": {
+    "original_compute_term": "理论峰值",
+    "operational_compute_denominator": "同工况独立参考",
+    "confirmation": "理论峰值就解释为同工况参考，否则不可能实现。",
+    "formula": "eta_ref = 100 * C / C_ref = 100 * T_ref / T",
+    "same_effective_work_and_card_count_required": true,
+    "vendor_peak_is_not_used": true,
+    "model": "Qwen3.5-35B-A3B",
+    "model_scope_explanation_already_confirmed": true,
+    "original_model_wording": "代表性7B–13B模型（与主责单位确定）",
+    "model_explanation_source": "V1.5课题四35B调整及用户再次确认模型差异已解释；不重新设为阻塞项。"
+  },
+  "targets": {
+    "3.4.1": {
+      "name": "单芯片有效算力",
+      "efficiency_percent_min": 90,
+      "reference": "同工况独立参考",
+      "model": "Qwen3.5-35B-A3B"
+    },
+    "3.4.2": {
+      "name": "吞吐与时延",
+      "throughput_ratio_min": 2,
+      "throughput_gain_percent_min": 100,
+      "mean_ttft_reduction_percent_min": 20,
+      "mean_tpot_reduction_percent_min": 20,
+      "quality_and_service_requirements_unchanged": true,
+      "scenarios": "既定多轮对话、工具调用等典型场景；基准与可比资源沿用已确认配置。"
+    },
+    "3.4.3": {
+      "name": "长上下文稳定性",
+      "context_tokens_min": 32768,
+      "requires_stable_throughput_curve": true,
+      "requires_stable_ttft_tpot_p95_p99": true,
+      "requires_no_obvious_performance_degradation": true,
+      "invented_numeric_tail_tolerance": null
+    },
+    "3.4.4": {
+      "name": "单位token成本与利用率",
+      "unit_token_cost_reduction_percent_min": 30,
+      "comparator": "国际主流开源框架；本项目按已确认B0配对及可比条件复核。",
+      "requires_high_multi_tenant_utilization": true,
+      "invented_numeric_utilization_threshold": null
+    }
+  }
+}

@@ -6,6 +6,7 @@ import sys
 import hashlib
 import math
 import argparse
+from project_goal_assessment import assess, merge_requirements, REFERENCE_SHA256
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--run", type=Path, required=True)
@@ -125,6 +126,10 @@ def extras(root, native=False):
         "input_tokens_min": min(ins),
         "input_tokens_max": max(ins),
         "input_at_least16384_cases": sum(n >= 16384 for n in ins),
+        "input_at_least32768_cases": sum(n >= 32768 for n in ins),
+        "input_plus_output_at_least32768_cases": sum(
+            a + b >= 32768 for a, b in zip(ins, outs)
+        ),
         "input_plus_output_at_least16384_cases": sum(
             a + b >= 16384 for a, b in zip(ins, outs)
         ),
@@ -316,6 +321,21 @@ result = {
         "reuse": "Every reused stage re-audited by the one-click runner; original source dates/controllers/failed parent statuses retained. No duplicated inference.",
     },
 }
+reference_path = (
+    Path(__file__).resolve().parents[1]
+    / "reports/m01-qualified-pair-20261103/summary.json"
+)
+if sha(reference_path) != REFERENCE_SHA256:
+    raise ValueError("Project final-target source changed")
+result["milestone_assessment"] = {
+    "profile": "milestone-v1.5",
+    "targets": targets,
+    "scope": "V1.5里程碑四项要求；本表不构成项目最终目标验收。",
+}
+result["project_final_assessment"] = assess(
+    json.loads(reference_path.read_bytes()), datasets
+)
+result["merge_requirements"] = merge_requirements()
 # Only structured result metrics and public provenance are published, never prompts/answers or private endpoints.
 raw = (
     json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
