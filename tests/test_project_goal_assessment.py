@@ -19,7 +19,7 @@ def test_final90_is_independent_of_milestone50_and_retains_bound_scope():
     )
     data = json.loads(
         (
-            ROOT / "reports/five-datasets-standard-20261113/summary-public-v1.json"
+            ROOT / "reports/five-datasets-standard-20261113/summary-public-v2.json"
         ).read_bytes()
     )
     final = MODULE.assess(source, data["datasets"])
@@ -33,7 +33,7 @@ def test_final90_is_independent_of_milestone50_and_retains_bound_scope():
 def test_all_four_final_criteria_and_confirmed_interpretations_are_explicit():
     data = json.loads(
         (
-            ROOT / "reports/five-datasets-standard-20261113/summary-public-v1.json"
+            ROOT / "reports/five-datasets-standard-20261113/summary-public-v2.json"
         ).read_bytes()
     )
     assert data["milestone_assessment"]["targets"] == data["formal_targets"]
@@ -56,7 +56,7 @@ def test_all_four_final_criteria_and_confirmed_interpretations_are_explicit():
 def test_numeric_subset_success_does_not_hide_hle_or_claim_final_acceptance():
     data = json.loads(
         (
-            ROOT / "reports/five-datasets-standard-20261113/summary-public-v1.json"
+            ROOT / "reports/five-datasets-standard-20261113/summary-public-v2.json"
         ).read_bytes()
     )
     final = data["project_final_assessment"]

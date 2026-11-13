@@ -55,6 +55,9 @@ GenNova 与 GenNova Autotune 产品级独立结果已迁往
 
 ## 常用问题入口
 
+- **固定五项与16K稳定性订正：** [复核与未决范围](reports/five-datasets-standard-20261113/STABILITY-AUDIT-v1.md)，
+  区分已完成执行、实际总上下文覆盖、预算终止、合成C8及真实任务连续窗口；v1原投影保留，v2追加审计。
+
 - **项目最终目标与里程碑区别：** [最终目标及已确认解释](reports/project-final-goals-20261113/README.md)，
   列出90%同工况参考、吞吐2×/时延20%、32K及成本30%/多租户四项最终要求；
   [本轮双阶段判定](reports/five-datasets-standard-20261113/README.md)不复用里程碑通过标记来代替最终验收。

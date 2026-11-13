@@ -9,13 +9,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_all_five_paired_results_keep_original_denominators_and_scope():
     original = (
-        ROOT / "reports/five-datasets-standard-20261113/summary-public-v1.json"
+        ROOT / "reports/five-datasets-standard-20261113/summary-public-v2.json"
     ).read_bytes()
     assert (
         original
         == (
             ROOT
-            / "website-publication/data/five-datasets-standard-20261113/summary-public-v1.json"
+            / "website-publication/data/five-datasets-standard-20261113/summary-public-v2.json"
         ).read_bytes()
     )
     data = json.loads(original)

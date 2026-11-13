@@ -7,6 +7,7 @@ import hashlib
 import math
 import argparse
 from project_goal_assessment import assess, merge_requirements, REFERENCE_SHA256
+from stability_assessment import assess as assess_stability, milestone_target
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--run", type=Path, required=True)
@@ -265,11 +266,8 @@ stages = [
     for s in data["receipt"]["stages"]
 ]
 targets = data["formal_targets"]
-targets["3.4.3"] = {
-    **targets["3.4.3"],
-    "status": "冻结五项执行完成；质量与16K稳定性整体验收未通过",
-    "reason": "HLE两臂各106/200裁判未决（均为长度终止后不满足strict_json，不能当作已确认错误）；Frontier裁判未决B0/B1为7/5，Research成功数5→3/60；MMLU正确150→149/200。SWE/Terminal仅测推理，不测任务解决率，且输入≥16384 tokens均为0。独立4K/16K C8窗口已完成，但不能替代这些真实任务的16K尾时延稳定性验收。",
-}
+stability = assess_stability(stage_roots, datasets)
+targets["3.4.3"] = milestone_target(stability)
 result = {
     "schema": "sealed-five-dataset-comparison/v1",
     "run_id": run.name,
@@ -303,6 +301,7 @@ result = {
     },
     "datasets": datasets,
     "continuous": continuous,
+    "stability_assessment": stability,
     "formal_targets": targets,
     "price_basis": price,
     "source_provenance": {
@@ -336,6 +335,14 @@ result["project_final_assessment"] = assess(
     json.loads(reference_path.read_bytes()), datasets
 )
 result["merge_requirements"] = merge_requirements()
+previous_projection = R / "summary-public-v1.json"
+if previous_projection.exists() and args.output != previous_projection:
+    result["revision"] = {
+        "version": 2,
+        "supersedes": previous_projection.name,
+        "supersedes_sha256": sha(previous_projection),
+        "reason": "Separate answer quality from V1.5 stability; count total context and expose continuous C8 tails. Original measurements and v1 remain unchanged.",
+    }
 # Only structured result metrics and public provenance are published, never prompts/answers or private endpoints.
 raw = (
     json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
@@ -344,5 +351,8 @@ assert not any(
     x in raw for x in [b"/root/", b"/tmp/", b"http://127.", b"/data/shared_upload"]
 )
 args.output.write_bytes(raw)
+(R / "stability-audit-v1.json").write_text(
+    json.dumps(stability, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+)
 print("Exported", len(raw), "bytes", sha(args.output))
 print([(d["id"], d["changes_percent"]) for d in datasets])
