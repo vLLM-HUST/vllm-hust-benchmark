@@ -118,6 +118,26 @@ def verify():
         hashlib.sha256((ROOT / "formal_runtime.py.source").read_bytes()).hexdigest()
         == plan["runtime_helper_sha256"]
     )
+    supplements = ROOT / "supplements.json"
+    if supplements.is_file():
+        for descriptor in json.loads(supplements.read_text(encoding="utf-8")):
+            raw = (ROOT / descriptor["file"]).read_bytes()
+            assert len(raw) == descriptor["bytes"]
+            assert hashlib.sha256(raw).hexdigest() == descriptor["sha256"]
+            with tarfile.open(ROOT / descriptor["file"]) as package:
+                manifest = json.load(package.extractfile("manifest.json"))
+                for member in manifest["files"]:
+                    content = package.extractfile(member["path"]).read()
+                    assert len(content) == member["bytes"]
+                    assert hashlib.sha256(content).hexdigest() == member["sha256"]
+                assert (
+                    json.load(package.extractfile("campaign-status.json"))["phase"]
+                    == "failed"
+                )
+                oracle = json.load(
+                    package.extractfile("evidence/native/qualification-oracle.json")
+                )
+                assert oracle["valid"] is False and oracle["short"][6]["equal"] is False
     return {
         "capsules": counts,
         "cross_arm_sampled_tokens_equal": True,

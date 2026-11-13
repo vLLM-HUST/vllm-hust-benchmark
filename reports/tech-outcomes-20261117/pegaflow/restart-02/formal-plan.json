@@ -1,7 +1,7 @@
 {
   "schema": "pegaflow-matched-swe-plan/v1",
   "experiment": "ascend91-restart02-20261113",
-  "frozen_unix": 1794574460.809336,
+  "frozen_unix": 1794575884.230675,
   "protocol": "swe-prefix-reuse/v1",
   "cells": [
     1,
@@ -34,7 +34,8 @@
     "cross_arm_token_ids_equal": true,
     "swe_concurrency": 2,
     "swe_seconds": 180,
-    "requires_zero_protocol_and_load_save_failures": true
+    "requires_zero_protocol_and_load_save_failures": true,
+    "minimum_settle_seconds_before_each_probe": 1
   },
   "quality_scope": "Sampled token equality and real external restore plus strict SWE token-budget/stream/prompt checks. Not SWE solving accuracy or universal numerical equivalence.",
   "hardware": {
@@ -267,7 +268,7 @@
     "MKL_NUM_THREADS": "2",
     "VLLM_SERVER_DEV_MODE": "1"
   },
-  "driver_sha256": "5e3dead4507b18ce7294421effc972700f5b9a6d6e4207efcac5943ed1254483",
+  "driver_sha256": "8748cbab17e13037b95f859eaf78c0f2e3de8d53b17e132b7bc6bdac18c5d505",
   "runtime_helper_sha256": "bfd6999e15ea622f88a8fff69d7a0e50164fe1b962f289a62394343dcd26a31f",
   "ownership_monitor_interval_seconds": 60,
   "checkpoint_policy": "Each completed qualification/window is frozen with SHA-256 member manifest and mirrored to E: before the next window; controller waits up to 300s for byte-verified local ACK and then settles for 15s. Checkpoint work is outside timed windows.",
@@ -283,5 +284,7 @@
   ],
   "no_eager_fallback": true,
   "rdma_enabled": false,
-  "history_boundary": "Initial 0/7 workspace logs are unavailable through the rebuilt overlay. Old single-case discrepancy remains unresolved and was not reproduced in the current 20+20 short probes; two real long restores matched Native. Do not pool cohorts or promote 60s qualification throughput to a 900s result."
+  "history_boundary": "Initial 0/7 workspace logs are unavailable through the rebuilt overlay. Old single-case discrepancy remains unresolved and was not reproduced in the current 20+20 short probes; two real long restores matched Native. Do not pool cohorts or promote 60s qualification throughput to a 900s result.",
+  "supersedes_plan_sha256": "eb02f2fc14b45d4ecf2a56923c285914b826748a8f513c1a8dce68043fac49dc",
+  "amendment_reason": "The first formal Native oracle used back-to-back calls and case 6 diverged before timing. Restore the settled diagnostic precondition for every correctness probe; preserve the failed packet. Timed SWE client traffic is unchanged."
 }

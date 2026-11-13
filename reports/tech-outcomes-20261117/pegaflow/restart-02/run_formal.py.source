@@ -36,6 +36,8 @@ def post(path, body=None):
 
 
 def probe(prompt, salt):
+    # Isolate correctness probes from the preceding asynchronous request.
+    time.sleep(1)
     body = {
         "model": "pegaflow-techoutcomes-qwen35",
         "prompt": prompt,
