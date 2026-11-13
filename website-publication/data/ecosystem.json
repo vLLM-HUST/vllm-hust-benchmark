@@ -3203,6 +3203,62 @@
       ]
     },
     {
+      "id": "instance-controller",
+      "public_surface": true,
+      "name": "Instance Controller",
+      "name_en": "Instance Controller",
+      "name_zh": "实例控制器",
+      "artifact_type": "external_system",
+      "system_role": "lifecycle_control_plane",
+      "integration_contracts": [
+        "RIDE SDK"
+      ],
+      "integration_surfaces": [
+        "RIDE model lifecycle API",
+        "Ray Jobs"
+      ],
+      "execution_planes": [
+        "control_plane"
+      ],
+      "deployment_topology": "separate_application",
+      "delivery_model": "external_service",
+      "ownership": "community_integration",
+      "maintainers": [
+        "yancanmao"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "yancanmao",
+          "name": "毛言粲"
+        }
+      ],
+      "advisors": [],
+      "repository_relationship": "external_reference",
+      "maturity": "experimental",
+      "canonical_repository": "https://github.com/yancanmao/instance-controller",
+      "upstream_repository": null,
+      "summary_en": "Adjusts vLLM inference replica counts in an existing Ray cluster through RIDE. New replicas receive traffic when ready, and retiring replicas drain in-flight work before releasing resources.",
+      "summary_zh": "通过 RIDE 在现有 Ray 集群内调整 vLLM 推理副本数。新副本就绪后接流，待移除的副本完成在途请求后释放资源。",
+      "public_effect_en": "Ascend validation covered real inference on four serving replicas and scale-down after draining.",
+      "public_effect_zh": "昇腾真机验证覆盖四副本推理接流和排空后缩容。",
+      "public_effect_status": "validated",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/06c7afc760fc470e5fafebe2f2d8adcdc52b42a6/reports/controller-milestone-20261113/README.md#instance-controller",
+      "compatibility": {
+        "status": "external_service",
+        "host": "RIDE / Ray / vLLM",
+        "versions": [
+          "Instance Controller 0.1.12.dev3 (Ascend experiment)",
+          "RIDE 0.3.6 (Ascend experiment)"
+        ],
+        "platforms": [
+          "Ascend"
+        ],
+        "requirements_en": "Requires an existing Ray cluster and a RIDE-managed model service.",
+        "requirements_zh": "需要已有 Ray 集群及由 RIDE 管理的模型服务。"
+      },
+      "evidence_level": "integration_tested"
+    },
+    {
       "id": "request-throttling-controller",
       "public_surface": true,
       "name": "Request Throttling Controller",
