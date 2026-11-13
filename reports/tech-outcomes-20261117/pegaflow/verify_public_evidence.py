@@ -166,6 +166,11 @@ def verify(archive=None, native_part=None):
         "new_speedup_claim": False,
         "restart02_diagnostics": restart_result,
         "restart02_windows": window_result,
+        "restart02_final_sources": runpy.run_path(
+            str(ROOT / "restart-02/verify_final_sources.py")
+        )["verify"]()
+        if (ROOT / "restart-02/verify_final_sources.py").is_file()
+        else None,
     }
 
 
