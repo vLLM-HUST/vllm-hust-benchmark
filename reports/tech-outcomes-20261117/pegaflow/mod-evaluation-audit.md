@@ -45,3 +45,12 @@ Ascend0.23载体内加窄physical→logical解析修复，原安装树与二进�
 
 91另一份True v2准备在权重receipt字段守卫发生KeyError，0模型启动/0tokenize/0生成；原版编译通过未证明真实准入。修正将按实际91
 receipt的固定revision、14个分片size/hash与完成字段逐项CPU执行验证，作为新的v3；不改原始权重或补造旧成功。
+
+81共同修复的首个copied运行包在Native04模型初始化实际失败：只复制tracked源码和.so，漏了原安装CANN资源，`aclnnAddRmsNormBias`因`binary_info_config.json`不存在报EZ1009；0生成、0
+C8、0正式五项。对应[v3失败源](../bidkv/driver-mod-v3/README.md)与[真实wait/资产库存/受控原件索引](../bidkv/native04-failure-v1/README.md)保留。预检实际子进程返回−2、owned
+API清理后−9；不能把这些数值当吞吐失败次数或未提交solver请求。
+
+后续共同helper固定为`fe00e47faa81a0a3713a368e79a53504290687f2f249e4bf693457c2f7341253`，来自[PR28提交b931a952](https://github.com/vLLM-HUST/vllm-hust-bidkv/commit/b931a952683eef1fdc6d9abc44a15c97a6f98905)。CPU原/新源码为`71719e397ab003b31ba5e46e1a6da4da658ae7221eeead04311b65ad4d12d533`/`b7a84571c349c22935414b2c5a4c6cf91223414f80c0954f797340ad0f1f55f2`，补丁本身不变。81实际Linux准备保留1264个installed文件，其中804个CANN资产共65693604字节，相对symlink与原二进制逐项校验；9项Linux
+CPU测试通过。原安装树不改、不重建算子、不换SDK；CPU准备仍不证明NPU模型启动或性能通过。
+
+[91新v3准备源](driver-mod-v3/README.md)已对齐该最终helper和实际旧权重receipt，但尚未在91运行；该机02:15被admin主动停止，资源恢复确认待回复。81新v4与91准备稿分别标明执行身份、失败、未执行阶段，不把任一机器的准备或资格代填给另一台。

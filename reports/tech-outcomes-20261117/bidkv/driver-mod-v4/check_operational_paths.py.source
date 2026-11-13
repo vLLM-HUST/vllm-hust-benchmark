@@ -1,0 +1,162 @@
+"""Execute routing/template paths on CPU with mocked children; no model traffic."""
+
+import argparse
+import ast
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import tempfile
+from types import SimpleNamespace
+from unittest.mock import patch
+
+
+def load(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def check(folder):
+    import campaign81
+    import service81
+
+    lifecycle = load("operational_lifecycle", folder / "run_mod_v4.py")
+    controller_paths = {}
+    for arm in ["native", "bidkv"]:
+        tree = ast.parse((folder / ("c8-" + arm + "-controller.py")).read_bytes())
+        header = tree.body[
+            : next(i for i, node in enumerate(tree.body) if isinstance(node, ast.Try))
+        ]
+        namespace = {}
+        exec(
+            compile(
+                ast.Module(body=header, type_ignores=[]), "controller_header", "exec"
+            ),
+            namespace,
+        )
+        meta, output = campaign81.qualification_paths(arm)
+        assert (meta, output) == (namespace["META"], namespace["OUT"])
+        expected_preflight = "native-05" if arm == "native" else "bidkv-04"
+        assert namespace["PREFLIGHT"].name == expected_preflight
+        controller_paths[arm] = {
+            "metadata": str(meta),
+            "verify_c8_input": str(output),
+            "preflight": str(namespace["PREFLIGHT"]),
+        }
+    commands = []
+    with tempfile.TemporaryDirectory(prefix="bidkv-operational-cpu-") as directory:
+        root = Path(directory)
+        (root / "redirected-tmp").mkdir()
+        persist = root / "durable"
+        (persist / "metadata").mkdir(parents=True)
+        (root / "model-expected-weights.json").write_text("[]")
+        for arm, name in [("native", "native-05"), ("bidkv", "bidkv-04")]:
+            target = persist / "preflight" / name
+            target.mkdir(parents=True)
+            (target / "command.json").write_bytes(
+                (folder / (arm + "-qualified-command.json")).read_bytes()
+            )
+
+        def fake_path(value):
+            text = str(value)
+            return (
+                root / "redirected-tmp" / Path(text).name
+                if text.startswith("/workspace/bf-")
+                else Path(value)
+            )
+
+        def fake_popen(command, **kwargs):
+            commands.append({"argv": command, "environment": kwargs["env"]})
+            return SimpleNamespace(pid=1, poll=lambda: None)
+
+        class Healthy:
+            status = 200
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return None
+
+        with (
+            patch.object(service81, "ROOT", root),
+            patch.object(service81, "PERSIST", persist),
+            patch.object(service81, "Path", fake_path),
+            patch.object(service81, "ticks", lambda _p: "1"),
+            patch.object(service81, "mapping", lambda: "CPU mock mapping"),
+            patch.object(
+                service81, "npu", lambda: "No running processes found in NPU\n" * 2
+            ),
+            patch.object(service81.subprocess, "Popen", fake_popen),
+            patch.object(
+                service81.urllib.request, "urlopen", lambda *_a, **_k: Healthy()
+            ),
+        ):
+            for arm, label in [
+                ("native", "81fn04"),
+                ("bidkv", "81fb04"),
+                ("native", "81fj04"),
+            ]:
+                output = root / label
+                output.mkdir()
+                service81.Service(arm, output, label).start()
+                command = json.loads((output / "command.json").read_bytes())
+                assert command["qualified_command_source"] == str(
+                    persist
+                    / "preflight"
+                    / ("native-05" if arm == "native" else "bidkv-04")
+                    / "command.json"
+                )
+                assert label in command["environment"]["VLLM_CACHE_ROOT"]
+                additional = json.loads(
+                    command["argv"][command["argv"].index("--additional-config") + 1]
+                )
+                assert additional["enable_cpu_binding"] is True
+                assert (additional["bidkv_official023"]["policy"] is not None) == (
+                    arm == "bidkv"
+                )
+        child_routes = []
+
+        def child(name, command):
+            child_routes.append((name, command))
+            if name == "native-c8":
+                (persist / "metadata/native05-owned-supervisor.json").write_text(
+                    json.dumps({"phase": "completed", "actual_returncode": 0})
+                )
+
+        lifecycle.ROOT, lifecycle.PERSIST, lifecycle.DRIVER = root, persist, folder
+        lifecycle.RECEIPT = persist / "metadata/mock-lifecycle.json"
+        lifecycle.run_child = child
+        assert lifecycle.main(SimpleNamespace(out=root / "full-cohort")) == 0
+        assert [name for name, _command in child_routes] == [
+            "native-c8",
+            "bidkv-c8",
+            "full-five",
+        ]
+        assert [Path(command[2]).name for _name, command in child_routes] == [
+            "c8-native-controller.py",
+            "c8-bidkv-controller.py",
+            "campaign81.py",
+        ]
+        assert child_routes[-1][1][-1] == str(root / "full-cohort")
+    return {
+        "scope": "Actual CPU routing/template execution with mocked model health/children; no NPU or inference qualification",
+        "controller_to_verifier_paths": controller_paths,
+        "actual_service_template_routes_executed": len(commands),
+        "owned_lifecycle_child_routes_executed": len(child_routes),
+        "model_generation_requests": 0,
+        "source_manifest_sha256": hashlib.sha256(
+            (folder / "source-manifest.json").read_bytes()
+        ).hexdigest(),
+    }
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    report = check(Path(__file__).resolve().parent)
+    args.out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(report))
