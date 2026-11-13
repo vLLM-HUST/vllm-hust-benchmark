@@ -884,3 +884,9 @@ StructEval的[原始数据、官方源码获取与独立客户端安装说明](d
 [five-datasets-20261113-v1](docs/dataset-standards/five-datasets-v1/README.md)：MMLU 200、HLE 分层
 200、Frontier 160， SWE / Terminal 各 32 任务的公开 trace；固定 ID、顺序、来源、生成预算和统计口径。 质量与 trace
 推理性能分别报告；此入口不表示已有该标准的新实测成绩。
+
+## 测试范围与预计时长
+
+全量测试跑冻结的五项（MMLU200、HLE200、Frontier160、SWE/Terminal 各 32 任务 trace）； 快速测试只跑 MMLU200。双卡 910B2 /
+Qwen3.5-35B-A3B 配对参考： 快速预留 2–3 小时，全量预留 12–16 小时，含首次 C8；下载、安装、排队另计。
+这是阶段记录推算的排期范围，不是一轮全量实测，也不适用于所有引擎/硬件。 详见 [版本化运行指南](docs/dataset-standards/run-guide-v1.json)。
