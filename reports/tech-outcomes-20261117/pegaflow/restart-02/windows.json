@@ -290,6 +290,87 @@
         }
       ],
       "storage": "Concatenate parts in manifest order to recover the byte-identical original .tar.gz; the file field names the reconstructed archive."
+    },
+    {
+      "window": "native-c16-900s",
+      "file": "windows/native-c16-900s.tar.gz",
+      "bytes": 1191339,
+      "sha256": "74f649dbf0866b5235f04af2f6a5895d055b056fa033d1393f8d21132e0e2854",
+      "classification": "completed 900s observation; pairing/confirmation may still be pending",
+      "result": {
+        "arm": "native",
+        "concurrency": 16,
+        "qualification": false,
+        "valid": true,
+        "measurement_seconds": 900.0,
+        "requests_started": 446,
+        "max_prompt_tokens_observed": 50188,
+        "prompt_tokens_p50": 14239.0,
+        "max_turn_index_reached": 31,
+        "distinct_trajectories_started": 8,
+        "sessions_completed": 8,
+        "requests_completed_in_window": 430,
+        "requests_drained": 16,
+        "failed_requests": 0,
+        "observed_output_tokens_in_window": 240585,
+        "output_tokens_per_second": 267.31666666666666,
+        "output_tokens_per_second_per_chip": 133.65833333333333,
+        "decode_tokens_per_second_p90": 34.23529930951782,
+        "decode_speed_samples": 430,
+        "ttft_seconds_p95": 9.044531038600141,
+        "client_inflight_seconds": {
+          "0": 0.00021073400057503022,
+          "1": 0.0010655619989847764,
+          "2": 0.0008025570004974725,
+          "3": 0.0006794239998271223,
+          "4": 0.0006612140005017864,
+          "5": 0.0009724510000523878,
+          "6": 0.0007000939986028243,
+          "7": 0.0007984470012161182,
+          "8": 0.0007262250001076609,
+          "9": 0.0006757339997420786,
+          "10": 0.0006814240005041938,
+          "11": 0.0006674539999949047,
+          "12": 0.0009484399997745641,
+          "13": 0.0007063449993438553,
+          "14": 0.0007121050002751872,
+          "15": 1.441492569005277,
+          "16": 898.5474992209947
+        },
+        "mean_client_inflight": 15.998289958553325,
+        "full_concurrency_fraction": 0.9983861102455497,
+        "drain_seconds": 60.23449847499978,
+        "aborted": false,
+        "planned_measurement_seconds": 900.0
+      },
+      "local_verification": {
+        "window": "native-c16-900s",
+        "sha256": "74f649dbf0866b5235f04af2f6a5895d055b056fa033d1393f8d21132e0e2854",
+        "bytes": 1191339,
+        "verified_unix": 1794583811.1630628,
+        "files_verified": 35,
+        "requests_verified": 446,
+        "tokens_recomputed": 240585
+      },
+      "sampled_quality": {
+        "short_repeatability_mismatches": [],
+        "short_cross_arm_mismatches": [],
+        "long_prefix_samples_equal": true,
+        "quality_scope": "Strict SWE prompt/token-budget/stream checks and two bitwise-equal long-prefix restore samples with real external loads. Native-only uncached short case 6 was nonrepeatable in both archived attempts, including with 1s settling. All 8 short cases remain in the diagnostic and timed workload. Their differences are disclosed; no universal token equivalence, SWE solving accuracy, or causal explanation is established. Throughput is an observation under these quality limits."
+      },
+      "parts": [
+        {
+          "file": "windows/native-c16-900s.tar.gz.part-000",
+          "bytes": 921600,
+          "sha256": "9d348a8a116bdd08aab2ab87ad5d4523ba911aa2ef12c7fec01c58b89b28b3e2"
+        },
+        {
+          "file": "windows/native-c16-900s.tar.gz.part-001",
+          "bytes": 269739,
+          "sha256": "d62ed8cbdbac30ed069919a21f4f7e55d7a38b683a20f677a4c3db834047d913"
+        }
+      ],
+      "storage": "Concatenate parts in manifest order to recover the byte-identical original .tar.gz; the file field names the reconstructed archive."
     }
   ]
 }
