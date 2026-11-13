@@ -612,6 +612,72 @@
         "long_prefix_samples_equal": true,
         "quality_scope": "Strict SWE prompt/token-budget/stream checks and two bitwise-equal long-prefix restore samples with real external loads. Native-only uncached short case 6 was nonrepeatable in both archived attempts, including with 1s settling. All 8 short cases remain in the diagnostic and timed workload. Their differences are disclosed; no universal token equivalence, SWE solving accuracy, or causal explanation is established. Throughput is an observation under these quality limits."
       }
+    },
+    {
+      "window": "pegaflow-c8-900s",
+      "file": "windows/pegaflow-c8-900s.tar.gz",
+      "bytes": 995554,
+      "sha256": "d767de46d0c7182e944fb0428120164e80867a26648fe52fda784351073d1daf",
+      "classification": "completed 900s observation; pairing/confirmation may still be pending",
+      "result": {
+        "arm": "pegaflow",
+        "concurrency": 8,
+        "qualification": false,
+        "valid": true,
+        "measurement_seconds": 900.0,
+        "requests_started": 270,
+        "max_prompt_tokens_observed": 55491,
+        "prompt_tokens_p50": 14785.0,
+        "max_turn_index_reached": 37,
+        "distinct_trajectories_started": 8,
+        "sessions_completed": 5,
+        "requests_completed_in_window": 262,
+        "requests_drained": 8,
+        "failed_requests": 0,
+        "observed_output_tokens_in_window": 147521,
+        "output_tokens_per_second": 163.91222222222223,
+        "output_tokens_per_second_per_chip": 81.95611111111111,
+        "decode_tokens_per_second_p90": 38.243302395835826,
+        "decode_speed_samples": 262,
+        "ttft_seconds_p95": 7.005001950948461,
+        "client_inflight_seconds": {
+          "0": 0.000167353999131592,
+          "1": 0.001163534998340765,
+          "2": 0.0007814170021447353,
+          "3": 0.0007120949994714465,
+          "4": 0.0006930550007382408,
+          "5": 0.000737316000595456,
+          "6": 0.0010021620000770781,
+          "7": 1.055524360952404,
+          "8": 898.9392187050471
+        },
+        "mean_client_inflight": 7.998799727325612,
+        "full_concurrency_fraction": 0.998821354116719,
+        "drain_seconds": 22.39609526300046,
+        "aborted": false,
+        "planned_measurement_seconds": 900.0,
+        "mechanism_delta": {
+          "pega_load_success_total": 436.0,
+          "pega_save_success_total": 1220.0,
+          "pega_load_failure_total": 0.0,
+          "pega_save_failure_total": 0.0
+        }
+      },
+      "local_verification": {
+        "window": "pegaflow-c8-900s",
+        "sha256": "d767de46d0c7182e944fb0428120164e80867a26648fe52fda784351073d1daf",
+        "bytes": 995554,
+        "verified_unix": 1794588271.9046404,
+        "files_verified": 40,
+        "requests_verified": 270,
+        "tokens_recomputed": 147521
+      },
+      "sampled_quality": {
+        "short_repeatability_mismatches": [],
+        "short_cross_arm_mismatches": [],
+        "long_prefix_samples_equal": true,
+        "quality_scope": "Strict SWE prompt/token-budget/stream checks and two bitwise-equal long-prefix restore samples with real external loads. Native-only uncached short case 6 was nonrepeatable in both archived attempts, including with 1s settling. All 8 short cases remain in the diagnostic and timed workload. Their differences are disclosed; no universal token equivalence, SWE solving accuracy, or causal explanation is established. Throughput is an observation under these quality limits."
+      }
     }
   ]
 }

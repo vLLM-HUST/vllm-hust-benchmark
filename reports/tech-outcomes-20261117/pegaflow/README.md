@@ -90,10 +90,9 @@ python reports/tech-outcomes-20261117/pegaflow/verify_public_evidence.py --archi
 
 <!-- restart02-live-start -->
 
-重启后的独立批次已公开 8 个 900s 观察点；最新原件和配对状态见
+重启后的独立批次已公开 9 个 900s 观察点；最新原件和配对状态见
 [restart-02/RESULTS.md](restart-02/RESULTS.md)。本页初次中断记录与历史索引保留，不能代替新批次结果。
 
 <!-- restart02-live-end -->
-
 
 [冻结五数据集审计与新一轮 C8 适配器](five-datasets-c8-driver-v1/README.md)：此阶段仅准备与资格，不计五项正式完成。
