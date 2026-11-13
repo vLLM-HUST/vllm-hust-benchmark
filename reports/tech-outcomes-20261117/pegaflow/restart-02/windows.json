@@ -678,6 +678,93 @@
         "long_prefix_samples_equal": true,
         "quality_scope": "Strict SWE prompt/token-budget/stream checks and two bitwise-equal long-prefix restore samples with real external loads. Native-only uncached short case 6 was nonrepeatable in both archived attempts, including with 1s settling. All 8 short cases remain in the diagnostic and timed workload. Their differences are disclosed; no universal token equivalence, SWE solving accuracy, or causal explanation is established. Throughput is an observation under these quality limits."
       }
+    },
+    {
+      "window": "pegaflow-c16-900s",
+      "file": "windows/pegaflow-c16-900s.tar.gz",
+      "bytes": 1302073,
+      "sha256": "e7c9a2b905abc5cd8e9a050b5d96e7cbecfff17c3758cae76bd82b78fa9ae92f",
+      "classification": "completed 900s observation; pairing/confirmation may still be pending",
+      "result": {
+        "arm": "pegaflow",
+        "concurrency": 16,
+        "qualification": false,
+        "valid": true,
+        "measurement_seconds": 900.0,
+        "requests_started": 382,
+        "max_prompt_tokens_observed": 40244,
+        "prompt_tokens_p50": 13197.0,
+        "max_turn_index_reached": 29,
+        "distinct_trajectories_started": 8,
+        "sessions_completed": 6,
+        "requests_completed_in_window": 366,
+        "requests_drained": 16,
+        "failed_requests": 0,
+        "observed_output_tokens_in_window": 195612,
+        "output_tokens_per_second": 217.34666666666666,
+        "output_tokens_per_second_per_chip": 108.67333333333333,
+        "decode_tokens_per_second_p90": 22.935023172176876,
+        "decode_speed_samples": 366,
+        "ttft_seconds_p95": 7.397521313749166,
+        "client_inflight_seconds": {
+          "0": 0.0001860939992184285,
+          "1": 0.0010668619979696814,
+          "2": 0.0007750060030957684,
+          "3": 0.0006648149974353146,
+          "4": 0.0006816439999965951,
+          "5": 0.0009593499999027699,
+          "6": 0.0006925750021764543,
+          "7": 0.0007597559997520875,
+          "8": 0.000714134999725502,
+          "9": 0.0006737340008839965,
+          "10": 0.0006672839990642387,
+          "11": 0.0006626739996136166,
+          "12": 0.0009174299993901514,
+          "13": 0.0007031749992165715,
+          "14": 0.0007314150025194976,
+          "15": 1.1836211279915005,
+          "16": 898.8055229230085
+        },
+        "mean_client_inflight": 15.998578245844474,
+        "full_concurrency_fraction": 0.9986728032477873,
+        "drain_seconds": 95.35742697000023,
+        "aborted": false,
+        "planned_measurement_seconds": 900.0,
+        "mechanism_delta": {
+          "pega_load_success_total": 582.0,
+          "pega_save_success_total": 1542.0,
+          "pega_load_failure_total": 0.0,
+          "pega_save_failure_total": 0.0
+        }
+      },
+      "local_verification": {
+        "window": "pegaflow-c16-900s",
+        "sha256": "e7c9a2b905abc5cd8e9a050b5d96e7cbecfff17c3758cae76bd82b78fa9ae92f",
+        "bytes": 1302073,
+        "verified_unix": 1794589309.4855242,
+        "files_verified": 41,
+        "requests_verified": 382,
+        "tokens_recomputed": 195612
+      },
+      "sampled_quality": {
+        "short_repeatability_mismatches": [],
+        "short_cross_arm_mismatches": [],
+        "long_prefix_samples_equal": true,
+        "quality_scope": "Strict SWE prompt/token-budget/stream checks and two bitwise-equal long-prefix restore samples with real external loads. Native-only uncached short case 6 was nonrepeatable in both archived attempts, including with 1s settling. All 8 short cases remain in the diagnostic and timed workload. Their differences are disclosed; no universal token equivalence, SWE solving accuracy, or causal explanation is established. Throughput is an observation under these quality limits."
+      },
+      "parts": [
+        {
+          "file": "windows/pegaflow-c16-900s.tar.gz.part-000",
+          "bytes": 921600,
+          "sha256": "5d04b18370235535d7e05a983e5c22af4af7baf1887d03af983c998e6d49d5cb"
+        },
+        {
+          "file": "windows/pegaflow-c16-900s.tar.gz.part-001",
+          "bytes": 380473,
+          "sha256": "82bff9a3a62498512fbbdbce54d2aa5cb959a9eeb5d176df0bfc0c54a423cca2"
+        }
+      ],
+      "storage": "Concatenate parts in manifest order to recover the byte-identical original .tar.gz; the file field names the reconstructed archive."
     }
   ]
 }
