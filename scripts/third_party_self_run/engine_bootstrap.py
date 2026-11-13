@@ -17,11 +17,11 @@ import urllib.request
 import uuid
 
 REPOSITORY = "vLLM-HUST/vllm-hust-engine"
-COMMIT = "448362c7565597c8963c970dcfea0b235fd5fcf7"  # pragma: allowlist secret
-ASSET_ID = 740017947
-ASSET_BYTES = 407729
-ASSET_SHA256 = "c85e643c838efee170f7925acb8bdeeff78266b322c0f7dba92b8aaac5ae7d90"  # pragma: allowlist secret
-MANIFEST_SHA256 = "1f0b34b2221312b81ce2a91b190d694dfb3a30662f94720e38a86e45c5f960b7"  # pragma: allowlist secret
+COMMIT = "5aec60c49ff568fc8515f9bedc950316b0dac118"  # pragma: allowlist secret
+ASSET_ID = 742377706
+ASSET_BYTES = 412319
+ASSET_SHA256 = "c41f3b64d1ab5a920904e6a3f11c27f0d91afe751a6f2bb9d9497fe19ff7d8f0"  # pragma: allowlist secret
+MANIFEST_SHA256 = "5f556845d2cf327aa707c86593b498364929ffa61ef98cd5519736eeafa74075"  # pragma: allowlist secret
 PREFIX = "vllm-hust-engine-b1-r4"
 
 
