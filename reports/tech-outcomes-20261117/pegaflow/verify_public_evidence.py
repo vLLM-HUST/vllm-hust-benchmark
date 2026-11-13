@@ -5,6 +5,7 @@ import gzip
 import hashlib
 import json
 import math
+import runpy
 from pathlib import Path
 import tarfile
 
@@ -146,6 +147,10 @@ def verify(archive=None, native_part=None):
                 original["requests_artifact_sha256"]
                 == baseline["requests_artifact_sha256_recorded_in_public_metadata"]
             )
+    restart = ROOT / "restart-02/verify.py"
+    restart_result = (
+        runpy.run_path(str(restart))["verify"]() if restart.is_file() else None
+    )
     return {
         "public_files_verified": len(expected),
         "historical_candidate_requests_recomputed": requests,
@@ -153,6 +158,7 @@ def verify(archive=None, native_part=None):
         "native_full_request_stream_verified": False,
         "new_formal_900s_points": 0,
         "new_speedup_claim": False,
+        "restart02_diagnostics": restart_result,
     }
 
 
