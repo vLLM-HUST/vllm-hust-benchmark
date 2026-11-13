@@ -67,6 +67,9 @@ receipt 尚未取回， 因此本提交不声称完成 formal artifact custody�
 formatter 改写。 这些快照依赖未完整取回的 run-env/prepared/build receipts，属于失败尝试的执行来源， 不能作为已经成功的、可直接启动的 formal
 复现入口。
 
+兼容补丁以 `.patch.gz` 保存，解压后的 SHA-256 与原执行记录一致，以保留 diff 上下文空白。 原始控制器中的公开模型 revision SHA 在仓库秘密扫描 baseline
+中逐条标为已审核误报；未关闭扫描或修改源码快照。
+
 ## 验证与后续
 
 ```bash

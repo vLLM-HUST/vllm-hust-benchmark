@@ -29,7 +29,7 @@ def verify(archive=None, native_part=None):
     actual = {
         path.relative_to(ROOT).as_posix()
         for path in ROOT.rglob("*")
-        if path.is_file() and path.name != "manifest.json"
+        if path.is_file() and path != ROOT / "manifest.json"
     }
     assert actual == expected, "Public capsule file inventory changed"
     for record in manifest["files"]:
@@ -37,7 +37,9 @@ def verify(archive=None, native_part=None):
         assert path.resolve().is_relative_to(ROOT) and not path.is_symlink()
         assert path.stat().st_size == record["bytes"], record["path"]
         assert digest(path) == record["sha256"], record["path"]
-    patch = (ROOT / "config/numa-sparse-container.patch").read_bytes()
+    patch = gzip.decompress(
+        (ROOT / "config/numa-sparse-container.patch.gz").read_bytes()
+    )
     assert (
         hashlib.sha256(patch).hexdigest()
         == read("config/compatibility-patch.json")["patch_sha256"]
