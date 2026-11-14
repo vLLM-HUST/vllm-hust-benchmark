@@ -45,7 +45,8 @@ for axis, key, title in zip(
     if key != "output_tokens_per_second":
         axis.set_yscale("log")
 fig.suptitle(
-    "All five frozen profiles · original paired native runs; 15 verified reused stages, 0 new inference"
+    "All five frozen profiles · paired native evidence; "
+    f"{d['reused_stages']} verified reused stages, {d['new_inference_stages']} new native stages"
 )
 fig.tight_layout()
 fig.savefig(a.out / "throughput-latency.png", dpi=170)
