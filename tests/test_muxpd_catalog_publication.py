@@ -147,7 +147,7 @@ def test_muxpd_throughput_uses_exact_archived_metrics_and_separate_tp_observatio
     assert len(entry["observations"]) == 2
     for tp, observation in zip(("tp2", "tp4"), entry["observations"]):
         expected = metrics["workloads"]["wl-2wiki-r1.6"]["comparisons"][tp]
-        comparison, = observation["comparisons"]
+        (comparison,) = observation["comparisons"]
         assert comparison["baseline"] == expected["native"]["out_tok_s"]
         assert comparison["candidate"] == expected["mux43"]["out_tok_s"]
         assert observation["kind"] == "published-comparisons"
