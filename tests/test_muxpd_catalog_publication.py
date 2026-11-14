@@ -138,8 +138,11 @@ def test_live_publication_facts_refer_to_exact_archived_sources():
 
 def test_muxpd_throughput_uses_exact_archived_metrics_and_separate_tp_observations():
     metrics = read(ROOT / "reports/tech-outcomes-20261117/muxpd/metrics-v1.json")
-    entry = next(row for row in read(DATA / "plugin-performance.json")["entries"]
-                 if row["id"] == "muxpd")
+    entry = next(
+        row
+        for row in read(DATA / "plugin-performance.json")["entries"]
+        if row["id"] == "muxpd"
+    )
     assert entry["default_observation_id"] == "muxpd:wl38-2wiki-tp2"
     assert len(entry["observations"]) == 2
     for tp, observation in zip(("tp2", "tp4"), entry["observations"]):
