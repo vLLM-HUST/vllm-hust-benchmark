@@ -237,6 +237,7 @@ def verify():
             event
             for journal in carry["policy_guard_revalidated"]
             for event in journal["events"]
+            if event["event"] == "preemption-decision"
         ]
         assert len(events) == 7
         for event in events:
