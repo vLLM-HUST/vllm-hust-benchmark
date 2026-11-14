@@ -1,0 +1,230 @@
+"""Restore the qualified e2 wheel on a matching stock SDK, without inference."""
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import platform
+import subprocess
+import sys
+import time
+import traceback
+
+from service81 import runtime_environment, release_admission, ASCEND
+
+ROOT = Path("/workspace/pegaflow91-five-datasets-20261114-04")
+NAS = Path("/data/shared_upload/cybber695/pegaflow91-five-datasets-20261114-04")
+OLD = Path("/data/shared_upload/cybber695/pegaflow-techoutcomes-20261113-02")
+WHEEL = (
+    OLD / "provenance/pegaflow_llm_npu-0.23.4-cp312-cp312-manylinux_2_34_aarch64.whl"
+)
+WHEEL_SHA = "df687c8d1fe5650cc94a83371e94c1cb90f8e3b3a7c0a467e09fe75ca334f58b"  # pragma: allowlist secret -- qualified public build artifact identity
+PREPARE_SHA = "fe00e47faa81a0a3713a368e79a53504290687f2f249e4bf693457c2f7341253"  # pragma: allowlist secret -- shared public prepare script identity
+CORE = {
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0",
+    "transformers": "5.5.4",
+    "tokenizers": "0.22.2",
+}
+STATE = {
+    "phase": "starting",
+    "started_unix": time.time(),
+    "pid": os.getpid(),
+    "model_startups": 0,
+    "model_generation_requests": 0,
+    "steps": [],
+}
+
+
+def sha(path):
+    with Path(path).open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def save():
+    path = NAS / "metadata/sdk-restore-status.json"
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(STATE, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(path)
+
+
+def invoke(label, command, environment, timeout=300):
+    STATE["phase"] = label
+    row = {"name": label, "argv": command, "started_unix": time.time()}
+    STATE["steps"].append(row)
+    save()
+    result = subprocess.run(
+        command, env=environment, capture_output=True, text=True, timeout=timeout
+    )
+    row.update(
+        actual_returncode=result.returncode,
+        completed_unix=time.time(),
+        stdout=result.stdout,
+        stderr=result.stderr,
+    )
+    save()
+    if result.returncode:
+        raise RuntimeError(
+            label + " failed; inspect the retained actual returncode/log"
+        )
+    return result
+
+
+def main():
+    os.umask(0o077)
+    assert ROOT.is_dir() and NAS.is_dir()
+    assert (ROOT / "durable").resolve() == NAS.resolve()
+    assert sys.version_info[:2] == (3, 12) and platform.machine() == "aarch64"
+    assert not (ROOT / ".venv").exists(), (
+        "Fresh SDK path required; never overwrite a running environment"
+    )
+    STATE["source_sha256"] = sha(Path(__file__))
+    save()
+    try:
+        release_admission()
+        assert WHEEL.stat().st_size == 7481020 and sha(WHEEL) == WHEEL_SHA
+        STATE["qualified_wheel"] = {
+            "path": str(WHEEL),
+            "bytes": WHEEL.stat().st_size,
+            "sha256": WHEEL_SHA,
+        }
+        environment = runtime_environment()
+        temporary = ROOT / "setup-tmp"
+        temporary.mkdir(mode=0o700, exist_ok=False)
+        environment.update(
+            TMPDIR=str(temporary),
+            PIP_CACHE_DIR=str(ROOT / "cache/pip"),
+            PIP_DISABLE_PIP_VERSION_CHECK="1",
+            PYTHONDONTWRITEBYTECODE="1",
+            PYTHONUNBUFFERED="1",
+        )
+        code = (
+            "import importlib.metadata as m,json;actual={k:m.version(k)for k in "
+            + repr(CORE)
+            + "};assert actual=="
+            + repr(CORE)
+            + ",(actual,'stock SDK drift');print(json.dumps(actual))"
+        )
+        invoke("stock-core-six", [sys.executable, "-B", "-c", code], environment)
+        for name, path, commit in [
+            (
+                "vllm",
+                "/vllm-workspace/vllm",
+                "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+            ),
+            (
+                "ascend",
+                "/vllm-workspace/vllm-ascend",
+                "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+            ),
+        ]:  # pragma: allowlist secret -- fixed public official source commits
+            head = invoke(
+                name + "-source-head",
+                ["git", "-C", path, "rev-parse", "HEAD"],
+                environment,
+            ).stdout.strip()
+            assert head == commit
+            assert not invoke(
+                name + "-source-diff",
+                ["git", "-C", path, "diff", "--binary", "HEAD"],
+                environment,
+            ).stdout
+        python = str(ROOT / ".venv/bin/python")
+        invoke(
+            "create-system-site-sdk",
+            [
+                sys.executable,
+                "-B",
+                "-m",
+                "venv",
+                "--system-site-packages",
+                str(ROOT / ".venv"),
+            ],
+            environment,
+        )
+        invoke(
+            "install-verified-wheel-no-dependencies",
+            [
+                python,
+                "-B",
+                "-m",
+                "pip",
+                "install",
+                "--no-index",
+                "--no-deps",
+                str(WHEEL),
+            ],
+            environment,
+        )
+        invoke("measurement-core-six", [python, "-B", "-c", code], environment)
+        image = subprocess.run(
+            [sys.executable, "-B", "-m", "pip", "check"],
+            env=environment,
+            capture_output=True,
+            text=True,
+            timeout=90,
+        )
+        sdk = subprocess.run(
+            [python, "-B", "-m", "pip", "check"],
+            env=environment,
+            capture_output=True,
+            text=True,
+            timeout=90,
+        )
+        new_conflicts = sorted(
+            set(sdk.stdout.splitlines()) - set(image.stdout.splitlines())
+        )
+        STATE["pip_check_delta"] = {
+            "image": {
+                "actual_returncode": image.returncode,
+                "stdout": image.stdout,
+                "stderr": image.stderr,
+            },
+            "measurement": {
+                "actual_returncode": sdk.returncode,
+                "stdout": sdk.stdout,
+                "stderr": sdk.stderr,
+            },
+            "new_conflicts": new_conflicts,
+            "scope": "Preserve inherited image conflicts; no new measurement SDK conflicts allowed. This does not certify optional image dependencies globally.",
+        }
+        save()
+        assert not new_conflicts
+        assert sdk.returncode == image.returncode
+        from carrier_admission import verify
+
+        STATE["shared_common_carrier_admission"] = verify(ASCEND)
+        save()
+        # This final CPU-only execution checks actual SDK bytes/import paths,
+        # source manifest, receipt schema, weights stats and original five-input
+        # contracts before any model/tokenization request can be launched.
+        invoke(
+            "actual-linux-cpu-admission",
+            [python, "-B", str(Path(__file__).with_name("preflight_cpu81.py"))],
+            environment,
+            timeout=900,
+        )
+        STATE.update(
+            phase="sdk-and-linux-cpu-admitted-only",
+            completed_unix=time.time(),
+            controller_function_returncode=0,
+        )
+        save()
+        return 0
+    except BaseException as error:
+        STATE.update(
+            phase="failed",
+            error=type(error).__name__ + ": " + str(error),
+            failed_unix=time.time(),
+            controller_function_returncode=2,
+        )
+        save()
+        traceback.print_exc()
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
