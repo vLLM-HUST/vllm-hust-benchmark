@@ -247,3 +247,24 @@ def test_milestone_cost_and_utilization_must_match_one_profile():
     assert target["3.4.2"]["accepted"] and target["3.4.4"]["accepted"]
     assert not target["3.4.1"]["accepted"] and not target["3.4.3"]["accepted"]
     assert original["3.4.2"] == {"accepted": False}
+
+
+def test_verified_live_compute_uses_observed_repeats_and_separate_final90():
+    source = json.loads(
+        (ROOT / "reports/m01-qualified-pair-20261103/summary.json").read_bytes()
+    )
+    current = dict(
+        status="measured", efficiency_lower_observed_percent=70, status_sha256="a" * 64
+    )
+    result = MODULE.assess(source, synthetic_profiles(), current_compute=current)
+    goal = result["targets"]["3.4.1"]
+    assert goal["attainment"] == "not_demonstrated"
+    assert goal["current_min_observed_efficiency_percent"] == 70
+    assert goal["evidence_lower_bound_percent"] is None
+    current["efficiency_lower_observed_percent"] = 92
+    goal = MODULE.assess(source, synthetic_profiles(), current_compute=current)[
+        "targets"
+    ]["3.4.1"]
+    assert goal["attainment"] == "demonstrated"
+    assert goal["source_sha256"] == "a" * 64
+    assert goal["historical_reference_separate"]

@@ -136,7 +136,7 @@ def unmeasured_current_compute_target(archived):
     }
 
 
-def assess(reference, datasets, profile=None):
+def assess(reference, datasets, profile=None, current_compute=None):
     profile = profile or json.loads(PROFILE_PATH.read_bytes())
     criteria = profile["targets"]
     if (
@@ -167,6 +167,24 @@ def assess(reference, datasets, profile=None):
             "reason": "原文“理论峰值”按用户确认解释为同工况独立参考，模型沿用已确认35B。历史out256的B1保守下界约59.76%，未证明90%；下界距离不是实际效率差距，不反推真实效率必低90%，不套用于本轮完整回答或全五项。",
         }
     }
+    if current_compute is not None and current_compute.get("status") == "measured":
+        value = Decimal(str(current_compute["efficiency_lower_observed_percent"]))
+        if not value.is_finite() or value <= 0:
+            raise ValueError("Invalid current-workload reference efficiency")
+        targets["3.4.1"].update(
+            attainment="demonstrated"
+            if value >= Decimal(threshold)
+            else "not_demonstrated",
+            evidence_lower_bound_percent=None,
+            lower_bound_distance_to_target_pp=None,
+            current_min_observed_efficiency_percent=float(value),
+            evidence_summary=f"本轮MMLU200现场参考，各重复最小值{value}%",
+            evidence_summary_en=f"Current MMLU200 live reference: minimum observed repeat {value}%",
+            source_url=None,
+            source_sha256=current_compute["status_sha256"],
+            historical_reference_separate=True,
+            reason="本轮独立标定、整链验证、同步计时及封存记录复算；这是各重复的观测最小值，不冒充统计保守下界。历史out256原件单列。",
+        )
     performance = []
     costs = []
     for dataset in datasets:

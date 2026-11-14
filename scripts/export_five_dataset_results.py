@@ -294,7 +294,33 @@ reuse = reuse_binding
 origins = [{k: v for k, v in o.items() if k != "source_root"} for o in reuse["origins"]]
 stages = provenance(data)
 targets = milestone_representative_targets(data["formal_targets"], datasets)
-targets["3.4.1"] = unmeasured_current_compute_target(targets["3.4.1"])
+current_compute = data.get("current_compute_reference")
+published_compute = None
+if current_compute and current_compute.get("status") == "measured":
+    current_path = run / "compute-reference/status.json"
+    if (
+        json.loads(current_path.read_bytes()) != current_compute
+        or data["receipt"].get("compute_reference") != current_compute
+    ):
+        raise ValueError("Current reference differs from the bound campaign receipt")
+    from compute_reference import binding, target as compute_target  # noqa: E402
+
+    if current_compute["binding"] != binding(data["plan"]):
+        raise ValueError(
+            "Current compute reference belongs to another workload/runtime"
+        )
+    targets["3.4.1"] = compute_target(current_compute)
+    published_compute = {
+        "status": "measured",
+        "profile": "mmlu-fixed200-v1",
+        "efficiency_lower_observed_percent": current_compute[
+            "efficiency_lower_observed_percent"
+        ],
+        "status_sha256": sha(current_path),
+        "summary_sha256": current_compute["summary_sha256"],
+    }
+else:
+    targets["3.4.1"] = unmeasured_current_compute_target(targets["3.4.1"])
 stability = assess_stability(stage_roots, datasets)
 targets["3.4.3"] = milestone_target(stability)
 result = {
@@ -337,6 +363,7 @@ result = {
     "continuous": continuous,
     "stability_assessment": stability,
     "formal_targets": targets,
+    "current_compute_reference": published_compute,
     "price_basis": price,
     "source_provenance": {
         "campaign_seal_sha256": sha(run / "campaign-checksums.json"),
@@ -366,7 +393,7 @@ result["milestone_assessment"] = {
     "scope": "V1.5里程碑四项要求；本表不构成项目最终目标验收。",
 }
 result["project_final_assessment"] = assess(
-    json.loads(reference_path.read_bytes()), datasets
+    json.loads(reference_path.read_bytes()), datasets, current_compute=published_compute
 )
 quality_denominators = []
 for dataset in datasets:
