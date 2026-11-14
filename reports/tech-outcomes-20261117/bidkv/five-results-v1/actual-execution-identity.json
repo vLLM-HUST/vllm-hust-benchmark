@@ -1,0 +1,1018 @@
+{
+  "schema": "primary-actual-execution-identity/v1",
+  "source_kind": "Launcher captured argv and selected environment from actual constructed Popen inputs immediately before spawning, linked to actual PID/ready/wait receipts. No full /proc argv/environment snapshot was persisted for these formal services.",
+  "launcher_source": {
+    "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-mod-v4/service81.py",
+    "bytes": 9494,
+    "sha256": "e7b0b924e161510b5abb10a580460f29cf1e1accf4b59c81097599ec1600c51e"
+  },
+  "services": {
+    "native": {
+      "launch_command": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-native/command.json",
+        "bytes": 3026,
+        "sha256": "4f9c19512b3894b05f2b93a0a321d73955c28366a089bb918daa8db885d58c02",
+        "value": {
+          "argv": [
+            "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "serve",
+            "/data/shared_models/Qwen3.5-35B-A3B",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "18390",
+            "--served-model-name",
+            "qwen3.5-35b",
+            "--tensor-parallel-size",
+            "2",
+            "--pipeline-parallel-size",
+            "1",
+            "--distributed-executor-backend",
+            "mp",
+            "--dtype",
+            "bfloat16",
+            "--max-model-len",
+            "65536",
+            "--max-num-seqs",
+            "16",
+            "--max-num-batched-tokens",
+            "4096",
+            "--kv-cache-memory-bytes",
+            "17179869184",
+            "--gpu-memory-utilization",
+            "0.95",
+            "--seed",
+            "17",
+            "--enable-prefix-caching",
+            "--mamba-cache-mode",
+            "align",
+            "--async-scheduling",
+            "--enable-prompt-tokens-details",
+            "--speculative-config",
+            "{\"method\": \"mtp\", \"num_speculative_tokens\": 2}",
+            "--compilation-config",
+            "{\"cudagraph_mode\": \"FULL_AND_PIECEWISE\", \"cudagraph_capture_sizes\": [3, 6, 12, 24, 48], \"max_cudagraph_capture_size\": 48}",
+            "--generation-config",
+            "vllm",
+            "--override-generation-config",
+            "{\"temperature\": 0.0, \"top_p\": 1.0, \"top_k\": -1}",
+            "--default-chat-template-kwargs",
+            "{\"enable_thinking\": true}",
+            "--limit-mm-per-prompt",
+            "{\"image\": 1, \"video\": 0}",
+            "--additional-config",
+            "{\"enable_cpu_binding\": true, \"bidkv_official023\": {\"policy\": null, \"evidence_dir\": \"/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-native/policy\"}}",
+            "--shutdown-timeout",
+            "60"
+          ],
+          "environment": {
+            "PYTHONPATH": "/workspace/bidkv-five-datasets-20261113-01/runtime/official023:/workspace/bidkv-five-datasets-20261113-01/runtime/ascend023-cpubind03:/workspace/bidkv-five-datasets-20261113-01/sources/bidkv-compat-02/src:/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe:",
+            "HF_HUB_OFFLINE": "1",
+            "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+            "OMP_NUM_THREADS": "2",
+            "MKL_NUM_THREADS": "2",
+            "TMPDIR": "/workspace/bf-81fn04-t",
+            "VLLM_RPC_BASE_PATH": "/workspace/bf-81fn04-r",
+            "VLLM_CACHE_ROOT": "/workspace/bidkv-five-datasets-20261113-01/cache/81fn04/vllm",
+            "TRITON_CACHE_DIR": "/workspace/bidkv-five-datasets-20261113-01/cache/81fn04/triton",
+            "TORCHINDUCTOR_CACHE_DIR": "/workspace/bidkv-five-datasets-20261113-01/cache/81fn04/inductor",
+            "ASCEND_CACHE_PATH": "/workspace/bidkv-five-datasets-20261113-01/cache/81fn04/ascend",
+            "ASCEND_RT_VISIBLE_DEVICES": null,
+            "LD_PRELOAD": "/usr/lib64/libjemalloc.so.2:",
+            "LCCL_DETERMINISTIC": "0"
+          },
+          "qualified_command_source": "/workspace/bidkv-five-datasets-20261113-01/durable/preflight/native-05/command.json",
+          "only_operational_changes": [
+            "fresh evidence path",
+            "fresh temporary/cache paths"
+          ]
+        }
+      },
+      "qualified_command": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/preflight/native-05/command.json",
+        "bytes": 2805,
+        "sha256": "298778f38db9c20c474ba29f3babf4433726fb793ea4606b6aca9ebfe177f229",
+        "value": {
+          "argv": [
+            "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "serve",
+            "/data/shared_models/Qwen3.5-35B-A3B",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "18390",
+            "--served-model-name",
+            "qwen3.5-35b",
+            "--tensor-parallel-size",
+            "2",
+            "--pipeline-parallel-size",
+            "1",
+            "--distributed-executor-backend",
+            "mp",
+            "--dtype",
+            "bfloat16",
+            "--max-model-len",
+            "65536",
+            "--max-num-seqs",
+            "16",
+            "--max-num-batched-tokens",
+            "4096",
+            "--kv-cache-memory-bytes",
+            "17179869184",
+            "--gpu-memory-utilization",
+            "0.95",
+            "--seed",
+            "17",
+            "--enable-prefix-caching",
+            "--mamba-cache-mode",
+            "align",
+            "--async-scheduling",
+            "--enable-prompt-tokens-details",
+            "--speculative-config",
+            "{\"method\": \"mtp\", \"num_speculative_tokens\": 2}",
+            "--compilation-config",
+            "{\"cudagraph_mode\": \"FULL_AND_PIECEWISE\", \"cudagraph_capture_sizes\": [3, 6, 12, 24, 48], \"max_cudagraph_capture_size\": 48}",
+            "--generation-config",
+            "vllm",
+            "--override-generation-config",
+            "{\"temperature\": 0.0, \"top_p\": 1.0, \"top_k\": -1}",
+            "--default-chat-template-kwargs",
+            "{\"enable_thinking\": true}",
+            "--limit-mm-per-prompt",
+            "{\"image\": 1, \"video\": 0}",
+            "--additional-config",
+            "{\"enable_cpu_binding\": true, \"bidkv_official023\": {\"policy\": null, \"evidence_dir\": \"/workspace/bidkv-five-datasets-20261113-01/durable/preflight/native-05/policy\"}}",
+            "--shutdown-timeout",
+            "60"
+          ],
+          "environment": {
+            "PYTHONPATH": "/workspace/bidkv-five-datasets-20261113-01/runtime/official023:/workspace/bidkv-five-datasets-20261113-01/runtime/ascend023-cpubind03:/workspace/bidkv-five-datasets-20261113-01/sources/bidkv-compat-02/src:/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe:",
+            "HF_HUB_OFFLINE": "1",
+            "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+            "OMP_NUM_THREADS": "2",
+            "MKL_NUM_THREADS": "2",
+            "TMPDIR": "/workspace/bf81n05-t",
+            "VLLM_RPC_BASE_PATH": "/workspace/bf81n05-r",
+            "VLLM_CACHE_ROOT": "/workspace/bidkv-five-datasets-20261113-01/cache/native05/vllm",
+            "TRITON_CACHE_DIR": "/workspace/bidkv-five-datasets-20261113-01/cache/native05/triton",
+            "ASCEND_CACHE_PATH": "/workspace/bidkv-five-datasets-20261113-01/cache/native05/ascend",
+            "ASCEND_RT_VISIBLE_DEVICES": null,
+            "LD_PRELOAD": "/usr/lib64/libjemalloc.so.2:",
+            "LCCL_DETERMINISTIC": "0"
+          },
+          "scope": "Model startup and input tokenization only; no generation until separate execution sources are sealed."
+        }
+      },
+      "actual_process": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-native/process.json",
+        "bytes": 88,
+        "sha256": "ca4e86b93033667b37a9dd57d3f1a35397dfe98546e8a3c4f0aa2291538bf7bb",
+        "value": {
+          "pid": 381199,
+          "start_ticks": "980090999",
+          "started_unix": 1794599985.8348124
+        }
+      },
+      "ready": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-native/ready.json",
+        "bytes": 81,
+        "sha256": "f1b2501201d5e26606df791f52b77e35bf1645adb9d7e5f250aae20e059c1cd0",
+        "value": {
+          "healthy_unix": 1794600614.3127298,
+          "startup_seconds": 628.4768318925053
+        }
+      },
+      "actual_wait": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-native/stop.json",
+        "bytes": 57,
+        "sha256": "684398b121f5cd3063f6d717253da03cd8ea585ebcb5e8cce5c63dbe999a01c4",
+        "value": {
+          "stopped_unix": 1794606572.89225,
+          "exit_code": 0
+        }
+      },
+      "proc_captured_argv": null,
+      "per_service_loaded_module_import_capture": null,
+      "import_scope": "Same frozen launcher PYTHONPATH/carrier and source admission as qualified arm; no per-service module-path RPC was collected in primary full. Do not substitute preflight evidence for a direct formal-service import observation."
+    },
+    "bidkv": {
+      "launch_command": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-bidkv/command.json",
+        "bytes": 3587,
+        "sha256": "92563c8b1135e83379e96294a07efe4846b32a1ddc1c9140055d0e8d7bff0568",
+        "value": {
+          "argv": [
+            "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "serve",
+            "/data/shared_models/Qwen3.5-35B-A3B",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "18390",
+            "--served-model-name",
+            "qwen3.5-35b",
+            "--tensor-parallel-size",
+            "2",
+            "--pipeline-parallel-size",
+            "1",
+            "--distributed-executor-backend",
+            "mp",
+            "--dtype",
+            "bfloat16",
+            "--max-model-len",
+            "65536",
+            "--max-num-seqs",
+            "16",
+            "--max-num-batched-tokens",
+            "4096",
+            "--kv-cache-memory-bytes",
+            "17179869184",
+            "--gpu-memory-utilization",
+            "0.95",
+            "--seed",
+            "17",
+            "--enable-prefix-caching",
+            "--mamba-cache-mode",
+            "align",
+            "--async-scheduling",
+            "--enable-prompt-tokens-details",
+            "--speculative-config",
+            "{\"method\": \"mtp\", \"num_speculative_tokens\": 2}",
+            "--compilation-config",
+            "{\"cudagraph_mode\": \"FULL_AND_PIECEWISE\", \"cudagraph_capture_sizes\": [3, 6, 12, 24, 48], \"max_cudagraph_capture_size\": 48}",
+            "--generation-config",
+            "vllm",
+            "--override-generation-config",
+            "{\"temperature\": 0.0, \"top_p\": 1.0, \"top_k\": -1}",
+            "--default-chat-template-kwargs",
+            "{\"enable_thinking\": true}",
+            "--limit-mm-per-prompt",
+            "{\"image\": 1, \"video\": 0}",
+            "--additional-config",
+            "{\"enable_cpu_binding\": true, \"enable_utility_victim_selection\": true, \"utility_strategy\": \"bidkv\", \"utility_kill_switch\": false, \"bidkv_official023\": {\"policy\": \"bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy\", \"evidence_dir\": \"/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-bidkv/policy\"}, \"utility_completion_weight\": 0.5, \"utility_preempt_weight\": 0.3, \"utility_kv_gate\": 0.0, \"utility_cooldown_s\": 0.0, \"utility_min_running\": 1, \"utility_liveness_preemptions\": 2, \"utility_cascade_gain_ratio\": 1.25, \"utility_snapshot_enabled\": false, \"utility_snapshot_top_k\": 3, \"utility_snapshot_history_size\": 32, \"utility_epsilon\": 1e-06, \"utility_default_max_tokens\": 1024}",
+            "--shutdown-timeout",
+            "60"
+          ],
+          "environment": {
+            "PYTHONPATH": "/workspace/bidkv-five-datasets-20261113-01/runtime/official023:/workspace/bidkv-five-datasets-20261113-01/runtime/ascend023-cpubind03:/workspace/bidkv-five-datasets-20261113-01/sources/bidkv-compat-02/src:/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe:",
+            "HF_HUB_OFFLINE": "1",
+            "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+            "OMP_NUM_THREADS": "2",
+            "MKL_NUM_THREADS": "2",
+            "TMPDIR": "/workspace/bf-81fb04-t",
+            "VLLM_RPC_BASE_PATH": "/workspace/bf-81fb04-r",
+            "VLLM_CACHE_ROOT": "/workspace/bidkv-five-datasets-20261113-01/cache/81fb04/vllm",
+            "TRITON_CACHE_DIR": "/workspace/bidkv-five-datasets-20261113-01/cache/81fb04/triton",
+            "TORCHINDUCTOR_CACHE_DIR": "/workspace/bidkv-five-datasets-20261113-01/cache/81fb04/inductor",
+            "ASCEND_CACHE_PATH": "/workspace/bidkv-five-datasets-20261113-01/cache/81fb04/ascend",
+            "ASCEND_RT_VISIBLE_DEVICES": null,
+            "LD_PRELOAD": "/usr/lib64/libjemalloc.so.2:",
+            "LCCL_DETERMINISTIC": "0"
+          },
+          "qualified_command_source": "/workspace/bidkv-five-datasets-20261113-01/durable/preflight/bidkv-04/command.json",
+          "only_operational_changes": [
+            "fresh evidence path",
+            "fresh temporary/cache paths"
+          ]
+        }
+      },
+      "qualified_command": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/preflight/bidkv-04/command.json",
+        "bytes": 3364,
+        "sha256": "0d02877c2b3a43258f07fcc287c93d8d430ff2a8dd9ac1066817e3688e434f54",
+        "value": {
+          "argv": [
+            "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "serve",
+            "/data/shared_models/Qwen3.5-35B-A3B",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "18390",
+            "--served-model-name",
+            "qwen3.5-35b",
+            "--tensor-parallel-size",
+            "2",
+            "--pipeline-parallel-size",
+            "1",
+            "--distributed-executor-backend",
+            "mp",
+            "--dtype",
+            "bfloat16",
+            "--max-model-len",
+            "65536",
+            "--max-num-seqs",
+            "16",
+            "--max-num-batched-tokens",
+            "4096",
+            "--kv-cache-memory-bytes",
+            "17179869184",
+            "--gpu-memory-utilization",
+            "0.95",
+            "--seed",
+            "17",
+            "--enable-prefix-caching",
+            "--mamba-cache-mode",
+            "align",
+            "--async-scheduling",
+            "--enable-prompt-tokens-details",
+            "--speculative-config",
+            "{\"method\": \"mtp\", \"num_speculative_tokens\": 2}",
+            "--compilation-config",
+            "{\"cudagraph_mode\": \"FULL_AND_PIECEWISE\", \"cudagraph_capture_sizes\": [3, 6, 12, 24, 48], \"max_cudagraph_capture_size\": 48}",
+            "--generation-config",
+            "vllm",
+            "--override-generation-config",
+            "{\"temperature\": 0.0, \"top_p\": 1.0, \"top_k\": -1}",
+            "--default-chat-template-kwargs",
+            "{\"enable_thinking\": true}",
+            "--limit-mm-per-prompt",
+            "{\"image\": 1, \"video\": 0}",
+            "--additional-config",
+            "{\"enable_cpu_binding\": true, \"enable_utility_victim_selection\": true, \"utility_strategy\": \"bidkv\", \"utility_kill_switch\": false, \"bidkv_official023\": {\"policy\": \"bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy\", \"evidence_dir\": \"/workspace/bidkv-five-datasets-20261113-01/durable/preflight/bidkv-04/policy\"}, \"utility_completion_weight\": 0.5, \"utility_preempt_weight\": 0.3, \"utility_kv_gate\": 0.0, \"utility_cooldown_s\": 0.0, \"utility_min_running\": 1, \"utility_liveness_preemptions\": 2, \"utility_cascade_gain_ratio\": 1.25, \"utility_snapshot_enabled\": false, \"utility_snapshot_top_k\": 3, \"utility_snapshot_history_size\": 32, \"utility_epsilon\": 1e-06, \"utility_default_max_tokens\": 1024}",
+            "--shutdown-timeout",
+            "60"
+          ],
+          "environment": {
+            "PYTHONPATH": "/workspace/bidkv-five-datasets-20261113-01/runtime/official023:/workspace/bidkv-five-datasets-20261113-01/runtime/ascend023-cpubind03:/workspace/bidkv-five-datasets-20261113-01/sources/bidkv-compat-02/src:/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe:",
+            "HF_HUB_OFFLINE": "1",
+            "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+            "OMP_NUM_THREADS": "2",
+            "MKL_NUM_THREADS": "2",
+            "TMPDIR": "/workspace/bf81b04-t",
+            "VLLM_RPC_BASE_PATH": "/workspace/bf81b04-r",
+            "VLLM_CACHE_ROOT": "/workspace/bidkv-five-datasets-20261113-01/cache/bidkv04/vllm",
+            "TRITON_CACHE_DIR": "/workspace/bidkv-five-datasets-20261113-01/cache/bidkv04/triton",
+            "ASCEND_CACHE_PATH": "/workspace/bidkv-five-datasets-20261113-01/cache/bidkv04/ascend",
+            "ASCEND_RT_VISIBLE_DEVICES": null,
+            "LD_PRELOAD": "/usr/lib64/libjemalloc.so.2:",
+            "LCCL_DETERMINISTIC": "0"
+          },
+          "scope": "Model startup and input tokenization only; no generation until separate execution sources are sealed."
+        }
+      },
+      "actual_process": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-bidkv/process.json",
+        "bytes": 88,
+        "sha256": "4b40f0631fd17a470b497a418b7b1cc35035253d5c97e3a1bad3924ca3e151c5",
+        "value": {
+          "pid": 568546,
+          "start_ticks": "980749857",
+          "started_unix": 1794606574.4131873
+        }
+      },
+      "ready": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-bidkv/ready.json",
+        "bytes": 81,
+        "sha256": "9673202b86bbdd2da9358e772821f1c2a8b61fa9800e69fbb7c32c862742b043",
+        "value": {
+          "healthy_unix": 1794607167.1617157,
+          "startup_seconds": 592.7473374716938
+        }
+      },
+      "actual_wait": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-bidkv/stop.json",
+        "bytes": 59,
+        "sha256": "5bbe54306b277ad6b798ef67a5136c23045658666a1124a87801018736482d3b",
+        "value": {
+          "stopped_unix": 1794613028.2357614,
+          "exit_code": 0
+        }
+      },
+      "proc_captured_argv": null,
+      "per_service_loaded_module_import_capture": null,
+      "import_scope": "Same frozen launcher PYTHONPATH/carrier and source admission as qualified arm; no per-service module-path RPC was collected in primary full. Do not substitute preflight evidence for a direct formal-service import observation."
+    },
+    "judge": {
+      "launch_command": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-judge/command.json",
+        "bytes": 3025,
+        "sha256": "cf89c8a44911fa4d947f5181702cab1d28434eba740ddb8a29fdb56b2e2e19b0",
+        "value": {
+          "argv": [
+            "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "serve",
+            "/data/shared_models/Qwen3.5-35B-A3B",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "18390",
+            "--served-model-name",
+            "qwen3.5-35b",
+            "--tensor-parallel-size",
+            "2",
+            "--pipeline-parallel-size",
+            "1",
+            "--distributed-executor-backend",
+            "mp",
+            "--dtype",
+            "bfloat16",
+            "--max-model-len",
+            "65536",
+            "--max-num-seqs",
+            "16",
+            "--max-num-batched-tokens",
+            "4096",
+            "--kv-cache-memory-bytes",
+            "17179869184",
+            "--gpu-memory-utilization",
+            "0.95",
+            "--seed",
+            "17",
+            "--enable-prefix-caching",
+            "--mamba-cache-mode",
+            "align",
+            "--async-scheduling",
+            "--enable-prompt-tokens-details",
+            "--speculative-config",
+            "{\"method\": \"mtp\", \"num_speculative_tokens\": 2}",
+            "--compilation-config",
+            "{\"cudagraph_mode\": \"FULL_AND_PIECEWISE\", \"cudagraph_capture_sizes\": [3, 6, 12, 24, 48], \"max_cudagraph_capture_size\": 48}",
+            "--generation-config",
+            "vllm",
+            "--override-generation-config",
+            "{\"temperature\": 0.0, \"top_p\": 1.0, \"top_k\": -1}",
+            "--default-chat-template-kwargs",
+            "{\"enable_thinking\": true}",
+            "--limit-mm-per-prompt",
+            "{\"image\": 1, \"video\": 0}",
+            "--additional-config",
+            "{\"enable_cpu_binding\": true, \"bidkv_official023\": {\"policy\": null, \"evidence_dir\": \"/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-judge/policy\"}}",
+            "--shutdown-timeout",
+            "60"
+          ],
+          "environment": {
+            "PYTHONPATH": "/workspace/bidkv-five-datasets-20261113-01/runtime/official023:/workspace/bidkv-five-datasets-20261113-01/runtime/ascend023-cpubind03:/workspace/bidkv-five-datasets-20261113-01/sources/bidkv-compat-02/src:/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe:",
+            "HF_HUB_OFFLINE": "1",
+            "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+            "OMP_NUM_THREADS": "2",
+            "MKL_NUM_THREADS": "2",
+            "TMPDIR": "/workspace/bf-81fj04-t",
+            "VLLM_RPC_BASE_PATH": "/workspace/bf-81fj04-r",
+            "VLLM_CACHE_ROOT": "/workspace/bidkv-five-datasets-20261113-01/cache/81fj04/vllm",
+            "TRITON_CACHE_DIR": "/workspace/bidkv-five-datasets-20261113-01/cache/81fj04/triton",
+            "TORCHINDUCTOR_CACHE_DIR": "/workspace/bidkv-five-datasets-20261113-01/cache/81fj04/inductor",
+            "ASCEND_CACHE_PATH": "/workspace/bidkv-five-datasets-20261113-01/cache/81fj04/ascend",
+            "ASCEND_RT_VISIBLE_DEVICES": null,
+            "LD_PRELOAD": "/usr/lib64/libjemalloc.so.2:",
+            "LCCL_DETERMINISTIC": "0"
+          },
+          "qualified_command_source": "/workspace/bidkv-five-datasets-20261113-01/durable/preflight/native-05/command.json",
+          "only_operational_changes": [
+            "fresh evidence path",
+            "fresh temporary/cache paths"
+          ]
+        }
+      },
+      "qualified_command": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/preflight/native-05/command.json",
+        "bytes": 2805,
+        "sha256": "298778f38db9c20c474ba29f3babf4433726fb793ea4606b6aca9ebfe177f229",
+        "value": {
+          "argv": [
+            "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "serve",
+            "/data/shared_models/Qwen3.5-35B-A3B",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "18390",
+            "--served-model-name",
+            "qwen3.5-35b",
+            "--tensor-parallel-size",
+            "2",
+            "--pipeline-parallel-size",
+            "1",
+            "--distributed-executor-backend",
+            "mp",
+            "--dtype",
+            "bfloat16",
+            "--max-model-len",
+            "65536",
+            "--max-num-seqs",
+            "16",
+            "--max-num-batched-tokens",
+            "4096",
+            "--kv-cache-memory-bytes",
+            "17179869184",
+            "--gpu-memory-utilization",
+            "0.95",
+            "--seed",
+            "17",
+            "--enable-prefix-caching",
+            "--mamba-cache-mode",
+            "align",
+            "--async-scheduling",
+            "--enable-prompt-tokens-details",
+            "--speculative-config",
+            "{\"method\": \"mtp\", \"num_speculative_tokens\": 2}",
+            "--compilation-config",
+            "{\"cudagraph_mode\": \"FULL_AND_PIECEWISE\", \"cudagraph_capture_sizes\": [3, 6, 12, 24, 48], \"max_cudagraph_capture_size\": 48}",
+            "--generation-config",
+            "vllm",
+            "--override-generation-config",
+            "{\"temperature\": 0.0, \"top_p\": 1.0, \"top_k\": -1}",
+            "--default-chat-template-kwargs",
+            "{\"enable_thinking\": true}",
+            "--limit-mm-per-prompt",
+            "{\"image\": 1, \"video\": 0}",
+            "--additional-config",
+            "{\"enable_cpu_binding\": true, \"bidkv_official023\": {\"policy\": null, \"evidence_dir\": \"/workspace/bidkv-five-datasets-20261113-01/durable/preflight/native-05/policy\"}}",
+            "--shutdown-timeout",
+            "60"
+          ],
+          "environment": {
+            "PYTHONPATH": "/workspace/bidkv-five-datasets-20261113-01/runtime/official023:/workspace/bidkv-five-datasets-20261113-01/runtime/ascend023-cpubind03:/workspace/bidkv-five-datasets-20261113-01/sources/bidkv-compat-02/src:/usr/local/Ascend/cann-9.1.0/python/site-packages:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe:/usr/local/Ascend/ascend-toolkit/latest/python/site-packages:/usr/local/Ascend/ascend-toolkit/latest/opp/built-in/op_impl/ai_core/tbe:",
+            "HF_HUB_OFFLINE": "1",
+            "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+            "OMP_NUM_THREADS": "2",
+            "MKL_NUM_THREADS": "2",
+            "TMPDIR": "/workspace/bf81n05-t",
+            "VLLM_RPC_BASE_PATH": "/workspace/bf81n05-r",
+            "VLLM_CACHE_ROOT": "/workspace/bidkv-five-datasets-20261113-01/cache/native05/vllm",
+            "TRITON_CACHE_DIR": "/workspace/bidkv-five-datasets-20261113-01/cache/native05/triton",
+            "ASCEND_CACHE_PATH": "/workspace/bidkv-five-datasets-20261113-01/cache/native05/ascend",
+            "ASCEND_RT_VISIBLE_DEVICES": null,
+            "LD_PRELOAD": "/usr/lib64/libjemalloc.so.2:",
+            "LCCL_DETERMINISTIC": "0"
+          },
+          "scope": "Model startup and input tokenization only; no generation until separate execution sources are sealed."
+        }
+      },
+      "actual_process": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-judge/process.json",
+        "bytes": 88,
+        "sha256": "7836d188cfa8b624e6a2b99b6bdbaae66f68a90006d3247e8f967043a152a9ca",
+        "value": {
+          "pid": 752323,
+          "start_ticks": "981395401",
+          "started_unix": 1794613029.8549335
+        }
+      },
+      "ready": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-judge/ready.json",
+        "bytes": 80,
+        "sha256": "19c66519015a30d8523b2bc3d59fb7ad5b65b15602d9dc6f6100fb27a0fd41a8",
+        "value": {
+          "healthy_unix": 1794613638.1985893,
+          "startup_seconds": 608.342480417341
+        }
+      },
+      "actual_wait": {
+        "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/service-judge/stop.json",
+        "bytes": 59,
+        "sha256": "73b2b5c4528bbf87e33a51d00b428637edc6ef7a2afbd06273605b26b3194281",
+        "value": {
+          "stopped_unix": 1794621043.5965242,
+          "exit_code": 0
+        }
+      },
+      "proc_captured_argv": null,
+      "per_service_loaded_module_import_capture": null,
+      "import_scope": "Same frozen launcher PYTHONPATH/carrier and source admission as qualified arm; no per-service module-path RPC was collected in primary full. Do not substitute preflight evidence for a direct formal-service import observation."
+    }
+  },
+  "binding_files": {
+    "execution-plan.json": {
+      "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/execution-plan.json",
+      "bytes": 6652,
+      "sha256": "dc639944d2f668482d875eee0587807e2dc5485d3edf2e3c64c3b48ab47018f3",
+      "value": {
+        "schema": "plugin-five-full-cohort-plan/v1",
+        "project": "BidKV",
+        "standard_id": "five-datasets-20261113-v1",
+        "standard_sha256": "66c050b7c6d705853f10bc437e6ace1707a9b46d43b6bdb7159724045045b756",
+        "stage_order": [
+          "native-all-five",
+          "bidkv-all-five",
+          "native-shared-judge"
+        ],
+        "datasets": [
+          {
+            "id": "mmlu",
+            "requests_per_arm": 200,
+            "concurrency": 200,
+            "max_completion_tokens": 8192,
+            "temperature": 0,
+            "seed": 0,
+            "thinking": "unchanged qualified server default",
+            "timeout_seconds": 14400
+          },
+          {
+            "id": "hle",
+            "requests_per_arm": 200,
+            "strata": {
+              "gold/text": 64,
+              "gold/image": 10,
+              "revision/text": 113,
+              "revision/image": 13
+            },
+            "concurrency": 16,
+            "max_tokens": 16384,
+            "temperature": 0,
+            "seed": 17,
+            "thinking": false,
+            "timeout_seconds": 1800
+          },
+          {
+            "id": "frontier",
+            "requests_per_arm": 160,
+            "tracks": {
+              "olympiad": 100,
+              "research": 60
+            },
+            "concurrency": 16,
+            "max_tokens": 16384,
+            "temperature": 0,
+            "seed": 17,
+            "thinking": false,
+            "timeout_seconds": 1800
+          },
+          {
+            "id": "swe",
+            "requests_per_arm": 64,
+            "tasks": 32,
+            "concurrency": 8,
+            "max_tokens": 2048,
+            "temperature": 0,
+            "seed": 17,
+            "timeout_seconds": 600,
+            "tools": "original histories/tools; tool_choice=none; execute no commands"
+          },
+          {
+            "id": "terminal",
+            "requests_per_arm": 48,
+            "tasks": 32,
+            "concurrency": 8,
+            "max_tokens": 2048,
+            "temperature": 0,
+            "seed": 17,
+            "timeout_seconds": 600,
+            "tools": "original histories/tools; tool_choice=none; execute no commands"
+          }
+        ],
+        "solver_requests_per_arm": 672,
+        "planned_judge_inputs": 720,
+        "judge": {
+          "arm": "fresh Native official0.23 prepared host, policy disabled",
+          "same_fixed_model_runtime_for_both_solver_arms": true,
+          "max_tokens": 8192,
+          "concurrency": 16,
+          "temperature": 0,
+          "seed": 17,
+          "thinking": false,
+          "traffic_excluded_from_solver_metrics_and_cost": true,
+          "original_graders_unchanged": true
+        },
+        "model": "Qwen3.5-35B-A3B BF16",
+        "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+        "parallelism": {
+          "tensor": 2,
+          "pipeline": 1,
+          "data": 1,
+          "expert": false
+        },
+        "physical_npus": [
+          6,
+          7
+        ],
+        "logical_npus": [
+          0,
+          1
+        ],
+        "server_profile": {
+          "kv_bytes_per_rank": 17179869184,
+          "max_model_len": 65536,
+          "max_num_seqs": 16,
+          "max_num_batched_tokens": 4096,
+          "image_limit": 1,
+          "mtp_tokens": 2,
+          "graph": "FULL_AND_PIECEWISE",
+          "capture_sizes": [
+            3,
+            6,
+            12,
+            24,
+            48
+          ],
+          "service_seed": 17,
+          "default_thinking": true,
+          "enable_cpu_binding": true
+        },
+        "runtime_profile": "official-vllm-0.23-source-bridge/v1",
+        "runtime": {
+          "torch": "2.10.0+cpu",
+          "torch_npu": "2.10.0.post4",
+          "vllm": "0.23.0+empty",
+          "vllm_ascend": "0.23.0",
+          "transformers": "5.5.4",
+          "tokenizers": "0.22.2",
+          "CANN": "9.1"
+        },
+        "bidkv_commit": "53eed4dd65bc4ba12efa37f9f1e334fa1ae51076",
+        "qualified_command_sha256": {
+          "native": "298778f38db9c20c474ba29f3babf4433726fb793ea4606b6aca9ebfe177f229",
+          "bidkv": "0d02877c2b3a43258f07fcc287c93d8d430ff2a8dd9ac1066817e3688e434f54"
+        },
+        "pre_generation_gates": [
+          "both original C8 arms completed and devices released",
+          "independent all-record C8 SSE/phase/counter revalidation",
+          "all controlled input member hashes and original HLE assets verified",
+          "prepared source and shared libraries hashes revalidated",
+          "unchanged original graders and task membership/order admitted",
+          "New CPU-defaultTrue qualification for both arms; default binding attempts, warning/skip and actual affinity retained"
+        ],
+        "request_rules": {
+          "eos_enabled": true,
+          "inference_retries": 0,
+          "outcome_filtering": false,
+          "replacement_or_padding": false,
+          "fresh_cache_salts": true,
+          "zero_reuse_proved_by_usage_and_engine_counters": true,
+          "trace_actual_token_ids_match_all_frozen_offline_hashes": true
+        },
+        "failure_policy": "Retain every failure and planned unexecuted stage; no automatic retry or budget change. Subsequent diagnosis/new attempt must be explicitly separate and preserve this cohort.",
+        "order_limitation": "All Native solver datasets precede all Candidate solver datasets. No random interleaving or repeated cohort; time drift remains a limitation.",
+        "zero_decision_limitation": "If no native preemptions/policy calls occur, no BidKV mechanism benefit is established.",
+        "coverage_is_not_four_target_pass": true,
+        "privacy": "Original questions, answers, dialogues, private Engine and full SSE stay controlled. Public report contains numeric derivatives, configurations, identities and audit hashes.",
+        "profile_id": "bidkv-default-true-common-topology-fix-20261114-v4",
+        "test_target": "own_mod",
+        "mod_reference_sha256": "43bc925a6ad749971a64e5244b86451f5d4cf3361e87423b1eda8ea0b0d04461",
+        "cpu_binding_change": "Restore official Ascend0.23 default True in both arms; no evidence justified prior False. Old False qualification/cohort retained separately and not reused as True qualification.",
+        "common_ascend_compatibility": {
+          "base_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+          "source_original_sha256": "71719e397ab003b31ba5e46e1a6da4da658ae7221eeead04311b65ad4d12d533",
+          "source_prepared_sha256": "b7a84571c349c22935414b2c5a4c6cf91223414f80c0954f797340ad0f1f55f2",
+          "prepare_script_sha256": "fe00e47faa81a0a3713a368e79a53504290687f2f249e4bf693457c2f7341253",
+          "shared_both_arms": true,
+          "scope": "Only physical\u2192logical topology parsing; all1264installed files including804CANN assets and8prebuiltlibs preserved except one Python method; no manual IRQ/migration operations.",
+          "copied_carrier_source_admission_sha256": "55194e2e23ae7a590227ce93508c5c66f8718251952ed7b982d79de2f3f0a1d2",
+          "installed_file_count": 1264,
+          "installed_cann_asset_count": 804,
+          "installed_cann_asset_bytes": 65693604,
+          "prepared_root": "/workspace/bidkv-five-datasets-20261113-01/runtime/ascend023-cpubind03"
+        },
+        "prior_zero_generation_failure": {
+          "attempt": "native-04",
+          "source_version": "mod-v3",
+          "reason": "Copied Ascend package omitted untracked installed CANN operator metadata/kernel resources; health failed before any generation. Retain actual supervisorRC=-2/APIrc=-9 and raw evidence. New copy preserves full installed package original bytes except disclosed CPU parser."
+        }
+      }
+    },
+    "source-manifest.json": {
+      "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/source-manifest.json",
+      "bytes": 2454,
+      "sha256": "2e28cbe231438325ba96038588ad23e2888a3d503a8bc220100a667a4475e434",
+      "value": {
+        "schema": "own-mod-execution-sources/v4",
+        "files": {
+          "admission-plan.json": "cc43ed8c72555e16ee9fe4b52717bc890a6c2527292fe7c869df60eb149b0ff1",
+          "bidkv-preflight.py": "6739c411221d626469a79b558ab1772378fd94ea0b0324b064a9a977fb9ec1c3",
+          "bidkv-qualified-command.json": "0d02877c2b3a43258f07fcc287c93d8d430ff2a8dd9ac1066817e3688e434f54",
+          "c8-bidkv-controller.py": "f9ab18ece89f478afbc30a9df933ca24796d39453942862dfa0dc8e6265a9ce1",
+          "c8-native-controller.py": "842354386426e319abac089eda45dd3292435a06df20bd400dce935c95d4a9d5",
+          "campaign81.py": "cb3fe30e233f5fb957313c5349dc1469f9cf65d5be39b19d695abf299a2966be",
+          "carrier-source-admission.json": "55194e2e23ae7a590227ce93508c5c66f8718251952ed7b982d79de2f3f0a1d2",
+          "check_operational_paths.py": "e49502402f5cdc6814da47d7a0e019e567c33a2d488dc2aa49db58c3376cea02",
+          "common_cpu_host_admission.py": "e010b60fb0a0b5f199040450ba233c9a6aaff8bb827a7ac8a783f1e7863d3739",
+          "continuous.py": "046c427be605a8d97d785201032ffb82f5e9476d55667f355557fdbf363f764e",
+          "execution-plan.json": "0e21db07a0dc2ef5834a69073f8925911f203ed1aeb8a334231d9bb85694b97e",
+          "finite.py": "a132336395d0441e2bb72f972e1f72c5022f1a80ec4a200e1a29c200d508236e",
+          "measurement.py": "d4999f0f43d6f804fb298fa52ce930ca974c06c7e18438a09580a6a14863fe95",
+          "mod-binding.json": "08e2bfd641a927279a88e4658a008c5e3c24a7f996000c601629281430242fa5",
+          "native-preflight.py": "19ef2c59875587e45c040ec0bef3a955dc0fdac7171ca902af7e197e5f778503",
+          "native-qualified-command.json": "298778f38db9c20c474ba29f3babf4433726fb793ea4606b6aca9ebfe177f229",
+          "observation.py": "cae477ce93c7821a704fbebc211de1edba10ec16a7db2fe2d463943879ed784e",
+          "preflight_supervisor.py": "dc5e166275adbff957c0a8d2ef7dbca078fe8616cfeffe65602908c933e0c55d",
+          "prepare_ascend023_cpu_binding_host.py": "fe00e47faa81a0a3713a368e79a53504290687f2f249e4bf693457c2f7341253",
+          "run_mod_v4.py": "b478aeb9a19777f424f51195fc629db442b61ac99408659eb767e5fb40aa7636",
+          "service81.py": "e7b0b924e161510b5abb10a580460f29cf1e1accf4b59c81097599ec1600c51e",
+          "startup-source-manifest.json": "d861d25ad1a986bd9855fb28e8669e7ab1a748d0de9a1edcc8957d2f83d0bd29",
+          "test_driver.py": "f371c00a234f9e2d21435e131975113060350598755b3bedae274631936bb9ff",
+          "transport.py": "e372ac8bdc271550b380b67a7294350d6ffd266f363cdb23359e07b2c0e869f2",
+          "verify_c8.py": "aa2667716d521e06126df0092c8df5a83700ac6783c27f6c5b291ff19e733ad1"
+        }
+      }
+    },
+    "plan-file-manifest.json": {
+      "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/plan-file-manifest.json",
+      "bytes": 4772,
+      "sha256": "73ba0c0ff630e083b1d0dbc14879e8dcf0470e04eb752a7fb21c6b36dcda209b",
+      "value": {
+        "frontier/assets/olympiad/test.jsonl": "450e7fceb53c8140283a752f0d62a3abc69a85e252d4dbbd5d9dfbfb762db4e4",
+        "frontier/assets/research/test.jsonl": "96c0434abfcbadd6ef6f59a03cc374be4caf9c1f2d5e62d8fe921e768f66aa46",
+        "frontier/client_source/__init__.py": "56b5e91c3bb77ab933c25fd65eba883419bdc5691cc94cb9dc840e8f4e3674eb",
+        "frontier/client_source/__main__.py": "cf7390a2508a0fcad4777a4a629fc5212ab655cb45845975995f835676a834e3",
+        "frontier/client_source/bench.py": "60217bc42294332c5f3849fa3945111be71ac770bc96b3697d08623b6f1760bc",
+        "frontier/client_source/cli.py": "7aa839b641854744cf127794e54f5364f5f5599758edc8c6636b2bdebc40a38b",
+        "frontier/client_source/config_check.py": "313909b5b466fb0afcc7921bde836eaca270597048c0f4cb939e3a00c36f9d08",
+        "frontier/client_source/hashing.py": "8aea14c8193b267cadd65f384781b1819495b503abe82e4d86606d7c2449186a",
+        "frontier/client_source/official_prompts.py": "5d0a1ebd27e1180f0a390aaa469eda90db5da2cbc6da2e3a1def91e539a4c17d",
+        "frontier/client_source/pipeline.py": "3267a5314ead5e1de0b98b178ea7f6732afa9c1df0de545050e690e696bab663",
+        "frontier/client_source/receipt.py": "39a9fe54e9d990cd39775382fb084768d419edc493f61473f0b517ef975a4214",
+        "frontier/client_source/runtime_contract.py": "1413ecfb346affb397585fbcd8f7597b46a5a2477b87546f5644c454daf5e9f9",
+        "frontier/client_source/seal.py": "cb2d32350b5f5a408b660448b93b597bc8ebb665db6c89efa615051fcade7dc5",
+        "frontier/contract.json": "196e7ab5cea4835a42310bc22c5a0c682633c0eb2d6dd6b254dd6739a27e5f55",
+        "frontier/contract.sha256": "e30d3f0036bd5583d0c88f3b37cc1677dd4dbc39e6507f78f4e4452c70eb2a61",
+        "frontier/original-contract.json": "c8e472673d58d3d93c30ca61f57bcb2a84d5bdd54e95f30f20f610f86984d891",
+        "frontier/tasks.json": "56a699d8bc91b579e90041825ac702cc9ae770e4870cbef0c6154268cb9b9c7c",
+        "hle/assets/gold/test.jsonl": "f03c2632400970ffe5167d5ecde169ad38d34ce4dceb2eb8cfb54ece9c5fae00",
+        "hle/assets/revision/test.jsonl": "a5a1b1d84edfb90844dfd2f506f331e69d58cb8ef9488ef5f4ebd420fb30cec6",
+        "hle/client_source/__init__.py": "6218f67a3ff08f807ed354df0d53d6808fc25d9d506b9c1a71959f4c94a52d90",
+        "hle/client_source/bench.py": "10fc3ea8ef511dfb52995d0ea771612e8d516bab8513edf78541a1895572e8cb",
+        "hle/client_source/bench_inputs.py": "a1ae3a61cd226d6b8bfa518c3ede51e464675bf93d6958ed1acbde1753b22148",
+        "hle/client_source/hashing.py": "8aea14c8193b267cadd65f384781b1819495b503abe82e4d86606d7c2449186a",
+        "hle/client_source/official_prompts.py": "983de1a08d9c0d584a50f8146ce9bf4d18a028b2334220c5e91cfc7f5a2a93cc",
+        "hle/client_source/pipeline.py": "51deda3e41d8ac54a55c770acc9250b775189261f36186304878c89eb81f63a7",
+        "hle/client_source/seal.py": "cb2d32350b5f5a408b660448b93b597bc8ebb665db6c89efa615051fcade7dc5",
+        "hle/contract.json": "e60b057d8b4a006a2913c195e63dbadc5270f8c3b69da5e18be18c81627d2466",
+        "hle/contract.sha256": "ef72daf8f6789c90e32a8887ba27ee678edab91d7fe202ebfe705080f7f3e477",
+        "hle/excluded.json": "bac0529b0e52355326945daa516d6e7f2e574de32474e4d168c0ce07ae389293",
+        "hle/inventory.json": "7290c268c338261880151e6e3a61b2441cf5a6f86ccf5a9783ca209eab296b36",
+        "hle/original-contract.json": "fc9102263f62d563055f5d6a0ea1dfab8300128a178d5cf273026d07c6e0c6ef",
+        "hle/sample-scope.json": "ffcdd5e27b0822937b0f60aea1ca7c88eac82a39fd9d55c50f41c797ba676282",
+        "hle/tasks.json": "f896d1f97fcf97173d4614db6d30f2404d79b8bd3430f777c4cf19e50b045884",
+        "mmlu/inputs/mmlu-quality018-r2/quality-request-plan.json": "f4ed4ce5956c9ed08f360400b5a996ef92a217ce295d50648d4dc06443db768e",
+        "mmlu/inputs/mmlu-quality018-r2/quality-tokenize-preflight.json": "5851407b052fd600a8d425057667c24b478777609652c2b7a0cd3887fae6b57d",
+        "mmlu/inputs/recovered-mmlu-cases.json": "0fe202235190be0d1143ba68f7264ae263d13c004a474843ac9c8a6245e2415e",
+        "mmlu/inputs/verified-mmlu-quality-inputs.json": "708056e54a5a50a78a3f794fb6f5ec70f50d18384d938d8d67b45d7f1d405959",
+        "mmlu/scorers/mmlu_pro_pyramidkv.py": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801",
+        "swe/contract.json": "00901d57ec1dca5f1c231bdaa5e75cae056e9eefbc3ad3c0cfd32a0ad5764888",
+        "swe/offline-token-id-freeze.json": "00ecd723d0ce3370e2a6542a9f14bb3fa301783d9ce2154a0a8cfd96e3ff7864",
+        "swe/sample-scope.json": "d27c6dd20fd232c1410c4760b27de520a1cb48062bc271e275e5336a401985d6",
+        "swe/tasks.jsonl": "80debb929bee17798f88ccd177022fe7b24849f923e1e27f2e9d4020570cb23d",
+        "terminal/contract.json": "8da42e3c1101d1f7f331c2ed9ef6d57346dfc69b9f91c10b164118056894b6cd",
+        "terminal/offline-token-id-freeze.json": "5c576251a9ea83dd37d0b30a07e69c68f48e9e15cac0ee287a6c718eb1898046",
+        "terminal/sample-scope.json": "eafe5957c5a34720bfc8eccd7f39e0693bdb15438cac2c73c39021e29d0c90ae",
+        "terminal/tasks.jsonl": "e3b3e5b1cc28061aeab1b8aaa0a946ecb74af604d8e4ce6c3a28bc6bd14a7b03"
+      }
+    },
+    "native-c8-reuse-admission.json": {
+      "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/native-c8-reuse-admission.json",
+      "bytes": 1923,
+      "sha256": "585bd821a02113c6a0de47e16f25c745f9148f21d9ccfc8c54848051c81c441d",
+      "value": {
+        "passed": true,
+        "phases": [
+          {
+            "name": "4096-warmup",
+            "requests": 16,
+            "zero_reuse": {
+              "passed": true,
+              "prefix_hit_counter_deltas": {
+                "vllm:prefix_cache_hits_total": 0.0,
+                "vllm:external_prefix_cache_hits_total": 0.0
+              },
+              "unique_salts": 16,
+              "external_loads": "no external connector in this arm",
+              "null_cache_details": 16
+            },
+            "all_sse_records_verified": true
+          },
+          {
+            "name": "4096-formal",
+            "requests": 225,
+            "zero_reuse": {
+              "passed": true,
+              "prefix_hit_counter_deltas": {
+                "vllm:prefix_cache_hits_total": 0.0,
+                "vllm:external_prefix_cache_hits_total": 0.0
+              },
+              "unique_salts": 225,
+              "external_loads": "no external connector in this arm",
+              "null_cache_details": 225
+            },
+            "all_sse_records_verified": true
+          },
+          {
+            "name": "16384-warmup",
+            "requests": 16,
+            "zero_reuse": {
+              "passed": true,
+              "prefix_hit_counter_deltas": {
+                "vllm:prefix_cache_hits_total": 0.0,
+                "vllm:external_prefix_cache_hits_total": 0.0
+              },
+              "unique_salts": 16,
+              "external_loads": "no external connector in this arm",
+              "null_cache_details": 16
+            },
+            "all_sse_records_verified": true
+          },
+          {
+            "name": "16384-formal",
+            "requests": 77,
+            "zero_reuse": {
+              "passed": true,
+              "prefix_hit_counter_deltas": {
+                "vllm:prefix_cache_hits_total": 0.0,
+                "vllm:external_prefix_cache_hits_total": 0.0
+              },
+              "unique_salts": 77,
+              "external_loads": "no external connector in this arm",
+              "null_cache_details": 77
+            },
+            "all_sse_records_verified": true
+          }
+        ],
+        "total_requests": 334,
+        "scope": "Original synthetic C8 protocol; no invented numeric latency/SLO threshold or five-dataset quality claim"
+      }
+    },
+    "bidkv-c8-reuse-admission.json": {
+      "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/bidkv-c8-reuse-admission.json",
+      "bytes": 1923,
+      "sha256": "02b00a0738e560b90629d4f47462f9862fc458e20f4a28f3459c527695fa825b",
+      "value": {
+        "passed": true,
+        "phases": [
+          {
+            "name": "4096-warmup",
+            "requests": 16,
+            "zero_reuse": {
+              "passed": true,
+              "prefix_hit_counter_deltas": {
+                "vllm:prefix_cache_hits_total": 0.0,
+                "vllm:external_prefix_cache_hits_total": 0.0
+              },
+              "unique_salts": 16,
+              "external_loads": "no external connector in this arm",
+              "null_cache_details": 16
+            },
+            "all_sse_records_verified": true
+          },
+          {
+            "name": "4096-formal",
+            "requests": 236,
+            "zero_reuse": {
+              "passed": true,
+              "prefix_hit_counter_deltas": {
+                "vllm:prefix_cache_hits_total": 0.0,
+                "vllm:external_prefix_cache_hits_total": 0.0
+              },
+              "unique_salts": 236,
+              "external_loads": "no external connector in this arm",
+              "null_cache_details": 236
+            },
+            "all_sse_records_verified": true
+          },
+          {
+            "name": "16384-warmup",
+            "requests": 16,
+            "zero_reuse": {
+              "passed": true,
+              "prefix_hit_counter_deltas": {
+                "vllm:prefix_cache_hits_total": 0.0,
+                "vllm:external_prefix_cache_hits_total": 0.0
+              },
+              "unique_salts": 16,
+              "external_loads": "no external connector in this arm",
+              "null_cache_details": 16
+            },
+            "all_sse_records_verified": true
+          },
+          {
+            "name": "16384-formal",
+            "requests": 81,
+            "zero_reuse": {
+              "passed": true,
+              "prefix_hit_counter_deltas": {
+                "vllm:prefix_cache_hits_total": 0.0,
+                "vllm:external_prefix_cache_hits_total": 0.0
+              },
+              "unique_salts": 81,
+              "external_loads": "no external connector in this arm",
+              "null_cache_details": 81
+            },
+            "all_sse_records_verified": true
+          }
+        ],
+        "total_requests": 349,
+        "scope": "Original synthetic C8 protocol; no invented numeric latency/SLO threshold or five-dataset quality claim"
+      }
+    },
+    "provenance/model-hash-status.json": {
+      "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/provenance/model-hash-status.json",
+      "bytes": 5084,
+      "sha256": "e95e919abc6d13f160ca7530211ec167945a2d3981aa36c48003bbd9ade5b6c8"
+    },
+    "provenance/model-expected-weights.json": {
+      "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/provenance/model-expected-weights.json",
+      "bytes": 2453,
+      "sha256": "1fec52d80a8898b730f32bd498a7ce9f90a31d6b6cc15d833611cd271fdce0d3"
+    }
+  }
+}
