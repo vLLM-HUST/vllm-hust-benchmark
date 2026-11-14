@@ -267,6 +267,73 @@ def verify():
             "old_v2_remains_failed": True,
             "original_sse_publicly_read_back": False,
         }
+    closed_pressure = {}
+    for name in ("pressure-v2-failed-results-v1", "pressure-v3-corrective-results-v1"):
+        folder = ROOT / name
+        if not folder.is_dir():
+            continue
+        for item in read(folder / "manifest.json")["files"]:
+            raw = (folder / item["path"]).read_bytes()
+            assert (
+                len(raw) == item["bytes"]
+                and hashlib.sha256(raw).hexdigest() == item["sha256"]
+            )
+        value = read(folder / "summary.json")
+        assert (
+            value["planned_requests"] == 16 and value["complete_valid_cohort"] is False
+        )
+        assert (
+            value["lifecycle_status"]
+            == value["original_v2_status_unchanged"]
+            == "failed"
+        )
+        rows = read(folder / "requests.json")
+        assert len(rows) == len({row["case_id"] for row in rows}) == 16
+        native = [row for row in rows if row["arm"] == "native"]
+        candidate = [row for row in rows if row["arm"] == "bidkv"]
+        assert len(native) == len(candidate) == 8
+        assert all(
+            row["status"] == "ok" and row["usage"]["completion_tokens"] == 4096
+            for row in native
+        )
+        assert all(row.get("usage") is None for row in candidate)
+        assert (
+            value["independently_recomputed_batch_metrics"][1][
+                "output_tokens_per_second_if_complete"
+            ]
+            is None
+        )
+        if name.startswith("pressure-v3"):
+            assert all(
+                row["call_entry_present"] is True
+                and row["http_status"] == 200
+                and row["first_generated_event"] is None
+                for row in candidate
+            )
+            handoff = read(folder / "resource-handoff-to-pegaflow.json")
+            assert handoff["actual_npu_no_running_processes_both"] is True
+            for key in ("native/api-owned-wait.json", "bidkv/api-owned-wait.json"):
+                assert handoff["owned_wait_receipts"][key]["actual_returncode"] == 0
+        else:
+            assert all(
+                row["final_record_present"] is False
+                and row["call_entry_present"] is False
+                for row in candidate
+            )
+        closed_pressure[name] = {
+            "original_failed_status_preserved": True,
+            "native8_successful": True,
+            "candidate_throughput": None,
+        }
+    if (ROOT / "pressure-analysis-v3").is_dir():
+        analysis = ROOT / "pressure-analysis-v3"
+        for name, checksum in read(analysis / "analysis-source-manifest.json")[
+            "files"
+        ].items():
+            stored = name + ".source" if name.endswith(".py") else name
+            assert (
+                hashlib.sha256((analysis / stored).read_bytes()).hexdigest() == checksum
+            )
     progress_path = ROOT / "solver-progress-v1/solver-progress.json"
     closed_solver_audits = 0
     if progress_path.is_file():
@@ -506,6 +573,10 @@ def verify():
         "actual_zero_generation_pressure_capacity_smaller_v2": pressure_capacity_v2,
         "smaller_pressure_v2_source_members_verified": len(pressure_v2_sources),
         "candidate_only_corrective_source_and_native_receipt": corrective,
+        "closed_failed_or_partial_pressure_results": closed_pressure,
+        "prospective_eos_historical_workload": runpy.run_path(
+            str(ROOT / "verify_evo_preparation.py")
+        )["verify"](ROOT / "evoscientist-pressure02-v2"),
         "default_true_c8": current_c8,
         "closed_solver_controlled_sse_audits_indexed": closed_solver_audits,
         "original_sse_publicly_read_back": False,

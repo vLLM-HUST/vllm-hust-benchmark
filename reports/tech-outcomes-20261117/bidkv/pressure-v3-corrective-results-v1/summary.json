@@ -1,0 +1,167 @@
+{
+  "schema": "bidkv-supplemental-pressure-numeric/v3",
+  "cohort_scope": "separate corrective Candidate8 + all original Native8 carry baseline; not a completed originalv2 cohort",
+  "new_generation_requests_planned": 8,
+  "carried_native_requests": 8,
+  "original_v2_status_unchanged": "failed",
+  "planned_requests": 16,
+  "lifecycle_status": "failed",
+  "complete_valid_cohort": false,
+  "all_observed_policy_fault_counters_zero": true,
+  "independently_recomputed_batch_metrics": [
+    {
+      "name": "native-r01",
+      "full8_successful_records": true,
+      "batch_wall_seconds_if_complete": 296.0366401299834,
+      "output_tokens_per_second_if_complete": 110.6890011507098,
+      "mean_ttft_first_generated_seconds_successful_only": 140.5730488866102,
+      "mean_tpot_seconds_successful_only": 0.013911231592870676,
+      "legacy_tpot_reference": "first_generated_event; retained original diagnostic, not first content",
+      "mean_tpot_first_generated_seconds_successful_only": 0.013911231592870676,
+      "mean_ttft_first_content_seconds_successful_only": 140.5730488866102,
+      "mean_tpot_first_content_seconds_successful_only": 0.013911231592870676,
+      "successful_latency_population": 8,
+      "first_generated_ttft_population": 8,
+      "first_content_ttft_population": 8,
+      "first_generated_tpot_population_n_gt_1": 8,
+      "first_content_tpot_population_n_gt_1": 8,
+      "successful_missing_first_generated_excluded": 0,
+      "successful_missing_first_content_excluded": 0,
+      "successful_completion_n_le_1_excluded_from_tpot": 0,
+      "both_first_events_present": 8,
+      "first_generated_equals_first_content": 8,
+      "tpot_denominator_note": "Both diagnostics divide by total accepted completion_tokens minus1; if reasoning exists, content-reference TPOT is not a separately measured content-token-only rate.",
+      "policy_and_cohort_validity_separate": true
+    },
+    {
+      "name": "bidkv-r01",
+      "full8_successful_records": false,
+      "batch_wall_seconds_if_complete": null,
+      "output_tokens_per_second_if_complete": null,
+      "mean_ttft_first_generated_seconds_successful_only": null,
+      "mean_tpot_seconds_successful_only": null,
+      "legacy_tpot_reference": "first_generated_event; retained original diagnostic, not first content",
+      "mean_tpot_first_generated_seconds_successful_only": null,
+      "mean_ttft_first_content_seconds_successful_only": null,
+      "mean_tpot_first_content_seconds_successful_only": null,
+      "successful_latency_population": 0,
+      "first_generated_ttft_population": 0,
+      "first_content_ttft_population": 0,
+      "first_generated_tpot_population_n_gt_1": 0,
+      "first_content_tpot_population_n_gt_1": 0,
+      "successful_missing_first_generated_excluded": 0,
+      "successful_missing_first_content_excluded": 0,
+      "successful_completion_n_le_1_excluded_from_tpot": 0,
+      "both_first_events_present": 0,
+      "first_generated_equals_first_content": 0,
+      "tpot_denominator_note": "Both diagnostics divide by total accepted completion_tokens minus1; if reasoning exists, content-reference TPOT is not a separately measured content-token-only rate.",
+      "policy_and_cohort_validity_separate": true
+    }
+  ],
+  "completed_ok": 8,
+  "recorded": 16,
+  "call_entries": 16,
+  "successful_SSE_independently_verified": 8,
+  "planned_salts_present": 16,
+  "batches": [
+    {
+      "name": "native-r01",
+      "arm": "native",
+      "repeat": 1,
+      "planned": 8,
+      "planned_records_present": true,
+      "status": {
+        "phase": "failed",
+        "arm": "native",
+        "repeat": 1,
+        "planned": 8,
+        "started_unix": 1794623081.4073977,
+        "cutoff_monotonic": 9825927.20844858,
+        "inference_retries": 0,
+        "failed_unix": 1794623378.0348616,
+        "error": "AssertionError: Unbound engine request in policy journal"
+      },
+      "original_summary": null,
+      "cache_counter_scope": {
+        "counter_deltas": {
+          "vllm:prefix_cache_queries_total": 78786414.0,
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_queries_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:num_preemptions_total": 7.0
+        },
+        "external_restore_zero": true,
+        "local_prefix_hit_scope": "DefaultAPC internal resume is allowed. Aggregate hits are observed, not proved per-hit self-resume attribution. Unique fresh salts and the pinned hash chain constrain cross-request sharing; this is not primaryzero-reuse qualification."
+      }
+    },
+    {
+      "name": "bidkv-r01",
+      "arm": "bidkv",
+      "repeat": 1,
+      "planned": 8,
+      "planned_records_present": true,
+      "status": {
+        "phase": "failed",
+        "arm": "bidkv",
+        "repeat": 1,
+        "planned": 8,
+        "started_unix": 1794624993.986746,
+        "cutoff_monotonic": 9825927.20844858,
+        "inference_retries": 0,
+        "completed_unix": 1794625003.0921578
+      },
+      "original_summary": {
+        "planned": 8,
+        "recorded": 8,
+        "successful": 0,
+        "failed": 8,
+        "fixed_batch_complete": false,
+        "batch_wall_seconds": 9.069854808971286,
+        "accepted_output_tokens_known_complete_records": 0,
+        "output_tokens_per_second": null,
+        "ttft_first_generated_seconds": {
+          "samples": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "tpot_completion_seconds": {
+          "samples": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "length_stops": 0,
+        "failed_or_unaccepted_records": 8,
+        "records_with_unknown_final_usage": 8,
+        "observed_output_tokens_in_all_usage_records": 0,
+        "counter_scope": {
+          "counter_deltas": {
+            "vllm:prefix_cache_queries_total": 0.0,
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_queries_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0,
+            "vllm:num_preemptions_total": 0.0
+          },
+          "external_restore_zero": true,
+          "local_prefix_hit_scope": "DefaultAPC internal resume is allowed. Aggregate hits are observed, not proved per-hit self-resume attribution. Unique fresh salts and the pinned hash chain constrain cross-request sharing; this is not primaryzero-reuse qualification."
+        },
+        "scope": "Supplemental forced4096 synthetic, first-generated timing. No task-quality or primaryfive score; incompletebatchTPSnull, no missingusage invented."
+      },
+      "cache_counter_scope": {
+        "counter_deltas": {
+          "vllm:prefix_cache_queries_total": 0.0,
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_queries_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:num_preemptions_total": 0.0
+        },
+        "external_restore_zero": true,
+        "local_prefix_hit_scope": "DefaultAPC internal resume is allowed. Aggregate hits are observed, not proved per-hit self-resume attribution. Unique fresh salts and the pinned hash chain constrain cross-request sharing; this is not primaryzero-reuse qualification."
+      }
+    }
+  ],
+  "scope": "Artificial1GiB synthetic16x4096 bounded cohort; every planned cell retained. Not normal16GiB/task quality/hardware savings. Local aggregate prefix hits permit only inference, not per-hit self-resume proof. Partial/unexecuted results are not a complete paired cohort."
+}

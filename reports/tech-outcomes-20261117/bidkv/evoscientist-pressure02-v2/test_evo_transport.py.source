@@ -1,0 +1,220 @@
+"""Pure mocked SSE: completion integrity and answer-quality absence are distinct."""
+
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+import pytest
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+
+
+def module(name, filename):
+    spec = importlib.util.spec_from_file_location(name, HERE / filename)
+    result = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(result)
+    return result
+
+
+TRANSPORT = module("evo_transport_cpu_target", "pressure_transport.py")
+CLIENT = module("evo_client_cpu_target", "evo_client.py")
+USAGE = {"prompt_tokens": 3, "completion_tokens": 4, "total_tokens": 7}
+
+
+def response_lines(*, content=None, usage=True, done=True, count=4):
+    events = [
+        {
+            "id": "chatcmpl-test",
+            "choices": [
+                {"delta": {"reasoning_content": "thought"}, "finish_reason": None}
+            ],
+        },
+    ]
+    if content is not None:
+        events.append(
+            {
+                "id": "chatcmpl-test",
+                "choices": [{"delta": {"content": content}, "finish_reason": None}],
+            }
+        )
+    events.append(
+        {"id": "chatcmpl-test", "choices": [{"delta": {}, "finish_reason": "length"}]}
+    )
+    if usage:
+        events.append(
+            {
+                "id": "chatcmpl-test",
+                "choices": [],
+                "usage": {
+                    **USAGE,
+                    "completion_tokens": count,
+                    "total_tokens": 3 + count,
+                },
+            }
+        )
+    lines = []
+    for event in events:
+        lines.extend([b"data: " + json.dumps(event).encode() + b"\n", b"\n"])
+    if done:
+        lines.extend([b"data: [DONE]\n", b"\n"])
+    return lines
+
+
+def fake_http(monkeypatch, lines):
+    class Socket:
+        def settimeout(self, _timeout):
+            pass
+
+    class Response:
+        status = 200
+
+        def __init__(self):
+            self.lines = iter(lines)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            pass
+
+        def readline(self):
+            return next(self.lines, b"")
+
+    class Connection:
+        def __init__(self, *_args, **_kwargs):
+            self.sock = Socket()
+
+        def connect(self):
+            pass
+
+        def request(self, method, route, payload, _headers):
+            assert method == "POST" and route == "/v1/chat/completions"
+            body = json.loads(payload)
+            assert "ignore_eos" not in body
+
+        def getresponse(self):
+            return Response()
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(TRANSPORT.http.client, "HTTPConnection", Connection)
+
+
+def invoke(tmp_path, **options):
+    return TRANSPORT.call(
+        {"base_url": "http://127.0.0.1:1", "timeout": 5},
+        {
+            "model": "test",
+            "messages": [{"role": "user", "content": "inert"}],
+            "max_tokens": 4,
+            "stream": True,
+            "stream_options": {"include_usage": True},
+        },
+        tmp_path,
+        **options,
+    )
+
+
+def test_default_finite_semantics_still_reject_reasoning_only(monkeypatch, tmp_path):
+    fake_http(monkeypatch, response_lines())
+    row = invoke(tmp_path)
+    assert row["status"] == "transport_error"
+    assert row["no_final_content"] is True
+    assert "Empty answer" in row["error"]
+    assert row["observed_usage"] == USAGE
+    assert row["observed_finish_reason"] == "length"
+    assert row.get("usage") is None
+
+
+def test_diagnostic_accepts_complete_reasoning_only_without_quality_claim(
+    monkeypatch, tmp_path
+):
+    fake_http(monkeypatch, response_lines())
+    row = invoke(tmp_path, require_final_answer=False)
+    assert row["status"] == "ok" and row["usage"] == USAGE
+    assert row["finish_reason"] == "length" and row["no_final_content"] is True
+    assert row["content"] == "" and row["reasoning"] == "thought"
+    assert row["first_token"] is None and row["first_generated_event"] is not None
+    observation = CLIENT.completion_observations([row])
+    assert observation["unresolved_no_final_content"] == 1
+    assert observation["accepted_usage_records"] == 1
+    assert observation["unknown_final_usage"] == 0
+    assert observation["quality_evaluation"].startswith("not_performed")
+
+
+@pytest.mark.parametrize("missing", ["done", "usage"])
+def test_diagnostic_still_rejects_incomplete_sse_or_missing_usage(
+    monkeypatch, tmp_path, missing
+):
+    fake_http(
+        monkeypatch, response_lines(done=missing != "done", usage=missing != "usage")
+    )
+    row = invoke(tmp_path, require_final_answer=False)
+    assert row["status"] == "transport_error"
+    assert row.get("usage") is None
+    observation = CLIENT.completion_observations([row])
+    assert observation["accepted_usage_records"] == 0
+    if missing == "done":
+        assert row["observed_usage"] == USAGE
+        assert observation["observed_usage_on_failed_records"] == 1
+        assert observation["unknown_final_usage"] == 0
+        assert observation["finish_length"] == 0
+        assert observation["observed_finish_length"] == 1
+    else:
+        assert observation["unknown_final_usage"] == 1
+
+
+def test_diagnostic_budget_violation_is_not_accepted(monkeypatch, tmp_path):
+    fake_http(monkeypatch, response_lines(count=5))
+    row = invoke(tmp_path, require_final_answer=False)
+    assert row["status"] == "transport_error"
+    assert row["observed_usage"]["completion_tokens"] == 5
+    observation = CLIENT.completion_observations([row])
+    assert observation["unknown_final_usage"] == 0
+    assert observation["accepted_usage_records"] == 0
+
+
+def test_synthetic_fixed_length_reasoning_semantics_unchanged(monkeypatch, tmp_path):
+    fake_http(monkeypatch, response_lines())
+    row = invoke(tmp_path, fixed_length=True)
+    assert row["status"] == "ok" and row["finish_reason"] == "length"
+    assert row["no_final_content"] is True
+
+
+def test_default_finite_answer_still_passes(monkeypatch, tmp_path):
+    fake_http(monkeypatch, response_lines(content="answer"))
+    row = invoke(tmp_path)
+    assert row["status"] == "ok" and row["no_final_content"] is False
+    assert row["first_token"] is not None
+
+
+def test_observed_usage_is_not_accepted_after_identity_failure(monkeypatch, tmp_path):
+    fake_http(monkeypatch, response_lines(content="answer"))
+    row = invoke(tmp_path)
+    row.update(status="identity_error", case_id="inert-id")
+    observation = CLIENT.completion_observations([row])
+    assert observation["accepted_usage_records"] == 0
+    assert observation["observed_usage_records"] == 1
+    assert observation["unknown_final_usage"] == 0
+    detail = observation["completion_observations"][0]
+    assert detail["accepted_usage"] is None and detail["observed_usage"] == USAGE
+    assert (
+        detail["accepted_finish_reason"] is None
+        and detail["observed_finish_reason"] == "length"
+    )
+
+
+def test_unknown_usage_requires_both_absent():
+    observations = CLIENT.completion_observations(
+        [
+            {"status": "transport_error", "usage": None, "observed_usage": None},
+            {"status": "transport_error", "usage": USAGE, "observed_usage": None},
+            {"status": "transport_error", "usage": None, "observed_usage": USAGE},
+        ]
+    )
+    assert observations["unknown_final_usage"] == 1
+    assert observations["observed_usage_records"] == 2
+    assert observations["accepted_usage_records"] == 0

@@ -1,0 +1,100 @@
+"""Retain service counters and low-frequency device/cgroup observations."""
+
+import json
+from pathlib import Path
+import re
+import subprocess
+import threading
+import time
+import urllib.request
+
+
+def snapshot(base_url, out, name):
+    with urllib.request.urlopen(
+        base_url.rstrip("/") + "/metrics", timeout=30
+    ) as response:
+        raw = response.read()
+    (Path(out) / (name + "-metrics.txt")).write_bytes(raw)
+    return raw.decode()
+
+
+def totals(raw):
+    result = {}
+    for line in raw.splitlines():
+        match = re.match(r"^([^#\s{]+)(?:\{.*\})?\s+([-+\d.eE]+)$", line)
+        if match:
+            key, value = match.groups()
+            result[key] = result.get(key, 0.0) + float(value)
+    return result
+
+
+def zero_reuse(before, after, rows, *, external_metrics=None):
+    left, right = totals(before), totals(after)
+    hits = [
+        key for key in right if "prefix_cache_hits" in key and key.endswith("_total")
+    ]
+    if not hits:
+        raise ValueError(
+            "No engine prefix-hit counter available; zero reuse remains unverified"
+        )
+    deltas = {key: right[key] - left[key] for key in hits if key in left}
+    if set(deltas) != set(hits) or any(value != 0 for value in deltas.values()):
+        raise ValueError("Missing/reset/nonzero prefix-hit counter in salted batch")
+    salts = [row["request"].get("cache_salt") for row in rows]
+    if not all(salts) or len(salts) != len(set(salts)):
+        raise ValueError("Every submitted request needs a unique fresh salt")
+    if any(row.get("cached_tokens_reported") not in (None, 0) for row in rows):
+        raise ValueError("A request reported cached tokens")
+    external = "no external connector in this arm"
+    if external_metrics is not None:
+        a, b = map(totals, external_metrics)
+        keys = [key for key in b if key.endswith("load_success_total")]
+        if not keys or any(key not in a or b[key] - a[key] != 0 for key in keys):
+            raise ValueError("External successful-load counters missing/reset/nonzero")
+        external = {key: b[key] - a[key] for key in keys}
+    return {
+        "passed": True,
+        "prefix_hit_counter_deltas": deltas,
+        "unique_salts": len(salts),
+        "external_loads": external,
+        "null_cache_details": sum(
+            row.get("cached_tokens_reported") is None for row in rows
+        ),
+    }
+
+
+class Sampler:
+    def __init__(self, out):
+        self.out = Path(out)
+        self.stop_event = threading.Event()
+        self.thread = threading.Thread(target=self.run, daemon=True)
+
+    def run(self):
+        with (self.out / "telemetry.jsonl").open("a", buffering=1) as stream:
+            while not self.stop_event.is_set():
+                row = {"wall": time.time(), "monotonic": time.monotonic()}
+                for name in [
+                    "memory.current",
+                    "memory.events",
+                    "memory.stat",
+                    "cpu.stat",
+                ]:
+                    path = Path("/sys/fs/cgroup") / name
+                    if path.is_file():
+                        row[name] = path.read_text()
+                try:
+                    row["npu_smi"] = subprocess.check_output(
+                        ["npu-smi", "info"], text=True, timeout=15
+                    )
+                except Exception as error:
+                    row["sampling_error"] = type(error).__name__ + ": " + str(error)
+                stream.write(json.dumps(row) + "\n")
+                self.stop_event.wait(10)
+
+    def __enter__(self):
+        self.thread.start()
+        return self
+
+    def __exit__(self, *args):
+        self.stop_event.set()
+        self.thread.join(timeout=20)

@@ -1,0 +1,32 @@
+# PegaFlow81 supplemental admission and numeric analysis
+
+This package is preparation tooling, not model results. It leaves the frozen62ab Pega execution sources, primary report builder and benchmark working tree unchanged. The local CPU checks use synthetic observations and the authorized local Frontier plan; no SSH, NPU or model request is made.
+
+This v2 corrects the retained87c/v1 preparation snapshot: both `vllm:prefix_cache_hits_total` and `vllm:external_prefix_cache_hits_total` must exist in both snapshots, stay nonreset and have zero delta. Extra prefix counters remain checked too. A counter missing from both snapshots cannot disappear from the required set and pass admission. The additional CPU cases cover either required counter absent at both ends.
+
+This v3 also applies that identical required-counter proof to every Native/Pega C8 phase before producing a qualified paired export, independently of the original inspector's broader prefix check. The auxiliary controlled index includes parent-level logs as hashes. Both previous preparation snapshots remain unchanged; the execution source62ab is untouched.
+
+## Before the first Pega generation
+
+The original execution preflight verifies fixed MMLU/HLE/trace scope and budgets, but its controller has no populated `plan_files` inventory. Frontier's original load_plan verifies its self-consistent contract/task/source hashes without directly comparing all160 ordered tasks to the public aefdc protocol. This supplemental admission closes that missing external comparison before generation, rather than relabeling a postrun reconstruction as pregen evidence.
+
+1. Publicly freeze/read back this analysis manifest and write `metadata/analysis-publication.json` with `commit`, exact `analysis_manifest_sha256`, and `readback_verified:true`.
+2. After the existing resource/source gates and SDK CPU admission, run `admit_pegaflow_inputs.py --driver DRIVER62AB --common COMMON --source-publication metadata/analysis-publication.json --out metadata/pregen-input-admission.json`. It admits the original controlled29f3 packet's148payload members plus its manifest, original private grader bytes, actual derived-contract changes, all five request budgets/EOS, fixed Frontier160 task/order/source hashes against the included public aefdc protocol, and full plans/reference-tools byte inventories. The148 original entries contain no derived `plans/` files, so this does not demand old bytes for legally adapted contracts. It starts no model and never changes shared plans.
+3. Publish/read back the actual numeric admission receipt before generation. Write `metadata/pregen-input-publication.json` with `commit`, exact `receipt_sha256`, and `readback_verified:true`.
+4. Use `launch_with_input_admission.py --receipt metadata/pregen-input-admission.json --publication metadata/pregen-input-publication.json --source-publication metadata/analysis-publication.json --driver DRIVER62AB --common COMMON --wait-record metadata/input-admitted-launcher-wait.json`. It rechecks the published analysis sources and actual input inventory, then owns/waits the unchanged launch81.py. No SDK shim or execution-source mutation is used.
+
+The original controller's empty inventory loop remains disclosed. Existing per-stage original body/budget/hash guards and postrun all-request/SSE/input-inventory comparison provide the additional audit; this package does not claim that the old controller performed a full inventory check at every stage.
+
+## After quiescence
+
+Run `verify_pegaflow_finite.py` for every solver/judge stage with the same original controlled tools/plans/driver and `--arm native|pegaflow` matching the actual serving arm. Judge always uses native. Unlike a Bid policy check, the Pega verifier requires the explicit initialized Pega load/save success/failure metrics in addition to both prefix-cache hit counters. B1 must have zero successful restores and failures under this salted protocol. Missing/reset counters remain unverified.
+
+`export_pegaflow_numeric.py --root FORMAL --common COMMON --verification VERIFIED --out NEW_PUBLIC` exports per-request numeric records, four byte-identical original quality summaries, runtime/diagnostics/actual wait/cleanup identities, controlled original hashes and the real pregen admission lineage. It rechecks the admitted inventory at export. Questions, answers, reasoning, images, token-ID arrays, raw SSE, private source and error text remain controlled. Null usage/counters stay unknown.
+
+`runtime-overheads.json` preserves the three formal fresh services and two separate C8 initialization periods. Each formal period's `telemetry_numeric` is its formal-stage Sampler observations only; model/sidecar startup streams remain separately timestamped in `startup_telemetry_streams`, without invented alignment or frequency. Model-ready, sidecar-ready and total preparation times are distinct. The actual capacity gauge, pool-used/cache-resident/inflight bytes, configuration30gb and total container/HBM observations remain distinct; gauges may fall without a counter reset. No total observation is claimed as exclusive MOD incremental memory, effective FLOP or currency cost.
+
+`export_pegaflow_c8.py` independently replays both controlled C8 arms and explicit Pega counters, exporting the common four-phase paired-summary shape with pegaflow arm keys. Throughput uses all drained tokens divided by actual phase end-start, not a nominal300-second production interval. Cold save activation and zero restores do not establish a cache-offload benefit.
+
+Use the primary builder with `--project PegaFlow --candidate-arm pegaflow` and optional new `--c8-summary/--c8-link`. Do not pass Pega evidence to its Bid-only `--mechanism-evidence` option. `build_pegaflow_supplement.py` validates the Pega evidence and emits a separate connector/cost supplement for the report, without modifying the primary builder. Four-target acceptance remains separate.
+
+The one-time `prepare_analysis.py` seed utility is not a frozen runtime member and must not be rerun over this finalized package. The manifest-listed files are the actual reviewed runtime/analysis sources. CPU tests establish only these source/schema/admission properties; actual Linux input admission, model qualification and complete paired results remain future work.

@@ -1,0 +1,320 @@
+"""Read-only pre-generation input admission; never start a model or alter plans."""
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import sys
+import tarfile
+import time
+
+FRONTIER_SHA = "aefdc72f23240d59ba5b54e1b1294cec31937ed993fac2617daec61258d04311"  # pragma: allowlist secret -- fixed public standard
+PACKET_SHA = "29f3f78b303a2f8154236b9366cfdad6ad3192fd56c7d3fd8ee654a4f91347fa"  # pragma: allowlist secret -- original controlled packet identity
+DRIVER_SHA = "62ab12f5d7c36cbbccd2eda9c5db7b86e4c2ec2b8d92b1d6c2daecbd92c64773"  # pragma: allowlist secret -- already published frozen execution source
+
+
+def sha(path):
+    with Path(path).open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def digest(value):
+    return hashlib.sha256(
+        json.dumps(
+            value, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+        ).encode()
+    ).hexdigest()
+
+
+def read(path):
+    return json.loads(Path(path).read_bytes())
+
+
+def inventory(root):
+    root = Path(root)
+    return {
+        path.relative_to(root).as_posix(): {
+            "bytes": path.stat().st_size,
+            "sha256": sha(path),
+        }
+        for path in sorted(root.rglob("*"))
+        if path.is_file()
+        and "__pycache__" not in path.parts
+        and path.suffix not in [".pyc", ".pyo"]
+    }
+
+
+def source_admission(publication):
+    root = Path(__file__).resolve().parent
+    manifest = root / "analysis-manifest.json"
+    value = read(publication)
+    assert value["commit"] and value["readback_verified"] is True
+    assert value["analysis_manifest_sha256"] == sha(manifest)
+    for name, expected in read(manifest)["files"].items():
+        path = (root / name).resolve()
+        assert path.is_relative_to(root) and sha(path) == expected
+    return sha(manifest)
+
+
+def frontier_membership(plan, protocol):
+    assert sha(protocol) == FRONTIER_SHA
+    pin = read(protocol)
+    tasks = read(Path(plan) / "tasks.json")
+    rows = []
+    for task in tasks:
+        original = {
+            key: value
+            for key, value in task.items()
+            if key not in ["case_id", "track", "row_index"]
+        }
+        rows.append(
+            {
+                "case_id": task["case_id"],
+                "track": task["track"],
+                "source_row_index": task["row_index"],
+                "task_group_id": task["task_group_id"],
+                "subject": task["subject"],
+                "source_row_sha256": digest(original),
+                "task_sha256": digest(task),
+            }
+        )
+    assert rows == pin["cases"], (
+        "Frontier fixed160 task bytes/order differ from public aefdc protocol"
+    )
+    assert len(tasks) == 160
+    for track, expected in pin["source_asset_sha256"].items():
+        assert sha(Path(plan) / "assets" / track / "test.jsonl") == expected
+    return {
+        "tasks": 160,
+        "ordered_task_metadata_sha256": digest(rows),
+        "public_protocol_sha256": FRONTIER_SHA,
+        "parts": pin["parts"],
+    }
+
+
+def admit(args):
+    begin = time.time()
+    analysis_sha = source_admission(args.source_publication)
+    driver, common = args.driver.resolve(), args.common.resolve()
+    assert sha(driver / "source-manifest.json") == DRIVER_SHA
+    for name, expected in read(driver / "source-manifest.json")["files"].items():
+        assert sha(driver / name) == expected
+    packet = common / "controlled-packet.tar.gz"
+    assert sha(packet) == PACKET_SHA
+    with tarfile.open(packet) as archive:
+        manifest = archive.extractfile("packet-manifest.json").read()
+        packet_members = len(archive.getmembers())
+    assert (common / "packet-manifest.json").read_bytes() == manifest
+    for item in json.loads(manifest):
+        path = (common / item["path"]).resolve()
+        assert (
+            path.is_relative_to(common)
+            and path.stat().st_size == item["bytes"]
+            and sha(path) == item["sha256"]
+        )
+    sys.path.insert(0, str(driver))
+    import finite
+
+    finite.load_tools(common / "reference-tools")
+    from mmlu_scope import verify
+
+    verify(common / "plans/mmlu")
+    from dataset_contract import client
+    from hle_scope import verify_selected
+    import agent_trace
+
+    scopes = {"mmlu": {"tasks": 200, "concurrency": 200, "max_tokens": 8192}}
+    for name, count in [("hle", 200), ("frontier", 160)]:
+        path = common / "plans" / name
+        original_raw = (common / "original-plans" / name / "contract.json").read_bytes()
+        expected = json.loads(original_raw)
+        for role in ["solver", "judge"]:
+            expected[role]["model_artifact"] = "/data/shared_models/Qwen3.5-35B-A3B"
+        original_adapter = expected["engine_transport"]["adapter_sha256"]
+        expected["engine_transport"].update(
+            reference_adapter_sha256=original_adapter,
+            adapter_sha256=sha(driver / "transport.py"),
+            project_execution_adapter="Project HTTP/SSE transport; original client, prompts, budgets, tasks and graders unchanged",
+        )
+        expected["original_contract_sha256"] = hashlib.sha256(original_raw).hexdigest()
+        actual = read(path / "contract.json")
+        assert actual == expected, "Undeclared derived contract change: " + name
+        module = client(name)
+        contract, tasks = module.load_plan(path)
+        assert len(tasks) == count and contract["scoring_policy"] == (
+            "strict_json" if name == "hle" else "mmlu_extract_first"
+        )
+        for role, maximum in [("solver", 16384), ("judge", 8192)]:
+            assert contract[role]["concurrency"] == 16
+            assert contract[role]["request"] == {
+                "temperature": 0,
+                "seed": 17,
+                "max_tokens": maximum,
+                "chat_template_kwargs": {"enable_thinking": False},
+            }
+        if name == "hle":
+            verify_selected(path, contract, tasks)
+            assert sum(bool(task["image"]) for task in tasks) == 23
+        else:
+            scopes["frontier_membership"] = frontier_membership(
+                path, args.frontier_protocol
+            )
+        scopes[name] = {
+            "tasks": count,
+            "contract_sha256": sha(path / "contract.json"),
+            "tasks_sha256": contract["tasks_sha256"],
+            "solver_max_tokens": 16384,
+            "judge_max_tokens": 8192,
+            "concurrency": 16,
+        }
+    mmlu = read(
+        common / "plans/mmlu/inputs/mmlu-quality018-r2/quality-request-plan.json"
+    )["requests"]
+    assert len(mmlu) == 200
+    for body in mmlu:
+        assert (
+            body["max_completion_tokens"] == 8192
+            and body["temperature"] == 0
+            and body["seed"] == 0
+        )
+        assert (
+            body["stream"] is True
+            and body["stream_options"] == {"include_usage": True}
+            and "ignore_eos" not in body
+        )
+    for name, count in [("swe", 64), ("terminal", 48)]:
+        path = common / "plans" / name
+        contract, tasks = agent_trace.load_plan(path)
+        assert len(tasks) == count and contract["concurrency"] == 8
+        for task in tasks:
+            body = agent_trace.request_body(contract, task)
+            assert (
+                body["max_tokens"] == 2048
+                and body["temperature"] == 0
+                and body["seed"] == 17
+                and body["tool_choice"] == "none"
+                and "ignore_eos" not in body
+            )
+        scopes[name] = {
+            "requests": count,
+            "concurrency": 8,
+            "max_tokens": 2048,
+            "ordered_ids_sha256": digest([task["case_id"] for task in tasks]),
+        }
+    initial = Path(
+        "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/controlled/initial-inputs-01"
+    )
+    assert (
+        sha(initial / "continuous-inputs-r1.json")
+        == "a73c9e1b2afa476dea80f91832e963867f6f4130e4988d97210dddfea5aeb392"
+    )  # pragma: allowlist secret -- published original C8 bank
+    for name in ["swe", "terminal"]:
+        for filename in ["tasks.jsonl", "offline-token-id-freeze.json"]:
+            left, right = initial / name / filename, common / "plans" / name / filename
+            if filename.endswith(".jsonl"):
+                left_value = [
+                    json.loads(line)
+                    for line in left.read_text().splitlines()
+                    if line.strip()
+                ]
+                right_value = [
+                    json.loads(line)
+                    for line in right.read_text().splitlines()
+                    if line.strip()
+                ]
+            else:
+                left_value, right_value = read(left), read(right)
+                assert len(left_value) == len({row["case_id"] for row in left_value})
+                assert len(right_value) == len({row["case_id"] for row in right_value})
+                left_value = {row["case_id"]: row for row in left_value}
+                right_value = {row["case_id"]: row for row in right_value}
+            assert left_value == right_value, (
+                "Pregen128 token bank differs from canonical formal trace inputs"
+            )
+    initial_inventory = inventory(initial)
+    plans, tools = inventory(common / "plans"), inventory(common / "reference-tools")
+    return {
+        "schema": "pegaflow-actual-pregen-input-admission/v1",
+        "analysis_manifest_sha256": analysis_sha,
+        "phase": "passed",
+        "source_manifest_sha256": DRIVER_SHA,
+        "admitted_started_unix": begin,
+        "admitted_completed_unix": time.time(),
+        "tool_sha256": sha(Path(__file__)),
+        "controlled_common": str(common),
+        "controlled_packet_sha256": PACKET_SHA,
+        "controlled_packet_archive_members": packet_members,
+        "controlled_initial_inputs_root": str(initial),
+        "initial_input_inventory": initial_inventory,
+        "packet_manifest_sha256": hashlib.sha256(manifest).hexdigest(),
+        "scopes": scopes,
+        "plan_inventory": plans,
+        "reference_tool_inventory": tools,
+        "plan_file_hashes": {name: value["sha256"] for name, value in plans.items()},
+        "model_startups": 0,
+        "generation_requests": 0,
+        "scope": "Actual pre-generation external CPU guard, supplemental to unchanged62ab source. Inventory is not the controller's absent plan_files loop; rerun check before launching and compare against it postrun. Raw question/answer/Engine text remains controlled.",
+    }
+
+
+def check(receipt, common):
+    value = read(receipt)
+    assert value["phase"] == "passed" and value["source_manifest_sha256"] == DRIVER_SHA
+    assert inventory(common / "plans") == value["plan_inventory"]
+    assert inventory(common / "reference-tools") == value["reference_tool_inventory"]
+    if "initial_input_inventory" in value:
+        assert (
+            inventory(Path(value["controlled_initial_inputs_root"]))
+            == value["initial_input_inventory"]
+        )
+    return value
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--driver", type=Path, required=True)
+    parser.add_argument("--common", type=Path, required=True)
+    parser.add_argument(
+        "--frontier-protocol",
+        type=Path,
+        default=Path(__file__).with_name("frontier-full160.json"),
+    )
+    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--source-publication", type=Path, required=True)
+    args = parser.parse_args()
+    assert not args.out.exists(), "Preserve prior admission receipts"
+    args.out.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    try:
+        result = admit(args)
+    except BaseException as error:
+        args.out.write_text(
+            json.dumps(
+                {
+                    "schema": "pegaflow-actual-pregen-input-admission/v1",
+                    "phase": "failed",
+                    "failure_type": type(error).__name__,
+                    "failure_detail": "Retained in controlled stderr; not public question/error text",
+                    "source_manifest_sha256": DRIVER_SHA,
+                    "completed_unix": time.time(),
+                    "tool_sha256": sha(Path(__file__)),
+                    "model_startups": 0,
+                    "generation_requests": 0,
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        raise
+    args.out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    print(
+        json.dumps(
+            {
+                "phase": result["phase"],
+                "plans": len(result["plan_inventory"]),
+                "tools": len(result["reference_tool_inventory"]),
+                "receipt_sha256": sha(args.out),
+                "generation_requests": 0,
+            }
+        )
+    )

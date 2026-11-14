@@ -173,6 +173,25 @@ def verify(archive=None, native_part=None):
             candidate = folder / (path + ".source" if path.endswith(".py") else path)
             assert digest(candidate) == checksum, candidate
         execution_sources[name] = len(sources)
+    analysis_members = 0
+    folder = ROOT / "analysis-v3-81"
+    if folder.is_dir():
+        sources = read("analysis-v3-81/analysis-manifest.json")["files"]
+        assert len(sources) == 13
+        for name, checksum in sources.items():
+            stored = (
+                "original-README.md.source"
+                if name == "README.md"
+                else name + ".source"
+                if name.endswith(".py")
+                else name
+            )
+            assert digest(folder / stored) == checksum
+        assert (
+            read("analysis-v3-81/cpu-export-receipt.json")["model_generation_requests"]
+            == 0
+        )
+        analysis_members = len(sources)
     return {
         "public_files_verified": len(expected),
         "historical_candidate_requests_recomputed": requests,
@@ -181,6 +200,7 @@ def verify(archive=None, native_part=None):
         "new_formal_900s_points": window_result["formal_900s_points"],
         "new_speedup_claim": False,
         "frozen_execution_sources_verified": execution_sources,
+        "pegaflow_input_and_numeric_analysis_preparation_members": analysis_members,
         "restart02_diagnostics": restart_result,
         "restart02_windows": window_result,
         "restart02_final_sources": runpy.run_path(

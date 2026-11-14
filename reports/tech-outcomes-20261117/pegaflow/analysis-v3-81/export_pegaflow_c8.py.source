@@ -1,0 +1,139 @@
+"""Export independently checked Pega C8 numeric observations, with actual drain."""
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+from pega_evidence import (
+    ENGINE,
+    deltas,
+    totals,
+    optional,
+    execution_receipts,
+    strict_prefix_cache,
+)
+
+
+def read(path):
+    return json.loads(path.read_bytes())
+
+
+def main(args):
+    sys.path.insert(0, str(args.driver))
+    from verify_c8 import inspect
+
+    args.out.mkdir(parents=True, exist_ok=False)
+    verified, phases = {}, {}
+    for arm in ["native", "pegaflow"]:
+        folder = args.campaign / "qualification" / (arm + "-c8-01")
+        checked = inspect(folder, args.inputs)
+        verified[arm] = checked
+        for value in read(folder / "continuous.json")["phases"]:
+            name = value["name"]
+            prefix = strict_prefix_cache(
+                totals(folder / (name + "-before-metrics.txt")),
+                totals(folder / (name + "-after-metrics.txt")),
+            )
+            assert prefix["passed"], (
+                "Required C8 local/external prefix counters missing/reset/nonzero"
+            )
+            checked.setdefault("explicit_required_prefix_proofs", []).append(
+                {"phase": name, **prefix}
+            )
+            if arm == "pegaflow":
+                proof = deltas(
+                    totals(folder / (name + "-before-metrics.txt")),
+                    totals(folder / (name + "-after-metrics.txt")),
+                    ENGINE,
+                )
+                assert not proof["missing"] and not proof["counter_reset_seen"]
+                assert (
+                    proof["deltas"][ENGINE[0]]
+                    == proof["deltas"][ENGINE[2]]
+                    == proof["deltas"][ENGINE[3]]
+                    == 0
+                )
+                checked.setdefault("explicit_pega_engine_proofs", []).append(
+                    {"phase": name, **proof}
+                )
+            span = value["end"]["monotonic"] - value["start"]["monotonic"]
+            assert span >= value["seconds"] and value["failed"] == 0
+            row = phases.setdefault(name, {"phase": name})
+            row.update(
+                {
+                    arm + "_requests": value["requests"],
+                    arm + "_failures": value["failed"],
+                    arm + "_window_tokens_per_second": value[
+                        "output_tokens_accepted_including_drain"
+                    ]
+                    / span,
+                    arm + "_phase_elapsed_seconds_including_drain": span,
+                    arm + "_drain_seconds": value["drain_seconds"],
+                    arm + "_ttft_mean_seconds": value["ttft_generated_seconds"]["mean"],
+                    arm + "_tpot_mean_seconds": value["tpot_completion_seconds"][
+                        "mean"
+                    ],
+                }
+            )
+    activation = read(
+        args.campaign / "qualification/pegaflow-c8-01/mechanism-activation.json"
+    )
+    assert (
+        activation["actual_storage_save_activated"] is True
+        and activation["restore_successes"] == activation["failures"] == 0
+    )
+    for row in phases.values():
+        row["throughput_change_percent"] = 100 * (
+            row["pegaflow_window_tokens_per_second"]
+            / row["native_window_tokens_per_second"]
+            - 1
+        )
+    result = {
+        "schema": "pegaflow-default-true-c8-paired-summary/v1",
+        "source_manifest_sha256": hashlib.sha256(
+            (args.driver / "source-manifest.json").read_bytes()
+        ).hexdigest(),
+        "native_requests": verified["native"]["total_requests"],
+        "pegaflow_requests": verified["pegaflow"]["total_requests"],
+        "failed": 0,
+        "all_records_independently_replayed": True,
+        "phases": list(phases.values()),
+        "pega_actual_storage_activation": activation,
+        "comparison_scope": "Original60/300s submission windows with all requests drained; numerator includes drain tokens and denominator is actual phase end-start. Fixed256/ignoreEOS separate from five EOS metrics. Zero restores establishes no offload benefit; no Bid policy fields.",
+    }
+    (args.out / "paired-summary.json").write_text(
+        json.dumps(result, indent=2) + "\n", encoding="utf-8"
+    )
+    (args.out / "independent-verification.json").write_text(
+        json.dumps(verified, indent=2) + "\n", encoding="utf-8"
+    )
+    (args.out / "actual-execution-receipts.json").write_text(
+        json.dumps(
+            execution_receipts(args.campaign / "formal-01", args.campaign), indent=2
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (args.out / "qualification-status.json").write_text(
+        json.dumps(optional(args.campaign / "metadata/c8-campaign-status.json")),
+        encoding="utf-8",
+    )
+    return result
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    for name in ["campaign", "driver", "inputs", "out"]:
+        parser.add_argument("--" + name, type=Path, required=True)
+    result = main(parser.parse_args())
+    print(
+        json.dumps(
+            {
+                "passed": result["all_records_independently_replayed"],
+                "native_requests": result["native_requests"],
+                "pegaflow_requests": result["pegaflow_requests"],
+            }
+        )
+    )

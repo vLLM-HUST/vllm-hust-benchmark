@@ -1,0 +1,89 @@
+{
+  "schema": "bidkv81-resource-handoff-to-pegaflow/v1",
+  "released_unix": 1794625168.4827163,
+  "physical_npus": [
+    6,
+    7
+  ],
+  "logical_npus": [
+    0,
+    1
+  ],
+  "actual_npu_no_running_processes_both": true,
+  "npu_smi": "+------------------------------------------------------------------------------------------------------------------+\n| npu-smi 26.0.rc1                            Version: 26.0.rc1                                                    |\n+---------------------------+---------------+----------------------------------------------------------------------+\n| NPU   Name                | Health        | Power(W)             Temp(C)                 Hugepages-Usage(page)   |\n| Chip                      | Bus-Id        | AICore(%)            Memory-Usage(MB)        HBM-Usage(MB)           |\n+===========================+===============+======================================================================+\n| 6     910B2               | OK            | 98.3                 43                      0    / 0                |\n| 0                         | 0000:82:00.0  | 0                    0    / 0                3430 / 65536            |\n+===========================+===============+======================================================================+\n| 7     910B2               | OK            | 97.8                 43                      0    / 0                |\n| 0                         | 0000:42:00.0  | 0                    0    / 0                3433 / 65536            |\n+===========================+===============+======================================================================+\n+---------------------------+---------------+----------------------------------------------------------------------+\n| NPU     Chip              | Process id    | Process name       | Process memory(MB)    | Process id in container |\n+===========================+===============+======================================================================+\n| No running processes found in NPU 6                                                                              |\n+===========================+===============+======================================================================+\n| No running processes found in NPU 7                                                                              |\n+===========================+===============+======================================================================+\n",
+  "owned_wait_receipts": {
+    "native/api-owned-wait.json": {
+      "actual_returncode": 0,
+      "wait_returned_unix": 1794623387.8587568,
+      "api_pid": 987250
+    },
+    "bidkv/api-owned-wait.json": {
+      "actual_returncode": 0,
+      "wait_returned_unix": 1794625017.4919603,
+      "api_pid": 1058719
+    },
+    "metadata/native-owned-supervisor.json": {
+      "phase": "completed",
+      "pid": 987007,
+      "started_unix": 1794621418.0464592,
+      "source_manifest_sha256": "13dc6b582f81008e081c31ce1cd75096ea706989db185bc9bbea96fbe23d44f9",
+      "submitted_generation_requests": 0,
+      "child_pid": 987236,
+      "actual_child_returncode": 0,
+      "ended_unix": 1794623388.504136
+    },
+    "metadata/bidkv-owned-supervisor.json": {
+      "phase": "completed",
+      "pid": 1058703,
+      "started_unix": 1794623961.1162257,
+      "command": [
+        "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+        "-B",
+        "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-pressure-admission-v1/admission_owner.py",
+        "--arm",
+        "bidkv"
+      ],
+      "source_sha256": "a5e93e9f0510cf30b584f527d4404862549cfd4ec66677400abc0ab3e30e086b",
+      "submitted_generation_requests": 0,
+      "authorization": "Parent explicitly authorized unchanged13dc Candidate0gen after v2guardfailure; originalclock unchanged",
+      "child_pid": 1058704,
+      "actual_child_returncode": 0,
+      "ended_unix": 1794625018.1157658
+    },
+    "metadata/generation-controller-owned-supervisor.json": {
+      "phase": "failed",
+      "pid": 1033308,
+      "started_unix": 1794623081.0091074,
+      "source_sha256": "460c9c60159bb7a2e04a89ea367986e2839c0eca348b39c6d8daa60fa94b2d25",
+      "fixed_controller_manifest_sha256": "9d3f51e15dcf6d8040ebc2eaf904be1f69a87c8a0f33586d038d1b67c5c2bdde",
+      "command": [
+        "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+        "-B",
+        "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-pressure-driver-v2/run_pressure.py"
+      ],
+      "child_pid": 1033309,
+      "actual_child_returncode": 2,
+      "ended_unix": 1794623389.2912762
+    },
+    "metadata/corrective-v3-controller-owned-supervisor.json": {
+      "phase": "failed",
+      "pid": 1088722,
+      "started_unix": 1794624993.6737301,
+      "source_sha256": "0c5e14e42b1800978d3a920225ba1339e30829671ab650021fac3d90abddfa42",
+      "fixed_controller_manifest_sha256": "97b82126270fb015ff864807228cb5f28ffc05a4d9ce6293e80226d89fd0a950",
+      "command": [
+        "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+        "-B",
+        "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-pressure-driver-v3/run_pressure.py"
+      ],
+      "child_pid": 1088723,
+      "actual_child_returncode": 2,
+      "ended_unix": 1794625018.709481
+    }
+  },
+  "primary_completed_actual_RC0": true,
+  "original_v2_status": "failedRC1client/RC2controller, unchanged",
+  "corrective_v3_status": "failedRC2client/controller, partial, unchanged",
+  "new_Bid_models_allowed": false,
+  "handoff_scope": "All owned BidKV model processes released. Parent and Pegaagent may now perform alreadyauthorized Pega81 scope; no BidKV furtherNPUrequests. CPUread-only exports may remain."
+}
