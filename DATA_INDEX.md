@@ -228,3 +228,7 @@ python -m pytest -q tests/test_data_index.py
 
 [一键执行与完整公开指标](reports/five-datasets-standard-20261113/README.md)：
 15阶段由封存原件重新核验，新增推理0阶段；保留原日期、失败父批次与负结果。 五项范围已执行完成；HLE/Frontier评分未决及真实trace的16K输入覆盖限制仍阻止整体验收。
+
+## B1 r6固定五项复测（2026-11-14）
+
+[15阶段封存复核与四目标验收](reports/five-datasets-r6-20261114/README.md)：10阶段复用、5阶段新增，672条solver/trace请求每臂均完成；保留质量下降、裁判未决、当前MMLU参考及16K/32K、多租户证据缺口。
