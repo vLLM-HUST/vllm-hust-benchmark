@@ -2,6 +2,7 @@
 
 import copy
 import importlib.util
+import json
 from pathlib import Path
 
 SPEC = importlib.util.spec_from_file_location("publication_campaign", Path(__file__).resolve().parents[1] / "scripts/publication_campaign.py")
@@ -61,3 +62,27 @@ def test_incomplete_failed_missing_and_inconsistent_campaigns_are_rejected():
         except ValueError:
             continue
         raise AssertionError("Unsafe synthetic campaign was accepted")
+
+
+def test_device_identity_follows_each_stage_including_reused_origins(tmp_path):
+    for name, cards in (("reused", [5, 6]), ("new", [1, 6])):
+        root = tmp_path / name
+        root.mkdir()
+        (root / "device-mapping.json").write_text(json.dumps(dict(physical_cards=cards)))
+        assert MODULE.device_cards(root) == tuple(map(str, cards))
+
+
+def test_missing_duplicate_or_invalid_device_identity_cannot_use_legacy_defaults(tmp_path):
+    for cards in ([1, 1], [True, 6], ["1", "6"], [1], [-1, 6]):
+        (tmp_path / "device-mapping.json").write_text(json.dumps(dict(physical_cards=cards)))
+        try:
+            MODULE.device_cards(tmp_path)
+        except ValueError:
+            continue
+        raise AssertionError("Invalid physical device identity accepted")
+    (tmp_path / "device-mapping.json").unlink()
+    try:
+        MODULE.device_cards(tmp_path)
+    except FileNotFoundError:
+        return
+    raise AssertionError("Missing physical device identity accepted")

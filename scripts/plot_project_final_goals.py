@@ -12,9 +12,9 @@ def main():
     args = parser.parse_args()
     data = json.loads(args.summary.read_bytes())
     final = data["project_final_assessment"]
-    if final["acceptance_established"] or not final["fully_specified"]:
+    if not final["fully_specified"]:
         raise ValueError(
-            "This figure describes the disclosed incomplete final acceptance"
+            "Final target specification is incomplete"
         )
     targets = final["targets"]
     performance = targets["3.4.2"]["numeric_results_by_profile"]
@@ -42,7 +42,9 @@ def main():
             "4.2 Throughput and latency",
             "Target >=2x; latency -20%",
             f"{sum(p['numeric_threshold_met'] for p in performance)}/{len(performance)} profiles meet numeric thresholds",
-            "HLE misses; quality / runtime review stays open",
+            "Missing numeric targets: " + ", ".join(p["dataset"] for p in performance if not p["numeric_threshold_met"])
+            if not all(p["numeric_threshold_met"] for p in performance)
+            else "All profiles meet numeric thresholds; quality shown separately",
         ),
         (
             "4.3 Context stability",
@@ -70,7 +72,8 @@ def main():
         )
         axis.set_xticks([])
         axis.set_yticks([])
-    fig.suptitle("Project final goals - final acceptance NOT demonstrated", fontsize=15)
+    verdict = "established" if final["acceptance_established"] else "NOT demonstrated"
+    fig.suptitle("Project final goals - final acceptance " + verdict, fontsize=15)
     fig.text(
         0.5,
         0.018,

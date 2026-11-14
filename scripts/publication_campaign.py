@@ -1,6 +1,7 @@
 """Validate complete native/reused campaigns without rewriting stage identities."""
 
 from datetime import datetime, timedelta, timezone
+import json
 from pathlib import Path
 
 STAGES = (
@@ -63,3 +64,13 @@ def provenance(data):
 
 def report_date(data):
     return datetime.fromtimestamp(data["receipt"]["ended"], timezone(timedelta(hours=8))).date().isoformat()
+
+
+def device_cards(root):
+    """Use each stage's recorded physical devices, including reused origins."""
+    cards = json.loads((Path(root) / "device-mapping.json").read_bytes())["physical_cards"]
+    if (not isinstance(cards, list) or len(cards) != 2
+            or any(type(card) is not int or card < 0 for card in cards)
+            or len(set(cards)) != 2):
+        raise ValueError("Utilization requires two distinct recorded physical cards")
+    return tuple(str(card) for card in cards)

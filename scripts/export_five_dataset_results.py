@@ -8,7 +8,7 @@ import math
 import argparse
 from project_goal_assessment import assess, merge_requirements, REFERENCE_SHA256
 from stability_assessment import assess as assess_stability, milestone_target
-from publication_campaign import validate, roots, provenance, report_date
+from publication_campaign import validate, roots, provenance, report_date, device_cards
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--run", type=Path, required=True)
@@ -137,7 +137,7 @@ def extras(root, native=False):
         "input_plus_output_at_least16384_cases": sum(
             a + b >= 16384 for a, b in zip(ins, outs)
         ),
-        "sampled_utilization": utilization(samples, start, end),
+        "sampled_utilization": utilization(samples, start, end, expected=device_cards(root)),
         "estimated_cny_per_million_output_tokens": 1e6
         * rate
         * (end - start)
