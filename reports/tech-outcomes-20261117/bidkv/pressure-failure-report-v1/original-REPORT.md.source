@@ -1,0 +1,33 @@
+# BidKV 补充压力验证：失败与资源会计报告
+
+本补充验证没有形成有效完整配对，也没有证明 BidKV 机制收益。它采用每卡人工1GiB KV限额，不能代表常规16GiB配置、任务质量或硬件成本下降。原正式五数据集1344条solver、720条judge已经完整结束，原四份质量报告逐字节复算一致，与本补充验证分开。
+
+v2在Native8条HTTP请求全部成功后，被本agent编写的观测guard误拒绝：guard把外部SSE ID当作内部scheduler ID，遗漏官方默认追加的`-8小写hex`。8条原SSE、固定请求体、usage、盐、counter及全部7次决策的candidate/selected/builtin/requesting合法性均已独立重验；Native calls=0、fault=0。原client RC1、controller RC2保持失败，没有倒填成功。Native完整窗口296.0366s、32768个accepted输出token、110.6890tok/s；8/8的first-generated与first-content相同，平均TTFT140.5730s、TPOT0.0139112s。这只是单臂诊断数据。
+
+v3只修正ID观测绑定，显式沿用全部原Native8作baseline，没有新增Native请求。Candidate冷加载和源码公开读回仍计入原60分钟。实际生成批窗口仅9.0699s：8条HTTP200、8个SSE捕获、8份失败记录，0个已观察first-generated事件、8条最终usage未知。`0 known accepted output`是完整记录可确认token的下界，不能解释为实际0生成或0TPS。Candidate TPS为null；calls=0和preemptionΔ0来自这个不完整窗口，不能证明机制无效或证明收益。
+
+| 实际返回码 | Native v2 | Candidate corrective v3 |
+|---|---:|---:|
+| 客户端 | 1 | 2 |
+| controller（父进程真实wait） | 2 | 2 |
+| 模型API | 0 | 0 |
+| 13dc准入owner（父进程真实wait） | 0 | 0 |
+
+| 资源时间，秒 | Native | Candidate |
+|---|---:|---:|
+| 实际cold init | 607.148 | 597.172 |
+| ready→首个客户端call | 1054.472 | 434.545 |
+| ready→stop文件mtime代理值† | 1351.115 | 443.665 |
+| ready→API实际wait | 1360.915 | 458.042 |
+| stop文件mtime→API实际wait† | 9.799 | 14.376 |
+| API驻留（包含init/park/请求/cleanup） | 1968.064 | 1055.215 |
+
+†stop-request没有单独持久化程序时钟；这里用只读封存的文件mtime作近似代理。NAS与host时钟未校准，不能当精确同钟的stop事件计时。准确程序边界及原文件SHA均在JSON中。
+
+原clock从2026-11-14T09:56:58.044+08:00开始，3600s截止投影为2026-11-14T10:56:58.044+08:00，没有重置；末15s事前保留用于封存。两次cold init合计1204.320s。两轮API驻留间隔574.418s，空卡端点有原件，未连续证明该整段的利用率。最后API实际wait在截止投影前0.553s；controller真实wait在投影后0.665s，属于已声明单列的cleanup，不是额外推理窗口。clock开始到最终controller wait为3600.665s。
+
+ready→call的混合park区间包含准备、观测guard修复、父端公开/安全扫描/逐字节读回及消息调度，全部占用原clock和驻留成本。父端聚合核验脚本曾把初始化行计入decision总数，后以追加提交修正，最终公开源为`e13f5fc`；没有各修复/出版步骤独立起止原件，细分耗时在JSON中为null，不编造或重复叠加。模型驻留资源时间只是device-seconds代理；没有价格、账单、增量模块内存或FLOP参考，不能据此认定成本目标达成。
+
+全部partial、失败、原v2未执行Candidate分母和真实非零退出码均保留；没有续时、改4096/1GiB/600s、补齐旧cohort或挑选轮次。2026-11-14T10:59:28.482+08:00双卡实际空闲并已正式交接Pega，本agent不再发BidKV NPU请求。
+
+未来可在Pega工作后另行预注册一个全新8+8配对：保持16407/4096/1GiB与共同默认优化，所有修正源、负例和条件容量准入先公开读回，再开始独立clock和两次fresh cold init；实际容量/源/输入不符即0生成停止，保留全部结果。这个建议没有启动，也不是延长本轮或调整参数。

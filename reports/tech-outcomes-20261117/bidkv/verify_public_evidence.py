@@ -574,6 +574,9 @@ def verify():
         "smaller_pressure_v2_source_members_verified": len(pressure_v2_sources),
         "candidate_only_corrective_source_and_native_receipt": corrective,
         "closed_failed_or_partial_pressure_results": closed_pressure,
+        "historical_pressure_failure_report_and_full_preemption_audit": runpy.run_path(
+            str(ROOT / "verify_pressure_failure_report.py")
+        )["verify"](ROOT),
         "prospective_eos_historical_workload": runpy.run_path(
             str(ROOT / "verify_evo_preparation.py")
         )["verify"](ROOT / "evoscientist-pressure02-v2"),
