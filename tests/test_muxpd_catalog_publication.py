@@ -33,15 +33,13 @@ def test_muxpd_four_tables_join_without_expanding_qualification():
     assert component["maturity"] == "experimental"
     assert component["maintainers"] == ["Irisuko"]
     assert component["evidence_level"] == "hardware_verified"
-    assert "6/8" in component["public_effect_en"]
-    assert (
-        "current-package performance gain is established"
-        in component["public_effect_en"]
-    )
-    assert "5/8" in component["public_effect_en"]
-    assert component["public_effect_status"] == "not-beneficial-in-tested-cell"
+    assert "single-pass" in component["public_effect_en"]
+    assert "quality not evaluated" in component["public_effect_en"]
+    assert "23.31%" in component["public_effect_zh"]
+    assert "7.40%" in component["public_effect_zh"]
+    assert component["public_effect_status"] == "measured"
     assert component["public_effect_url"].endswith(
-        "/reports/muxpd-batch14-quota-control-20261030/README.md"
+        "/reports/tech-outcomes-20261117/muxpd/README.md"
     )
     assert component["qualification_report"] == (
         "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/"
@@ -57,7 +55,7 @@ def test_muxpd_four_tables_join_without_expanding_qualification():
     )
     metadata = read(DATA / "plugin-workshop-metadata.json")["plugins"]["muxpd"]
     assert [row["login"] for row in metadata["maintainers"]] == ["Irisuko"]
-    assert "muxpd" not in {
+    assert "muxpd" in {
         row["id"] for row in read(DATA / "plugin-performance.json")["entries"]
     }
 
@@ -136,3 +134,21 @@ def test_live_publication_facts_refer_to_exact_archived_sources():
     assert download["original_four_assets_api_digests_unchanged"] == original
     for name, sha in original.items():
         assert assets[name]["digest"] == "sha256:" + sha
+
+
+def test_muxpd_throughput_uses_exact_archived_metrics_and_separate_tp_observations():
+    metrics = read(ROOT / "reports/tech-outcomes-20261117/muxpd/metrics-v1.json")
+    entry = next(row for row in read(DATA / "plugin-performance.json")["entries"]
+                 if row["id"] == "muxpd")
+    assert entry["default_observation_id"] == "muxpd:wl38-2wiki-tp2"
+    assert len(entry["observations"]) == 2
+    for tp, observation in zip(("tp2", "tp4"), entry["observations"]):
+        expected = metrics["workloads"]["wl-2wiki-r1.6"]["comparisons"][tp]
+        comparison, = observation["comparisons"]
+        assert comparison["baseline"] == expected["native"]["out_tok_s"]
+        assert comparison["candidate"] == expected["mux43"]["out_tok_s"]
+        assert observation["kind"] == "published-comparisons"
+        assert tp.upper() in observation["setting_label_en"]
+        assert "single-pass" in observation["aggregation_note_en"]
+        assert "quality not evaluated" in observation["aggregation_note_en"]
+        assert "gain" not in observation
