@@ -66,6 +66,18 @@ class MetricsTests(unittest.TestCase):
         self.assertEqual(s["sse_event_count_equals_completion_tokens"], 3)
         self.assertAlmostEqual(s["maxgap_s"]["p95"], 0.56875)
 
+    def test_tpot_mean_keeps_small_positive_terms_across_python_versions(self):
+        # 1 + 2**-53 + 2**-53 is exactly 1 + 2**-52; naive float
+        # summation on Python 3.11 loses both half-ULP contributions.
+        result, manifest = synthetic()
+        result["rows"] = result["rows"][:3]
+        manifest["requests"] = manifest["requests"][:3]
+        for row, duration in zip(result["rows"], (1.0, 2**-53, 2**-53)):
+            row["events"] = [0.0, duration]
+        self.assertEqual(
+            recompute.summarize(result, manifest)["tpot_mean_s"], 0.3333333333333334
+        )
+
     def test_slo_boundaries_are_inclusive_for_each_request_kind(self):
         result, manifest = synthetic()
         result["rows"] = result["rows"][:4]

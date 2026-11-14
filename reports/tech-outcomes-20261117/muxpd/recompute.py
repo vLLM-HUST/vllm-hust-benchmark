@@ -166,7 +166,9 @@ def _metrics(rows, t0):
         "req_s": rate(len(ok)),
         "goodput_req_s": rate(good),
         **{key: quantiles(val) for key, val in values.items()},
-        "tpot_mean_s": sum(values["tpot_s"]) / len(ok) if ok else None,
+        # Explicit accurate summation is stable across Python 3.11/3.12;
+        # builtin sum(float) changed algorithms in Python 3.12.
+        "tpot_mean_s": math.fsum(values["tpot_s"]) / len(ok) if ok else None,
         "worst_stall_s": max(values["itl_s"], default=None),
         "send_lag_max_s": max(r["sent"] - r["sched"] for r in rows),
         "violations": violations,
