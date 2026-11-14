@@ -15,6 +15,90 @@ PROFILE_PATH = (
     Path(__file__).resolve().parents[1]
     / "reports/project-final-goals-20261113/final-goals-v1.json"
 )
+ACCEPTANCE_POLICY = {
+    "id": "single-fixed-profile-20261114-v2",
+    "source": "user_confirmed_interpretation_after_partial_execution",
+    "source_quote": "只要一个数据集达成目标就行。",
+    "minimum_qualifying_profiles": 1,
+    "joint_metrics_must_share_one_profile": True,
+    "all_five_numeric_passes_required": False,
+    "all_five_execution_and_result_disclosure_unchanged": True,
+    "compute_reference_profile": "mmlu-fixed200-v1",
+    "context_and_multi_tenant_requirements_unchanged": True,
+}
+
+
+def milestone_representative_targets(original, datasets):
+    """Each numeric goal needs one whole qualifying profile, never mixed metrics."""
+    targets = copy.deepcopy(original)
+    performance, costs = [], []
+    for d in datasets:
+        change = d["changes_percent"]
+        ratio = (
+            d["arms"]["B1"]["output_tokens_per_second"]
+            / d["arms"]["B0"]["output_tokens_per_second"]
+        )
+        performance.append(
+            {
+                "dataset": d["id"],
+                "throughput_ratio": ratio,
+                "mean_ttft_reduction_percent": -change["mean_ttft_ms"],
+                "mean_tpot_reduction_percent": -change["mean_tpot_ms"],
+                "numeric_threshold_met": ratio >= 1.10
+                and -change["mean_ttft_ms"] >= 5
+                and -change["mean_tpot_ms"] >= 5,
+            }
+        )
+        gain = change.get("ai_core_utilization_gain_pp")
+        costs.append(
+            {
+                "dataset": d["id"],
+                "equal_rate_unit_cost_reduction_percent": -change[
+                    "unit_cost_change_percent"
+                ],
+                "ai_core_utilization_gain_pp": gain,
+                "numeric_threshold_met": -change["unit_cost_change_percent"] >= 10,
+                "observed_utilization_increased": gain is not None and gain > 0,
+            }
+        )
+    good_performance = [p["dataset"] for p in performance if p["numeric_threshold_met"]]
+    good_cost = [
+        p["dataset"]
+        for p in costs
+        if p["numeric_threshold_met"] and p["observed_utilization_increased"]
+    ]
+    for key, rows, qualifying in [
+        ("3.4.2", performance, good_performance),
+        ("3.4.4", costs, good_cost),
+    ]:
+        targets[key].update(
+            accepted=bool(qualifying),
+            numeric_threshold_met=bool(qualifying)
+            if key == "3.4.2"
+            else any(p["numeric_threshold_met"] for p in costs),
+            status="单一固定数据集达标"
+            if qualifying
+            else "尚无单一固定数据集满足该项条件",
+            accepted_scope="One complete fixed profile per target; all profile results disclosed"
+            if qualifying
+            else None,
+            qualifying_profiles=qualifying,
+            numeric_results_by_profile=rows,
+            acceptance_policy_id=ACCEPTANCE_POLICY["id"],
+            measured_value=None,
+            display_value="达标：" + ", ".join(qualifying) if qualifying else "未达标",
+            display_value_en="Met: " + ", ".join(qualifying)
+            if qualifying
+            else "Not met",
+            reason="同一个固定数据集须同时满足该项目标的全部条件；符合条件："
+            + (", ".join(qualifying) or "无")
+            + "。五项结果与负收益均保留，不跨数据集拼接指标。成本为已披露的同费率估算，利用率增量单列，不另造‘明显改善’阈值。质量与专项稳定性另行报告。",
+            reason_en="One fixed profile must jointly satisfy this target; qualifying profiles: "
+            + (", ".join(qualifying) or "none")
+            + ". All results and regressions remain visible. Never mix metrics across profiles. Cost uses the disclosed equal-rate estimate; utilization changes are reported without inventing a significance threshold. Quality and context stability remain separate.",
+        )
+        targets[key].pop("source_url", None)
+    return targets
 
 
 def unmeasured_current_compute_target(archived):
@@ -117,23 +201,25 @@ def assess(reference, datasets, profile=None):
             }
         )
     misses = [p["dataset"] for p in performance if not p["numeric_threshold_met"]]
+    qualifying = [p["dataset"] for p in performance if p["numeric_threshold_met"]]
     targets["3.4.2"] = {
         **criteria["3.4.2"],
-        "requirement": "吞吐 ≥2×；平均TTFT/TPOT分别降低 ≥20%",
-        "requirement_en": "Throughput ≥2×; mean TTFT/TPOT each reduced ≥20%",
-        "evidence_summary": "按五项逐一核算；未达数值门槛：" + ", ".join(misses)
-        if misses
-        else "五项吞吐/时延数值门槛均达到",
-        "evidence_summary_en": "Profiles missing numeric targets: " + ", ".join(misses)
-        if misses
-        else "All five profiles meet throughput/latency numeric targets",
+        "requirement": "单一固定数据集：吞吐 ≥2×；平均TTFT/TPOT分别降低 ≥20%",
+        "requirement_en": "One fixed profile: throughput ≥2×; mean TTFT/TPOT each reduced ≥20%",
+        "evidence_summary": "符合全部数值门槛的固定数据集："
+        + (", ".join(qualifying) or "无"),
+        "evidence_summary_en": "Fixed profiles meeting all numeric targets: "
+        + (", ".join(qualifying) or "none"),
         "criterion_source_verified": True,
-        "attainment": "not_demonstrated" if misses else "demonstrated",
+        "attainment": "demonstrated" if qualifying else "not_demonstrated",
+        "qualifying_profiles": qualifying,
+        "nonqualifying_profiles": misses,
+        "any_profile_numeric_threshold_met": bool(qualifying),
         "numeric_results_by_profile": performance,
         "all_profile_numeric_thresholds_met": all(
             p["numeric_threshold_met"] for p in performance
         ),
-        "reason": "沿用本轮可比B0/B1、固定任务和服务协议，按各项实际吞吐、TTFT/TPOT分别判定，不用某项最好值覆盖其他负载。质量与裁判未决数独立保留；数值达标不构成统计质量等价证明。",
+        "reason": "按用户确认，任一固定数据集在同一可比B0/B1工况同时满足吞吐、TTFT和TPOT全部数值门槛即可，不要求五项均达标。各项结果、负收益和未决数完整披露，不跨数据集拼接最好指标，不改写此前报告。数值达标不构成统计质量等价证明。",
     }
     targets["3.4.3"] = {
         **criteria["3.4.3"],
@@ -165,6 +251,12 @@ def assess(reference, datasets, profile=None):
         "criterion_source_verified": True,
         "attainment": "not_demonstrated",
         "numeric_cost_results_by_profile": costs,
+        "qualifying_cost_profiles": [
+            p["dataset"] for p in costs if p["numeric_threshold_met"]
+        ],
+        "any_profile_cost_threshold_met": any(
+            p["numeric_threshold_met"] for p in costs
+        ),
         "multi_tenant_utilization_verified": False,
         "reason": "保留已确认国际主流开源框架B0与可比条件，费用为历史公开报价同费率估算，不是本机账单。单服务高负载利用率不能自动证明多租户要求；未发明“较高利用率”的数值门槛。",
     }
@@ -178,6 +270,7 @@ def assess(reference, datasets, profile=None):
         ),
         "confirmed_interpretation": profile["confirmed_interpretation"],
         "criterion_source": profile["source"],
+        "acceptance_policy": copy.deepcopy(ACCEPTANCE_POLICY),
         "targets": targets,
         "limits": "已确认同工况参考和35B模型解释；最终目标单独展示，里程碑通过不等于最终验收通过。",
     }

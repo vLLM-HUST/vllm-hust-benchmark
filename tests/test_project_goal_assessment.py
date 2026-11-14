@@ -144,3 +144,106 @@ def test_merge_readiness_uses_current_evidence_not_historical_failure_text():
     )
     assert ready["ready_to_merge"] and not ready["blockers"]
     assert ready["project_final_attainment_is_independent"]
+
+
+def synthetic_profiles():
+    """Synthetic policy fixture; never a published performance observation."""
+    return [
+        {
+            "id": name,
+            "arms": {
+                "B0": {"output_tokens_per_second": 100},
+                "B1": {"output_tokens_per_second": 100},
+            },
+            "changes_percent": {
+                "mean_ttft_ms": 0,
+                "mean_tpot_ms": 0,
+                "unit_cost_change_percent": 0,
+                "ai_core_utilization_gain_pp": 0,
+            },
+        }
+        for name in ["mmlu", "hle", "frontier", "swe", "terminal"]
+    ]
+
+
+def test_one_whole_profile_is_enough_without_hiding_other_profiles():
+    source = json.loads(
+        (ROOT / "reports/m01-qualified-pair-20261103/summary.json").read_bytes()
+    )
+    profiles = synthetic_profiles()
+    profiles[2]["arms"]["B1"]["output_tokens_per_second"] = 230
+    profiles[2]["changes_percent"].update(
+        mean_ttft_ms=-30, mean_tpot_ms=-40, unit_cost_change_percent=-55
+    )
+    result = MODULE.assess(source, profiles)
+    target = result["targets"]["3.4.2"]
+    assert target["attainment"] == "demonstrated"
+    assert target["qualifying_profiles"] == ["frontier"]
+    assert target["any_profile_numeric_threshold_met"]
+    assert not target["all_profile_numeric_thresholds_met"]
+    assert len(target["numeric_results_by_profile"]) == 5
+    assert result["acceptance_policy"]["id"] == "single-fixed-profile-20261114-v2"
+    assert not result["acceptance_established"]
+    assert result["targets"]["3.4.4"]["qualifying_cost_profiles"] == ["frontier"]
+    assert (
+        result["targets"]["3.4.4"]["attainment"] == "not_demonstrated"
+    )  # multi-tenant remains separate
+
+
+def test_best_metrics_from_different_profiles_cannot_be_combined():
+    source = json.loads(
+        (ROOT / "reports/m01-qualified-pair-20261103/summary.json").read_bytes()
+    )
+    profiles = synthetic_profiles()
+    profiles[0]["arms"]["B1"]["output_tokens_per_second"] = 300
+    profiles[1]["changes_percent"]["mean_ttft_ms"] = -50
+    profiles[2]["changes_percent"]["mean_tpot_ms"] = -50
+    result = MODULE.assess(source, profiles)["targets"]["3.4.2"]
+    assert (
+        result["attainment"] == "not_demonstrated" and not result["qualifying_profiles"]
+    )
+
+
+def test_ratio_below_two_is_not_rounded_to_a_final_pass():
+    source = json.loads(
+        (ROOT / "reports/m01-qualified-pair-20261103/summary.json").read_bytes()
+    )
+    profiles = synthetic_profiles()
+    profiles[0]["arms"]["B1"]["output_tokens_per_second"] = 199.83
+    profiles[0]["changes_percent"].update(mean_ttft_ms=-50, mean_tpot_ms=-50)
+    assert (
+        MODULE.assess(source, profiles)["targets"]["3.4.2"]["attainment"]
+        == "not_demonstrated"
+    )
+
+
+def test_milestone_cost_and_utilization_must_match_one_profile():
+    profiles = synthetic_profiles()
+    original = {
+        "3.4.1": {"accepted": False},
+        "3.4.2": {"accepted": False},
+        "3.4.3": {"accepted": False},
+        "3.4.4": {"accepted": False},
+    }
+    profiles[0]["changes_percent"].update(
+        unit_cost_change_percent=-20, ai_core_utilization_gain_pp=-1
+    )
+    profiles[1]["changes_percent"].update(
+        unit_cost_change_percent=-5, ai_core_utilization_gain_pp=10
+    )
+    assert not MODULE.milestone_representative_targets(original, profiles)["3.4.4"][
+        "accepted"
+    ]
+    profiles[2]["arms"]["B1"]["output_tokens_per_second"] = 150
+    profiles[2]["changes_percent"].update(
+        mean_ttft_ms=-10,
+        mean_tpot_ms=-10,
+        unit_cost_change_percent=-20,
+        ai_core_utilization_gain_pp=5,
+    )
+    target = MODULE.milestone_representative_targets(original, profiles)
+    assert target["3.4.2"]["qualifying_profiles"] == ["frontier"]
+    assert target["3.4.4"]["qualifying_profiles"] == ["frontier"]
+    assert target["3.4.2"]["accepted"] and target["3.4.4"]["accepted"]
+    assert not target["3.4.1"]["accepted"] and not target["3.4.3"]["accepted"]
+    assert original["3.4.2"] == {"accepted": False}
