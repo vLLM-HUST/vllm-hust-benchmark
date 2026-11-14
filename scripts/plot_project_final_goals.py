@@ -13,9 +13,7 @@ def main():
     data = json.loads(args.summary.read_bytes())
     final = data["project_final_assessment"]
     if not final["fully_specified"]:
-        raise ValueError(
-            "Final target specification is incomplete"
-        )
+        raise ValueError("Final target specification is incomplete")
     targets = final["targets"]
     performance = targets["3.4.2"]["numeric_results_by_profile"]
     cost = next(
@@ -42,7 +40,10 @@ def main():
             "4.2 Throughput and latency",
             "Target >=2x; latency -20%",
             f"{sum(p['numeric_threshold_met'] for p in performance)}/{len(performance)} profiles meet numeric thresholds",
-            "Missing numeric targets: " + ", ".join(p["dataset"] for p in performance if not p["numeric_threshold_met"])
+            "Missing numeric targets: "
+            + ", ".join(
+                p["dataset"] for p in performance if not p["numeric_threshold_met"]
+            )
             if not all(p["numeric_threshold_met"] for p in performance)
             else "All profiles meet numeric thresholds; quality shown separately",
         ),

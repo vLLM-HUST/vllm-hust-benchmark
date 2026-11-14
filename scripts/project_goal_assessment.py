@@ -85,8 +85,12 @@ def assess(reference, datasets, profile=None):
         **criteria["3.4.2"],
         "requirement": "吞吐 ≥2×；平均TTFT/TPOT分别降低 ≥20%",
         "requirement_en": "Throughput ≥2×; mean TTFT/TPOT each reduced ≥20%",
-        "evidence_summary": "按五项逐一核算；未达数值门槛：" + ", ".join(misses) if misses else "五项吞吐/时延数值门槛均达到",
-        "evidence_summary_en": "Profiles missing numeric targets: " + ", ".join(misses) if misses else "All five profiles meet throughput/latency numeric targets",
+        "evidence_summary": "按五项逐一核算；未达数值门槛：" + ", ".join(misses)
+        if misses
+        else "五项吞吐/时延数值门槛均达到",
+        "evidence_summary_en": "Profiles missing numeric targets: " + ", ".join(misses)
+        if misses
+        else "All five profiles meet throughput/latency numeric targets",
         "criterion_source_verified": True,
         "attainment": "not_demonstrated" if misses else "demonstrated",
         "numeric_results_by_profile": performance,
@@ -146,13 +150,22 @@ def assess(reference, datasets, profile=None):
 def merge_requirements(review=None):
     """Report/source readiness is separate from achieving every project goal."""
     review = review or {}
-    required = ("execution_complete", "raw_sources_verified", "quality_denominators_accounted")
+    required = (
+        "execution_complete",
+        "raw_sources_verified",
+        "quality_denominators_accounted",
+    )
     blockers = [
-        label for key, label in zip(required, (
-            "本轮五数据集执行未完整结束",
-            "本轮原始流和来源清单尚未核验",
-            "本轮质量分母、失败与裁判未决数尚未完整列出",
-        )) if review.get(key) is not True
+        label
+        for key, label in zip(
+            required,
+            (
+                "本轮五数据集执行未完整结束",
+                "本轮原始流和来源清单尚未核验",
+                "本轮质量分母、失败与裁判未决数尚未完整列出",
+            ),
+        )
+        if review.get(key) is not True
     ]
     return {
         "milestone_and_final_sections_required": True,

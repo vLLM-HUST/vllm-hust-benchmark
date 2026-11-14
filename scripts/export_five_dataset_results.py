@@ -37,7 +37,10 @@ for name, expected in data["plan"]["sources"].items():
     if sha(args.engine_tools / name) != expected:
         raise ValueError("Export tools differ from captured execution source: " + name)
 source_identity = args.engine_tools / "SOURCE-COMMIT.json"
-if source_identity.exists() and json.loads(source_identity.read_bytes())["commit"] != args.aggregation_commit:
+if (
+    source_identity.exists()
+    and json.loads(source_identity.read_bytes())["commit"] != args.aggregation_commit
+):
     raise ValueError("Export Engine commit differs from its verified source identity")
 sys.path.insert(0, str(args.engine_tools / "scripts"))
 from telemetry_audit import utilization  # noqa: E402 - supplied fixed Engine tools
@@ -46,7 +49,11 @@ from third_party_report import verify_campaign_bindings  # noqa: E402 - fixed En
 
 # Recheck the actual files consumed below, not merely the earlier report JSON.
 verify_campaign_bindings(run)
-reuse_binding = json.loads((run / "reused-stages.json").read_bytes()) if (run / "reused-stages.json").exists() else {"origins": []}
+reuse_binding = (
+    json.loads((run / "reused-stages.json").read_bytes())
+    if (run / "reused-stages.json").exists()
+    else {"origins": []}
+)
 for origin in reuse_binding["origins"]:
     source_root = Path(origin["source_root"])
     for filename, field in (
@@ -137,7 +144,9 @@ def extras(root, native=False):
         "input_plus_output_at_least16384_cases": sum(
             a + b >= 16384 for a, b in zip(ins, outs)
         ),
-        "sampled_utilization": utilization(samples, start, end, expected=device_cards(root)),
+        "sampled_utilization": utilization(
+            samples, start, end, expected=device_cards(root)
+        ),
         "estimated_cny_per_million_output_tokens": 1e6
         * rate
         * (end - start)
@@ -208,10 +217,25 @@ for name, title, count, kind in [
             src = data["current_trace_performance"][name]["arms"][role]
             a = {k: src.get(k) for k in fields}
             root = stage_roots[name + "-trace-" + role]
-        expected_requests = {"mmlu": 200, "hle": 200, "frontier": 160, "swe": 64, "terminal": 48}[name]
-        if (a["planned"] != expected_requests or a["recorded"] != expected_requests
-                or a["failed"] != 0 or a["unreturned"] != 0):
-            raise ValueError("Standard solver/trace request denominator or execution differs: " + name + "/" + role)
+        expected_requests = {
+            "mmlu": 200,
+            "hle": 200,
+            "frontier": 160,
+            "swe": 64,
+            "terminal": 48,
+        }[name]
+        if (
+            a["planned"] != expected_requests
+            or a["recorded"] != expected_requests
+            or a["failed"] != 0
+            or a["unreturned"] != 0
+        ):
+            raise ValueError(
+                "Standard solver/trace request denominator or execution differs: "
+                + name
+                + "/"
+                + role
+            )
         a.update(extras(root, name == "mmlu"))
         a["estimated_cny_per_million_output_tokens"] = (
             1e6 * rate / a["output_tokens_per_second"]
@@ -295,7 +319,9 @@ result = {
         },
         "B1": data["plan"]["optimized_dependencies"]["metadata"],
         "actual_worker": "corrected_serving_runtime.CorrectedWorker",
-        "engine_release": data["plan"].get("engine_release", "full-answer-b1-20261030-r4"),
+        "engine_release": data["plan"].get(
+            "engine_release", "full-answer-b1-20261030-r4"
+        ),
         "serving_warmup": data["plan"].get("serving_warmup"),
         "task_serving_warmup": data["plan"].get("task_serving_warmup"),
         "hle_configuration_note": "HLE uses the separately recorded multimodal configuration; other profiles remain text/trace. Original per-stage source/version identities are retained, not rewritten to the aggregation commit.",
@@ -345,12 +371,17 @@ for dataset in datasets:
         if n is None:
             n = sum(t["total"] for t in quality["tracks"].values())
         quality_denominators.append(n == dataset["tasks_per_arm"])
-result["merge_requirements"] = merge_requirements(dict(
-    execution_complete=True,
-    raw_sources_verified=True,
-    quality_denominators_accounted=bool(quality_denominators) and all(quality_denominators),
-))
-result["milestone_numeric_requirements_met"] = all(t["accepted"] for t in targets.values())
+result["merge_requirements"] = merge_requirements(
+    dict(
+        execution_complete=True,
+        raw_sources_verified=True,
+        quality_denominators_accounted=bool(quality_denominators)
+        and all(quality_denominators),
+    )
+)
+result["milestone_numeric_requirements_met"] = all(
+    t["accepted"] for t in targets.values()
+)
 previous_projection = R / "summary-public-v1.json"
 if previous_projection.exists() and args.output != previous_projection:
     result["revision"] = {
