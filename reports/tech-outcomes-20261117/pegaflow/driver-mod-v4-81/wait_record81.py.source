@@ -1,0 +1,86 @@
+"""Own a direct child, retain actual wait status, and preserve process-group cleanup."""
+
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+
+
+def save(path, value):
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(
+        json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    temporary.replace(path)
+
+
+def run(command, receipt):
+    receipt = Path(receipt)
+    receipt.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    state = {
+        "phase": "starting",
+        "supervisor_pid": os.getpid(),
+        "started_unix": time.time(),
+        "started_monotonic": time.monotonic(),
+        "argv": command,
+        "metric_payload_modified": False,
+    }
+    save(receipt, state)
+    child = None
+    cancelled = []
+
+    def remember(signum, frame):
+        cancelled.append(signum)
+
+    previous = {
+        signum: signal.signal(signum, remember)
+        for signum in [signal.SIGINT, signal.SIGTERM]
+    }
+    try:
+        child = subprocess.Popen(command, start_new_session=True)
+        state.update(
+            phase="running",
+            child_pid=child.pid,
+            child_start_ticks=Path(f"/proc/{child.pid}/stat").read_text().split()[21],
+        )
+        save(receipt, state)
+        while True:
+            if cancelled and child.poll() is None:
+                os.killpg(child.pid, signal.SIGINT)
+                # The direct child is an owned controller that cleans its model
+                # descendants. Do not cut off that cleanup with a parent exit.
+                code = child.wait()
+                break
+            try:
+                code = child.wait(timeout=0.5)
+                break
+            except subprocess.TimeoutExpired:
+                continue
+        result = code if code >= 0 else 128 - code
+        state.update(
+            phase="exited",
+            child_returncode=code,
+            supervisor_returncode=result,
+            completed_unix=time.time(),
+            completed_monotonic=time.monotonic(),
+            signals=cancelled,
+        )
+        save(receipt, state)
+        return result
+    except BaseException as error:
+        if child is not None:
+            if child.poll() is None:
+                os.killpg(child.pid, signal.SIGINT)
+            state["child_returncode"] = child.wait()
+        state.update(
+            phase="supervisor_error",
+            error=type(error).__name__ + ": " + str(error),
+            completed_unix=time.time(),
+        )
+        save(receipt, state)
+        raise
+    finally:
+        for signum, handler in previous.items():
+            signal.signal(signum, handler)

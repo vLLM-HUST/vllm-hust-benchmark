@@ -1,0 +1,221 @@
+{
+  "schema": "c8-actual-owned-lifecycle-receipt/v1",
+  "observed_unix": 1794613648.0823576,
+  "profile": "BidKV commondefaultTrue MODv4 C8-04",
+  "arms": [
+    {
+      "arm": "native",
+      "controller_child": {
+        "pid": 319360,
+        "started_unix": 1794597865.7157137,
+        "ended_unix": 1794598622.04342,
+        "actual_returncode": 0,
+        "status": "completed"
+      },
+      "controller_waiter_master_pid": 319359,
+      "client_actual_wait_returncode": 0,
+      "client_pid": null,
+      "client_start_end_unix": null,
+      "client_identity_limit": "Controller actually waited client; its PID and exact process start/end were not persisted. Do not infer them from request clocks.",
+      "preflight": {
+        "pid": 289416,
+        "started_unix": 1794596866.4434314,
+        "completed_unix": 1794598621.5723126,
+        "actual_wait_returncode": 0,
+        "waiter": {
+          "kind": "owned preflight supervisor",
+          "pid": 289415,
+          "started_unix": 1794596866.3079593,
+          "ended_unix": 1794598621.6082432,
+          "receipt": {
+            "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/metadata/native05-owned-supervisor.json",
+            "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/metadata/native05-owned-supervisor.json",
+            "bytes": 401,
+            "sha256": "bd0456f6d2c013c28ec012b26b614308fd2b67efb5d3bca1dbd36f789e1bb1ed"
+          }
+        }
+      },
+      "api_model": {
+        "pid": 289442,
+        "start_ticks": "979779190",
+        "actual_wait_returncode": 0,
+        "stopped_unix": 1794598621.57147,
+        "start_unix": null,
+        "start_unix_limit": "API exact wall-clock spawn was not separately persisted; preflight start and native startup-cost provide bounded preparation scope."
+      },
+      "release_observation": {
+        "allocated_physical_npus": [
+          6,
+          7
+        ],
+        "no_running_processes_count": 2,
+        "original": {
+          "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/native-05/npu-release.txt",
+          "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/native-05/npu-release.txt",
+          "bytes": 2223,
+          "sha256": "04b3c09c01c741c3574353d9fbb1a62e0608526d1ef1f278628d6709fe9f2fc9"
+        }
+      },
+      "controller_metadata": {
+        "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/metadata/c8-native04-controller.json",
+        "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/metadata/c8-native04-controller.json",
+        "bytes": 310,
+        "sha256": "a232da2736433cc5a535508657779eb68c589684135ba0874c591cd71153a2db"
+      },
+      "preflight_status_metadata": {
+        "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/native-05/status.json",
+        "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/native-05/status.json",
+        "bytes": 434,
+        "sha256": "fab890f04815f30fe7eda47584cad92b061f86821d03e6916f4a1b280915bfaf"
+      },
+      "api_wait_metadata": {
+        "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/native-05/stop.json",
+        "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/native-05/stop.json",
+        "bytes": 56,
+        "sha256": "8ce51a5ff63aa9717affc5e99b8ab77e422d0afc7651b3486039da5e65d948fa"
+      }
+    },
+    {
+      "arm": "bidkv",
+      "controller_child": {
+        "pid": 340752,
+        "started_unix": 1794598622.0469556,
+        "ended_unix": 1794599980.2844543,
+        "actual_returncode": 0,
+        "status": "completed"
+      },
+      "controller_waiter_master_pid": 319359,
+      "client_actual_wait_returncode": 0,
+      "client_pid": null,
+      "client_start_end_unix": null,
+      "client_identity_limit": "Controller actually waited client; its PID and exact process start/end were not persisted. Do not infer them from request clocks.",
+      "preflight": {
+        "pid": 340765,
+        "started_unix": 1794598622.8069365,
+        "completed_unix": 1794599980.0021615,
+        "actual_wait_returncode": 0,
+        "waiter": {
+          "kind": "candidate C8 controller owns/waits preflight",
+          "pid": 340752,
+          "receipt": {
+            "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/metadata/c8-bidkv04-controller.json",
+            "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/metadata/c8-bidkv04-controller.json",
+            "bytes": 365,
+            "sha256": "736280a0fdd6ac4a9d5183c68ece9b7f00e7319c5cd0da1e6ecfea935e520173"
+          }
+        }
+      },
+      "api_model": {
+        "pid": 340791,
+        "start_ticks": "979954826",
+        "actual_wait_returncode": 0,
+        "stopped_unix": 1794599980.0012267,
+        "start_unix": null,
+        "start_unix_limit": "API exact wall-clock spawn was not separately persisted; preflight start and native startup-cost provide bounded preparation scope."
+      },
+      "release_observation": {
+        "allocated_physical_npus": [
+          6,
+          7
+        ],
+        "no_running_processes_count": 2,
+        "original": {
+          "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/bidkv-04/npu-release.txt",
+          "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/bidkv-04/npu-release.txt",
+          "bytes": 2223,
+          "sha256": "f4b5ad91747ca2578593a3baac5d8296aa48073884d620c396d8d1ba79d4eb40"
+        }
+      },
+      "controller_metadata": {
+        "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/metadata/c8-bidkv04-controller.json",
+        "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/metadata/c8-bidkv04-controller.json",
+        "bytes": 365,
+        "sha256": "736280a0fdd6ac4a9d5183c68ece9b7f00e7319c5cd0da1e6ecfea935e520173"
+      },
+      "preflight_status_metadata": {
+        "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/bidkv-04/status.json",
+        "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/bidkv-04/status.json",
+        "bytes": 434,
+        "sha256": "f5640b873433d3ef94b9ad953a0feb51d55d5435286e3833965b1bfa066a0af4"
+      },
+      "api_wait_metadata": {
+        "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/bidkv-04/stop.json",
+        "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/bidkv-04/stop.json",
+        "bytes": 58,
+        "sha256": "87473903f214763cf9c85fb4f4217a6ce3a5a5e39657cd653fbd909f2044576f"
+      }
+    }
+  ],
+  "master_original_snapshot": {
+    "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/metadata/mod-v4-lifecycle.json",
+    "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/metadata/mod-v4-lifecycle.json",
+    "bytes": 1697,
+    "sha256": "27a3aebef82f6de1dcaba3ef6c5186365ca1ad650f8a8656150d3f7a0bd5ffe3"
+  },
+  "master_snapshot_phase": "full-five",
+  "scope": "Only closed C8 children and their preflight/model exits. Full-five child remains running in this snapshot; no full-five success or outer detached master returncode is inferred. All exits derive from actual owned wait fields.",
+  "controlled_snapshot_root": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01",
+  "controlled_snapshot_originals": [
+    {
+      "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/metadata/mod-v4-lifecycle.json",
+      "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/metadata/mod-v4-lifecycle.json",
+      "bytes": 1697,
+      "sha256": "27a3aebef82f6de1dcaba3ef6c5186365ca1ad650f8a8656150d3f7a0bd5ffe3"
+    },
+    {
+      "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/metadata/c8-native04-controller.json",
+      "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/metadata/c8-native04-controller.json",
+      "bytes": 310,
+      "sha256": "a232da2736433cc5a535508657779eb68c589684135ba0874c591cd71153a2db"
+    },
+    {
+      "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/metadata/c8-bidkv04-controller.json",
+      "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/metadata/c8-bidkv04-controller.json",
+      "bytes": 365,
+      "sha256": "736280a0fdd6ac4a9d5183c68ece9b7f00e7319c5cd0da1e6ecfea935e520173"
+    },
+    {
+      "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/metadata/native05-owned-supervisor.json",
+      "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/metadata/native05-owned-supervisor.json",
+      "bytes": 401,
+      "sha256": "bd0456f6d2c013c28ec012b26b614308fd2b67efb5d3bca1dbd36f789e1bb1ed"
+    },
+    {
+      "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/native-05/status.json",
+      "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/native-05/status.json",
+      "bytes": 434,
+      "sha256": "fab890f04815f30fe7eda47584cad92b061f86821d03e6916f4a1b280915bfaf"
+    },
+    {
+      "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/native-05/stop.json",
+      "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/native-05/stop.json",
+      "bytes": 56,
+      "sha256": "8ce51a5ff63aa9717affc5e99b8ab77e422d0afc7651b3486039da5e65d948fa"
+    },
+    {
+      "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/native-05/npu-release.txt",
+      "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/native-05/npu-release.txt",
+      "bytes": 2223,
+      "sha256": "04b3c09c01c741c3574353d9fbb1a62e0608526d1ef1f278628d6709fe9f2fc9"
+    },
+    {
+      "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/bidkv-04/status.json",
+      "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/bidkv-04/status.json",
+      "bytes": 434,
+      "sha256": "f5640b873433d3ef94b9ad953a0feb51d55d5435286e3833965b1bfa066a0af4"
+    },
+    {
+      "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/bidkv-04/stop.json",
+      "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/bidkv-04/stop.json",
+      "bytes": 58,
+      "sha256": "87473903f214763cf9c85fb4f4217a6ce3a5a5e39657cd653fbd909f2044576f"
+    },
+    {
+      "original_controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/bidkv-04/npu-release.txt",
+      "immutable_snapshot_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/analysis/c8-lifecycle-custody01/preflight/bidkv-04/npu-release.txt",
+      "bytes": 2223,
+      "sha256": "f4b5ad91747ca2578593a3baac5d8296aa48073884d620c396d8d1ba79d4eb40"
+    }
+  ],
+  "no_new_model_or_benchmark_requests": true
+}
