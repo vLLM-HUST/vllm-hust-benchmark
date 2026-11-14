@@ -150,6 +150,18 @@ def verify(root, driver):
                 - 1
             )
             assert math.isclose(ratio, phase["throughput_change_percent"])
+    lifecycle_path = root / "c8-owned-lifecycle.json"
+    if lifecycle_path.is_file():
+        lifecycle = read(lifecycle_path)
+        assert lifecycle["no_new_model_or_benchmark_requests"] is True
+        assert {item["arm"] for item in lifecycle["arms"]} == {"native", "bidkv"}
+        for item in lifecycle["arms"]:
+            assert item["controller_child"]["actual_returncode"] == 0
+            assert item["client_actual_wait_returncode"] == 0
+            assert item["preflight"]["actual_wait_returncode"] == 0
+            assert item["api_model"]["actual_wait_returncode"] == 0
+            assert item["client_pid"] is None and item["client_start_end_unix"] is None
+            result[item["arm"]]["actual_owned_wait_receipts_verified"] = True
     return result
 
 

@@ -93,6 +93,60 @@ def verify():
     current_c8 = runpy.run_path(str(ROOT / "verify_current_c8.py"))["verify"](
         ROOT / "c8-results-v2", ROOT / "driver-mod-v4"
     )
+    progress_path = ROOT / "solver-progress-v1/solver-progress.json"
+    closed_solver_audits = 0
+    if progress_path.is_file():
+        progress = read(progress_path)
+        assert progress["formal_complete"] is False
+        assert progress["private_content_not_included"] is True
+        assert progress["planned_solver_requests_per_arm"] == 672
+        assert progress["planned_judge_inputs"] == 720
+        expected = {"mmlu": 200, "hle": 200, "frontier": 160, "swe": 64, "terminal": 48}
+        stages = progress["solver_stages"]
+        assert len(stages) == 10
+        assert {(item["arm"], item["dataset"]) for item in stages} == {
+            (arm, dataset) for arm in ("native", "bidkv") for dataset in expected
+        }
+        for item in stages:
+            count = expected[item["dataset"]]
+            summary = item["summary"]
+            proof = item["independent_verification"]
+            assert (
+                summary["planned"]
+                == summary["executed"]
+                == summary["successful"]
+                == count
+            )
+            assert summary["failed"] == summary["not_executed"] == 0
+            assert (
+                proof["planned"]
+                == proof["recorded"]
+                == proof["raw_sse_verified"]
+                == count
+            )
+            assert proof["metrics_recomputed"] and proof["zero_reuse"]["passed"]
+            assert math.isclose(
+                summary["output_tokens_per_second"],
+                summary["accepted_output_tokens"]
+                / summary["solver_batch_wall_seconds"],
+            )
+            closed_solver_audits += count
+        assert len(progress["actual_audit_waits"]) == 10
+        assert all(
+            item["actual_returncode"] == 0 for item in progress["actual_audit_waits"]
+        )
+        for item in progress["solver_policy_custody"]:
+            assert item["owned_api_stop"]["exit_code"] == 0
+            for journal in item["journals"]:
+                stats = journal["last_stats"]
+                assert stats["enabled"] == (item["arm"] == "bidkv")
+                assert (
+                    stats["calls"]
+                    == stats["decisions"]
+                    == stats["failures"]
+                    == stats["invalid_selections"]
+                    == 0
+                )
     failure_raw = (ROOT / "native04-failure-v1/failure-capsule.json").read_bytes()
     assert hashlib.sha256(failure_raw).hexdigest() == (
         "39b6fc5658aa892b16ee511cb963e87351f4eaf5f4acad7f54237664a4a5888b"
@@ -262,6 +316,7 @@ def verify():
         "actual_native05_zero_generation_admission_verified": admission_path.is_file(),
         "analysis_only_frozen_members_verified": len(analysis_sources),
         "default_true_c8": current_c8,
+        "closed_solver_controlled_sse_audits_indexed": closed_solver_audits,
         "original_sse_publicly_read_back": False,
         "controlled_sse_independent_verification_receipts_indexed": True,
         "aborted_cohort_receipt_counts_verified": True,

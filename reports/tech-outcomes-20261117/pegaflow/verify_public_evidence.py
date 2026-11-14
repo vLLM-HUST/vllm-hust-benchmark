@@ -158,7 +158,13 @@ def verify(archive=None, native_part=None):
         else {"formal_900s_points": 0}
     )
     execution_sources = {}
-    for name in ["finite-driver-v1", "pegaflow91-v1", "driver-mod-v2", "driver-mod-v3"]:
+    for name in [
+        "finite-driver-v1",
+        "pegaflow91-v1",
+        "driver-mod-v2",
+        "driver-mod-v3",
+        "driver-mod-v4-81",
+    ]:
         folder = ROOT / name
         if not (folder / "source-manifest.json").is_file():
             continue
