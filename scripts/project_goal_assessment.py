@@ -18,7 +18,7 @@ PROFILE_PATH = (
 
 
 def unmeasured_current_compute_target(archived):
-    """The five-profile driver supplies archived M01 evidence, not a new calibration."""
+    """M01 uses one representative MMLU200 workload, independently of five-profile tests."""
     historical = copy.deepcopy(archived)
     return {
         "name": "有效算力效率 ≥50%",
@@ -28,8 +28,17 @@ def unmeasured_current_compute_target(archived):
         "measured_value": None,
         "display_value": "本轮未验证；归档工况另列",
         "display_value_en": "Current workload unverified; archive separate",
-        "reason": "本轮五数据集性能运行未采集完整必要算量、独立标定、整链验证和双卡同步计时，不能据此计算本轮3.4.1。历史MMLU200/out256的≥59.76%仍保留在historical_evidence，仅适用于其归档工况。现场采集包已接入主分支，但完整工况认证模块尚未齐备，不将分项算量或时间线冒充参考值。",
-        "reason_en": "This five-profile campaign does not collect complete necessary-work accounting, independent calibration, whole-chain validation and synchronized timing for its current workload. The archived MMLU200/out256 lower bound remains separate; the live collection kit still requires complete workload certifiers.",
+        "reason": "3.4.1按用户确认仅选固定MMLU200为代表工况，无需对HLE、Frontier、SWE或Terminal另做参考标定。当前MMLU200仍缺完整必要算量、独立标定、整链验证和双卡同步计时，不能据吞吐配对直接计算参考效率。历史MMLU200/out256的≥59.76%单列保留，不套用于当前完整回答配置。现场采集包的完整工况认证模块尚未齐备，不将分项算量或时间线冒充参考值。",
+        "reason_en": "Target3.4.1 uses only fixed MMLU200 as the user-confirmed representative workload. HLE, Frontier, SWE and Terminal do not require separate reference calibration. Current MMLU200 still lacks complete necessary-work accounting, independent calibration, whole-chain validation and synchronized timing; throughput comparisons alone cannot establish reference efficiency. Archived MMLU200/out256 evidence remains separate from the current full-answer configuration; complete live workload certifiers are still required.",
+        "calibration_scope": {
+            "dataset": "mmlu",
+            "profile": "fixed200-v1",
+            "tasks": 200,
+            "selection_basis": "user_confirmed_20261114",
+            "current_workload": "frozen_mmlu_pair",
+            "other_profiles_require_calibration": False,
+            "generation_policy": "Retain the frozen MMLU pair configuration; historical out256 is a separate workload.",
+        },
         "required_evidence": [
             "complete_necessary_work_ledger",
             "independent_calibration",

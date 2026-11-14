@@ -46,6 +46,10 @@ def test_archived_compute_pass_cannot_supply_current_workload_acceptance():
     current["historical_evidence"]["accepted"] = False
     assert data["formal_targets"]["3.4.1"]["accepted"]
     assert len(current["required_evidence"]) == 5
+    scope = current["calibration_scope"]
+    assert scope["dataset"] == "mmlu" and scope["tasks"] == 200
+    assert scope["current_workload"] == "frozen_mmlu_pair"
+    assert scope["other_profiles_require_calibration"] is False
 
 
 def test_all_four_final_criteria_and_confirmed_interpretations_are_explicit():
