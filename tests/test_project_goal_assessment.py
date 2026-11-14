@@ -86,3 +86,23 @@ def test_goal_source_fidelity_and_public_copy_are_explicit():
             / "website-publication/data/five-datasets-standard-20261113/project-final-goals-v1.json"
         ).read_bytes()
     )
+
+
+def test_new_numeric_results_do_not_inherit_old_hle_and_cost_diagnoses():
+    source = json.loads((ROOT / "reports/m01-qualified-pair-20261103/summary.json").read_bytes())
+    data = json.loads((ROOT / "reports/five-datasets-standard-20261113/summary-public-v2.json").read_bytes())
+    for dataset in data["datasets"]:
+        dataset["arms"]["B1"]["output_tokens_per_second"] = 3 * dataset["arms"]["B0"]["output_tokens_per_second"]
+        dataset["changes_percent"].update(mean_ttft_ms=-30, mean_tpot_ms=-30, unit_cost_change_percent=-60)
+    final = MODULE.assess(source, data["datasets"])
+    assert final["targets"]["3.4.2"]["attainment"] == "demonstrated"
+    assert final["targets"]["3.4.2"]["all_profile_numeric_thresholds_met"]
+    assert "50.24" not in final["targets"]["3.4.4"]["evidence_summary"]
+    assert not final["acceptance_established"]  #32K/multi-tenant remain separate.
+
+
+def test_merge_readiness_uses_current_evidence_not_historical_failure_text():
+    assert not MODULE.merge_requirements()["ready_to_merge"]
+    ready = MODULE.merge_requirements(dict(execution_complete=True, raw_sources_verified=True, quality_denominators_accounted=True))
+    assert ready["ready_to_merge"] and not ready["blockers"]
+    assert ready["project_final_attainment_is_independent"]

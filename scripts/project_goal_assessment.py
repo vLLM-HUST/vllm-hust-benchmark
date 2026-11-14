@@ -80,19 +80,20 @@ def assess(reference, datasets, profile=None):
                 >= criteria["3.4.4"]["unit_token_cost_reduction_percent_min"],
             }
         )
+    misses = [p["dataset"] for p in performance if not p["numeric_threshold_met"]]
     targets["3.4.2"] = {
         **criteria["3.4.2"],
         "requirement": "吞吐 ≥2×；平均TTFT/TPOT分别降低 ≥20%",
         "requirement_en": "Throughput ≥2×; mean TTFT/TPOT each reduced ≥20%",
-        "evidence_summary": "按五项逐一核算；HLE吞吐/TTFT不满足，质量仍在复核",
-        "evidence_summary_en": "Per-profile numbers; HLE throughput/TTFT miss; quality under review",
+        "evidence_summary": "按五项逐一核算；未达数值门槛：" + ", ".join(misses) if misses else "五项吞吐/时延数值门槛均达到",
+        "evidence_summary_en": "Profiles missing numeric targets: " + ", ".join(misses) if misses else "All five profiles meet throughput/latency numeric targets",
         "criterion_source_verified": True,
-        "attainment": "not_demonstrated",
+        "attainment": "not_demonstrated" if misses else "demonstrated",
         "numeric_results_by_profile": performance,
         "all_profile_numeric_thresholds_met": all(
             p["numeric_threshold_met"] for p in performance
         ),
-        "reason": "沿用既定可比B0/B1与统一质量/服务要求。MMLU和两项trace等部分负载数值达到最终吞吐/时延门槛，但不能用这些通过覆盖HLE退化或未解决的质量/Schema问题；不拼接不同负载的最优值。",
+        "reason": "沿用本轮可比B0/B1、固定任务和服务协议，按各项实际吞吐、TTFT/TPOT分别判定，不用某项最好值覆盖其他负载。质量与裁判未决数独立保留；数值达标不构成统计质量等价证明。",
     }
     targets["3.4.3"] = {
         **criteria["3.4.3"],
@@ -119,8 +120,8 @@ def assess(reference, datasets, profile=None):
         **criteria["3.4.4"],
         "requirement": "单位token成本降低 ≥30%；多租户场景维持较高利用率",
         "requirement_en": "Unit token cost reduced ≥30%; high utilization with multiple tenants",
-        "evidence_summary": "MMLU同费率估算约降低50.24%；多租户证据未完成",
-        "evidence_summary_en": "MMLU equal-rate estimate about−50.24%; multi-tenant evidence incomplete",
+        "evidence_summary": "各项同费率估算降幅单列；多租户证据未完成",
+        "evidence_summary_en": "Current equal-rate cost reductions are listed per profile; multi-tenant evidence incomplete",
         "criterion_source_verified": True,
         "attainment": "not_demonstrated",
         "numeric_cost_results_by_profile": costs,
@@ -142,16 +143,26 @@ def assess(reference, datasets, profile=None):
     }
 
 
-def merge_requirements():
+def merge_requirements(review=None):
+    """Report/source readiness is separate from achieving every project goal."""
+    review = review or {}
+    required = ("execution_complete", "raw_sources_verified", "quality_denominators_accounted")
+    blockers = [
+        label for key, label in zip(required, (
+            "本轮五数据集执行未完整结束",
+            "本轮原始流和来源清单尚未核验",
+            "本轮质量分母、失败与裁判未决数尚未完整列出",
+        )) if review.get(key) is not True
+    ]
     return {
         "milestone_and_final_sections_required": True,
         "both_sections_present": True,
         "final_goal_sources_complete": True,
         "reference_interpretation_recorded": True,
         "model_scope_explanation_recorded": True,
-        "runtime_and_quality_review_resolved": False,
-        "ready_to_merge": False,
-        "blockers": [
-            "MMLU质量优势未复现、HLE首批延迟和裁判未决问题仍在复核；4例开发诊断不替代正式验收。"
-        ],
+        "runtime_and_quality_review_resolved": not blockers,
+        "ready_to_merge": not blockers,
+        "merge_scope": "结果报告及来源核验就绪，不代表项目最终目标全部达到",
+        "project_final_attainment_is_independent": True,
+        "blockers": blockers,
     }
