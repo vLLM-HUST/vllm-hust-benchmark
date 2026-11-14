@@ -93,6 +93,17 @@ def verify():
     current_c8 = runpy.run_path(str(ROOT / "verify_current_c8.py"))["verify"](
         ROOT / "c8-results-v2", ROOT / "driver-mod-v4"
     )
+    pressure_sources = read(ROOT / "pressure-admission-v1/source-manifest.json")[
+        "files"
+    ]
+    for name, checksum in pressure_sources.items():
+        stored_name = name + ".source" if name.endswith(".py") else name
+        assert (
+            hashlib.sha256(
+                (ROOT / "pressure-admission-v1" / stored_name).read_bytes()
+            ).hexdigest()
+            == checksum
+        )
     progress_path = ROOT / "solver-progress-v1/solver-progress.json"
     closed_solver_audits = 0
     if progress_path.is_file():
@@ -315,6 +326,9 @@ def verify():
         "zero_generation_native04_failure_receipt_verified": True,
         "actual_native05_zero_generation_admission_verified": admission_path.is_file(),
         "analysis_only_frozen_members_verified": len(analysis_sources),
+        "zero_generation_pressure_admission_source_members_verified": len(
+            pressure_sources
+        ),
         "default_true_c8": current_c8,
         "closed_solver_controlled_sse_audits_indexed": closed_solver_audits,
         "original_sse_publicly_read_back": False,
