@@ -6,7 +6,12 @@ import sys
 import hashlib
 import math
 import argparse
-from project_goal_assessment import assess, merge_requirements, REFERENCE_SHA256
+from project_goal_assessment import (
+    assess,
+    merge_requirements,
+    REFERENCE_SHA256,
+    unmeasured_current_compute_target,
+)
 from stability_assessment import assess as assess_stability, milestone_target
 from publication_campaign import validate, roots, provenance, report_date, device_cards
 
@@ -288,6 +293,7 @@ reuse = reuse_binding
 origins = [{k: v for k, v in o.items() if k != "source_root"} for o in reuse["origins"]]
 stages = provenance(data)
 targets = data["formal_targets"]
+targets["3.4.1"] = unmeasured_current_compute_target(targets["3.4.1"])
 stability = assess_stability(stage_roots, datasets)
 targets["3.4.3"] = milestone_target(stability)
 result = {

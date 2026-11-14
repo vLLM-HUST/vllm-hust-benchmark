@@ -1,6 +1,7 @@
 """Assess project final goals using the user's confirmed reference/model interpretation."""
 
 from decimal import Decimal
+import copy
 import json
 from pathlib import Path
 
@@ -14,6 +15,32 @@ PROFILE_PATH = (
     Path(__file__).resolve().parents[1]
     / "reports/project-final-goals-20261113/final-goals-v1.json"
 )
+
+
+def unmeasured_current_compute_target(archived):
+    """The five-profile driver supplies archived M01 evidence, not a new calibration."""
+    historical = copy.deepcopy(archived)
+    return {
+        "name": "有效算力效率 ≥50%",
+        "status": "current_workload_reference_not_measured",
+        "accepted": False,
+        "accepted_scope": None,
+        "measured_value": None,
+        "display_value": "本轮未验证；归档工况另列",
+        "display_value_en": "Current workload unverified; archive separate",
+        "reason": "本轮五数据集性能运行未采集完整必要算量、独立标定、整链验证和双卡同步计时，不能据此计算本轮3.4.1。历史MMLU200/out256的≥59.76%仍保留在historical_evidence，仅适用于其归档工况。现场采集包已接入主分支，但完整工况认证模块尚未齐备，不将分项算量或时间线冒充参考值。",
+        "reason_en": "This five-profile campaign does not collect complete necessary-work accounting, independent calibration, whole-chain validation and synchronized timing for its current workload. The archived MMLU200/out256 lower bound remains separate; the live collection kit still requires complete workload certifiers.",
+        "required_evidence": [
+            "complete_necessary_work_ledger",
+            "independent_calibration",
+            "independent_whole_chain_validation",
+            "synchronized_dual_card_timing",
+            "workload_applicability_certification",
+        ],
+        "historical_evidence": historical,
+        "reference_interpretation": "同工况独立参考",
+        "kit_source_url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/9287f42708880de74e70145c5e8d4bf9d8fdca6a/third-party-test-kit/参考算力标定与复算.md",
+    }
 
 
 def assess(reference, datasets, profile=None):

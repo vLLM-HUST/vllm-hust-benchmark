@@ -30,6 +30,24 @@ def test_final90_is_independent_of_milestone50_and_retains_bound_scope():
     assert not final["acceptance_established"]
 
 
+def test_archived_compute_pass_cannot_supply_current_workload_acceptance():
+    data = json.loads(
+        (
+            ROOT / "reports/five-datasets-standard-20261113/summary-public-v2.json"
+        ).read_bytes()
+    )
+    original = json.loads(json.dumps(data["formal_targets"]["3.4.1"]))
+    current = MODULE.unmeasured_current_compute_target(data["formal_targets"]["3.4.1"])
+    assert original["accepted"]
+    assert not current["accepted"] and current["measured_value"] is None
+    assert current["status"] == "current_workload_reference_not_measured"
+    assert current["historical_evidence"] == original
+    assert data["formal_targets"]["3.4.1"] == original
+    current["historical_evidence"]["accepted"] = False
+    assert data["formal_targets"]["3.4.1"]["accepted"]
+    assert len(current["required_evidence"]) == 5
+
+
 def test_all_four_final_criteria_and_confirmed_interpretations_are_explicit():
     data = json.loads(
         (
