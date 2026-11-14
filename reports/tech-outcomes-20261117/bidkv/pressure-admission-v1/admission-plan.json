@@ -1,0 +1,55 @@
+{
+  "schema": "bidkv-supplemental-pressure-zero-generation-admission/v1",
+  "status": "zero-generation-only; no pressureclient included or authorized bythis packet",
+  "primary_requirement": "fullMODv4 mastercompleted withallactualchildRC0,formal_completeTrue andnoallocatedNPUprocesses",
+  "physical_npus": [
+    6,
+    7
+  ],
+  "logical_npus": [
+    0,
+    1
+  ],
+  "model": "Qwen3.5-35B-A3B BF16 TP2",
+  "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+  "shared_profile_change": "KVcacheperrank16GiB\u21921GiB forbotharms; no other model/optimization/budget settings changed fromfullv4",
+  "shared_observer_changes": [
+    "official --worker-extension-cls metadata-only method",
+    "VLLM_SERVER_DEV_MODE=1 only localhost officialcollective_rpc router",
+    "newnamespace/cache/evidence paths; botharmscoldinitialization"
+  ],
+  "core_scheduler_sha256": "ae12773bc25b42149d4aa5c84c0797dcf12a0b60c045a7e85ca3c974bc47915c",
+  "ascend_cpu_binding_sha256": "b7a84571c349c22935414b2c5a4c6cf91223414f80c0954f797340ad0f1f55f2",
+  "copied_ascend_inventory_sha256": "55194e2e23ae7a590227ce93508c5c66f8718251952ed7b982d79de2f3f0a1d2",
+  "rpc": {
+    "method": "describe_bidkv_probe_cache_groups_v1",
+    "args": [],
+    "kwargs": {},
+    "timeout": 30,
+    "endpoint": "POST http://127.0.0.1:18390/collective_rpc",
+    "response": "results list ofnativeJSON metadata only, no tensor repr/values/data_ptr/copy andno config/allocator mutation"
+  },
+  "before_any_generation": [
+    "publish/readbackthiszero-gensource",
+    "afterfullreleaseNativecold0genobservesactualperrankgroups/K/page/block/descriptorunitsandeightactual16407tokenhashes",
+    "CPUcalculateactualhybridgroupadmission/growthwithnativepinnedrules; rejectifmaxlen65536notadmittedor4096fixedworkloadhasnopressure",
+    "publishactualcapacitygo/no-goandfinalpressureclient/source/plan; independentreadbackrequired",
+    "bothpublicationparkperiodsconsumeoriginal60minclock"
+  ],
+  "fixed_future_workload": {
+    "kv_bytes_per_rank": 1073741824,
+    "max_model_len": 65536,
+    "concurrency": 8,
+    "repeats_per_arm": 3,
+    "requests_per_repeat": 8,
+    "total_requests": 48,
+    "max_tokens": 4096,
+    "ignore_eos": true,
+    "max_output_tokens_total": 196608,
+    "input": "theoriginaleight16407-tokenC8prompts unchanged; unique salts",
+    "no_quality_claim": true
+  },
+  "fixed_operation_limit_seconds": 3600,
+  "prior256and1024proposals": "retained0execution;4096selectedbeforeanyprobeoutcome basedonactual2048blockgranularity metadata",
+  "no_adaptive_change": "Do notchangeKV/output/workload toseekpositiveperformance. Preserveallcalls/selection/fallback/negative/0call/timeouts/partial andunexecuted. Exactcapacitymustcomefromactual1GiBmetadata,not730orlineartokenprojection."
+}
