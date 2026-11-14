@@ -1,0 +1,48 @@
+"""Verify actual published pregen inventory, then own the unchanged Pega launcher."""
+
+import argparse
+import json
+from pathlib import Path
+import sys
+
+from admit_pegaflow_inputs import check, sha, DRIVER_SHA, source_admission
+
+
+def launch(args):
+    analysis_sha = source_admission(args.source_publication)
+    value = check(args.receipt, args.common)
+    assert value["analysis_manifest_sha256"] == analysis_sha
+    assert value["tool_sha256"] == sha(
+        Path(__file__).with_name("admit_pegaflow_inputs.py")
+    )
+    publication = json.loads(args.publication.read_bytes())
+    assert publication["commit"] and publication["readback_verified"] is True
+    assert publication["receipt_sha256"] == sha(args.receipt)
+    assert (
+        sha(args.driver / "source-manifest.json")
+        == value["source_manifest_sha256"]
+        == DRIVER_SHA
+    )
+    sys.path.insert(0, str(args.driver))
+    from wait_record81 import run
+    from service81 import ROOT, release_admission
+
+    release_admission()
+    return run(
+        [str(ROOT / ".venv/bin/python"), "-B", str(args.driver / "launch81.py")],
+        args.wait_record,
+    )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    for name in [
+        "receipt",
+        "publication",
+        "source-publication",
+        "driver",
+        "common",
+        "wait-record",
+    ]:
+        parser.add_argument("--" + name, type=Path, required=True)
+    raise SystemExit(launch(parser.parse_args()))

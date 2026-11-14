@@ -1,0 +1,93 @@
+"""CPU-only independent SSE/partial and denominator checks, never NPU results."""
+
+import gzip
+import json
+from http.server import ThreadingHTTPServer
+from pathlib import Path
+import sys
+import threading
+
+sys.path.insert(
+    0,
+    str(
+        Path(__file__).resolve().parent / "preparation-ready/bidkv81-pressure-driver-v2"
+    ),
+)
+from test_pressure_client import Handler, body
+from pressure_transport import call
+from export_pressure_numeric import export, inspect_sse, recompute_batch
+
+
+def test_independent_wire_replay_matches_actual_mock_transport(tmp_path):
+    Handler.mismatch = False
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        row = call(
+            {"base_url": f"http://127.0.0.1:{server.server_address[1]}", "timeout": 5},
+            body(),
+            tmp_path,
+            fixed_length=True,
+            require_zero_reuse=False,
+        )
+        row["expected_wire_id"] = "chatcmpl-fixed-id"
+        value = inspect_sse(Path(row["stream_capture"]), row)
+        assert value["successful_record_independently_verified"]
+        assert value["usage_observed"]["completion_tokens"] == 4096
+        assert "content" not in value and "reasoning" not in value
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def test_truncated_capture_is_retained_as_partial_not_success(tmp_path):
+    path = tmp_path / "truncated.sse.jsonl.gz"
+    raw = gzip.compress(
+        (
+            json.dumps(
+                {"clock": {"monotonic": 1, "wall": 1}, "raw_b64": "ZGF0YToge30KCg=="}
+            )
+            + "\n"
+        ).encode()
+    )
+    path.write_bytes(raw[:-5])
+    value = inspect_sse(path)
+    assert value["gzip_or_parse_error_type"] == "EOFError"
+    assert not value["complete_wire"] and value["usage_observed"] is None
+
+
+def test_zero_generation_export_keeps_all16_planned_cells(tmp_path):
+    root = tmp_path / "source"
+    root.mkdir()
+    output = tmp_path / "numeric"
+    export(root, output)
+    summary = json.loads((output / "summary.json").read_bytes())
+    assert summary["planned_requests"] == 16 and summary["recorded"] == 0
+    assert len(json.loads((output / "requests.json").read_bytes())) == 16
+    assert len(summary["batches"]) == 2
+
+
+def test_generated_content_references_and_n1_exclusions_are_distinct():
+    def row(generated, content, n):
+        return {
+            "status": "ok",
+            "start": {"monotonic": 0},
+            "end": {"monotonic": 10},
+            "first_generated_event": {"monotonic": generated},
+            "first_token": {"monotonic": content} if content is not None else None,
+            "usage": {"completion_tokens": n},
+        }
+
+    value = recompute_batch(
+        "synthetic-only", [row(1, 3, 4), row(1, 1, 1), row(1, None, 4)]
+    )
+    assert value["output_tokens_per_second_if_complete"] is None
+    assert value["mean_ttft_first_generated_seconds_successful_only"] == 1
+    assert value["mean_ttft_first_content_seconds_successful_only"] == 2
+    assert value["mean_tpot_first_generated_seconds_successful_only"] == 3
+    assert value["mean_tpot_first_content_seconds_successful_only"] == 7 / 3
+    assert value["successful_completion_n_le_1_excluded_from_tpot"] == 1
+    assert value["successful_missing_first_content_excluded"] == 1
+    assert value["first_generated_equals_first_content"] == 1

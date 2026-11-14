@@ -1,0 +1,111 @@
+{
+  "schema": "bidkv-public-numeric-export-contract/v2",
+  "not_model_results": true,
+  "primary_export_directory": "publication-ready/bidkv81-five-results-v1",
+  "c8_export_directory": "publication-ready/bidkv81-c8-results-v2",
+  "required_primary_files": [
+    "summary.json",
+    "manifest.json",
+    "controlled-originals-index.json",
+    "runtime-overheads.json",
+    "diagnostic-overheads.json",
+    "original-grader-sources.json",
+    "execution-plan.json",
+    "source-manifest.json",
+    "plan-file-manifest.json"
+  ],
+  "quality_files": [
+    "quality-native-hle-summary.json",
+    "quality-bidkv-hle-summary.json",
+    "quality-native-frontier-summary.json",
+    "quality-bidkv-frontier-summary.json"
+  ],
+  "summary_top_keys": [
+    "schema",
+    "status",
+    "formal_complete",
+    "planned_solver_requests_per_arm",
+    "planned_judge_inputs",
+    "stages",
+    "classification",
+    "quality_summary_files"
+  ],
+  "stage_core_keys": [
+    "name",
+    "arm",
+    "solver_arm",
+    "dataset",
+    "stage",
+    "planned",
+    "status",
+    "started_unix",
+    "completed_unix",
+    "exit_code",
+    "actual_client_returncode",
+    "summary",
+    "numeric_records_file",
+    "recorded",
+    "zero_reuse",
+    "independent_verification",
+    "sse_capture_files",
+    "unbound_sse_capture_files",
+    "unbound_capture_scope"
+  ],
+  "solver_metric_schema": "Exact numeric fields emitted by frozen measurement.py; quality originalMMLUsummary nestedquality, HLE/Frontier originalseparatequalityfiles",
+  "judge_metric_schema": [
+    "planned",
+    "executed",
+    "successful",
+    "invalid_judge",
+    "solver_failed",
+    "transport_failures",
+    "length_stops",
+    "scope"
+  ],
+  "runtime_overheads_schema": {
+    "schema": "bidkv-runtime-overheads/v1",
+    "period_names": [
+      "service-native",
+      "service-bidkv",
+      "service-judge"
+    ],
+    "period_fields": [
+      "name",
+      "status",
+      "physical_device_count",
+      "process",
+      "ready",
+      "stop",
+      "initialization_device_seconds",
+      "telemetry_numeric"
+    ],
+    "scope": "Modelinit/compile device seconds and totalcontainer/HBM observations; notmonetarycost or isolatedMODmemoryoverhead/effectiveFLOP claim"
+  },
+  "diagnostic_overheads_schema": {
+    "schema": "hle-synthetic-diagnostic-overheads/v1",
+    "planned": 4,
+    "requests_per_arm": 2,
+    "max_tokens": 32,
+    "arm_fields": [
+      "arm",
+      "planned",
+      "recorded",
+      "attempted",
+      "successful",
+      "passed",
+      "failed_final_records",
+      "no_final_record",
+      "length_stops",
+      "wall_seconds_from_completed_records",
+      "device_seconds_from_completed_records",
+      "cost_is_lower_bound_if_incomplete",
+      "records",
+      "controlled_root",
+      "capture_files"
+    ],
+    "scope": "Original HLEred/blue interface outsideformal200 window andcounters, separatelycosted; notpart672solver/720plannedjudge"
+  },
+  "source_custody_schema": "original-grader-sources.json containsprivateoriginaltoolDEPLOYMENT-TOOLS rawmanifestSHA/allpathhashes plusactualcontrolledplan hashes; no source text",
+  "unknown_policy": "Missing record is notassumedunexecuted,0tokens or falsecase mapping. UnboundrawSSE count separate. Nullcacheusage remainsunknown despitebatch-counterzero proof. Missingindependentverification explicitlynull; do notlabelverified.",
+  "custody_policy": "Numericonlypublic; nooriginalquestions,answers,dialogues,images,tokenIDarrays,rawSSE orprivateEnginecode. Publiccontrolledindexhashes retain everyoriginal grade,per-layer/per-trackquality and diagnostic artifact."
+}

@@ -1,0 +1,99 @@
+{
+  "schema": "own-mod-runtime-binding/v2",
+  "test_target": "own_mod",
+  "selected_scope": "full",
+  "selected_profiles": [
+    "mmlu",
+    "hle",
+    "frontier",
+    "swe",
+    "terminal"
+  ],
+  "mod_reference": {
+    "file_name": "vllm-hust-five-datasets-20261113-v1-mod-ai-prompt-zh.txt",
+    "bytes": 10568,
+    "sha256": "43bc925a6ad749971a64e5244b86451f5d4cf3361e87423b1eda8ea0b0d04461"
+  },
+  "mod_repository": "https://github.com/vLLM-HUST/vllm-hust-bidkv",
+  "mod_revision": "53eed4dd65bc4ba12efa37f9f1e334fa1ae51076",
+  "code_pr": "https://github.com/vLLM-HUST/vllm-hust-bidkv/pull/28",
+  "code_status": "Draft experimental official0.23 isolated measurement carrier; not a published maintained integration",
+  "base_runtime": {
+    "vllm_repository": "https://github.com/vllm-project/vllm",
+    "vllm_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+    "ascend_repository": "https://github.com/vllm-project/vllm-ascend",
+    "ascend_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+    "shared_prepared_scheduler_sha256": "ae12773bc25b42149d4aa5c84c0797dcf12a0b60c045a7e85ca3c974bc47915c",
+    "upstream_original_scheduler_sha256": "9ae1491f57a6294e32416b93ef2ea68107fa0d65c3a4d7f745f1261012f735e9",
+    "definition": "Both arms use the same guarded official0.23 prepared tree and append-only measurement bridge; B0 is not an uninstrumented byte-identical upstream anchor."
+  },
+  "B0": {
+    "name": "Native policy disabled",
+    "mod_activation": {
+      "bidkv_official023.policy": null
+    },
+    "role": "Same actual base SDK/model/config and measurement bridge, target selector disabled"
+  },
+  "B1": {
+    "name": "BidKV policy enabled",
+    "mod_activation": {
+      "bidkv_official023.policy": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy",
+      "enable_utility_victim_selection": true,
+      "utility_strategy": "bidkv",
+      "utility_kill_switch": false
+    },
+    "role": "Same actual base SDK/model/config and measurement bridge; target selector activated with its explicit frozen default utility parameters"
+  },
+  "actual_command_templates": {
+    "native": {
+      "file": "native-qualified-command.json",
+      "sha256": "9bf189661c9fb5aa51faff2e365169daf5f050b8bce4ca43420fd1ca44bb41c3"
+    },
+    "bidkv": {
+      "file": "bidkv-qualified-command.json",
+      "sha256": "7ebad52540c2bce2cdc597d30c6dd5cdefe570c01e9fa5ceb4f41ae149fcf212"
+    }
+  },
+  "default_optimisation_audit": {
+    "enable_cpu_binding": {
+      "official_default": true,
+      "current_profile": true,
+      "both_arms_same": true,
+      "source_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+      "source": "vllm_ascend/ascend_config.py:162",
+      "source_files": [
+        {
+          "path": "vllm_ascend/ascend_config.py",
+          "sha256": "8da61f88d8e5153fde5311ddc8de11cd8a361deb5f2efed5140640a5eeeb7c38"
+        },
+        {
+          "path": "vllm_ascend/worker/worker.py",
+          "sha256": "c392da56095b255d47fe5ad7ffdfbedd269fe69851690e89a8d2ed44c073f6c3"
+        },
+        {
+          "path": "vllm_ascend/cpu_binding.py",
+          "sha256": "71719e397ab003b31ba5e46e1a6da4da658ae7221eeead04311b65ad4d12d533"
+        },
+        {
+          "path": "docs/source/user_guide/feature_guide/cpu_binding.md",
+          "sha256": "6271f9fc95e0ed3b983100841f48b487ebe5b7d07ec2c85f5e5964eb95617309"
+        }
+      ],
+      "previous_false": "Explicit historical common change, not an upstream default; no necessity evidence found. All old False records retained and not reused as True qualification."
+    },
+    "other_common_profile": "MTP2/APC/async/FULL_AND_PIECEWISE, KV16GiB/rank, maxlen65536/seq16/batch4096/image1 remain exactly the predeclared shared profile. This is a configured actual base profile, not a claim about untouched upstream-default throughput."
+  },
+  "mechanism_evidence_levels": [
+    "installation/source identity",
+    "initialized policy/enabled state",
+    "actual scheduler decision/call/selection counts",
+    "no fallback/invalid selection",
+    "matched performance and original-task quality"
+  ],
+  "zero_call_limit": "The16GiB/seq16 profile has about1.08M token capacity and may not preempt in these tasks. Loaded/enabled/HTTP200 does not establish actual mechanism invocation or gains. Supplemental pressure diagnosis must be separately labelled and frozen.",
+  "quality": "Original MMLU extractor and unchanged HLE/Frontier graders with independent gold answers; token mismatches are diagnostics, not proof of quality loss. SWE/Terminal have no solve score.",
+  "cost_and_initialisation": "Keep10s host cgroup memory/stat/events/CPU and NPU sampling during init, raw load/compile logs, ready/process clocks, effective worker/thread affinity, warning/skip, actual owned child returncodes. Solver windows and judge traffic accounted separately.",
+  "reference_engine": "Frozen Engine sources are only optional input/unchanged-grader references. No Engine r4/torch2.13 runtime replaces the tested MOD.",
+  "prior_cohort": "Parent issued a preventive stop before completing the MOD document audit. Subsequent audit found the MOD off/on/runtime/workload design compatible; the user did not request cancellation. A separate later audit found CPU-bindingFalse overrode upstreamTrue and motivates this new True profile. Prior44 complete responses and156 cancelled/incomplete streams remain archived; no padding or retries in that old cohort.",
+  "four_targets": "MOD measurements do not inherit Engine historical scores or automatically pass project targets; effective compute/32K long stability/cost applicability remain separately audited."
+}

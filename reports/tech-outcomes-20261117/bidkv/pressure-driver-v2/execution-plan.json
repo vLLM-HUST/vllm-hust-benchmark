@@ -1,0 +1,95 @@
+{
+  "schema": "bidkv-supplemental-pressure-fixed-generation/v2",
+  "separate_from_primary": true,
+  "primary_full_required_closed": true,
+  "admission_source_manifest_sha256": "13dc6b582f81008e081c31ce1cd75096ea706989db185bc9bbea96fbe23d44f9",
+  "native_command_sha256": "bb76f06f4c3f44337abca577c099dd0fadef2d22c1835defba163dad93a3964d",
+  "bidkv_command_sha256": "044dd95af2498a6325cc8e7dac7651c2658c3d215f675293c1058ad3fd28857b",
+  "common_changes_from_primary": [
+    "KV bytes per rank16GiB to1GiB, artificial quota on64GiB cards",
+    "official metadata-only worker extension and localhost dev RPC",
+    "new cold namespace/cache/evidence paths",
+    "synthetic ignore_eos True max_tokens4096, no task-quality claim",
+    "explicit32char clientrequest_id, require consistent SSE wire ID",
+    "allow local self-prefix resume after preemption while preserving APC; external restores must stay0"
+  ],
+  "fixed_workload": {
+    "input_sha256": "a73c9e1b2afa476dea80f91832e963867f6f4130e4988d97210dddfea5aeb392",
+    "input_tokens_each": 16407,
+    "kv_bytes_per_rank": 1073741824,
+    "max_model_len": 65536,
+    "concurrency": 8,
+    "repeats_per_arm": 1,
+    "requests_per_batch": 8,
+    "order": [
+      "native-r01",
+      "bidkv-r01"
+    ],
+    "planned_requests": 16,
+    "max_tokens": 4096,
+    "ignore_eos": true,
+    "max_output_tokens": 65536,
+    "temperature": 0,
+    "seed": 17,
+    "inference_retries": 0
+  },
+  "time": {
+    "original_operation_seconds": 3600,
+    "starts_before_first_cold_init": true,
+    "includes_all_cold_initializations_and_parks": true,
+    "record_sealing_reserve_seconds_within_original_clock": 15,
+    "whole_request_timeout_seconds_upper_bound": 600,
+    "cleanup_grace_separately_recorded": true
+  },
+  "capacity_go": "Actual native geometry only; first-prefill sum and steady upper bounds from pinned sources. Context65536 must fit; at least2 admissions and aggregate end upper bound exceeds usable K. This permits pressure, does not guarantee it. Unknown layout or no-pressure means0gen, no adaptive adjustments.",
+  "candidate_conditional_go": {
+    "pre_authorized_in_same_public_release": true,
+    "requires_exact_native_metadata_fingerprint": true,
+    "owner_rechecks_all_shared_sources_profile_tokenhashes_affinity": true,
+    "second_publication_park_required": false,
+    "actual_confirmation_preserved_and_published": true,
+    "supersedes": "Earlier0gen plan wording about two publication parks; no clock extension"
+  },
+  "cache_semantics": {
+    "unique_salts_per_external_request": true,
+    "explicit_request_id_length": 32,
+    "server_wire_id": "chatcmpl-<explicit request_id>",
+    "external_restore_success_must_be_zero": true,
+    "local_self_prefix_resume_allowed": true,
+    "APC_enabled": true,
+    "aggregate_hits_not_per_hit_attribution": true,
+    "primary_strict_zero_reuse_unchanged": true
+  },
+  "generation_release_required_fields": [
+    "source_manifest_sha256",
+    "admission_source_manifest_sha256",
+    "public_commit",
+    "fixed_workload_go",
+    "capacity_report_sha256",
+    "native_cache_rpc_sha256",
+    "candidate_identical_capacity_pre_authorized"
+  ],
+  "public_release_location": "/workspace/bidkv-five-datasets-20261113-01/durable/probes/bidkv-pressure-01/metadata/generation-public-release.json",
+  "transport_derivative": {
+    "base_file": "primary MODv4 transport.py",
+    "base_sha256": "e372ac8bdc271550b380b67a7294350d6ffd266f363cdb23359e07b2c0e869f2",
+    "only_source_change": "Retain consistent SSE event.id as server_request_id; default strict reuse remainsTrue"
+  },
+  "outcome_rules": [
+    "Preserve every round,negative,zero-call,timeout,partial andunexecuted cell",
+    "No retries/replacement/bestselection or KV/output tuning",
+    "Allsuccessful records must4096 completion tokens and16407 input; otherwise failure retained",
+    "IncompletebatchTPSnull; unknown finalusage not filled",
+    "Actuallegalpolicycalls/selection/nofault required for mechanism claim",
+    "No normal16GiBbenefit/hardwarecost/quality/fourtargetclaim fromsupplemental synthetic"
+  ],
+  "pre_generation_amendment": {
+    "superseded_manifest_sha256": "40eb17d15d955ea4bc1af2773a7cadc72649eea20c5b6fe6ea85fe5ae743c0f8",
+    "prior_planned_generation_requests": 48,
+    "prior_actual_generation_requests": 0,
+    "reason": "Actual zero-generation capacity admits only2 requests concurrently; shrink to1 complete paired batch per arm for bounded cost before any generation outcome",
+    "original_clock_not_reset": true,
+    "capacity_calculation_change": "Only report no_go_rule count text48 to16; all numeric geometry/bounds unchanged. Original48-labelled capacity report retained separately."
+  },
+  "capacity_report_path": "metadata/native-capacity-go-no-go-v2.json"
+}

@@ -1,0 +1,194 @@
+"""Execute actual81 receipt/input/stock-SDK contracts before either model."""
+
+import copy
+import hashlib
+import json
+from pathlib import Path
+import sys
+import time
+
+from service81 import (
+    PERSIST,
+    reference,
+    MODEL,
+    MODEL_REVISION,
+    identity,
+    command,
+    save,
+    release_admission,
+)
+from weight_admission import admit
+
+COMMON = Path("/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled")
+DRIVER = Path(__file__).resolve().parent
+
+
+def sha(path):
+    with Path(path).open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def main():
+    begin = time.monotonic()
+    result = {
+        "started_unix": time.time(),
+        "model_startups": 0,
+        "model_generation_requests": 0,
+        "phase": "running",
+    }
+    out = PERSIST / "metadata/actual-cpu-admission.json"
+    save(out, result)
+    try:
+        result["exclusive_resource_and_publication"] = release_admission()
+        manifest = json.loads((DRIVER / "source-manifest.json").read_bytes())
+        for name, expected in manifest["files"].items():
+            assert sha(DRIVER / name) == expected, name
+        receipt = json.loads(reference("81-weights"))
+        weights = json.loads(reference("81-expected"))
+        result["actual_weight_receipt"] = admit(
+            receipt, weights, MODEL_REVISION, str(MODEL)
+        )
+        current = []
+        for item in weights:
+            stat = (MODEL / item["path"]).stat()
+            assert stat.st_size == item["bytes"], (
+                "Current shard size differs from the previously fully hashed artifact"
+            )
+            current.append(
+                {
+                    "path": item["path"],
+                    "bytes": stat.st_size,
+                    "mtime_ns": stat.st_mtime_ns,
+                    "inode": stat.st_ino,
+                }
+            )
+        result["current_weight_file_stats"] = current
+        checks = []
+        for label in [
+            "wrong_profile_key",
+            "false_global",
+            "wrong_revision",
+            "false_shard",
+            "wrong_shard_hash",
+            "missing_shard",
+        ]:
+            bad = copy.deepcopy(receipt)
+            if label == "wrong_profile_key":
+                bad["all_weights_match_expected"] = bad.pop("all_weights_match")
+            elif label == "false_global":
+                bad["all_weights_match"] = False
+            elif label == "wrong_revision":
+                pass
+            else:
+                member = next(
+                    row for row in bad["files"] if row.get("matches_expected") is True
+                )
+                if label == "false_shard":
+                    member["matches_expected"] = False
+                elif label == "wrong_shard_hash":
+                    member["sha256"] = "changed"
+                elif label == "missing_shard":
+                    bad["files"].remove(member)
+            try:
+                admit(
+                    bad,
+                    weights,
+                    "wrong-revision" if label == "wrong_revision" else MODEL_REVISION,
+                    str(MODEL),
+                )
+            except ValueError:
+                checks.append({"case": label, "rejected": True})
+            else:
+                raise AssertionError("Malformed actual receipt was accepted: " + label)
+        result["negative_receipt_contract_checks"] = checks
+        result["runtime_identity"] = identity()
+        native = command("native")
+        candidate = command("pegaflow")
+        index = candidate.index("--kv-transfer-config")
+        assert candidate[:index] == native and len(candidate) == index + 2
+        assert (
+            json.loads(native[native.index("--additional-config") + 1])[
+                "enable_cpu_binding"
+            ]
+            is True
+        )
+        assert native[native.index("--kv-cache-memory-bytes") + 1] == str(16 * 1024**3)
+        assert native[native.index("--max-model-len") + 1] == "65536"
+        assert json.loads(native[native.index("--limit-mm-per-prompt") + 1]) == {
+            "image": 1,
+            "video": 0,
+        }
+        result["actual_planned_commands"] = {
+            "native": native,
+            "pegaflow": candidate,
+            "difference": "Only target connector; same source/dependencies/defaultTrue/common profile. Separate sidecar command is documented in mod-binding.",
+        }
+        sys.path.insert(0, str(DRIVER))
+        from finite import load_tools
+
+        load_tools(COMMON / "reference-tools")
+        from mmlu_scope import verify
+
+        verify(COMMON / "plans/mmlu")
+        import agent_trace
+
+        pin = agent_trace.protocol()
+        result["current_tokenizer_metadata_sha256"] = {
+            name: sha(MODEL / name) for name in pin["tokenizer_files"]
+        }
+        assert result["current_tokenizer_metadata_sha256"] == pin["tokenizer_files"]
+        result["dataset_contracts"] = {
+            "mmlu": {"requests": 200, "exact_original_files_verified": True}
+        }
+        for name, count in [("swe", 64), ("terminal", 48)]:
+            contract, tasks = agent_trace.load_plan(COMMON / "plans" / name)
+            expected = json.loads(
+                (COMMON / "plans" / name / "offline-token-id-freeze.json").read_bytes()
+            )
+            assert len(tasks) == len(expected) == count
+            result["dataset_contracts"][name] = {
+                "requests": count,
+                "contract_sha256": sha(COMMON / "plans" / name / "contract.json"),
+                "tasks_sha256": sha(COMMON / "plans" / name / "tasks.jsonl"),
+            }
+        from dataset_contract import client
+
+        for name, count in [("hle", 200), ("frontier", 160)]:
+            module = client(name)
+            contract, tasks = module.load_plan(COMMON / "plans" / name)
+            assert len(tasks) == count
+            assert contract["engine_transport"]["adapter_sha256"] == sha(
+                DRIVER / "transport.py"
+            )
+            if name == "hle":
+                from hle_scope import verify_selected
+
+                verify_selected(COMMON / "plans" / name, contract, tasks)
+                assert sum(bool(task["image"]) for task in tasks) == 23
+            result["dataset_contracts"][name] = {
+                "requests": count,
+                "contract_sha256": sha(COMMON / "plans" / name / "contract.json"),
+                "tasks_sha256": contract["tasks_sha256"],
+                "original_client_and_grader_unchanged": True,
+            }
+        result.update(
+            phase="passed",
+            completed_unix=time.time(),
+            elapsed_seconds=time.monotonic() - begin,
+            scope="Actual Linux source/dependency/receipt/input contract execution, no model initialization or inference; API/token/binding/C8 remain future stages",
+        )
+        save(out, result)
+        return 0
+    except BaseException as error:
+        result.update(
+            phase="failed",
+            error=type(error).__name__ + ": " + str(error),
+            completed_unix=time.time(),
+            elapsed_seconds=time.monotonic() - begin,
+        )
+        save(out, result)
+        raise
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

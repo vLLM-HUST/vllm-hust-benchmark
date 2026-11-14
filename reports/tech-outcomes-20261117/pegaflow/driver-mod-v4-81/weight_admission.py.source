@@ -1,0 +1,46 @@
+"""Validate the actual81 full-byte receipt without re-reading70GiB weights."""
+
+
+def admit(receipt, expected, revision, model):
+    if (
+        receipt.get("phase") != "verified"
+        or receipt.get("all_weights_match") is not True
+    ):
+        raise ValueError("81 weight receipt requires verified/all_weights_match=true")
+    if (
+        revision != "712cf74392b05026a6db2bf213d343747d1f6d45"
+        or model != "/data/shared_models/Qwen3.5-35B-A3B"
+    ):  # pragma: allowlist secret -- fixed model revision identity
+        raise ValueError("81 expected manifest model/revision differs")
+    weights = [
+        item
+        for item in receipt.get("files", [])
+        if item.get("path", "").startswith("model.safetensors-")
+        and item["path"].endswith(".safetensors")
+    ]
+    actual = {item["path"]: item for item in weights}
+    wanted = {item["path"]: item for item in expected}
+    if (
+        len(weights) != 14
+        or len(actual) != 14
+        or len(wanted) != 14
+        or set(actual) != set(wanted)
+    ):
+        raise ValueError("Weight receipt omitted/duplicated/replaced a shard")
+    for name, item in actual.items():
+        if (
+            item.get("matches_expected") is not True
+            or item.get("bytes") != wanted[name]["bytes"]
+            or item.get("sha256") != wanted[name]["sha256"]
+            or item.get("actual_bytes") != wanted[name]["bytes"]
+            or item.get("actual_sha256") != wanted[name]["sha256"]
+        ):
+            raise ValueError("Original actual size/hash/verification differs: " + name)
+    return {
+        "admitted": True,
+        "shards": 14,
+        "revision": revision,
+        "model": model,
+        "receipt_schema": "81 phase=verified/all_weights_match=true with14 individually matching bytes/hash",
+        "source": "Reuse recorded full-byte verification; no model rehash or inference in this admission",
+    }

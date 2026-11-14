@@ -1,0 +1,312 @@
+"""Matched real-serving campaign. All timing is produced by the unchanged SWE client."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import signal
+import socket
+import subprocess
+import sys
+import time
+import traceback
+import urllib.request
+import model_oracle
+
+ROOT = Path('/workspace/pegaflow-techoutcomes-20261113-01')
+EVIDENCE = ROOT / 'evidence'
+PYTHON = str(ROOT / '.venv/bin/python')
+MODEL = '/data/shared_models/Qwen3.5-35B-A3B'
+MODEL_REVISION = '712cf74392b05026a6db2bf213d343747d1f6d45'
+PORT = 33891
+PEGA_GRPC = 33892
+PEGA_HTTP = 33893
+ENV = os.environ.copy()
+ENV.update(json.loads((ROOT / 'run-env.json').read_text()))
+ENV.update({'VLLM_WORKER_MULTIPROC_METHOD': 'spawn', 'PYTHONUNBUFFERED': '1'})
+STATE = {'pid': os.getpid(), 'started_unix': time.time(), 'phase': 'preflight', 'completed_points': []}
+OWNED = []
+SERVER = None
+SIDECAR = None
+
+
+def write(path, value):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_suffix(path.suffix + '.tmp')
+    temp.write_text(json.dumps(value, indent=2))
+    temp.replace(path)
+
+
+def update(phase, **fields):
+    STATE.update(phase=phase, updated_unix=time.time(), **fields)
+    write(ROOT / 'campaign-status.json', STATE)
+    print(json.dumps({'phase': phase, **fields}), flush=True)
+
+
+def request(url):
+    with urllib.request.urlopen(url, timeout=5) as response:
+        return response.read().decode()
+
+
+def npu(path):
+    result = subprocess.run(['npu-smi', 'info'], capture_output=True, text=True, timeout=30)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(result.stdout + result.stderr)
+    return result.stdout
+
+
+def memory():
+    data = {'time': time.time()}
+    for name in ['memory.current', 'memory.events', 'memory.stat']:
+        data[name] = Path('/sys/fs/cgroup', name).read_text().strip()
+    return data
+
+
+def start(label, command, folder):
+    folder.mkdir(parents=True, exist_ok=True)
+    write(folder / 'command.json', {'argv': command, 'env_overrides': json.loads((ROOT / 'run-env.json').read_text()) | {'VLLM_WORKER_MULTIPROC_METHOD': 'spawn'}, 'started_unix': time.time()})
+    stream = (folder / 'service.log').open('ab', buffering=0)
+    process = subprocess.Popen(command, cwd=ROOT, env=ENV, stdin=subprocess.DEVNULL, stdout=stream, stderr=subprocess.STDOUT, start_new_session=True)
+    item = {'label': label, 'pid': process.pid, 'process': process, 'start_ticks': Path(f'/proc/{process.pid}/stat').read_text().split()[21], 'folder': folder}
+    OWNED.append(item)
+    write(folder / 'process.json', {k: str(v) if isinstance(v, Path) else v for k, v in item.items() if k != 'process'})
+    return item
+
+
+def alive(item):
+    return item['process'].poll() is None
+
+
+def stop(item):
+    if item is None:
+        return
+    process = item['process']
+    if process.poll() is None:
+        stat = Path(f'/proc/{process.pid}/stat')
+        if stat.exists() and stat.read_text().split()[21] == item['start_ticks']:
+            os.killpg(process.pid, signal.SIGTERM)
+            try:
+                process.wait(timeout=120)
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGKILL)
+                process.wait(timeout=30)
+    write(item['folder'] / 'stop.json', {'stopped_unix': time.time(), 'exit_code': process.poll()})
+
+
+def health(item, url, maximum=1200):
+    began = time.monotonic()
+    while time.monotonic() - began < maximum:
+        if not alive(item):
+            raise RuntimeError(f"{item['label']} exited {item['process'].returncode}; inspect service.log")
+        log_path = item['folder'] / 'service.log'
+        with log_path.open('rb') as stream:
+            stream.seek(max(0, log_path.stat().st_size - 32768))
+            tail = stream.read().decode(errors='replace')
+        if any(token in tail for token in ['NPUModelRunner init failed', 'Engine core initialization failed', 'NPUGraph: ERROR', 'register_context_batch RPC failed', 'Worker failed with error']):
+            raise RuntimeError(f"{item['label']} reported a fatal initialization error; inspect service.log")
+        try:
+            request(url)
+            return
+        except Exception:
+            pass
+        STATE['startup_seconds'] = round(time.monotonic() - began, 1)
+        write(ROOT / 'campaign-status.json', STATE)
+        time.sleep(2)
+    raise TimeoutError(f"{item['label']} readiness deadline exceeded")
+
+
+def snapshot_runtime():
+    result = {}
+    for name, folder in [('vllm', '/vllm-workspace/vllm'), ('vllm_ascend', '/vllm-workspace/vllm-ascend')]:
+        head = subprocess.check_output(['git', '-C', folder, 'rev-parse', 'HEAD'], text=True).strip()
+        diff = subprocess.check_output(['git', '-C', folder, 'diff', '--binary', 'HEAD'])
+        result[name] = {'commit': head, 'diff_sha256': hashlib.sha256(diff).hexdigest(), 'modified': bool(diff)}
+        (EVIDENCE / f'{name}-runtime.patch').write_bytes(diff)
+    native_dir = ROOT / '.venv/lib/python3.12/site-packages/pegaflow'
+    result['pegaflow'] = {'commit': '2e4cd2e9a244f7aefd732a442f9662a2acc88049', 'binaries': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in native_dir.iterdir() if p.suffix == '.so' or p.name in ['pegaflow-server-py', 'pegaflow-metaserver-py']}}
+    if (ROOT / 'compatibility-patch.json').exists():
+        result['pegaflow']['compatibility_patch'] = json.loads((ROOT / 'compatibility-patch.json').read_text())
+    result['workload_sha256'] = hashlib.sha256((ROOT / 'prepared-qwen35.json').read_bytes()).hexdigest()
+    return result
+
+
+def server_command(candidate):
+    command = [PYTHON, '-m', 'vllm.entrypoints.cli.main', 'serve', MODEL,
+        '--host', '127.0.0.1', '--port', str(PORT), '--served-model-name', 'pegaflow-techoutcomes-qwen35',
+        '--tensor-parallel-size', '2', '--pipeline-parallel-size', '1', '--distributed-executor-backend', 'mp',
+        '--dtype', 'bfloat16', '--max-model-len', '262144', '--max-num-seqs', '16', '--max-num-batched-tokens', '4096',
+        '--kv-cache-memory-bytes', '21474836480', '--gpu-memory-utilization', '0.95', '--seed', '17',
+        '--enable-prefix-caching', '--mamba-cache-mode', 'align', '--async-scheduling', '--enable-prompt-tokens-details',
+        '--speculative-config', json.dumps({'method': 'mtp', 'num_speculative_tokens': 2}),
+        '--compilation-config', json.dumps({'cudagraph_mode': 'FULL_AND_PIECEWISE', 'cudagraph_capture_sizes': [3, 6, 12, 24, 48], 'max_cudagraph_capture_size': 48}),
+        '--generation-config', 'vllm', '--override-generation-config', json.dumps({'temperature': 0.0, 'top_p': 1.0, 'top_k': -1}),
+        '--default-chat-template-kwargs', json.dumps({'enable_thinking': True}),
+        '--limit-mm-per-prompt', json.dumps({'image': 0, 'video': 0}),
+        '--additional-config', json.dumps({'enable_cpu_binding': False}), '--shutdown-timeout', '60']
+    if candidate:
+        command += ['--kv-transfer-config', json.dumps({'kv_connector': 'PegaKVConnector', 'kv_connector_module_path': 'pegaflow.connector', 'kv_role': 'kv_both', 'kv_connector_extra_config': {'pegaflow.mode': 'read_write', 'pegaflow.model_revision': MODEL_REVISION, 'pegaflow.host': 'http://127.0.0.1', 'pegaflow.port': PEGA_GRPC}})]
+    return command
+
+
+def metrics(folder, suffix, candidate):
+    (folder / f'vllm-metrics-{suffix}.txt').write_text(request(f'http://127.0.0.1:{PORT}/metrics'))
+    if candidate:
+        (folder / f'pegaflow-metrics-{suffix}.txt').write_text(request(f'http://127.0.0.1:{PEGA_HTTP}/metrics'))
+    write(folder / f'memory-{suffix}.json', memory())
+
+
+def counter(text, name):
+    total = 0.0
+    for line in text.splitlines():
+        if line.startswith('#'):
+            continue
+        token = line.split('{', 1)[0].split(' ', 1)[0]
+        if token.endswith(name):
+            total += float(line.rsplit(' ', 1)[-1])
+    return total
+
+
+def point(arm, concurrency, duration, qualification=False):
+    candidate = arm.startswith('pegaflow')
+    name = f'c{concurrency}-{int(duration)}s'
+    folder = EVIDENCE / arm / ('qualification-' + name if qualification else name)
+    folder.mkdir(parents=True, exist_ok=False)
+    metadata = {'model': 'Qwen3.5-35B-A3B', 'model_revision': MODEL_REVISION, 'precision': 'bfloat16',
+        'hardware': 'Ascend 910B2', 'serving_chips': 2, 'physical_npus': [0, 7], 'logical_npus': [0, 1],
+        'tensor_parallel_size': 2, 'pipeline_parallel_size': 1, 'data_parallel_size': 1,
+        'runtime_identity': BASE_IDENTITY, 'mod': 'PegaFlow' if candidate else 'Native',
+        'server_command': server_command(candidate), 'host_pool_gib': 30 if candidate else 0,
+        'quality_scope': 'Exact token budgets and stream/prompt integrity; not SWE solving accuracy.'}
+    write(folder / 'server-metadata.json', metadata)
+    metrics(folder, 'before', candidate)
+    npu(folder / 'npu-before.txt')
+    command = [PYTHON, '-m', 'swe_prefix_reuse.cli', 'run', '--workload', str(ROOT / 'prepared-qwen35.json'),
+        '--endpoint', f'http://127.0.0.1:{PORT}/v1/completions', '--model', 'pegaflow-techoutcomes-qwen35',
+        '--server-max-context', '262144', '--concurrency', str(concurrency), '--duration', str(duration),
+        '--chips', '2', '--seed', '17', '--timeout', '600', '--server-metadata', str(folder / 'server-metadata.json'), '--output', str(folder / 'client')]
+    write(folder / 'client-command.json', {'argv': command, 'started_unix': time.time()})
+    update('qualification' if qualification else 'measurement', arm=arm, concurrency=concurrency, duration=duration, point_started_unix=time.time(), current_folder=str(folder))
+    with (folder / 'client.log').open('wb') as log:
+        process = subprocess.Popen(command, cwd=ROOT, env=ENV, stdout=log, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, start_new_session=True)
+        started = time.monotonic()
+        try:
+            while process.poll() is None:
+                if not alive(SERVER):
+                    raise RuntimeError('Inference service died during the client window')
+                if candidate and not alive(SIDECAR):
+                    raise RuntimeError('PegaFlow service died during the client window')
+                if time.monotonic() - started > duration + 660:
+                    raise TimeoutError('Client window plus permitted drain exceeded')
+                STATE['point_elapsed_seconds'] = round(time.monotonic() - started, 1)
+                write(ROOT / 'campaign-status.json', STATE)
+                time.sleep(2)
+        except BaseException:
+            os.killpg(process.pid, signal.SIGTERM)
+            process.wait(timeout=30)
+            raise
+    if process.returncode:
+        raise RuntimeError(f'Client rejected {arm}/{name}; exit={process.returncode}')
+    summary = json.loads((folder / 'client/summary.json').read_text())
+    assert summary['valid'] and summary['failed_requests'] == 0, summary
+    assert summary['measurement_seconds'] == duration, summary
+    metrics(folder, 'after', candidate)
+    npu(folder / 'npu-after.txt')
+    assert snapshot_runtime() == BASE_IDENTITY, 'Runtime or workload drift during a window'
+    result = {'arm': arm, 'concurrency': concurrency, 'qualification': qualification, 'folder': str(folder), **summary}
+    if candidate:
+        before = (folder / 'vllm-metrics-before.txt').read_text()
+        after = (folder / 'vllm-metrics-after.txt').read_text()
+        result['mechanism_delta'] = {name: counter(after, name) - counter(before, name) for name in ['pega_load_success_total', 'pega_save_success_total', 'pega_load_failure_total', 'pega_save_failure_total']}
+        assert not result['mechanism_delta']['pega_load_failure_total'], 'PegaFlow load failure counter increased'
+        assert not result['mechanism_delta']['pega_save_failure_total'], 'PegaFlow save failure counter increased'
+    STATE['completed_points'].append(result)
+    write(folder / 'result-receipt.json', result)
+    update('point-complete', last_result=result)
+    return result
+
+
+def run_arm(arm, cells):
+    global SERVER, SIDECAR
+    candidate = arm.startswith('pegaflow')
+    folder = EVIDENCE / arm
+    idle = npu(folder / 'npu-admission.txt')
+    assert idle.count('No running processes found in NPU') == 2, 'Allocated cards are occupied'
+    try:
+        if candidate:
+            update('starting-pegaflow', arm=arm)
+            command = [str(ROOT / '.venv/bin/pegaflow-server'), '--addr', f'127.0.0.1:{PEGA_GRPC}', '--http-addr', f'127.0.0.1:{PEGA_HTTP}', '--pool-size', '30gb', '--devices', '0,1', '--log-level', 'info']
+            SIDECAR = start(arm + '-sidecar', command, folder / 'sidecar')
+            health(SIDECAR, f'http://127.0.0.1:{PEGA_HTTP}/health', maximum=300)
+        update('starting-vllm', arm=arm)
+        SERVER = start(arm + '-vllm', server_command(candidate), folder / 'server')
+        health(SERVER, f'http://127.0.0.1:{PORT}/health')
+        update('token-oracle', arm=arm)
+        oracle = model_oracle.run(ROOT, EVIDENCE, arm, PORT)
+        update('token-oracle-complete', arm=arm, oracle_cases=len(oracle['results']))
+        qualification = point(arm, 2, 180, qualification=True)
+        if candidate:
+            assert qualification['mechanism_delta']['pega_load_success_total'] > 0, 'PegaFlow load path was not exercised during qualification'
+            assert qualification['mechanism_delta']['pega_save_success_total'] > 0, 'PegaFlow save path was not exercised during qualification'
+        for concurrency in cells:
+            point(arm, concurrency, 900)
+    finally:
+        update('stopping-owned-services', arm=arm)
+        stop(SERVER)
+        stop(SIDECAR)
+        SERVER = SIDECAR = None
+        npu(folder / 'npu-release.txt')
+
+
+try:
+    for filename in ['build-status.json', 'cpu-status.json', 'model-hash-status.json']:
+        current = json.loads((ROOT / filename).read_text())
+        assert current['phase'] == 'complete', (filename, current)
+    assert json.loads((ROOT / 'model-hash-status.json').read_text())['all_weights_match_expected']
+    resumed_native = EVIDENCE.exists()
+    if resumed_native:
+        assert (ROOT / 'resume-native-qualification.json').is_file(), 'Missing explicit resume receipt'
+        assert not (EVIDENCE / 'native').exists(), 'A formal Native arm already exists'
+        previous_qualification = json.loads((EVIDENCE / 'native-qualification/qualification-c2-60s/result-receipt.json').read_text())
+        assert previous_qualification['valid'] and not previous_qualification['failed_requests']
+        assert json.loads((EVIDENCE / 'native-qualification/token-oracle.json').read_text())['valid']
+        STATE['completed_points'].append(previous_qualification)
+    else:
+        EVIDENCE.mkdir(exist_ok=False)
+    BASE_IDENTITY = snapshot_runtime()
+    write(EVIDENCE / 'runtime-identity.json', BASE_IDENTITY)
+    PLAN = {'protocol': 'swe-prefix-reuse/v1', 'frozen_unix': time.time(), 'model': MODEL, 'model_revision': MODEL_REVISION,
+        'kv_cache_bytes_per_chip': 21474836480, 'host_pool_gib': 30, 'prior_failed_startup': '24.25 GiB KV exhausted NPU graph-capture headroom; original logs retained separately.',
+        'runtime_identity': BASE_IDENTITY, 'primary_concurrency': 8, 'cells': [1, 2, 4, 8, 16], 'seconds_per_cell': 900,
+        'initial_arm_order': ['native', 'pegaflow'], 'qualification_concurrency': 2, 'qualification_seconds': 180,
+        'confirmation': 'If C8 gain > 0, confirm C8 in reversed arm order. Otherwise, if C16 gain > 0, confirm C16 in reversed arm order. Retain every observation.',
+        'no_new_rdma_claim': True, 'quality_scope': 'Strict prompt echo/token budget/SSE completion; not semantic SWE accuracy.',
+        'stopping_rule': 'Finish the five matched cells and the predeclared reversed-order confirmation where eligible. Any crash, protocol failure, resource loss, model mismatch or software drift invalidates and stops the current campaign; failures remain archived.'}
+    write(EVIDENCE / 'experiment-plan.json', PLAN)
+    for port in [PORT, PEGA_GRPC, PEGA_HTTP]:
+        with socket.socket() as sock:
+            assert sock.connect_ex(('127.0.0.1', port)) != 0, f'Port {port} is occupied'
+    if not resumed_native:
+        run_arm('native-qualification', [])
+    run_arm('pegaflow-qualification', [])
+    run_arm('native', PLAN['cells'])
+    run_arm('pegaflow', PLAN['cells'])
+    baseline = {x['concurrency']: x for x in STATE['completed_points'] if x['arm'] == 'native' and not x['qualification']}
+    treatment = {x['concurrency']: x for x in STATE['completed_points'] if x['arm'] == 'pegaflow' and not x['qualification']}
+    gains = {c: (treatment[c]['output_tokens_per_second'] / baseline[c]['output_tokens_per_second'] - 1) * 100 for c in PLAN['cells']}
+    write(EVIDENCE / 'initial-comparison.json', {'gain_percent': gains, 'baseline': baseline, 'treatment': treatment})
+    confirmation = 8 if gains[8] > 0 else 16 if gains[16] > 0 else None
+    if confirmation:
+        run_arm('pegaflow-confirm', [confirmation])
+        run_arm('native-confirm', [confirmation])
+    update('complete', exit_code=0, gains_percent=gains, confirmation_concurrency=confirmation, completed_unix=time.time())
+except BaseException as error:
+    traceback.print_exc()
+    update('failed', exit_code=1, error=type(error).__name__ + ': ' + str(error))
+    for item in reversed(OWNED):
+        try:
+            stop(item)
+        except BaseException:
+            traceback.print_exc()
+    npu(ROOT / 'campaign-failure-npu-release.txt')
+    sys.exit(1)

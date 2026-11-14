@@ -1,0 +1,41 @@
+"""Owned wait around the unchanged public Candidate zero-generation owner."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import time
+
+ROOT = Path('/workspace/bidkv-five-datasets-20261113-01')
+PERSIST = ROOT/'durable'
+PROBE = PERSIST/'probes/bidkv-pressure-01'
+ADMISSION = PERSIST/'sources/bidkv81-pressure-admission-v1'
+
+
+def main():
+    os.umask(0o077)
+    manifest = (ADMISSION/'source-manifest.json').read_bytes()
+    assert hashlib.sha256(manifest).hexdigest() == '13dc6b582f81008e081c31ce1cd75096ea706989db185bc9bbea96fbe23d44f9'
+    for name, digest in json.loads(manifest)['files'].items():
+        assert hashlib.sha256((ADMISSION/name).read_bytes()).hexdigest() == digest
+    assert not (PROBE/'bidkv').exists()
+    receipt = PROBE/'metadata/bidkv-owned-supervisor.json'
+    assert not receipt.exists()
+    command = [str(ROOT/'.venv/bin/python'), '-B', str(ADMISSION/'admission_owner.py'), '--arm', 'bidkv']
+    state = {'phase':'starting-candidate-zero-generation', 'pid':os.getpid(), 'started_unix':time.time(),
+        'command':command, 'source_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        'submitted_generation_requests':0, 'authorization':'Parent explicitly authorized unchanged13dc Candidate0gen after v2guardfailure; originalclock unchanged'}
+    def save():
+        temporary=receipt.with_suffix('.tmp');temporary.write_text(json.dumps(state,indent=2)+'\n');temporary.replace(receipt)
+    save()
+    with (PROBE/'metadata/bidkv-admission.log').open('ab',buffering=0) as log:
+        child=subprocess.Popen(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,
+            start_new_session=True,env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1'})
+        state.update(phase='running-candidate-zero-generation',child_pid=child.pid);save()
+        code=child.wait()
+    state.update(phase='completed' if code==0 else 'failed',actual_child_returncode=code,ended_unix=time.time());save()
+    return code
+
+
+if __name__=='__main__':
+    raise SystemExit(main())

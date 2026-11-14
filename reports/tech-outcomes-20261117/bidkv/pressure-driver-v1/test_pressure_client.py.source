@@ -1,0 +1,177 @@
+"""CPU HTTP/identity/cache-scope checks; these are never NPU results."""
+
+import json
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+import sys
+import threading
+from types import SimpleNamespace
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pressure_client
+from pressure_transport import call
+import run_pressure
+
+
+class Handler(BaseHTTPRequestHandler):
+    mismatch = False
+
+    def do_POST(self):
+        self.rfile.read(int(self.headers["Content-Length"]))
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.end_headers()
+        events = [
+            {
+                "id": "chatcmpl-fixed-id",
+                "choices": [{"delta": {"content": "A"}, "finish_reason": None}],
+            },
+            {
+                "id": "chatcmpl-other" if self.mismatch else "chatcmpl-fixed-id",
+                "choices": [{"delta": {}, "finish_reason": "length"}],
+                "usage": {
+                    "prompt_tokens": 16407,
+                    "completion_tokens": 4096,
+                    "prompt_tokens_details": {"cached_tokens": 16384},
+                },
+            },
+        ]
+        for event in events:
+            self.wfile.write(("data: " + json.dumps(event) + "\n\n").encode())
+        self.wfile.write(b"data: [DONE]\n\n")
+        self.wfile.flush()
+
+    def log_message(self, *_args):
+        pass
+
+
+@pytest.fixture
+def server():
+    Handler.mismatch = False
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    yield {"base_url": f"http://127.0.0.1:{server.server_address[1]}", "timeout": 5}
+    server.shutdown()
+    thread.join()
+    server.server_close()
+
+
+def body():
+    return {
+        "model": "fixture",
+        "messages": [],
+        "stream": True,
+        "stream_options": {"include_usage": True},
+        "max_tokens": 4096,
+        "ignore_eos": True,
+        "cache_salt": "fixture-fresh",
+        "request_id": "fixed-id",
+    }
+
+
+def test_supplemental_retains_consistent_wire_id_and_positive_local_resume_usage(
+    server, tmp_path
+):
+    value = call(server, body(), tmp_path, fixed_length=True, require_zero_reuse=False)
+    assert value["status"] == "ok" and value["server_request_id"] == "chatcmpl-fixed-id"
+    assert value["cached_tokens_reported"] == 16384
+
+
+def test_default_strict_mode_remains_strict_and_mixed_wire_ids_fail(server, tmp_path):
+    assert (
+        call(server, body(), tmp_path / "strict", fixed_length=True)["status"] != "ok"
+    )
+    Handler.mismatch = True
+    value = call(
+        server,
+        body(),
+        tmp_path / "mismatch",
+        fixed_length=True,
+        require_zero_reuse=False,
+    )
+    assert value["status"] != "ok" and "identity" in value["error"]
+    assert Path(value["stream_capture"]).exists()
+
+
+def test_all48_fixed_ids_unique_and_missing_release_cannot_generate(
+    tmp_path, monkeypatch
+):
+    ids = [
+        pressure_client.salt_identity(arm, repeat, lane)
+        for arm in ["native", "bidkv"]
+        for repeat in [1, 2, 3]
+        for lane in range(8)
+    ]
+    assert len(set(ids)) == 48 and {len(value) for value in ids} == {32}
+    monkeypatch.setattr(pressure_client, "PROBE", tmp_path)
+    monkeypatch.setattr(
+        pressure_client,
+        "call",
+        lambda *_a, **_k: pytest.fail("No HTTP before publicrelease"),
+    )
+    with pytest.raises(FileNotFoundError):
+        pressure_client.run(SimpleNamespace(arm="native", repeat=1))
+    assert not (tmp_path / "batches").exists()
+
+
+def test_local_prefix_counter_may_increase_but_external_restore_must_stay_zero():
+    before = "vllm:prefix_cache_hits_total 0\nvllm:external_prefix_cache_hits_total 0\nvllm:num_preemptions_total 0\n"
+    after = "vllm:prefix_cache_hits_total 16384\nvllm:external_prefix_cache_hits_total 0\nvllm:num_preemptions_total 1\n"
+    value = pressure_client.metrics_delta(before, after)
+    assert value["counter_deltas"]["vllm:prefix_cache_hits_total"] == 16384
+    assert value["external_restore_zero"] is True
+    with pytest.raises(AssertionError, match="External"):
+        pressure_client.metrics_delta(
+            before,
+            after.replace(
+                "external_prefix_cache_hits_total 0",
+                "external_prefix_cache_hits_total 1",
+            ),
+        )
+
+
+def test_full_id_salt_closure_binds_all48_and_rejects_duplicate_salt(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(run_pressure, "PROBE", tmp_path)
+    (tmp_path / "metadata").mkdir()
+    for arm in ["native", "bidkv"]:
+        for repeat in [1, 2, 3]:
+            folder = tmp_path / "batches" / (arm + f"-r{repeat:02}")
+            (folder / "records").mkdir(parents=True)
+            planned = []
+            for lane in range(8):
+                identity = pressure_client.salt_identity(arm, repeat, lane)
+                planned.append(
+                    {
+                        "case_id": identity,
+                        "lane": lane,
+                        "request": {"request_id": identity, "cache_salt": identity},
+                    }
+                )
+                (folder / "records" / (identity + ".json")).write_text(
+                    json.dumps(
+                        {
+                            "status": "ok",
+                            "server_request_id": "chatcmpl-" + identity,
+                            "usage": {
+                                "prompt_tokens": 16407,
+                                "completion_tokens": 4096,
+                            },
+                            "stream_sha256": "synthetic-only",
+                        }
+                    )
+                )
+            (folder / "planned-requests.json").write_text(json.dumps(planned))
+    run_pressure.verify_completed_cohort()
+    value = json.loads((tmp_path / "metadata/request-id-salt-audit.json").read_bytes())
+    assert value["unique_salts"] == value["verified_successful_wire_ids"] == 48
+    path = tmp_path / "batches/bidkv-r03/planned-requests.json"
+    rows = json.loads(path.read_bytes())
+    rows[1]["request"]["cache_salt"] = rows[0]["request"]["cache_salt"]
+    path.write_text(json.dumps(rows))
+    with pytest.raises(AssertionError):
+        run_pressure.verify_completed_cohort()

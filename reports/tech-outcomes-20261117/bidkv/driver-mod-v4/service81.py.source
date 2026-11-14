@@ -1,0 +1,177 @@
+"""Owned BidKV measurement service using an already C8-qualified command."""
+import json
+import hashlib
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+import urllib.request
+from observation import Sampler
+
+ROOT = Path('/workspace/bidkv-five-datasets-20261113-01')
+PERSIST = ROOT/'durable'
+MODEL = Path('/data/shared_models/Qwen3.5-35B-A3B')
+
+
+def save(path, value):
+    path = Path(path)
+    temporary = path.with_suffix(path.suffix+'.tmp')
+    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    temporary.replace(path)
+
+
+def npu():
+    return subprocess.check_output(['npu-smi', 'info'], text=True, timeout=30)
+
+
+def mapping():
+    raw = subprocess.check_output(['npu-smi', 'info', '-m'], text=True, timeout=30)
+    found = {}
+    for line in raw.splitlines():
+        columns = line.split()
+        if len(columns) >= 3 and columns[0].isdigit() and columns[1] == '0' and columns[2].isdigit():
+            found[int(columns[0])] = int(columns[2])
+    assert [found.get(index) for index in [6, 7]] == [0, 1], 'Physical lease changed; do not guess new mapping'
+    return raw
+
+
+def ticks(process):
+    return Path(f'/proc/{process.pid}/stat').read_text().split()[21]
+
+
+def stop_owned(process, expected_ticks):
+    if process is not None and process.poll() is None:
+        assert ticks(process) == expected_ticks, 'PID ownership changed'
+        os.killpg(process.pid, signal.SIGTERM)
+        try:
+            process.wait(timeout=120)
+        except subprocess.TimeoutExpired:
+            assert ticks(process) == expected_ticks
+            os.killpg(process.pid, signal.SIGKILL)
+            process.wait(timeout=30)
+
+
+class Service:
+    def __init__(self, arm, folder, name):
+        self.arm, self.folder, self.name = arm, Path(folder), name
+        self.process, self.start_ticks = None, None
+
+    def __enter__(self):
+        self.folder.mkdir(parents=True, exist_ok=False, mode=0o700)
+        try:
+            with Sampler(self.folder):
+                self.start()
+            return self
+        except BaseException:
+            self.__exit__(None, None, None)
+            raise
+
+    def start(self):
+        (self.folder/'device-mapping.txt').write_text(mapping())
+        admission = npu()
+        (self.folder/'npu-before.txt').write_text(admission)
+        assert admission.count('No running processes found in NPU') == 2, 'Allocated devices are occupied'
+        qualified = PERSIST/'preflight'/('native-05' if self.arm == 'native' else 'bidkv-04')
+        expected_template = '298778f38db9c20c474ba29f3babf4433726fb793ea4606b6aca9ebfe177f229' if self.arm == 'native' else '0d02877c2b3a43258f07fcc287c93d8d430ff2a8dd9ac1066817e3688e434f54'
+        assert hashlib.sha256((qualified/'command.json').read_bytes()).hexdigest() == expected_template
+        template = json.loads((qualified/'command.json').read_bytes())
+        command = list(template['argv'])
+        index = command.index('--additional-config')+1
+        additional = json.loads(command[index])
+        expected = None if self.arm == 'native' else 'bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy'
+        assert additional['bidkv_official023']['policy'] == expected
+        assert additional['enable_cpu_binding'] is True
+        additional['bidkv_official023']['evidence_dir'] = str(self.folder/'policy')
+        command[index] = json.dumps(additional)
+        environment = dict(os.environ)
+        environment.update({key: value for key, value in template['environment'].items() if value is not None})
+        environment.update({'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONUNBUFFERED': '1', 'TOKENIZERS_PARALLELISM': 'false',
+                            'TMPDIR': '/workspace/bf-'+self.name+'-t', 'VLLM_RPC_BASE_PATH': '/workspace/bf-'+self.name+'-r',
+                            'VLLM_CACHE_ROOT': str(ROOT/'cache'/self.name/'vllm'),
+                            'TRITON_CACHE_DIR': str(ROOT/'cache'/self.name/'triton'),
+                            'TORCHINDUCTOR_CACHE_DIR': str(ROOT/'cache'/self.name/'inductor'),
+                            'ASCEND_CACHE_PATH': str(ROOT/'cache'/self.name/'ascend')})
+        for key in ['TMPDIR', 'VLLM_RPC_BASE_PATH']:
+            Path(environment[key]).mkdir(mode=0o700, exist_ok=False)
+        save(self.folder/'command.json', {'argv': command, 'environment': {key: environment.get(key) for key in [
+            'PYTHONPATH', 'HF_HUB_OFFLINE', 'VLLM_WORKER_MULTIPROC_METHOD', 'OMP_NUM_THREADS', 'MKL_NUM_THREADS',
+            'TMPDIR', 'VLLM_RPC_BASE_PATH', 'VLLM_CACHE_ROOT', 'TRITON_CACHE_DIR', 'TORCHINDUCTOR_CACHE_DIR', 'ASCEND_CACHE_PATH',
+            'ASCEND_RT_VISIBLE_DEVICES', 'LD_PRELOAD', 'LCCL_DETERMINISTIC']},
+            'qualified_command_source': str(qualified/'command.json'), 'only_operational_changes': ['fresh evidence path', 'fresh temporary/cache paths']})
+        log = (self.folder/'service.log').open('ab', buffering=0)
+        self.process = subprocess.Popen(command, cwd=ROOT, env=environment, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+        self.start_ticks = ticks(self.process)
+        save(self.folder/'process.json', {'pid': self.process.pid, 'start_ticks': self.start_ticks, 'started_unix': time.time()})
+        begin, advice = time.monotonic(), []
+        while True:
+            assert self.process.poll() is None, 'Owned model exited before readiness'
+            startup_log=(self.folder/'service.log').read_text(errors='replace')
+            assert not any(marker in startup_log for marker in ['EngineCore failed to start.', 'Engine core initialization failed.', "Worker failed with error 'call aclnn"]), 'Model worker initialization failed; preserve raw service log'
+            assert time.monotonic()-begin < 1200, 'Original startup deadline exceeded'
+            stats = {key: int(value) for key, value in (line.split() for line in Path('/sys/fs/cgroup/memory.stat').read_text().splitlines())}
+            if stats['file'] > 16*1024**3:
+                for item in json.loads((ROOT/'model-expected-weights.json').read_bytes()):
+                    descriptor = os.open(MODEL/item['path'], os.O_RDONLY)
+                    try:
+                        os.posix_fadvise(descriptor, 0, 0, os.POSIX_FADV_DONTNEED)
+                    finally:
+                        os.close(descriptor)
+                advice.append({'elapsed': time.monotonic()-begin, 'file_cache_before': stats['file'],
+                               'memory_current_after': Path('/sys/fs/cgroup/memory.current').read_text()})
+                save(self.folder/'startup-cache-advice.json', advice)
+            try:
+                with urllib.request.urlopen('http://127.0.0.1:18390/health', timeout=5) as response:
+                    assert response.status == 200
+                break
+            except Exception:
+                time.sleep(2)
+        save(self.folder/'ready.json', {'healthy_unix': time.time(), 'startup_seconds': time.monotonic()-begin})
+
+    def policy(self):
+        journals = list((self.folder/'policy').glob('*.jsonl'))
+        assert journals, 'No native/candidate measurement journal'
+        rows = []
+        for journal in journals:
+            events = [json.loads(line) for line in journal.read_text().splitlines() if line.strip()]
+            assert events[0]['event'] == 'initialized'
+            stats = events[-1]['stats']
+            assert stats['failures'] == stats['invalid_selections'] == 0, 'Policy fallback invalidates the experiment'
+            assert stats['enabled'] == (self.arm == 'bidkv')
+            rows.append(stats)
+        save(self.folder/'policy-summary.json', rows)
+        return rows
+
+    def check(self):
+        assert self.process.poll() is None and ticks(self.process) == self.start_ticks, 'Owned service is not alive'
+        self.policy()
+        sample = npu()
+        observed = set()
+        for line in sample.splitlines():
+            cells = [value.strip() for value in line.split('|')[1:-1]]
+            if len(cells) != 5 or not cells[-1].isdigit():
+                continue
+            device = cells[0].split()
+            if len(device) != 2 or not all(value.isdigit() for value in device):
+                continue
+            observed.add(int(device[0]))
+            pid = int(cells[-1])
+            for _ in range(32):
+                if pid == self.process.pid:
+                    break
+                status = Path(f'/proc/{pid}/status')
+                assert status.is_file(), 'Unowned NPU process: '+line
+                parent = next(int(row.split()[1]) for row in status.read_text().splitlines() if row.startswith('PPid:'))
+                assert parent > 1 and parent != pid, 'Foreign NPU process: '+line
+                pid = parent
+            else:
+                raise AssertionError('NPU ownership ancestry exceeded: '+line)
+        assert observed == {6, 7}, 'Expected only the two admitted physical NPUs'
+        save(self.folder/'last-owned-check.json', {'checked_unix': time.time(), 'server_pid': self.process.pid, 'npu_smi': sample,
+                                                  'ownership': 'All visible NPU worker container PIDs descend from our service process'})
+
+    def __exit__(self, *args):
+        stop_owned(self.process, self.start_ticks)
+        if self.process is not None:
+            save(self.folder/'stop.json', {'stopped_unix': time.time(), 'exit_code': self.process.poll()})
+        (self.folder/'npu-release.txt').write_text(npu())

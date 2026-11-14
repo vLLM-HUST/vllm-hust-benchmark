@@ -1,0 +1,64 @@
+"""Only own and actually wait for the fixed, separately released v2 controller."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+
+ROOT = Path('/workspace/bidkv-five-datasets-20261113-01')
+PERSIST = ROOT/'durable'
+PROBE = PERSIST/'probes/bidkv-pressure-01'
+DRIVER = PERSIST/'sources/bidkv81-pressure-driver-v3'
+EXPECTED = '97b82126270fb015ff864807228cb5f28ffc05a4d9ce6293e80226d89fd0a950'
+
+
+def main():
+    os.umask(0o077)
+    manifest = (DRIVER/'source-manifest.json').read_bytes()
+    assert hashlib.sha256(manifest).hexdigest() == EXPECTED
+    for name, digest in json.loads(manifest)['files'].items():
+        assert hashlib.sha256((DRIVER/name).read_bytes()).hexdigest() == digest
+    release = json.loads((PROBE/'metadata/generation-corrective-v3-public-release.json').read_bytes())
+    assert release['source_manifest_sha256'] == EXPECTED and release['fixed_workload_go'] is True
+    receipt = PROBE/'metadata/corrective-v3-controller-owned-supervisor.json'
+    assert not receipt.exists(), 'Never overwrite an actual controller wait'
+    command = [str(ROOT/'.venv/bin/python'), '-B', str(DRIVER/'run_pressure.py')]
+    state = {'phase': 'spawning-fixed-controller', 'pid': os.getpid(), 'started_unix': time.time(),
+             'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+             'fixed_controller_manifest_sha256': EXPECTED, 'command': command}
+
+    def save():
+        temporary = receipt.with_suffix('.tmp')
+        temporary.write_text(json.dumps(state, indent=2)+'\n')
+        temporary.replace(receipt)
+
+    save()
+    with (PROBE/'metadata/generation-controller.log').open('ab', buffering=0) as log:
+        child = subprocess.Popen(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
+                                 start_new_session=True, env={**os.environ, 'PYTHONDONTWRITEBYTECODE': '1'})
+        state.update(phase='waiting-fixed-controller', child_pid=child.pid)
+        save()
+        try:
+            code = child.wait()
+        except BaseException as error:
+            if child.poll() is None:
+                os.killpg(child.pid, signal.SIGTERM)
+                try:
+                    child.wait(timeout=240)
+                except subprocess.TimeoutExpired:
+                    os.killpg(child.pid, signal.SIGKILL)
+                    child.wait(timeout=30)
+            state.update(phase='failed', error_type=type(error).__name__,
+                         actual_child_returncode=child.returncode, ended_unix=time.time())
+            save()
+            raise
+    state.update(phase='completed' if code == 0 else 'failed',
+                 actual_child_returncode=code, ended_unix=time.time())
+    save()
+    return code
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

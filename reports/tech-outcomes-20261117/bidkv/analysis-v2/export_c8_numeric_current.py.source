@@ -1,0 +1,220 @@
+"""Export independently checked C8 numeric evidence without messages or SSE."""
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+
+def sha(path):
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def save(path, value):
+    path.write_text(
+        json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+
+
+def export(persist, arm, out, source, driver, preflight, public_commit):
+    assert len(public_commit) == 40 and all(
+        c in "0123456789abcdef" for c in public_commit
+    )
+    sys.path.insert(0, str(driver))
+    from verify_c8 import inspect
+
+    verification = inspect(
+        source, persist / "controlled/initial-inputs-01/continuous-inputs-r1.json"
+    )
+    target = out / arm
+    target.mkdir(parents=True, exist_ok=False)
+    save(target / "independent-verification.json", verification)
+    report = json.loads((source / "continuous.json").read_bytes())
+    phase_rows = []
+    numeric_rows = []
+    for phase in report["phases"]:
+        row = {
+            key: phase[key]
+            for key in [
+                "name",
+                "start",
+                "submission_deadline_monotonic",
+                "end",
+                "seconds",
+                "requests",
+                "failed",
+                "drain_seconds",
+                "output_tokens_accepted_including_drain",
+                "ttft_generated_seconds",
+                "tpot_completion_seconds",
+                "throughput_scope",
+            ]
+        }
+        phase_rows.append(row)
+        for path in sorted(source.glob(phase["name"] + "-lane*.json")):
+            raw = json.loads(path.read_bytes())
+            usage = raw["usage"]
+            numeric_rows.append(
+                {
+                    "case_id": raw["case_id"],
+                    "phase": raw["phase"],
+                    "lane": raw["lane"],
+                    "status": raw["status"],
+                    "http_status": raw.get("http_status"),
+                    "start": raw["start"],
+                    "first_generated_event": raw["first_generated_event"],
+                    "last_generated_event": raw["last_generated_event"],
+                    "first_content_event": raw["first_token"],
+                    "last_content_event": raw["last_token"],
+                    "end": raw["end"],
+                    "elapsed_s": raw["elapsed_s"],
+                    "input_tokens": usage["prompt_tokens"],
+                    "output_tokens": usage["completion_tokens"],
+                    "finish_reason": raw["finish_reason"],
+                    "cached_tokens_reported": raw["cached_tokens_reported"],
+                    "controlled_record_sha256": sha(path),
+                    "controlled_sse_sha256": raw["stream_sha256"],
+                }
+            )
+    save(target / "phases.json", phase_rows)
+    with (target / "requests.jsonl").open(
+        "w", encoding="utf-8", newline="\n"
+    ) as stream:
+        for row in numeric_rows:
+            stream.write(json.dumps(row, ensure_ascii=False, allow_nan=False) + "\n")
+    original_files = [
+        {
+            "path": path.relative_to(source).as_posix(),
+            "bytes": path.stat().st_size,
+            "sha256": sha(path),
+        }
+        for path in sorted(source.rglob("*"))
+        if path.is_file()
+    ]
+    save(
+        target / "controlled-originals-index.json",
+        {
+            "controlled_root": str(source.resolve()),
+            "files": original_files,
+            "access": "Existing authorized Coder/NAS access; no public download link",
+            "classification": "Original requests, generated text and exact raw SSE remain controlled; numeric export omits them",
+        },
+    )
+    plan = json.loads((source / "plan.json").read_bytes())
+    command = json.loads((preflight / "command.json").read_bytes())
+    config = json.loads(
+        command["argv"][command["argv"].index("--additional-config") + 1]
+    )
+    assert config["enable_cpu_binding"] is True
+    assert (config["bidkv_official023"]["policy"] is not None) == (arm == "bidkv")
+    save(
+        target / "execution-identity.json",
+        {
+            "arm": arm,
+            "public_execution_source_commit": public_commit,
+            "source_manifest_sha256": sha(driver / "source-manifest.json"),
+            "preflight_command_sha256": sha(preflight / "command.json"),
+            "copied_carrier_inventory_sha256": sha(
+                driver / "carrier-source-admission.json"
+            ),
+            "input_sha256": plan["input_sha256"],
+            "actual_source_files_sha256": plan["source_files"],
+            "common_enable_cpu_binding": True,
+            "concurrency": 8,
+            "warmup_seconds_per_length": 60,
+            "formal_submission_seconds_per_length": 300,
+            "timeout_seconds": 180,
+            "actual_input_tokens": [4115, 16407],
+            "max_tokens": 256,
+            "ignore_eos": True,
+            "requests_verified": len(numeric_rows),
+            "qualification_only": True,
+            "ttft_scope": "C8 original first generated content/reasoning event; finite five use first content",
+            "no_five_dataset_quality_or_32k_stability_claim": True,
+        },
+    )
+    journals = []
+    for path in sorted((preflight / "policy").glob("*.jsonl")):
+        events = [
+            json.loads(line) for line in path.read_text().splitlines() if line.strip()
+        ]
+        assert events and events[0]["event"] == "initialized"
+        journals.append(
+            {
+                "controlled_path": str(path.resolve()),
+                "bytes": path.stat().st_size,
+                "sha256": sha(path),
+                "records": len(events),
+                "initial_event": events[0]["event"],
+                "initial_stats": events[0]["stats"],
+                "last_event": events[-1]["event"],
+                "last_stats": events[-1]["stats"],
+            }
+        )
+    assert journals, "No policy custody journal"
+    save(
+        target / "policy-custody-index.json",
+        {
+            "journals": journals,
+            "preflight_controlled_root": str(preflight.resolve()),
+            "command": {
+                "bytes": (preflight / "command.json").stat().st_size,
+                "sha256": sha(preflight / "command.json"),
+            },
+            "original_files": [
+                {
+                    "path": str(path.relative_to(preflight)),
+                    "bytes": path.stat().st_size,
+                    "sha256": sha(path),
+                }
+                for path in sorted(preflight.rglob("*"))
+                if path.is_file()
+            ],
+            "scope": "Original tokenization/raw logs remain controlled; this inventory contains paths,counts,hashes only",
+        },
+    )
+    save(
+        target / "manifest.json",
+        {
+            "schema": "public-safe-c8-numeric-arm/v1",
+            "arm": arm,
+            "files": [
+                {"path": path.name, "bytes": path.stat().st_size, "sha256": sha(path)}
+                for path in sorted(target.iterdir())
+                if path.is_file()
+            ],
+        },
+    )
+    return {
+        "arm": arm,
+        "verified": verification["passed"],
+        "requests": len(numeric_rows),
+        "output": str(target),
+    }
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--persist", type=Path, required=True)
+    parser.add_argument("--arm", choices=["native", "bidkv"], required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    for name in ["source", "driver", "preflight"]:
+        parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument("--public-commit", required=True)
+    args = parser.parse_args()
+    print(
+        json.dumps(
+            export(
+                args.persist,
+                args.arm,
+                args.out,
+                args.source,
+                args.driver,
+                args.preflight,
+                args.public_commit,
+            )
+        )
+    )

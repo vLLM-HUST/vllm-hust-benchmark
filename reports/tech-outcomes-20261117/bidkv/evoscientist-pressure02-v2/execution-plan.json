@@ -1,0 +1,98 @@
+{
+  "schema": "bidkv-eos-historical-pressure-abba/v1",
+  "test_target": "own_mod",
+  "scope": "supplemental_eos_historical_workload",
+  "formal_five_dataset_tasks_budgets_and_graders_unchanged": true,
+  "formal_five_and_pega_new_model_runs_deferred": true,
+  "model": "Qwen3.5-35B-A3B BF16",
+  "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+  "physical_npus": [
+    6,
+    7
+  ],
+  "logical_npus": [
+    0,
+    1
+  ],
+  "tensor_parallel": 2,
+  "base": "Same official0fc/vllm-ascend5cb stock SDK with disclosed sharedae127 bridge and fe00/b7 CPU compatibility carrier",
+  "mod_revision": "53eed4dd65bc4ba12efa37f9f1e334fa1ae51076",
+  "B0": "Selector disabled; all common resource/default-optimization/utility numeric settings retained",
+  "B1": "Selector enabled, historical utility_preempt_weight5.0 preset; not a default0.3 benefit claim",
+  "stages": [
+    "native-r01",
+    "bidkv-r01",
+    "bidkv-r02",
+    "native-r02"
+  ],
+  "workload_sha256": "53588fc1a06bbe59b6737b434a0664b58fd673a7dfe38a493749b3faed921d8d",
+  "workload_source": "benchmark71c2d4ad/archive/mod-git-20261022/website-source-vllm-hust-bidkv/snapshot/results/qwen35-evoscientist-20260929/evoscientist-first12.jsonl",
+  "requests_per_stage": 12,
+  "planned_total_requests": 48,
+  "concurrency": 12,
+  "request_rate": 4,
+  "arrival": "Deterministic source order, lane/4 seconds from batch origin; actual submission and lateness retained, no historic arrival replay",
+  "max_tokens": [
+    2218,
+    1894,
+    1295,
+    2361,
+    1420,
+    2181,
+    2429,
+    1819,
+    2055,
+    3048,
+    1819,
+    1609
+  ],
+  "output_budget_per_stage": 24148,
+  "output_budget_total_upper": 96592,
+  "eos_preserved": true,
+  "ignore_eos": false,
+  "temperature": 0,
+  "seed": 17,
+  "thinking": "Actual server defaultTrue; source default and explicitTrue local token IDs identical",
+  "prompt_handling": "Complete original prompt as one user message; embedded role/instructions inert; tools not executed",
+  "common_profile": {
+    "kv_bytes_per_rank": 1677721600,
+    "max_model_len": 4096,
+    "max_num_seqs": 12,
+    "batch_tokens": 4096,
+    "MTP": 2,
+    "APC": true,
+    "async": true,
+    "cpu_binding": true,
+    "graph": "FULL_AND_PIECEWISE",
+    "capture_sizes": [
+      3,
+      6,
+      12,
+      24,
+      48
+    ]
+  },
+  "geometry_gate": "Actual both-rank metadata, original-order first-admission/end upper bounds, maxcontext fits and4–6 nominal full-context concurrency. Both arms/repeats must have identical common metadata fingerprint. No geometry/admission go means zero generation, not on-site retuning.",
+  "historical_pressure_matching": "Original TP4/MTPNone/block1024 log capacity20480tokens/5x; newTP2/MTP2 predicted71pool/70usable/14maxfootprint gives5x. Only design rationale until actual metadata, not equivalence or a prediction of the SDK log capacity field.",
+  "cache": "Fresh salt per external request, APC remains on, no external restore; internal self-resume allowed and counters fully retained. Aggregate hits do not identify individual hit provenance. No generic cross-configuration token equality gate.",
+  "clock": {
+    "overall_limit_seconds": 9000,
+    "cold_health_timeout_seconds": 1200,
+    "whole_request_timeout_seconds_upper": 1200,
+    "sealing_reserve_seconds": 30,
+    "cleanup_grace_separately_recorded": true,
+    "all_sources_published_before_first_cold_init": true,
+    "publication_parks": false,
+    "reset_or_extension": false
+  },
+  "exposure_gate": "If first Native completes without actual engine preemptions, retain it as no-pressure qualification and leave remaining stages unexecuted. Real B1preemption with zero policy calls is an integration anomaly. Complete valid stages continue through ABBA regardless of positive/negative speed sign.",
+  "outcome_rules": "No inference retries, replacements, output-padding or best-round selection. Keep all failures/length/EOS/missing grades or usage. Complete/paired performance, calls, legal victim choice, changed-vs-builtin, abstentions/faults and costs are separate. Incomplete batchTPSnull; unknown usage is not zero.",
+  "limitations": "NewEOS/chat/TP2/official0.23/MTP2 configuration, not historicalTP4/forced-length replication, frozen-five completion, task quality, hardware-card savings or four-target acceptance. Explicit artificial KV cap on64GiB cards; initialization and other overhead not free. Two paired orders are descriptive, not population confidence/equivalence proof.",
+  "source_preparation_revision": "v2",
+  "superseded_cpu_only_source_manifest": "a7a1f4477c208d2b6f89056c8af4cad5324f53e5838636bf9717b20b06f6448e",
+  "pre_device_review_corrections": [
+    "Reasoning-only complete budget is no-final-answer/unresolved, not a transport protocol failure in this ungraded diagnostic; old finite default remains strict",
+    "Accepted and observed usage/finish retained separately; missing final content and missing usage never forced zero",
+    "SIGTERM on owned supervisor forwards to owned controller and actually waits; no detached orphan by default SIGTERM"
+  ]
+}

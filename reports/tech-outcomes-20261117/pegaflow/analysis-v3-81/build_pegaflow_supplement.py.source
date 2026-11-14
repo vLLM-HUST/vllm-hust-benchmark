@@ -1,0 +1,83 @@
+"""Build a separate connector/host-cost supplement; do not modify the main builder."""
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+
+
+def read(path):
+    return json.loads(path.read_bytes())
+
+
+def build(root, out):
+    summary = read(root / "summary.json")
+    mechanism = read(root / "connector-mechanism.json")
+    runtime = read(root / "runtime-overheads.json")
+    if summary["formal_complete"]:
+        assert len(mechanism["stages"]) == 10
+        assert all(
+            item["cache_admission"]["passed"] is True for item in mechanism["stages"]
+        )
+        assert {path.name for path in root.glob("quality-*-summary.json")} == {
+            f"quality-{arm}-{name}-summary.json"
+            for arm in ["native", "pegaflow"]
+            for name in ["hle", "frontier"]
+        }
+    out.mkdir(parents=True, exist_ok=False)
+    result = {
+        "schema": "pegaflow-connector-cost-report-supplement/v1",
+        "formal_execution_complete": summary["formal_complete"],
+        "connector_mechanism": mechanism,
+        "runtime_overheads": runtime,
+        "actual_execution_receipts": read(root / "actual-execution-receipts.json"),
+        "source_hashes": {
+            name: hashlib.sha256((root / name).read_bytes()).hexdigest()
+            for name in [
+                "connector-mechanism.json",
+                "runtime-overheads.json",
+                "actual-execution-receipts.json",
+            ]
+        },
+    }
+    (out / "PEGA-CONNECTOR.json").write_text(
+        json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    lines = [
+        "# PegaFlow connector 与额外开销",
+        "",
+        "这是五项报告的独立机制补充，使用真实KV保存/恢复/失败计数，不使用Bid policy字段。",
+        "",
+        "| 阶段 | prefix零复用已核验 | save success | restore success | load/save失败 |",
+        "| --- | --- | ---: | ---: | ---: |",
+    ]
+    for item in mechanism["stages"]:
+        proof = item["cache_admission"]
+        values = (proof.get("engine_connector") or {}).get("deltas", {})
+
+        def number(name):
+            value = values.get("vllm:pega_" + name + "_total")
+            return "未验证/不适用" if value is None else str(value)
+
+        lines.append(
+            f"| {item['name']} | {proof['passed']} | {number('save_success')} | {number('load_success')} | {number('load_failure')}/{number('save_failure')} |"
+        )
+    lines += [
+        "",
+        "零restore不证明offload缓存收益；save路径被实际调用也不能单独证明加速。两臂保留各自prefix计数与未知cache usage，不从缺失计数推零。",
+        "",
+        "sidecar配置参数为30gb（冻结计划声明30GiB），容量字节与常驻量按实际metric/主机观测分别保留，未知不记零。初始化、模型外sidecar准备、连续常驻期间以及模型/sidecar独立telemetry流见PEGA-CONNECTOR.json。容器/HBM总观测不自动当作MOD独占增量，不能替代有效FLOP或货币费用。",
+        "",
+        "主通用报告使用--project PegaFlow --candidate-arm pegaflow；不得把本文件传给仅识别Bid solver_policy_custody的--mechanism-evidence。C8可另传--c8-summary，仍与EOS五项分开。",
+        "",
+    ]
+    (out / "PEGA-CONNECTOR.md").write_text("\n".join(lines), encoding="utf-8")
+    return result
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--capsule", type=Path, required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    build(args.capsule, args.out)

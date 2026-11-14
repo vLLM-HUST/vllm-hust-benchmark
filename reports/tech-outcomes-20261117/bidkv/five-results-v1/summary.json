@@ -1,0 +1,1192 @@
+{
+  "schema": "bidkv-five-numeric-export/v2",
+  "status": "completed",
+  "formal_complete": true,
+  "planned_solver_requests_per_arm": 672,
+  "planned_judge_inputs": 720,
+  "stages": [
+    {
+      "name": "native-mmlu",
+      "arm": "native",
+      "solver_arm": null,
+      "dataset": "mmlu",
+      "stage": "solver",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794600615.465912,
+      "completed_unix": 1794601720.0124967,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 20,
+        "solver_batch_wall_seconds": 1104.09108046256,
+        "accepted_output_tokens": 678540,
+        "output_tokens_per_second": 614.568863028696,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 495.3695574808773,
+          "p50": 496.5218533696607,
+          "p95": 929.0791031063533,
+          "p99": 978.5681813657842
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.02411247852336639,
+          "p50": 0.022371792016041444,
+          "p95": 0.037317105351996956,
+          "p99": 0.04670911672125361
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "planned": 200,
+          "correct": 144,
+          "accuracy": 0.72,
+          "unparsed": 0,
+          "categories": {
+            "biology": {
+              "planned": 12,
+              "correct": 11
+            },
+            "business": {
+              "planned": 14,
+              "correct": 12
+            },
+            "chemistry": {
+              "planned": 18,
+              "correct": 10
+            },
+            "computer science": {
+              "planned": 7,
+              "correct": 4
+            },
+            "economics": {
+              "planned": 14,
+              "correct": 13
+            },
+            "engineering": {
+              "planned": 16,
+              "correct": 11
+            },
+            "health": {
+              "planned": 14,
+              "correct": 8
+            },
+            "history": {
+              "planned": 6,
+              "correct": 4
+            },
+            "law": {
+              "planned": 19,
+              "correct": 6
+            },
+            "math": {
+              "planned": 22,
+              "correct": 18
+            },
+            "other": {
+              "planned": 15,
+              "correct": 10
+            },
+            "philosophy": {
+              "planned": 9,
+              "correct": 6
+            },
+            "physics": {
+              "planned": 21,
+              "correct": 21
+            },
+            "psychology": {
+              "planned": 13,
+              "correct": 10
+            }
+          },
+          "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "mmlu",
+        "stage": "solver",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 200
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "native-mmlu-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "native-hle",
+      "arm": "native",
+      "solver_arm": null,
+      "dataset": "hle",
+      "stage": "solver",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794601721.4763496,
+      "completed_unix": 1794604540.623662,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 124,
+        "solver_batch_wall_seconds": 2815.7438803557307,
+        "accepted_output_tokens": 2233661,
+        "output_tokens_per_second": 793.2756297841293,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 1.4001129039097577,
+          "p50": 0.727858236990869,
+          "p95": 6.41640377053991,
+          "p99": 6.429843207206577
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.02036204828997802,
+          "p50": 0.019297338297589135,
+          "p95": 0.026487106398902373,
+          "p99": 0.03495825468652106
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "hle",
+        "stage": "solver",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 200
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "native-hle-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "native-frontier",
+      "arm": "native",
+      "solver_arm": null,
+      "dataset": "frontier",
+      "stage": "solver",
+      "planned": 160,
+      "status": "completed",
+      "started_unix": 1794604541.985552,
+      "completed_unix": 1794606147.385097,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 160,
+        "executed": 160,
+        "successful": 160,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 160,
+        "length_stops": 36,
+        "solver_batch_wall_seconds": 1604.4667282290757,
+        "accepted_output_tokens": 1221049,
+        "output_tokens_per_second": 761.0310507016424,
+        "ttft_seconds": {
+          "samples": 160,
+          "mean": 1.1850728955352678,
+          "p50": 0.7252968465909362,
+          "p95": 5.532230545859784,
+          "p99": 6.13319981161505
+        },
+        "tpot_seconds": {
+          "samples": 160,
+          "mean": 0.019559377712891367,
+          "p50": 0.019392943273916288,
+          "p95": 0.02181720271426504,
+          "p99": 0.022124259750806768
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 160,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 160,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 160
+      },
+      "independent_verification": {
+        "dataset": "frontier",
+        "stage": "solver",
+        "planned": 160,
+        "recorded": 160,
+        "raw_sse_verified": 160,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 160,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 160
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "native-frontier-requests.json",
+      "recorded": 160,
+      "sse_capture_files": 160,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "native-swe",
+      "arm": "native",
+      "solver_arm": null,
+      "dataset": "swe",
+      "stage": "solver",
+      "planned": 64,
+      "status": "completed",
+      "started_unix": 1794606148.7430804,
+      "completed_unix": 1794606378.427641,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 64,
+        "executed": 64,
+        "successful": 64,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 64,
+        "length_stops": 2,
+        "solver_batch_wall_seconds": 226.35277020558715,
+        "accepted_output_tokens": 8183,
+        "output_tokens_per_second": 36.15153458280059,
+        "ttft_seconds": {
+          "samples": 64,
+          "mean": 7.390298320824513,
+          "p50": 5.743083822540939,
+          "p95": 20.774327814020197,
+          "p99": 35.34700432645153
+        },
+        "tpot_seconds": {
+          "samples": 64,
+          "mean": 0.2317713783978412,
+          "p50": 0.20989165633737322,
+          "p95": 0.5201146960681002,
+          "p99": 0.5405507313197118
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 64,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 64,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 64
+      },
+      "independent_verification": {
+        "dataset": "swe",
+        "stage": "solver",
+        "planned": 64,
+        "recorded": 64,
+        "raw_sse_verified": 64,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 64,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 64
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "native-swe-requests.json",
+      "recorded": 64,
+      "sse_capture_files": 64,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "native-terminal",
+      "arm": "native",
+      "solver_arm": null,
+      "dataset": "terminal",
+      "stage": "solver",
+      "planned": 48,
+      "status": "completed",
+      "started_unix": 1794606379.764101,
+      "completed_unix": 1794606559.5191634,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 48,
+        "executed": 48,
+        "successful": 48,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 48,
+        "length_stops": 2,
+        "solver_batch_wall_seconds": 176.40858767740428,
+        "accepted_output_tokens": 15064,
+        "output_tokens_per_second": 85.39266822739553,
+        "ttft_seconds": {
+          "samples": 48,
+          "mean": 6.865376408832769,
+          "p50": 5.516966598108411,
+          "p95": 21.58520580949261,
+          "p99": 27.881923030093315
+        },
+        "tpot_seconds": {
+          "samples": 48,
+          "mean": 0.11131279291351408,
+          "p50": 0.08650160220167094,
+          "p95": 0.30973204088330486,
+          "p99": 0.37323189977412335
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 48,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 48,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 48
+      },
+      "independent_verification": {
+        "dataset": "terminal",
+        "stage": "solver",
+        "planned": 48,
+        "recorded": 48,
+        "raw_sse_verified": 48,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 48,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 48
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "native-terminal-requests.json",
+      "recorded": 48,
+      "sse_capture_files": 48,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "bidkv-mmlu",
+      "arm": "bidkv",
+      "solver_arm": null,
+      "dataset": "mmlu",
+      "stage": "solver",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794607167.9537783,
+      "completed_unix": 1794608237.3034682,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 20,
+        "solver_batch_wall_seconds": 1068.927816864103,
+        "accepted_output_tokens": 673331,
+        "output_tokens_per_second": 629.9125061366077,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 514.055731772799,
+          "p50": 524.6191084338352,
+          "p95": 951.4979872523807,
+          "p99": 976.1630768342875
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.023676374467376728,
+          "p50": 0.022011669467699245,
+          "p95": 0.03655956851827672,
+          "p99": 0.043629757253893675
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "planned": 200,
+          "correct": 149,
+          "accuracy": 0.745,
+          "unparsed": 0,
+          "categories": {
+            "biology": {
+              "planned": 12,
+              "correct": 10
+            },
+            "business": {
+              "planned": 14,
+              "correct": 13
+            },
+            "chemistry": {
+              "planned": 18,
+              "correct": 13
+            },
+            "computer science": {
+              "planned": 7,
+              "correct": 4
+            },
+            "economics": {
+              "planned": 14,
+              "correct": 11
+            },
+            "engineering": {
+              "planned": 16,
+              "correct": 11
+            },
+            "health": {
+              "planned": 14,
+              "correct": 6
+            },
+            "history": {
+              "planned": 6,
+              "correct": 2
+            },
+            "law": {
+              "planned": 19,
+              "correct": 12
+            },
+            "math": {
+              "planned": 22,
+              "correct": 20
+            },
+            "other": {
+              "planned": 15,
+              "correct": 12
+            },
+            "philosophy": {
+              "planned": 9,
+              "correct": 8
+            },
+            "physics": {
+              "planned": 21,
+              "correct": 16
+            },
+            "psychology": {
+              "planned": 13,
+              "correct": 11
+            }
+          },
+          "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "mmlu",
+        "stage": "solver",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 200
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "bidkv-mmlu-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "bidkv-hle",
+      "arm": "bidkv",
+      "solver_arm": null,
+      "dataset": "hle",
+      "stage": "solver",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794608238.6430993,
+      "completed_unix": 1794610967.6825767,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 121,
+        "solver_batch_wall_seconds": 2725.789075087756,
+        "accepted_output_tokens": 2164679,
+        "output_tokens_per_second": 794.1476542642276,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 1.3987938023079187,
+          "p50": 0.7138167768716812,
+          "p95": 5.7855633125640455,
+          "p99": 5.7933156716823575
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.020790620218012056,
+          "p50": 0.019303410712600194,
+          "p95": 0.028943311844192868,
+          "p99": 0.03925587194263972
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "hle",
+        "stage": "solver",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 200
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "bidkv-hle-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "bidkv-frontier",
+      "arm": "bidkv",
+      "solver_arm": null,
+      "dataset": "frontier",
+      "stage": "solver",
+      "planned": 160,
+      "status": "completed",
+      "started_unix": 1794610969.0455804,
+      "completed_unix": 1794612599.6110697,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 160,
+        "executed": 160,
+        "successful": 160,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 160,
+        "length_stops": 43,
+        "solver_batch_wall_seconds": 1629.6390143483877,
+        "accepted_output_tokens": 1243109,
+        "output_tokens_per_second": 762.8124934754695,
+        "ttft_seconds": {
+          "samples": 160,
+          "mean": 1.1900729442131706,
+          "p50": 0.7060939129441977,
+          "p95": 5.560552872903645,
+          "p99": 6.165059695523232
+        },
+        "tpot_seconds": {
+          "samples": 160,
+          "mean": 0.019617039584583423,
+          "p50": 0.019257223678259557,
+          "p95": 0.0221119613179095,
+          "p99": 0.023027453850578677
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 160,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 160,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 160
+      },
+      "independent_verification": {
+        "dataset": "frontier",
+        "stage": "solver",
+        "planned": 160,
+        "recorded": 160,
+        "raw_sse_verified": 160,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 160,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 160
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "bidkv-frontier-requests.json",
+      "recorded": 160,
+      "sse_capture_files": 160,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "bidkv-swe",
+      "arm": "bidkv",
+      "solver_arm": null,
+      "dataset": "swe",
+      "stage": "solver",
+      "planned": 64,
+      "status": "completed",
+      "started_unix": 1794612600.943675,
+      "completed_unix": 1794612834.5502622,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 64,
+        "executed": 64,
+        "successful": 64,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 64,
+        "length_stops": 2,
+        "solver_batch_wall_seconds": 230.27428765408695,
+        "accepted_output_tokens": 8185,
+        "output_tokens_per_second": 35.54456766921077,
+        "ttft_seconds": {
+          "samples": 64,
+          "mean": 7.739399505750043,
+          "p50": 5.280409654602408,
+          "p95": 23.33598799258469,
+          "p99": 38.16616674350572
+        },
+        "tpot_seconds": {
+          "samples": 64,
+          "mean": 0.23657393900954177,
+          "p50": 0.2064978241892154,
+          "p95": 0.46236153208549946,
+          "p99": 0.5694213495657813
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 64,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 64,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 64
+      },
+      "independent_verification": {
+        "dataset": "swe",
+        "stage": "solver",
+        "planned": 64,
+        "recorded": 64,
+        "raw_sse_verified": 64,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 64,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 64
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "bidkv-swe-requests.json",
+      "recorded": 64,
+      "sse_capture_files": 64,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "bidkv-terminal",
+      "arm": "bidkv",
+      "solver_arm": null,
+      "dataset": "terminal",
+      "stage": "solver",
+      "planned": 48,
+      "status": "completed",
+      "started_unix": 1794612835.9138637,
+      "completed_unix": 1794613018.6036127,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 48,
+        "executed": 48,
+        "successful": 48,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 48,
+        "length_stops": 4,
+        "solver_batch_wall_seconds": 179.4126995243132,
+        "accepted_output_tokens": 15679,
+        "output_tokens_per_second": 87.39069219498172,
+        "ttft_seconds": {
+          "samples": 48,
+          "mean": 7.224116511177272,
+          "p50": 4.8832311211153865,
+          "p95": 22.806411615852266,
+          "p99": 31.712167505752298
+        },
+        "tpot_seconds": {
+          "samples": 48,
+          "mean": 0.11018056389182664,
+          "p50": 0.07872851838785336,
+          "p95": 0.313153807041013,
+          "p99": 0.37174989119094487
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 48,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 48,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 48
+      },
+      "independent_verification": {
+        "dataset": "terminal",
+        "stage": "solver",
+        "planned": 48,
+        "recorded": 48,
+        "raw_sse_verified": 48,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 48,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 48
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "bidkv-terminal-requests.json",
+      "recorded": 48,
+      "sse_capture_files": 48,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "judge-native-hle",
+      "arm": "native",
+      "solver_arm": "native",
+      "dataset": "hle",
+      "stage": "judge",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794613638.9832945,
+      "completed_unix": 1794616686.8760672,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 106,
+        "invalid_judge": 94,
+        "solver_failed": 0,
+        "transport_failures": 0,
+        "length_stops": 94,
+        "scope": "Judge traffic excluded from all solver throughput and cost; invalid/unresolved answers remain in planned denominator"
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "hle",
+        "stage": "judge",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 200
+        },
+        "failed_records_retained": 0
+      },
+      "numeric_records_file": "judge-native-hle-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "judge-bidkv-hle",
+      "arm": "native",
+      "solver_arm": "bidkv",
+      "dataset": "hle",
+      "stage": "judge",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794616688.4795885,
+      "completed_unix": 1794619501.1201892,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 108,
+        "invalid_judge": 92,
+        "solver_failed": 0,
+        "transport_failures": 0,
+        "length_stops": 92,
+        "scope": "Judge traffic excluded from all solver throughput and cost; invalid/unresolved answers remain in planned denominator"
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "hle",
+        "stage": "judge",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 200
+        },
+        "failed_records_retained": 0
+      },
+      "numeric_records_file": "judge-bidkv-hle-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "judge-native-frontier",
+      "arm": "native",
+      "solver_arm": "native",
+      "dataset": "frontier",
+      "stage": "judge",
+      "planned": 160,
+      "status": "completed",
+      "started_unix": 1794619502.5132062,
+      "completed_unix": 1794620267.8961678,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 160,
+        "executed": 160,
+        "successful": 152,
+        "invalid_judge": 8,
+        "solver_failed": 0,
+        "transport_failures": 0,
+        "length_stops": 15,
+        "scope": "Judge traffic excluded from all solver throughput and cost; invalid/unresolved answers remain in planned denominator"
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 160,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 160
+      },
+      "independent_verification": {
+        "dataset": "frontier",
+        "stage": "judge",
+        "planned": 160,
+        "recorded": 160,
+        "raw_sse_verified": 160,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 160,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 160
+        },
+        "failed_records_retained": 0
+      },
+      "numeric_records_file": "judge-native-frontier-requests.json",
+      "recorded": 160,
+      "sse_capture_files": 160,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    },
+    {
+      "name": "judge-bidkv-frontier",
+      "arm": "native",
+      "solver_arm": "bidkv",
+      "dataset": "frontier",
+      "stage": "judge",
+      "planned": 160,
+      "status": "completed",
+      "started_unix": 1794620269.2574658,
+      "completed_unix": 1794621033.474216,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 160,
+        "executed": 160,
+        "successful": 156,
+        "invalid_judge": 4,
+        "solver_failed": 0,
+        "transport_failures": 0,
+        "length_stops": 15,
+        "scope": "Judge traffic excluded from all solver throughput and cost; invalid/unresolved answers remain in planned denominator"
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 160,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 160
+      },
+      "independent_verification": {
+        "dataset": "frontier",
+        "stage": "judge",
+        "planned": 160,
+        "recorded": 160,
+        "raw_sse_verified": 160,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 160,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 160
+        },
+        "failed_records_retained": 0
+      },
+      "numeric_records_file": "judge-bidkv-frontier-requests.json",
+      "recorded": 160,
+      "sse_capture_files": 160,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+    }
+  ],
+  "classification": "Explicit numeric derivatives only; original questions, answers, dialogues, private Engine and raw SSE remain controlled",
+  "quality_summary_files": {
+    "quality-bidkv-frontier": {
+      "file": "quality-bidkv-frontier-summary.json",
+      "sha256": "acffd63e873b2ecbd3c183a8ff5136111fec593389c3baa4698a9a6f0ae88955",
+      "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/quality-bidkv-frontier/quality/summary.json"
+    },
+    "quality-bidkv-hle": {
+      "file": "quality-bidkv-hle-summary.json",
+      "sha256": "0e067bab248b8eb5eb84b64227e16b55ffc754c8a48c123e0ae2bb80b9fc47f9",
+      "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/quality-bidkv-hle/quality/summary.json"
+    },
+    "quality-native-frontier": {
+      "file": "quality-native-frontier-summary.json",
+      "sha256": "3398febeb3ff4e14dca1bbf11f95602b07937e48981f3df41e189388659b19d4",
+      "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/quality-native-frontier/quality/summary.json"
+    },
+    "quality-native-hle": {
+      "file": "quality-native-hle-summary.json",
+      "sha256": "1e5463c4d247cba2b74d37d22e8fd7c2662160a16db60ee790aa57f6ac1c1ceb",
+      "controlled_path": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/quality-native-hle/quality/summary.json"
+    }
+  }
+}

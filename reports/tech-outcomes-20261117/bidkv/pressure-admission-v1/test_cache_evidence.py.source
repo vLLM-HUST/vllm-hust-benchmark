@@ -1,0 +1,161 @@
+"""CPU guards: only metadata is touched; unknown/tensor-like objects reject."""
+
+from enum import Enum
+import importlib.util
+import json
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+SPEC = importlib.util.spec_from_file_location(
+    "probe_metadata", Path(__file__).with_name("bidkv_probe_cache_evidence.py")
+)
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+
+
+class Poison:
+    def __getattribute__(self, name):
+        raise AssertionError("Forbidden tensor/model access: " + name)
+
+    def __repr__(self):
+        raise AssertionError("Tensor repr forbidden")
+
+    def __str__(self):
+        raise AssertionError("Tensor values forbidden")
+
+
+DTYPE = type(
+    "dtype", (), {"__module__": "torch", "__str__": lambda _self: "torch.bfloat16"}
+)
+
+
+class Backend(Enum):
+    GDN = 1
+
+
+def worker():
+    attention = type("FullAttentionSpec", (), {})()
+    for key, value in {
+        "block_size": 2048,
+        "page_size_bytes": 2138112,
+        "page_size_padded": 2138112,
+        "dtype": DTYPE(),
+        "num_kv_heads": 1,
+        "head_size": 256,
+        "head_size_v": 256,
+        "real_page_size_bytes": 2097152,
+        "sliding_window": None,
+        "attention_chunk_size": None,
+    }.items():
+        setattr(attention, key, value)
+    mamba = type("MambaSpec", (), {})()
+    for key, value in {
+        "block_size": 2048,
+        "page_size_bytes": 2138112,
+        "page_size_padded": 2138112,
+        "shapes": ((2, 3),),
+        "dtypes": (DTYPE(),),
+        "mamba_type": Backend.GDN,
+        "mamba_cache_mode": "align",
+        "num_speculative_blocks": 2,
+    }.items():
+        setattr(mamba, key, value)
+    descriptor = type("KVCacheTensor", (), {})()
+    descriptor.size, descriptor.shared_by = 45 * 2138112, ["layer0", "layer1"]
+    config = SimpleNamespace(
+        num_blocks=45,
+        kv_cache_groups=[
+            SimpleNamespace(
+                layer_names=["layer0"], kv_cache_spec=attention, is_eagle_group=False
+            ),
+            SimpleNamespace(
+                layer_names=["layer1"], kv_cache_spec=mamba, is_eagle_group=False
+            ),
+        ],
+        kv_cache_tensors=[descriptor],
+    )
+    # A tensor field exists but the actual reader must not fetch it or the model.
+    runner = SimpleNamespace(kv_cache_config=config, kv_caches=Poison(), model=Poison())
+    engine = SimpleNamespace(
+        model_config=SimpleNamespace(max_model_len=65536, dtype=DTYPE()),
+        parallel_config=SimpleNamespace(
+            tensor_parallel_size=2, pipeline_parallel_size=1, data_parallel_size=1
+        ),
+        scheduler_config=SimpleNamespace(
+            max_num_seqs=16, max_num_batched_tokens=4096, async_scheduling=True
+        ),
+        cache_config=SimpleNamespace(
+            kv_cache_memory_bytes=1073741824,
+            enable_prefix_caching=True,
+            mamba_cache_mode="align",
+        ),
+        speculative_config=SimpleNamespace(num_speculative_tokens=2),
+        additional_config={"enable_cpu_binding": True},
+        compilation_config=SimpleNamespace(
+            cudagraph_mode=SimpleNamespace(name="FULL_AND_PIECEWISE"),
+            cudagraph_capture_sizes=[3, 6, 12, 24, 48],
+        ),
+    )
+    return SimpleNamespace(
+        model_runner=runner, vllm_config=engine, rank=0, local_rank=0
+    )
+
+
+def test_native_json_metadata_without_model_tensor_access_or_mutation():
+    item = worker()
+    config = item.model_runner.kv_cache_config
+    before = [
+        (id(group), id(group.kv_cache_spec), tuple(group.layer_names))
+        for group in config.kv_cache_groups
+    ]
+    report = MODULE.BidkvProbeCacheEvidenceWorkerExtension.describe_bidkv_probe_cache_groups_v1(
+        item
+    )
+    decoded = json.loads(json.dumps(report, allow_nan=False))
+    assert decoded["num_blocks"] == 45
+    assert decoded["groups"][0]["spec"]["real_page_size_bytes"] == 2097152
+    assert decoded["groups"][1]["spec"]["num_speculative_blocks"] == 2
+    assert before == [
+        (id(group), id(group.kv_cache_spec), tuple(group.layer_names))
+        for group in config.kv_cache_groups
+    ]
+    assert config.num_blocks == 45 and len(config.kv_cache_tensors) == 1
+    assert item.vllm_config.model_config.max_model_len == 65536
+    assert item.vllm_config.additional_config == {"enable_cpu_binding": True}
+
+
+def test_tensor_like_dtype_is_rejected_before_repr_or_values():
+    item = worker()
+    item.model_runner.kv_cache_config.kv_cache_groups[0].kv_cache_spec.dtype = Poison()
+    with pytest.raises(TypeError, match="torch.dtype"):
+        MODULE.BidkvProbeCacheEvidenceWorkerExtension.describe_bidkv_probe_cache_groups_v1(
+            item
+        )
+
+
+def test_tensor_storage_is_never_treated_as_a_cache_tensor_descriptor():
+    item = worker()
+    item.model_runner.kv_cache_config.kv_cache_tensors = [Poison()]
+    with pytest.raises(TypeError, match="descriptor"):
+        MODULE.BidkvProbeCacheEvidenceWorkerExtension.describe_bidkv_probe_cache_groups_v1(
+            item
+        )
+
+
+def test_unknown_spec_or_non_align_mode_rejects_admission():
+    item = worker()
+    item.model_runner.kv_cache_config.kv_cache_groups[0].kv_cache_spec = Poison()
+    with pytest.raises(TypeError, match="Unqualified"):
+        MODULE.BidkvProbeCacheEvidenceWorkerExtension.describe_bidkv_probe_cache_groups_v1(
+            item
+        )
+    item = worker()
+    item.model_runner.kv_cache_config.kv_cache_groups[
+        1
+    ].kv_cache_spec.mamba_cache_mode = "all"
+    with pytest.raises(ValueError, match="Mamba mode"):
+        MODULE.BidkvProbeCacheEvidenceWorkerExtension.describe_bidkv_probe_cache_groups_v1(
+            item
+        )

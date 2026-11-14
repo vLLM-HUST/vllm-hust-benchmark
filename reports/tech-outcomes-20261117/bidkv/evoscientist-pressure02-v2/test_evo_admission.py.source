@@ -1,0 +1,208 @@
+"""CPU-only negative contracts for inert input and model admission boundaries."""
+
+import copy
+import hashlib
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+import pytest
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+SPEC = importlib.util.spec_from_file_location(
+    "evo_admission_test_target", HERE / "admission_owner.py"
+)
+OWNER = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(OWNER)
+SOURCE = (
+    HERE.parents[2]
+    / "github-audit/bidkv-snapshot/results/qwen35-evoscientist-20260929/evoscientist-first12.jsonl"
+)
+if not SOURCE.is_file():
+    SOURCE = OWNER.INPUT
+STAGES = ["native-r01", "bidkv-r01", "bidkv-r02", "native-r02"]
+
+
+def test_original12_are_inert_user_strings_with_exact_budgets():
+    cases, receipt = OWNER.load_input_contract(
+        SOURCE, HERE / "input-token-receipt.json"
+    )
+    assert len(cases) == 12
+    assert sum(case["output_tokens"] for case in cases) == 24148
+    for case in cases:
+        messages = OWNER.messages_for(case)
+        assert messages == [{"role": "user", "content": case["prompt"]}]
+    assert receipt["summary"]["minimum_context_headroom"] == 962
+
+
+def test_changed_raw_input_rejected_before_tokenize(tmp_path):
+    target = tmp_path / "changed.jsonl"
+    target.write_bytes(SOURCE.read_bytes() + b"\n")
+    with pytest.raises(AssertionError):
+        OWNER.load_input_contract(target, HERE / "input-token-receipt.json")
+
+
+def test_changed_token_receipt_rejected(tmp_path):
+    target = tmp_path / "changed.json"
+    value = json.loads((HERE / "input-token-receipt.json").read_bytes())
+    value["requests"][0]["requested_output_budget"] = 1
+    target.write_text(json.dumps(value))
+    with pytest.raises(AssertionError):
+        OWNER.load_input_contract(SOURCE, target)
+
+
+def response_fixture():
+    tokens = [1, 2, 3]
+    expected = {
+        "source_row_1based": 1,
+        "chat_input_tokens": 3,
+        "input_token_ids_sha256": hashlib.sha256(b"[1,2,3]").hexdigest(),
+        "requested_output_budget": 40,
+    }
+    return {"tokens": tokens, "count": 3}, expected
+
+
+def test_compact_json_token_hash_rule():
+    value, expected = response_fixture()
+    result = OWNER.check_token_response(value, expected)
+    assert result["sha256"] == hashlib.sha256(b"[1,2,3]").hexdigest()
+    assert result["sha256"] != hashlib.sha256(b"[1, 2, 3]").hexdigest()
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "count",
+        "token",
+        "bool_token",
+        "string_token",
+        "spaced_hash",
+        "context_overflow",
+        "bool_count",
+    ],
+)
+def test_invalid_token_response_rejected(change):
+    value, expected = response_fixture()
+    if change == "count":
+        value["count"] = 4
+    elif change == "token":
+        value["tokens"][1] = 9
+    elif change == "bool_token":
+        value["tokens"][0] = True
+    elif change == "string_token":
+        value["tokens"][0] = "1"
+    elif change == "spaced_hash":
+        expected["input_token_ids_sha256"] = hashlib.sha256(b"[1, 2, 3]").hexdigest()
+    elif change == "context_overflow":
+        expected["requested_output_budget"] = 4094
+    else:
+        value["count"] = True
+    with pytest.raises(AssertionError):
+        OWNER.check_token_response(value, expected)
+
+
+def test_four_command_profiles_and_only_policy_enable_delta():
+    commands = {
+        stage: json.loads((HERE / (stage + "-command.json")).read_bytes())
+        for stage in STAGES
+    }
+    for stage, value in commands.items():
+        assert OWNER.verify_command(value, stage)
+    assert len({value["environment"]["TMPDIR"] for value in commands.values()}) == 4
+    assert (
+        len({value["environment"]["VLLM_RPC_BASE_PATH"] for value in commands.values()})
+        == 4
+    )
+    common = []
+    for value in commands.values():
+        argv = copy.deepcopy(value["argv"])
+        index = argv.index("--additional-config") + 1
+        cfg = json.loads(argv[index])
+        cfg.pop("enable_utility_victim_selection")
+        cfg["bidkv_official023"].pop("policy")
+        cfg["bidkv_official023"].pop("evidence_dir")
+        argv[index] = cfg
+        common.append(argv)
+    assert all(argv == common[0] for argv in common)
+
+
+@pytest.mark.parametrize(
+    "change", ["kv", "thinking", "binding", "preset", "enable", "policy", "evidence"]
+)
+def test_changed_common_profile_or_policy_rejected(change):
+    value = json.loads((HERE / "bidkv-r01-command.json").read_bytes())
+    argv = value["argv"]
+    if change == "kv":
+        argv[argv.index("--kv-cache-memory-bytes") + 1] = "536870912"
+    elif change == "thinking":
+        argv[argv.index("--default-chat-template-kwargs") + 1] = (
+            '{"enable_thinking":false}'
+        )
+    else:
+        index = argv.index("--additional-config") + 1
+        cfg = json.loads(argv[index])
+        if change == "binding":
+            cfg["enable_cpu_binding"] = False
+        elif change == "preset":
+            cfg["utility_preempt_weight"] = 0.3
+        elif change == "enable":
+            cfg["enable_utility_victim_selection"] = False
+        elif change == "policy":
+            cfg["bidkv_official023"]["policy"] = None
+        else:
+            cfg["bidkv_official023"]["evidence_dir"] = "/old/pressure01"
+        argv[index] = json.dumps(cfg)
+    with pytest.raises(AssertionError):
+        OWNER.verify_command(value, "bidkv-r01")
+
+
+def test_generation_route_is_not_available_to_owner():
+    for route in ["/v1/chat/completions", "/generate", "/v1/completions"]:
+        with pytest.raises(ValueError):
+            OWNER.http(route, {"messages": []})
+    with pytest.raises(AssertionError):
+        OWNER.http("/collective_rpc", {"method": "execute_model"})
+
+
+def test_npu_mapping_refuses_new_allocation():
+    assert OWNER.check_npu_mapping(
+        "6 0 0 Ascend910B2\n6 1 - Mcu\n7 0 1 Ascend910B2"
+    ) == [(6, 0), (7, 1)]
+    with pytest.raises(AssertionError):
+        OWNER.check_npu_mapping("3 0 0 Ascend910B2\n4 0 1 Ascend910B2")
+
+
+def workers_fixture():
+    return [
+        {
+            "physical_npu": 6,
+            "main_affinity": list(range(98, 142)),
+            "threads": [
+                {"tid": 1, "Cpus_allowed_list": "98-141"},
+                {"tid": 2, "Cpus_allowed_list": "142"},
+            ],
+        },
+        {
+            "physical_npu": 7,
+            "main_affinity": list(range(50, 94)),
+            "threads": [
+                {"tid": 3, "Cpus_allowed_list": "50-93"},
+                {"tid": 4, "Cpus_allowed_list": "95"},
+            ],
+        },
+    ]
+
+
+def test_actual_binding_pool_guards_each_thread():
+    workers = workers_fixture()
+    assert OWNER.check_binding(workers)
+    workers[0]["threads"][0]["Cpus_allowed_list"] = "0-191"
+    with pytest.raises(AssertionError):
+        OWNER.check_binding(workers)
+
+
+def test_missing_rank_binding_rejected():
+    with pytest.raises(AssertionError):
+        OWNER.check_binding(workers_fixture()[:1])

@@ -1,0 +1,178 @@
+{
+  "schema": "pegaflow-own-mod-frozen-five-execution-plan/v2",
+  "project": "PegaFlow",
+  "standard_id": "five-datasets-20261113-v1",
+  "standard_sha256": "66c050b7c6d705853f10bc437e6ace1707a9b46d43b6bdb7159724045045b756",
+  "run_guide_sha256": "5db88d61ceaa2e831ab808f77f58f8241aa279e68c66ac4bd1de94c9f3d22c08",
+  "private_reference_tools_commit": "448362c7565597c8963c970dcfea0b235fd5fcf7",
+  "runtime_binding": "Project Native/PegaFlow on its official0.23 runtime; this workload standard does not replace the project runtime contract. Not the private Engine B0/B1 runtime pair.",
+  "baseline": "Native official vLLM0.23/vLLM-Ascend0.23, no connector",
+  "candidate": "Same official framework/core SDK/model/profile plus PegaFlow read_write connector and30GiB host sidecar",
+  "pegaflow_commit": "e2cdc2f7b32d8294b54a74545c05d103e5a5ecaf",
+  "vllm_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+  "ascend_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+  "physical_npus": [
+    3,
+    4
+  ],
+  "logical_npus": [
+    0,
+    1
+  ],
+  "chip": "Ascend910B2,64GiB/card",
+  "parallelism": {
+    "tensor": 2,
+    "pipeline": 1,
+    "data": 1,
+    "expert": false
+  },
+  "model": "Qwen3.5-35B-A3B BF16",
+  "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+  "kv_bytes_per_rank": 17179869184,
+  "max_model_len": 65536,
+  "max_num_seqs": 16,
+  "max_num_batched_tokens": 4096,
+  "image_limit": 1,
+  "video_limit": 0,
+  "mtp_tokens": 2,
+  "graph_mode": "FULL_AND_PIECEWISE",
+  "graph_capture_sizes": [
+    3,
+    6,
+    12,
+    24,
+    48
+  ],
+  "service_seed": 17,
+  "stage_order": [
+    "native-all-five",
+    "pegaflow-all-five",
+    "native-shared-judge"
+  ],
+  "dataset_order": [
+    "mmlu",
+    "hle",
+    "frontier",
+    "swe",
+    "terminal"
+  ],
+  "planned_solver_requests_per_arm": 672,
+  "planned_judge_inputs": 720,
+  "judge": "One fresh Native instance, same pinned Qwen model/framework/profile and unchanged per-dataset judge configs for both solver arms; judge traffic excluded from solver metrics/cost",
+  "generation_limits": {
+    "mmlu": {
+      "tasks": 200,
+      "max_completion_tokens": 8192,
+      "concurrency": 200,
+      "temperature": 0,
+      "seed": 0,
+      "thinking": "Unchanged original server default/frozen request"
+    },
+    "hle": {
+      "tasks": 200,
+      "max_tokens": 16384,
+      "concurrency": 16,
+      "temperature": 0,
+      "seed": 17,
+      "thinking": false,
+      "judge_max_tokens": 8192,
+      "image_tasks": 23,
+      "strata": [
+        64,
+        10,
+        113,
+        13
+      ]
+    },
+    "frontier": {
+      "tasks": 160,
+      "max_tokens": 16384,
+      "concurrency": 16,
+      "temperature": 0,
+      "seed": 17,
+      "thinking": false,
+      "judge_max_tokens": 8192,
+      "tracks": [
+        100,
+        60
+      ]
+    },
+    "swe": {
+      "requests": 64,
+      "tasks": 32,
+      "max_tokens": 2048,
+      "concurrency": 8,
+      "temperature": 0,
+      "seed": 17,
+      "tool_choice": "none"
+    },
+    "terminal": {
+      "requests": 48,
+      "tasks": 32,
+      "max_tokens": 2048,
+      "concurrency": 8,
+      "temperature": 0,
+      "seed": 17,
+      "tool_choice": "none"
+    }
+  },
+  "formal_dataset_eos": "Preserved for all five; no force-length, retries, replacement, outcome filtering or historical tool execution",
+  "c8": {
+    "arm_order": [
+      "native",
+      "pegaflow"
+    ],
+    "nominal_input_lengths": [
+      4096,
+      16384
+    ],
+    "actual_input_tokens": [
+      4115,
+      16407
+    ],
+    "input_sha256": "a73c9e1b2afa476dea80f91832e963867f6f4130e4988d97210dddfea5aeb392",
+    "lanes": 8,
+    "warmup_seconds": 60,
+    "formal_seconds": 300,
+    "request_timeout_seconds": 180,
+    "fixed_output_tokens": 256,
+    "ignore_eos": true,
+    "scope": "Original separate synthetic continuous qualification; not an EOS dataset result or a32K/full four-target stability proof"
+  },
+  "actual_token_admission": "Both fresh arms16C8+112trace inputs must match offline frozen token ID hashes before any generation; each formal trace phase checks every input again",
+  "cache_reuse": "All formal tasks use unique salts. Actual internal/external prefix hits0, Pega successful external restore delta0; null usage cache details remain unknown until engine counter proof. Zero restore cells cannot establish cache-offload benefit.",
+  "external_metrics_url_candidate": "http://127.0.0.1:18390 (vLLM API metrics exposes actual vllm:pega_load_success_total); Native omits external URL. Independent raw sidecar snapshots retained too.",
+  "quality": "Unchanged original MMLU extractor/HLE/Frontier graders and all planned denominators; errors,length stops,missing/unresolved remain. SWE/Terminal performance replay only, no solve rate.",
+  "metrics": "Accepted tokens / first submission to last response wall; TTFT first content; TPOT(end-first content)/(tokens-1), equal request weight; finite quantile linear(n-1)q; one-token exclusion count retained",
+  "source_and_input_policy": "Project own execution sources public. Private Engine source and original questions/answers/dialogues/SSE controlled only; public numeric observations,SHA and controlled-location index.",
+  "startup_policy": "Same startup-only model-file fadvise when cgroup filecache>16GiB; no global cleaning and no cleaning within timed measurement",
+  "old_protocol_separation": "Old20GiB/context262144 SWE900s cohort and separate3GiB capacity diagnostic remain untouched; neither qualifies this new16GiB/image-enabled profile",
+  "order_limit": "All Native solver scopes precede Candidate scopes, then a shared Native judge. No random interleaving/repeated formal five cohorts; time drift remains a limitation.",
+  "completion_vs_targets": "Full execution is separate from four-target acceptance; no inherited Engine historical target or cost claims",
+  "status": "Prospective new own-MOD defaultTrue profile; no full-five PegaFlow model generations at publication",
+  "profile": "ascend91-own-mod-default-cpu-binding-true-20261114-02",
+  "test_target": "own_mod",
+  "selected_scope": "full",
+  "mod_prompt_sha256": "43bc925a6ad749971a64e5244b86451f5d4cf3361e87423b1eda8ea0b0d04461",
+  "enable_cpu_binding": true,
+  "previous_prepared_profile": {
+    "profile": "pegaflow91-v1",
+    "enable_cpu_binding": false,
+    "disposition": "Superseded before any model startup/generation; source and LinuxCPU receipt retained. New defaultTrue requires fresh per-arm C8, not reuseFalse qualification."
+  },
+  "base_definition": "B0 is the same official0.23 foundation with targetPegaFlow OFF; B1 is that same configuration with targetPegaFlow ON. The optional Engine reference runner does not defineB1.",
+  "mod_repository": "https://github.com/vLLM-HUST/pegaflow-hust",
+  "pre_generation_admission": "Local/NAS source/argv/hash sealed first; Native defaultTrue model loading, thread-affinity and128actual token checks may run with0generation, then park until public source/plan readback. C8 and all solver/judgegeneration remain gated by released source-manifest SHA.",
+  "startup_cost_evidence": "Lifecycle/source admission/sidecar and model start-ready times;10-second cgroup hostmemory/stat/events+NPU memory/utilization samples only during startup; compilation/load log observations and actual worker/thread affinity/warnings; formal solver phases use their existingSampler.",
+  "controller_fix": "Recognize already observed fatal EngineCore/worker/capacity initialization messages even if API parent survives; abort owned startup immediately and retain error. No budget,task,EOS orgrader change.",
+  "quality_gate": "Original independent task graders; no cross-configuration exact-token equality requirement for full-five MOD quality. Trace tokenizer IDs remain exact. The prior separate3GiBprobe retains its own predeclared sampled gate without replacing this campaign.",
+  "core_packages": {
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0",
+    "transformers": "5.5.4",
+    "tokenizers": "0.22.2",
+    "CANN": "9.1 installedimage/path"
+  }
+}

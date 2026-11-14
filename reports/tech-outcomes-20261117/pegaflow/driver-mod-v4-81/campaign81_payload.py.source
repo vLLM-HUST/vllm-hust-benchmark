@@ -1,0 +1,352 @@
+"""Run the predeclared PegaFlow full-five cohort and a fixed native shared judge."""
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+import traceback
+
+from service81 import (
+    ROOT,
+    PERSIST,
+    reference,
+    Service,
+    save,
+    stop_owned,
+    ticks,
+    identity,
+)
+from verify_c8 import inspect as inspect_c8
+
+COMMON = Path("/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled")
+DATASETS = [
+    ("mmlu", 200),
+    ("hle", 200),
+    ("frontier", 160),
+    ("swe", 64),
+    ("terminal", 48),
+]
+
+
+def sha(path):
+    with Path(path).open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def cancelled(signum, frame):
+    raise KeyboardInterrupt("Owned campaign cancelled by signal " + str(signum))
+
+
+def run(args):
+    os.umask(0o077)
+    for signum in [signal.SIGINT, signal.SIGTERM]:
+        signal.signal(signum, cancelled)
+    driver = Path(__file__).resolve().parent
+    source_manifest = json.loads((driver / "source-manifest.json").read_bytes())
+    plan = json.loads((driver / "execution-plan.json").read_bytes())
+    assert plan["stage_order"] == [
+        "native-all-five",
+        "pegaflow-all-five",
+        "native-shared-judge",
+    ]
+    assert (
+        plan["standard_sha256"]
+        == "66c050b7c6d705853f10bc437e6ace1707a9b46d43b6bdb7159724045045b756"
+    )
+    out = args.out
+    out.mkdir(parents=True, exist_ok=False, mode=0o700)
+    stages = [
+        {
+            "name": arm + "-" + name,
+            "arm": arm,
+            "dataset": name,
+            "stage": "solver",
+            "planned": count,
+            "status": "not_executed",
+        }
+        for arm in ["native", "pegaflow"]
+        for name, count in DATASETS
+    ]
+    stages += [
+        {
+            "name": "judge-" + arm + "-" + name,
+            "arm": "native",
+            "solver_arm": arm,
+            "dataset": name,
+            "stage": "judge",
+            "planned": count,
+            "status": "not_executed",
+        }
+        for name, count in DATASETS
+        if name in ["hle", "frontier"]
+        for arm in ["native", "pegaflow"]
+    ]
+    state = {
+        "phase": "waiting-inputs-and-qualification",
+        "started_unix": time.time(),
+        "pid": os.getpid(),
+        "stages": stages,
+        "source_manifest_sha256": sha(driver / "source-manifest.json"),
+        "execution_plan_sha256": sha(driver / "execution-plan.json"),
+        "planned_solver_requests_per_arm": 672,
+        "planned_judge_inputs": 720,
+        "formal_complete": False,
+    }
+
+    def checkpoint():
+        save(out / "execution-checklist.json", state)
+
+    def source_admission():
+        for name, expected in source_manifest["files"].items():
+            assert sha(driver / name) == expected, (
+                "Execution source changed after prospective publication: " + name
+            )
+        assert sha(driver / "execution-plan.json") == state["execution_plan_sha256"]
+        for name, expected in state.get("plan_files", {}).items():
+            assert sha(COMMON / "plans" / name) == expected, (
+                "Controlled plan changed after prospective freeze: " + name
+            )
+
+    def invoke(stage):
+        source_admission()
+        stage.update(status="running", started_unix=time.time())
+        checkpoint()
+        command = [
+            str(ROOT / ".venv/bin/python"),
+            "-B",
+            str(driver / "finite.py"),
+            "--dataset",
+            stage["dataset"],
+            "--stage",
+            stage["stage"],
+            "--tools",
+            str(COMMON / "reference-tools"),
+            "--plan",
+            str(COMMON / "plans" / stage["dataset"]),
+            "--out",
+            str(out / stage["name"]),
+        ]
+        if stage["stage"] == "judge":
+            command += [
+                "--responses",
+                str(
+                    out / (stage["solver_arm"] + "-" + stage["dataset"]) / "evaluation"
+                ),
+            ]
+        if stage["arm"] == "pegaflow":
+            command += ["--external-metrics-url", "http://127.0.0.1:18390"]
+        log = (out / (stage["name"] + "-client.log")).open("ab", buffering=0)
+        process = subprocess.Popen(
+            command,
+            cwd=ROOT,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+        start_ticks = ticks(process)
+        stage.update(
+            command=command, client_pid=process.pid, client_start_ticks=start_ticks
+        )
+        checkpoint()
+        try:
+            result = process.wait()
+        except BaseException:
+            stop_owned(process, start_ticks)
+            raise
+        stage.update(
+            status="completed" if result == 0 else "failed",
+            exit_code=result,
+            completed_unix=time.time(),
+        )
+        checkpoint()
+        assert result == 0, (
+            "Retained failed stage; remaining stages remain unexecuted: "
+            + stage["name"]
+        )
+
+    try:
+        checkpoint()
+        source_admission()
+        deadline = time.monotonic() + 7200
+        while True:
+            path = COMMON / "input-status.json"
+            current = json.loads(path.read_bytes()) if path.exists() else {}
+            assert current.get("phase") != "failed", current
+            if current.get("phase") == "all-controlled-inputs-admitted":
+                break
+            assert time.monotonic() < deadline, (
+                "Controlled inputs not admitted before operational wait deadline"
+            )
+            time.sleep(15)
+        state["phase"] = "independent-c8-evidence-admission"
+        checkpoint()
+        for arm in ["native", "pegaflow"]:
+            controller = json.loads(
+                (PERSIST / "metadata/c8-campaign-status.json").read_bytes()
+            )
+            assert (
+                controller["phase"] == "complete"
+                and controller["arms"][arm]["client_exit_code"] == 0
+                and controller["arms"][arm]["owned_service_released"]
+            )
+            folder = PERSIST / "qualification" / (arm + "-c8-01")
+            verified = inspect_c8(
+                folder,
+                Path(
+                    "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/controlled/initial-inputs-01/continuous-inputs-r1.json"
+                ),
+            )
+            save(out / (arm + "-c8-reuse-admission.json"), verified)
+            if arm == "pegaflow":
+                from observation import zero_reuse
+
+                proofs = []
+                for length in ["4096", "16384"]:
+                    for label in ["warmup", "formal"]:
+                        phase = length + "-" + label
+                        rows = [
+                            json.loads(path.read_bytes())
+                            for path in folder.glob(phase + "-lane*.json")
+                        ]
+                        proof = zero_reuse(
+                            (folder / (phase + "-before-metrics.txt")).read_text(),
+                            (folder / (phase + "-after-metrics.txt")).read_text(),
+                            rows,
+                            external_metrics=(
+                                (
+                                    folder / (phase + "-external-before-metrics.txt")
+                                ).read_text(),
+                                (
+                                    folder / (phase + "-external-after-metrics.txt")
+                                ).read_text(),
+                            ),
+                        )
+                        proofs.append({"phase": phase, "proof": proof})
+                save(out / "pegaflow-c8-external-reuse-admission.json", proofs)
+        from weight_admission import admit
+
+        from service81 import MODEL, MODEL_REVISION
+
+        admit(
+            json.loads(reference("81-weights")),
+            json.loads(reference("81-expected")),
+            MODEL_REVISION,
+            str(MODEL),
+        )
+        save(out / "qualified-runtime-source-admission.json", identity())
+        save(out / "execution-plan.json", plan)
+        save(out / "source-manifest.json", source_manifest)
+        # Time order is fixed before observing any formal score. All Native tasks
+        # precede all Candidate tasks; a fresh Native instance judges both arms.
+        for arm, label in [("native", "pf81fn04"), ("pegaflow", "pf81fp04")]:
+            state.update(phase=arm + "-solver-cohort")
+            checkpoint()
+            with Service(arm, out / ("service-" + arm), label) as service:
+                for stage in stages:
+                    if stage["stage"] == "solver" and stage["arm"] == arm:
+                        service.check()
+                        service.sidecar_metrics("before-" + stage["name"])
+                        invoke(stage)
+                        service.sidecar_metrics("after-" + stage["name"])
+                        service.check()
+        state.update(phase="fixed-native-shared-judge")
+        checkpoint()
+        with Service("native", out / "service-judge", "pf81fj04") as service:
+            for stage in stages:
+                if stage["stage"] == "judge":
+                    service.check()
+                    invoke(stage)
+                    service.check()
+        state.update(phase="original-grader-summaries")
+        checkpoint()
+        for name in ["hle", "frontier"]:
+            for arm in ["native", "pegaflow"]:
+                command = [
+                    str(ROOT / ".venv/bin/python"),
+                    "-B",
+                    str(driver / "finite.py"),
+                    "--dataset",
+                    name,
+                    "--stage",
+                    "quality",
+                    "--tools",
+                    str(COMMON / "reference-tools"),
+                    "--plan",
+                    str(COMMON / "plans" / name),
+                    "--out",
+                    str(out / ("quality-" + arm + "-" + name)),
+                    "--responses",
+                    str(out / (arm + "-" + name) / "evaluation"),
+                    "--grades",
+                    str(out / ("judge-" + arm + "-" + name) / "evaluation"),
+                ]
+                subprocess.run(command, cwd=ROOT, check=True)
+        summaries = {
+            stage["name"]: json.loads(
+                (out / stage["name"] / "summary.json").read_bytes()
+            )
+            for stage in stages
+        }
+        qualities = {}
+        for name in ["hle", "frontier"]:
+            for arm in ["native", "pegaflow"]:
+                path = out / ("quality-" + arm + "-" + name) / "quality/summary.json"
+                qualities[arm + "-" + name] = {
+                    "original_summary_sha256": sha(path),
+                    "original_summary": json.loads(path.read_bytes()),
+                }
+        save(
+            out / "summary.json",
+            {
+                "stages": summaries,
+                "original_quality_summaries": qualities,
+                "solver_requests_per_arm": 672,
+                "quality_source": "Original unchanged MMLU extractor and HLE/Frontier graders; all planned denominators retained",
+                "scope": "Full five frozen task coverage; not an automatic four-target pass",
+                "order_limit": "All Native solver datasets precede all Candidate solver datasets; no random interleaving or independent repetitions; time drift remains a limitation",
+            },
+        )
+        state.update(
+            phase="completed", formal_complete=True, completed_unix=time.time()
+        )
+        checkpoint()
+        return 0
+    except BaseException as error:
+        state.update(
+            phase="failed",
+            error=type(error).__name__ + ": " + str(error),
+            failed_unix=time.time(),
+            exit_code=2,
+        )
+        checkpoint()
+        traceback.print_exc()
+        return 2
+    finally:
+        files = [
+            {
+                "path": path.relative_to(out).as_posix(),
+                "bytes": path.stat().st_size,
+                "sha256": sha(path),
+            }
+            for path in sorted(out.rglob("*"))
+            if path.is_file() and path != out / "manifest.json"
+        ]
+        save(
+            out / "manifest.json",
+            {
+                "files": files,
+                "sealed_unix": time.time(),
+                "controlled_only": True,
+                "classification": "Contains original questions/answers/dialogues/private source bindings; publish numeric derivatives and hashes only",
+            },
+        )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--out", type=Path, required=True)
+    raise SystemExit(run(parser.parse_args()))

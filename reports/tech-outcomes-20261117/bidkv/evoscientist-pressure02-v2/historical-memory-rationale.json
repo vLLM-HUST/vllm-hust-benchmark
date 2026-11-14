@@ -1,0 +1,99 @@
+{
+  "schema": "evoscientist-new-pressure-capacity-design-rationale/v1",
+  "old_archive": {
+    "path": "E:\\CodexData\\Documents\\Codex\\2026-11-13\\https-github-com-vllm-hust-vllm\\work\\github-audit\\bidkv-snapshot\\results\\qwen35-evoscientist-20260929\\first12-c12-512m-preempt5.tar.gz",
+    "bytes": 97816,
+    "sha256": "a9d3889bb195fa3be913b9201145c86ff17ffb702a0a8bcd51d6f8fcaa4a46e9"
+  },
+  "old_measured_log_facts": [
+    {
+      "archive_member": "bidkv-qwen35-evoscientist-first12-c12-512m-20260929/repeat-1-baseline/server.log",
+      "bytes": 69677,
+      "sha256": "e84ef701baea8559a8f0b435dda7a728a7e137ee48f80f6b81e42fbb0edc6328",
+      "tensor_parallel_size": 4,
+      "speculative_config": null,
+      "attention_block_size_tokens": 1024,
+      "reported_gpu_kv_capacity_tokens": 20480,
+      "reported_max_context": 4096,
+      "reported_max_context_concurrency": 5.0,
+      "capacity_log_excerpt": "GPU KV cache size: 20,480 tokens, Maximum concurrency for 4,096 tokens per request: 5.00x"
+    },
+    {
+      "archive_member": "bidkv-qwen35-evoscientist-first12-c12-512m-20260929/repeat-1-bidkv/server.log",
+      "bytes": 302260,
+      "sha256": "40ab0168242c836f1687f3a3bfad0907a497d5902b4c030bfed823ced3fe6437",
+      "tensor_parallel_size": 4,
+      "speculative_config": null,
+      "attention_block_size_tokens": 1024,
+      "reported_gpu_kv_capacity_tokens": 20480,
+      "reported_max_context": 4096,
+      "reported_max_context_concurrency": 5.0,
+      "capacity_log_excerpt": "GPU KV cache size: 20,480 tokens, Maximum concurrency for 4,096 tokens per request: 5.00x"
+    },
+    {
+      "archive_member": "bidkv-qwen35-evoscientist-first12-c12-512m-20260929/repeat-2-bidkv/server.log",
+      "bytes": 283253,
+      "sha256": "624960f6ba5ed98f9ad562f2cc80acb5d2befe40bee0dde312da7b1d3ca7031b",
+      "tensor_parallel_size": 4,
+      "speculative_config": null,
+      "attention_block_size_tokens": 1024,
+      "reported_gpu_kv_capacity_tokens": 20480,
+      "reported_max_context": 4096,
+      "reported_max_context_concurrency": 5.0,
+      "capacity_log_excerpt": "GPU KV cache size: 20,480 tokens, Maximum concurrency for 4,096 tokens per request: 5.00x"
+    },
+    {
+      "archive_member": "bidkv-qwen35-evoscientist-first12-c12-512m-20260929/repeat-2-baseline/server.log",
+      "bytes": 86220,
+      "sha256": "800a398f4bc3599addc6547b1ed5406e91bffa14a2b3de6b21c384bea4c0f567",
+      "tensor_parallel_size": 4,
+      "speculative_config": null,
+      "attention_block_size_tokens": 1024,
+      "reported_gpu_kv_capacity_tokens": 20480,
+      "reported_max_context": 4096,
+      "reported_max_context_concurrency": 5.0,
+      "capacity_log_excerpt": "GPU KV cache size: 20,480 tokens, Maximum concurrency for 4,096 tokens per request: 5.00x"
+    }
+  ],
+  "new_unmeasured_design": {
+    "tensor_parallel_size": 2,
+    "max_model_len": 4096,
+    "max_num_seqs": 12,
+    "http_concurrency": 12,
+    "request_rate": 4,
+    "requested_cache_bytes_per_rank": 1677721600,
+    "cache_mib_per_rank": 1600,
+    "speculative_num_tokens": 2,
+    "mamba_mode": "align",
+    "base_block_size_tokens_if_prior_profile_unchanged": 2048,
+    "page_bytes_per_layer_if_prior_profile_unchanged": 2138112,
+    "bytes_per_pool_block_if_prior_profile_unchanged": 23519232,
+    "predicted_total_pool_blocks": 71,
+    "reserved_null_blocks": 1,
+    "predicted_usable_pool_blocks": 70,
+    "max_context_per_request_pool_block_upper_bound": 14,
+    "max_context_resident_equivalent_capacity_requests": 5.0,
+    "max_context_resident_equivalent_capacity_tokens": 20480.0,
+    "first_prefill_blocks_per_short_input": 10,
+    "maximum_first_admissions_by_capacity": 7,
+    "steady_input_upper_blocks_per_request": 13,
+    "end_upper_blocks_per_request_range": [
+      13,
+      14
+    ],
+    "seven_simultaneous_input_steady_upper_blocks": 91,
+    "seven_simultaneous_end_upper_blocks": 98
+  },
+  "rejected_512_mib_design": {
+    "measured": false,
+    "reason": "Same byte count as oldTP4 gives only21usable currentTP2/MTP2 pool blocks, a different severity. Replaced before any new attempt startup/generation. Its earlier static arithmetic is retained separately."
+  },
+  "interpretation": [
+    "The design aligns old reported5.00x at4096 with a new metadata-derived5.00 max-context resident-equivalent capacity. It does not claim the new SDK GPU KV-cache-token log will equal20,480.",
+    "Actual rank metadata must independently establish pool count, null reservation, groups, page/block sizes, MTP2, current max-context footprint and paired normalized fingerprints before any generation. Inference cannot replace runtime admission.",
+    "Capacity pressure_possible is not proof of activation. At fixed4rps a request may reach steady state before another arrives, causing waiting instead of preemption; MTP state recycling and scheduling timing can prevent simultaneous upper-bound peaks.",
+    "NewTP2/official0.23+Ascend0.23 uses MTP2,2048blocks,defaultAPC/async/graphs/CPUTrue and EOS-preserving chat. OldTP4/fork0.28 used no MTP,1024blocks,completion API/forcedignoreEOS. This is an independent matched B0/B1 diagnostic with historical load/preset lineage, not exact old-stack reproduction or frozen-five compliance evidence.",
+    "Original twelve prompt bytes/order and output budgets remain fixed. Historical preempt_weight5.0 is declared in both arms, with target policy off/on; it does not establish default0.3 gains. Actual EOS means generated totals may differ."
+  ],
+  "no_remote_or_model_execution": true
+}

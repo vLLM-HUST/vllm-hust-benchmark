@@ -1,0 +1,70 @@
+{
+  "schema": "bidkv-default-true-c8-paired-summary/v1",
+  "source_manifest_sha256": "2e28cbe231438325ba96038588ad23e2888a3d503a8bc220100a667a4475e434",
+  "profile": "same official0.23 prepared host + copied installed Ascend common topologyfix, defaultCPUbindingTrue",
+  "native_requests": 334,
+  "bidkv_requests": 349,
+  "failed": 0,
+  "all_records_independently_replayed": true,
+  "native_policy_calls": 0,
+  "bidkv_policy_calls": 0,
+  "comparison_scope": "Original C8 fourphase duration-limited submissions fullydrained; generated-first TTFT. Allfixedmax256/ignoreEOS. This is a separate qualification, not fivefiniteEOS metrics. Numeric throughput differences with0policycalls do not establish BidKV mechanism benefit or2x target. One predeclaredcohort/order only, no repetitions or confidenceinterval claim.",
+  "phases": [
+    {
+      "phase": "4096-warmup",
+      "native_requests": 16,
+      "bidkv_requests": 16,
+      "native_failures": 0,
+      "bidkv_failures": 0,
+      "native_window_tokens_per_second": 65.29388462267211,
+      "bidkv_window_tokens_per_second": 65.60061029900001,
+      "throughput_change_percent": 0.4697617213318628,
+      "native_ttft_mean_seconds": 22.700719182030298,
+      "bidkv_ttft_mean_seconds": 22.54559715639334,
+      "native_tpot_mean_seconds": 0.03335306451875059,
+      "bidkv_tpot_mean_seconds": 0.03318911710680992
+    },
+    {
+      "phase": "4096-formal",
+      "native_requests": 225,
+      "bidkv_requests": 236,
+      "native_failures": 0,
+      "bidkv_failures": 0,
+      "native_window_tokens_per_second": 189.5131891307036,
+      "bidkv_window_tokens_per_second": 198.78180478237897,
+      "throughput_change_percent": 4.890749659266702,
+      "native_ttft_mean_seconds": 1.5883424421482617,
+      "bidkv_ttft_mean_seconds": 1.551203784714374,
+      "native_tpot_mean_seconds": 0.03587922279471795,
+      "bidkv_tpot_mean_seconds": 0.03406778405506836
+    },
+    {
+      "phase": "16384-warmup",
+      "native_requests": 16,
+      "bidkv_requests": 16,
+      "native_failures": 0,
+      "bidkv_failures": 0,
+      "native_window_tokens_per_second": 60.59086065029576,
+      "bidkv_window_tokens_per_second": 61.97364208967688,
+      "throughput_change_percent": 2.282161739477395,
+      "native_ttft_mean_seconds": 12.982007191400044,
+      "bidkv_ttft_mean_seconds": 12.316067391308025,
+      "native_tpot_mean_seconds": 0.07986895086143311,
+      "bidkv_tpot_mean_seconds": 0.07933220665207973
+    },
+    {
+      "phase": "16384-formal",
+      "native_requests": 77,
+      "bidkv_requests": 81,
+      "native_failures": 0,
+      "bidkv_failures": 0,
+      "native_window_tokens_per_second": 64.70889515797164,
+      "bidkv_window_tokens_per_second": 68.30179820403603,
+      "throughput_change_percent": 5.552409815208814,
+      "native_ttft_mean_seconds": 6.54323638569225,
+      "bidkv_ttft_mean_seconds": 6.403293706637657,
+      "native_tpot_mean_seconds": 0.09783494564796377,
+      "bidkv_tpot_mean_seconds": 0.09197770336435901
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+"""Run real CPU contract admission before the first model; wait on C8 handoff."""
+
+from pathlib import Path
+
+from service91 import ROOT, PERSIST
+from wait_record91 import run
+
+
+if __name__ == "__main__":
+    driver = Path(__file__).resolve().parent
+    code = run(
+        [str(ROOT / ".venv/bin/python"), "-B", str(driver / "preflight_cpu91.py")],
+        PERSIST / "metadata/cpu-admission-wait.json",
+    )
+    if not code:
+        code = run(
+            [str(ROOT / ".venv/bin/python"), "-B", str(driver / "c8_campaign91.py")],
+            PERSIST / "metadata/c8-controller-wait.json",
+        )
+    raise SystemExit(code)

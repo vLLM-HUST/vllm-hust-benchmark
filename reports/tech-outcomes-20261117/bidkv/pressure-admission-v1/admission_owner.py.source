@@ -1,0 +1,423 @@
+"""Own one probe model, collect read-only cache metadata/token hashes, then park."""
+
+import argparse
+import hashlib
+import importlib.metadata
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+import traceback
+import urllib.request
+
+from observation import Sampler
+
+ROOT = Path("/workspace/bidkv-five-datasets-20261113-01")
+PERSIST = ROOT / "durable"
+PROBE = PERSIST / "probes/bidkv-pressure-01"
+DRIVER = Path(__file__).resolve().parent
+INPUT = PERSIST / "controlled/initial-inputs-01/continuous-inputs-r1.json"
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def save(path, value):
+    temp = path.with_suffix(".tmp")
+    temp.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    temp.replace(path)
+
+
+def http(path, body=None):
+    if path not in ["/health", "/collective_rpc", "/metrics", "/tokenize"]:
+        raise ValueError("Zero-generation admission forbids all other HTTP routes")
+    if path == "/collective_rpc":
+        assert body == {
+            "method": "describe_bidkv_probe_cache_groups_v1",
+            "args": [],
+            "kwargs": {},
+            "timeout": 30,
+        }
+    request = urllib.request.Request(
+        "http://127.0.0.1:18390" + path,
+        None if body is None else json.dumps(body).encode(),
+        {"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(
+        request, timeout=5 if path == "/health" else 60
+    ) as response:
+        return response.read()
+
+
+def remaining():
+    clock = json.loads((PROBE / "metadata/clock.json").read_bytes())
+    assert (
+        clock["host_boot_id_sha256"]
+        == hashlib.sha256(
+            Path("/proc/sys/kernel/random/boot_id").read_bytes()
+        ).hexdigest()
+    ), "Host restart invalidates this attempt; do not reset its clock"
+    return clock["deadline_monotonic"] - time.monotonic()
+
+
+def binding_evidence(api_pid):
+    sample = subprocess.check_output(["npu-smi", "info"], text=True, timeout=20)
+    workers = []
+    for line in sample.splitlines():
+        cells = [value.strip() for value in line.split("|")[1:-1]]
+        if len(cells) != 5 or not cells[-1].isdigit():
+            continue
+        device = cells[0].split()
+        if len(device) != 2 or not all(value.isdigit() for value in device):
+            continue
+        pid, current = int(cells[-1]), int(cells[-1])
+        for _ in range(32):
+            if current == api_pid:
+                break
+            status = Path(f"/proc/{current}/status").read_text()
+            current = next(
+                int(value.split()[1])
+                for value in status.splitlines()
+                if value.startswith("PPid:")
+            )
+            assert current > 1, "Foreign NPU process during zero-generation admission"
+        else:
+            raise ValueError("NPU process ownership chain exceeded")
+        threads = []
+        for task in sorted(
+            Path(f"/proc/{pid}/task").iterdir(), key=lambda item: int(item.name)
+        ):
+            try:
+                status = task.joinpath("status").read_text()
+                fields = {
+                    row.split(":", 1)[0]: row.split(":", 1)[1].strip()
+                    for row in status.splitlines()
+                    if row.startswith(
+                        ("Name:", "Cpus_allowed_list:", "Mems_allowed_list:")
+                    )
+                }
+                threads.append({"tid": int(task.name), **fields})
+            except FileNotFoundError:
+                pass
+        workers.append(
+            {
+                "physical_npu": int(device[0]),
+                "pid": pid,
+                "main_affinity": sorted(os.sched_getaffinity(pid)),
+                "threads": threads,
+            }
+        )
+    assert {worker["physical_npu"] for worker in workers} == {6, 7}
+    return {
+        "workers": workers,
+        "npu_smi": sample,
+        "scope": "Read-only actual owned worker/thread affinities; no manual binding/IRQ/migration commands",
+    }
+
+
+def main(args):
+    folder = PROBE / args.arm
+    folder.mkdir(exist_ok=False, mode=0o700)
+    state = {
+        "phase": "checking",
+        "pid": os.getpid(),
+        "arm": args.arm,
+        "started_unix": time.time(),
+        "preflight_submitted_generation_requests": 0,
+    }
+    service = sampler = None
+
+    def checkpoint():
+        save(folder / "status.json", state)
+
+    def cancel(signum, _frame):
+        raise KeyboardInterrupt(
+            "Owned probe admission cancelled by signal " + str(signum)
+        )
+
+    for signum in [signal.SIGTERM, signal.SIGINT]:
+        signal.signal(signum, cancel)
+    checkpoint()
+    try:
+        manifest = json.loads((DRIVER / "source-manifest.json").read_bytes())
+        for name, expected in manifest["files"].items():
+            assert digest(DRIVER / name) == expected, name
+        assert remaining() > 0, "Fixed60min operation budget expired before admission"
+        assert (
+            digest(ROOT / "runtime/ascend023-cpubind03/source-admission.json")
+            == "55194e2e23ae7a590227ce93508c5c66f8718251952ed7b982d79de2f3f0a1d2"
+        )
+        for package, special, expected in [
+            (
+                "runtime/official023",
+                "vllm/v1/core/sched/scheduler.py",
+                "ae12773bc25b42149d4aa5c84c0797dcf12a0b60c045a7e85ca3c974bc47915c",
+            ),
+            (
+                "runtime/ascend023-cpubind03",
+                "vllm_ascend/cpu_binding.py",
+                "b7a84571c349c22935414b2c5a4c6cf91223414f80c0954f797340ad0f1f55f2",
+            ),
+        ]:
+            admission = json.loads(
+                (ROOT / package / "source-admission.json").read_bytes()
+            )
+            assert digest(ROOT / package / special) == expected
+            for item in admission["source_files"]:
+                assert digest(ROOT / package / item["path"]) == (
+                    expected if item["path"] == special else item["source_sha256"]
+                ), item["path"]
+        assert (
+            digest(PERSIST / "provenance/model-hash-status.json")
+            == "e95e919abc6d13f160ca7530211ec167945a2d3981aa36c48003bbd9ade5b6c8"
+        )
+        versions = {
+            key: importlib.metadata.version(key)
+            for key in [
+                "torch",
+                "torch-npu",
+                "vllm",
+                "vllm-ascend",
+                "transformers",
+                "tokenizers",
+            ]
+        }
+        assert versions == {
+            "torch": "2.10.0+cpu",
+            "torch-npu": "2.10.0.post4",
+            "vllm": "0.23.0+empty",
+            "vllm-ascend": "0.23.0",
+            "transformers": "5.5.4",
+            "tokenizers": "0.22.2",
+        }
+        save(folder / "core-sdk-metadata.json", versions)
+        before = subprocess.check_output(["npu-smi", "info"], text=True, timeout=20)
+        assert before.count("No running processes found in NPU") == 2, (
+            "Allocated devices occupied"
+        )
+        (folder / "npu-before.txt").write_text(before)
+        template = json.loads((DRIVER / (args.arm + "-command.json")).read_bytes())
+        environment = {
+            **os.environ,
+            **{k: v for k, v in template["environment"].items() if v is not None},
+        }
+        for key in ["TMPDIR", "VLLM_RPC_BASE_PATH"]:
+            Path(environment[key]).mkdir(exist_ok=False, mode=0o700)
+        save(folder / "command.json", template)
+        sampler = Sampler(folder)
+        sampler.__enter__()
+        log = (folder / "service.log").open("ab", buffering=0)
+        state["api_spawn_begin_unix"] = time.time()
+        service = subprocess.Popen(
+            template["argv"],
+            cwd=ROOT,
+            env=environment,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+        state.update(
+            phase="starting-model",
+            api_pid=service.pid,
+            api_spawn_return_unix=time.time(),
+            api_start_ticks=Path(f"/proc/{service.pid}/stat").read_text().split()[21],
+        )
+        checkpoint()
+        begin = time.monotonic()
+        while True:
+            assert service.poll() is None, "Owned API exited before health"
+            assert time.monotonic() - begin < 1200 and remaining() > 0, (
+                "Admission/operation deadline expired"
+            )
+            text = (folder / "service.log").read_text(errors="replace")
+            assert not any(
+                marker in text
+                for marker in [
+                    "EngineCore failed to start.",
+                    "Engine core initialization failed.",
+                    "Worker failed with error 'call aclnn",
+                ]
+            ), "Worker initialization fatal; preserve raw log"
+            stats = {
+                key: int(value)
+                for key, value in (
+                    line.split()
+                    for line in Path("/sys/fs/cgroup/memory.stat")
+                    .read_text()
+                    .splitlines()
+                )
+            }
+            if stats["file"] > 16 * 1024**3:
+                for item in json.loads(
+                    (ROOT / "model-expected-weights.json").read_bytes()
+                ):
+                    descriptor = os.open(
+                        "/data/shared_models/Qwen3.5-35B-A3B/" + item["path"],
+                        os.O_RDONLY,
+                    )
+                    try:
+                        os.posix_fadvise(descriptor, 0, 0, os.POSIX_FADV_DONTNEED)
+                    finally:
+                        os.close(descriptor)
+            try:
+                http("/health")
+                break
+            except Exception:
+                time.sleep(2)
+        state.update(
+            phase="reading-cache-metadata",
+            healthy_unix=time.time(),
+            initialization_seconds=time.monotonic() - begin,
+        )
+        checkpoint()
+        save(folder / "binding-evidence.json", binding_evidence(service.pid))
+        sampler.__exit__(None, None, None)
+        sampler = None
+        (folder / "telemetry.jsonl").replace(folder / "startup-telemetry.jsonl")
+        body = {
+            "method": "describe_bidkv_probe_cache_groups_v1",
+            "args": [],
+            "kwargs": {},
+            "timeout": 30,
+        }
+        raw = http("/collective_rpc", body)
+        (folder / "cache-groups-rpc.json").write_bytes(raw)
+        actual = json.loads(raw)["results"]
+        assert len(actual) == 2 and {item["rank"] for item in actual} == {0, 1}
+        assert all(
+            item["schema"] == "actual-worker-cache-metadata/v1" for item in actual
+        )
+        expected_profile = {
+            "max_model_len": 65536,
+            "dtype": "torch.bfloat16",
+            "tensor_parallel_size": 2,
+            "pipeline_parallel_size": 1,
+            "data_parallel_size": 1,
+            "max_num_seqs": 16,
+            "max_num_batched_tokens": 4096,
+            "async_scheduling": True,
+            "kv_cache_memory_bytes": 1073741824,
+            "enable_prefix_caching": True,
+            "mamba_cache_mode": "align",
+            "speculative_num_tokens": 2,
+            "enable_cpu_binding": True,
+            "graph_mode": "FULL_AND_PIECEWISE",
+            "capture_sizes": [3, 6, 12, 24, 48],
+        }
+        assert all(item["actual_profile"] == expected_profile for item in actual), (
+            "Actual optimization/configuration metadata differs"
+        )
+        assert all(
+            item["observer_source_sha256"]
+            == digest(DRIVER / "bidkv_probe_cache_evidence.py")
+            for item in actual
+        )
+        assert all(
+            Path(item["loaded_vllm_file"]).resolve()
+            == (ROOT / "runtime/official023/vllm/__init__.py").resolve()
+            for item in actual
+        )
+        assert all(
+            Path(item["loaded_ascend_file"]).resolve()
+            == (ROOT / "runtime/ascend023-cpubind03/vllm_ascend/__init__.py").resolve()
+            for item in actual
+        )
+        metrics = http("/metrics")
+        (folder / "zero-generation-metrics.txt").write_bytes(metrics)
+        assert (
+            digest(INPUT)
+            == "a73c9e1b2afa476dea80f91832e963867f6f4130e4988d97210dddfea5aeb392"
+        )
+        cases = json.loads(INPUT.read_bytes())["16384"]
+        assert len(cases) == 8
+        (folder / "tokenize").mkdir()
+        checked = []
+        for index, case in enumerate(cases):
+            raw = http(
+                "/tokenize",
+                {
+                    "model": "qwen3.5-35b",
+                    "messages": case["request"]["messages"],
+                    "add_generation_prompt": True,
+                },
+            )
+            value = json.loads(raw)
+            (folder / "tokenize" / (str(index) + ".json")).write_bytes(raw)
+            token_hash = hashlib.sha256(
+                json.dumps(value["tokens"]).encode()
+            ).hexdigest()
+            assert (
+                value["count"] == len(value["tokens"]) == case["input_tokens"] == 16407
+            )
+            assert token_hash == case["token_ids_sha256"]
+            checked.append(
+                {"lane": index, "tokens": value["count"], "sha256": token_hash}
+            )
+        save(
+            folder / "token-id-admission.json",
+            {"passed": True, "checked": checked, "generation_requests": 0},
+        )
+        state.update(
+            phase="admitted-awaiting-public-capacity-binding",
+            tokenizations_passed=8,
+            cache_rpc_sha256=digest(folder / "cache-groups-rpc.json"),
+            remaining_operation_seconds=remaining(),
+        )
+        checkpoint()
+        while not (folder / "stop-requested").exists():
+            assert service.poll() is None, "Owned API exited while parked"
+            assert remaining() > 0, (
+                "Fixed60min budget expired including publication parks"
+            )
+            time.sleep(2)
+        state.update(phase="stopping-owned-model")
+        checkpoint()
+        return 0
+    except BaseException as error:
+        state.update(
+            phase="failed",
+            error=type(error).__name__ + ": " + str(error),
+            failed_unix=time.time(),
+        )
+        checkpoint()
+        traceback.print_exc()
+        return 2
+    finally:
+        if service is not None:
+            if service.poll() is None:
+                assert (
+                    Path(f"/proc/{service.pid}/stat").read_text().split()[21]
+                    == state["api_start_ticks"]
+                )
+                os.killpg(service.pid, signal.SIGTERM)
+                try:
+                    service.wait(timeout=120)
+                except subprocess.TimeoutExpired:
+                    os.killpg(service.pid, signal.SIGKILL)
+                    service.wait(timeout=30)
+            save(
+                folder / "api-owned-wait.json",
+                {
+                    "actual_returncode": service.returncode,
+                    "wait_returned_unix": time.time(),
+                    "api_pid": service.pid,
+                },
+            )
+        if sampler is not None:
+            sampler.__exit__(None, None, None)
+        (folder / "npu-release.txt").write_text(
+            subprocess.check_output(["npu-smi", "info"], text=True, timeout=20)
+        )
+        if state["phase"] != "failed":
+            state.update(phase="owned-model-released", released_unix=time.time())
+            checkpoint()
+
+
+if __name__ == "__main__":
+    os.umask(0o077)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--arm", choices=["native", "bidkv"], required=True)
+    raise SystemExit(main(parser.parse_args()))

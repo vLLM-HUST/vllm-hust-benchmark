@@ -1,0 +1,83 @@
+"""Null-test token variability without relaxing the campaign's correctness gate."""
+import hashlib
+import json
+from pathlib import Path
+import time
+import traceback
+import urllib.request
+
+ROOT = Path('/workspace/pegaflow-techoutcomes-20261113-01')
+source = (ROOT / 'run_campaign.py').read_text()
+namespace = {'__name__': 'campaign_support'}
+support = source.split('\ntry:\n    for filename')[0].replace('campaign-status.json', 'diagnostic-server-startup.json')
+exec(compile(support, str(ROOT / 'run_campaign.py'), 'exec'), namespace)
+OUT = ROOT / 'diagnostics/token-variability-mtp2'
+OUT.mkdir(parents=True, exist_ok=False)
+status = {'phase': 'starting', 'pid': __import__('os').getpid(), 'source_sha256': hashlib.sha256(source.encode()).hexdigest(), 'started_unix': time.time(), 'arms': []}
+
+
+def save():
+    namespace['write'](ROOT / 'diagnostic-status.json', status)
+    namespace['write'](OUT / 'status.json', status)
+
+
+def post(body):
+    request = urllib.request.Request('http://127.0.0.1:33891/v1/completions', data=json.dumps(body).encode(), headers={'Content-Type': 'application/json'})
+    with urllib.request.urlopen(request, timeout=180) as response:
+        return json.load(response)
+
+
+try:
+    sessions = json.loads((ROOT / 'prepared-qwen35.json').read_text())['sessions']
+    for candidate in [False, True]:
+        arm = 'pegaflow' if candidate else 'native'
+        folder = OUT / arm
+        folder.mkdir()
+        assert namespace['npu'](folder / 'npu-before.txt').count('No running processes found in NPU') == 2
+        server = sidecar = None
+        result = {'arm': arm, 'pairs': [], 'metrics': []}
+        status.update(phase='starting-' + arm, current_arm=arm)
+        save()
+        try:
+            if candidate:
+                command = [str(ROOT / '.venv/bin/pegaflow-server'), '--addr', '127.0.0.1:33892', '--http-addr', '127.0.0.1:33893', '--pool-size', '30gb', '--devices', '0,1', '--log-level', 'info']
+                sidecar = namespace['start'](arm + '-diagnostic-sidecar', command, folder / 'sidecar')
+                namespace['health'](sidecar, 'http://127.0.0.1:33893/health', maximum=300)
+            server = namespace['start'](arm + '-diagnostic-vllm', namespace['server_command'](candidate), folder / 'server')
+            namespace['health'](server, 'http://127.0.0.1:33891/health')
+            namespace['metrics'](folder, 'before', candidate)
+            status['phase'] = 'probing-' + arm
+            save()
+            for pair in range(10):
+                prompt = sessions[4]['turns'][0]['input_ids']
+                salt = f'null-test-mtp2-{arm}-{pair}'
+                responses = []
+                for repetition in range(2):
+                    body = {'model': 'pegaflow-techoutcomes-qwen35', 'prompt': prompt, 'max_tokens': 32, 'temperature': 0, 'seed': 17, 'ignore_eos': True, 'return_token_ids': True, 'cache_salt': salt, 'stream': False}
+                    response = post(body)
+                    responses.append(response)
+                    namespace['metrics'](folder, f'pair{pair}-rep{repetition}', candidate)
+                tokens = [response['choices'][0]['token_ids'] for response in responses]
+                assert all(isinstance(ids, list) and len(ids) == 32 for ids in tokens)
+                result['pairs'].append({'pair': pair, 'case': 4, 'prompt_tokens': len(prompt), 'cache_salt': salt, 'equal': tokens[0] == tokens[1], 'responses': responses})
+                namespace['write'](folder / 'probes.json', result)
+                status.update(pairs_completed=pair + 1, equal_pairs=sum(p['equal'] for p in result['pairs']))
+                save()
+            unique = {tuple(response['choices'][0]['token_ids']) for pair in result['pairs'] for response in pair['responses']}
+            result['unique_sequences'] = len(unique)
+            result['completed_unix'] = time.time()
+            namespace['write'](folder / 'probes.json', result)
+            status['arms'].append({'arm': arm, 'unique_sequences': len(unique), 'unequal_pairs': sum(not p['equal'] for p in result['pairs'])})
+        finally:
+            status['phase'] = 'stopping-' + arm
+            save()
+            namespace['stop'](server)
+            namespace['stop'](sidecar)
+            namespace['npu'](folder / 'npu-release.txt')
+    status.update(phase='complete', completed_unix=time.time())
+    save()
+except BaseException as error:
+    traceback.print_exc()
+    status.update(phase='failed', error=type(error).__name__ + ': ' + str(error), completed_unix=time.time())
+    save()
+    raise
