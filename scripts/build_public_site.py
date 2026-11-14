@@ -59,6 +59,90 @@ PUBLIC_C16_RUN_IDS = frozenset(
     }
 )
 
+# The MOD card may show this historical service comparison. The separate
+# project page, raw artifacts, and all other BetterScale records stay filtered.
+BETTERSCALE_ID = "betterscale"
+BETTERSCALE_CARD = {
+    "id": BETTERSCALE_ID,
+    "name": "BetterScale",
+    "name_en": "BetterScale",
+    "name_zh": "BetterScale",
+    "artifact_type": "runtime_component",
+    "system_role": "graph_execution_policy",
+    "integration_contracts": [],
+    "execution_planes": ["worker", "native", "device"],
+    "deployment_topology": "in_process",
+    "delivery_model": "python_distribution",
+    "ownership": "hust_owned_subsystem",
+    "repository_relationship": "organization_native",
+    "repository_visibility": "private",
+    "maturity": "experimental",
+    "maintainers": ["CubeLander"],
+    "maintainer_profiles": [{"login": "CubeLander", "name": "田景远"}],
+    "summary_en": "Multi-device inference execution optimization for Ascend.",
+    "summary_zh": "面向昇腾的多卡推理执行优化。",
+    "public_effect_status": "measured",
+    "public_effect_en": "Historical DeepSeek-V4-Flash HTTP test: output throughput rose 39.63% at DP8/C16 and 35.17% at TP8/C4 against their respective baselines.",
+    "public_effect_zh": "DeepSeek-V4-Flash 历史 HTTP 实测中，DP8／并发 16 和 TP8／并发 4 的输出吞吐分别较各自基线提高 39.63% 和 35.17%。",
+    "public_effect_detail_en": [
+        "2026-09-14 · DeepSeek-V4-Flash-0731 W8A8 on 8 × Ascend 910B2 (HCCS), vLLM 0.25.1 / vLLM-Ascend 0.25.1rc1, K5.",
+        "DP8, concurrency 16, 8 GiB KV/rank: 268.89 → 375.45 output tok/s (+39.63%), runs 158 → 155. The candidate included the DP startup preparation carried into 0.3.1.",
+        "TP8, concurrency 4, 12 GiB KV/rank: 155.13 → 209.68 output tok/s (+35.17%), runs 160 → 161. The baseline included the LCM startup compatibility fix.",
+        "Each comparison divides total output tokens by total timed duration across all nine synthetic HTTP rounds (three workloads, three repeats). Startup, the separately logged prelude and quality scoring were excluded. Each arm passed 32/32 retrieval questions. TP decode P99 chunk-gap worsened. These measurements do not establish maximum concurrency, SLO capacity, or performance of a newer wheel.",
+    ],
+    "public_effect_detail_zh": [
+        "2026-09-14 · DeepSeek-V4-Flash-0731 W8A8，8 张昇腾 910B2（HCCS），vLLM 0.25.1 / vLLM-Ascend 0.25.1rc1，K5。",
+        "DP8，并发 16，每 rank 8 GiB KV。原生基线 268.89 → 优化后 375.45 输出 token/s（+39.63%，run 158 → 155）。候选包含后续收录于 0.3.1 的 DP 启动预热。",
+        "TP8，并发 4，每 rank 12 GiB KV。含 LCM 启动兼容修复的基线 155.13 → 优化后 209.68 输出 token/s（+35.17%，run 160 → 161）。",
+        "各自按九组固定合成 HTTP 负载（三种负载，各三次）的输出 token 总数除以计时总长。启动、单独记录的预备阶段和质量评分不计时。各组检索 32/32，TP 解码 P99 输出块间隔变差。结果仅适用于上述实测工况，不能用于推断最大并发、SLO 容量或新版软件包性能。",
+    ],
+    "evidence_level": "hardware_verified",
+}
+BETTERSCALE_CATALOG_ENTRIES = {
+    "data/mod-taxonomy.json": {
+        "kind": "runtime_mod",
+        "capability": "execution_optimization",
+        "phases": ["prefill", "decode"],
+        "lifecycle": "implemented",
+        "evidence": "measured_beneficial",
+    },
+    "data/plugin-workload-navigation.json": ["distributed_pipeline"],
+}
+
+
+def add_betterscale_card(path, projected, original):
+    if path == "data/ecosystem.json":
+        if any(item["id"] == BETTERSCALE_ID for item in original["components"]):
+            projected["components"].append(copy.deepcopy(BETTERSCALE_CARD))
+    elif path in BETTERSCALE_CATALOG_ENTRIES:
+        key = (
+            "plugins"
+            if path == "data/plugin-workload-navigation.json"
+            else "components"
+        )
+        if BETTERSCALE_ID in original[key]:
+            projected[key][BETTERSCALE_ID] = copy.deepcopy(
+                BETTERSCALE_CATALOG_ENTRIES[path]
+            )
+
+
+def validate_betterscale_card(path, data):
+    if path == "data/ecosystem.json":
+        cards = [item for item in data["components"] if item["id"] == BETTERSCALE_ID]
+        assert not cards or cards == [BETTERSCALE_CARD], path
+        if cards:
+            data["components"].remove(cards[0])
+    elif path in BETTERSCALE_CATALOG_ENTRIES:
+        key = (
+            "plugins"
+            if path == "data/plugin-workload-navigation.json"
+            else "components"
+        )
+        if BETTERSCALE_ID in data[key]:
+            assert data[key].pop(BETTERSCALE_ID) == BETTERSCALE_CATALOG_ENTRIES[path], (
+                path
+            )
+
 
 def matches(value):
     return bool(PROJECT.search(json.dumps(value, ensure_ascii=False)))
@@ -392,6 +476,7 @@ def build(source, destination, policy_revision):
         if projected is DROP:
             removed.append(name)
             continue
+        add_betterscale_card(name, projected, original)
         out = (
             raw
             if projected == original
@@ -456,7 +541,9 @@ def validate(destination):
         if path.name == "benchmark-source-manifest.json":
             continue
         data = json.loads(path.read_text())
-        if path.relative_to(destination).as_posix() == C16_EVIDENCE_PATH:
+        name = path.relative_to(destination).as_posix()
+        validate_betterscale_card(name, data)
+        if name == C16_EVIDENCE_PATH:
             for run in data.get("runs", []):
                 if run.get("run_id") in PUBLIC_C16_RUN_IDS:
                     run.clear()

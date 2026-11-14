@@ -92,6 +92,59 @@ def test_refuses_to_overwrite_or_write_inside_source(tmp_path):
         projection.build(tmp_path, tmp_path, "test")
 
 
+def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
+    source = tmp_path / "source"
+    (source / "data").mkdir(parents=True)
+    (source / "assets").mkdir()
+    for name in (
+        "index.html",
+        "plugins.html",
+        "dataset-introductions.html",
+        "leaderboard-runs.html",
+        "betterscale.html",
+        "assets/site.js",
+        "assets/betterscale.js",
+    ):
+        (source / name).write_text("")
+    payloads = {
+        "data/ecosystem.json": {
+            "components": [
+                {
+                    "id": "betterscale",
+                    "documentation_url": "./betterscale.html",
+                    "canonical_repository": "https://github.com/vLLM-HUST/BetterScale",
+                }
+            ]
+        },
+        "data/mod-taxonomy.json": {"components": {"betterscale": {}}},
+        "data/plugin-workload-navigation.json": {"plugins": {"betterscale": []}},
+        "data/plugin-performance.json": {"entries": [{"id": "betterscale"}]},
+        "data/betterscale-results.json": {"secret-study": "unpublished"},
+    }
+    for name, value in payloads.items():
+        (source / name).write_text(json.dumps(value))
+    (source / "data/benchmark-source-manifest.json").write_text('{"files": []}')
+    output = tmp_path / "public"
+    projection.build(source, output, "test-policy")
+    projection.validate(output)
+    assert not (output / "data/betterscale-results.json").exists()
+    assert json.loads((output / "data/plugin-performance.json").read_text()) == {
+        "entries": []
+    }
+    catalog = output / "data/ecosystem.json"
+    data = json.loads(catalog.read_text())
+    [card] = data["components"]
+    assert card["id"] == "betterscale"
+    assert "documentation_url" not in card
+    assert "canonical_repository" not in card
+    assert "375.45" in " ".join(card["public_effect_detail_en"])
+    assert "209.68" in " ".join(card["public_effect_detail_zh"])
+    card["documentation_url"] = "./betterscale.html"
+    catalog.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(AssertionError):
+        projection.validate(output)
+
+
 def test_combined_record_is_withheld_as_a_whole():
     record = {"id": "combined", "mods": ["PegaFlow", "LatchMoE"], "value": 42}
     assert projection.project_json([record], set()) == []
