@@ -5,6 +5,7 @@ import json
 import math
 from pathlib import Path
 import runpy
+import re
 import statistics
 
 ROOT = Path(__file__).resolve().parent
@@ -195,6 +196,76 @@ def verify():
         token_ids = read(capacity_root / "native-token-id-admission.json")
         assert token_ids["passed"] is True and len(token_ids["checked"]) == 8
         assert all(row["tokens"] == 16407 for row in token_ids["checked"])
+    corrective = None
+    if (ROOT / "pressure-driver-v3").is_dir():
+        v3 = ROOT / "pressure-driver-v3"
+        for manifest_name in (
+            "source-manifest.json",
+            "operation-launcher-manifest.json",
+        ):
+            for name, checksum in read(v3 / manifest_name)["files"].items():
+                stored = name + ".source" if name.endswith(".py") else name
+                assert (
+                    hashlib.sha256((v3 / stored).read_bytes()).hexdigest() == checksum
+                )
+        plan = read(v3 / "execution-plan.json")
+        assert plan["fixed_workload"]["planned_requests"] == 8
+        assert plan["corrective_scope"]["new_Native_requests"] == 0
+        assert plan["corrective_scope"]["old_controller_RC"] == 2
+        carry = read(
+            ROOT / "pressure-correction-v3/native-carry-baseline-audit-v3.json"
+        )
+        assert carry["passed"] is True and carry["verified_native_requests"] == 8
+        assert carry["old_v2_remains_failed"] is True
+        assert (
+            carry["original_client_returncode"] == 1
+            and carry["original_controller_returncode"] == 2
+        )
+        mapping = carry["exact_external_internal_mapping"]
+        assert len(mapping) == len(set(mapping.values())) == 8
+        for wire, internal in mapping.items():
+            assert re.fullmatch(re.escape(wire) + "-[0-9a-f]{8}", internal)
+        proofs = carry["sse_proofs"]
+        assert len(proofs) == 8 and {row["lane"] for row in proofs} == set(range(8))
+        for row in proofs:
+            assert row["wire_id"] in mapping
+            proof = row["proof"]
+            assert proof["successful_record_independently_verified"] is True
+            assert proof["usage_observed"]["prompt_tokens"] == 16407
+            assert proof["usage_observed"]["completion_tokens"] == 4096
+        events = [
+            event
+            for journal in carry["policy_guard_revalidated"]
+            for event in journal["events"]
+        ]
+        assert len(events) == 7
+        for event in events:
+            context = event["context"]
+            ids = {row["request_id"] for row in context["candidates"]}
+            assert ids <= set(mapping.values())
+            assert event["selected_id"] in ids
+            assert (
+                context["builtin_victim_id"] in ids
+                and context["requesting_request_id"] in ids
+            )
+            assert event["outcome"] not in ("exception-fallback", "invalid-fallback")
+            assert (
+                event["stats"]["failures"] == event["stats"]["invalid_selections"] == 0
+            )
+        analysis = ROOT / "pressure-analysis-v2"
+        for name, checksum in read(analysis / "analysis-source-manifest.json")[
+            "files"
+        ].items():
+            stored = name + ".source" if name.endswith(".py") else name
+            assert (
+                hashlib.sha256((analysis / stored).read_bytes()).hexdigest() == checksum
+            )
+        corrective = {
+            "new_candidate_planned": 8,
+            "native_all8_carry_receipt_verified": True,
+            "old_v2_remains_failed": True,
+            "original_sse_publicly_read_back": False,
+        }
     progress_path = ROOT / "solver-progress-v1/solver-progress.json"
     closed_solver_audits = 0
     if progress_path.is_file():
@@ -433,6 +504,7 @@ def verify():
         "actual_zero_generation_pressure_capacity": pressure_capacity,
         "actual_zero_generation_pressure_capacity_smaller_v2": pressure_capacity_v2,
         "smaller_pressure_v2_source_members_verified": len(pressure_v2_sources),
+        "candidate_only_corrective_source_and_native_receipt": corrective,
         "default_true_c8": current_c8,
         "closed_solver_controlled_sse_audits_indexed": closed_solver_audits,
         "original_sse_publicly_read_back": False,
