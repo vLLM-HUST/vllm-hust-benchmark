@@ -1,0 +1,322 @@
+"""CPU adversarial checks, before any model starts; private inputs stay private."""
+
+import copy
+import hashlib
+import json
+import os
+from pathlib import Path
+import sys
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from mmlu_contract import (
+    PROFILE,
+    STAGES,
+    check_tokens,
+    geometry,
+    load_inputs,
+    metric_delta,
+    pilot_decision,
+    read,
+    wire_id,
+)
+from admission_owner import check_binding, check_npu_mapping, http, verify_command
+from study_tools import numeric_row, summarize
+
+DRIVER = Path(__file__).resolve().parent
+PRIVATE = Path(os.environ.get("MMLU03_PRIVATE_INPUT", DRIVER.parent / "private-inputs"))
+
+
+def payload():
+    common = {
+        "num_blocks": 71,
+        "groups": [
+            {
+                "is_eagle_group": False,
+                "spec": {
+                    "type": "FullAttentionSpec",
+                    "block_size_tokens": 2048,
+                    "sliding_window": None,
+                    "attention_chunk_size": None,
+                },
+            },
+            *[
+                {
+                    "is_eagle_group": False,
+                    "spec": {
+                        "type": "MambaSpec",
+                        "block_size_tokens": 2048,
+                        "mamba_cache_mode": "align",
+                        "num_speculative_blocks": 2,
+                    },
+                }
+                for _ in range(3)
+            ],
+        ],
+        "tensor_descriptors": [],
+        "actual_profile": copy.deepcopy(PROFILE),
+        "observer_source_sha256": "a" * 64,
+        "loaded_vllm_file": "/same/core",
+        "loaded_ascend_file": "/same/ascend",
+    }
+    return {"results": [{"rank": rank, **copy.deepcopy(common)} for rank in range(2)]}
+
+
+def summary():
+    return {
+        "successful": 8,
+        "failed": 0,
+        "wire_audit_passed": True,
+        "counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0,
+            "vllm:external_prefix_cache_hits_total": 0,
+            "vllm:num_preemptions_total": 5,
+        },
+        "input_admission_passed": True,
+        "policy": {
+            "legal": True,
+            "failures": 0,
+            "invalid_selections": 0,
+            "calls": 5,
+            "changed_from_builtin": 1,
+        },
+        "output_tokens_per_second": 100,
+        "quality": {"correct": 7, "unparsed": 0},
+        "finish_length": 0,
+    }
+
+
+def decide(a, b, **kwargs):
+    return pilot_decision(
+        a,
+        b,
+        clean_runtime=kwargs.get("clean_runtime", True),
+        same_geometry=kwargs.get("same_geometry", True),
+        actual_waits_ok=kwargs.get("actual_waits_ok", True),
+    )
+
+
+def test_original_eight_body_order_and_budget():
+    rows = load_inputs(PRIVATE, DRIVER)
+    assert [row["frozen"]["input_tokens"] for row in rows] == [
+        1369,
+        1562,
+        1485,
+        1385,
+        1519,
+        1520,
+        1511,
+        1501,
+    ]
+    assert all(
+        row["body"]["max_completion_tokens"] == 8192 and "ignore_eos" not in row["body"]
+        for row in rows
+    )
+
+
+@pytest.mark.parametrize("stage", STAGES)
+def test_commands(stage):
+    assert verify_command(read(DRIVER / (stage + "-command.json")), stage)
+    assert len({wire_id(stage, lane) for lane in range(8)}) == 8
+
+
+def test_wrong_command_budget_rejected():
+    value = read(DRIVER / "native-r01-command.json")
+    value["argv"][value["argv"].index("--max-model-len") + 1] = "4096"
+    with pytest.raises(AssertionError):
+        verify_command(value, STAGES[0])
+
+
+def test_geometry_accepts_low_nominal_concurrency_if_single_fits_and_growth_pressures():
+    actual = geometry(
+        payload(), [row["frozen"] for row in load_inputs(PRIVATE, DRIVER)]
+    )
+    assert actual["go"] and actual["first_admission_upper_count"] == 7
+    assert (
+        actual["maximum_context_upper_blocks"] == 44
+        and actual["usable_pool_blocks"] == 70
+    )
+    assert actual["nominal_context_concurrency_for_description_only"] < 2
+
+
+def test_geometry_rank_mismatch_rejected():
+    value = payload()
+    value["results"][1]["num_blocks"] += 1
+    with pytest.raises(AssertionError):
+        geometry(value, [row["frozen"] for row in load_inputs(PRIVATE, DRIVER)])
+
+
+def test_geometry_single_context_does_not_fit():
+    value = payload()
+    for rank in value["results"]:
+        rank["num_blocks"] = 40
+    assert not geometry(value, [row["frozen"] for row in load_inputs(PRIVATE, DRIVER)])[
+        "go"
+    ]
+
+
+def test_original_and_compact_token_hash_both_required():
+    ids = [1, 2, 3]
+    row = {
+        "case_id": "synthetic",
+        "input_tokens": 3,
+        "original_token_ids_sha256": hashlib.sha256(
+            json.dumps(ids).encode()
+        ).hexdigest(),
+        "compact_token_ids_sha256": hashlib.sha256(
+            json.dumps(ids, separators=(",", ":")).encode()
+        ).hexdigest(),
+    }
+    assert check_tokens({"count": 3, "tokens": ids}, row)["tokens"] == 3
+    with pytest.raises(AssertionError):
+        check_tokens({"count": 3, "tokens": [1, 2, 4]}, row)
+
+
+@pytest.mark.parametrize(
+    "missing", ["vllm:prefix_cache_hits_total", "vllm:external_prefix_cache_hits_total"]
+)
+def test_missing_both_end_counter_rejected(missing):
+    value = summary()["counter_deltas"]
+    value.pop(missing)
+    with pytest.raises(AssertionError):
+        metric_delta(value, value)
+
+
+def test_counter_reset_rejected():
+    value = summary()["counter_deltas"]
+    after = {**value, "vllm:num_preemptions_total": 0}
+    with pytest.raises(AssertionError):
+        metric_delta(value, after)
+
+
+def test_pilot_clear_qualified_pair():
+    a, b = summary(), summary()
+    b["output_tokens_per_second"] = 106
+    assert decide(a, b)["run_reverse_confirmation"]
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "small_gain",
+        "wrong_quality",
+        "unparsed",
+        "length",
+        "no_calls",
+        "no_changes",
+        "fault",
+        "cache",
+        "failed",
+        "no_preempt",
+    ],
+)
+def test_pilot_declines_material_negative(mutation):
+    a, b = summary(), summary()
+    b["output_tokens_per_second"] = 106
+    if mutation == "small_gain":
+        b["output_tokens_per_second"] = 104.9
+    elif mutation == "wrong_quality":
+        b["quality"]["correct"] = 6
+    elif mutation == "unparsed":
+        b["quality"]["unparsed"] = 1
+    elif mutation == "length":
+        b["finish_length"] = 1
+    elif mutation == "no_calls":
+        b["policy"]["calls"] = 0
+    elif mutation == "no_changes":
+        b["policy"]["changed_from_builtin"] = 0
+    elif mutation == "fault":
+        b["policy"]["failures"] = 1
+    elif mutation == "cache":
+        b["counter_deltas"]["vllm:external_prefix_cache_hits_total"] = 1
+    elif mutation == "failed":
+        b["successful"], b["failed"] = 7, 1
+    elif mutation == "no_preempt":
+        b["counter_deltas"]["vllm:num_preemptions_total"] = 0
+    assert not decide(a, b)["run_reverse_confirmation"]
+
+
+@pytest.mark.parametrize("flag", ["clean_runtime", "same_geometry", "actual_waits_ok"])
+def test_runtime_invalid_never_promoted(flag):
+    a, b = summary(), summary()
+    b["output_tokens_per_second"] = 120
+    assert not decide(a, b, **{flag: False})["run_reverse_confirmation"]
+
+
+def test_numeric_export_private_fields_removed():
+    row = numeric_row(
+        {
+            "content": "PRIVATE_QUESTION",
+            "reasoning": "PRIVATE_REASON",
+            "gold": "A",
+            "answer": "A",
+            "request": {"messages": []},
+            "status": "transport_error",
+            "usage": None,
+        }
+    )
+    assert (
+        "PRIVATE" not in json.dumps(row) and "gold" not in row and row["usage"] is None
+    )
+
+
+def test_missing_records_stay_failed_not_zero_tps():
+    value = summarize([])
+    assert value["failed"] == value["quality"]["unparsed"] == 8
+    assert value["output_tokens_per_second"] is None
+
+
+def test_wrong_npu_mapping_rejected():
+    with pytest.raises(AssertionError):
+        check_npu_mapping("3 0 0\n4 0 1\n")
+
+
+def test_zero_generation_route_rejects_chat_without_network():
+    with pytest.raises(ValueError):
+        http("/v1/chat/completions", {})
+
+
+def test_affinity_escaped_pool_rejected():
+    workers = [
+        {
+            "physical_npu": number,
+            "main_affinity": [100 if number == 6 else 50],
+            "threads": [{"Cpus_allowed_list": "0-191"}],
+        }
+        for number in (6, 7)
+    ]
+    with pytest.raises(AssertionError):
+        check_binding(workers)
+
+
+def test_all_unexecuted_export_keeps32_no_invented_success(tmp_path):
+    from export_numeric import audit
+
+    result = audit(tmp_path, DRIVER, PRIVATE)
+    assert result["planned"] == 32 and not result["master_completed_successfully"]
+    assert result["all_four_geometry_verified_equal"] is None
+    assert not result["all_four_stage_audits_passed"]
+    assert all(
+        stage["summary"]["failed"] == 8
+        and stage["summary"]["output_tokens_per_second"] is None
+        for stage in result["stages"]
+    )
+
+
+@pytest.mark.parametrize("returncode", [None, 1])
+def test_missing_nonzero_master_not_success(tmp_path, returncode):
+    from export_numeric import audit
+
+    (tmp_path / "metadata").mkdir()
+    (tmp_path / "metadata/controller-owned-supervisor.json").write_text(
+        json.dumps({"actual_child_returncode": returncode})
+    )
+    (tmp_path / "metadata/lifecycle.json").write_text(
+        json.dumps({"phase": "completed"})
+    )
+    result = audit(tmp_path, DRIVER, PRIVATE)
+    assert (
+        not result["master_completed_successfully"]
+        and not result["all_four_stage_audits_passed"]
+    )

@@ -1,0 +1,191 @@
+"""Read-only wire/numeric primitives copied from reviewed analysis172; no cohort constants."""
+
+import base64
+import gzip
+import hashlib
+import json
+import math
+from pathlib import Path
+import re
+
+
+def sha(path):
+    with Path(path).open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def read(path):
+    return json.loads(Path(path).read_bytes())
+
+
+def optional(path):
+    try:
+        return read(path) if Path(path).is_file() else None
+    except (OSError, ValueError, TypeError):
+        return None
+
+
+def number(value):
+    return value if type(value) in (int, float) and math.isfinite(value) else None
+
+
+def elapsed(end, begin):
+    left, right = number(end), number(begin)
+    return (
+        left - right
+        if left is not None and right is not None and left >= right
+        else None
+    )
+
+
+def clock(value):
+    return (
+        {key: number(value.get(key)) for key in ("monotonic", "wall")}
+        if isinstance(value, dict)
+        else None
+    )
+
+
+def usage(value):
+    if not isinstance(value, dict):
+        return None
+    return {
+        key: value.get(key) if type(value.get(key)) is int and value[key] >= 0 else None
+        for key in ("prompt_tokens", "completion_tokens", "total_tokens")
+    }
+
+
+def replay(path):
+    """Replay partial as well as completed streams; never export text payloads."""
+    result = {
+        "content": "",
+        "reasoning": "",
+        "usage": None,
+        "finish_reason": None,
+        "server_request_id": None,
+        "done": False,
+        "first_token": None,
+        "last_token": None,
+        "first_generated_event": None,
+        "last_generated_event": None,
+        "issues": [],
+    }
+    pending, stamp, prior_monotonic = [], None, None
+
+    def consume():
+        raw = b"\n".join(pending)
+        if raw.strip() == b"[DONE]":
+            result["done"] = True
+            return
+        event = json.loads(raw)
+        if event.get("error"):
+            result["issues"].append("sse_error_event")
+        if event.get("id") is not None:
+            if result["server_request_id"] not in (None, event["id"]):
+                result["issues"].append("changing_sse_identity")
+            result["server_request_id"] = event["id"]
+        if event.get("usage") is not None:
+            result["usage"] = event["usage"]
+        for choice in event.get("choices", []):
+            delta = choice.get("delta") or {}
+            text = delta.get("content") or ""
+            thought = delta.get("reasoning_content") or delta.get("reasoning") or ""
+            if not isinstance(text, str) or not isinstance(thought, str):
+                raise ValueError("Non-text delta")
+            result["content"] += text
+            result["reasoning"] += thought
+            if text:
+                result["first_token"] = result["first_token"] or stamp
+                result["last_token"] = stamp
+            if text or thought:
+                result["first_generated_event"] = (
+                    result["first_generated_event"] or stamp
+                )
+                result["last_generated_event"] = stamp
+            result["finish_reason"] = (
+                choice.get("finish_reason") or result["finish_reason"]
+            )
+
+    try:
+        with gzip.open(path, "rt", encoding="utf-8") as stream:
+            for line in stream:
+                event = json.loads(line)
+                raw = base64.b64decode(event["raw_b64"], validate=True)
+                stamp_now = event["clock"]
+                current_monotonic = number(stamp_now.get("monotonic"))
+                if (
+                    current_monotonic is None
+                    or prior_monotonic is not None
+                    and current_monotonic < prior_monotonic
+                ):
+                    result["issues"].append("invalid_wire_clock_order")
+                prior_monotonic = current_monotonic
+                if raw.rstrip(b"\r\n") == b"":
+                    if pending:
+                        consume()
+                        pending, stamp = [], None
+                elif raw.startswith(b"data:"):
+                    pending.append(raw[5:].lstrip(b" ").rstrip(b"\r\n"))
+                    stamp = stamp_now
+            if pending:
+                consume()
+    except (
+        OSError,
+        ValueError,
+        TypeError,
+        KeyError,
+        UnicodeError,
+        EOFError,
+        AttributeError,
+    ):
+        result["issues"].append("unreadable_or_partial_capture")
+    return result
+
+
+def telemetry(path):
+    if not path.is_file():
+        return {
+            "present": False,
+            "samples": 0,
+            "memory_current_max_bytes": None,
+            "devices": [],
+        }
+    stamps, memory, devices, errors = [], [], {}, 0
+    for line in path.read_text().splitlines():
+        try:
+            row = json.loads(line)
+            if number(row.get("wall")) is not None:
+                stamps.append(row["wall"])
+            if str(row.get("memory.current", "")).strip().isdigit():
+                memory.append(int(row["memory.current"]))
+            current = None
+            for raw in row.get("npu_smi", "").splitlines():
+                cells = [cell.strip() for cell in raw.split("|")[1:-1]]
+                if len(cells) == 3 and re.fullmatch(r"[67]\s+910B2", cells[0]):
+                    current = int(cells[0].split()[0])
+                elif current is not None and len(cells) == 3 and cells[0] == "0":
+                    pairs = re.findall(r"(\d+)\s*/\s*(\d+)", cells[-1])
+                    if pairs:
+                        devices.setdefault(current, []).append(int(pairs[-1][0]))
+                    current = None
+            errors += bool(row.get("sampling_error"))
+        except (ValueError, TypeError):
+            errors += 1
+    return {
+        "present": True,
+        "sha256": sha(path),
+        "samples": len(stamps),
+        "sample_errors": errors,
+        "first_unix": min(stamps) if stamps else None,
+        "last_unix": max(stamps) if stamps else None,
+        "memory_current_max_bytes": max(memory) if memory else None,
+        "devices": [
+            {
+                "physical_npu": device,
+                "hbm_used_max_mb": max(values),
+                "observations": len(values),
+            }
+            for device, values in sorted(devices.items())
+        ],
+        "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate.",
+    }

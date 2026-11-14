@@ -1,0 +1,170 @@
+{
+  "schema": "own-mod-binding/v3",
+  "test_target": "own_mod",
+  "mod_prompt_sha256": "43bc925a6ad749971a64e5244b86451f5d4cf3361e87423b1eda8ea0b0d04461",
+  "mod_repository": "https://github.com/vLLM-HUST/pegaflow-hust",
+  "mod_revision": "e2cdc2f7b32d8294b54a74545c05d103e5a5ecaf",
+  "base_runtime": {
+    "vllm": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+    "ascend": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+    "core_packages": {
+      "torch": "2.10.0+cpu",
+      "torch-npu": "2.10.0.post4",
+      "vllm": "0.23.0+empty",
+      "vllm-ascend": "0.23.0",
+      "transformers": "5.5.4",
+      "tokenizers": "0.22.2",
+      "CANN": "9.1 installedimage/path"
+    },
+    "common_compatibility": {
+      "profile": "official-ascend0.23-single-chip-topology-compat/v2",
+      "base_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+      "original_cpu_binding_sha256": "71719e397ab003b31ba5e46e1a6da4da658ae7221eeead04311b65ad4d12d533",
+      "prepared_cpu_binding_sha256": "b7a84571c349c22935414b2c5a4c6cf91223414f80c0954f797340ad0f1f55f2",
+      "prepare_script_sha256": "fe00e47faa81a0a3713a368e79a53504290687f2f249e4bf693457c2f7341253",
+      "actual_import_tree": "/workspace/bidkv-five-datasets-20261113-01/runtime/ascend023-cpubind03",
+      "arms": [
+        "B0",
+        "B1",
+        "shared-native-judge"
+      ],
+      "change": "Only parse_topo_affinity maps allocated physical rows through existing info-m logical mapping. Unknown/unallocated rows are skipped; invalid, conflicting and multichip mappings reject.",
+      "unchanged": "Original official tree, all other copied source bytes and prebuilt ABI libraries; CPU assignment, migration and IRQ algorithms are unchanged.",
+      "installed_runtime_resource_policy": "Copy every installed package file except Python caches, including _build_info.py, all original _cann_ops_custom metadata/kernel binaries and internal relative runtime links; verify original/copied inventory, target identity and bytes. No rebuild or CANN/SDK replacement.",
+      "previous_prepare_draft": "Helper469 was rejected before any91 execution after81 zero-generation initialization found omitted CANN runtime assets. Final helperfe00 preserves the installed assets; CPU patchedb7 bytes are unchanged. No91 model used the incomplete copy.",
+      "attribution": "A common foundation compatibility fix, not a PegaFlow MOD gain.",
+      "pre_generation_requirements": [
+        "Independently run the guarded prepare script on restored91 and verify every copied source/library byte; no upstream mutation.",
+        "Fresh actual SDK import must resolve cpu_binding.py to the isolated copied tree with the declared patched SHA.",
+        "Actual per-worker/per-thread affinities and warnings must be inspected; a True flag alone does not demonstrate effective binding."
+      ],
+      "reuse_policy": "Read-only reuse fe00/b7 complete Ascend carrier with full origin/copy inventory/byte/link/ABI checks. Stock vLLM path is separate and must resolve original schedulerSHA9ae149, never Bid ae127.",
+      "host_actual_prepare_status": "Prior81 common carrier byte identity known; newPega81 SDK/source/ABI/CPU/effectivebinding/token/C8 admission not yet executed."
+    },
+    "stock_vllm_admission": {
+      "source": "/vllm-workspace/vllm",
+      "commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+      "scheduler_sha256": "9ae1491f57a6294e32416b93ef2ea68107fa0d65c3a4d7f745f1261012f735e9",
+      "forbidden_bid_scheduler_sha256": "ae12773bc25b42149d4aa5c84c0797dcf12a0b60c045a7e85ca3c974bc47915c",
+      "fresh_import_proof": "actual vllm/Scheduler module paths and source bytes, no _select_bidkv023_victim method, no Bid package source or carrier on PYTHONPATH"
+    }
+  },
+  "B0": {
+    "target": "Stock official0fc vLLM, declared shared Ascend common carrier, PegaFlow OFF; no Bid measurement scheduler",
+    "activation": "No kv-transfer-config and no Pega sidecar",
+    "enable_cpu_binding": true,
+    "common_optimizations": [
+      "APC enabled",
+      "Mamba align",
+      "async scheduling",
+      "MTP2",
+      "FULL_AND_PIECEWISE graphs3,6,12,24,48"
+    ],
+    "resource_profile": {
+      "kv_gib_per_rank": 16,
+      "max_model_len": 65536,
+      "max_num_seqs": 16,
+      "batch_tokens": 4096,
+      "image": 1,
+      "video": 0,
+      "TP": 2,
+      "PP": 1,
+      "DP": 1,
+      "EP": false
+    }
+  },
+  "B1": {
+    "target": "PegaFlow e2 ON the same stock foundation",
+    "activation": {
+      "sidecar": "pegaflow-server --addr 127.0.0.1:18391 --http-addr 127.0.0.1:18392 --pool-size 30gb --devices 0,1",
+      "kv_connector": "PegaKVConnector",
+      "module": "pegaflow.connector",
+      "role": "kv_both",
+      "extra": {
+        "pegaflow.mode": "read_write",
+        "pegaflow.model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+        "pegaflow.host": "http://127.0.0.1",
+        "pegaflow.port": 18391
+      }
+    },
+    "all_B0_common_configuration_retained": true,
+    "necessary_actual_differences": [
+      "External sidecar and30GiB host pool plus its CPU/device overhead",
+      "Connector scheduler/worker callbacks and host saves/loads",
+      "Current HMA connector disables local hybrid prefix index for dense/recurrent async safety; this is a MOD-specific cost, not a reason to disable NativeAPC"
+    ]
+  },
+  "actual_activation_evidence": [
+    "Installed artifact bytes compared with prior e2 wheel manifest",
+    "BothTPworker cache-registration and source logs retained",
+    "PegaAPI initialized counters and sidecar snapshots",
+    "Actual per-phase save/load successes/failures and transferred byte deltas; zero restore counts do not establish benefit",
+    "B1 must show actual engine save-success delta>0 and positive fresh-sidecar saved-byte delta, with failures0 and successful restores0. This demonstrates cold storage-save activation, not restored-cache benefit; lazy sidecar counters absent before first save are explicitly reported. The independent strict zero-reuse check uses explicit initialized vLLM counters. No extra synthetic model requests are introduced.",
+    "Independently verify actual81 e2 compiled extension paths/hash imports, worker registration/counters and storage saves. Prior91 measurements are provenance only."
+  ],
+  "build_reuse": {
+    "source_build_script": "Existing qualified build_current.py, sourcee2cdc..., Rust1.100.0, Ascendonly(noRDMA)",
+    "commands": [
+      "cargo build --release --no-default-features --features ascend -p pegaflow-py --bin pegaflow-server-py --bin pegaflow-metaserver-py",
+      "python setup.py build_ext --inplace (python/pegaflow/npu_ipc_bindings)",
+      "maturin build --release --no-default-features --features ascend --interpreter <SDK>/bin/python",
+      "<SDK>/bin/python -m pip install --no-deps --force-reinstall <verified-wheel>"
+    ],
+    "wheel_sha256": "df687c8d1fe5650cc94a83371e94c1cb90f8e3b3a7c0a467e09fe75ca334f58b",
+    "cargo_lock_sha256": "ba3347636c828187272d29fd08e06b63b49ffb1c6c6aea2af76be6be5d08b175",
+    "new_campaign_rebuild_executed": false,
+    "scope": "Reuse actual already qualified source/artifact, not a new compilation success claim"
+  },
+  "default_cpu_binding": {
+    "official_default": true,
+    "evidence": "OfficialAscend0.23 defaultTrue and same disclosed fe00/b7 common carrier; actual newPega81 worker/thread affinity and warnings must be retained in each qualification/service folder. Prior81/Bid binding evidence is provenance, not newPega qualification.",
+    "quota_vs_cpuset": "8CPU quota with effective0-191 cpuset/affinity does not justify manually disabling binding",
+    "action": "Both fresh MODarms explicitly requestTrue; record actual per-worker/per-thread affinity and warning markers; no manual hostsystemctl orIRQ modifications",
+    "sparse_mapping_root_cause": "Officialphysical2/5 topology versus logical0/1 requires the same narrow parse fix. Both newPega arms use identical common carrier/defaultTrue; no manual host IRQ/migration operation."
+  },
+  "uncertainty": [
+    "Same frozen finite tasks and original graders; no token-equality quality substitute",
+    "No inference retries/filtering/replacement; failure,lengthstop,unresolved planned denominators retained",
+    "All Native scopes before all Pega scopes then oneNativejudge; time drift and absence of independent formal repetitions retained",
+    "Five/C8 completion does not establish four project acceptance targets or inherited Engine historical benefits",
+    "Startup/compile/host/device overhead separately retained; no actual cloudbill claim"
+  ],
+  "preparation_only": true,
+  "machine": "ascend-91, sequential physical2/5 logical0/1",
+  "actual81_reference_files": {
+    "e2-artifact": {
+      "path": "\\data\\shared_upload\\cybber695\\pegaflow-techoutcomes-20261113-02\\evidence\\formal-runtime-identity.json",
+      "bytes": 7816,
+      "sha256": "6580cb0025e8559cb6294593df203fc70e410953f6c9d9ae7679a76f57b4f923"
+    },
+    "shared-weights": {
+      "path": "\\data\\shared_upload\\cybber695\\bidkv-five-datasets-20261113-01\\provenance\\model-hash-status.json",
+      "bytes": 5084,
+      "sha256": "e95e919abc6d13f160ca7530211ec167945a2d3981aa36c48003bbd9ade5b6c8"
+    },
+    "shared-expected": {
+      "path": "\\data\\shared_upload\\cybber695\\bidkv-five-datasets-20261113-01\\provenance\\model-expected-weights.json",
+      "bytes": 2453,
+      "sha256": "1fec52d80a8898b730f32bd498a7ce9f90a31d6b6cc15d833611cd271fdce0d3"
+    }
+  },
+  "new91_adaptation": {
+    "source": "auditedPega81-62ab21member",
+    "workspace_build": "156deb69-729e-44b9-a90c-34c8d89491cf",
+    "physical_npus": [
+      2,
+      5
+    ],
+    "logical_npus": [
+      0,
+      1
+    ],
+    "stock_core": "0fc/9ae149, neverBid ae127",
+    "isolated_ascend_carrier_sha256": "4c1f0f6365411c9aed605aa98605b36fdcceb3bc70d1b9af0ad855ebe7bbed48",
+    "cpu_binding_patch": "fe00/b7 unchanged all1264assets",
+    "prior_models_or_old91_state_reused": false,
+    "shared_weight_stats_receipt_sha256": "18860dc343393b6fc73036c42a1213bfb4dcabf649984886846325ed4c8d3fe4",
+    "all_tasks_budgets_EOS_grading_sharedjudge_unchanged": true,
+    "SDK_bootstrap": "Separate CPU-only restore already performed; do notrerunrestore_sdk81.py, no new SDK upgrades"
+  }
+}

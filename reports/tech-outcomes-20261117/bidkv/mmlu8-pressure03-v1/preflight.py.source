@@ -1,0 +1,56 @@
+"""CPU-only actual controlled-input/source admission, before the first cold start."""
+
+import argparse
+import ast
+import json
+from pathlib import Path
+import time
+
+from mmlu_contract import DRIVER, INPUT, PROBE, load_inputs, load_grader, read, sha
+
+
+def check(root=INPUT, driver=DRIVER):
+    driver, root = Path(driver), Path(root)
+    for name, checksum in read(driver / "source-manifest.json")["files"].items():
+        path = (driver / name).resolve()
+        assert path.is_relative_to(driver.resolve()) and sha(path) == checksum
+        if name.endswith(".py"):
+            ast.parse(path.read_text(encoding="utf-8"), filename=name)
+    selected = load_inputs(root, driver)
+    grader = load_grader(root, driver)
+    assert grader.extract_answer("The answer is (B).") == "B"
+    return {
+        "passed": True,
+        "inference_generations": 0,
+        "source_manifest_sha256": sha(driver / "source-manifest.json"),
+        "input_identity_sha256": sha(driver / "input-identity.json"),
+        "controlled_input_files": [
+            {
+                "path": name,
+                "bytes": (root / name).stat().st_size,
+                "sha256": sha(root / name),
+            }
+            for name in read(driver / "mmlu-fixed200.json")["frozen_files_sha256"]
+        ],
+        "selected_original_indices": list(range(8)),
+        "case_ids": [item["case"]["case_id"] for item in selected],
+        "input_token_counts": [item["frozen"]["input_tokens"] for item in selected],
+        "original_output_budgets": [8192] * 8,
+        "eos_preserved": True,
+        "original_grader_verified": True,
+        "completed_unix": time.time(),
+        "scope": "Source/input/grader CPU admission only; actual model/token-ID/affinity/cache geometry still required before generation",
+    }
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=Path, default=INPUT)
+    parser.add_argument("--driver", type=Path, default=DRIVER)
+    parser.add_argument(
+        "--out", type=Path, default=PROBE / "metadata/cpu-admission.json"
+    )
+    args = parser.parse_args()
+    result = check(args.input, args.driver)
+    assert not args.out.exists()
+    args.out.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")

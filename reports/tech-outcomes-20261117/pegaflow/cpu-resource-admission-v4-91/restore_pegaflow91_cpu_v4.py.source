@@ -1,0 +1,67 @@
+"""Fresh isolated91 CPU SDK/carrier restore; never starts a model or server."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+import traceback
+
+ROOT=Path('/workspace/pegaflow91-five-datasets-20261114-04')
+NAS=Path('/data/shared_upload/cybber695/pegaflow91-five-datasets-20261114-04')
+OLD=Path('/data/shared_upload/cybber695/pegaflow-techoutcomes-20261113-02')
+ASCEND=ROOT/'runtime/ascend023-cpubind04'
+CORE={'torch':'2.10.0+cpu','torch-npu':'2.10.0.post4','vllm':'0.23.0+empty','vllm-ascend':'0.23.0','transformers':'5.5.4','tokenizers':'0.22.2'}
+
+
+def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def main():
+    os.umask(0o077)
+    state={'phase':'starting','pid':os.getpid(),'started_unix':time.time(),'workspace_build':'156deb69-729e-44b9-a90c-34c8d89491cf','model_startups':0,'generation_requests':0,'steps':[],'source_sha256':sha(__file__)}
+    target=NAS/'metadata/cpu-restore.json'
+    def save():
+        temporary=target.with_suffix('.tmp');temporary.write_text(json.dumps(state,indent=2)+'\n');temporary.replace(target)
+    env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1','HF_HUB_OFFLINE':'1','PIP_DISABLE_PIP_VERSION_CHECK':'1','TMPDIR':str(ROOT/'setup-tmp'),'PIP_CACHE_DIR':str(ROOT/'cache/pip')}
+    def invoke(name,command,timeout=180):
+        row={'name':name,'argv':command,'started_unix':time.time()};state['steps'].append(row);state['phase']=name;save()
+        result=subprocess.run(command,capture_output=True,text=True,env=env,timeout=timeout)
+        row.update(actual_returncode=result.returncode,completed_unix=time.time(),stdout=result.stdout,stderr=result.stderr);save();assert result.returncode==0,name
+        return result.stdout
+    save()
+    try:
+        assert sys.version_info[:2]==(3,12)
+        assert not (ROOT/'.venv').exists() and not ASCEND.exists()
+        assert subprocess.check_output(['npu-smi','info'],text=True).count('No running processes found in NPU')==2
+        for path,commit in [('/vllm-workspace/vllm','0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665'),('/vllm-workspace/vllm-ascend','5cb98caaadeff42b5b62b996e34bb2aaa29d20fd')]:
+            assert invoke(path+'-head',['git','-C',path,'rev-parse','HEAD']).strip()==commit
+            assert not invoke(path+'-diff',['git','-C',path,'diff','--binary','HEAD'])
+        check='import importlib.metadata as m,json;v={n:m.version(n)for n in '+repr(CORE)+'};assert v=='+repr(CORE)+';print(json.dumps(v))'
+        invoke('stock-six',[sys.executable,'-B','-c',check])
+        wheel=OLD/'provenance/pegaflow_llm_npu-0.23.4-cp312-cp312-manylinux_2_34_aarch64.whl'
+        assert wheel.stat().st_size==7481020 and sha(wheel)=='df687c8d1fe5650cc94a83371e94c1cb90f8e3b3a7c0a467e09fe75ca334f58b'
+        invoke('fresh-system-site-venv',[sys.executable,'-B','-m','venv','--system-site-packages',str(ROOT/'.venv')])
+        python=str(ROOT/'.venv/bin/python')
+        invoke('qualified-wheel-no-deps',[python,'-B','-m','pip','install','--no-index','--no-deps',str(wheel)])
+        invoke('measurement-six',[python,'-B','-c',check])
+        image=subprocess.run([sys.executable,'-B','-m','pip','check'],capture_output=True,text=True,env=env,timeout=90)
+        installed=subprocess.run([python,'-B','-m','pip','check'],capture_output=True,text=True,env=env,timeout=90)
+        delta=sorted(set(installed.stdout.splitlines())-set(image.stdout.splitlines()));state['pip_check_delta']={'image_returncode':image.returncode,'measurement_returncode':installed.returncode,'image':image.stdout,'measurement':installed.stdout,'new_conflicts':delta};save();assert not delta and installed.returncode==image.returncode
+        helper=Path(__file__).with_name('prepare_ascend023_cpu_binding_host.py');assert sha(helper)=='fe00e47faa81a0a3713a368e79a53504290687f2f249e4bf693457c2f7341253'
+        invoke('complete-common-carrier',[python,'-B',str(helper),'--source','/vllm-workspace/vllm-ascend','--out',str(ASCEND)])
+        env['PYTHONPATH']=str(ASCEND)+':/vllm-workspace/vllm:'+env.get('PYTHONPATH','')
+        sys.path.insert(0,str(Path(__file__).parent));from carrier_admission import verify,imported
+        state['carrier']=verify(ASCEND);state['carrier_import']=imported(ASCEND,python,env);save()
+        code="import json,importlib,inspect,hashlib;from pathlib import Path;from vllm.v1.core.sched.scheduler import Scheduler;assert not hasattr(Scheduler,'_select_bidkv023_victim');f=Path(inspect.getfile(Scheduler));assert hashlib.sha256(f.read_bytes()).hexdigest()=='9ae1491f57a6294e32416b93ef2ea68107fa0d65c3a4d7f745f1261012f735e9';print('__IMPORTS__'+json.dumps({n:importlib.import_module(n).__file__ for n in ['pegaflow.pegaflow','pegaflow.npu_ipc_bindings._npu_ipc']}))"
+        state['compiled_import_stdout']=invoke('compiled-stock-and-pega-import',[python,'-B','-c',code]);save()
+        artifact=json.loads((OLD/'evidence/formal-runtime-identity.json').read_bytes())['pegaflow'];assert artifact['commit']=='e2cdc2f7b32d8294b54a74545c05d103e5a5ecaf'
+        package=ROOT/'.venv/lib/python3.12/site-packages/pegaflow'
+        assert all(sha(package/name)==digest for name,digest in artifact['binaries'].items());state['qualified_artifact']=artifact
+        state.update(phase='cpu-sdk-carrier-ready-no-model',completed_unix=time.time());save();return 0
+    except BaseException as error:
+        state.update(phase='failed',error=type(error).__name__+': '+str(error),failed_unix=time.time());save();traceback.print_exc();return 2
+
+
+if __name__=='__main__':raise SystemExit(main())

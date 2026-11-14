@@ -1,0 +1,40 @@
+{
+  "root": "/workspace/bidkv-five-datasets-20261113-01",
+  "probe": "/workspace/bidkv-five-datasets-20261113-01/durable/probes/bidkv-mmlu8-pressure-03",
+  "source": "/workspace/bidkv-five-datasets-20261113-01/durable/sources/mmlu8-pressure03-v1",
+  "private_input": "PROBE/input/mmlu-original, exact5 original files from COMMON/plans/mmlu or enclosed private-inputs; never public",
+  "cpu_command": [
+    "ROOT/.venv/bin/python",
+    "-B",
+    "DRIVER/preflight.py"
+  ],
+  "tests_command": "MMLU03_PRIVATE_INPUT=PROBE/input/mmlu-original ROOT/.venv/bin/python -B -m pytest -q DRIVER/test_mmlu03_cpu.py DRIVER/test_transport_cpu.py --basetemp PROBE/cpu-pytest-temp (all BEFORE model)",
+  "publication_required": {
+    "readback_verified": true,
+    "commit": "actual40hex",
+    "source_manifest_sha256": "SHA(source-manifest.json)",
+    "plan_sha256": "SHA(execution-plan.json)",
+    "study_scope": "supplemental_original_mmlu_first8_eos",
+    "input_identity_sha256": "SHA(input-identity.json)",
+    "cpu_admission_sha256": "SHA(PROBE/metadata/cpu-admission.json)"
+  },
+  "launch_command": [
+    "ROOT/.venv/bin/python",
+    "-B",
+    "DRIVER/supervisor.py"
+  ],
+  "launch_prerequisites": [
+    "metadata dir exists mode0700; no existing clock/lifecycle",
+    "source/plan/actual CPU admission published and read back; receipt copied PROBE/publication.json",
+    "two physical6/7 idle, no other CPU validation jobs during generation",
+    "no autostart/TTL/cron/keepalive changes"
+  ],
+  "actual_exit": "supervisor owns/waits controller; controller owns/waits client+owner; owner owns/waits API, cleanup confirms two idle devices",
+  "export_command": [
+    "ROOT/.venv/bin/python",
+    "-B",
+    "DRIVER/export_numeric.py",
+    "--out",
+    "NEW_NUMERIC_JSON_AFTER_ALL_DEVICES_RELEASE"
+  ]
+}

@@ -1,0 +1,157 @@
+"""One simultaneous original-first8 batch, original body/EOS/grader, no retries."""
+
+import argparse
+from concurrent.futures import ThreadPoolExecutor
+import copy
+import json
+import time
+import uuid
+
+from mmlu_contract import (
+    DRIVER,
+    INPUT,
+    PROBE,
+    STAGES,
+    load_inputs,
+    load_grader,
+    metric_delta,
+    read,
+    sha,
+    wire_id,
+)
+from observation import Sampler, snapshot, totals
+from pressure_transport import call
+from study_tools import policies, summarize, wire_check
+
+
+def save(path, value):
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(
+        json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
+    )
+    temporary.replace(path)
+
+
+def run(stage):
+    from controller import publication_admission
+
+    publication_admission()
+    life = read(PROBE / "metadata/lifecycle.json")
+    assert life["phase"] == stage
+    assert read(PROBE / stage / "status.json")["phase"] == "admitted"
+    assert read(PROBE / stage / "capacity-go.json")["go"] is True
+    clock = read(PROBE / "metadata/clock.json")
+    assert clock["operation_limit_seconds"] == 14400
+    assert clock["host_boot_id_sha256"] == sha(
+        __import__("pathlib").Path("/proc/sys/kernel/random/boot_id")
+    )
+    cutoff = clock["deadline_monotonic"] - 30
+    assert cutoff > time.monotonic()
+    selected = load_inputs(INPUT, DRIVER)
+    grader = load_grader(INPUT, DRIVER)
+    out = PROBE / "batches" / stage
+    out.mkdir(parents=True, exist_ok=False, mode=0o700)
+    (out / "records").mkdir()
+    planned = []
+    for lane, item in enumerate(selected):
+        body = copy.deepcopy(item["body"])
+        body.update(cache_salt=uuid.uuid4().hex, request_id=wire_id(stage, lane))
+        planned.append(
+            {
+                "case_id": item["case"]["case_id"],
+                "lane": lane,
+                "wire_id": wire_id(stage, lane),
+                "request": body,
+            }
+        )
+    save(out / "planned-requests.json", planned)
+    before = snapshot("http://127.0.0.1:18393", out, "before")
+    save(out / "before-policy.json", policies(PROBE / stage / "policy", stage))
+
+    def send(row):
+        identity = row["wire_id"]
+        save(
+            out / "records" / (identity + "-call-entry.json"),
+            {
+                "entered_unix": time.time(),
+                "entered_monotonic": time.monotonic(),
+                "lane": row["lane"],
+            },
+        )
+        record = call(
+            {
+                "base_url": "http://127.0.0.1:18393",
+                "timeout": min(1800, max(0.001, cutoff - time.monotonic())),
+            },
+            row["request"],
+            out / "transport" / identity,
+            fixed_length=False,
+            require_zero_reuse=False,
+        )
+        record.update(
+            case_id=row["case_id"], wire_id=identity, stage=stage, lane=row["lane"]
+        )
+        save(out / "records" / (identity + ".json"), record)
+        return record
+
+    with Sampler(out), ThreadPoolExecutor(max_workers=8) as pool:
+        records = list(pool.map(send, planned))
+    # Independent replay/grading occurs only once all eight network requests drain.
+    for row, item in zip(records, selected, strict=True):
+        row["wire_audit_passed"] = row["status"] == "ok" and wire_check(
+            row, item, row["wire_id"]
+        )
+        if row["status"] == "ok" and not row["wire_audit_passed"]:
+            row.update(
+                status="wire_audit_error",
+                error="Retained SSE integrity/identity/budget mismatch",
+            )
+        answer = (
+            grader.extract_answer(row.get("content", ""))
+            if row["status"] == "ok"
+            else None
+        )
+        valid = isinstance(answer, str) and answer in [
+            chr(65 + index) for index in range(item["case"]["option_count"])
+        ]
+        row.update(
+            answer=answer,
+            gold=item["case"]["answer"],
+            correct=bool(
+                row["status"] == "ok" and valid and answer == item["case"]["answer"]
+            ),
+            unparsed=not valid,
+        )
+        save(out / "records" / (row["wire_id"] + ".json"), row)
+    after = snapshot("http://127.0.0.1:18393", out, "after")
+    counters = metric_delta(totals(before), totals(after))
+    policy = policies(PROBE / stage / "policy", stage)
+    assert policy["decisions"] == counters["vllm:num_preemptions_total"]
+    result = summarize(records)
+    result.update(
+        stage=stage,
+        counter_deltas=counters,
+        policy=policy,
+        input_admission_passed=read(PROBE / stage / "token-id-admission.json")[
+            "passed"
+        ],
+        eos_preserved=True,
+        inference_retries=0,
+        runtime_auxiliary_cpu_tests=False,
+        scope="Independent originalfirst8 MMLU diagnostic;32prospective ABBA requests conditional on fixed pilot gate, not formal200/full MMLU/five tasks",
+    )
+    save(out / "summary.json", result)
+    return (
+        0
+        if result["successful"] == 8
+        and policy["legal"]
+        and not policy["failures"]
+        and not policy["invalid_selections"]
+        else 2
+    )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--stage", choices=STAGES, required=True)
+    raise SystemExit(run(parser.parse_args().stage))

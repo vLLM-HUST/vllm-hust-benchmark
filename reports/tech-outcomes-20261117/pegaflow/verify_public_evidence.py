@@ -201,6 +201,9 @@ def verify(archive=None, native_part=None):
         "new_speedup_claim": False,
         "frozen_execution_sources_verified": execution_sources,
         "pegaflow_input_and_numeric_analysis_preparation_members": analysis_members,
+        "fresh91_pre_model_cpu_and_frozen_source": runpy.run_path(
+            str(ROOT / "verify_restart91_preparation.py")
+        )["verify"](),
         "restart02_diagnostics": restart_result,
         "restart02_windows": window_result,
         "restart02_final_sources": runpy.run_path(

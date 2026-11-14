@@ -1,0 +1,378 @@
+"""CPU-only source/contract tests; synthetic observations are not model results."""
+
+import copy
+import importlib.util
+import json
+from pathlib import Path
+import tempfile
+from types import SimpleNamespace
+import sys
+import unittest
+from unittest.mock import patch
+
+import admit_pegaflow_inputs as admission
+import export_pegaflow_numeric as exporter
+import export_pegaflow_c8 as c8_exporter
+from pega_evidence import (
+    ENGINE,
+    strict_phase_cache,
+    runtime_overheads,
+    connector_evidence,
+)
+
+HERE = Path(__file__).resolve().parent
+BASE = HERE.parents[1]
+
+
+def write(path, value):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value), encoding="utf-8")
+
+
+class Contracts(unittest.TestCase):
+    def setUp(self):
+        self.fixture = tempfile.TemporaryDirectory(prefix=".cpu-fixture-", dir=HERE)
+        self.addCleanup(self.fixture.cleanup)
+        self.root = Path(self.fixture.name).resolve()
+        assert self.root.is_relative_to(HERE.resolve())
+
+    def metrics(self, name, values):
+        (self.root / (name + "-metrics.txt")).write_text(
+            "\n".join(key + " " + str(value) for key, value in values.items()),
+            encoding="utf-8",
+        )
+
+    def test_published_frontier_real160_and_changed_order_content_are_rejected(self):
+        plan = BASE / "controlled-cache/frozen-inputs-01/frontier"
+        protocol = HERE / "frontier-full160.json"
+        self.assertEqual(admission.frontier_membership(plan, protocol)["tasks"], 160)
+        tasks = admission.read(plan / "tasks.json")
+        original_read = admission.read
+        for mutate in ["order", "content", "missing"]:
+            changed = copy.deepcopy(tasks)
+            if mutate == "order":
+                changed[0], changed[1] = changed[1], changed[0]
+            elif mutate == "content":
+                changed[0]["problem"] = "synthetic altered content"
+            else:
+                changed.pop()
+            with patch.object(
+                admission,
+                "read",
+                side_effect=lambda p: (
+                    changed if Path(p) == plan / "tasks.json" else original_read(p)
+                ),
+            ):
+                with self.assertRaises(AssertionError):
+                    admission.frontier_membership(plan, protocol)
+
+    def test_inventory_change_is_rejected(self):
+        common = self.root / "common"
+        write(common / "plans/a.json", {"pinned": 1})
+        write(common / "reference-tools/a.json", {"source": 1})
+        receipt = self.root / "receipt.json"
+        write(
+            receipt,
+            {
+                "phase": "passed",
+                "source_manifest_sha256": admission.DRIVER_SHA,
+                "plan_inventory": admission.inventory(common / "plans"),
+                "reference_tool_inventory": admission.inventory(
+                    common / "reference-tools"
+                ),
+            },
+        )
+        admission.check(receipt, common)
+        write(common / "plans/a.json", {"changed": 1})
+        with self.assertRaises(AssertionError):
+            admission.check(receipt, common)
+
+    def test_pega_requires_explicit_its_own_load_counter_and_zero_restore(self):
+        initial = {
+            "vllm:prefix_cache_hits_total": 0,
+            "vllm:external_prefix_cache_hits_total": 0,
+            **dict.fromkeys(ENGINE, 0),
+        }
+        final = {**initial, "vllm:pega_save_success_total": 2}
+        for name, values in [
+            ("before", initial),
+            ("after", final),
+            ("external-before", initial),
+            ("external-after", final),
+        ]:
+            self.metrics(name, values)
+        self.assertTrue(strict_phase_cache(self.root, "pegaflow")["passed"])
+        missing = {key: value for key, value in final.items() if key != ENGINE[0]}
+        missing["unrelated:load_success_total"] = 0
+        self.metrics("after", missing)
+        self.assertFalse(strict_phase_cache(self.root, "pegaflow")["passed"])
+        final[ENGINE[0]] = 1
+        self.metrics("after", final)
+        self.assertFalse(strict_phase_cache(self.root, "pegaflow")["passed"])
+
+    def test_c8_export_rejects_missing_external_counter_despite_base_inspector_pass(
+        self,
+    ):
+        campaign = self.root / "campaign"
+        folder = campaign / "qualification/native-c8-01"
+        write(folder / "continuous.json", {"phases": [{"name": "4096-warmup"}]})
+        for position in ["before", "after"]:
+            (folder / ("4096-warmup-" + position + "-metrics.txt")).write_text(
+                "vllm:prefix_cache_hits_total 0\n", encoding="utf-8"
+            )
+        fake = SimpleNamespace(inspect=lambda *_args: {"total_requests": 1})
+        with patch.dict(sys.modules, {"verify_c8": fake}):
+            with self.assertRaisesRegex(AssertionError, "Required C8"):
+                c8_exporter.main(
+                    SimpleNamespace(
+                        driver=self.root,
+                        campaign=campaign,
+                        inputs=self.root / "inputs.json",
+                        out=self.root / "c8-public",
+                    )
+                )
+
+    def test_missing_native_counters_are_unknown_not_zero(self):
+        self.assertFalse(strict_phase_cache(self.root, "native")["passed"])
+
+    def test_either_required_prefix_counter_absent_at_both_ends_is_rejected(self):
+        expected = {
+            "vllm:prefix_cache_hits_total": 0,
+            "vllm:external_prefix_cache_hits_total": 0,
+            "extra:prefix_cache_hits_total": 0,
+        }
+        for missing in [
+            "vllm:prefix_cache_hits_total",
+            "vllm:external_prefix_cache_hits_total",
+        ]:
+            values = {key: value for key, value in expected.items() if key != missing}
+            self.metrics("before", values)
+            self.metrics("after", values)
+            for arm in ["native", "pegaflow"]:
+                proof = strict_phase_cache(self.root, arm)
+                self.assertFalse(proof["passed"])
+                self.assertIn(missing, proof["prefix"]["missing"])
+        self.metrics("before", expected)
+        self.metrics("after", expected)
+        self.assertTrue(strict_phase_cache(self.root, "native")["passed"])
+
+    def test_sidecar_gauge_decrease_is_not_counter_reset(self):
+        write(
+            self.root / "execution-checklist.json",
+            {
+                "stages": [
+                    {"name": "pegaflow-swe", "arm": "pegaflow", "stage": "solver"}
+                ]
+            },
+        )
+        service = self.root / "service-pegaflow"
+        service.mkdir()
+        for name, used, saved in [("before", 100, 20), ("after", 50, 25)]:
+            (service / (name + "-pegaflow-swe-sidecar-metrics.txt")).write_text(
+                f"pegaflow_pool_capacity_bytes 32212254720\npegaflow_pool_used_bytes {used}\npegaflow_save_bytes_total {saved}\n",
+                encoding="utf-8",
+            )
+        result = connector_evidence(self.root)
+        metrics = result["stages"][0]["sidecar_metric_snapshots"]
+        self.assertFalse(metrics["explicit_counter_deltas"]["counter_reset_seen"])
+        self.assertIn("pegaflow_pool_used_bytes", metrics["gauge_names"])
+        self.assertEqual(
+            result["declared_host_pool"]["verified_capacity_bytes"], 32212254720
+        )
+        self.metrics(
+            "before",
+            {
+                "vllm:prefix_cache_hits_total": 2,
+                "vllm:external_prefix_cache_hits_total": 0,
+            },
+        )
+        self.metrics(
+            "after",
+            {
+                "vllm:prefix_cache_hits_total": 1,
+                "vllm:external_prefix_cache_hits_total": 0,
+            },
+        )
+        proof = strict_phase_cache(self.root, "native")
+        self.assertFalse(proof["passed"])
+        self.assertTrue(proof["prefix"]["counter_reset_seen"])
+
+    def test_numeric_allowlist_omits_private_body_answers_errors_and_nested_fields(
+        self,
+    ):
+        private = "DO_NOT_PUBLISH_ORIGINAL_QUESTION_OR_REASONING"
+        path = self.root / "record.json"
+        write(
+            path,
+            {
+                "case_id": "synthetic",
+                "status": "transport_error",
+                "attempted": True,
+                "request": {"messages": private},
+                "content": private,
+                "answer": private,
+                "raw_response": private,
+                "error": private,
+                "start": {"monotonic": 1, "wall": 2, "untrusted": private},
+                "observed_usage": {"completion_tokens": 3, "untrusted": private},
+                "cached_tokens_reported": None,
+                "grade": {"correct": True, "score": 8, "reason": private},
+            },
+        )
+        value = exporter.numeric_record(path)
+        self.assertNotIn(private, json.dumps(value))
+        self.assertIsNone(value["cached_tokens_reported"])
+        self.assertEqual(value["observed_usage"]["completion_tokens"], 3)
+
+    def test_sidecar_startup_and_formal_telemetry_are_not_mixed(self):
+        write(
+            self.root / "execution-checklist.json",
+            {
+                "stages": [
+                    {"name": "pegaflow-mmlu", "arm": "pegaflow", "stage": "solver"}
+                ]
+            },
+        )
+        folder = self.root / "service-pegaflow"
+        write(
+            folder / "preparation-ready.json",
+            {"total_preparation_seconds": 120, "ready_unix": 130},
+        )
+        write(folder / "ready-model.json", {"startup_seconds": 80})
+        write(folder / "ready-sidecar.json", {"startup_seconds": 10})
+        write(
+            folder / "command.json",
+            {
+                "argv": ["serve"],
+                "environment": {
+                    "OMP_NUM_THREADS": "2",
+                    "SECRET": "PRIVATE_SECRET_SENTINEL",
+                },
+            },
+        )
+        sample = (
+            json.dumps({"wall": 1, "monotonic": 1, "memory.current": "1024"}) + "\n"
+        )
+        for name in [
+            "startup-model-telemetry.jsonl",
+            "startup-sidecar-telemetry.jsonl",
+        ]:
+            (folder / name).write_text(sample, encoding="utf-8")
+        (self.root / "pegaflow-mmlu").mkdir()
+        (self.root / "pegaflow-mmlu/telemetry.jsonl").write_text(
+            sample * 2, encoding="utf-8"
+        )
+        value = runtime_overheads(self.root)
+        sidecar = value["periods"][1]
+        self.assertEqual(sidecar["initialization_device_seconds"], 240)
+        self.assertEqual(sidecar["model_ready"]["startup_seconds"], 80)
+        self.assertEqual(sidecar["sidecar_ready"]["startup_seconds"], 10)
+        self.assertEqual(len(sidecar["telemetry_numeric"]), 2)
+        self.assertEqual(len(sidecar["startup_telemetry_streams"]["startup-model"]), 1)
+        self.assertNotIn("PRIVATE_SECRET_SENTINEL", json.dumps(value))
+        self.assertIsNone(value["periods"][0]["initialization_device_seconds"])
+
+    def test_parent_common_report_observed_accepts_numeric_schema(self):
+        module_path = BASE.parent / "pegaflow-run-20261113/build_five_mod_report.py"
+        spec = importlib.util.spec_from_file_location(
+            "parent_report_readonly", module_path
+        )
+        report = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(report)
+        records = [
+            {
+                "case_id": "synthetic",
+                "attempted": True,
+                "status": "ok",
+                "start": {"monotonic": 1},
+                "first_token": {"monotonic": 2},
+                "end": {"monotonic": 5},
+                "usage": {"completion_tokens": 3},
+                "finish_reason": "stop",
+            }
+        ]
+        write(self.root / "records.json", records)
+        stage = {
+            "numeric_records_file": "records.json",
+            "status": "completed",
+            "zero_reuse": {"passed": True},
+            "independent_verification": {
+                "metrics_recomputed": True,
+                "recorded": 1,
+                "zero_reuse": {"passed": True},
+            },
+        }
+        value = report.observed(stage, self.root, 1)
+        self.assertEqual(value["output_tokens_per_second"], 0.75)
+        self.assertEqual(value["ttft_seconds"]["mean"], 1)
+        self.assertEqual(value["tpot_seconds"]["mean"], 1.5)
+
+    def test_partial_capsule_exports_unknowns_without_inventing_execution(self):
+        cohort = self.root / "formal-01"
+        stages = [
+            {
+                "name": arm + "-" + dataset,
+                "arm": arm,
+                "dataset": dataset,
+                "stage": "solver",
+                "planned": count,
+                "status": "not_executed",
+            }
+            for arm in ["native", "pegaflow"]
+            for dataset, count in [
+                ("mmlu", 200),
+                ("hle", 200),
+                ("frontier", 160),
+                ("swe", 64),
+                ("terminal", 48),
+            ]
+        ]
+        stages += [
+            {
+                "name": "judge-" + arm + "-" + dataset,
+                "arm": "native",
+                "solver_arm": arm,
+                "dataset": dataset,
+                "stage": "judge",
+                "planned": count,
+                "status": "not_executed",
+            }
+            for dataset, count in [("hle", 200), ("frontier", 160)]
+            for arm in ["native", "pegaflow"]
+        ]
+        write(
+            cohort / "execution-checklist.json",
+            {
+                "phase": "failed",
+                "formal_complete": False,
+                "planned_solver_requests_per_arm": 672,
+                "planned_judge_inputs": 720,
+                "stages": stages,
+            },
+        )
+        out = self.root / "public"
+        (self.root / "logs").mkdir()
+        (self.root / "logs/outer.log").write_text(
+            "PRIVATE_OUTER_LOG_CONTENT", encoding="utf-8"
+        )
+        exporter.export(cohort, out)
+        value = json.loads((out / "summary.json").read_bytes())
+        self.assertEqual(len(value["stages"]), 14)
+        self.assertFalse(value["formal_complete"])
+        self.assertTrue(value["input_inventory_provenance"]["unverified"])
+        runtime = json.loads((out / "runtime-overheads.json").read_bytes())
+        self.assertTrue(
+            all(
+                period.get("initialization_device_seconds") is None
+                for period in runtime["periods"]
+            )
+        )
+        mechanism = json.loads((out / "connector-mechanism.json").read_bytes())
+        self.assertIsNone(mechanism["declared_host_pool"]["verified_capacity_bytes"])
+        custody = json.loads((out / "controlled-campaign-index.json").read_bytes())
+        self.assertIn("logs/outer.log", [item["path"] for item in custody["files"]])
+        self.assertNotIn("PRIVATE_OUTER_LOG_CONTENT", json.dumps(custody))
+
+
+if __name__ == "__main__":
+    unittest.main()

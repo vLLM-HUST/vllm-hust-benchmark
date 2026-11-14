@@ -1,0 +1,104 @@
+"""Actually wait for the fixed study controller and retain its real return code."""
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+
+from controller import PROBE, DRIVER, ROOT, PYTHON, publication_admission
+
+
+def main():
+    os.umask(0o077)
+    publication_admission()
+    receipt = PROBE / "metadata/controller-owned-supervisor.json"
+    assert not receipt.exists()
+    value = {
+        "phase": "spawning",
+        "pid": os.getpid(),
+        "started_unix": time.time(),
+        "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    }
+
+    def save():
+        temporary = receipt.with_suffix(".tmp")
+        temporary.write_text(json.dumps(value, indent=2) + "\n")
+        temporary.replace(receipt)
+
+    requested_signal = None
+
+    def cancel(number, _frame):
+        # A flag avoids throwing between Popen returning and storing its handle.
+        nonlocal requested_signal
+        requested_signal = number
+
+    for number in (signal.SIGTERM, signal.SIGINT):
+        signal.signal(number, cancel)
+
+    command = [PYTHON, "-B", str(DRIVER / "controller.py")]
+    value["command"] = command
+    save()
+    if requested_signal is not None:
+        value.update(
+            phase="cancelled-before-spawn",
+            actual_child_returncode=None,
+            ended_unix=time.time(),
+        )
+        save()
+        return 128 + requested_signal
+    with (PROBE / "metadata/controller.log").open("ab", buffering=0) as log:
+        child = subprocess.Popen(
+            command,
+            cwd=ROOT,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+            env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+        )
+        value.update(phase="waiting", child_pid=child.pid)
+        save()
+        try:
+            while True:
+                if requested_signal is not None and child.poll() is None:
+                    value.update(
+                        phase="cancelling-owned-controller",
+                        requested_signal=requested_signal,
+                    )
+                    save()
+                    os.killpg(child.pid, signal.SIGTERM)
+                    code = child.wait(timeout=420)
+                    break
+                try:
+                    code = child.wait(timeout=0.5)
+                    break
+                except subprocess.TimeoutExpired:
+                    pass
+        except BaseException:
+            if child.poll() is None:
+                os.killpg(child.pid, signal.SIGTERM)
+                child.wait(timeout=420)
+            value.update(
+                phase="failed",
+                actual_child_returncode=child.returncode,
+                ended_unix=time.time(),
+            )
+            save()
+            raise
+    value.update(
+        phase="cancelled"
+        if requested_signal is not None
+        else "completed"
+        if code == 0
+        else "failed",
+        actual_child_returncode=code,
+        ended_unix=time.time(),
+    )
+    save()
+    return code
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

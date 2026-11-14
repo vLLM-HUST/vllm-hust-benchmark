@@ -1,0 +1,105 @@
+{
+  "schema": "original-mmlu-first8-pressure03/v1",
+  "study_scope": "supplemental_original_mmlu_first8_eos",
+  "stages": [
+    "native-r01",
+    "bidkv-r01",
+    "bidkv-r02",
+    "native-r02"
+  ],
+  "planned_each": 8,
+  "planned_total": 32,
+  "selection_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "dataset_scope": "First8 original biology prefix; independent diagnostic, NOT formal200/fullfive",
+  "input_identity_sha256": "fa030fe9c63ace37d57c636a3fc0f24eb40891b50d0cb3f7d7c80aabc5ab5d07",
+  "token_receipt_sha256": "6383c040699c403c9aa567a391f55ffe34a77e9c7b96c5d0e1b39f7304aa6498",
+  "output_budget_each": 8192,
+  "request_temperature": 0,
+  "request_seed": 0,
+  "eos": "original retained, no ignore_eos",
+  "thinking": "server explicit defaultTrue; original body unchanged",
+  "wire_changes_only": [
+    "cache_salt fresh UUID32hex",
+    "request_id explicit32chars",
+    "original stream/include_usage retained"
+  ],
+  "arrival": "8 simultaneous ThreadPool workers, no fixed rate, original order selected before run",
+  "api_port": 18393,
+  "overall_seconds": 14400,
+  "health_seconds": 1200,
+  "request_seconds": 1800,
+  "drain_reserve_seconds": 30,
+  "no_retries": true,
+  "no_clock_reset_or_publication_parks": true,
+  "all_sources_cpu_admission_public_readback_before_first_cold": true,
+  "outside_auxiliary_cpu_tests_during_generation": "forbidden",
+  "common_profile": {
+    "tp": 2,
+    "max_model_len": 65536,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 4096,
+    "kv_cache_bytes_per_rank": 1677721600,
+    "mtp": 2,
+    "apc": true,
+    "async": true,
+    "cpu_binding": true,
+    "graph": "FULL_AND_PIECEWISE",
+    "capture_sizes": [
+      3,
+      6,
+      12,
+      24,
+      48
+    ]
+  },
+  "common_policy_preset": {
+    "utility_preempt_weight": 5.0,
+    "utility_liveness_preemptions": 2,
+    "utility_cascade_gain_ratio": 1.25,
+    "utility_completion_weight": 0.5,
+    "scope": "historical pressure preset5, not default0.3; Native same fields policy disabled; Bid enabled is sole arm change"
+  },
+  "geometry_gate": {
+    "same_rank_and_all_executed_stage_fingerprint": true,
+    "single_maximum_context_must_fit": true,
+    "first_prefill_admissions_min": 2,
+    "sum_admitted_end_upper_must_exceed_usable": true,
+    "evo_nominal_4_to_6_gate": false,
+    "expected_for_design_only": {
+      "usable_blocks": 70,
+      "single_65536_blocks": 44,
+      "first_admission_count": 7
+    },
+    "actual_metadata_required": true
+  },
+  "first_native_no_preempt": "stop no exposure; other24 not executed, RC3",
+  "reverse_BA_gate": {
+    "firstAB8each_complete_transport_SSE_body_input_affinity_geometry_waits_valid": true,
+    "cache_local_and_external_hits_each_zero": true,
+    "candidate_engine_preempt_calls_changed_builtin_positive": true,
+    "policy_failures_invalid_zero": true,
+    "throughput_gain_min_pct": 5,
+    "native_correct_min": 6,
+    "bid_correct_at_least_native": true,
+    "bid_unparsed_at_most_native": true,
+    "bid_length_at_most_native": true,
+    "no_recorded_external_runtime_interference": true,
+    "otherwise": "retain completeAB and16not_executed; no rerun",
+    "scope": "cost triage, NOT quality equivalence or proof"
+  },
+  "performance": "accepted completion tokens / whole8batch wall from earliest call start to last call end, complete only; cold/admission/cleanup separate",
+  "ttft": "first content event-start; exclusions retained",
+  "tpot": "(request end-first content)/(completion_tokens-1); exclusions retained",
+  "quality": "exact unchanged original extract_answer; planned8 denominator, all failures/unreturned/unparsed retained",
+  "all_outcomes_retained": true,
+  "postrun_export": "export_numeric.py replays captured SSE, original body/grader and policy journals; numeric only, source/control SHA indexes; both AB/BA reported without best selection"
+}

@@ -580,6 +580,9 @@ def verify():
         "prospective_eos_historical_workload": runpy.run_path(
             str(ROOT / "verify_evo_preparation.py")
         )["verify"](ROOT / "evoscientist-pressure02-v2"),
+        "prospective_mmlu_first8_diagnostic": runpy.run_path(
+            str(ROOT / "verify_mmlu03_preparation.py")
+        )["verify"](),
         "default_true_c8": current_c8,
         "closed_solver_controlled_sse_audits_indexed": closed_solver_audits,
         "original_sse_publicly_read_back": False,
