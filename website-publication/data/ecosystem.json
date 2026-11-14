@@ -3260,6 +3260,73 @@
       "evidence_level": "integration_tested"
     },
     {
+      "id": "kv-controller",
+      "public_surface": true,
+      "name": "KV Controller",
+      "name_en": "KV Controller",
+      "name_zh": "KV 控制器",
+      "artifact_type": "external_system",
+      "system_role": "kv_state_manager",
+      "integration_contracts": [
+        "RIDE SDK"
+      ],
+      "integration_surfaces": [
+        "RIDE model lifecycle API",
+        "KV backend plugins"
+      ],
+      "execution_planes": [
+        "control_plane"
+      ],
+      "deployment_topology": "separate_application",
+      "delivery_model": "external_service",
+      "ownership": "community_integration",
+      "maintainers": [
+        "yancanmao"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "yancanmao",
+          "name": "毛言粲"
+        }
+      ],
+      "advisors": [],
+      "repository_relationship": "external_reference",
+      "maturity": "experimental",
+      "repository_visibility": "private",
+      "canonical_repository": "https://github.com/yancanmao/kv-controller",
+      "upstream_repository": null,
+      "summary_en": "Decides when to prepare KV cache for an agent’s next model call during a tool wait. The RIDE interface also supports TokenCake CPU save and restore.",
+      "summary_zh": "Agent 等工具返回时，决定是否为下一轮推理准备 KV 缓存。RIDE 接口也已接通 TokenCake 的 CPU 保存与恢复。",
+      "public_effect_en": "Selective prewarming shortened two complete 24-program SWE-smith runs by 1.51% and 2.07%. TokenCake saved prefill work, while both full batches took longer.",
+      "public_effect_zh": "选择性预热在两次 24 个 program 的完整 SWE-smith 对照中分别提速 1.51% 和 2.07%。TokenCake 减少了 prefill 计算，但两次整批都变慢。",
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/c77453dc2edda566a261370cf7a76f850c8839c9/reports/kv-controller-swe-smith-20261114",
+      "compatibility": {
+        "status": "external_service",
+        "host": "RIDE / Ray / vLLM",
+        "versions": [
+          "RIDE 0.3.6",
+          "vLLM 0.22.0 (TokenCake experiment)"
+        ],
+        "platforms": [
+          "NVIDIA RTX A6000"
+        ],
+        "requirements_en": "Existing Ray cluster and RIDE-managed inference replicas. TokenCake uses an engine with its tool lifecycle API.",
+        "requirements_zh": "需要已有 Ray 集群及 RIDE 管理的推理副本。TokenCake 后端需要带工具生命周期接口的引擎。"
+      },
+      "evidence_level": "hardware_verified",
+      "public_effect_detail_en": [
+        "Two RTX A6000 GPUs, Qwen2.5-0.5B-Instruct, 437 foreground requests per arm. The baseline used cache-aware routing and simple background recompute. With selective prewarming, P95 for other requests overlapping baseline prewarming fell 17.3% and 24.8%. One of three 8-program pairs regressed.",
+        "In separate matched runs, TokenCake cut total computed prefill tokens by 20.41% and 23.86%, including eliminated background recompute. Batch time rose 8.36% and 16.37%.",
+        "Experimental RIDE integration. Standard Mod installation and rollback remain to be validated."
+      ],
+      "public_effect_detail_zh": [
+        "两张 RTX A6000，Qwen2.5-0.5B-Instruct，每组 437 轮前台请求。基线采用缓存感知路由加简单后台重算。选择性预热使基线中与预热重叠的其他请求 P95 分别下降 17.3% 和 24.8%。三组 8-program 对照中有一组退化。",
+        "单独对照中，TokenCake 使引擎实际计算的 prefill token 总量下降 20.41% 和 23.86%，其中包含省下的后台重算。整批耗时分别增加 8.36% 和 16.37%。",
+        "已完成 RIDE 真机接入，标准 Mod 安装与回滚待验收。"
+      ]
+    },
+    {
       "id": "request-throttling-controller",
       "public_surface": true,
       "name": "Request Throttling Controller",
