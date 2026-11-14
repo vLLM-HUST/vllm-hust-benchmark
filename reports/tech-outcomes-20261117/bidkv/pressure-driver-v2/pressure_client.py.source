@@ -1,0 +1,326 @@
+"""One fixed8-request synthetic pressure batch; no retries or adaptive settings."""
+
+import argparse
+from concurrent.futures import ThreadPoolExecutor
+import hashlib
+import json
+from pathlib import Path
+import time
+import uuid
+
+from measurement import distribution
+from observation import Sampler, snapshot, totals
+from pressure_transport import call
+
+ROOT = Path("/workspace/bidkv-five-datasets-20261113-01")
+PERSIST = ROOT / "durable"
+PROBE = PERSIST / "probes/bidkv-pressure-01"
+INPUT = PERSIST / "controlled/initial-inputs-01/continuous-inputs-r1.json"
+DRIVER = Path(__file__).resolve().parent
+
+
+def generation_gate(arm, repeat):
+    release = json.loads(
+        (PROBE / "metadata/generation-public-release.json").read_bytes()
+    )
+    manifest_raw = (DRIVER / "source-manifest.json").read_bytes()
+    assert release["source_manifest_sha256"] == hashlib.sha256(manifest_raw).hexdigest()
+    for name, expected in json.loads(manifest_raw)["files"].items():
+        assert hashlib.sha256((DRIVER / name).read_bytes()).hexdigest() == expected, (
+            name
+        )
+    assert (
+        release["admission_source_manifest_sha256"]
+        == "13dc6b582f81008e081c31ce1cd75096ea706989db185bc9bbea96fbe23d44f9"
+    )
+    assert len(release["public_commit"]) == 40 and release["fixed_workload_go"] is True
+    assert release["candidate_identical_capacity_pre_authorized"] is True
+    capacity = PROBE / "metadata/native-capacity-go-no-go-v2.json"
+    assert (
+        release["capacity_report_sha256"]
+        == hashlib.sha256(capacity.read_bytes()).hexdigest()
+    )
+    assert json.loads(capacity.read_bytes())["go_for_fixed_workload"] is True
+    lifecycle = json.loads((PROBE / "metadata/pressure-lifecycle.json").read_bytes())
+    assert lifecycle["phase"] == arm + f"-r{repeat:02}"
+    status = json.loads((PROBE / arm / "status.json").read_bytes())
+    assert status["phase"] == "admitted-awaiting-public-capacity-binding"
+    assert (
+        Path(f"/proc/{status['api_pid']}/stat").read_text().split()[21]
+        == status["api_start_ticks"]
+    )
+
+
+def save(path, value):
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    temporary.replace(path)
+
+
+def salt_identity(arm, repeat, lane):
+    identifier = f"hust-bkprobe01-{'n' if arm == 'native' else 'b'}-r{repeat:02}-l{lane:02}".ljust(
+        32, "0"
+    )
+    assert len(identifier) == 32
+    return identifier
+
+
+def expected_engine_ids():
+    return {
+        "chatcmpl-" + salt_identity(arm, repeat, lane)
+        for arm in ["native", "bidkv"]
+        for repeat in [1]
+        for lane in range(8)
+    }
+
+
+def policy_snapshot(folder):
+    journals = sorted((PROBE / folder / "policy").glob("*.jsonl"))
+    assert journals
+    result = []
+    for path in journals:
+        rows = [
+            json.loads(line) for line in path.read_text().splitlines() if line.strip()
+        ]
+        assert rows[0]["event"] == "initialized"
+        for row in rows:
+            if row["event"] == "preemption-decision":
+                ids = {item["request_id"] for item in row["context"]["candidates"]}
+                assert row["selected_id"] in ids
+                assert row["context"]["builtin_victim_id"] in ids
+                assert ids <= expected_engine_ids(), (
+                    "Unbound engine request in policy journal"
+                )
+                assert row["context"]["requesting_request_id"] in ids
+                assert row["outcome"] not in ["exception-fallback", "invalid-fallback"]
+        stats = rows[-1]["stats"]
+        assert stats["failures"] == stats["invalid_selections"] == 0
+        assert stats["enabled"] == (folder == "bidkv")
+        result.append(
+            {
+                "controlled_path": str(path),
+                "bytes": path.stat().st_size,
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                "stats": stats,
+                "preemption_events": sum(
+                    row["event"] == "preemption-decision" for row in rows
+                ),
+            }
+        )
+    return result
+
+
+def metrics_delta(before, after):
+    left, right = totals(before), totals(after)
+    keys = [
+        name
+        for name in right
+        if any(word in name for word in ["prefix_cache", "preempt", "load_success"])
+        and name.endswith("_total")
+    ]
+    assert keys
+    result = {}
+    for key in keys:
+        assert key in left and right[key] >= left[key], "Missing/reset counter"
+        result[key] = right[key] - left[key]
+    external = [
+        key
+        for key in result
+        if "external_prefix_cache_hits" in key or "load_success" in key
+    ]
+    assert any("external_prefix_cache_hits" in key for key in external)
+    assert all(result[key] == 0 for key in external), (
+        "External successful restore/reuse invalidates this supplemental cell"
+    )
+    return {
+        "counter_deltas": result,
+        "external_restore_zero": True,
+        "local_prefix_hit_scope": "DefaultAPC internal resume is allowed. Aggregate hits are observed, not proved per-hit self-resume attribution. Unique fresh salts and the pinned hash chain constrain cross-request sharing; this is not primaryzero-reuse qualification.",
+    }
+
+
+def run(args):
+    generation_gate(args.arm, args.repeat)
+    out = PROBE / "batches" / (args.arm + f"-r{args.repeat:02}")
+    out.mkdir(parents=True, exist_ok=False, mode=0o700)
+    (out / "records").mkdir()
+    clock = json.loads((PROBE / "metadata/clock.json").read_bytes())
+    assert (
+        clock["host_boot_id_sha256"]
+        == hashlib.sha256(
+            Path("/proc/sys/kernel/random/boot_id").read_bytes()
+        ).hexdigest()
+    )
+    assert (
+        hashlib.sha256(INPUT.read_bytes()).hexdigest()
+        == "a73c9e1b2afa476dea80f91832e963867f6f4130e4988d97210dddfea5aeb392"
+    )
+    # Reserve15s of the original60min for final counters/records before the
+    # independently owned model's hard expiry. This is predeclared, not extended.
+    cutoff = clock["deadline_monotonic"] - 15
+    assert time.monotonic() < cutoff
+    cases = json.loads(INPUT.read_bytes())["16384"]
+    assert len(cases) == 8
+    planned = []
+    for lane, case in enumerate(cases):
+        identifier = salt_identity(args.arm, args.repeat, lane)
+        body = {
+            "model": "qwen3.5-35b",
+            "messages": case["request"]["messages"],
+            "temperature": 0,
+            "seed": 17,
+            "max_tokens": 4096,
+            "ignore_eos": True,
+            "stream": True,
+            "stream_options": {"include_usage": True},
+            "n": 1,
+            "cache_salt": uuid.uuid4().hex,
+            "request_id": identifier,
+        }
+        planned.append(
+            {
+                "case_id": identifier,
+                "lane": lane,
+                "request": body,
+                "expected_wire_id": "chatcmpl-" + identifier,
+                "input_tokens": 16407,
+                "input_token_ids_sha256": case["token_ids_sha256"],
+            }
+        )
+    assert len({row["request"]["cache_salt"] for row in planned}) == 8
+    save(out / "planned-requests.json", planned)
+    before = snapshot("http://127.0.0.1:18390", out, "before")
+    save(out / "before-policy.json", policy_snapshot(args.arm))
+    state = {
+        "phase": "running",
+        "arm": args.arm,
+        "repeat": args.repeat,
+        "planned": 8,
+        "started_unix": time.time(),
+        "cutoff_monotonic": cutoff,
+        "inference_retries": 0,
+    }
+    save(out / "status.json", state)
+
+    def send(row):
+        identity = row["case_id"]
+        save(
+            out / "records" / (identity + "-call-entry.json"),
+            {
+                "case_id": identity,
+                "call_entered_unix": time.time(),
+                "scope": "Clientattemptentered; not proof server accepted if headers/finalrecord are absent",
+            },
+        )
+        config = {
+            "base_url": "http://127.0.0.1:18390",
+            "timeout": min(600, max(0.001, cutoff - time.monotonic())),
+        }
+        record = call(
+            config,
+            row["request"],
+            out / "transport" / identity,
+            fixed_length=True,
+            require_zero_reuse=False,
+        )
+        record.update(
+            case_id=identity,
+            lane=row["lane"],
+            repeat=args.repeat,
+            arm=args.arm,
+            expected_wire_id=row["expected_wire_id"],
+        )
+        if (
+            record["status"] == "ok"
+            and record.get("server_request_id") != row["expected_wire_id"]
+        ):
+            record.update(
+                status="request_id_error",
+                error="ObservedwireIDdoesnotmatchfrozenexplicitrequestID",
+            )
+        if record["status"] == "ok" and record["usage"]["prompt_tokens"] != 16407:
+            record.update(
+                status="input_tokenization_error",
+                error="Acceptedinputtoken count differs from frozen16407",
+            )
+        save(out / "records" / (identity + ".json"), record)
+        return record
+
+    try:
+        with Sampler(out), ThreadPoolExecutor(max_workers=8) as pool:
+            rows = list(pool.map(send, planned))
+        after = snapshot("http://127.0.0.1:18390", out, "after")
+        counters = metrics_delta(before, after)
+        save(out / "cache-counter-scope.json", counters)
+        save(out / "after-policy.json", policy_snapshot(args.arm))
+        good = [row for row in rows if row["status"] == "ok"]
+        complete = len(good) == 8
+        span = max(row["end"]["monotonic"] for row in rows) - min(
+            row["start"]["monotonic"] for row in rows
+        )
+        known = sum(row["usage"]["completion_tokens"] for row in good)
+        report = {
+            "planned": 8,
+            "recorded": len(rows),
+            "successful": len(good),
+            "failed": 8 - len(good),
+            "fixed_batch_complete": complete,
+            "batch_wall_seconds": span,
+            "accepted_output_tokens_known_complete_records": known,
+            "output_tokens_per_second": known / span if complete else None,
+            "ttft_first_generated_seconds": distribution(
+                [
+                    row["first_generated_event"]["monotonic"]
+                    - row["start"]["monotonic"]
+                    for row in good
+                ]
+            ),
+            "tpot_completion_seconds": distribution(
+                [
+                    (
+                        row["end"]["monotonic"]
+                        - row["first_generated_event"]["monotonic"]
+                    )
+                    / (row["usage"]["completion_tokens"] - 1)
+                    for row in good
+                ]
+            ),
+            "length_stops": sum(
+                row.get("finish_reason", row.get("observed_finish_reason")) == "length"
+                for row in rows
+            ),
+            "failed_or_unaccepted_records": 8 - len(good),
+            "records_with_unknown_final_usage": sum(
+                row.get("usage") is None and row.get("observed_usage") is None
+                for row in rows
+            ),
+            "observed_output_tokens_in_all_usage_records": sum(
+                (row.get("usage") or row.get("observed_usage") or {}).get(
+                    "completion_tokens", 0
+                )
+                for row in rows
+            ),
+            "counter_scope": counters,
+            "scope": "Supplemental forced4096 synthetic, first-generated timing. No task-quality or primaryfive score; incompletebatchTPSnull, no missingusage invented.",
+        }
+        save(out / "summary.json", report)
+        state.update(
+            phase="completed" if complete else "failed", completed_unix=time.time()
+        )
+        save(out / "status.json", state)
+        return 0 if complete else 2
+    except BaseException as error:
+        state.update(
+            phase="failed",
+            failed_unix=time.time(),
+            error=type(error).__name__ + ": " + str(error),
+        )
+        save(out / "status.json", state)
+        raise
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--arm", choices=["native", "bidkv"], required=True)
+    parser.add_argument("--repeat", type=int, choices=[1], required=True)
+    raise SystemExit(run(parser.parse_args()))

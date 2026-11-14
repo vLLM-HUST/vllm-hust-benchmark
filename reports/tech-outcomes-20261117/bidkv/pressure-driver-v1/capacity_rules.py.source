@@ -1,0 +1,141 @@
+"""Pure CPU bounds from actual RPC metadata; never access a live allocator."""
+
+import argparse
+import hashlib
+import json
+import math
+from pathlib import Path
+
+INPUT_TOKENS = 16407
+OUTPUT_TOKENS = 4096
+LOOKAHEAD_TOKENS = 2
+CONCURRENCY = 8
+
+
+def evaluate(payload):
+    ranks = payload["results"]
+    assert len(ranks) == 2 and {row["rank"] for row in ranks} == {0, 1}
+    keys = [
+        "num_blocks",
+        "groups",
+        "tensor_descriptors",
+        "actual_profile",
+        "observer_source_sha256",
+        "loaded_vllm_file",
+        "loaded_ascend_file",
+    ]
+    assert {key: ranks[0][key] for key in keys} == {
+        key: ranks[1][key] for key in keys
+    }, "Ranks have different actual layouts"
+    row = ranks[0]
+    profile = row["actual_profile"]
+    assert profile["kv_cache_memory_bytes"] == 1073741824
+    assert (
+        profile["max_model_len"] == 65536
+        and profile["speculative_num_tokens"] == LOOKAHEAD_TOKENS
+    )
+    total = row["num_blocks"]
+    # Pinned BlockPool reserves block0 as its null placeholder (source SHA below).
+    usable = total - 1
+    assert usable > 0
+    groups = []
+    first = peak_input = peak_end = max_context = 0
+    for group in row["groups"]:
+        assert group["is_eagle_group"] is False, (
+            "Unqualified separate draft-group layout; no generation"
+        )
+        spec = group["spec"]
+        block = spec["block_size_tokens"]
+        assert type(block) is int and block > 0
+        if spec["type"] == "FullAttentionSpec":
+            assert (
+                spec["sliding_window"] is None and spec["attention_chunk_size"] is None
+            )
+            a = math.ceil(INPUT_TOKENS / block)
+            b = math.ceil((INPUT_TOKENS + LOOKAHEAD_TOKENS) / block)
+            c = math.ceil((INPUT_TOKENS + OUTPUT_TOKENS + LOOKAHEAD_TOKENS) / block)
+            d = math.ceil(profile["max_model_len"] / block)
+            explanation = "Full-input admission; growing full-attention blocks, lookahead included in steady bounds"
+        elif spec["type"] == "MambaSpec":
+            assert spec["mamba_cache_mode"] == "align"
+            extra = spec["num_speculative_blocks"]
+            assert type(extra) is int and extra >= 0
+            # Native MambaManager first-prefill allocation; MambaSpec steady
+            # maximum in align mode. Old requests allocate at most1 new state.
+            a, b, c, d = 1 + extra, 2 + extra, 2 + extra, 2 + extra
+            explanation = "First prefill1+spec states; align-mode resident upper bound2+spec, not ceil(context/block) physical states"
+        else:
+            raise ValueError("Unsupported actual group; retain zero generation")
+        first += a
+        peak_input += b
+        peak_end += c
+        max_context += d
+        groups.append(
+            {
+                "index": group["index"],
+                "type": spec["type"],
+                "layer_names": group["layer_names"],
+                "layer_count": group["layer_count"],
+                "block_size_tokens": block,
+                "page_size_bytes_per_layer": spec["page_size_bytes"],
+                "first_prefill_pool_blocks": a,
+                "input_resident_upper_pool_blocks": b,
+                "end_resident_upper_pool_blocks": c,
+                "max_context_upper_pool_blocks": d,
+                "native_rule": explanation,
+            }
+        )
+    assert first > 0 and peak_input >= first and peak_end >= peak_input
+    active_upper = min(CONCURRENCY, profile["max_num_seqs"], usable // first)
+    steady_input_safe = min(CONCURRENCY, profile["max_num_seqs"], usable // peak_input)
+    pressure_possible = active_upper >= 2 and active_upper * peak_end > usable
+    max_context_fits = max_context <= usable
+    go = max_context_fits and pressure_possible
+    allocation_bytes = sum(item["size_bytes"] for item in row["tensor_descriptors"])
+    return {
+        "schema": "actual-hybrid-cache-pressure-bounds/v1",
+        "go_for_fixed_workload": go,
+        "actual_per_rank_total_pool_blocks": total,
+        "reserved_null_blocks": 1,
+        "usable_pool_blocks": usable,
+        "groups": groups,
+        "input_tokens": INPUT_TOKENS,
+        "fixed_output_tokens": OUTPUT_TOKENS,
+        "lookahead_tokens": LOOKAHEAD_TOKENS,
+        "sum_first_prefill_blocks_per_request": first,
+        "sum_input_resident_upper_blocks_per_request": peak_input,
+        "sum_end_resident_upper_blocks_per_request": peak_end,
+        "floor_usableK_over_input_admission_blocks": usable // first,
+        "admission_active_upper_bound": active_upper,
+        "steady_input_safe_active_count": steady_input_safe,
+        "fixed_end_upper_blocks_at_admission_count": active_upper * peak_end,
+        "max_context_upper_blocks": max_context,
+        "max_context_fits_usable_pool": max_context_fits,
+        "actual_tensor_descriptor_bytes": allocation_bytes,
+        "bytes_per_pool_block_from_descriptors": allocation_bytes // total
+        if allocation_bytes % total == 0
+        else None,
+        "metadata_fingerprint_sha256": hashlib.sha256(
+            json.dumps(
+                {key: row[key] for key in keys}, sort_keys=True, separators=(",", ":")
+            ).encode()
+        ).hexdigest(),
+        "rule_source_sha256": {
+            "vllm/v1/kv_cache_interface.py": "8d6be98bbf75b3d55007b64ccf5afef047ca01790a432522f70a196412c103d9",
+            "vllm/v1/core/single_type_kv_cache_manager.py": "dc425e1e87b6157f3e5c46be2bfee54076ccb020b86c5a8aaa3d9901c75e46ef",
+            "vllm/v1/core/block_pool.py": "84755b84c36ed6460ceefe2690c9484a9c31488c5da6daa6c918f497d8837dee",
+            "vllm/v1/core/kv_cache_coordinator.py": "aeca063d319413d2bd0f094158a16be08c2a4c9b1c96a21617f97936c23bd9ce",
+        },
+        "scope": "Metadata-derived first-admission and steady upper bounds, not an observed policy call or exact scheduling simulation. In-flight timing, MTP acceptance and state recycling may avoid simultaneous peaks. Positive actual calls/selection must still be measured; every0call/negative/partial result retained. No live config or allocator is touched.",
+        "no_go_rule": "No generation if max context is not admitted, layout is unsupported, or the fixed upper bound fits without pressure. Never change1GiB/4096/48 on site.",
+    }
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--rpc", type=Path, required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    result = evaluate(json.loads(args.rpc.read_bytes()))
+    args.out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(result))

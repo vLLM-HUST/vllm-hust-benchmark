@@ -104,6 +104,97 @@ def verify():
             ).hexdigest()
             == checksum
         )
+    pressure_driver_sources = read(ROOT / "pressure-driver-v1/source-manifest.json")[
+        "files"
+    ]
+    assert len(pressure_driver_sources) == 12
+    for name, checksum in pressure_driver_sources.items():
+        stored_name = name + ".source" if name.endswith(".py") else name
+        assert (
+            hashlib.sha256(
+                (ROOT / "pressure-driver-v1" / stored_name).read_bytes()
+            ).hexdigest()
+            == checksum
+        )
+    pressure_plan = read(ROOT / "pressure-driver-v1/execution-plan.json")
+    assert pressure_plan["fixed_workload"]["planned_requests"] == 48
+    assert pressure_plan["fixed_workload"]["max_tokens"] == 4096
+    assert pressure_plan["time"]["original_operation_seconds"] == 3600
+    assert (
+        pressure_plan["candidate_conditional_go"][
+            "requires_exact_native_metadata_fingerprint"
+        ]
+        is True
+    )
+    assert (
+        pressure_plan["candidate_conditional_go"]["second_publication_park_required"]
+        is False
+    )
+    pressure_v2_sources = read(ROOT / "pressure-driver-v2/source-manifest.json")[
+        "files"
+    ]
+    assert len(pressure_v2_sources) == 12
+    for name, checksum in pressure_v2_sources.items():
+        stored_name = name + ".source" if name.endswith(".py") else name
+        assert (
+            hashlib.sha256(
+                (ROOT / "pressure-driver-v2" / stored_name).read_bytes()
+            ).hexdigest()
+            == checksum
+        )
+    plan_v2 = read(ROOT / "pressure-driver-v2/execution-plan.json")
+    assert plan_v2["fixed_workload"]["planned_requests"] == 16
+    assert plan_v2["fixed_workload"]["repeats_per_arm"] == 1
+    assert plan_v2["fixed_workload"]["max_output_tokens"] == 65536
+    assert plan_v2["time"]["original_operation_seconds"] == 3600
+    operation_root = ROOT / "pressure-driver-v2"
+    operation = read(operation_root / "operation-launcher-manifest.json")
+    assert (
+        operation["fixed_controller_manifest_sha256"]
+        == hashlib.sha256(
+            (operation_root / "source-manifest.json").read_bytes()
+        ).hexdigest()
+    )
+    for name, checksum in operation["files"].items():
+        assert (
+            hashlib.sha256(
+                (operation_root / (name + ".source")).read_bytes()
+            ).hexdigest()
+            == checksum
+        )
+    pressure_capacity = None
+    pressure_capacity_v2 = None
+    capacity_root = ROOT / "pressure-capacity-v1"
+    if capacity_root.is_dir():
+        for item in read(capacity_root / "manifest.json")["files"]:
+            raw = (capacity_root / item["path"]).read_bytes()
+            assert len(raw) == item["bytes"]
+            assert hashlib.sha256(raw).hexdigest() == item["sha256"]
+        pressure_capacity = runpy.run_path(
+            str(ROOT / "pressure-driver-v1/capacity_rules.py.source")
+        )["evaluate"](read(capacity_root / "native-cache-groups-rpc.json"))
+        assert pressure_capacity == read(
+            capacity_root / "native-capacity-go-no-go.json"
+        )
+        pressure_capacity_v2 = runpy.run_path(
+            str(ROOT / "pressure-driver-v2/capacity_rules.py.source")
+        )["evaluate"](read(capacity_root / "native-cache-groups-rpc.json"))
+        assert pressure_capacity_v2 == read(
+            capacity_root / "native-capacity-go-no-go-v2.json"
+        )
+        assert (
+            pressure_capacity_v2["metadata_fingerprint_sha256"]
+            == pressure_capacity["metadata_fingerprint_sha256"]
+        )
+        clock = read(capacity_root / "operation-clock.json")
+        assert clock["operation_limit_seconds"] == 3600
+        assert clock["deadline_monotonic"] - clock["started_monotonic"] == 3600
+        admission = read(capacity_root / "native-admission-status.json")
+        assert admission["phase"] == "admitted-awaiting-public-capacity-binding"
+        assert admission["preflight_submitted_generation_requests"] == 0
+        token_ids = read(capacity_root / "native-token-id-admission.json")
+        assert token_ids["passed"] is True and len(token_ids["checked"]) == 8
+        assert all(row["tokens"] == 16407 for row in token_ids["checked"])
     progress_path = ROOT / "solver-progress-v1/solver-progress.json"
     closed_solver_audits = 0
     if progress_path.is_file():
@@ -319,6 +410,13 @@ def verify():
                 == 0
             )
         count += len(rows)
+    full = (
+        runpy.run_path(str(ROOT / "verify_full_five.py"))["verify"](
+            ROOT / "five-results-v1"
+        )
+        if (ROOT / "five-results-v1").is_dir()
+        else None
+    )
     return {
         "public_files_verified": len(manifest["files"]),
         "c8_numeric_requests_recomputed": count,
@@ -329,13 +427,20 @@ def verify():
         "zero_generation_pressure_admission_source_members_verified": len(
             pressure_sources
         ),
+        "supplemental_fixed_pressure_source_members_verified": len(
+            pressure_driver_sources
+        ),
+        "actual_zero_generation_pressure_capacity": pressure_capacity,
+        "actual_zero_generation_pressure_capacity_smaller_v2": pressure_capacity_v2,
+        "smaller_pressure_v2_source_members_verified": len(pressure_v2_sources),
         "default_true_c8": current_c8,
         "closed_solver_controlled_sse_audits_indexed": closed_solver_audits,
         "original_sse_publicly_read_back": False,
         "controlled_sse_independent_verification_receipts_indexed": True,
         "aborted_cohort_receipt_counts_verified": True,
         "aborted_cohort_controlled_answers_publicly_reverified": False,
-        "five_dataset_formal_completion_established_by_this_capsule": False,
+        "five_dataset_formal_completion_established_by_this_capsule": bool(full),
+        "full_five_numeric_and_custody_verification": full,
         "selector_mechanism_gain_established": False,
     }
 

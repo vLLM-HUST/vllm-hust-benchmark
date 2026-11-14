@@ -1,0 +1,363 @@
+"""Run exactly the preregistered two batches with real owned child waits."""
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+import traceback
+
+from capacity_rules import evaluate
+from pressure_client import expected_engine_ids, salt_identity
+
+ROOT = Path("/workspace/bidkv-five-datasets-20261113-01")
+PERSIST = ROOT / "durable"
+PROBE = PERSIST / "probes/bidkv-pressure-01"
+DRIVER = Path(__file__).resolve().parent
+ADMISSION = PERSIST / "sources/bidkv81-pressure-admission-v1"
+
+
+def save(path, value):
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    temporary.replace(path)
+
+
+def remaining():
+    value = json.loads((PROBE / "metadata/clock.json").read_bytes())
+    assert (
+        value["host_boot_id_sha256"]
+        == hashlib.sha256(
+            Path("/proc/sys/kernel/random/boot_id").read_bytes()
+        ).hexdigest()
+    )
+    return value["deadline_monotonic"] - time.monotonic()
+
+
+def verify_completed_cohort():
+    """Bind all fixed client IDs, salt uniqueness and actual SSE wire IDs."""
+    ids, salts, records = set(), set(), []
+    for arm in ["native", "bidkv"]:
+        for repeat in [1]:
+            folder = PROBE / "batches" / (arm + f"-r{repeat:02}")
+            planned = json.loads((folder / "planned-requests.json").read_bytes())
+            assert len(planned) == 8
+            for row in planned:
+                identifier = salt_identity(arm, repeat, row["lane"])
+                assert row["case_id"] == row["request"]["request_id"] == identifier
+                salt = row["request"]["cache_salt"]
+                assert identifier not in ids and salt not in salts
+                ids.add(identifier)
+                salts.add(salt)
+                value = json.loads(
+                    (folder / "records" / (identifier + ".json")).read_bytes()
+                )
+                wire = value["server_request_id"]
+                assert value["status"] == "ok" and wire == "chatcmpl-" + identifier
+                assert value["usage"]["prompt_tokens"] == 16407
+                assert value["usage"]["completion_tokens"] == 4096
+                records.append(
+                    {
+                        "case_id": identifier,
+                        "server_request_id": wire,
+                        "salt_sha256": hashlib.sha256(salt.encode()).hexdigest(),
+                        "stream_sha256": value["stream_sha256"],
+                    }
+                )
+    assert len(ids) == len(salts) == len(records) == 16
+    assert {"chatcmpl-" + identity for identity in ids} == expected_engine_ids()
+    save(
+        PROBE / "metadata/request-id-salt-audit.json",
+        {
+            "planned": 16,
+            "verified_successful_wire_ids": 16,
+            "unique_salts": 16,
+            "records": records,
+            "scope": "Explicit case-to-wire-ID mapping. Unique salts constrain cross-request reuse; aggregate local hits do not prove per-hit self-resume attribution.",
+        },
+    )
+
+
+def main():
+    os.umask(0o077)
+    state_path = PROBE / "metadata/pressure-lifecycle.json"
+    assert not state_path.exists(), "Never resume or overwrite this bounded attempt"
+    state = {
+        "phase": "checking-public-release",
+        "pid": os.getpid(),
+        "started_unix": time.time(),
+        "planned_generation_requests": 16,
+        "batches": [
+            {"arm": arm, "repeat": repeat, "planned": 8, "status": "not_executed"}
+            for arm in ["native", "bidkv"]
+            for repeat in [1]
+        ],
+        "owned_waits": [],
+    }
+    save(state_path, state)
+    candidate = None
+    released_arms = set()
+
+    def checkpoint():
+        save(state_path, state)
+
+    def cancel(signum, _frame):
+        raise KeyboardInterrupt(
+            "Owned fixedpressure lifecycle cancelled by signal " + str(signum)
+        )
+
+    for signum in [signal.SIGTERM, signal.SIGINT]:
+        signal.signal(signum, cancel)
+
+    def stop_model(arm):
+        if arm in released_arms:
+            return
+        folder = PROBE / arm
+        if not folder.exists():
+            return
+        (folder / "stop-requested").write_text(
+            "Owned pressure lifecycle drained/failed/deadline; release only this model\n"
+        )
+        limit = time.monotonic() + 180
+        while True:
+            path = folder / "api-owned-wait.json"
+            if path.exists():
+                actual = json.loads(path.read_bytes())
+                state["owned_waits"].append(
+                    {
+                        "kind": arm + "-API",
+                        "receipt": str(path),
+                        "actual_returncode": actual["actual_returncode"],
+                        "pid": actual["api_pid"],
+                        "ended_unix": actual["wait_returned_unix"],
+                    }
+                )
+                checkpoint()
+                break
+            owner_status = folder / "status.json"
+            owner = (
+                json.loads(owner_status.read_bytes()) if owner_status.exists() else {}
+            )
+            if owner.get("phase") == "failed" and "api_pid" not in owner:
+                state["owned_waits"].append(
+                    {
+                        "kind": arm + "-API",
+                        "actual_returncode": None,
+                        "scope": "Owner failed before spawning an API; no APIwait was invented",
+                    }
+                )
+                checkpoint()
+                break
+            assert time.monotonic() < limit, "Owned model cleanup did not seal its wait"
+            time.sleep(1)
+        if arm == "native":
+            receipt = PROBE / "metadata/native-owned-supervisor.json"
+            while True:
+                value = json.loads(receipt.read_bytes())
+                if value["phase"] in ["completed", "failed"]:
+                    break
+                assert time.monotonic() < limit, "Native supervisor wait not sealed"
+                time.sleep(0.2)
+            state["owned_waits"].append(
+                {
+                    "kind": "native-admission-owner",
+                    "pid": value["child_pid"],
+                    "actual_returncode": value["actual_child_returncode"],
+                    "receipt": str(receipt),
+                    "ended_unix": value["ended_unix"],
+                }
+            )
+            checkpoint()
+        else:
+            assert candidate is not None
+            code = candidate.wait(timeout=max(1, limit - time.monotonic()))
+            state["owned_waits"].append(
+                {
+                    "kind": "bidkv-admission-owner",
+                    "pid": candidate.pid,
+                    "actual_returncode": code,
+                    "ended_unix": time.time(),
+                }
+            )
+            checkpoint()
+        sample = subprocess.check_output(["npu-smi", "info"], text=True, timeout=20)
+        (folder / "lifecycle-release-observation.txt").write_text(sample)
+        assert sample.count("No running processes found in NPU") == 2
+        released_arms.add(arm)
+        assert all(
+            item["actual_returncode"] == 0
+            for item in state["owned_waits"]
+            if item["kind"].startswith(arm + "-")
+        ), "Nonzero owned model/owner cleanup retained as failure"
+
+    try:
+        manifest_raw = (DRIVER / "source-manifest.json").read_bytes()
+        manifest_hash = hashlib.sha256(manifest_raw).hexdigest()
+        for name, digest in json.loads(manifest_raw)["files"].items():
+            assert hashlib.sha256((DRIVER / name).read_bytes()).hexdigest() == digest, (
+                name
+            )
+        release = json.loads(
+            (PROBE / "metadata/generation-public-release.json").read_bytes()
+        )
+        assert (
+            release["source_manifest_sha256"] == manifest_hash
+            and release["fixed_workload_go"] is True
+            and release["candidate_identical_capacity_pre_authorized"] is True
+        )
+        assert (
+            release["admission_source_manifest_sha256"]
+            == "13dc6b582f81008e081c31ce1cd75096ea706989db185bc9bbea96fbe23d44f9"
+        )
+        capacity_path = PROBE / "metadata/native-capacity-go-no-go-v2.json"
+        assert (
+            release["capacity_report_sha256"]
+            == hashlib.sha256(capacity_path.read_bytes()).hexdigest()
+        )
+        native_rpc = PROBE / "native/cache-groups-rpc.json"
+        assert (
+            release["native_cache_rpc_sha256"]
+            == hashlib.sha256(native_rpc.read_bytes()).hexdigest()
+        )
+        capacity = evaluate(json.loads(native_rpc.read_bytes()))
+        assert (
+            capacity == json.loads(capacity_path.read_bytes())
+            and capacity["go_for_fixed_workload"] is True
+        )
+        state["public_release"] = release
+        state["source_manifest_sha256"] = manifest_hash
+        checkpoint()
+        for arm in ["native", "bidkv"]:
+            if arm == "bidkv":
+                assert remaining() > 15, (
+                    "Original operation budget expired before candidate"
+                )
+                state["phase"] = "bidkv-zero-generation"
+                checkpoint()
+                log = (PROBE / "metadata/bidkv-admission.log").open("ab", buffering=0)
+                candidate = subprocess.Popen(
+                    [
+                        str(ROOT / ".venv/bin/python"),
+                        "-B",
+                        str(ADMISSION / "admission_owner.py"),
+                        "--arm",
+                        "bidkv",
+                    ],
+                    cwd=ROOT,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    start_new_session=True,
+                    env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                )
+                state["candidate_owner_pid"] = candidate.pid
+                checkpoint()
+                while True:
+                    path = PROBE / "bidkv/status.json"
+                    value = json.loads(path.read_bytes()) if path.exists() else {}
+                    assert value.get("phase") != "failed", (
+                        "Candidate admission failed; preserve zero/incomplete generation"
+                    )
+                    if (
+                        value.get("phase")
+                        == "admitted-awaiting-public-capacity-binding"
+                    ):
+                        break
+                    assert candidate.poll() is None and remaining() > 15
+                    time.sleep(2)
+                candidate_capacity = evaluate(
+                    json.loads((PROBE / "bidkv/cache-groups-rpc.json").read_bytes())
+                )
+                assert (
+                    candidate_capacity["metadata_fingerprint_sha256"]
+                    == capacity["metadata_fingerprint_sha256"]
+                ), "Arms have different actual cache units"
+                save(
+                    PROBE / "metadata/bidkv-capacity-confirmation.json",
+                    candidate_capacity,
+                )
+            for batch in state["batches"]:
+                if batch["arm"] != arm:
+                    continue
+                assert remaining() > 15, (
+                    "Fixed original operation limit reached; no padding/retry"
+                )
+                name = arm + f"-r{batch['repeat']:02}"
+                state["phase"] = name
+                batch.update(status="running", started_unix=time.time())
+                checkpoint()
+                command = [
+                    str(ROOT / ".venv/bin/python"),
+                    "-B",
+                    str(DRIVER / "pressure_client.py"),
+                    "--arm",
+                    arm,
+                    "--repeat",
+                    str(batch["repeat"]),
+                ]
+                log = (PROBE / "metadata" / (name + "-client.log")).open(
+                    "ab", buffering=0
+                )
+                child = subprocess.Popen(
+                    command,
+                    cwd=ROOT,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    start_new_session=True,
+                    env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                )
+                batch.update(pid=child.pid, command=command)
+                checkpoint()
+                try:
+                    code = child.wait(timeout=max(1, remaining() + 20))
+                except BaseException:
+                    if child.poll() is None:
+                        os.killpg(child.pid, signal.SIGTERM)
+                        try:
+                            child.wait(timeout=20)
+                        except subprocess.TimeoutExpired:
+                            os.killpg(child.pid, signal.SIGKILL)
+                            child.wait(timeout=20)
+                    batch.update(
+                        status="cancelled",
+                        actual_returncode=child.returncode,
+                        ended_unix=time.time(),
+                    )
+                    checkpoint()
+                    raise
+                batch.update(
+                    status="completed" if code == 0 else "failed",
+                    actual_returncode=code,
+                    ended_unix=time.time(),
+                )
+                checkpoint()
+                assert code == 0, (
+                    "Retained failed fixedbatch; no automatic retry or remaining-batch replacement"
+                )
+            stop_model(arm)
+        verify_completed_cohort()
+        state.update(phase="completed", completed_unix=time.time())
+        checkpoint()
+        return 0
+    except BaseException as error:
+        state.update(
+            phase="failed",
+            failed_unix=time.time(),
+            error=type(error).__name__ + ": " + str(error),
+        )
+        checkpoint()
+        traceback.print_exc()
+        for arm in ["native", "bidkv"]:
+            try:
+                stop_model(arm)
+            except Exception as cleanup_error:
+                state.setdefault("cleanup_errors", []).append(
+                    type(cleanup_error).__name__ + ": " + str(cleanup_error)
+                )
+                checkpoint()
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

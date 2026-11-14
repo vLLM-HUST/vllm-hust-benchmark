@@ -1,0 +1,346 @@
+{
+  "primary_owned_master": {
+    "phase": "completed",
+    "pid": 319359,
+    "started_unix": 1794597865.7024548,
+    "children": [
+      {
+        "name": "native-c8",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/sources/bidkv81-mod-v4/c8-native-controller.py"
+        ],
+        "started_unix": 1794597865.7157137,
+        "status": "completed",
+        "pid": 319360,
+        "actual_returncode": 0,
+        "ended_unix": 1794598622.04342
+      },
+      {
+        "name": "bidkv-c8",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/sources/bidkv81-mod-v4/c8-bidkv-controller.py"
+        ],
+        "started_unix": 1794598622.0469556,
+        "status": "completed",
+        "pid": 340752,
+        "actual_returncode": 0,
+        "ended_unix": 1794599980.2844543
+      },
+      {
+        "name": "full-five",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/sources/bidkv81-mod-v4/campaign81.py",
+          "--out",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04"
+        ],
+        "started_unix": 1794599980.2860956,
+        "status": "completed",
+        "pid": 380944,
+        "actual_returncode": 0,
+        "ended_unix": 1794621053.837759
+      }
+    ],
+    "native_preflight_supervisor_receipt": "/workspace/bidkv-five-datasets-20261113-01/durable/metadata/native05-owned-supervisor.json",
+    "source_manifest_sha256": "2e28cbe231438325ba96038588ad23e2888a3d503a8bc220100a667a4475e434",
+    "native_preflight_actual_returncode": 0,
+    "completed_unix": 1794621053.8398628
+  },
+  "final_readonly_audit": {
+    "phase": "completed",
+    "pid": 981864,
+    "started_unix": 1794621209.3787699,
+    "source_sha256": "f9ddb47dc05c31cb1a3548a01822c7155e50dffff113403bb698fc0fe30b0e3a",
+    "scope": "Read-only CPU; original frozen SSE and grader, no model HTTP",
+    "children": [
+      {
+        "name": "audit-judge-native-hle",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit-source01/verify_finite_records.py",
+          "--driver",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-mod-v4",
+          "--tools",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/reference-tools",
+          "--plan",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/plans/hle",
+          "--root",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/judge-native-hle",
+          "--dataset",
+          "hle",
+          "--stage",
+          "judge",
+          "--responses",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/native-hle/evaluation",
+          "--out",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/verification/judge-native-hle.json"
+        ],
+        "started_unix": 1794621209.4017553,
+        "status": "completed",
+        "pid": 981865,
+        "actual_returncode": 0,
+        "ended_unix": 1794621219.900949
+      },
+      {
+        "name": "audit-judge-bidkv-hle",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit-source01/verify_finite_records.py",
+          "--driver",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-mod-v4",
+          "--tools",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/reference-tools",
+          "--plan",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/plans/hle",
+          "--root",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/judge-bidkv-hle",
+          "--dataset",
+          "hle",
+          "--stage",
+          "judge",
+          "--responses",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/bidkv-hle/evaluation",
+          "--out",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/verification/judge-bidkv-hle.json"
+        ],
+        "started_unix": 1794621219.9027598,
+        "status": "completed",
+        "pid": 982180,
+        "actual_returncode": 0,
+        "ended_unix": 1794621230.230755
+      },
+      {
+        "name": "audit-judge-native-frontier",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit-source01/verify_finite_records.py",
+          "--driver",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-mod-v4",
+          "--tools",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/reference-tools",
+          "--plan",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/plans/frontier",
+          "--root",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/judge-native-frontier",
+          "--dataset",
+          "frontier",
+          "--stage",
+          "judge",
+          "--responses",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/native-frontier/evaluation",
+          "--out",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/verification/judge-native-frontier.json"
+        ],
+        "started_unix": 1794621230.2326505,
+        "status": "completed",
+        "pid": 982501,
+        "actual_returncode": 0,
+        "ended_unix": 1794621235.9905221
+      },
+      {
+        "name": "audit-judge-bidkv-frontier",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit-source01/verify_finite_records.py",
+          "--driver",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-mod-v4",
+          "--tools",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/reference-tools",
+          "--plan",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/plans/frontier",
+          "--root",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/judge-bidkv-frontier",
+          "--dataset",
+          "frontier",
+          "--stage",
+          "judge",
+          "--responses",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/bidkv-frontier/evaluation",
+          "--out",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/verification/judge-bidkv-frontier.json"
+        ],
+        "started_unix": 1794621235.9926167,
+        "status": "completed",
+        "pid": 982503,
+        "actual_returncode": 0,
+        "ended_unix": 1794621241.703095
+      },
+      {
+        "name": "recompute-quality-native-hle",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-mod-v4/finite.py",
+          "--dataset",
+          "hle",
+          "--stage",
+          "quality",
+          "--tools",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/reference-tools",
+          "--plan",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/plans/hle",
+          "--out",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/quality-native-hle",
+          "--responses",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/native-hle/evaluation",
+          "--grades",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/judge-native-hle/evaluation"
+        ],
+        "started_unix": 1794621241.7054222,
+        "status": "completed",
+        "pid": 982726,
+        "actual_returncode": 0,
+        "ended_unix": 1794621243.7975416
+      },
+      {
+        "name": "recompute-quality-bidkv-hle",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-mod-v4/finite.py",
+          "--dataset",
+          "hle",
+          "--stage",
+          "quality",
+          "--tools",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/reference-tools",
+          "--plan",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/plans/hle",
+          "--out",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/quality-bidkv-hle",
+          "--responses",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/bidkv-hle/evaluation",
+          "--grades",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/judge-bidkv-hle/evaluation"
+        ],
+        "started_unix": 1794621243.8032472,
+        "status": "completed",
+        "pid": 982728,
+        "actual_returncode": 0,
+        "ended_unix": 1794621245.8654995
+      },
+      {
+        "name": "recompute-quality-native-frontier",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-mod-v4/finite.py",
+          "--dataset",
+          "frontier",
+          "--stage",
+          "quality",
+          "--tools",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/reference-tools",
+          "--plan",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/plans/frontier",
+          "--out",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/quality-native-frontier",
+          "--responses",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/native-frontier/evaluation",
+          "--grades",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/judge-native-frontier/evaluation"
+        ],
+        "started_unix": 1794621245.8714402,
+        "status": "completed",
+        "pid": 982729,
+        "actual_returncode": 0,
+        "ended_unix": 1794621246.9186625
+      },
+      {
+        "name": "recompute-quality-bidkv-frontier",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-mod-v4/finite.py",
+          "--dataset",
+          "frontier",
+          "--stage",
+          "quality",
+          "--tools",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/reference-tools",
+          "--plan",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/plans/frontier",
+          "--out",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/quality-bidkv-frontier",
+          "--responses",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/bidkv-frontier/evaluation",
+          "--grades",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/judge-bidkv-frontier/evaluation"
+        ],
+        "started_unix": 1794621246.9266083,
+        "status": "completed",
+        "pid": 982730,
+        "actual_returncode": 0,
+        "ended_unix": 1794621247.9706678
+      },
+      {
+        "name": "numeric-export",
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit-source01/export_bidkv_numeric.py",
+          "--root",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04",
+          "--out",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/bidkv81-five-results-v1",
+          "--common",
+          "/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled",
+          "--verification",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/verification"
+        ],
+        "started_unix": 1794621247.9770846,
+        "status": "completed",
+        "pid": 982731,
+        "actual_returncode": 0,
+        "ended_unix": 1794621255.2094066
+      }
+    ],
+    "quality_recomputation": [
+      {
+        "name": "quality-native-hle",
+        "original": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/quality-native-hle/quality/summary.json",
+        "original_sha256": "1e5463c4d247cba2b74d37d22e8fd7c2662160a16db60ee790aa57f6ac1c1ceb",
+        "recomputed": "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/quality-native-hle/quality/summary.json",
+        "recomputed_sha256": "1e5463c4d247cba2b74d37d22e8fd7c2662160a16db60ee790aa57f6ac1c1ceb",
+        "byte_identical": true
+      },
+      {
+        "name": "quality-bidkv-hle",
+        "original": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/quality-bidkv-hle/quality/summary.json",
+        "original_sha256": "0e067bab248b8eb5eb84b64227e16b55ffc754c8a48c123e0ae2bb80b9fc47f9",
+        "recomputed": "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/quality-bidkv-hle/quality/summary.json",
+        "recomputed_sha256": "0e067bab248b8eb5eb84b64227e16b55ffc754c8a48c123e0ae2bb80b9fc47f9",
+        "byte_identical": true
+      },
+      {
+        "name": "quality-native-frontier",
+        "original": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/quality-native-frontier/quality/summary.json",
+        "original_sha256": "3398febeb3ff4e14dca1bbf11f95602b07937e48981f3df41e189388659b19d4",
+        "recomputed": "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/quality-native-frontier/quality/summary.json",
+        "recomputed_sha256": "3398febeb3ff4e14dca1bbf11f95602b07937e48981f3df41e189388659b19d4",
+        "byte_identical": true
+      },
+      {
+        "name": "quality-bidkv-frontier",
+        "original": "/workspace/bidkv-five-datasets-20261113-01/durable/results/five-datasets-mod-04/quality-bidkv-frontier/quality/summary.json",
+        "original_sha256": "acffd63e873b2ecbd3c183a8ff5136111fec593389c3baa4698a9a6f0ae88955",
+        "recomputed": "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/full-mod04-final-audit01/quality-bidkv-frontier/quality/summary.json",
+        "recomputed_sha256": "acffd63e873b2ecbd3c183a8ff5136111fec593389c3baa4698a9a6f0ae88955",
+        "byte_identical": true
+      }
+    ],
+    "completed_unix": 1794621255.2117994,
+    "audited_solver_requests": 1344,
+    "audited_judge_requests": 720,
+    "public_output": "/workspace/bidkv-five-datasets-20261113-01/durable/analysis/bidkv81-five-results-v1"
+  }
+}

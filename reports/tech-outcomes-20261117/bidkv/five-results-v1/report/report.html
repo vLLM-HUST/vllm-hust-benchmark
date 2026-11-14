@@ -1,0 +1,638 @@
+<!doctype html><html lang='zh-CN'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>BidKV MOD报告</title><style>body{max-width:1180px;margin:3rem auto;padding:0 1rem;font:16px/1.75 system-ui;color:#17283b;background:#fff}h1{font-size:2rem}h2{margin-top:2.5rem}table{border-collapse:collapse;width:100%;font-size:.9rem;margin:1.5rem 0}td,th{border-bottom:1px solid #d9e3ee;padding:.7rem;text-align:right}td:first-child,th:first-child{text-align:left}th{background:#eff4fa}code{overflow-wrap:anywhere;font-size:.85em}a{color:#1763a7}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6fa;padding:1rem}@media(max-width:800px){body{font-size:14px}table{display:block;overflow:auto}}</style><h1>BidKV：冻结五数据集MOD配对报告</h1>
+<p>执行状态：<code>completed</code>；完整执行标记：<code>True</code>。这不是自动通过项目四目标。</p>
+<p><a href="../actual-execution-identity.json">实际启动身份</a>保留Popen前构造完成的command.json
+argv/环境allowlist及实际PID/ready/wait绑定；正式服务没有独立/proc argv或loaded-import
+RPC直接观测，这两个字段保留null，资格import证据与正式服务分开。</p>
+<p>整个solver阶段策略观测：native enabled=False、calls=0、selections=0；bidkv
+enabled=True、calls=0、selections=0。零调用情况下，正吞吐比值与正确数变化不能归因于BidKV机制。</p>
+<p>B0与B1使用同一基础引擎、模型、硬件及共同配置，分别关闭/开启目标MOD。具体身份与必要适配见本批冻结计划；不能用准备、HTTP成功或零调用宣称机制收益。</p>
+<p>模型：Qwen3.5-35B-A3B
+BF16，修订<code>712cf74392b05026a6db2bf213d343747d1f6d45</code>。设备：2×Ascend910B2，物理<code>[6, 7]</code>/逻辑<code>[0, 1]</code>，并行<code>{&quot;tensor&quot;: 2, &quot;pipeline&quot;: 1, &quot;data&quot;: 1, &quot;expert&quot;: false}</code>。
+MOD：<a href="https://github.com/vLLM-HUST/vllm-hust-bidkv">https://github.com/vLLM-HUST/vllm-hust-bidkv</a>，源码<code>53eed4dd65bc4ba12efa37f9f1e334fa1ae51076</code>；基础vLLM<code>0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665</code>、Ascend<code>5cb98caaadeff42b5b62b996e34bb2aaa29d20fd</code>及披露的共同兼容/测量适配。标准<code>five-datasets-20261113-v1</code>/SHA<code>66c050b7c6d705853f10bc437e6ace1707a9b46d43b6bdb7159724045045b756</code>。
+依赖：<code>{&quot;torch&quot;: &quot;2.10.0+cpu&quot;, &quot;torch_npu&quot;: &quot;2.10.0.post4&quot;, &quot;vllm&quot;: &quot;0.23.0+empty&quot;, &quot;vllm_ascend&quot;: &quot;0.23.0&quot;, &quot;transformers&quot;: &quot;5.5.4&quot;, &quot;tokenizers&quot;: &quot;0.22.2&quot;, &quot;CANN&quot;: &quot;9.1&quot;}</code>。完整身份与B0/B1开关见<a href="../../driver-mod-v4/mod-binding.json">绑定</a>，<a href="../execution-plan.json">冻结计划</a>、<a href="../runtime-overheads.json">进程/初始化开销</a>与<a href="../summary.json">原始数字/独立核验</a>分别保留。</p>
+<table>
+<thead>
+<tr>
+<th>数据集</th>
+<th style="text-align:right">B0成功/计划</th>
+<th style="text-align:right">B1成功/计划</th>
+<th style="text-align:right">B0 tok/s</th>
+<th style="text-align:right">B1 tok/s</th>
+<th style="text-align:right">吞吐变化</th>
+<th style="text-align:right">TTFT P95改善</th>
+<th style="text-align:right">TPOT均值改善</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mmlu</td>
+<td style="text-align:right">200/200</td>
+<td style="text-align:right">200/200</td>
+<td style="text-align:right">614.568863</td>
+<td style="text-align:right">629.912506</td>
+<td style="text-align:right">+2.497%</td>
+<td style="text-align:right">-2.413%</td>
+<td style="text-align:right">+1.809%</td>
+</tr>
+<tr>
+<td>hle</td>
+<td style="text-align:right">200/200</td>
+<td style="text-align:right">200/200</td>
+<td style="text-align:right">793.275630</td>
+<td style="text-align:right">794.147654</td>
+<td style="text-align:right">+0.110%</td>
+<td style="text-align:right">+9.832%</td>
+<td style="text-align:right">-2.105%</td>
+</tr>
+<tr>
+<td>frontier</td>
+<td style="text-align:right">160/160</td>
+<td style="text-align:right">160/160</td>
+<td style="text-align:right">761.031051</td>
+<td style="text-align:right">762.812493</td>
+<td style="text-align:right">+0.234%</td>
+<td style="text-align:right">-0.512%</td>
+<td style="text-align:right">-0.295%</td>
+</tr>
+<tr>
+<td>swe</td>
+<td style="text-align:right">64/64</td>
+<td style="text-align:right">64/64</td>
+<td style="text-align:right">36.151535</td>
+<td style="text-align:right">35.544568</td>
+<td style="text-align:right">-1.679%</td>
+<td style="text-align:right">-12.331%</td>
+<td style="text-align:right">-2.072%</td>
+</tr>
+<tr>
+<td>terminal</td>
+<td style="text-align:right">48/48</td>
+<td style="text-align:right">48/48</td>
+<td style="text-align:right">85.392668</td>
+<td style="text-align:right">87.390692</td>
+<td style="text-align:right">+2.340%</td>
+<td style="text-align:right">-5.658%</td>
+<td style="text-align:right">+1.017%</td>
+</tr>
+</tbody>
+</table>
+<p><img src="throughput.svg" alt="五项配对吞吐及全部正负比值" /></p>
+<p>吞吐为accepted输出token除以整个solver
+batch首提交至末响应时间；失败请求的计时仍在完整区间内。不完整残批不推算完整吞吐。TTFT取首content事件，TPOT按每请求(token&gt;1)计算并均权；分位数按(n−1)q线性插值。单臂或部分记录不足以给出配对效果。</p>
+<h2>单列的4K/16K C8资格</h2>
+<p><a href="../../c8-results-v2/README.md">完整证据、预热和实际退出</a>：两臂各按60秒预热/300秒正式提交窗口运行后排空，固定256输出。以下tok/s包含drain并除以phase
+end−start，不能称为固定[0,300)窗口产出。该资格与五项保留EOS的有限batch分别统计。</p>
+<table>
+<thead>
+<tr>
+<th>正式phase</th>
+<th style="text-align:right">B0请求</th>
+<th style="text-align:right">B1请求</th>
+<th style="text-align:right">B0 tok/s</th>
+<th style="text-align:right">B1 tok/s</th>
+<th style="text-align:right">吞吐变化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4096-formal</td>
+<td style="text-align:right">225</td>
+<td style="text-align:right">236</td>
+<td style="text-align:right">189.513189</td>
+<td style="text-align:right">198.781805</td>
+<td style="text-align:right">+4.891%</td>
+</tr>
+<tr>
+<td>16384-formal</td>
+<td style="text-align:right">77</td>
+<td style="text-align:right">81</td>
+<td style="text-align:right">64.708895</td>
+<td style="text-align:right">68.301798</td>
+<td style="text-align:right">+5.552%</td>
+</tr>
+</tbody>
+</table>
+<p>一次固定顺序资格不能证明32K长稳、总体时延等价或项目四目标；策略零调用时不能从该比值推断MOD机制收益。</p>
+<h2>分母与失败</h2>
+<p>正式controller的exit_code直接来自实际process.wait()；可选actual_client_returncode仅取消路径写入，本轮null不补填。全程owned等待、四份原grader无HTTP重算逐字节一致、各模型退出和双卡释放见<a href="../closure-and-quality-recompute.json">闭合审计</a>及<a href="../full-owned-lifecycle-policy.json">生命周期</a>。</p>
+<table>
+<thead>
+<tr>
+<th>数据集/臂</th>
+<th style="text-align:right">有最终记录的attempted</th>
+<th style="text-align:right">返回失败</th>
+<th style="text-align:right">length stop</th>
+<th style="text-align:right">未执行/未完成</th>
+<th style="text-align:right">TPOT排除</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mmlu/native</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">20</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>mmlu/candidate</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">20</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>hle/native</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">124</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>hle/candidate</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">121</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>frontier/native</td>
+<td style="text-align:right">160</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">36</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>frontier/candidate</td>
+<td style="text-align:right">160</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">43</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>swe/native</td>
+<td style="text-align:right">64</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>swe/candidate</td>
+<td style="text-align:right">64</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>terminal/native</td>
+<td style="text-align:right">48</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>terminal/candidate</td>
+<td style="text-align:right">48</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<h2>原质量与judge</h2>
+<p>质量使用原金标准和原评分器；token相同或不同不作为质量判据。HLE四层、Frontier两轨和MMLU学科分组见原grader汇总。720只是计划judge输入；实际HTTP、solver_failed、invalid和未决按stage单列。SWE/Terminal只报告轨迹推理性能，没有执行历史工具，不给解决率。</p>
+<ul>
+<li>原汇总：<a href="../quality-bidkv-frontier-summary.json">quality-bidkv-frontier-summary.json</a>（SHA
+<code>acffd63e873b2ecbd3c183a8ff5136111fec593389c3baa4698a9a6f0ae88955</code>）。</li>
+<li>原汇总：<a href="../quality-bidkv-hle-summary.json">quality-bidkv-hle-summary.json</a>（SHA
+<code>0e067bab248b8eb5eb84b64227e16b55ffc754c8a48c123e0ae2bb80b9fc47f9</code>）。</li>
+<li>原汇总：<a href="../quality-native-frontier-summary.json">quality-native-frontier-summary.json</a>（SHA
+<code>3398febeb3ff4e14dca1bbf11f95602b07937e48981f3df41e189388659b19d4</code>）。</li>
+<li>原汇总：<a href="../quality-native-hle-summary.json">quality-native-hle-summary.json</a>（SHA
+<code>1e5463c4d247cba2b74d37d22e8fd7c2662160a16db60ee790aa57f6ac1c1ceb</code>）。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>数据集/臂/层或轨</th>
+<th style="text-align:right">已判成功/计划</th>
+<th style="text-align:right">有效grade</th>
+<th style="text-align:right">原rate</th>
+<th style="text-align:right">未决</th>
+<th style="text-align:right">solver/judge length</th>
+<th style="text-align:right">研究均分/10（仅有效）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>frontier/bidkv/olympiad</td>
+<td style="text-align:right">55/100</td>
+<td style="text-align:right">98</td>
+<td style="text-align:right">55.00%</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">33/6</td>
+<td style="text-align:right">不适用/未测</td>
+</tr>
+<tr>
+<td>frontier/bidkv/research</td>
+<td style="text-align:right">2/60</td>
+<td style="text-align:right">58</td>
+<td style="text-align:right">3.33%</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">10/9</td>
+<td style="text-align:right">2.3286</td>
+</tr>
+<tr>
+<td>hle/bidkv/gold/text</td>
+<td style="text-align:right">8/64</td>
+<td style="text-align:right">36</td>
+<td style="text-align:right">12.50%</td>
+<td style="text-align:right">28</td>
+<td style="text-align:right">38/28</td>
+<td style="text-align:right">不适用/未测</td>
+</tr>
+<tr>
+<td>hle/bidkv/gold/image</td>
+<td style="text-align:right">1/10</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">10.00%</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">1/6</td>
+<td style="text-align:right">不适用/未测</td>
+</tr>
+<tr>
+<td>hle/bidkv/revision/text</td>
+<td style="text-align:right">22/113</td>
+<td style="text-align:right">56</td>
+<td style="text-align:right">19.47%</td>
+<td style="text-align:right">57</td>
+<td style="text-align:right">80/57</td>
+<td style="text-align:right">不适用/未测</td>
+</tr>
+<tr>
+<td>hle/bidkv/revision/image</td>
+<td style="text-align:right">2/13</td>
+<td style="text-align:right">12</td>
+<td style="text-align:right">15.38%</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">2/1</td>
+<td style="text-align:right">不适用/未测</td>
+</tr>
+<tr>
+<td>frontier/native/olympiad</td>
+<td style="text-align:right">63/100</td>
+<td style="text-align:right">95</td>
+<td style="text-align:right">63.00%</td>
+<td style="text-align:right">5</td>
+<td style="text-align:right">29/7</td>
+<td style="text-align:right">不适用/未测</td>
+</tr>
+<tr>
+<td>frontier/native/research</td>
+<td style="text-align:right">1/60</td>
+<td style="text-align:right">57</td>
+<td style="text-align:right">1.67%</td>
+<td style="text-align:right">3</td>
+<td style="text-align:right">7/8</td>
+<td style="text-align:right">2.5053</td>
+</tr>
+<tr>
+<td>hle/native/gold/text</td>
+<td style="text-align:right">7/64</td>
+<td style="text-align:right">35</td>
+<td style="text-align:right">10.94%</td>
+<td style="text-align:right">29</td>
+<td style="text-align:right">40/29</td>
+<td style="text-align:right">不适用/未测</td>
+</tr>
+<tr>
+<td>hle/native/gold/image</td>
+<td style="text-align:right">2/10</td>
+<td style="text-align:right">7</td>
+<td style="text-align:right">20.00%</td>
+<td style="text-align:right">3</td>
+<td style="text-align:right">1/3</td>
+<td style="text-align:right">不适用/未测</td>
+</tr>
+<tr>
+<td>hle/native/revision/text</td>
+<td style="text-align:right">21/113</td>
+<td style="text-align:right">55</td>
+<td style="text-align:right">18.58%</td>
+<td style="text-align:right">58</td>
+<td style="text-align:right">81/58</td>
+<td style="text-align:right">不适用/未测</td>
+</tr>
+<tr>
+<td>hle/native/revision/image</td>
+<td style="text-align:right">2/13</td>
+<td style="text-align:right">9</td>
+<td style="text-align:right">15.38%</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">2/4</td>
+<td style="text-align:right">不适用/未测</td>
+</tr>
+</tbody>
+</table>
+<p>HLE沿冻结strict_json原评分：未决计入计划分母的非成功项，不能称为已证错误。Frontier沿冻结mmlu_extract_first：取首个完整显式VERDICT，length结尾满足原规则仍可解析；研究score为0–10、≥7成功。缺失/invalid/失败仍保留，原rate若null不以lower
+bound代填。研究均分只覆盖有效grade。两者均是Qwen替代judge的单次本地协议，不是官方leaderboard复现；HLE校准误差原工具未实现，保留未验证。</p>
+<table>
+<thead>
+<tr>
+<th>Judge所评solver/数据集</th>
+<th style="text-align:right">计划输入</th>
+<th style="text-align:right">已绑定HTTPattempted</th>
+<th style="text-align:right">有效grade</th>
+<th style="text-align:right">invalid</th>
+<th style="text-align:right">solver_failed</th>
+<th style="text-align:right">transport失败</th>
+<th style="text-align:right">length</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>native/hle</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right">106</td>
+<td style="text-align:right">94</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">94</td>
+</tr>
+<tr>
+<td>bidkv/hle</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right">108</td>
+<td style="text-align:right">92</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">92</td>
+</tr>
+<tr>
+<td>native/frontier</td>
+<td style="text-align:right">160</td>
+<td style="text-align:right">160</td>
+<td style="text-align:right">152</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">15</td>
+</tr>
+<tr>
+<td>bidkv/frontier</td>
+<td style="text-align:right">160</td>
+<td style="text-align:right">160</td>
+<td style="text-align:right">156</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">0</td>
+<td style="text-align:right">15</td>
+</tr>
+</tbody>
+</table>
+<p>MMLU原extractor：144/200→149/200；仅B0正确24题、仅B1正确29题。配对discordance双侧精确binomial诊断p=0.583132；固定子集、单次解码的诊断不证明总体差异、等价或重复性。</p>
+<table>
+<thead>
+<tr>
+<th>MMLU学科</th>
+<th style="text-align:right">计划/臂</th>
+<th style="text-align:right">B0正确</th>
+<th style="text-align:right">B1正确</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>biology</td>
+<td style="text-align:right">12</td>
+<td style="text-align:right">11</td>
+<td style="text-align:right">10</td>
+</tr>
+<tr>
+<td>business</td>
+<td style="text-align:right">14</td>
+<td style="text-align:right">12</td>
+<td style="text-align:right">13</td>
+</tr>
+<tr>
+<td>chemistry</td>
+<td style="text-align:right">18</td>
+<td style="text-align:right">10</td>
+<td style="text-align:right">13</td>
+</tr>
+<tr>
+<td>computer science</td>
+<td style="text-align:right">7</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td>economics</td>
+<td style="text-align:right">14</td>
+<td style="text-align:right">13</td>
+<td style="text-align:right">11</td>
+</tr>
+<tr>
+<td>engineering</td>
+<td style="text-align:right">16</td>
+<td style="text-align:right">11</td>
+<td style="text-align:right">11</td>
+</tr>
+<tr>
+<td>health</td>
+<td style="text-align:right">14</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">6</td>
+</tr>
+<tr>
+<td>history</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">2</td>
+</tr>
+<tr>
+<td>law</td>
+<td style="text-align:right">19</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">12</td>
+</tr>
+<tr>
+<td>math</td>
+<td style="text-align:right">22</td>
+<td style="text-align:right">18</td>
+<td style="text-align:right">20</td>
+</tr>
+<tr>
+<td>other</td>
+<td style="text-align:right">15</td>
+<td style="text-align:right">10</td>
+<td style="text-align:right">12</td>
+</tr>
+<tr>
+<td>philosophy</td>
+<td style="text-align:right">9</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">8</td>
+</tr>
+<tr>
+<td>physics</td>
+<td style="text-align:right">21</td>
+<td style="text-align:right">21</td>
+<td style="text-align:right">16</td>
+</tr>
+<tr>
+<td>psychology</td>
+<td style="text-align:right">13</td>
+<td style="text-align:right">10</td>
+<td style="text-align:right">11</td>
+</tr>
+</tbody>
+</table>
+<p>MMLU未解析答案：B0 0，B1 0；仍保留在200分母，不能只在可解析子集算正确率。</p>
+<p>仅将未决grade视为可正可负、保持已判grade不变时，已判成功占计划分母的条件范围如下；这不是统计置信区间，也没有包含judge误判的不确定性：</p>
+<table>
+<thead>
+<tr>
+<th>数据集/臂</th>
+<th style="text-align:right">已判成功</th>
+<th style="text-align:right">未决</th>
+<th style="text-align:right">计划</th>
+<th style="text-align:right">条件范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hle/native</td>
+<td style="text-align:right">32</td>
+<td style="text-align:right">94</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right">16.00%–63.00%</td>
+</tr>
+<tr>
+<td>hle/bidkv</td>
+<td style="text-align:right">33</td>
+<td style="text-align:right">92</td>
+<td style="text-align:right">200</td>
+<td style="text-align:right">16.50%–62.50%</td>
+</tr>
+<tr>
+<td>frontier/native</td>
+<td style="text-align:right">64</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">160</td>
+<td style="text-align:right">40.00%–45.00%</td>
+</tr>
+<tr>
+<td>frontier/bidkv</td>
+<td style="text-align:right">57</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">160</td>
+<td style="text-align:right">35.62%–38.12%</td>
+</tr>
+</tbody>
+</table>
+<h2>成本、适用范围与不确定性</h2>
+<p>成本只可按相同费率比较solver
+wall/accepted输出token，初始化、图编译、诊断生成、judge和额外主机/设备内存另列；实际货币费用未验证。完整数值及原件hash见summary.json与本批数字胶囊。原问题、答案、对话和完整SSE保持受控，公共hash不冒充原SSE重新读取。</p>
+<table>
+<thead>
+<tr>
+<th>数据集</th>
+<th style="text-align:right">同费率solver时间/输出token变化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mmlu</td>
+<td style="text-align:right">-2.436%</td>
+</tr>
+<tr>
+<td>hle</td>
+<td style="text-align:right">-0.110%</td>
+</tr>
+<tr>
+<td>frontier</td>
+<td style="text-align:right">-0.234%</td>
+</tr>
+<tr>
+<td>swe</td>
+<td style="text-align:right">+1.708%</td>
+</tr>
+<tr>
+<td>terminal</td>
+<td style="text-align:right">-2.286%</td>
+</tr>
+</tbody>
+</table>
+<p>本轮为先B0后B1的固定顺序单批，时间漂移、队列相关性及单次运行的不确定性保留；不把不显著写成等价，不以有限batch的P95/P99证明连续16K或32K长期稳定，也不把冻结子集升级为上游全集或四目标验收。</p>
+<table>
+<thead>
+<tr>
+<th>完整五项服务</th>
+<th style="text-align:right">初始化资源代理（卡秒）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>service-native</td>
+<td style="text-align:right">1256.953664</td>
+</tr>
+<tr>
+<td>service-bidkv</td>
+<td style="text-align:right">1185.494675</td>
+</tr>
+<tr>
+<td>service-judge</td>
+<td style="text-align:right">1216.684961</td>
+</tr>
+</tbody>
+</table>
+<p>以上仅完整五项的三次fresh初始化，不含另列的C8准备，也不是总账单。容器与HBM数值采样见runtime-overheads.json，属于总观测，不能自动当作MOD独占增量或有效FLOP证据。</p>
+<table>
+<thead>
+<tr>
+<th>服务</th>
+<th style="text-align:right">留存样本</th>
+<th style="text-align:right">容器memory.current最大观测GiB</th>
+<th>各物理卡HBM最大观测MB</th>
+<th style="text-align:right">采样错误记录</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>service-native</td>
+<td style="text-align:right">60</td>
+<td style="text-align:right">26.353096</td>
+<td>{&quot;6&quot;: 55943, &quot;7&quot;: 55946}</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>service-bidkv</td>
+<td style="text-align:right">57</td>
+<td style="text-align:right">22.765385</td>
+<td>{&quot;6&quot;: 55935, &quot;7&quot;: 55936}</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>service-judge</td>
+<td style="text-align:right">58</td>
+<td style="text-align:right">20.554703</td>
+<td>{&quot;6&quot;: 55933, &quot;7&quot;: 55931}</td>
+<td style="text-align:right">0</td>
+</tr>
+</tbody>
+</table>
+<p>这些是留存采样区间内的总容器/设备最大观测，非精确分配峰值；缺样本保留未验证，不能用0或两臂总内存差冒充MOD独占内存。HBM单位沿用npu-smi原标记MB。</p>
+<p>原HLE额外red/blue资格每臂2条、max32、保留EOS，与672/720和正式window分开；记录及不完整下界见diagnostic-overheads.json。</p>
+</html>
