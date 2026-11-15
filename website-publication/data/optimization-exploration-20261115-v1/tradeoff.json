@@ -1,0 +1,1634 @@
+{
+  "schema": "vllm-hust-tradeoff-evidence/v1",
+  "catalog_sha256": "3f2d4e58192eafffb2d5f1dd71543a4ce855a9bcacd12e0c768f37231fbb5d0f",
+  "scope": {
+    "model": "Qwen3.5-35B-A3B BF16",
+    "hardware": "2 x Ascend 910B2",
+    "dataset": "fixed full MMLU200",
+    "request_burst": 200,
+    "max_output_tokens": 8192,
+    "mtp_tokens": 2,
+    "graph": "FULL",
+    "scope_review": "Historical native experiments, not one common-source randomized campaign. Use original per-source comparisons for effects; separate same-condition controls remain separate configurations.",
+    "excluded": "Operator-only probes/profiler timings excluded from model-performance scatter. All E19 source/input/clock/activation/compiler/cleanup/seal/raw-readback checks passed; references remain historical. E20 completed and admitted with required GDN96; its negative TPOT/quality tradeoff remains retained."
+  },
+  "sources": [
+    {
+      "path": "E02-capacity-v2/analyses/capacity-sealed4-v2.json",
+      "sha256": "3637a43c80ea4c2a8238ba311732380a555910d7370f131198feda21614248a4",
+      "trial_ids": [
+        "E02-01-E24",
+        "E02-02-E32",
+        "E02-03-E24",
+        "E02-04-E32"
+      ],
+      "schema": "vllm-hust-capacity-analysis/v2",
+      "protocol": "E02-mmlu200-execution24-vs32-20261115"
+    },
+    {
+      "path": "E04-padding-v4/analyses/padding-sealed4-v5.json",
+      "sha256": "ec756aad0aa2d51227586b461023b5c0459b0e36a29dd02d47af5dee2aedb84e",
+      "trial_ids": [
+        "E04-01-E24",
+        "E04-02-E26",
+        "E04-03-E24",
+        "E04-04-E26"
+      ],
+      "schema": "vllm-hust-padding-analysis/v5",
+      "protocol": "E04-mmlu200-execution24-vs26-20261115"
+    },
+    {
+      "path": "E05-state-policy-v5/analyses/policy-sealed2-v2.json",
+      "sha256": "65ad439fa56874fbddca4c435bfd79b3e6e6dd5dc8ef63b46aac0d8b761b7a0e",
+      "trial_ids": [
+        "E05-01-policy-on",
+        "E05-02-policy-off"
+      ],
+      "schema": "vllm-hust-state-policy-pilot-analysis/v2",
+      "protocol": "E05-cold-mmlu200-state-policy-pilot-20261115"
+    },
+    {
+      "path": "E06-native-overlap-v6/analyses/native-overlap-sealed2-v1.json",
+      "sha256": "c6f73b6592ddfefa17e9c5b112e73e7983d83d7d405c4331db99ddf6fdb4cc71",
+      "trial_ids": [
+        "E06-01-native-off",
+        "E06-02-native-on"
+      ],
+      "schema": "vllm-hust-native-overlap-pilot-analysis/v1",
+      "protocol": "E06-mmlu200-native-shared-expert-overlap-pilot-20261115"
+    },
+    {
+      "path": "E08-decode-capacity-v9/analyses/decode-sealed2-v1.json",
+      "sha256": "b97faea6a8db14e32d7a48bd9e1eab86e3a614811d63bc58b27c645c9fbb22eb",
+      "trial_ids": [
+        "E08-01-decode80",
+        "E08-02-decode72"
+      ],
+      "schema": "vllm-hust-decode-capacity-analysis/v1",
+      "protocol": "E08-mmlu200-decode-capacity72-pilot-20261115"
+    },
+    {
+      "path": "E09-weight-layout-v10/analyses/layout-sealed2-v1.json",
+      "sha256": "2e19d0f27a33fad2268c31b61951900779b745e29e34c9a8dc34db58edaebdb6",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E09-02-nz-mode2"
+      ],
+      "schema": "vllm-hust-native-weight-layout-analysis/v1",
+      "protocol": "E09-mmlu200-native-weight-nz2-pilot-20261115"
+    },
+    {
+      "path": "E11-nz-scalar-compat-v12/analyses/scalar-sealed1-v1.json",
+      "sha256": "5c9f93a0cf2a36859303e844963f220defb5ea9013e5cb1f906118b4e57e02ff",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E11-01-nz2-scalar-compat"
+      ],
+      "schema": "vllm-hust-nz-scalar-compat-analysis/v1",
+      "protocol": "E11-mmlu200-nz2-scalar-nd-compat-20261115"
+    },
+    {
+      "path": "E15-nz-gates-nd-v19/analyses/four-cell-sealed1-v2.json",
+      "sha256": "0da2239f229e7daf45a88d8d3c0a139abae8ecf9512264ac8f3033f6b659b09e",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E13-01-nz2-linear-compat",
+        "E14-01-nd-router-precast",
+        "E15-01-nz-gates-nd-no-cache"
+      ],
+      "schema": "vllm-hust-nz-layout-cache-four-cell-analysis/v1",
+      "protocol": "E15-mmlu200-nz-with-ND-scalar-router-no-precast-20261115"
+    },
+    {
+      "path": "E17-expert-nz-linear-nd-v21/analyses/expert-linear-sealed1-v1.json",
+      "sha256": "71d17ac02b1559bc8db2878526e8ab36e6d1bcc415f97ca734e1ff580f112c52",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E15-01-nz-gates-nd-no-cache",
+        "E17-01-expert-nz-linear-nd"
+      ],
+      "schema": "vllm-hust-expert-nz-linear-nd-analysis/v1",
+      "protocol": "E17-mmlu200-expert-NZ-ordinaryLinear-ND-20261115"
+    },
+    {
+      "path": "E18-joint-capacity-layout-overlap-v22/analyses/joint-sealed1-v1.json",
+      "sha256": "8b2b9cd6cfba448a47d51ac8ad78d5cd359094ba8ed2fa34a78b6d2b8a8ae379",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E17-01-expert-nz-linear-nd",
+        "E18-01-joint-E26-NZ-linearND-overlap"
+      ],
+      "schema": "vllm-hust-joint-policy-analysis/v1",
+      "protocol": "E18-joint-E26-expertNZ-linearND-nativeOverlap-20261115"
+    },
+    {
+      "path": "E19-E26-layout-overlap-off-v23/analyses/native-off-sealed1-v1.json",
+      "sha256": "f50768d916bec4c0b2317b47f1bca60e434de52b97fed7f3003e935ab10a612b",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E17-01-expert-nz-linear-nd",
+        "E18-01-joint-E26-NZ-linearND-overlap",
+        "E19-01-E26-NZ-linearND-native-off"
+      ],
+      "schema": "vllm-hust-native-off-ablation-analysis/v1",
+      "protocol": "E19-E26-selective-layout-native-off-20261115"
+    },
+    {
+      "path": "E20-capacity28-v24/analyses/capacity28-sealed1-v1.json",
+      "sha256": "6d219d7186197088508111f206d3246cc4fa761fa6fd1a1eaa9cea85e09d8bf2",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E20-01-E28-nativeND-off"
+      ],
+      "schema": "vllm-hust-native-capacity28-analysis/v1",
+      "protocol": "E20-MMLU200-capacity28-nativeND-nativeOff-20261115"
+    }
+  ],
+  "configurations": [
+    {
+      "id": "E02-E24",
+      "family": "Capacity",
+      "trial_ids": [
+        "E02-01-E24",
+        "E02-03-E24"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E02-E32",
+      "family": "Capacity",
+      "trial_ids": [
+        "E02-02-E32",
+        "E02-04-E32"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E04-E24",
+      "family": "Capacity",
+      "trial_ids": [
+        "E04-01-E24",
+        "E04-03-E24"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E04-E26",
+      "family": "Capacity",
+      "trial_ids": [
+        "E04-02-E26",
+        "E04-04-E26"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E05-01-policy-on",
+      "family": "State policy",
+      "trial_ids": [
+        "E05-01-policy-on"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E05-02-policy-off",
+      "family": "State policy",
+      "trial_ids": [
+        "E05-02-policy-off"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E06-01-native-off",
+      "family": "Native multistream",
+      "trial_ids": [
+        "E06-01-native-off"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E06-02-native-on",
+      "family": "Native multistream",
+      "trial_ids": [
+        "E06-02-native-on"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E08-01-decode80",
+      "family": "Decode padding",
+      "trial_ids": [
+        "E08-01-decode80"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E08-02-decode72",
+      "family": "Decode padding",
+      "trial_ids": [
+        "E08-02-decode72"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E09-01-nz-mode1",
+      "family": "Weight layout / router",
+      "trial_ids": [
+        "E09-01-nz-mode1"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E09-02-nz-mode2",
+      "family": "Weight layout / router",
+      "trial_ids": [
+        "E09-02-nz-mode2"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E11-01-nz2-scalar-compat",
+      "family": "Weight layout / router",
+      "trial_ids": [
+        "E11-01-nz2-scalar-compat"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E13-01-nz2-linear-compat",
+      "family": "Weight layout / router",
+      "trial_ids": [
+        "E13-01-nz2-linear-compat"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E14-01-nd-router-precast",
+      "family": "Weight layout / router",
+      "trial_ids": [
+        "E14-01-nd-router-precast"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E15-01-nz-gates-nd-no-cache",
+      "family": "Weight layout / router",
+      "trial_ids": [
+        "E15-01-nz-gates-nd-no-cache"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E17-01-expert-nz-linear-nd",
+      "family": "Weight layout / router",
+      "trial_ids": [
+        "E17-01-expert-nz-linear-nd"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E18-01-joint-E26-NZ-linearND-overlap",
+      "family": "Joint E26/layout/multistream",
+      "trial_ids": [
+        "E18-01-joint-E26-NZ-linearND-overlap"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E19-01-E26-NZ-linearND-native-off",
+      "family": "Joint E26/layout/multistream",
+      "trial_ids": [
+        "E19-01-E26-NZ-linearND-native-off"
+      ],
+      "proposal_only": true
+    },
+    {
+      "id": "E20-01-E28-nativeND-off",
+      "family": "Capacity",
+      "trial_ids": [
+        "E20-01-E28-nativeND-off"
+      ],
+      "proposal_only": true
+    }
+  ],
+  "rows": [
+    {
+      "id": "E02-01-E24",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 145,
+      "truncated": 22,
+      "unparsed": 0,
+      "output_tokens": 703667,
+      "seal_sha256": "8ca117488bb06503df253f20dfc35e8b971e3f049dc68fcf05264cda3b2047f4",
+      "output_tokens_per_second": 1051.2120757254086,
+      "mean_tpot_ms": 20.865648280222555,
+      "mean_ttft_ms": 264254.477238825,
+      "tpot_p95_ms": 22.646493782256467,
+      "ttft_p95_ms": 528468.5273291382,
+      "duration_seconds": 669.3863362580014,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        0
+      ],
+      "configuration_id": "E02-E24",
+      "family": "Capacity"
+    },
+    {
+      "id": "E02-02-E32",
+      "execution_seats": 32,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 146,
+      "truncated": 18,
+      "unparsed": 0,
+      "output_tokens": 695364,
+      "seal_sha256": "5c1e9484e895fe2ae099f30d08b84de997e2afa7b04fcec688461c856db07918",
+      "output_tokens_per_second": 1271.7319350201878,
+      "mean_tpot_ms": 22.78986571114109,
+      "mean_ttft_ms": 199290.82059864915,
+      "tpot_p95_ms": 24.772387118217406,
+      "ttft_p95_ms": 426665.18400126003,
+      "duration_seconds": 546.7850423909986,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        0
+      ],
+      "configuration_id": "E02-E32",
+      "family": "Capacity"
+    },
+    {
+      "id": "E02-03-E24",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 149,
+      "truncated": 28,
+      "unparsed": 0,
+      "output_tokens": 697936,
+      "seal_sha256": "95d4f59e2f1a8ab55b1d0ed3b760d9649cc50030b6e9d08a08088b2d25344ba8",
+      "output_tokens_per_second": 1065.4353863569386,
+      "mean_tpot_ms": 21.129649276927648,
+      "mean_ttft_ms": 253551.04257357,
+      "tpot_p95_ms": 23.03201954004854,
+      "ttft_p95_ms": 534589.2286974047,
+      "duration_seconds": 655.0711652129976,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        0
+      ],
+      "configuration_id": "E02-E24",
+      "family": "Capacity"
+    },
+    {
+      "id": "E02-04-E32",
+      "execution_seats": 32,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 151,
+      "truncated": 24,
+      "unparsed": 0,
+      "output_tokens": 697903,
+      "seal_sha256": "238837c16bfffb24d7c7885c24bd53a24e49bba607948623edaf9b4ec3eb0a9d",
+      "output_tokens_per_second": 1264.3318598524656,
+      "mean_tpot_ms": 22.83493340609524,
+      "mean_ttft_ms": 190928.74779388527,
+      "tpot_p95_ms": 24.794680002032674,
+      "ttft_p95_ms": 418786.56258455594,
+      "duration_seconds": 551.9935249289992,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        0
+      ],
+      "configuration_id": "E02-E32",
+      "family": "Capacity"
+    },
+    {
+      "id": "E04-01-E24",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 148,
+      "truncated": 23,
+      "unparsed": 0,
+      "output_tokens": 697163,
+      "seal_sha256": "6f320017e75ce331b00be8d6517e4545f6948d500386e591fbb713a5cb677883",
+      "output_tokens_per_second": 1034.3332395737755,
+      "mean_tpot_ms": 21.132256884740514,
+      "mean_ttft_ms": 242746.13231307914,
+      "tpot_p95_ms": 23.103434010472803,
+      "ttft_p95_ms": 527969.3914698422,
+      "duration_seconds": 674.0216531059996,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        1
+      ],
+      "configuration_id": "E04-E24",
+      "family": "Capacity"
+    },
+    {
+      "id": "E04-02-E26",
+      "execution_seats": 26,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 138,
+      "truncated": 17,
+      "unparsed": 0,
+      "output_tokens": 703248,
+      "seal_sha256": "ce91d9d0583a0a3336c7fd77cd2f67bbc82bb344e62a6fc9448beac939ac529b",
+      "output_tokens_per_second": 1135.9905634459653,
+      "mean_tpot_ms": 21.35918289364117,
+      "mean_ttft_ms": 231978.93312545595,
+      "tpot_p95_ms": 23.16630585090157,
+      "ttft_p95_ms": 512119.5750266546,
+      "duration_seconds": 619.0614804640063,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        1
+      ],
+      "configuration_id": "E04-E26",
+      "family": "Capacity"
+    },
+    {
+      "id": "E04-03-E24",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 149,
+      "truncated": 15,
+      "unparsed": 0,
+      "output_tokens": 668754,
+      "seal_sha256": "6143e58bf60d8359cffe810b1b1510664ff63d78a7f80161f5538a6338c6f61a",
+      "output_tokens_per_second": 1037.8979917992333,
+      "mean_tpot_ms": 20.94767095186696,
+      "mean_ttft_ms": 234153.97225301043,
+      "tpot_p95_ms": 22.89637620538082,
+      "ttft_p95_ms": 514621.17013265233,
+      "duration_seconds": 644.3349975470046,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        1
+      ],
+      "configuration_id": "E04-E24",
+      "family": "Capacity"
+    },
+    {
+      "id": "E04-04-E26",
+      "execution_seats": 26,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 144,
+      "truncated": 19,
+      "unparsed": 0,
+      "output_tokens": 685031,
+      "seal_sha256": "87835fe904c7d0ab7f35ac6d40fc8a0f65ebe454f92d83cc760c1ed0c58ac462",
+      "output_tokens_per_second": 1118.1572076812265,
+      "mean_tpot_ms": 21.35876299355532,
+      "mean_ttft_ms": 243078.9017700356,
+      "tpot_p95_ms": 23.135091587933555,
+      "ttft_p95_ms": 503270.81474153383,
+      "duration_seconds": 612.6428334890225,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        1
+      ],
+      "configuration_id": "E04-E26",
+      "family": "Capacity"
+    },
+    {
+      "id": "E05-01-policy-on",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 145,
+      "truncated": 19,
+      "unparsed": 0,
+      "output_tokens": 685778,
+      "seal_sha256": "5d4554ca62c2fc17a763fbd57b8bb1982eef21269e6df9f09e2b9f16cdfd6004",
+      "output_tokens_per_second": 1077.6248829362326,
+      "mean_tpot_ms": 20.546569479738974,
+      "mean_ttft_ms": 258206.4620257284,
+      "tpot_p95_ms": 22.2009462204051,
+      "ttft_p95_ms": 529898.1206216601,
+      "duration_seconds": 636.379143483995,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        2
+      ],
+      "configuration_id": "E05-01-policy-on",
+      "family": "State policy"
+    },
+    {
+      "id": "E05-02-policy-off",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 149,
+      "truncated": 21,
+      "unparsed": 0,
+      "output_tokens": 680961,
+      "seal_sha256": "5ad08df3dade12707448c51219912848104e7ea007551e25aa7712fb16b76d9d",
+      "output_tokens_per_second": 1047.4123644253316,
+      "mean_tpot_ms": 20.843538291318215,
+      "mean_ttft_ms": 251919.62017430458,
+      "tpot_p95_ms": 22.895458920935955,
+      "ttft_p95_ms": 506037.29138949123,
+      "duration_seconds": 650.1364917279861,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        2
+      ],
+      "configuration_id": "E05-02-policy-off",
+      "family": "State policy"
+    },
+    {
+      "id": "E06-01-native-off",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 148,
+      "truncated": 27,
+      "unparsed": 0,
+      "output_tokens": 703610,
+      "seal_sha256": "34daa3ffa9c923f16a04480ddcd593c6129c6e943eed5156237303328137fa7f",
+      "output_tokens_per_second": 1058.711521359435,
+      "mean_tpot_ms": 20.943584276630034,
+      "mean_ttft_ms": 239087.9686777656,
+      "tpot_p95_ms": 22.837066997620262,
+      "ttft_p95_ms": 514561.7436701402,
+      "duration_seconds": 664.5908595540095,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        3
+      ],
+      "configuration_id": "E06-01-native-off",
+      "family": "Native multistream"
+    },
+    {
+      "id": "E06-02-native-on",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 147,
+      "truncated": 18,
+      "unparsed": 0,
+      "output_tokens": 699191,
+      "seal_sha256": "3dcc2c9de0fdd55103ef53caf4ed8f489c4bf94eec4ba7517cd4789417154ce7",
+      "output_tokens_per_second": 1076.6806320974702,
+      "mean_tpot_ms": 20.657985125723137,
+      "mean_ttft_ms": 247016.12360043844,
+      "tpot_p95_ms": 22.39765813199609,
+      "ttft_p95_ms": 541199.5205936341,
+      "duration_seconds": 649.3949822779978,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        3
+      ],
+      "configuration_id": "E06-02-native-on",
+      "family": "Native multistream"
+    },
+    {
+      "id": "E08-01-decode80",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 147,
+      "truncated": 24,
+      "unparsed": 0,
+      "output_tokens": 722506,
+      "seal_sha256": "6406fc7564b3e694cba96e0218db896affc5cb1d8d0ec9f9158de3c9bdba9320",
+      "output_tokens_per_second": 1062.0342670706125,
+      "mean_tpot_ms": 20.795020297946884,
+      "mean_ttft_ms": 257401.57490836966,
+      "tpot_p95_ms": 22.5800643856574,
+      "ttft_p95_ms": 551311.04006471,
+      "duration_seconds": 680.3038493219938,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        4
+      ],
+      "configuration_id": "E08-01-decode80",
+      "family": "Decode padding"
+    },
+    {
+      "id": "E08-02-decode72",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 144,
+      "truncated": 17,
+      "unparsed": 0,
+      "output_tokens": 682812,
+      "seal_sha256": "70c252f64cd1b805075023b50d2e5ff72a9adb311a530e6b310916e1a53e8581",
+      "output_tokens_per_second": 1084.2037487430925,
+      "mean_tpot_ms": 20.034455089771345,
+      "mean_ttft_ms": 222916.14079429884,
+      "tpot_p95_ms": 21.79748926009073,
+      "ttft_p95_ms": 496056.41153190215,
+      "duration_seconds": 629.7819951199926,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        4
+      ],
+      "configuration_id": "E08-02-decode72",
+      "family": "Decode padding"
+    },
+    {
+      "id": "E09-01-nz-mode1",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 149,
+      "truncated": 18,
+      "unparsed": 0,
+      "output_tokens": 681812,
+      "seal_sha256": "986390b0b8d8526c2d2c6aa9f3d353735fd768596b1a0221f2b50d891723bddd",
+      "output_tokens_per_second": 1067.4981278679002,
+      "mean_tpot_ms": 20.914172713035196,
+      "mean_ttft_ms": 252438.94155125206,
+      "tpot_p95_ms": 22.59903153581917,
+      "ttft_p95_ms": 525091.2749769529,
+      "duration_seconds": 638.7008859320194,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "configuration_id": "E09-01-nz-mode1",
+      "family": "Weight layout / router"
+    },
+    {
+      "id": "E09-02-nz-mode2",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 0,
+      "successful": 0,
+      "unreturned": 200,
+      "correct": null,
+      "truncated": null,
+      "unparsed": null,
+      "output_tokens": null,
+      "seal_sha256": "e16b9316310f95c3940b6d5caf98fbe2e714336407d6858edbe87693d3fad633",
+      "output_tokens_per_second": null,
+      "mean_tpot_ms": null,
+      "mean_ttft_ms": null,
+      "tpot_p95_ms": null,
+      "ttft_p95_ms": null,
+      "duration_seconds": null,
+      "timing_eligible": false,
+      "state": "sealed-failed",
+      "failure": "RuntimeError: Model worker failed before formal requests: RuntimeError: matmul_implement_npu:../third_party/op-plugin/op_plugin/ops/opapi/MatmulKernelNpuOpApi.cpp:90 NPU function error: call aclnnMatmulWeightNz failed, error code is 161002; see startup-failure.json and original service.log",
+      "source_indices": [
+        5
+      ],
+      "configuration_id": "E09-02-nz-mode2",
+      "family": "Weight layout / router"
+    },
+    {
+      "id": "E11-01-nz2-scalar-compat",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 0,
+      "successful": 0,
+      "unreturned": 200,
+      "correct": null,
+      "truncated": null,
+      "unparsed": null,
+      "output_tokens": null,
+      "seal_sha256": "1028fabfd799a17b3d5d966ba19cea17af1e626aaf2714dddc8bda961aa3cae5",
+      "output_tokens_per_second": null,
+      "mean_tpot_ms": null,
+      "mean_ttft_ms": null,
+      "tpot_p95_ms": null,
+      "ttft_p95_ms": null,
+      "duration_seconds": null,
+      "timing_eligible": false,
+      "state": "sealed-failed",
+      "failure": "RuntimeError: Model worker failed before formal requests: RuntimeError: Cannot run aclop operators during NPU graph capture. Current working aclop is Cast. If you need this call to be captured, please try to set torch.npu.config.allow_internal_format = False. If still fail, the operator needs aclnn implementation and please file an issue. Current npuStreamCaptureStatus: npuStreamCaptureStatusActive; see startup-failure.json and original service.log",
+      "source_indices": [
+        6
+      ],
+      "configuration_id": "E11-01-nz2-scalar-compat",
+      "family": "Weight layout / router"
+    },
+    {
+      "id": "E13-01-nz2-linear-compat",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 142,
+      "truncated": 23,
+      "unparsed": 0,
+      "output_tokens": 709078,
+      "seal_sha256": "1565c262846872cfd9eb76738360802e8c76990a755464f9a20063bf82f756a9",
+      "output_tokens_per_second": 1072.4408035310546,
+      "mean_tpot_ms": 20.464048899383545,
+      "mean_ttft_ms": 261901.14540773808,
+      "tpot_p95_ms": 22.214347485856663,
+      "ttft_p95_ms": 536872.2827915989,
+      "duration_seconds": 661.1814821529842,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        7
+      ],
+      "configuration_id": "E13-01-nz2-linear-compat",
+      "family": "Weight layout / router"
+    },
+    {
+      "id": "E14-01-nd-router-precast",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 148,
+      "truncated": 19,
+      "unparsed": 0,
+      "output_tokens": 679520,
+      "seal_sha256": "9380ae17245acea33604450e669c2d549dd6f48349d5b4ff463687a5a81db86b",
+      "output_tokens_per_second": 1069.0538910972398,
+      "mean_tpot_ms": 20.781972206762287,
+      "mean_ttft_ms": 250595.12560129457,
+      "tpot_p95_ms": 22.419291365822406,
+      "ttft_p95_ms": 533334.6868967084,
+      "duration_seconds": 635.6274512060045,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        7
+      ],
+      "configuration_id": "E14-01-nd-router-precast",
+      "family": "Weight layout / router"
+    },
+    {
+      "id": "E15-01-nz-gates-nd-no-cache",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 148,
+      "truncated": 22,
+      "unparsed": 0,
+      "output_tokens": 695607,
+      "seal_sha256": "3e62b70c7cd5229f9715a9322e0d36dd5ba81bbe47a25e5b37f0b55fd7c2e867",
+      "output_tokens_per_second": 1060.2118746077022,
+      "mean_tpot_ms": 20.710676032085146,
+      "mean_ttft_ms": 255391.73148225382,
+      "tpot_p95_ms": 22.544863557164483,
+      "ttft_p95_ms": 542825.2205855853,
+      "duration_seconds": 656.1018761060259,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        7,
+        8
+      ],
+      "configuration_id": "E15-01-nz-gates-nd-no-cache",
+      "family": "Weight layout / router"
+    },
+    {
+      "id": "E17-01-expert-nz-linear-nd",
+      "execution_seats": 24,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 151,
+      "truncated": 27,
+      "unparsed": 0,
+      "output_tokens": 709100,
+      "seal_sha256": "61d84589d82e8cc71f5295010d8182e6e067b01e9334223ec33dadf0a0d6b13c",
+      "output_tokens_per_second": 1077.0501255301567,
+      "mean_tpot_ms": 20.372113931850958,
+      "mean_ttft_ms": 228675.15462604526,
+      "tpot_p95_ms": 22.143124438925458,
+      "ttft_p95_ms": 510617.4977493952,
+      "duration_seconds": 658.3723293759977,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        8,
+        9,
+        10
+      ],
+      "configuration_id": "E17-01-expert-nz-linear-nd",
+      "family": "Weight layout / router"
+    },
+    {
+      "id": "E18-01-joint-E26-NZ-linearND-overlap",
+      "execution_seats": 26,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 154,
+      "truncated": 20,
+      "unparsed": 0,
+      "output_tokens": 681856,
+      "seal_sha256": "f652c8b6aaf009233250f696e8c2618c6a9bf97019c34476ace673ae64dd0454",
+      "output_tokens_per_second": 1124.2218901816561,
+      "mean_tpot_ms": 20.696686403363444,
+      "mean_ttft_ms": 232050.62815971876,
+      "tpot_p95_ms": 22.58685630679319,
+      "ttft_p95_ms": 488051.852287956,
+      "duration_seconds": 606.5137193599949,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        9,
+        10
+      ],
+      "configuration_id": "E18-01-joint-E26-NZ-linearND-overlap",
+      "family": "Joint E26/layout/multistream"
+    },
+    {
+      "id": "E19-01-E26-NZ-linearND-native-off",
+      "execution_seats": 26,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 143,
+      "truncated": 20,
+      "unparsed": 0,
+      "output_tokens": 688270,
+      "seal_sha256": "84f268fbdf70f6ae7327623811daa26670baed04131e96615d56968c84cc879a",
+      "output_tokens_per_second": 1127.5906867427034,
+      "mean_tpot_ms": 20.79853715183948,
+      "mean_ttft_ms": 230798.5263672963,
+      "tpot_p95_ms": 22.716951490247077,
+      "ttft_p95_ms": 493570.3091722986,
+      "duration_seconds": 610.3899296900199,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        10
+      ],
+      "configuration_id": "E19-01-E26-NZ-linearND-native-off",
+      "family": "Joint E26/layout/multistream"
+    },
+    {
+      "id": "E20-01-E28-nativeND-off",
+      "execution_seats": 28,
+      "planned": 200,
+      "recorded": 200,
+      "successful": 200,
+      "unreturned": 0,
+      "correct": 137,
+      "truncated": 19,
+      "unparsed": 0,
+      "output_tokens": 698850,
+      "seal_sha256": "9cc9734bbad7601be3088f5b56d7f1d45c4e694d2bb5e295d9f2b6dbaaa4cf5f",
+      "output_tokens_per_second": 1102.4235775979216,
+      "mean_tpot_ms": 22.737933654629096,
+      "mean_ttft_ms": 223261.89537732367,
+      "tpot_p95_ms": 24.643182478358277,
+      "ttft_p95_ms": 496392.0136069981,
+      "duration_seconds": 633.9214927920257,
+      "timing_eligible": true,
+      "state": "sealed-complete",
+      "failure": null,
+      "source_indices": [
+        11
+      ],
+      "configuration_id": "E20-01-E28-nativeND-off",
+      "family": "Capacity"
+    }
+  ],
+  "comparisons": [
+    {
+      "source_index": 0,
+      "native_comparisons": [
+        {
+          "baseline": "E02-01-E24",
+          "candidate": "E02-02-E32",
+          "valid_complete_pair": true,
+          "changes_percent": {
+            "output_tokens_per_second": 20.977675617225522,
+            "duration_seconds": -18.315476015295996,
+            "output_tokens": -1.1799615443100264,
+            "mean_ttft_ms": -24.583748710325047,
+            "mean_tpot_ms": 9.221939357342656,
+            "ttft_p95_ms": -19.263842227727125,
+            "tpot_p95_ms": 9.387295695312336
+          },
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 145,
+            "candidate_correct": 146,
+            "both_correct": 125,
+            "baseline_only_correct": 20,
+            "candidate_only_correct": 21,
+            "both_incorrect": 34,
+            "baseline_truncated": 22,
+            "candidate_truncated": 18,
+            "note": "Paired descriptive score, not a quality-equivalence or model-cause conclusion. Repetitions reuse the same200 questions; do not call them400 independent questions."
+          },
+          "discovery_screen_met": false,
+          "tradeoff_note": "Screen failure is retained as a negative/mixed result. Useful throughput/latency tradeoffs can justify a new predefined follow-up; it is not automatic rejection of all operating points."
+        },
+        {
+          "baseline": "E02-03-E24",
+          "candidate": "E02-04-E32",
+          "valid_complete_pair": true,
+          "changes_percent": {
+            "output_tokens_per_second": 18.668093442589438,
+            "duration_seconds": -15.735334686954571,
+            "output_tokens": -0.004728227229999771,
+            "mean_ttft_ms": -24.698101867009413,
+            "mean_tpot_ms": 8.070574702012024,
+            "ttft_p95_ms": -21.66199015925122,
+            "tpot_p95_ms": 7.653086864220415
+          },
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 149,
+            "candidate_correct": 151,
+            "both_correct": 128,
+            "baseline_only_correct": 21,
+            "candidate_only_correct": 23,
+            "both_incorrect": 28,
+            "baseline_truncated": 28,
+            "candidate_truncated": 24,
+            "note": "Paired descriptive score, not a quality-equivalence or model-cause conclusion. Repetitions reuse the same200 questions; do not call them400 independent questions."
+          },
+          "discovery_screen_met": false,
+          "tradeoff_note": "Screen failure is retained as a negative/mixed result. Useful throughput/latency tradeoffs can justify a new predefined follow-up; it is not automatic rejection of all operating points."
+        }
+      ]
+    },
+    {
+      "source_index": 1,
+      "native_comparisons": [
+        {
+          "baseline": "E04-01-E24",
+          "candidate": "E04-02-E26",
+          "valid_complete_pair": true,
+          "changes_percent": {
+            "output_tokens_per_second": 9.828295174394718,
+            "duration_seconds": -8.154066325425601,
+            "output_tokens": 0.8728231417903798,
+            "mean_ttft_ms": -4.435580120278216,
+            "mean_tpot_ms": 1.073837073523931,
+            "ttft_p95_ms": -3.002033204815613,
+            "tpot_p95_ms": 0.27213201466183
+          },
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 148,
+            "candidate_correct": 138,
+            "both_correct": 123,
+            "baseline_only_correct": 25,
+            "candidate_only_correct": 15,
+            "both_incorrect": 37,
+            "baseline_truncated": 23,
+            "candidate_truncated": 17,
+            "note": "Paired descriptive score, not a quality-equivalence or model-cause conclusion. Repetitions reuse the same200 questions; do not call them400 independent questions.",
+            "correct_delta_questions": -10,
+            "correct_delta_percentage_points": -5.0,
+            "baseline_detail": {
+              "correct_and_truncated": 10,
+              "correct_and_not_truncated": 138
+            },
+            "candidate_detail": {
+              "correct_and_truncated": 3,
+              "correct_and_not_truncated": 135
+            }
+          },
+          "performance_screen_met": true,
+          "quality_qualified": false,
+          "qualification_scope": "Performance screen covers only throughput and mean/p95 latency. It is not quality-equivalence, numerical or stability acceptance. Full200 scores remain unchanged; no truncated case is removed or relabeled."
+        },
+        {
+          "baseline": "E04-03-E24",
+          "candidate": "E04-04-E26",
+          "valid_complete_pair": true,
+          "changes_percent": {
+            "output_tokens_per_second": 7.732861660408563,
+            "duration_seconds": -4.9185849253315155,
+            "output_tokens": 2.433929367151455,
+            "mean_ttft_ms": 3.8115644296571993,
+            "mean_tpot_ms": 1.9624713536552818,
+            "ttft_p95_ms": -2.2055749063321195,
+            "tpot_p95_ms": 1.0425902352907412
+          },
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 149,
+            "candidate_correct": 144,
+            "both_correct": 128,
+            "baseline_only_correct": 21,
+            "candidate_only_correct": 16,
+            "both_incorrect": 35,
+            "baseline_truncated": 15,
+            "candidate_truncated": 19,
+            "note": "Paired descriptive score, not a quality-equivalence or model-cause conclusion. Repetitions reuse the same200 questions; do not call them400 independent questions.",
+            "correct_delta_questions": -5,
+            "correct_delta_percentage_points": -2.5,
+            "baseline_detail": {
+              "correct_and_truncated": 4,
+              "correct_and_not_truncated": 145
+            },
+            "candidate_detail": {
+              "correct_and_truncated": 6,
+              "correct_and_not_truncated": 138
+            }
+          },
+          "performance_screen_met": true,
+          "quality_qualified": false,
+          "qualification_scope": "Performance screen covers only throughput and mean/p95 latency. It is not quality-equivalence, numerical or stability acceptance. Full200 scores remain unchanged; no truncated case is removed or relabeled."
+        }
+      ]
+    },
+    {
+      "source_index": 2,
+      "native_comparisons": {
+        "baseline": "E05-01-policy-on",
+        "candidate": "E05-02-policy-off",
+        "timing_comparison_available": true,
+        "quality_qualified": false,
+        "changes_percent": {
+          "output_tokens_per_second": -2.8036210920241666,
+          "duration_seconds": 2.161816329912014,
+          "output_tokens": -0.7024139007083874,
+          "mean_ttft_ms": -2.4348119725978723,
+          "mean_tpot_ms": 1.4453449850695632,
+          "ttft_p95_ms": -4.5029088240917226,
+          "tpot_p95_ms": 3.128302251786552
+        },
+        "performance_screen_met": false,
+        "quality": {
+          "planned": 200,
+          "baseline_correct": 145,
+          "candidate_correct": 149,
+          "both_correct": 127,
+          "baseline_only_correct": 18,
+          "candidate_only_correct": 22,
+          "correct_delta_questions": 4,
+          "correct_delta_percentage_points": 2.0
+        }
+      }
+    },
+    {
+      "source_index": 3,
+      "native_comparisons": {
+        "baseline": "E06-01-native-off",
+        "candidate": "E06-02-native-on",
+        "timing_comparison_available": true,
+        "quality_qualified": false,
+        "changes_percent": {
+          "output_tokens_per_second": 1.6972622263486947,
+          "duration_seconds": -2.28650109425359,
+          "output_tokens": -0.6280467872827322,
+          "mean_ttft_ms": 3.315999113848389,
+          "mean_tpot_ms": -1.3636593771849448,
+          "ttft_p95_ms": 5.17678922912117,
+          "tpot_p95_ms": -1.9241037637186986
+        },
+        "performance_screen_met": false,
+        "quality": {
+          "planned": 200,
+          "baseline_correct": 148,
+          "candidate_correct": 147,
+          "both_correct": 122,
+          "baseline_only_correct": 26,
+          "candidate_only_correct": 25,
+          "correct_delta_questions": -1,
+          "correct_delta_percentage_points": -0.5
+        }
+      }
+    },
+    {
+      "source_index": 4,
+      "native_comparisons": {
+        "baseline": "E08-01-decode80",
+        "candidate": "E08-02-decode72",
+        "timing_comparison_available": true,
+        "quality_qualified": false,
+        "candidate_promoted": false,
+        "changes_percent": {
+          "output_tokens_per_second": 2.087454459791549,
+          "duration_seconds": -7.426366064568402,
+          "output_tokens": -5.493933614392132,
+          "mean_ttft_ms": -13.397522577842425,
+          "mean_tpot_ms": -3.6574391237821025,
+          "ttft_p95_ms": -10.022405596362137,
+          "tpot_p95_ms": -3.465778981851586
+        },
+        "performance_only_screen_met": false,
+        "quality": {
+          "planned": 200,
+          "baseline_correct": 147,
+          "candidate_correct": 144,
+          "baseline_truncated": 24,
+          "candidate_truncated": 17,
+          "both_correct": 125,
+          "baseline_only_correct": 22,
+          "candidate_only_correct": 19,
+          "correct_delta_questions": -3
+        }
+      }
+    },
+    {
+      "source_index": 5,
+      "native_comparisons": {
+        "baseline": "E09-01-nz-mode1",
+        "candidate": "E09-02-nz-mode2",
+        "timing_comparison_available": false,
+        "quality_qualified": false,
+        "candidate_promoted": false,
+        "reason": "Both complete, clean, activation-admitted outcomes required"
+      }
+    },
+    {
+      "source_index": 6,
+      "native_comparisons": {
+        "baseline": "E09-01-nz-mode1",
+        "candidate": "E11-01-nz2-scalar-compat",
+        "timing_comparison_available": false,
+        "quality_qualified": false,
+        "candidate_promoted": false,
+        "reason": "Both complete, clean, activation-admitted outcomes required"
+      }
+    },
+    {
+      "source_index": 7,
+      "native_comparisons": {
+        "cache_under_ND": {
+          "baseline": "E09-01-nz-mode1",
+          "candidate": "E14-01-nd-router-precast",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": 0.14573919979110617,
+            "duration_seconds": -0.4812009492565661,
+            "output_tokens": -0.33616304787830176,
+            "mean_ttft_ms": -0.7304007609234664,
+            "mean_tpot_ms": -0.632109661170166,
+            "ttft_p95_ms": 1.5699007606091664,
+            "tpot_p95_ms": -0.795344569132872
+          },
+          "performance_only_screen_met": false,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 149,
+            "candidate_correct": 148,
+            "baseline_truncated": 18,
+            "candidate_truncated": 19,
+            "both_correct": 130,
+            "baseline_only_correct": 19,
+            "candidate_only_correct": 18,
+            "correct_delta_questions": -1
+          },
+          "effect_scope": "ExistingNDcache comparison retained; bothcompletedreferences reused, notanewmeasurement",
+          "uses_new_measurement": false
+        },
+        "cache_under_NZ": {
+          "baseline": "E15-01-nz-gates-nd-no-cache",
+          "candidate": "E13-01-nz2-linear-compat",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": 1.1534419879873026,
+            "duration_seconds": 0.7742099560979598,
+            "output_tokens": 1.9365820067940742,
+            "mean_ttft_ms": 2.548795878278698,
+            "mean_tpot_ms": -1.19082125720823,
+            "ttft_p95_ms": -1.0966582922518842,
+            "tpot_p95_ms": -1.4660371328917843
+          },
+          "performance_only_screen_met": false,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 148,
+            "candidate_correct": 142,
+            "baseline_truncated": 22,
+            "candidate_truncated": 23,
+            "both_correct": 123,
+            "baseline_only_correct": 25,
+            "candidate_only_correct": 19,
+            "correct_delta_questions": -6
+          },
+          "effect_scope": "ExplicitFP32modulecache underglobalNZ; otherNativeNDgatecompat differences disclosed, sameeffectiveFP32routerbranch/math notnumerical-equivalence proof",
+          "uses_new_measurement": true
+        },
+        "global_NZ_without_explicit_cache": {
+          "baseline": "E09-01-nz-mode1",
+          "candidate": "E15-01-nz-gates-nd-no-cache",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": -0.6825541956453574,
+            "duration_seconds": 2.724434951834165,
+            "output_tokens": 2.023285011117437,
+            "mean_ttft_ms": 1.16970460771888,
+            "mean_tpot_ms": -0.9730085131371968,
+            "ttft_p95_ms": 3.3773072328064924,
+            "tpot_p95_ms": -0.2396915928402965
+          },
+          "performance_only_screen_met": false,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 149,
+            "candidate_correct": 148,
+            "baseline_truncated": 18,
+            "candidate_truncated": 22,
+            "both_correct": 132,
+            "baseline_only_correct": 17,
+            "candidate_only_correct": 16,
+            "correct_delta_questions": -1
+          },
+          "effect_scope": "GlobalNZlayout plusrequiredNDscalar/router gates, originalonsiteND-toFP32cast, no explicitmodulecache; newcandidate versusfixedoriginalND. NotisolatedGMM.",
+          "uses_new_measurement": true
+        },
+        "global_NZ_with_explicit_cache": {
+          "baseline": "E14-01-nd-router-precast",
+          "candidate": "E13-01-nz2-linear-compat",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": 0.3168140036737155,
+            "duration_seconds": 4.020284350289627,
+            "output_tokens": 4.349835177772543,
+            "mean_ttft_ms": 4.511667886322646,
+            "mean_tpot_ms": -1.5298033517497034,
+            "ttft_p95_ms": 0.6632975468883417,
+            "tpot_p95_ms": -0.9141407577144656
+          },
+          "performance_only_screen_met": false,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 148,
+            "candidate_correct": 142,
+            "baseline_truncated": 19,
+            "candidate_truncated": 23,
+            "both_correct": 123,
+            "baseline_only_correct": 25,
+            "candidate_only_correct": 19,
+            "correct_delta_questions": -6
+          },
+          "effect_scope": "Existingcommoncachedbranch NZbundle comparison retained, bothreferences reused; absoluteNZversusoriginalND remainsseparate",
+          "uses_new_measurement": false
+        }
+      }
+    },
+    {
+      "source_index": 8,
+      "native_comparisons": {
+        "selective_vs_original_ND": {
+          "baseline": "E09-01-nz-mode1",
+          "candidate": "E17-01-expert-nz-linear-nd",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": 0.894802287038643,
+            "duration_seconds": 3.0799148517342,
+            "output_tokens": 4.002276287305007,
+            "mean_ttft_ms": -9.413677136806609,
+            "mean_tpot_ms": -2.5918251160199524,
+            "ttft_p95_ms": -2.756430723057246,
+            "tpot_p95_ms": -2.0173744886859635
+          },
+          "performance_only_screen_met": false,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 149,
+            "candidate_correct": 151,
+            "baseline_truncated": 18,
+            "candidate_truncated": 27,
+            "both_correct": 133,
+            "baseline_only_correct": 16,
+            "candidate_only_correct": 18,
+            "correct_delta_questions": 2
+          },
+          "effect_scope": "ExpertNZ with ordinary-LinearND native policy vs original globalND; other methods/weights not assumed ND. Not isolated GMM or causal component contribution."
+        },
+        "selective_vs_global_NZ": {
+          "baseline": "E15-01-nz-gates-nd-no-cache",
+          "candidate": "E17-01-expert-nz-linear-nd",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": 1.588196786485252,
+            "duration_seconds": 0.34605193989796224,
+            "output_tokens": 1.9397447121722422,
+            "mean_ttft_ms": -10.461018726467653,
+            "mean_tpot_ms": -1.6347225928776354,
+            "ttft_p95_ms": -5.9333504809237265,
+            "tpot_p95_ms": -1.7819540899876363
+          },
+          "performance_only_screen_met": false,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 148,
+            "candidate_correct": 151,
+            "baseline_truncated": 22,
+            "candidate_truncated": 27,
+            "both_correct": 132,
+            "baseline_only_correct": 16,
+            "candidate_only_correct": 19,
+            "correct_delta_questions": 3
+          },
+          "effect_scope": "Ordinary Linear ND native policy bundle vs preselected globalNZ/NDgates/no-cache; historical reference, not fresh pairing or numerical equivalence."
+        }
+      }
+    },
+    {
+      "source_index": 9,
+      "native_comparisons": {
+        "joint_vs_original_ND": {
+          "baseline": "E09-01-nz-mode1",
+          "candidate": "E18-01-joint-E26-NZ-linearND-overlap",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": 5.313710706645414,
+            "duration_seconds": -5.0394742329276205,
+            "output_tokens": 0.006453391844085665,
+            "mean_ttft_ms": -8.076532592889961,
+            "mean_tpot_ms": -1.039899175816783,
+            "ttft_p95_ms": -7.05390176034113,
+            "tpot_p95_ms": -0.05387500347826535
+          },
+          "performance_only_screen_met": true,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 149,
+            "candidate_correct": 154,
+            "baseline_truncated": 18,
+            "candidate_truncated": 20,
+            "both_correct": 128,
+            "baseline_only_correct": 21,
+            "candidate_only_correct": 26,
+            "correct_delta_questions": 5
+          },
+          "effect_scope": "Joint E26/expertNZ-ordinaryLinearND/nativeSharedTrue vs fixed originalND. Not isolated GMM, additive gains, or causal component contribution."
+        },
+        "joint_vs_selective_E17": {
+          "baseline": "E17-01-expert-nz-linear-nd",
+          "candidate": "E18-01-joint-E26-NZ-linearND-overlap",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": 4.379718597431115,
+            "duration_seconds": -7.87679063990343,
+            "output_tokens": -3.842053307008886,
+            "mean_ttft_ms": 1.4760998146884141,
+            "mean_tpot_ms": 1.59321940078605,
+            "ttft_p95_ms": -4.419285582828603,
+            "tpot_p95_ms": 2.0039261807502484
+          },
+          "performance_only_screen_met": false,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 151,
+            "candidate_correct": 154,
+            "baseline_truncated": 27,
+            "candidate_truncated": 20,
+            "both_correct": 130,
+            "baseline_only_correct": 21,
+            "candidate_only_correct": 24,
+            "correct_delta_questions": 3
+          },
+          "effect_scope": "Capacity26 plus nativeSharedTrue bundle vs fixed E17 selective-layout; historical reference, not fresh pairing, separate component attribution or quality equivalence."
+        }
+      }
+    },
+    {
+      "source_index": 10,
+      "native_comparisons": {
+        "native_off_E26_vs_originalND": {
+          "baseline": "E09-01-nz-mode1",
+          "candidate": "E19-01-E26-NZ-linearND-native-off",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": 5.629289392275116,
+            "duration_seconds": -4.432584464116873,
+            "output_tokens": 0.9471819211160915,
+            "mean_ttft_ms": -8.572534431880497,
+            "mean_tpot_ms": -0.5529052608599927,
+            "ttft_p95_ms": -6.002949831157989,
+            "tpot_p95_ms": 0.5217920698991296
+          },
+          "performance_only_screen_met": true,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 149,
+            "candidate_correct": 143,
+            "baseline_truncated": 18,
+            "candidate_truncated": 20,
+            "both_correct": 125,
+            "baseline_only_correct": 24,
+            "candidate_only_correct": 18,
+            "correct_delta_questions": -6
+          },
+          "effect_scope": "Primaryabsolute: E26/selective/nativeOff versus originalND; no isolated GMM/additive/quality attribution.",
+          "uses_new_measurement": true
+        },
+        "capacity_under_selective_native_off": {
+          "baseline": "E17-01-expert-nz-linear-nd",
+          "candidate": "E19-01-E26-NZ-linearND-native-off",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": 4.69249852114999,
+            "duration_seconds": -7.288034072066063,
+            "output_tokens": -2.9375264419686964,
+            "mean_ttft_ms": 0.9285537577194969,
+            "mean_tpot_ms": 2.0931711918311446,
+            "ttft_p95_ms": -3.3385437538341445,
+            "tpot_p95_ms": 2.5914457234990973
+          },
+          "performance_only_screen_met": false,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 151,
+            "candidate_correct": 143,
+            "baseline_truncated": 27,
+            "candidate_truncated": 20,
+            "both_correct": 127,
+            "baseline_only_correct": 24,
+            "candidate_only_correct": 16,
+            "correct_delta_questions": -8
+          },
+          "effect_scope": "E24→E26 underselective-layout/nativeOff; historical E17 reused, not freshpair or confirmed causal capacity contribution.",
+          "uses_new_measurement": true
+        },
+        "native_overlap_under_E26_selective": {
+          "baseline": "E19-01-E26-NZ-linearND-native-off",
+          "candidate": "E18-01-joint-E26-NZ-linearND-overlap",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": -0.298760587565583,
+            "duration_seconds": -0.6350383814479943,
+            "output_tokens": -0.9319017246138817,
+            "mean_ttft_ms": 0.5425085732262636,
+            "mean_tpot_ms": -0.4897015003145433,
+            "ttft_p95_ms": -1.1180690535451565,
+            "tpot_p95_ms": -0.5726788803935179
+          },
+          "performance_only_screen_met": false,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 143,
+            "candidate_correct": 154,
+            "baseline_truncated": 20,
+            "candidate_truncated": 20,
+            "both_correct": 121,
+            "baseline_only_correct": 22,
+            "candidate_only_correct": 33,
+            "correct_delta_questions": 11
+          },
+          "effect_scope": "Off→On underE26/selective-layout: newOff is baseline, reusedE18On candidate; not freshpaired/replicated causal contribution.",
+          "uses_new_measurement": true
+        }
+      }
+    },
+    {
+      "source_index": 11,
+      "native_comparisons": {
+        "capacity28_vs_originalND": {
+          "baseline": "E09-01-nz-mode1",
+          "candidate": "E20-01-E28-nativeND-off",
+          "timing_comparison_available": true,
+          "quality_qualified": false,
+          "candidate_promoted": false,
+          "changes_percent": {
+            "output_tokens_per_second": 3.2717106305167665,
+            "duration_seconds": -0.7482991248743076,
+            "output_tokens": 2.498929323625876,
+            "mean_ttft_ms": -11.558060731293573,
+            "mean_tpot_ms": 8.720215552476528,
+            "ttft_p95_ms": -5.465575746086149,
+            "tpot_p95_ms": 9.045303287882733
+          },
+          "performance_only_screen_met": false,
+          "quality": {
+            "planned": 200,
+            "baseline_correct": 149,
+            "candidate_correct": 137,
+            "baseline_truncated": 18,
+            "candidate_truncated": 19,
+            "both_correct": 122,
+            "baseline_only_correct": 27,
+            "candidate_only_correct": 15,
+            "correct_delta_questions": -12
+          },
+          "effect_scope": "Capacity28 and required96 capture bins versus fixed originalND24. Historical reference, not freshpaired, causal component, interpolation, quality equivalence or autotuning attribution.",
+          "uses_new_measurement": true
+        }
+      }
+    }
+  ],
+  "physical_trials": 24,
+  "admitted_trials": 22,
+  "source_row_references": 34,
+  "observed_performance_nondominated": [
+    "E02-02-E32",
+    "E02-04-E32",
+    "E04-02-E26",
+    "E08-02-decode72",
+    "E18-01-joint-E26-NZ-linearND-overlap",
+    "E19-01-E26-NZ-linearND-native-off",
+    "E20-01-E28-nativeND-off"
+  ],
+  "quality_qualified": false,
+  "stability_qualified": false,
+  "candidate_promoted": false,
+  "limits": [
+    "Hash-bound native analyses, not a fresh verification of their raw archives; restore raw/seals and use each native analyzer for audit.",
+    "Historical protocols share a declared workload but include runtime/source differences. Scatter is descriptive; causal claims use the retained native comparisons only.",
+    "Every physical repetition retained; reused references deduplicated by exact trial/metric/seal identity, not new measurements.",
+    "Observed nondominance uses throughput/mean TPOT/mean TTFT only, not task quality; no connected/fitted global frontier or production recommendation.",
+    "Identical questions are reused; runs are not independent tasks. Generated lengths and scores vary. Burst TTFT includes queueing; startup/warmup excluded from inference clocks.",
+    "No equal-budget autotuning contribution, quality equivalence, chip MFU, universal gain or five-dataset acceptance claim."
+  ]
+}
