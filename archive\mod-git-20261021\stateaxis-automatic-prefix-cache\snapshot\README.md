@@ -4,7 +4,7 @@ Extension ID: `org.vllm-hust.stateaxis-automatic-prefix-cache`
 
 Automatic content-addressed prefix reuse with lease-safe bounded LRU residency.
 
-This repository is the independent MOD boundary for StateAxis issues #55, #95.
+This repository is the independent MOD boundary for StateAxis issues [#55](https://github.com/Qixin-Gaoke/stateaxis/issues/55), [#95](https://github.com/Qixin-Gaoke/stateaxis/issues/95).
 It is default-off and is admitted only through the vLLM-HUST Extension Manager
 StateAxis provider in explicit experiment mode. The split does not inherit
 correctness, device, performance, or publication qualification from the aggregate
