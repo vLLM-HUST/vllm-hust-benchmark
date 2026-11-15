@@ -8,7 +8,7 @@ covers every file in this directory.
 Four quotable conclusions:
 
 - **Output-norm fusion**: original cohort +2.66% is NOT reproduced. Eight interleaved runs give
-  +0.44% overall and -0.98% after dropping the cold first run; the fused kernel is proven to
+  +0.44% overall and -0.01% after dropping the cold first run; the fused kernel is proven to
   execute. The figure is kept as history only.
 - **GDN split operator group**: -39.7% is a same-window target-group self-ratio (8560 -> 5163 ms);
   the all-kernel-denominator figures are internal only. Service side is at parity (512-in +2.62%,
