@@ -7,8 +7,8 @@ import hashlib
 import json
 from pathlib import Path
 
-SOURCE_SHA256 = "95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0"
-SOURCE_COMMIT = "53541118b3461705f1e61532710ff0a759d59af0"
+SOURCE_SHA256 = "95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0"  # pragma: allowlist secret -- fixed public source digest
+SOURCE_COMMIT = "53541118b3461705f1e61532710ff0a759d59af0"  # pragma: allowlist secret -- fixed public revision
 
 
 def digest(path):

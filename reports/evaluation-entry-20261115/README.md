@@ -1,18 +1,27 @@
 # 当前 r6 测试入口与冻结组合
 
-执行入口更新至 Engine 3c08084c64f44d96a8b17a376889fd2e3308bac2，独立下载器固定在 1be195b12798e7a0959044e929e19fa358429cc4。下载器、工具附件与清单均经过 SHA256 校验和离线恢复核验。
+执行入口更新至 Engine 3c08084c64f44d96a8b17a376889fd2e3308bac2，独立下载器固定在
+1be195b12798e7a0959044e929e19fa358429cc4。下载器、工具附件与清单均经过 SHA256 校验和离线恢复核验。
 
-五数据集样本与原推理结果保持原字节，新增冻结 MOD 组合索引。指南估时依据当前 r6 全部15个封存阶段：合计约11.13小时，快速约2.44小时；12–16 / 2–3小时为含余量排期。下载入口提供最新版。
+五数据集样本与原推理结果保持原字节，新增冻结 MOD 组合索引。指南估时依据当前 r6 全部15个封存阶段：合计约11.13小时，快速约2.44小时；12–16 /
+2–3小时为含余量排期。下载入口提供最新版。
 
-有效算力复用的是同工况独立参考的**分母统计**，包括F区间、参考耗时下界、每卡参考算力上界与适用域；不沿用旧59.7573%的效率值。原固定MMLU200/out256、native inproc工况下，B0/B1的参考算力上界分别为26.8183 / 19.3404 TFLOP/s/卡。本轮效率应由匹配工作域的必要算量与双卡同步计时重新计算；out8192/HTTP性能计时不直接代入out256/native参考。分母已有与本轮分子状态分开显示。
+有效算力复用的是同工况独立参考的**分母统计**，包括F区间、参考耗时下界、每卡参考算力上界与适用域；不沿用旧59.7573%的效率值。原固定MMLU200/out256、native
+inproc工况下，B0/B1的参考算力上界分别为26.8183 / 19.3404
+TFLOP/s/卡。本轮效率应由匹配工作域的必要算量与双卡同步计时重新计算；out8192/HTTP性能计时不直接代入out256/native参考。分母已有与本轮分子状态分开显示。
 
-订正脚本为 `scripts/reuse_qualified_compute.py`。新结果及缓存分别为 `website-publication/data/five-datasets-r6-20261114/summary-public-v2.json` 与 `reference-denominator-v1.json`，旧v1保留。来源为 benchmark `53541118b3461705f1e61532710ff0a759d59af0` 中 `reports/m01-qualified-pair-20261103/summary.json`，SHA256 `95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0`。Engine重新核验原件和原脚本，再导出分母统计。
+订正脚本为 `scripts/reuse_qualified_compute.py`。新结果及缓存分别为
+`website-publication/data/five-datasets-r6-20261114/summary-public-v2.json` 与
+`reference-denominator-v1.json`，旧v1保留。来源为 benchmark `53541118b3461705f1e61532710ff0a759d59af0` 中
+`reports/m01-qualified-pair-20261103/summary.json`，SHA256
+`95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0`。Engine重新核验原件和原脚本，再导出分母统计。
 
 Engine主分支与acceptance-tools-20261115-r4已订正，r2中直接复用旧效率的实现被取代。161项CPU回归通过。真实上下文/多租户专项与本轮有效算力分子另行入账。
 
 ## 参考分母统计公式
 
-`C_ref_upper = sum(F_upper) / (k * sum(T_ref_lower) * 10^12)`，单位 TFLOP/s/卡，k=2。所有重复先求和后相除；不平均逐轮TFLOPS，不挑最快一轮。
+`C_ref_upper = sum(F_upper) / (k * sum(T_ref_lower) * 10^12)`，单位
+TFLOP/s/卡，k=2。所有重复先求和后相除；不平均逐轮TFLOPS，不挑最快一轮。
 
 参考时间由独立标定的算子时长和已认证的资源/依赖图给出：`finish(v) = duration(v) + max(finish(parent))`；`T_ref_lower = max(finish(v))`。保留图删除的工作及约束为非负，因而其完成时间是完整参考的下界；不把省略项当成完整参考中的零耗时。参考构造不读取B0/B1端到端耗时或目标效率。
 
@@ -21,4 +30,6 @@ Engine主分支与acceptance-tools-20261115-r4已订正，r2中直接复用旧�
 | B0           |    5488258327989369 | 102.3231709195348958960064 | 26.81825767648090573566921216250915821371 |
 | B1           |    5438638334450385 |         140.60316791316519 | 19.34038334687175052309470403284461724716 |
 
-本轮分子下界为 `C_current_lower = sum(F_current_lower) / (k * sum(T_current) * 10^12)`，效率保守下界为 `100 * C_current_lower / C_ref_upper`。仅当必要工作量相同且可合法消去共同F时，可采用 `100 * sum(T_ref_lower) / sum(T_current)`；不能把不同工作量、预算或计时边界强行消去。原59.7573%是原三轮的结果，本轮变更计时后应得到新的数值。
+本轮分子下界为 `C_current_lower = sum(F_current_lower) / (k * sum(T_current) * 10^12)`，效率保守下界为
+`100 * C_current_lower / C_ref_upper`。仅当必要工作量相同且可合法消去共同F时，可采用
+`100 * sum(T_ref_lower) / sum(T_current)`；不能把不同工作量、预算或计时边界强行消去。原59.7573%是原三轮的结果，本轮变更计时后应得到新的数值。
