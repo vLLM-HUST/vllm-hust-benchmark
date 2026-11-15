@@ -55,8 +55,8 @@
     "reference_en": "Reference: dual Ascend 910B2, Qwen3.5-35B-A3B BF16, original B0 0.18 / frozen B1 r6, serial pairing.",
     "includes_zh": "五数据集主流程估时包含本机 C8、两臂加载与预热、推理、评分和报告。",
     "includes_en": "Five-profile estimates include local C8, both-arm loading/warmup, inference, scoring and reporting.",
-    "excludes_zh": "首次下载、环境安装和资源排队另计；参考标定、32K 与多租户专项单列。",
-    "excludes_en": "Initial downloads, installation and resource queues are additional; reference,32K and multi-tenant supplements are listed separately.",
+    "excludes_zh": "首次下载、环境安装和资源排队另计；32K、多租户和有效算力分子采集专项单列。已有参考分母自动核验缓存。",
+    "excludes_en": "Downloads, installation and queues are additional;32K, multi-tenant and compute numerator captures are separate. Existing reference denominators are automatically verified and cached.",
     "basis_zh": "基于当前 r6 报告中15个封存阶段的耗时合计：全量约11.13小时，快速约2.44小时；展示排期范围为加上余量后的估算。",
     "basis_en": "Based on all15 sealed stages in the current r6 report: about11.13 hours full and2.44 hours quick, with planning allowance added.",
     "qualified_zh": "仅在同机同配置已有有效、封存的 C8 资格证据并通过脚本校验时，才可显式传 --continuous-evidence 复用；新第三方机器应重跑。复用后快速约 1–2 小时，全量约 10–14 小时。",
@@ -165,18 +165,28 @@
   },
   "execution": {
     "engine_repository": "vLLM-HUST/vllm-hust-engine",
-    "verified_runner_commit": "29ed9a834eef377d52ec710fbedbcafb7e19c3c6",
+    "verified_runner_commit": "3c08084c64f44d96a8b17a376889fd2e3308bac2",
     "command_template": "python one_click.py --model /path/to/model --out /path/to/new-results --datasets {datasets}",
-    "note_zh": "使用当前固定 r6 执行器；按部署清单设置模型、SDK、卡号与新结果目录。默认实时跟随日志。",
-    "note_en": "Use the current pinned r6 runner with model, SDK, devices and a fresh output directory. Live log following is enabled by default.",
+    "note_zh": "当前固定r6执行器；按部署清单设置模型、SDK、卡号与新结果目录，默认跟随日志。有效算力自动核验并缓存原同工况参考分母，本轮效率另按匹配分子重算。",
+    "note_en": "Current pinned r6 runner with local model/SDK/device paths and live logs. Compute-reference denominator statistics are automatically verified and cached; current efficiency requires matched numerator measurements.",
     "acceptance_zh": "报告逐项展示执行计数、质量、性能、参考算力、上下文与成本结论。",
     "acceptance_en": "The report lists execution counts, quality, performance, compute reference, context and cost results.",
-    "bootstrap_commit": "33fbb6dc7f99635cc15d127016f2ca4c1c0d18e3",
+    "bootstrap_commit": "1be195b12798e7a0959044e929e19fa358429cc4",
     "public_bootstrap_repository": "vLLM-HUST/vllm-hust-engine",
     "public_bootstrap_path": "download_and_run.py",
-    "bootstrap_sha256": "1afc3d51136d676b4c3f02c41cc9450bdbc82fadee3ed72b9378fafc1a155c49",
+    "bootstrap_sha256": "126abc8396bc597ea86f26087aa66d4dcd59d2199b5399d3203f06768eca5bf9",
     "bootstrap_bytes": 9577,
-    "tools_release": "acceptance-tools-20261115-r1",
-    "engine_release": "full-answer-b1-20261113-r6"
+    "tools_release": "acceptance-tools-20261115-r4",
+    "engine_release": "full-answer-b1-20261113-r6",
+    "compute_reference": {
+      "mode": "qualified_reference_denominator_reuse",
+      "profile": "MMLU200/out256 native inproc",
+      "denominator_unit": "TFLOP/s/card",
+      "B0_reference_upper": "26.81825767648090573566921216250915821371",
+      "B1_reference_upper": "19.34038334687175052309470403284461724716",
+      "current_efficiency_requires_new_matched_numerator": true,
+      "historical_efficiency_reused": false,
+      "source_summary_sha256": "95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0"
+    }
   }
 }
