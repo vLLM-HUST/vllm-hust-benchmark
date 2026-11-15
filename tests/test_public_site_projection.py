@@ -93,6 +93,11 @@ def test_refuses_to_overwrite_or_write_inside_source(tmp_path):
 
 
 def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
+    advisor = {
+        "name_zh": "张书豪",
+        "name_en": "Shuhao Zhang",
+        "relationship": "internal",
+    }
     source = tmp_path / "source"
     (source / "data").mkdir(parents=True)
     (source / "assets").mkdir()
@@ -113,6 +118,7 @@ def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
                     "id": "betterscale",
                     "documentation_url": "./betterscale.html",
                     "canonical_repository": "https://github.com/vLLM-HUST/BetterScale",
+                    "advisors": [{**advisor, "private_note": "unpublished"}],
                 }
             ]
         },
@@ -137,6 +143,7 @@ def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
     assert card["id"] == "betterscale"
     assert "documentation_url" not in card
     assert "canonical_repository" not in card
+    assert card["advisors"] == [advisor]
     assert "375.45" in " ".join(card["public_effect_detail_en"])
     assert "209.68" in " ".join(card["public_effect_detail_zh"])
     card["documentation_url"] = "./betterscale.html"
