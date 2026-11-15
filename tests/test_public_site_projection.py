@@ -176,6 +176,60 @@ def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
         projection.validate(output)
 
 
+def test_frozen_r6_mods_remain_public_after_projection(tmp_path):
+    source = tmp_path / "source"
+    data = source / "data"
+    data.mkdir(parents=True)
+    (source / "assets").mkdir()
+    for filename in (
+        "index.html",
+        "plugins.html",
+        "dataset-introductions.html",
+        "leaderboard-runs.html",
+        "assets/site.js",
+    ):
+        (source / filename).write_text("")
+    source_data = MODULE.parents[1] / "website-publication" / "data"
+    frozen = "five-datasets-r6-20261114/frozen-combination-v1.json"
+    for filename in (
+        "ecosystem.json",
+        "mod-taxonomy.json",
+        "plugin-workload-navigation.json",
+        frozen,
+    ):
+        path = data / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes((source_data / filename).read_bytes())
+    (data / "benchmark-source-manifest.json").write_text('{"files": []}')
+    output = tmp_path / "public"
+    projection.build(source, output, "test-policy")
+    projection.validate(output)
+
+    public = output / "data"
+    registry = json.loads((public / "ecosystem.json").read_text(encoding="utf-8"))
+    cards = {entry["id"]: entry for entry in registry["components"]}
+    classification = json.loads(
+        (public / "mod-taxonomy.json").read_text(encoding="utf-8")
+    )
+    expected = {
+        "betterscale",
+        "kv-materialization-arrival-control",
+        "prefill-microflow",
+        "hust-m01-correction",
+        "hust-joint-packed",
+    }
+    for identifier in expected:
+        assert "B1 r6" in cards[identifier]["summary_en"]
+        assert "B1 r6" in cards[identifier]["summary_zh"]
+        assert classification["components"][identifier]["kind"] == "runtime_mod"
+    for identifier in ("hust-m01-correction", "hust-joint-packed"):
+        card = cards[identifier]
+        assert card["canonical_repository"] is None
+        assert card["documentation_url"] == f"./data/{frozen}"
+        assert not any(key.startswith("public_effect_") for key in card)
+    assert (public / frozen).is_file()
+
+
 def test_combined_record_is_withheld_as_a_whole():
     record = {"id": "combined", "mods": ["PegaFlow", "LatchMoE"], "value": 42}
     assert projection.project_json([record], set()) == []
