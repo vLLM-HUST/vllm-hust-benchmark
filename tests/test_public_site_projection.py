@@ -126,6 +126,12 @@ def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
                     "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-perf-analyzer",
                     "advisors": [advisor],
                 },
+                {
+                    "id": "stateaxis-async-kv-transfer",
+                    "maintainers": ["example-maintainer"],
+                    "canonical_repository": "https://github.com/private-example/transfer",
+                    "summary_en": "Internal notes for private-example.",
+                },
             ]
         },
         "data/mod-taxonomy.json": {"components": {"betterscale": {}}},
@@ -150,9 +156,11 @@ def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
     assert cards["traceloom"]["advisors"] == [advisor]
     assert "documentation_url" not in cards["traceloom"]
     assert "canonical_repository" not in cards["traceloom"]
-    assert cards["stateaxis-async-kv-transfer"]["repository_relationship"] == (
-        "external_reference"
-    )
+    stateaxis = cards["stateaxis-async-kv-transfer"]
+    assert stateaxis["maintainers"] == ["example-maintainer"]
+    assert stateaxis["repository_visibility"] == "private"
+    assert "canonical_repository" not in stateaxis
+    assert "private-example" not in catalog.read_text(encoding="utf-8")
     assert (
         cards["ascend-mapped-kv-offload"]["compatibility"]["status"] == "inspect_only"
     )
