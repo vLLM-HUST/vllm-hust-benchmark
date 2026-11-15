@@ -58,7 +58,8 @@ Run on `8499a55aa` (the same commit as the original evidence) with `--max-num-ba
 - off mean **766.61** (741.6–791.6, intra-arm spread 6.74%)
 - on mean **794.85** (791.2–798.5, intra-arm spread 0.92%)
 - all four runs: **+3.68%**
-- excluding run 1 (cold start): **+0.41%**
+- excluding run 1 (cold start): **+0.41%** — run 1 is dropped and each arm is then averaged over the
+  runs that remain (off 791.62 vs on 794.85)
 
 The first server start of a session is systematically ~6% slower; runs 2–4 sit in a narrow 791–799
 band regardless of arm. One interleaved block therefore cannot separate the treatment from the order
@@ -135,16 +136,16 @@ per-run raw result files. Each block is `off, on, on, off`.
 
 ### First-run bias is the dominant effect
 
-In four of five blocks the first server start of the session is materially slower than the same
-arm's later run:
+In four of five blocks the first server start of the session is materially slower than the mean of
+the same arm's later runs:
 
-| block                  | first run | same arm, later run | first vs later |
-| ---------------------- | --------- | ------------------- | -------------- |
-| abba3 (off first)      | 741.6     | 791.6               | -6.3%          |
-| gate_fp32 (off first)  | 501.65    | 534.86              | -6.2%          |
-| split 2048 (off first) | 560.87    | 636.62              | -11.9%         |
-| split 512 (off first)  | 792.06    | 784.28              | +1.0%          |
-| abba4 (off first)      | 771.83    | 793.56              | -2.7%          |
+| block                  | first run | same arm, later runs (mean) | first vs later |
+| ---------------------- | --------- | --------------------------- | -------------- |
+| abba3 (off first)      | 741.6     | 791.6                       | -6.3%          |
+| gate_fp32 (off first)  | 501.65    | 534.86                      | -6.2%          |
+| split 2048 (off first) | 560.87    | 636.62                      | -11.9%         |
+| split 512 (off first)  | 792.06    | 784.28                      | +1.0%          |
+| abba4 (off first)      | 771.83    | 785.86                      | -1.8%          |
 
 Because the ABBA order always starts with `off`, a cold first run systematically depresses the off
 mean and inflates every on/off delta. Dropping the first run of each block changes the verdicts
@@ -152,14 +153,23 @@ materially:
 
 | carrier       | delta, all runs | delta, first run dropped |
 | ------------- | --------------- | ------------------------ |
-| output_norm   | +0.44%          | -0.98%                   |
+| output_norm   | +0.44%          | -0.01%                   |
 | conv_pack     | -0.41%          | +0.47%                   |
 | split 512-in  | +2.13%          | +2.63%                   |
 | split 2048-in | +5.01%          | -1.24%                   |
 | gate_fp32     | +3.07%          | -0.13%                   |
 
+"first run dropped" drops run 1 and then averages each arm over the runs that remain — the same rule
+for both arms. (An earlier draft divided by the last off run instead; that biased the 8-run block to
+-0.98% instead of -0.01%.)
+
+A caveat on the four 4-run blocks: dropping run 1 leaves a single off value against two on values,
+so those rows show a position effect rather than a balanced comparison. Only the 8-run output_norm
+block keeps 3 off vs 4 on after the drop, which is why its -0.01% is the one figure here that
+supports a statement about parity.
+
 After the cold run is removed, four of five blocks sit within ±1.3% of parity, and the split-2048
-result (-1.23%) reproduces the original -1.27% almost exactly. The only block still showing a
+result (-1.24%) reproduces the original -1.27% almost exactly. The only block still showing a
 positive delta is split-512 (+2.63%), which is also the only block whose first run was not
 depressed.
 
@@ -171,7 +181,7 @@ alone can produce a multi-percent apparent gain without any code difference.
 
 - `gdn_output_norm_fusion`: original cohort +2.66% (760.32 -> 780.57 tok/s, 2 runs/arm,
   non-interleaved). **Not reproduced**: this round's 8-run interleaved block gives +0.44% overall
-  and -0.98% after dropping the cold run. The original figure is kept as a historical record only.
+  and -0.01% after dropping the cold run. The original figure is kept as a historical record only.
 - `gdn_split_fusion`: **-39.7%** = 263k KV cohort target group 8560 -> 5163 ms, self-ratio
   denominator = the same-window baseline target group. Other cohorts are 53.5% (66k KV) and 55.3%
   (pure decode). The all-kernel-denominator figures 2.41% / 5.00% / 5.05% describe a share of total
@@ -185,7 +195,7 @@ alone can produce a multi-percent apparent gain without any code difference.
 
 ## Costs
 
-- `gdn_output_norm_fusion`: no service gain. +0.44% over all runs, -0.98% after dropping the cold
+- `gdn_output_norm_fusion`: no service gain. +0.44% over all runs, -0.01% after dropping the cold
   run; off-arm spread 2.98% is larger than the effect under test.
 - `gdn_split_fusion`: operator-group saving does not reach wall time in the historical cohort
   (+0.46% / -1.27%, both inside 4.18% / 4.29%). In this round the 512-in block shows +2.63% and the
