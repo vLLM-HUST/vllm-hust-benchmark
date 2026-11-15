@@ -1,0 +1,176 @@
+--- submitted/.vllm-hust/optimization.json
++++ merged48/.vllm-hust/optimization.json
+@@ -12,7 +12,7 @@
+     "environment": {
+       "VLLM_ALLOW_LONG_MAX_MODEL_LEN": "1",
+       "VLLM_ENGINE_ENABLE_PREFIX_CACHING": "0",
+-      "VLLM_ENGINE_MAX_NUM_SEQS": "4",
++      "VLLM_ENGINE_MAX_NUM_SEQS": "16",
+       "VLLM_ENGINE_COMPILATION_CONFIG": "{\"cudagraph_mode\":\"PIECEWISE\",\"cudagraph_capture_sizes\":[4,8,12,16]}"
+     },
+     "extra_env_keys": ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"],
+@@ -20,28 +20,29 @@
+       "--tensor-parallel-size",
+       "4",
+       "--speculative-config",
+-      {"method": "eagle3", "model": "${draft_model}", "num_speculative_tokens": 3, "draft_tensor_parallel_size": 4, "enforce_eager": false, "draft_context_policy": "diffspec", "diffspec_verification_mode": "auto", "diffspec_chunk_size": 64, "diffspec_token_budget": 2048}
++      {"method": "eagle3", "model": "${draft_model}", "num_speculative_tokens": 4, "draft_tensor_parallel_size": 4, "enforce_eager": false, "draft_context_policy": "diffspec", "diffspec_verification_mode": "auto", "diffspec_chunk_size": 64, "diffspec_token_budget": 2048, "diffspec_retrieval_interval": 4, "diffspec_adaptive_profile": false}
+     ]
+   },
+   "compatibility": {
+     "incompatible_with": ["latchmoe"],
+     "model_qualifications": [
+       {
+-        "model": "Qwen3.5-27B",
++        "model": "Qwen/Qwen3.5-35B-A3B",
++        "revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+         "tensor_parallel_size": 4,
+         "execution_mode": "graph",
+         "status": "pending",
+         "functional_compatibility": "pending",
+         "effectiveness_qualification": {
+           "status": "pending",
+-          "scope": "Qwen3.5-27B BF16 with Qwen3.5 Eagle3; corrected PIECEWISE retrieval requires fresh TP4 qualification",
+-          "reason": "The historical target identity was not verified to an immutable revision; its measurements and local TP2 diagnostics do not qualify this TP4 model pair"
++          "scope": "Qwen3.5-35B-A3B BF16 with the pinned Specforge Eagle3 draft; corrected PIECEWISE retrieval requires fresh TP4 qualification",
++          "reason": "No benchmark-custodied functional or performance result exists for the current immutable target/draft revisions"
+         },
+         "runtime_state_source": "live_instance_observation_only",
+-        "draft_model": "VirVen/Qwen3.5-27B-EAGLE3-v2",
+-        "reason": "Use verified Qwen3.5 target/draft checkpoints; historical target identity and full-graph evidence do not qualify corrected retrieval for this pair",
+-        "evidence": "docs/evidence/sage-mate-20260904-tp4-graph.md",
+-        "historical_execution_mode": "FULL_DECODE_ONLY"
++        "draft_model": "jiapingW/Qwen3.5-35B-A3B-Eagle3-Specforge",
++        "draft_revision": "d07a277ececba408f017a0416002d7abb23caf36",
++        "reason": "Use the pinned Qwen3.5 target/draft pair; historical Qwen3.8/full-graph evidence does not qualify this implementation",
++        "evidence": "README.md#supported-evaluation-configuration"
+       }
+     ]
+   }
+--- submitted/diffspec/manifests/vllm-hust-extension-v0.3.json
++++ merged48/diffspec/manifests/vllm-hust-extension-v0.3.json
+@@ -74,14 +74,16 @@
+         "accelerator": "ascend",
+         "core_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+         "execution_mode": "graph",
+-        "model": "Qwen3.5-27B",
++        "model": "Qwen/Qwen3.5-35B-A3B",
++        "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+         "plugin_commit": "4e57439e58ed3d78e675f9fd7b4614fb183c5394",
+         "tensor_parallel_size": 4,
+         "status": "pending_retrieval_requalification",
+-        "draft_model": "VirVen/Qwen3.5-27B-EAGLE3-v2",
++        "draft_model": "jiapingW/Qwen3.5-35B-A3B-Eagle3-Specforge",
++        "draft_model_revision": "d07a277ececba408f017a0416002d7abb23caf36",
+         "historical_artifact_image_id": "sha256:6dec9e68eaa61d5a3297abc5006d939d5644aa203c16ef1f9af65fb54d60722b",
+-        "reason": "Qwen3.5 target/Qwen3.5 draft requires PIECEWISE and fresh TP4 qualification; historical target identity and full-graph evidence do not qualify this pair",
+-        "evidence": "docs/evidence/sage-mate-20260904-tp4-graph.md"
++        "reason": "The pinned Qwen3.5 target/draft pair requires PIECEWISE and fresh TP4 qualification; historical Qwen3.8/full-graph evidence does not qualify this implementation",
++        "evidence": "README.md#supported-evaluation-configuration"
+       }
+     }
+   }
+--- submitted/diffspec/runtime.py
++++ merged48/diffspec/runtime.py
+@@ -1208,12 +1208,23 @@
+             self.metrics.retrieval_skipped_interval += 1
+             return
+ 
+-        query_ends = self._target_query_ends
++        # FIA may append a dummy graph-padding request to attention metadata.
++        # Native verification only returns counts for real scheduler requests.
++        # Exclude the dummy before building query offsets or reading KV rows.
++        batch_size = len(self._active_slots)
++        if (
++            valid_sampled_token_count.numel() < batch_size
++            or len(self._target_query_ends) < batch_size
++            or len(self._target_seq_lens) < batch_size
++            or self._target_block_tables.shape[0] < batch_size
++        ):
++            self.metrics.retrieval_skipped_no_snapshot += 1
++            return
++        query_ends = self._target_query_ends[:batch_size]
+         query_starts = [0, *query_ends[:-1]]
+         query_lens = [
+             end - start for start, end in zip(query_starts, query_ends)
+         ]
+-        batch_size = len(query_lens)
+         counts = valid_sampled_token_count[:batch_size].reshape(-1).long()
+         starts = torch.tensor(
+             query_starts,
+--- submitted/tests/test_extension_package.py
++++ merged48/tests/test_extension_package.py
+@@ -70,18 +70,37 @@
+     assert args[:2] == ["--tensor-parallel-size", "4"]
+     speculative = args[-1]
+     assert speculative["method"] == "eagle3"
+-    assert speculative["num_speculative_tokens"] == 3
++    assert speculative["num_speculative_tokens"] == 4
+     assert speculative["draft_tensor_parallel_size"] == 4
+     assert speculative["enforce_eager"] is False
+     qualification = profile["compatibility"]["model_qualifications"][0]
+-    assert qualification["model"] == "Qwen3.5-27B"
++    assert qualification["model"] == "Qwen/Qwen3.5-35B-A3B"
++    assert qualification["revision"] == "59d61f3ce65a6d9863b86d2e96597125219dc754"
+     assert qualification["status"] == "pending"
+     assert qualification["functional_compatibility"] == "pending"
+     compilation = json.loads(profile["activation"]["environment"]["VLLM_ENGINE_COMPILATION_CONFIG"])
+     assert compilation["cudagraph_mode"] == "PIECEWISE"
+     assert qualification["effectiveness_qualification"]["status"] == "pending"
+     assert qualification["runtime_state_source"] == "live_instance_observation_only"
++    assert qualification["draft_model"] == "jiapingW/Qwen3.5-35B-A3B-Eagle3-Specforge"
++    assert qualification["draft_revision"] == "d07a277ececba408f017a0416002d7abb23caf36"
+     assert "VLLM_ENGINE_ENFORCE_EAGER" not in profile["activation"]["environment"]
++
++
++def test_public_metadata_matches_current_pending_evaluation_lane() -> None:
++    metadata = json.loads((REPO_ROOT / "MOD_METADATA.json").read_text(encoding="utf-8"))
++    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
++    qualification = manifest["activation"]["additional_config"][
++        "_manager_runtime_qualification"
++    ]
++
++    assert metadata["evidence"]["qualification"] == "pending"
++    assert metadata["evidence"]["performance_claims"] == []
++    assert "#key-results" not in json.dumps(metadata)
++    assert qualification["model"] == "Qwen/Qwen3.5-35B-A3B"
++    assert qualification["model_revision"] == "59d61f3ce65a6d9863b86d2e96597125219dc754"
++    assert qualification["draft_model"] == "jiapingW/Qwen3.5-35B-A3B-Eagle3-Specforge"
++    assert qualification["draft_model_revision"] == "d07a277ececba408f017a0416002d7abb23caf36"
+ 
+ 
+ def test_documented_candidate_does_not_fall_back_to_eager() -> None:
+--- submitted/tests/test_runtime.py
++++ merged48/tests/test_runtime.py
+@@ -72,8 +72,9 @@
+ @pytest.mark.parametrize("counts", [[1, 2], [4, 4], [0, 2], [0, 0]])
+ @pytest.mark.parametrize("num_prefills", [0, 1])
+ @pytest.mark.parametrize("adaptive", [False, True])
++@pytest.mark.parametrize("graph_padding", [False, True])
+ def test_linear_proposer_retrieves_only_committed_queries(
+-    monkeypatch, counts, num_prefills, adaptive,
++    monkeypatch, counts, num_prefills, adaptive, graph_padding,
+ ):
+     """Linear proposals have no tree IDs, including during decode verification."""
+     from vllm_ascend.spec_decode.eagle_proposer import AscendEagleProposer
+@@ -92,12 +93,16 @@
+         AscendEagleProposer, "prepare_next_token_ids_padded",
+         lambda *args, **kwargs: result,
+     )
+-    query = torch.arange(32, dtype=torch.float32).view(8, 2, 2)
+-    lse = torch.arange(16, dtype=torch.float32).view(8, 2)
++    query = torch.arange(36 if graph_padding else 32, dtype=torch.float32).view(-1, 2, 2)
++    lse = torch.arange(18 if graph_padding else 16, dtype=torch.float32).view(-1, 2)
+     key_cache = torch.zeros((4, 8, 1, 2))
+     metadata = SimpleNamespace(
+-        actual_seq_lengths_q=[4, 8], seq_lens_list=[10, 12],
+-        block_tables=torch.tensor([[0, 1], [2, 3]], dtype=torch.int32),
++        actual_seq_lengths_q=[4, 8, 9] if graph_padding else [4, 8],
++        seq_lens_list=[10, 12, 1] if graph_padding else [10, 12],
++        block_tables=torch.tensor(
++            [[0, 1], [2, 3], [0, 0]] if graph_padding else [[0, 1], [2, 3]],
++            dtype=torch.int32,
++        ),
+         num_prefills=num_prefills,
+     )
+     calls = []
