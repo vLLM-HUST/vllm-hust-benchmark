@@ -108,12 +108,26 @@ BETTERSCALE_CATALOG_ENTRIES = {
     },
     "data/plugin-workload-navigation.json": ["distributed_pipeline"],
 }
+PUBLIC_ADVISOR_FIELDS = ("name_zh", "name_en", "relationship")
+
+
+def betterscale_public_advisors(component):
+    return [
+        {key: advisor[key] for key in PUBLIC_ADVISOR_FIELDS}
+        for advisor in component.get("advisors", [])
+    ]
 
 
 def add_betterscale_card(path, projected, original):
     if path == "data/ecosystem.json":
-        if any(item["id"] == BETTERSCALE_ID for item in original["components"]):
-            projected["components"].append(copy.deepcopy(BETTERSCALE_CARD))
+        source = next(
+            (item for item in original["components"] if item["id"] == BETTERSCALE_ID),
+            None,
+        )
+        if source is not None:
+            card = copy.deepcopy(BETTERSCALE_CARD)
+            card["advisors"] = betterscale_public_advisors(source)
+            projected["components"].append(card)
     elif path in BETTERSCALE_CATALOG_ENTRIES:
         key = (
             "plugins"
@@ -129,9 +143,20 @@ def add_betterscale_card(path, projected, original):
 def validate_betterscale_card(path, data):
     if path == "data/ecosystem.json":
         cards = [item for item in data["components"] if item["id"] == BETTERSCALE_ID]
-        assert not cards or cards == [BETTERSCALE_CARD], path
+        assert len(cards) <= 1, path
         if cards:
-            data["components"].remove(cards[0])
+            card = cards[0]
+            data["components"].remove(card)
+            advisors = card.pop("advisors")
+            assert isinstance(advisors, list), path
+            assert all(
+                isinstance(advisor, dict)
+                and set(advisor) == set(PUBLIC_ADVISOR_FIELDS)
+                and all(isinstance(value, str) and value for value in advisor.values())
+                for advisor in advisors
+            ), path
+            assert not matches(advisors), path
+            assert card == BETTERSCALE_CARD, path
     elif path in BETTERSCALE_CATALOG_ENTRIES:
         key = (
             "plugins"
