@@ -119,7 +119,13 @@ def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
                     "documentation_url": "./betterscale.html",
                     "canonical_repository": "https://github.com/vLLM-HUST/BetterScale",
                     "advisors": [{**advisor, "private_note": "unpublished"}],
-                }
+                },
+                {
+                    "id": "traceloom",
+                    "documentation_url": "./traceloom.html",
+                    "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-perf-analyzer",
+                    "advisors": [advisor],
+                },
             ]
         },
         "data/mod-taxonomy.json": {"components": {"betterscale": {}}},
@@ -139,8 +145,18 @@ def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
     }
     catalog = output / "data/ecosystem.json"
     data = json.loads(catalog.read_text())
-    [card] = data["components"]
-    assert card["id"] == "betterscale"
+    cards = {item["id"]: item for item in data["components"]}
+    assert set(cards) == {"betterscale", *projection.PUBLIC_MOD_PREVIEWS}
+    assert cards["traceloom"]["advisors"] == [advisor]
+    assert "documentation_url" not in cards["traceloom"]
+    assert "canonical_repository" not in cards["traceloom"]
+    assert cards["stateaxis-async-kv-transfer"]["repository_relationship"] == (
+        "external_reference"
+    )
+    assert (
+        cards["ascend-mapped-kv-offload"]["compatibility"]["status"] == "inspect_only"
+    )
+    card = cards["betterscale"]
     assert "documentation_url" not in card
     assert "canonical_repository" not in card
     assert card["advisors"] == [advisor]
