@@ -1,0 +1,46 @@
+Raw `vllm bench serve` result JSON (36 fields: per-request latencies[],
+p99 TTFT/TPOT/ITL, failed, duration, date, model_id, ...).
+
+COVERAGE LIMIT: the driver stores each arm's output in `<tag>/<arm>-bench/r.json`.
+A block contains two runs per arm, so the second run overwrites the first.
+Only the LAST run of each arm survives as a raw file. Listed below:
+
+  abba1-off.json
+  abba1-on.json
+  abba2-off.json
+  abba2-on.json
+  abba3-off.json
+  abba3-on.json
+  abba4-01-off.json
+  abba4-02-on.json
+  abba4-03-on.json
+  abba4-04-off.json
+  abba4-05-off.json
+  abba4-06-on.json
+  abba4-07-on.json
+  abba4-08-off.json
+  base8499-off.json
+  convpack-01-off.json
+  convpack-02-on.json
+  convpack-03-on.json
+  convpack-04-off.json
+  gatefp-01-off.json
+  gatefp-02-on.json
+  gatefp-03-on.json
+  gatefp-04-off.json
+  mbt16k-off.json
+  split2048-01-off.json
+  split2048-02-on.json
+  split2048-03-on.json
+  split2048-04-off.json
+  split512-01-off.json
+  split512-02-on.json
+  split512-03-on.json
+  split512-04-off.json
+
+The complete four-run aggregate record (all four throughput numbers used in
+the report) is in `../abba-interleaved-16384.json`, derived from the driver's
+`results.json` before any overwrite. The first off/on runs of each block have
+no raw result file and cannot be regenerated.
+
+Files are copied byte-for-byte; SHA256SUMS-v1 covers all of them.
