@@ -3,6 +3,11 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## DiffSpec 本轮补证（2026-11-15）
+
+[合并版功能回归与历史原生 Eagle3 配对](reports/tech-outcomes-20261117/diffspec/README.md)：固定 #11 的两真实请求加受控
+dummy、拒绝后缀和四 rank 一致性记录；35B 加速数字仍归属于 10 月 30 日冻结实现。
+
 ## MuxPD 成果补证（2026-11-14）
 
 [TP8 历史争用与 wl38 默认模式报告](reports/tech-outcomes-20261117/muxpd/README.md)： 复核 TP8 出词间隔改善及首 token
