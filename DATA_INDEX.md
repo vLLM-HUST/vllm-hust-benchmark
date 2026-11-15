@@ -55,8 +55,8 @@ provenance。涉及原件订正时保留旧字节及说明， 不要仅重新计
 
 GenNova 与 GenNova Autotune 产品级独立结果已迁往
 [GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)。历史 MOD 索引的维护入口见
-[迁移记录](reports/gennova-mod-evidence-20261105/README.md)。
-旧网站采集快照中的已迁移引用标记为 `relocated-to-external-repository`，并给出新仓库固定版本入口；它不是本仓库中的产品结果副本，也不是当前公开网站可访问性的证明。
+[迁移记录](reports/gennova-mod-evidence-20261105/README.md)。 旧网站采集快照中的已迁移引用标记为
+`relocated-to-external-repository`，并给出新仓库固定版本入口；它不是本仓库中的产品结果副本，也不是当前公开网站可访问性的证明。
 
 ## 常用问题入口
 

@@ -19,8 +19,8 @@ V1：[从全新 CPU 工作区部署并运行一个真实 Agent](docs/SWE_BENCH_P
 Wrapper benchmark repository for vllm-hust.
 
 GenNova 与 GenNova Autotune 的产品级独立测试结果统一维护在
-[GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)（私有仓库，需授权）。
-历史 MOD 证据入口见 [迁移记录](reports/gennova-mod-evidence-20261105/README.md)。
+[GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)（私有仓库，需授权）。 历史
+MOD 证据入口见 [迁移记录](reports/gennova-mod-evidence-20261105/README.md)。
 
 The goal is to keep `vllm-hust-benchmark` as the stable entrypoint for running experiments, while
 the real benchmark implementations stay in `vllm-hust`. This repo resolves the sibling `vllm-hust`
