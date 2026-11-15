@@ -22,9 +22,7 @@ public names and advisor relationships were used. Existing metrics, measurements
 historical authorship remain unchanged.
 
 | Component | Current maintainers | Repository evidence | Decision | |---|---|---|---| |
-state-scheduler | ShuhaoZhangTony |
-[README.md](https://github.com/Qixin-Gaoke/state-scheduler-plugin/blob/a4188b1e0f10dbf5e11b052711e45335d79838a5/README.md);
-[task #23](https://github.com/Qixin-Gaoke/state-scheduler-plugin/issues/23) | Retained; no
+state-scheduler | ShuhaoZhangTony | private source README.md; private source task #23 | Retained; no
 conflicting current owner found | | pegaflow | cybber695, zhangshengxiang682 |
 [README.md](https://github.com/vLLM-HUST/pegaflow-hust/blob/839bae7b603199dcb8914963bd7fd4a8afa1246e/README.md);
 [task #33](https://github.com/vLLM-HUST/pegaflow-hust/issues/33) | Retained; no conflicting current
