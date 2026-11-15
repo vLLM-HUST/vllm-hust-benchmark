@@ -1,0 +1,1697 @@
+{
+  "schema": "diffspec-three-role-results-v1",
+  "status": "complete",
+  "generated_utc": "2026-10-30T09:49:53.456462+00:00",
+  "models": {
+    "target": {
+      "repository": "Qwen/Qwen3.5-35B-A3B",
+      "revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+      "dtype": "bfloat16"
+    },
+    "draft": {
+      "repository": "jiapingW/Qwen3.5-35B-A3B-Eagle3-Specforge",
+      "revision": "d07a277ececba408f017a0416002d7abb23caf36",
+      "dtype": "bfloat16",
+      "auxiliary_layer_boundaries": [
+        4,
+        24,
+        36
+      ]
+    }
+  },
+  "configuration": {
+    "hardware": "Ascend910B2",
+    "tensor_parallel_size": 4,
+    "draft_tensor_parallel_size": 4,
+    "batch_size": 4,
+    "speculative_depth": 4,
+    "dtype": "bfloat16",
+    "compilation_mode": "PIECEWISE",
+    "max_model_len": 40960,
+    "temperature": 0,
+    "seed": 17,
+    "thinking": false,
+    "enable_prefix_caching": false,
+    "async_scheduling": false,
+    "diffspec": {
+      "token_budget": 2048,
+      "chunk_size": 64,
+      "retrieval_interval": 4,
+      "adaptive_profile": false
+    }
+  },
+  "dataset_provenance": {
+    "scope": "Assembled-context study-guide performance workload derived from MMLU-Pro material. This is not the MMLU-Pro test task, accuracy score, or official leaderboard protocol. The separate ten quality probes are synthetic arithmetic/extraction/format smoke tests.",
+    "dataset": {
+      "id": "TIGER-Lab/MMLU-Pro",
+      "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+      "test_rows": 12032,
+      "validation_rows": 70,
+      "test_url": "https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro/resolve/b189ec765aa7ed75c8acfea42df31fdae71f97be/data/test-00000-of-00001.parquet",
+      "validation_url": "https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro/resolve/b189ec765aa7ed75c8acfea42df31fdae71f97be/data/validation-00000-of-00001.parquet"
+    },
+    "original_prompt_protocol": {
+      "test_selection": "Sort test by (category, numeric question_id), take the first row of each of the 14 categories, selected before generation. Independently rechecked against the local parquet.",
+      "validation_examples": "All five same-category validation rows in stored parquet order, with their reference CoT answers; this contributes 70 demonstrations across the 14 source prompts.",
+      "formatting": "Remove N/A options, label remaining options A-J, use the pinned initial_prompt.txt with category substituted; demonstrations replace the A: Let's think step by step prefix with Answer: Let's think step by step; append the current test question without its answer.",
+      "reference_evaluator_revision": "f418b116db00b065c2aea046518d8fcf74d39872",
+      "template": {
+        "role": "user",
+        "add_generation_prompt": true,
+        "enable_thinking": false
+      }
+    },
+    "selected_test_cases": [
+      {
+        "task_id": "mmlu-pro-02804",
+        "category": "biology",
+        "question_id": 2804,
+        "validation_question_ids": [
+          20,
+          21,
+          22,
+          23,
+          24
+        ],
+        "raw_test_row_sha256": "7ffd67cfa3c9ac065ed19304e3174276d12087eb78b2f95721adeecc2fff0ab2",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-00070",
+        "category": "business",
+        "question_id": 70,
+        "validation_question_ids": [
+          15,
+          16,
+          17,
+          18,
+          19
+        ],
+        "raw_test_row_sha256": "64f56b6182b816b69223ad91ad5dda7759477b28e142c66005034f0ddfef2c59",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-03526",
+        "category": "chemistry",
+        "question_id": 3526,
+        "validation_question_ids": [
+          25,
+          26,
+          27,
+          28,
+          29
+        ],
+        "raw_test_row_sha256": "a33b299eee9d3739fab999b4feadff2ceca305b711a511d8470ef57b3256f024",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-10356",
+        "category": "computer science",
+        "question_id": 10356,
+        "validation_question_ids": [
+          30,
+          31,
+          32,
+          33,
+          34
+        ],
+        "raw_test_row_sha256": "7f587e93abed23a1c1cb047cca4aa1bf803a00335a998485b1d7f714dc1cdf01",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-06826",
+        "category": "economics",
+        "question_id": 6826,
+        "validation_question_ids": [
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "raw_test_row_sha256": "f2a9831a05a3e021a0cd06eb91be1a2137edc66262a63adef4420654482e11ef",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-11285",
+        "category": "engineering",
+        "question_id": 11285,
+        "validation_question_ids": [
+          40,
+          41,
+          42,
+          43,
+          44
+        ],
+        "raw_test_row_sha256": "878e106cbe40b5b77d8af6a1c09ec2ba801236decc31b4a96a162c49865601ad",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-06001",
+        "category": "health",
+        "question_id": 6001,
+        "validation_question_ids": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "raw_test_row_sha256": "d34afaceb9d1f524ff227271a1b5c8befe45b78dcee4d3b1a04568e18e720680",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-04669",
+        "category": "history",
+        "question_id": 4669,
+        "validation_question_ids": [
+          55,
+          56,
+          57,
+          58,
+          59
+        ],
+        "raw_test_row_sha256": "0d783b04fb1e8f49298987587b03d5534b68b038630cae6fa3fbfc1499498ab1",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-00866",
+        "category": "law",
+        "question_id": 866,
+        "validation_question_ids": [
+          65,
+          66,
+          67,
+          68,
+          69
+        ],
+        "raw_test_row_sha256": "a0dd88d79fce8db3b489d6403e7ef8d1b51de1c209b318b828c2a4de2d415188",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-07687",
+        "category": "math",
+        "question_id": 7687,
+        "validation_question_ids": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "raw_test_row_sha256": "fee5f356919669f30dbe693c7cd5d343be23f61648672268e5e1361c8580ed5c",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-05059",
+        "category": "other",
+        "question_id": 5059,
+        "validation_question_ids": [
+          50,
+          51,
+          52,
+          53,
+          54
+        ],
+        "raw_test_row_sha256": "12f7a9cc8848113192b50f911eafadc4ea9641f8024c40bd098613e4d2817733",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-10774",
+        "category": "philosophy",
+        "question_id": 10774,
+        "validation_question_ids": [
+          45,
+          46,
+          47,
+          48,
+          49
+        ],
+        "raw_test_row_sha256": "1b468881ed244bfc327876950a651c26dd631c243139486ed4f9a429d82757b2",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-09044",
+        "category": "physics",
+        "question_id": 9044,
+        "validation_question_ids": [
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "raw_test_row_sha256": "05448419a1c7b702550d64bdfb7e511a56ba423631732e38b905e54588a6ecd6",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      },
+      {
+        "task_id": "mmlu-pro-01986",
+        "category": "psychology",
+        "question_id": 1986,
+        "validation_question_ids": [
+          60,
+          61,
+          62,
+          63,
+          64
+        ],
+        "raw_test_row_sha256": "b5c89fc57e378d5a19d8daff322ffcd3d07c1b66c5ea3529cc1f0f80d17c918a",
+        "original_five_shot_prompt_rebuilt_exactly": true
+      }
+    ],
+    "assembly": {
+      "source_chat": "Decode the original Qwen3.8-27B token IDs including special tokens, remove only the checked outer single-user/assistant chat wrapper, assert the old chat template exactly round trips all source token IDs.",
+      "sections": 48,
+      "source_order": "14 selected prompts ordered by category, cyclically repeated. For case index 0..3, section i uses source[(i+index) % 14].",
+      "section_header": "Reference section {i+1}:\n",
+      "section_join": "two newline characters",
+      "instruction": "Use the following reference material to write a detailed study guide. <reference> ... </reference> Write a long study guide with explanations and worked examples for the topics above. Begin directly and keep writing until the token budget is exhausted.",
+      "template": "Qwen3.5, single user message, tokenize=True, return_dict=False, add_generation_prompt=True, enable_thinking=False.",
+      "truncation": "Keep the first L-256 tokens and final 256 tokens of the rendered assembled prompt; discard the middle. Long scenario L=32768.",
+      "performance_cases": 4,
+      "case_offsets": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "output_protocol": "Greedy temperature 0, seed 17, fixed 8192 output tokens with ignore_eos=True, batch size 4. Not a natural-EOS task score.",
+      "identity_evidence": "Final performance token IDs match corresponding task IDs in diffspec-qwen35-retest-20261029/inputs.json exactly. Copied into a local hash contract so runtime never reads prior report paths.",
+      "user_message_template": "Use the following reference material to write a detailed study guide.\n<reference>\n{sections}\n</reference>\nWrite a long study guide with explanations and worked examples for the topics above. Begin directly and keep writing until the token budget is exhausted."
+    },
+    "sha256_evidence": {
+      "/root/diffspec-eval-assets-20261011/test-00000-of-00001.parquet": "0e24a191921c2f453518a537a8b2117bd137e7714d4ef1565e9ba06c1ecb9ad8",
+      "/root/diffspec-eval-assets-20261011/validation-00000-of-00001.parquet": "139423c23722e480c807ac4a191409a710cfce4eba744c1d641cf88e730e2078",
+      "/root/diffspec-eval-assets-20261011/initial_prompt.txt": "d7337806b4d84eef7a86bcb20bf3d64b65e72736c1603e16d08cadebac436f0a",
+      "/root/diffspec-eval-assets-20261011/prepared/probe.json": "7dd811d61c18fad4ccaae74a9be396d892179186537115e0b6a0d090e5afb5b0",
+      "/root/diffspec-linear-retest-20261028/model-inputs.json": "e8c4d05bf4c25313bf7314b270f6db2f1d6dd679bd29bcd5253e23a25aaeac7a",
+      "/root/diffspec-qwen35-retest-20261029/build_inputs.py": "a64c361271222462ebc1d0ff90947bb3e57820608cfcf81563e9ab9b0f0499e7",
+      "/root/diffspec-qwen35-retest-20261029/inputs.json": "e9e53e646b6072ecd424b126cf997878a249969784a06624262a36e19887bd9c",
+      "/root/diffspec-fp8-long-output-20261030/inputs.json": "404f4637421fc7cf0ac10af49d17303416f7fffd07f53505309aef8a49790ef4",
+      "/root/qwen35-moe-diagnosis-20261030/long-inputs.json": "49e9443546feb6265604abd64b5583349e9376474ae92afe1f6ddcdbbbfdd17b",
+      "/root/diffspec-fusion-eval-20261030/inputs.json": "49e9443546feb6265604abd64b5583349e9376474ae92afe1f6ddcdbbbfdd17b",
+      "/root/vllm-ascend-hust-diffspec/benchmarks/diffspec_prepare_tasks.py": "bce1df9d9be8d950c3d35c1af52a10452ca460f4790be527538cea526cd00852",
+      "/root/vllm-hust-benchmark/src/vllm_hust_benchmark/mmlu_pro_pyramidkv.py": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801"
+    },
+    "independent_checks": {
+      "selected_test_ids_are_first_numeric_per_category": true,
+      "each_category_has_five_validation_examples": true,
+      "original_14_prompt_ids_equal_prepared_probe": true,
+      "final_8_prior_prompt_ids_equal_qwen35_builder_output": true,
+      "original_five_shot_prompts_rebuilt_from_pinned_parquet_exactly": true,
+      "all_four_32k_assembled_prompts_rebuilt_using_actual_35b_target_tokenizer_exactly": true,
+      "target_tokenizer_model": "/root/qwen35-moe-diagnosis-20261030/target-model",
+      "verified_epoch": 1793346211.7009966
+    }
+  },
+  "rows": [
+    {
+      "independent_starts": 3,
+      "total_output_tokens": 49152,
+      "total_generation_seconds": 825.036002708599,
+      "aggregate_tokens_per_second": 59.57558196082794,
+      "per_start_tokens_per_second": [
+        60.09761651499736,
+        58.439489622828624,
+        60.2232253478897
+      ],
+      "tokens_per_second": {
+        "count": 3,
+        "mean": 59.586777161905225,
+        "p50": 60.09761651499736,
+        "p99": 60.22071317123186,
+        "min": 58.439489622828624,
+        "max": 60.2232253478897
+      },
+      "median_tokens_per_second": 60.09761651499736,
+      "tokens_per_second_sample_stddev": 0.9955631158874277,
+      "mean_acceptance_length": null,
+      "draft_acceptance_rate": null,
+      "spec_steps": 0,
+      "accepted_draft_tokens": 0,
+      "draft_tokens": 0,
+      "ttft_seconds": {
+        "count": 12,
+        "mean": 1.1344767808914185,
+        "p50": 1.2781926393508911,
+        "p99": 1.647950987815857,
+        "min": 0.3481588363647461,
+        "max": 1.6538512706756592
+      },
+      "request_mean_tpot_seconds": {
+        "count": 12,
+        "mean": 0.06685227214786693,
+        "p50": 0.06627785545706713,
+        "p99": 0.06828974250837778,
+        "min": 0.06605931498674318,
+        "max": 0.06830672799531139
+      },
+      "request_e2e_seconds": {
+        "count": 12,
+        "mean": 274.89428953329724,
+        "p50": 272.5255688428879,
+        "p99": 280.3484226989746,
+        "min": 271.78622174263,
+        "max": 280.3557016849518
+      },
+      "engine_output_interval_seconds": {
+        "count": 49140,
+        "mean": 0.06685227214786693,
+        "p50": 0.06633242033421993,
+        "p99": 0.07457129657268524,
+        "min": 0.06015838123857975,
+        "max": 0.39177223667502403
+      },
+      "requests": 12,
+      "failures": 0,
+      "preemptions": 0,
+      "corrupted_metric_requests": 0,
+      "p99_semantics": "Request quantiles use 12 samples for three B4 starts. Engine output intervals use exact emitted-batch intervals; a speculative batch can contain multiple tokens.",
+      "scenario": "context-2048-output-4096",
+      "prompt_tokens": 2048,
+      "output_tokens_per_request": 4096,
+      "role_id": "native",
+      "role": "Target-only",
+      "retrieval_rank_measurements": [],
+      "startup_attempts": 3,
+      "startup_failures": 0,
+      "source": {
+        "role": "native",
+        "measurement_folders": [
+          "/root/diffspec-fusion-eval-20261030/formal/start-01/native/context-2048-output-4096",
+          "/root/diffspec-fusion-eval-20261030/formal/start-02/native/context-2048-output-4096",
+          "/root/diffspec-fusion-eval-20261030/formal/start-03/native/context-2048-output-4096"
+        ]
+      },
+      "output_equivalence": {
+        "versus_target_only": {
+          "requests": 12,
+          "exact_matches": 12
+        },
+        "same_role_across_starts": {
+          "requests": 8,
+          "exact_matches": 0
+        }
+      },
+      "median_speedup_vs_target_only": 1.0,
+      "median_speedup_vs_eagle3": 0.5704804201477406
+    },
+    {
+      "independent_starts": 3,
+      "total_output_tokens": 49152,
+      "total_generation_seconds": 466.2722595445812,
+      "aggregate_tokens_per_second": 105.41480646523533,
+      "per_start_tokens_per_second": [
+        106.17781786214381,
+        104.7309699905948,
+        105.3456251827776
+      ],
+      "tokens_per_second": {
+        "count": 3,
+        "mean": 105.4181376785054,
+        "p50": 105.3456251827776,
+        "p99": 106.16117400855649,
+        "min": 104.7309699905948,
+        "max": 106.17781786214381
+      },
+      "median_tokens_per_second": 105.3456251827776,
+      "tokens_per_second_sample_stddev": 0.7261444328637259,
+      "mean_acceptance_length": 2.5538637426596686,
+      "draft_acceptance_rate": 0.3884659356649171,
+      "spec_steps": 19243,
+      "accepted_draft_tokens": 29901,
+      "draft_tokens": 76972,
+      "ttft_seconds": {
+        "count": 12,
+        "mean": 1.2363551060358684,
+        "p50": 1.3980437517166138,
+        "p99": 1.8407294821739197,
+        "min": 0.35151171684265137,
+        "max": 1.8516638278961182
+      },
+      "request_mean_tpot_seconds": {
+        "count": 12,
+        "mean": 0.03530532842878014,
+        "p50": 0.03493843529196013,
+        "p99": 0.037765694710047364,
+        "min": 0.03311872760127316,
+        "max": 0.03777387243933221
+      },
+      "request_e2e_seconds": {
+        "count": 12,
+        "mean": 145.81183197100958,
+        "p50": 144.4709837436676,
+        "p99": 156.33595577716827,
+        "min": 136.0145354270935,
+        "max": 156.4362072944641
+      },
+      "engine_output_interval_seconds": {
+        "count": 19243,
+        "mean": 0.09015765935614281,
+        "p50": 0.08932166919112206,
+        "p99": 0.09969308041036129,
+        "min": 0.08408007957041264,
+        "max": 0.45688459277153015
+      },
+      "requests": 12,
+      "failures": 0,
+      "preemptions": 0,
+      "corrupted_metric_requests": 0,
+      "p99_semantics": "Request quantiles use 12 samples for three B4 starts. Engine output intervals use exact emitted-batch intervals; a speculative batch can contain multiple tokens.",
+      "scenario": "context-2048-output-4096",
+      "prompt_tokens": 2048,
+      "output_tokens_per_request": 4096,
+      "role_id": "eagle",
+      "role": "Eagle3",
+      "retrieval_rank_measurements": [],
+      "startup_attempts": 3,
+      "startup_failures": 0,
+      "source": {
+        "role": "eagle",
+        "measurement_folders": [
+          "/root/diffspec-fusion-eval-20261030/formal/start-01/eagle/context-2048-output-4096",
+          "/root/diffspec-fusion-eval-20261030/formal/start-02/eagle/context-2048-output-4096",
+          "/root/diffspec-fusion-eval-20261030/formal/start-03/eagle/context-2048-output-4096"
+        ]
+      },
+      "output_equivalence": {
+        "versus_target_only": {
+          "requests": 12,
+          "exact_matches": 0
+        },
+        "same_role_across_starts": {
+          "requests": 8,
+          "exact_matches": 0
+        }
+      },
+      "median_speedup_vs_target_only": 1.7529085393343111,
+      "median_speedup_vs_eagle3": 1.0
+    },
+    {
+      "independent_starts": 3,
+      "total_output_tokens": 49152,
+      "total_generation_seconds": 449.42832962051034,
+      "aggregate_tokens_per_second": 109.36560238982513,
+      "per_start_tokens_per_second": [
+        112.07336722597124,
+        111.00844284315001,
+        105.26450934182377
+      ],
+      "tokens_per_second": {
+        "count": 3,
+        "mean": 109.44877313698167,
+        "p50": 111.00844284315001,
+        "p99": 112.05206873831482,
+        "min": 105.26450934182377,
+        "max": 112.07336722597124
+      },
+      "median_tokens_per_second": 111.00844284315001,
+      "tokens_per_second_sample_stddev": 3.6625897416832958,
+      "mean_acceptance_length": 2.798155737704918,
+      "draft_acceptance_rate": 0.4495389344262295,
+      "spec_steps": 17568,
+      "accepted_draft_tokens": 31590,
+      "draft_tokens": 70272,
+      "ttft_seconds": {
+        "count": 12,
+        "mean": 1.2813430428504944,
+        "p50": 1.439607858657837,
+        "p99": 1.9140660738945008,
+        "min": 0.37607336044311523,
+        "max": 1.9263999462127686
+      },
+      "request_mean_tpot_seconds": {
+        "count": 12,
+        "mean": 0.03524356858625153,
+        "p50": 0.03510107722119753,
+        "p99": 0.03737047000424948,
+        "min": 0.03430122890042298,
+        "max": 0.03758463730514777
+      },
+      "request_e2e_seconds": {
+        "count": 12,
+        "mean": 145.60385713974634,
+        "p50": 145.11800837516785,
+        "p99": 154.75755204916,
+        "min": 140.8738431930542,
+        "max": 155.64338731765747
+      },
+      "engine_output_interval_seconds": {
+        "count": 17568,
+        "mean": 0.0985808834431011,
+        "p50": 0.0974369514733553,
+        "p99": 0.11192523501813412,
+        "min": 0.09092485532164574,
+        "max": 0.47158136032521725
+      },
+      "requests": 12,
+      "failures": 0,
+      "preemptions": 0,
+      "corrupted_metric_requests": 0,
+      "p99_semantics": "Request quantiles use 12 samples for three B4 starts. Engine output intervals use exact emitted-batch intervals; a speculative batch can contain multiple tokens.",
+      "scenario": "context-2048-output-4096",
+      "prompt_tokens": 2048,
+      "output_tokens_per_request": 4096,
+      "role_id": "diffspec",
+      "role": "DiffSpec",
+      "retrieval_rank_measurements": [
+        {
+          "rank": 0,
+          "count": 362,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-01/diffspec_current"
+        },
+        {
+          "rank": 1,
+          "count": 362,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-01/diffspec_current"
+        },
+        {
+          "rank": 2,
+          "count": 362,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-01/diffspec_current"
+        },
+        {
+          "rank": 3,
+          "count": 362,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-01/diffspec_current"
+        },
+        {
+          "rank": 0,
+          "count": 374,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-02/diffspec_current"
+        },
+        {
+          "rank": 1,
+          "count": 374,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-02/diffspec_current"
+        },
+        {
+          "rank": 2,
+          "count": 374,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-02/diffspec_current"
+        },
+        {
+          "rank": 3,
+          "count": 374,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-02/diffspec_current"
+        },
+        {
+          "rank": 0,
+          "count": 394,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-03/diffspec_current"
+        },
+        {
+          "rank": 1,
+          "count": 394,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-03/diffspec_current"
+        },
+        {
+          "rank": 2,
+          "count": 394,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-03/diffspec_current"
+        },
+        {
+          "rank": 3,
+          "count": 394,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-03/diffspec_current"
+        }
+      ],
+      "startup_attempts": 3,
+      "startup_failures": 0,
+      "source": {
+        "role": "diffspec_current",
+        "measurement_folders": [
+          "/root/diffspec-fusion-eval-20261030/formal/start-01/diffspec_current/context-2048-output-4096",
+          "/root/diffspec-fusion-eval-20261030/formal/start-02/diffspec_current/context-2048-output-4096",
+          "/root/diffspec-fusion-eval-20261030/formal/start-03/diffspec_current/context-2048-output-4096"
+        ]
+      },
+      "output_equivalence": {
+        "versus_target_only": {
+          "requests": 12,
+          "exact_matches": 0
+        },
+        "same_role_across_starts": {
+          "requests": 8,
+          "exact_matches": 0
+        }
+      },
+      "median_speedup_vs_target_only": 1.8471355318300826,
+      "median_speedup_vs_eagle3": 1.0537546542682457
+    },
+    {
+      "independent_starts": 3,
+      "total_output_tokens": 24576,
+      "total_generation_seconds": 476.64872451871634,
+      "aggregate_tokens_per_second": 51.559982720639766,
+      "per_start_tokens_per_second": [
+        51.77467663732085,
+        50.54431845840322,
+        52.395578573426846
+      ],
+      "tokens_per_second": {
+        "count": 3,
+        "mean": 51.57152455638364,
+        "p50": 51.77467663732085,
+        "p99": 52.38316053470473,
+        "min": 50.54431845840322,
+        "max": 52.395578573426846
+      },
+      "median_tokens_per_second": 51.77467663732085,
+      "tokens_per_second_sample_stddev": 0.9422017190395929,
+      "mean_acceptance_length": null,
+      "draft_acceptance_rate": null,
+      "spec_steps": 0,
+      "accepted_draft_tokens": 0,
+      "draft_tokens": 0,
+      "ttft_seconds": {
+        "count": 12,
+        "mean": 14.4271360039711,
+        "p50": 14.349020719528198,
+        "p99": 24.015094990730287,
+        "min": 5.133525371551514,
+        "max": 24.090024948120117
+      },
+      "request_mean_tpot_seconds": {
+        "count": 12,
+        "mean": 0.06978335144400762,
+        "p50": 0.06987277424608097,
+        "p99": 0.07464013200222311,
+        "min": 0.06541186032710306,
+        "max": 0.07483190878530538
+      },
+      "request_e2e_seconds": {
+        "count": 12,
+        "mean": 157.27382731437683,
+        "p50": 156.7747701406479,
+        "p99": 161.9496864271164,
+        "min": 153.0456347465515,
+        "max": 162.06289172172546
+      },
+      "engine_output_interval_seconds": {
+        "count": 24564,
+        "mean": 0.06978335144400762,
+        "p50": 0.06590086594223976,
+        "p99": 0.35145579533651466,
+        "min": 0.05980800464749336,
+        "max": 0.4017887692898512
+      },
+      "requests": 12,
+      "failures": 0,
+      "preemptions": 0,
+      "corrupted_metric_requests": 0,
+      "p99_semantics": "Request quantiles use 12 samples for three B4 starts. Engine output intervals use exact emitted-batch intervals; a speculative batch can contain multiple tokens.",
+      "scenario": "context-32768-output-2048",
+      "prompt_tokens": 32768,
+      "output_tokens_per_request": 2048,
+      "role_id": "native",
+      "role": "Target-only",
+      "retrieval_rank_measurements": [],
+      "startup_attempts": 3,
+      "startup_failures": 0,
+      "source": {
+        "role": "native",
+        "measurement_folders": [
+          "/root/diffspec-fusion-eval-20261030/formal/start-01/native/context-32768-output-2048",
+          "/root/diffspec-fusion-eval-20261030/formal/start-02/native/context-32768-output-2048",
+          "/root/diffspec-fusion-eval-20261030/formal/start-03/native/context-32768-output-2048"
+        ]
+      },
+      "output_equivalence": {
+        "versus_target_only": {
+          "requests": 12,
+          "exact_matches": 12
+        },
+        "same_role_across_starts": {
+          "requests": 8,
+          "exact_matches": 0
+        }
+      },
+      "median_speedup_vs_target_only": 1.0,
+      "median_speedup_vs_eagle3": 0.87911362332024
+    },
+    {
+      "independent_starts": 3,
+      "total_output_tokens": 24576,
+      "total_generation_seconds": 417.63447018526495,
+      "aggregate_tokens_per_second": 58.84571737840019,
+      "per_start_tokens_per_second": [
+        59.22475963076149,
+        58.42372554978279,
+        58.89418075649657
+      ],
+      "tokens_per_second": {
+        "count": 3,
+        "mean": 58.84755531234695,
+        "p50": 58.89418075649657,
+        "p99": 59.21814805327619,
+        "min": 58.42372554978279,
+        "max": 59.22475963076149
+      },
+      "median_tokens_per_second": 58.89418075649657,
+      "tokens_per_second_sample_stddev": 0.4025473248625067,
+      "mean_acceptance_length": 1.6611452910553717,
+      "draft_acceptance_rate": 0.1652863227638429,
+      "spec_steps": 14791,
+      "accepted_draft_tokens": 9779,
+      "draft_tokens": 59164,
+      "ttft_seconds": {
+        "count": 12,
+        "mean": 15.69105895360311,
+        "p50": 15.736679553985596,
+        "p99": 25.66642416715622,
+        "min": 5.6420300006866455,
+        "max": 25.67244553565979
+      },
+      "request_mean_tpot_seconds": {
+        "count": 12,
+        "mean": 0.05766237470260846,
+        "p50": 0.05740048356252324,
+        "p99": 0.06364637483713914,
+        "min": 0.051453461791386414,
+        "max": 0.06380032515767498
+      },
+      "request_e2e_seconds": {
+        "count": 12,
+        "mean": 133.726892610391,
+        "p50": 132.41238451004028,
+        "p99": 140.08915642261505,
+        "min": 126.77164053916931,
+        "max": 140.21237754821777
+      },
+      "engine_output_interval_seconds": {
+        "count": 14791,
+        "mean": 0.09576219134574229,
+        "p50": 0.08920188993215561,
+        "p99": 0.40223141945898533,
+        "min": 0.0841870866715908,
+        "max": 0.43274399638175964
+      },
+      "requests": 12,
+      "failures": 0,
+      "preemptions": 0,
+      "corrupted_metric_requests": 0,
+      "p99_semantics": "Request quantiles use 12 samples for three B4 starts. Engine output intervals use exact emitted-batch intervals; a speculative batch can contain multiple tokens.",
+      "scenario": "context-32768-output-2048",
+      "prompt_tokens": 32768,
+      "output_tokens_per_request": 2048,
+      "role_id": "eagle",
+      "role": "Eagle3",
+      "retrieval_rank_measurements": [],
+      "startup_attempts": 3,
+      "startup_failures": 0,
+      "source": {
+        "role": "eagle",
+        "measurement_folders": [
+          "/root/diffspec-fusion-eval-20261030/formal/start-01/eagle/context-32768-output-2048",
+          "/root/diffspec-fusion-eval-20261030/formal/start-02/eagle/context-32768-output-2048",
+          "/root/diffspec-fusion-eval-20261030/formal/start-03/eagle/context-32768-output-2048"
+        ]
+      },
+      "output_equivalence": {
+        "versus_target_only": {
+          "requests": 12,
+          "exact_matches": 0
+        },
+        "same_role_across_starts": {
+          "requests": 8,
+          "exact_matches": 0
+        }
+      },
+      "median_speedup_vs_target_only": 1.1375093884032825,
+      "median_speedup_vs_eagle3": 1.0
+    },
+    {
+      "independent_starts": 3,
+      "total_output_tokens": 24576,
+      "total_generation_seconds": 303.87733749486506,
+      "aggregate_tokens_per_second": 80.87473782218224,
+      "per_start_tokens_per_second": [
+        79.70833860875119,
+        82.04547719968953,
+        80.90418243388716
+      ],
+      "tokens_per_second": {
+        "count": 3,
+        "mean": 80.88599941410929,
+        "p50": 80.90418243388716,
+        "p99": 82.02265130437348,
+        "min": 79.70833860875119,
+        "max": 82.04547719968953
+      },
+      "median_tokens_per_second": 80.90418243388716,
+      "tokens_per_second_sample_stddev": 1.1686753890492823,
+      "mean_acceptance_length": 2.688026243849098,
+      "draft_acceptance_rate": 0.42200656096227446,
+      "spec_steps": 9145,
+      "accepted_draft_tokens": 15437,
+      "draft_tokens": 36580,
+      "ttft_seconds": {
+        "count": 12,
+        "mean": 16.410120566685993,
+        "p50": 16.456043481826782,
+        "p99": 27.198910620212555,
+        "min": 5.847300291061401,
+        "max": 27.28268313407898
+      },
+      "request_mean_tpot_seconds": {
+        "count": 12,
+        "mean": 0.040152001063018056,
+        "p50": 0.04074586777568853,
+        "p99": 0.04388615919597371,
+        "min": 0.035303649891570074,
+        "max": 0.04390427151546574
+      },
+      "request_e2e_seconds": {
+        "count": 12,
+        "mean": 98.60255322853725,
+        "p50": 99.31071031093597,
+        "p99": 102.61465925693513,
+        "min": 91.39480209350586,
+        "max": 102.76619601249695
+      },
+      "engine_output_interval_seconds": {
+        "count": 9145,
+        "mean": 0.10785060187118375,
+        "p50": 0.09633980318903923,
+        "p99": 0.42546888776123515,
+        "min": 0.09222237393260002,
+        "max": 0.4489730950444937
+      },
+      "requests": 12,
+      "failures": 0,
+      "preemptions": 0,
+      "corrupted_metric_requests": 0,
+      "p99_semantics": "Request quantiles use 12 samples for three B4 starts. Engine output intervals use exact emitted-batch intervals; a speculative batch can contain multiple tokens.",
+      "scenario": "context-32768-output-2048",
+      "prompt_tokens": 32768,
+      "output_tokens_per_request": 2048,
+      "role_id": "diffspec",
+      "role": "DiffSpec",
+      "retrieval_rank_measurements": [
+        {
+          "rank": 0,
+          "count": 191,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-01/diffspec_current"
+        },
+        {
+          "rank": 1,
+          "count": 191,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-01/diffspec_current"
+        },
+        {
+          "rank": 2,
+          "count": 191,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-01/diffspec_current"
+        },
+        {
+          "rank": 3,
+          "count": 191,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-01/diffspec_current"
+        },
+        {
+          "rank": 0,
+          "count": 192,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-02/diffspec_current"
+        },
+        {
+          "rank": 1,
+          "count": 192,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-02/diffspec_current"
+        },
+        {
+          "rank": 2,
+          "count": 192,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-02/diffspec_current"
+        },
+        {
+          "rank": 3,
+          "count": 192,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-02/diffspec_current"
+        },
+        {
+          "rank": 0,
+          "count": 191,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-03/diffspec_current"
+        },
+        {
+          "rank": 1,
+          "count": 191,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-03/diffspec_current"
+        },
+        {
+          "rank": 2,
+          "count": 191,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-03/diffspec_current"
+        },
+        {
+          "rank": 3,
+          "count": 191,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-fusion-eval-20261030/formal/start-03/diffspec_current"
+        }
+      ],
+      "startup_attempts": 3,
+      "startup_failures": 0,
+      "source": {
+        "role": "diffspec_current",
+        "measurement_folders": [
+          "/root/diffspec-fusion-eval-20261030/formal/start-01/diffspec_current/context-32768-output-2048",
+          "/root/diffspec-fusion-eval-20261030/formal/start-02/diffspec_current/context-32768-output-2048",
+          "/root/diffspec-fusion-eval-20261030/formal/start-03/diffspec_current/context-32768-output-2048"
+        ]
+      },
+      "output_equivalence": {
+        "versus_target_only": {
+          "requests": 12,
+          "exact_matches": 0
+        },
+        "same_role_across_starts": {
+          "requests": 8,
+          "exact_matches": 0
+        }
+      },
+      "median_speedup_vs_target_only": 1.5626207190170807,
+      "median_speedup_vs_eagle3": 1.3737211621703844
+    },
+    {
+      "independent_starts": 3,
+      "total_output_tokens": 98304,
+      "total_generation_seconds": 1715.8965976107866,
+      "aggregate_tokens_per_second": 57.290165466193265,
+      "per_start_tokens_per_second": [
+        56.75151789879488,
+        56.37306778823367,
+        58.80496361968592
+      ],
+      "tokens_per_second": {
+        "count": 3,
+        "mean": 57.309849768904826,
+        "p50": 56.75151789879488,
+        "p99": 58.7638947052681,
+        "min": 56.37306778823367,
+        "max": 58.80496361968592
+      },
+      "median_tokens_per_second": 56.75151789879488,
+      "tokens_per_second_sample_stddev": 1.3085603507840438,
+      "mean_acceptance_length": null,
+      "draft_acceptance_rate": null,
+      "spec_steps": 0,
+      "accepted_draft_tokens": 0,
+      "draft_tokens": 0,
+      "ttft_seconds": {
+        "count": 12,
+        "mean": 14.818296730518341,
+        "p50": 14.925037741661072,
+        "p99": 24.848071990013125,
+        "min": 5.3795623779296875,
+        "max": 25.024210453033447
+      },
+      "request_mean_tpot_seconds": {
+        "count": 12,
+        "mean": 0.06782591175812501,
+        "p50": 0.06808762555400041,
+        "p99": 0.06982841499250539,
+        "min": 0.06520565205639448,
+        "max": 0.06988304566754343
+      },
+      "request_e2e_seconds": {
+        "count": 12,
+        "mean": 570.3813394109408,
+        "p50": 575.8268070220947,
+        "p99": 581.145704805851,
+        "min": 554.1244192123413,
+        "max": 581.2580578327179
+      },
+      "engine_output_interval_seconds": {
+        "count": 98292,
+        "mean": 0.06782591175812501,
+        "p50": 0.06657313741743565,
+        "p99": 0.07833993621170521,
+        "min": 0.05928174965083599,
+        "max": 0.4998021572828293
+      },
+      "requests": 12,
+      "failures": 0,
+      "preemptions": 0,
+      "corrupted_metric_requests": 0,
+      "p99_semantics": "Request quantiles use 12 samples for three B4 starts. Engine output intervals use exact emitted-batch intervals; a speculative batch can contain multiple tokens.",
+      "scenario": "context-32768-output-8192",
+      "prompt_tokens": 32768,
+      "output_tokens_per_request": 8192,
+      "role_id": "native",
+      "role": "Target-only",
+      "retrieval_rank_measurements": [],
+      "startup_attempts": 3,
+      "startup_failures": 0,
+      "source": {
+        "role": "native",
+        "measurement_folders": [
+          "/root/diffspec-results-20261030/eval/long-output/start-01/native/context-32768-output-8192",
+          "/root/diffspec-results-20261030/eval/long-output/start-02/native/context-32768-output-8192",
+          "/root/diffspec-results-20261030/eval/long-output/start-03/native/context-32768-output-8192"
+        ]
+      },
+      "output_equivalence": {
+        "versus_target_only": {
+          "requests": 12,
+          "exact_matches": 12
+        },
+        "same_role_across_starts": {
+          "requests": 8,
+          "exact_matches": 0
+        }
+      },
+      "median_speedup_vs_target_only": 1.0,
+      "median_speedup_vs_eagle3": 0.863124590557212
+    },
+    {
+      "independent_starts": 3,
+      "total_output_tokens": 98304,
+      "total_generation_seconds": 1484.705483481288,
+      "aggregate_tokens_per_second": 66.21111129023384,
+      "per_start_tokens_per_second": [
+        64.11986556232527,
+        68.94180203202053,
+        65.75124671417078
+      ],
+      "tokens_per_second": {
+        "count": 3,
+        "mean": 66.27097143617219,
+        "p50": 65.75124671417078,
+        "p99": 68.87799092566354,
+        "min": 64.11986556232527,
+        "max": 68.94180203202053
+      },
+      "median_tokens_per_second": 65.75124671417078,
+      "tokens_per_second_sample_stddev": 2.452621693094735,
+      "mean_acceptance_length": 1.6593786932297823,
+      "draft_acceptance_rate": 0.1648766854952422,
+      "spec_steps": 59230,
+      "accepted_draft_tokens": 39055,
+      "draft_tokens": 236874,
+      "ttft_seconds": {
+        "count": 12,
+        "mean": 15.861373682816824,
+        "p50": 15.946977853775024,
+        "p99": 25.896167430877686,
+        "min": 5.709123849868774,
+        "max": 25.915359020233154
+      },
+      "request_mean_tpot_seconds": {
+        "count": 12,
+        "mean": 0.05609599722523775,
+        "p50": 0.055314958469967,
+        "p99": 0.060676204476259016,
+        "min": 0.053150660743928484,
+        "max": 0.06084853052745487
+      },
+      "request_e2e_seconds": {
+        "count": 12,
+        "mean": 475.34489218393963,
+        "p50": 471.6760605573654,
+        "p99": 510.5012328124046,
+        "min": 451.3487000465393,
+        "max": 511.03815627098083
+      },
+      "engine_output_interval_seconds": {
+        "count": 59237,
+        "mean": 0.09308013166201982,
+        "p50": 0.08978577889502048,
+        "p99": 0.10536685399711132,
+        "min": 0.08242618478834629,
+        "max": 14.990165960043669
+      },
+      "requests": 12,
+      "failures": 0,
+      "preemptions": 0,
+      "corrupted_metric_requests": 0,
+      "p99_semantics": "Request quantiles use 12 samples for three B4 starts. Engine output intervals use exact emitted-batch intervals; a speculative batch can contain multiple tokens.",
+      "scenario": "context-32768-output-8192",
+      "prompt_tokens": 32768,
+      "output_tokens_per_request": 8192,
+      "role_id": "eagle",
+      "role": "Eagle3",
+      "retrieval_rank_measurements": [],
+      "startup_attempts": 3,
+      "startup_failures": 0,
+      "source": {
+        "role": "eagle",
+        "measurement_folders": [
+          "/root/diffspec-results-20261030/eval/long-output/start-01/eagle/context-32768-output-8192",
+          "/root/diffspec-results-20261030/eval/long-output/start-02/eagle/context-32768-output-8192",
+          "/root/diffspec-results-20261030/eval/long-output/start-03/eagle/context-32768-output-8192"
+        ]
+      },
+      "output_equivalence": {
+        "versus_target_only": {
+          "requests": 12,
+          "exact_matches": 0
+        },
+        "same_role_across_starts": {
+          "requests": 8,
+          "exact_matches": 0
+        }
+      },
+      "median_speedup_vs_target_only": 1.1585812881943551,
+      "median_speedup_vs_eagle3": 1.0
+    },
+    {
+      "independent_starts": 3,
+      "total_output_tokens": 98304,
+      "total_generation_seconds": 1009.3288762103766,
+      "aggregate_tokens_per_second": 97.39541027409413,
+      "per_start_tokens_per_second": [
+        97.3455204720157,
+        96.72380137345189,
+        98.12705309666448
+      ],
+      "tokens_per_second": {
+        "count": 3,
+        "mean": 97.39879164737737,
+        "p50": 97.3455204720157,
+        "p99": 98.11142244417151,
+        "min": 96.72380137345189,
+        "max": 98.12705309666448
+      },
+      "median_tokens_per_second": 97.3455204720157,
+      "tokens_per_second_sample_stddev": 0.7031409625872224,
+      "mean_acceptance_length": 2.6765610958307233,
+      "draft_acceptance_rate": 0.4192258978304983,
+      "spec_steps": 36721,
+      "accepted_draft_tokens": 61565,
+      "draft_tokens": 146854,
+      "ttft_seconds": {
+        "count": 12,
+        "mean": 16.61692221959432,
+        "p50": 16.608728408813477,
+        "p99": 27.259700388908385,
+        "min": 5.98486852645874,
+        "max": 27.262945652008057
+      },
+      "request_mean_tpot_seconds": {
+        "count": 12,
+        "mean": 0.0384628842533434,
+        "p50": 0.03866778345938448,
+        "p99": 0.03941948996432933,
+        "min": 0.03712200477924878,
+        "max": 0.039446791657613334
+      },
+      "request_e2e_seconds": {
+        "count": 12,
+        "mean": 331.66756947835285,
+        "p50": 333.0625935792923,
+        "p99": 338.5329830789566,
+        "min": 320.22148060798645,
+        "max": 338.7705924510956
+      },
+      "engine_output_interval_seconds": {
+        "count": 36727,
+        "mean": 0.10293772480816918,
+        "p50": 0.09935336373746395,
+        "p99": 0.12336331143975253,
+        "min": 0.09260019846260548,
+        "max": 0.4750292208045721
+      },
+      "requests": 12,
+      "failures": 0,
+      "preemptions": 0,
+      "corrupted_metric_requests": 0,
+      "p99_semantics": "Request quantiles use 12 samples for three B4 starts. Engine output intervals use exact emitted-batch intervals; a speculative batch can contain multiple tokens.",
+      "scenario": "context-32768-output-8192",
+      "prompt_tokens": 32768,
+      "output_tokens_per_request": 8192,
+      "role_id": "diffspec",
+      "role": "DiffSpec",
+      "retrieval_rank_measurements": [
+        {
+          "rank": 0,
+          "count": 761,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-01/diffspec"
+        },
+        {
+          "rank": 1,
+          "count": 761,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-01/diffspec"
+        },
+        {
+          "rank": 2,
+          "count": 761,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-01/diffspec"
+        },
+        {
+          "rank": 3,
+          "count": 761,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-01/diffspec"
+        },
+        {
+          "rank": 0,
+          "count": 778,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-02/diffspec"
+        },
+        {
+          "rank": 1,
+          "count": 778,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-02/diffspec"
+        },
+        {
+          "rank": 2,
+          "count": 778,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-02/diffspec"
+        },
+        {
+          "rank": 3,
+          "count": 778,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-02/diffspec"
+        },
+        {
+          "rank": 0,
+          "count": 774,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-03/diffspec"
+        },
+        {
+          "rank": 1,
+          "count": 774,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-03/diffspec"
+        },
+        {
+          "rank": 2,
+          "count": 774,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-03/diffspec"
+        },
+        {
+          "rank": 3,
+          "count": 774,
+          "missing_snapshot_count": 0,
+          "run": "/root/diffspec-results-20261030/eval/long-output/start-03/diffspec"
+        }
+      ],
+      "startup_attempts": 3,
+      "startup_failures": 0,
+      "source": {
+        "role": "diffspec",
+        "measurement_folders": [
+          "/root/diffspec-results-20261030/eval/long-output/start-01/diffspec/context-32768-output-8192",
+          "/root/diffspec-results-20261030/eval/long-output/start-02/diffspec/context-32768-output-8192",
+          "/root/diffspec-results-20261030/eval/long-output/start-03/diffspec/context-32768-output-8192"
+        ]
+      },
+      "output_equivalence": {
+        "versus_target_only": {
+          "requests": 12,
+          "exact_matches": 0
+        },
+        "same_role_across_starts": {
+          "requests": 8,
+          "exact_matches": 0
+        }
+      },
+      "median_speedup_vs_target_only": 1.7152936886307113,
+      "median_speedup_vs_eagle3": 1.4805121626847526
+    }
+  ],
+  "quality": {
+    "native": {
+      "requests": 60,
+      "corrupted_requests": 0,
+      "correct": 60,
+      "length_capped": 0,
+      "startup_attempts": 6,
+      "startup_failures": 0
+    },
+    "eagle": {
+      "requests": 60,
+      "corrupted_requests": 0,
+      "correct": 60,
+      "length_capped": 0,
+      "startup_attempts": 6,
+      "startup_failures": 0
+    },
+    "diffspec": {
+      "requests": 60,
+      "corrupted_requests": 0,
+      "correct": 60,
+      "length_capped": 0,
+      "startup_attempts": 6,
+      "startup_failures": 0
+    }
+  },
+  "quality_by_cohort": {
+    "contexts": {
+      "native": {
+        "correct": 30,
+        "requests": 30,
+        "length_capped": 0,
+        "corrupted_requests": 0,
+        "startup_attempts": 3,
+        "startup_failures": 0
+      },
+      "eagle": {
+        "correct": 30,
+        "requests": 30,
+        "length_capped": 0,
+        "corrupted_requests": 0,
+        "startup_attempts": 3,
+        "startup_failures": 0
+      },
+      "diffspec": {
+        "correct": 30,
+        "requests": 30,
+        "length_capped": 0,
+        "corrupted_requests": 0,
+        "startup_attempts": 3,
+        "startup_failures": 0
+      }
+    },
+    "long_output": {
+      "native": {
+        "correct": 30,
+        "requests": 30,
+        "length_capped": 0,
+        "corrupted_requests": 0,
+        "startup_attempts": 3,
+        "startup_failures": 0
+      },
+      "eagle": {
+        "correct": 30,
+        "requests": 30,
+        "length_capped": 0,
+        "corrupted_requests": 0,
+        "startup_attempts": 3,
+        "startup_failures": 0
+      },
+      "diffspec": {
+        "correct": 30,
+        "requests": 30,
+        "length_capped": 0,
+        "corrupted_requests": 0,
+        "startup_attempts": 3,
+        "startup_failures": 0
+      }
+    }
+  },
+  "sources": [
+    {
+      "directory": "/root/diffspec-fusion-eval-20261030/formal",
+      "role_mapping": {
+        "native": "native",
+        "eagle": "eagle",
+        "diffspec": "diffspec_current"
+      },
+      "attempts": {
+        "native": [
+          {
+            "label": "formal/start-01/native",
+            "exit_code": 0,
+            "started_epoch": 1793337481.9574928,
+            "finished_epoch": 1793338256.8421116
+          },
+          {
+            "label": "formal/start-02/native",
+            "exit_code": 0,
+            "started_epoch": 1793339558.9257708,
+            "finished_epoch": 1793340324.3585904
+          },
+          {
+            "label": "formal/start-03/native",
+            "exit_code": 0,
+            "started_epoch": 1793343860.623776,
+            "finished_epoch": 1793344606.5058045
+          }
+        ],
+        "eagle": [
+          {
+            "label": "formal/start-01/eagle",
+            "exit_code": 0,
+            "started_epoch": 1793338256.8430047,
+            "finished_epoch": 1793338931.3080077
+          },
+          {
+            "label": "formal/start-02/eagle",
+            "exit_code": 0,
+            "started_epoch": 1793340324.359484,
+            "finished_epoch": 1793340934.549976
+          },
+          {
+            "label": "formal/start-03/eagle",
+            "exit_code": 0,
+            "started_epoch": 1793342073.8193564,
+            "finished_epoch": 1793342690.298989
+          }
+        ],
+        "diffspec": [
+          {
+            "label": "formal/start-01/diffspec_current",
+            "exit_code": 0,
+            "started_epoch": 1793336859.970252,
+            "finished_epoch": 1793337481.956632
+          },
+          {
+            "label": "formal/start-02/diffspec_current",
+            "exit_code": 0,
+            "started_epoch": 1793341513.4099085,
+            "finished_epoch": 1793342073.818523
+          },
+          {
+            "label": "formal/start-03/diffspec_current",
+            "exit_code": 0,
+            "started_epoch": 1793343279.1727247,
+            "finished_epoch": 1793343860.6228204
+          }
+        ]
+      },
+      "files": {
+        "plan.json": {
+          "path": "/root/diffspec-fusion-eval-20261030/formal/plan.json",
+          "sha256": "c32946cbe7e9960956485d002b9d3857add6fd1dc2683a1050b847caec8a38ea"
+        },
+        "verification.json": {
+          "path": "/root/diffspec-fusion-eval-20261030/formal/verification.json",
+          "sha256": "88c0be1a30da56b94cd101c91df6ba54b95510a2dbf73fd1cfd1a74895ba04e2"
+        },
+        "aggregate-results.json": {
+          "path": "/root/diffspec-fusion-eval-20261030/formal/aggregate-results.json",
+          "sha256": "1dc20561fe0c8f9f43f9b8b64d4cb5e5195ead858a4f4c9e00da0136e1a56c5d"
+        }
+      },
+      "selected_runs": [
+        {
+          "role_id": "native",
+          "round": 1,
+          "path": "/root/diffspec-fusion-eval-20261030/formal/start-01/native"
+        },
+        {
+          "role_id": "native",
+          "round": 2,
+          "path": "/root/diffspec-fusion-eval-20261030/formal/start-02/native"
+        },
+        {
+          "role_id": "native",
+          "round": 3,
+          "path": "/root/diffspec-fusion-eval-20261030/formal/start-03/native"
+        },
+        {
+          "role_id": "eagle",
+          "round": 1,
+          "path": "/root/diffspec-fusion-eval-20261030/formal/start-01/eagle"
+        },
+        {
+          "role_id": "eagle",
+          "round": 2,
+          "path": "/root/diffspec-fusion-eval-20261030/formal/start-02/eagle"
+        },
+        {
+          "role_id": "eagle",
+          "round": 3,
+          "path": "/root/diffspec-fusion-eval-20261030/formal/start-03/eagle"
+        },
+        {
+          "role_id": "diffspec",
+          "round": 1,
+          "path": "/root/diffspec-fusion-eval-20261030/formal/start-01/diffspec_current"
+        },
+        {
+          "role_id": "diffspec",
+          "round": 2,
+          "path": "/root/diffspec-fusion-eval-20261030/formal/start-02/diffspec_current"
+        },
+        {
+          "role_id": "diffspec",
+          "round": 3,
+          "path": "/root/diffspec-fusion-eval-20261030/formal/start-03/diffspec_current"
+        }
+      ]
+    },
+    {
+      "directory": "/root/diffspec-results-20261030/eval/long-output",
+      "role_mapping": {
+        "native": "native",
+        "eagle": "eagle",
+        "diffspec": "diffspec"
+      },
+      "attempts": {
+        "native": [
+          {
+            "label": "long-output/start-01/native",
+            "exit_code": 0,
+            "started_epoch": 1793346459.8570356,
+            "finished_epoch": 1793347367.7953591
+          },
+          {
+            "label": "long-output/start-02/native",
+            "exit_code": 0,
+            "started_epoch": 1793350392.0146,
+            "finished_epoch": 1793351284.7400784
+          },
+          {
+            "label": "long-output/start-03/native",
+            "exit_code": 0,
+            "started_epoch": 1793351932.2848792,
+            "finished_epoch": 1793352800.5433671
+          }
+        ],
+        "eagle": [
+          {
+            "label": "long-output/start-01/eagle",
+            "exit_code": 0,
+            "started_epoch": 1793347367.796173,
+            "finished_epoch": 1793348245.9825156
+          },
+          {
+            "label": "long-output/start-02/eagle",
+            "exit_code": 0,
+            "started_epoch": 1793348951.3118665,
+            "finished_epoch": 1793349739.9665537
+          },
+          {
+            "label": "long-output/start-03/eagle",
+            "exit_code": 0,
+            "started_epoch": 1793352800.5442743,
+            "finished_epoch": 1793353606.8311768
+          }
+        ],
+        "diffspec": [
+          {
+            "label": "long-output/start-01/diffspec",
+            "exit_code": 0,
+            "started_epoch": 1793348245.9832864,
+            "finished_epoch": 1793348951.3110619
+          },
+          {
+            "label": "long-output/start-02/diffspec",
+            "exit_code": 0,
+            "started_epoch": 1793349739.967397,
+            "finished_epoch": 1793350392.013537
+          },
+          {
+            "label": "long-output/start-03/diffspec",
+            "exit_code": 0,
+            "started_epoch": 1793351284.7466595,
+            "finished_epoch": 1793351932.284015
+          }
+        ]
+      },
+      "files": {
+        "plan.json": {
+          "path": "/root/diffspec-results-20261030/eval/long-output/plan.json",
+          "sha256": "57292861af560ee5d9c394d505095414e6cc287b4bfd1ba1665d3af990d87d46"
+        },
+        "verification.json": {
+          "path": "/root/diffspec-results-20261030/eval/long-output/verification.json",
+          "sha256": "221f94d8d5cbd842ed80a4d572a85e1d9cfbe0ad753d4db2e9e52a2e0237264b"
+        },
+        "aggregate-results.json": {
+          "path": "/root/diffspec-results-20261030/eval/long-output/aggregate-results.json",
+          "sha256": "5a28a10b5c528025eb17a934b4fdacdaa35fc89503fd2ea29bd927ffdc44a74c"
+        }
+      },
+      "selected_runs": [
+        {
+          "role_id": "native",
+          "round": 1,
+          "path": "/root/diffspec-results-20261030/eval/long-output/start-01/native"
+        },
+        {
+          "role_id": "native",
+          "round": 2,
+          "path": "/root/diffspec-results-20261030/eval/long-output/start-02/native"
+        },
+        {
+          "role_id": "native",
+          "round": 3,
+          "path": "/root/diffspec-results-20261030/eval/long-output/start-03/native"
+        },
+        {
+          "role_id": "eagle",
+          "round": 1,
+          "path": "/root/diffspec-results-20261030/eval/long-output/start-01/eagle"
+        },
+        {
+          "role_id": "eagle",
+          "round": 2,
+          "path": "/root/diffspec-results-20261030/eval/long-output/start-02/eagle"
+        },
+        {
+          "role_id": "eagle",
+          "round": 3,
+          "path": "/root/diffspec-results-20261030/eval/long-output/start-03/eagle"
+        },
+        {
+          "role_id": "diffspec",
+          "round": 1,
+          "path": "/root/diffspec-results-20261030/eval/long-output/start-01/diffspec"
+        },
+        {
+          "role_id": "diffspec",
+          "round": 2,
+          "path": "/root/diffspec-results-20261030/eval/long-output/start-02/diffspec"
+        },
+        {
+          "role_id": "diffspec",
+          "round": 3,
+          "path": "/root/diffspec-results-20261030/eval/long-output/start-03/diffspec"
+        }
+      ]
+    }
+  ],
+  "limits": {
+    "full_accuracy_evaluation": false,
+    "losslessness_proven": false,
+    "request_p99_samples_per_cell": 12,
+    "serving_benchmark": false
+  }
+}

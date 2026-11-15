@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/root/diffspec-experiments/environments/diffspec-moe-venv/bin/python",
+    "/root/diffspec-experiments/runs/tech-outcomes-20261115-diffspec/attempt02/model_smoke.py"
+  ],
+  "environment": {
+    "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/root/diffspec-experiments/source-snapshots/diffspec-runtime-core-kvgroup-20261029:/root/diffspec-experiments/source-snapshots/diffspec-runtime-ascend-moe-20261030:/root/diffspec-experiments/runs/tech-outcomes-20261115-diffspec/attempt02/source:/root/diffspec-experiments/runs/tech-outcomes-20261115-diffspec/attempt02",
+    "VLLM_PLUGINS": "ascend,diffspec",
+    "ASCEND_RT_VISIBLE_DEVICES": "0,1,2,3",
+    "VLLM_CACHE_ROOT": "/root/diffspec-experiments/runs/tech-outcomes-20261115-diffspec/attempt02/cache",
+    "ASCEND_CUSTOM_OPP_PATH": "/vllm-workspace/vllm-ascend/vllm_ascend/_cann_ops_custom/vendors/custom_transformer",
+    "LD_PRELOAD": "/vllm-workspace/vllm-ascend/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_api/lib/libcust_opapi.so"
+  }
+}

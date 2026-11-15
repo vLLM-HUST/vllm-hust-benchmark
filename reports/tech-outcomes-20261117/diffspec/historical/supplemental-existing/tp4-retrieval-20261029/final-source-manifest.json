@@ -1,0 +1,31 @@
+{
+  "worktree": "/root/diffspec-final-fix-20261029",
+  "branch": "fix/linear-retrieval-safe-depth-20261029",
+  "base_commit": "1294c95b6d9b2d9cbed0d0cffe31202fe5a6a254",
+  "source_files": {
+    ".vllm-hust/optimization.json": "b9e8aa3c3b63a18383bba3c347f52fa792390240717f8b7d93a34bb710dbf3e2",
+    "README.md": "4a57de5b2a0264aa3b3b38f2fa9a2b430cc13f277ee96b0528e0dd9d1c2b783e",
+    "benchmarks/diffspec_linear_model_smoke.py": "a8c2037de2c48f3783ce76dd8385031a8c5b5bf91811ea55a33c3801b8373993",
+    "benchmarks/diffspec_rope_graph_probe.py": "db8f55ec69f55617b2094a9140bf83b66fd24c06d8d1533dd1d7dcd7e27308ab",
+    "benchmarks/diffspec_tp_retrieval_probe.py": "c62261869f4440b4a2ee2f92d99a33cb5f4c85429683a20be7ecfc6dcf9b0e77",
+    "diffspec/config.py": "aab4a3d5a4e04c1ec1c2e742c285b55619b009f963ac5f55b3a8de4691e86d34",
+    "diffspec/kernels.py": "48f0d7e17fc4f87e42095c39095f0c8a2fdf3468db825e7abbe29667294d8b92",
+    "diffspec/manifests/vllm-hust-extension-v0.3.json": "0d5a269ca37902a92d953da8173526f09beb5e89dbc535313aae57ab923fa604",
+    "diffspec/proposer.py": "d2b4c0ea96dc3361db9fc5ccf72c385f25028d505c393c3d02156b814f5568b1",
+    "diffspec/runtime.py": "95279e50ed195a8fc053c30748c5f6cb7b6e41d9633fbade7ee77754cf84ecf2",
+    "diffspec/vllm_patch.py": "2ec133f5763c17441ceba95c413050d9996deb7734ddeb6eecc19d9b458ed34e",
+    "tests/test_config.py": "eaa0b57e22b8a48946210c4117488c3d0eafccb0e36050129d3301500f5d87a9",
+    "tests/test_extension_package.py": "febfd07fe8fdcd1d2bbfb60bb96f4034d9e607900f0759f117029b87fc42e7b9",
+    "tests/test_kv_graph_replay.py": "5133af212b52b7ec67682dff8be98cfe51af90a6b5db0d254a8afc3432f86854",
+    "tests/test_linear_attention_batch_npu.py": "c68e31ca9f5a13b33b5cdff16adce485f9ec7150a665c49e380147151ed671e2",
+    "tests/test_linear_cost_policy.py": "351974bde48d382230ad5e1911fd3fdbaf5046048b28e80a63920295c23d11d2",
+    "tests/test_retrieval_dynamic_npu.py": "8654fc91b6ae59b0a1adc959de4e4ef6c7f735547699af8d87c17ba8dfdef062",
+    "tests/test_retrieval_npu.py": "f8024e92589f1bafc417608db3668d42536de1c6fe024c928d09fb5e243c0f3f",
+    "tests/test_runtime.py": "d947c9c8fe1c066c7b14f6b12cb0d4c38fe0e0abcbfc6707511082fe3906498e",
+    "tests/test_sage_mate_contract.py": "7c5f1ebe2a6d1b4b6a733ec11b5da3ea4e3d5c3827319facf76ad49e76c50e20"
+  },
+  "default_adaptive_profile": false,
+  "policy": "Fixed configured depth by default; measured cost controller opt-in after shrinking-batch throughput regression. Retrieval independent of adaptive profile.",
+  "runtime": "gdn-adaptive-runtime-manifest.json",
+  "regression": "final-safe-tests.log (checked by launch controller; requires113 passed)"
+}
