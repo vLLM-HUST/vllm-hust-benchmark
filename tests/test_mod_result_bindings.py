@@ -17,6 +17,9 @@ def load(name):
 def test_result_bindings_are_complete_and_schema_valid():
     evidence = load("mod-test-evidence.json")
     bindings = load("mod-result-bindings.json")
+    jsonschema.validate(evidence, load("schemas/mod_test_evidence_v1.schema.json"))
+    if evidence["scope"].get("website_report") is False:
+        assert all(not evidence[key] for key in ("integration_records", "combination_effects", "negative_results"))
     schema = load("schemas/mod_result_bindings_v1.schema.json")
     jsonschema.validate(bindings, schema)
 

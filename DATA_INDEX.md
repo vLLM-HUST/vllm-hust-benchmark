@@ -54,8 +54,8 @@ Archive 与 reports 内也可能同时包含代码、报告和原始数据；上
 provenance。涉及原件订正时保留旧字节及说明， 不要仅重新计算 SHA256 来掩盖内容改变。
 
 GenNova 与 GenNova Autotune 产品级独立结果已迁往
-[GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)。本仓库另保留历史
-`inference-engine-project` 的 [MOD 证据固定快照](reports/gennova-mod-evidence-20261105/README.md)，仅用于发现和审计。
+[GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)。历史 MOD 索引的维护入口见
+[迁移记录](reports/gennova-mod-evidence-20261105/README.md)。
 旧网站采集快照中的已迁移引用标记为 `relocated-to-external-repository`，并给出新仓库固定版本入口；它不是本仓库中的产品结果副本，也不是当前公开网站可访问性的证明。
 
 ## 常用问题入口
@@ -66,10 +66,6 @@ GenNova 与 GenNova Autotune 产品级独立结果已迁往
 - **项目最终目标与里程碑区别：** [最终目标及已确认解释](reports/project-final-goals-20261113/README.md)，
   列出90%同工况参考、吞吐2×/时延20%、32K及成本30%/多租户四项最终要求；
   [本轮双阶段判定](reports/five-datasets-standard-20261113/README.md)不复用里程碑通过标记来代替最终验收。
-
-- **GenNova MOD 单项、组合与负结果：** [2026-11-05 固定快照](reports/gennova-mod-evidence-20261105/README.md)整理
-  107 个结果入口、55 项接入记录、 29 项组合影响和 90 项带重开条件的负结果。沿 manifest 的固定提交链接回到源证据；局部加速、有限配对和组合结果
-  不自动成为正式榜单成绩，也不发布到网站。
 
 - **PyramidKV Qwen3.5 缩池对照：**
   [TP2/C128，请求 456,704、实际 457,113 槽位](reports/pyramidkv-qwen35-pool456704-20261104/README.md)，单轮开关测量；保留
