@@ -5,7 +5,8 @@
 
 ## DiffSpec 本轮补证（2026-11-15）
 
-[合并版功能回归与历史原生 Eagle3 配对](reports/tech-outcomes-20261117/diffspec/README.md)：固定 #11 的两真实请求加受控 dummy、拒绝后缀和四 rank 一致性记录；35B 加速数字仍归属于 10 月 30 日冻结实现。
+[合并版功能回归与历史原生 Eagle3 配对](reports/tech-outcomes-20261117/diffspec/README.md)：固定 #11 的两真实请求加受控
+dummy、拒绝后缀和四 rank 一致性记录；35B 加速数字仍归属于 10 月 30 日冻结实现。
 
 ## MuxPD 成果补证（2026-11-14）
 
