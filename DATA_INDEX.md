@@ -3,6 +3,10 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## PegaFlow 历史实验原件补充归档（2026-11-15）
+
+[日志与数值诊断原件、归档规则和下载核验](reports/pegaflow-original-evidence-20261115/README.md)：补充保管资源采样、调度轨迹、配置、失败记录与原生 APC 张量。大包位于 GitHub Release，成员身份、SHA256 和公开下载回验独立保留，不产生新性能结论。
+
 ## MuxPD 成果补证（2026-11-14）
 
 [TP8 历史争用与 wl38 默认模式报告](reports/tech-outcomes-20261117/muxpd/README.md)： 复核 TP8 出词间隔改善及首 token
