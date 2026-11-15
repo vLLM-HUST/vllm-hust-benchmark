@@ -2470,8 +2470,8 @@
       "maturity": "incubating",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
       "upstream_repository": null,
-      "summary_en": "Arrival-time KV materialization MOD for full reuse, block-aligned partial reuse and recomputation. A unified Qwen3.5 plugin artifact exercised real scheduler decisions; the separate Qwen2.5-7B-Instruct M2 controller study remains a negative mechanism boundary.",
-      "summary_zh": "面向请求到达时刻完整复用、块对齐部分复用与重计算的 KV 物化 MOD。统一 Qwen3.5 插件制品已执行真实 scheduler 决策；独立的 Qwen2.5-7B-Instruct M2 controller 研究仍保留为负向机制边界。",
+      "summary_en": "Arrival-time KV materialization MOD for full reuse, block-aligned partial reuse and recomputation. A unified Qwen3.5 plugin artifact exercised real scheduler decisions; the separate Qwen2.5-7B-Instruct M2 controller study remains a negative mechanism boundary. The frozen B1 r6 profile pins vllm-kv-materialization 0.1.0 to per-request recomputation.",
+      "summary_zh": "面向请求到达时刻完整复用、块对齐部分复用与重计算的 KV 物化 MOD。统一 Qwen3.5 插件制品已执行真实 scheduler 决策；独立的 Qwen2.5-7B-Instruct M2 controller 研究仍保留为负向机制边界。B1 r6 冻结组合使用 vllm-kv-materialization 0.1.0 的逐请求重算策略。",
       "public_effect_en": "The unified Qwen3.5 five-point observation is +7.13% geometric mean versus its exact Native series, with recompute and reuse actions exercised. The separate Qwen2.5 M2 study did not beat the best fixed policy; neither result transfers to the other protocol.",
       "public_effect_zh": "统一 Qwen3.5 五点观察相对精确 Native 序列的几何平均变化为 +7.13%，且真实执行了 recompute 与 reuse。独立的 Qwen2.5 M2 研究未优于最佳固定策略；两项结果不得跨协议转移。",
       "public_effect_status": "measured",
@@ -2601,8 +2601,8 @@
       "repository_visibility": "private",
       "upstream_repository": null,
       "documentation_url": "./betterscale.html",
-      "summary_en": "Less host waiting. More device execution. BetterScale publishes separate bounded observations for DeepSeek V4 Flash and a Qwen3.5 TP2 small-fish prototype; their models, runtimes and protocols are not pooled.",
-      "summary_zh": "让设备少等调度，多做推理。BetterScale 分别公开 DeepSeek V4 Flash 与 Qwen3.5 TP2 small-fish 原型的有限观察；两者的模型、运行时与协议不会合并。",
+      "summary_en": "Less host waiting. More device execution. BetterScale publishes separate bounded observations for DeepSeek V4 Flash and a Qwen3.5 TP2 small-fish prototype; their models, runtimes and protocols are not pooled. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36.",
+      "summary_zh": "让设备少等调度，多做推理。BetterScale 分别公开 DeepSeek V4 Flash 与 Qwen3.5 TP2 small-fish 原型的有限观察；两者的模型、运行时与协议不会合并。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。",
       "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim.",
       "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。",
       "public_effect_status": "measured",
@@ -3817,8 +3817,8 @@
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-prefill-microflow",
       "repository_visibility": "public",
       "upstream_repository": null,
-      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification.",
-      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。",
+      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification. The frozen B1 r6 profile enables the school028 GDN and FlashAttention path from 0.1.0.dev0.",
+      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。B1 r6 冻结组合启用了 0.1.0.dev0 的 school028 GDN 与 FlashAttention 路径。",
       "compatibility": {
         "status": "experimental",
         "host": "Pinned BetterScale shared host on vLLM-HUST + vllm-ascend-hust",
@@ -4026,6 +4026,61 @@
         "requirements_en": "Explicit mount into a dedicated pinned SGLang checkout, native rebuild and ENABLE=1 in every worker. Exact source/runtime/schema checks; startup kill switch wins. Only 28 FIA records and one live actual_seq_lengths_kv update. Stop workers and unmount to restore exact source bytes. Not a vLLM Extension Manager bundle.",
         "requirements_zh": "在独立的固定版本 SGLang 源码副本中显式 mount，重建 native 扩展，并向每个 worker 传入 ENABLE=1；校验源码、运行时及 schema，启动时 kill switch 优先。仅支持 28 条 FIA 记录和单组实时 actual_seq_lengths_kv 更新；停止 worker 后 unmount 精确恢复源文件。不是 vLLM Extension Manager bundle。"
       }
+    },
+    {
+      "id": "hust-m01-correction",
+      "name": "M01 State Correction",
+      "name_en": "M01 State Correction",
+      "name_zh": "M01 状态校正",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "repository_visibility": "private",
+      "documentation_url": "./data/five-datasets-r6-20261114/frozen-combination-v1.json",
+      "evidence_level": "integration_tested",
+      "system_role": "kv_state_manager",
+      "integration_surfaces": [
+        "vllm.general_plugins / hust_m01_correction",
+        "corrected_serving_runtime.CorrectedWorker"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "summary_en": "The frozen B1 r6 composition restores hust-m01-correction 1.0 for request-state correction and live snapshot checks in CorrectedWorker. Qualification is scoped to the combined engine.",
+      "summary_zh": "B1 r6 冻结组合包含 hust-m01-correction 1.0，由 CorrectedWorker 执行请求状态校正与活动快照校验。验证范围为整套引擎。"
+    },
+    {
+      "id": "hust-joint-packed",
+      "name": "Packed Pinned-Host State",
+      "name_en": "Packed Pinned-Host State",
+      "name_zh": "锁页状态合并分配",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "repository_visibility": "private",
+      "documentation_url": "./data/five-datasets-r6-20261114/frozen-combination-v1.json",
+      "evidence_level": "integration_tested",
+      "system_role": "kv_state_manager",
+      "integration_surfaces": [
+        "vllm.general_plugins / hust_joint_packed",
+        "B1 r6 per-object / per-dtype host-state allocation"
+      ],
+      "execution_planes": [
+        "worker",
+        "native"
+      ],
+      "summary_en": "The frozen B1 r6 composition restores hust-joint-packed 1.0 to pack pinned host state per object and dtype, within a 4 GiB per-rank host-state budget. Qualification is scoped to the combined engine.",
+      "summary_zh": "B1 r6 冻结组合包含 hust-joint-packed 1.0，在每 rank 4 GiB 主机状态预算内，按对象及 dtype 合并锁页状态分配。验证范围为整套引擎。"
     }
   ]
 }
