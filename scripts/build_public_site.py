@@ -184,6 +184,13 @@ PUBLIC_MOD_PREVIEWS = {
             "repository_visibility": "private",
             "summary_en": "Inference timeline analysis with scheduler-step attribution. Its analysis functions have been demonstrated on Ascend.",
             "summary_zh": "推理时间线分析工具，可把 profiler 事件关联到调度步骤。已有昇腾上的分析功能验证。",
+            "system_role": "profiling_analysis",
+            "execution_planes": ["scheduler", "worker", "offline"],
+            "deployment_topology": "mixed",
+            "delivery_model": "python_distribution",
+            "ownership": "hust_owned_subsystem",
+            "repository_relationship": "organization_native",
+            "evidence_level": "hardware_verified",
         },
         "taxonomy": {
             "kind": "tool_mod",
@@ -206,6 +213,13 @@ PUBLIC_MOD_PREVIEWS = {
             "repository_visibility": "private",
             "summary_en": "MoE expert weight offloading. Functional validation covers one Ascend NPU in TP1 PIECEWISE mode. Historical TP4 throughput regressed.",
             "summary_zh": "MoE 专家权重卸载。功能验证限于昇腾单卡 TP1 PIECEWISE，历史 TP4 吞吐对照有回退。",
+            "system_role": "operator_runtime",
+            "execution_planes": ["worker", "native", "device"],
+            "deployment_topology": "in_process",
+            "delivery_model": "plugin_bundle",
+            "ownership": "hust_owned_subsystem",
+            "repository_relationship": "organization_native",
+            "evidence_level": "hardware_verified",
         },
         "taxonomy": {
             "kind": "runtime_mod",
@@ -228,6 +242,13 @@ PUBLIC_MOD_PREVIEWS = {
             "repository_visibility": "private",
             "summary_en": "Lifecycle event observer for long conversations. Validation covers Bundle packaging and enablement intent.",
             "summary_zh": "长会话生命周期事件观察组件。目前验证范围为 Bundle 打包和启用意图。",
+            "system_role": "lifecycle_control_plane",
+            "execution_planes": ["scheduler", "control_plane"],
+            "deployment_topology": "mixed",
+            "delivery_model": "plugin_bundle",
+            "ownership": "original_contributor_maintained",
+            "repository_relationship": "organization_native",
+            "evidence_level": "cpu_smoke",
         },
         "taxonomy": {
             "kind": "control_plane",
@@ -251,6 +272,13 @@ PUBLIC_MOD_PREVIEWS = {
             "summary_en": "Adaptive KV-cache quantization research on Ascend. Installation, discovery, and inspection work. Runtime activation awaits host-interface qualification.",
             "summary_zh": "昇腾 KV 缓存自适应量化研究。目前可安装、发现和检查，运行时启用待宿主接口验证。",
             "compatibility": {"status": "inspect_only"},
+            "system_role": "kv_quantization_research",
+            "execution_planes": ["worker", "device"],
+            "deployment_topology": "in_process",
+            "delivery_model": "python_distribution",
+            "ownership": "hust_owned_subsystem",
+            "repository_relationship": "organization_native",
+            "evidence_level": "cpu_smoke",
         },
         "taxonomy": {
             "kind": "runtime_mod",
@@ -273,6 +301,13 @@ PUBLIC_MOD_PREVIEWS = {
             "repository_visibility": "private",
             "summary_en": "Length-aware admission and preemption research. A known-output-budget experiment exercised admission checks and recorded zero deferrals or preemptions.",
             "summary_zh": "输出长度感知的请求准入与抢占研究。已测版本使用已知输出预算，观测到准入检查，延后和抢占均未触发。",
+            "system_role": "scheduler_policy",
+            "execution_planes": ["scheduler"],
+            "deployment_topology": "in_process",
+            "delivery_model": "plugin_bundle",
+            "ownership": "hust_owned_subsystem",
+            "repository_relationship": "organization_native",
+            "evidence_level": "performance_verified",
         },
         "taxonomy": {
             "kind": "runtime_mod",
@@ -297,6 +332,12 @@ PUBLIC_MOD_PREVIEWS = {
             "summary_zh": "由 Qixin-Gaoke 维护的外部 MOD。历史测试验证了启用和回退，测试窗口中前缀缓存命中为零。",
             "canonical_repository": "https://github.com/Qixin-Gaoke/stateaxis-automatic-prefix-cache",
             "repository_relationship": "external_reference",
+            "system_role": "prefix_cache_policy",
+            "execution_planes": ["scheduler", "worker"],
+            "deployment_topology": "in_process",
+            "delivery_model": "python_distribution",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "runtime_activation_verified_performance_unqualified",
         },
         "taxonomy": {
             "kind": "runtime_mod",
@@ -321,6 +362,12 @@ PUBLIC_MOD_PREVIEWS = {
             "summary_zh": "由 Qixin-Gaoke 维护的外部 MOD。历史组件测试验证了主机到设备的 KV 恢复与计算重叠，当前制品的在线收益待验证。",
             "canonical_repository": "https://github.com/Qixin-Gaoke/stateaxis-async-kv-transfer",
             "repository_relationship": "external_reference",
+            "system_role": "kv_transfer_overlap",
+            "execution_planes": ["worker", "device"],
+            "deployment_topology": "in_process",
+            "delivery_model": "python_distribution",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "runtime_activation_verified_historical_performance_only",
         },
         "taxonomy": {
             "kind": "runtime_mod",
@@ -345,6 +392,12 @@ PUBLIC_MOD_PREVIEWS = {
             "summary_zh": "由 Qixin-Gaoke 维护的外部 MOD。历史昇腾 TP2 诊断验证了部分启动阶段耗时改善，正式启用和稳态性能仍待验证。",
             "canonical_repository": "https://github.com/Qixin-Gaoke/stateaxis-pipelined-weight-loading",
             "repository_relationship": "external_reference",
+            "system_role": "model_weight_loading",
+            "execution_planes": ["worker", "native"],
+            "deployment_topology": "in_process",
+            "delivery_model": "python_distribution",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "hardware_startup_diagnostic",
         },
         "taxonomy": {
             "kind": "runtime_mod",
@@ -369,6 +422,11 @@ PUBLIC_MOD_PREVIEWS = {
             "summary_zh": "Qwen3.5 原生多词元预测的 CUDA 启用组件。已有 A6000 PP4/TP1 的有限启动与功能验证。",
             "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-cuda-mtp",
             "repository_relationship": "organization_native",
+            "system_role": "speculative_decoding",
+            "execution_planes": ["worker", "device"],
+            "delivery_model": "python_distribution",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "hardware_verified",
         },
         "taxonomy": {
             "kind": "runtime_mod",
@@ -393,6 +451,12 @@ PUBLIC_MOD_PREVIEWS = {
             "summary_zh": "采集昇腾计算图捕获的显存分配并导出 Perfetto 轨迹。实测覆盖单张 910B2 和有限捕获规格。",
             "maintainers": ["CubeLander"],
             "maintainer_profiles": [{"login": "CubeLander", "name": "田景远"}],
+            "system_role": "profiling_analysis",
+            "execution_planes": ["worker", "device"],
+            "delivery_model": "python_distribution",
+            "ownership": "original_contributor_maintained",
+            "repository_relationship": "organization_native",
+            "evidence_level": "hardware_verified",
         },
         "taxonomy": {
             "kind": "tool_mod",
@@ -420,6 +484,11 @@ PUBLIC_MOD_PREVIEWS = {
             "compatibility": {"status": "inspect_only"},
             "maintainers": ["CubeLander"],
             "maintainer_profiles": [{"login": "CubeLander", "name": "田景远"}],
+            "system_role": "kv_tiering",
+            "execution_planes": ["worker", "device"],
+            "delivery_model": "plugin_bundle",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "cpu_smoke",
         },
         "taxonomy": {
             "kind": "runtime_mod",
@@ -447,6 +516,11 @@ PUBLIC_MOD_PREVIEWS = {
             "compatibility": {"status": "inspect_only"},
             "maintainers": ["Tkhkrnx"],
             "maintainer_profiles": [{"login": "Tkhkrnx", "name": "彭浩然"}],
+            "system_role": "scheduler_policy",
+            "execution_planes": ["scheduler"],
+            "delivery_model": "source_toolkit",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "cpu_smoke",
         },
         "taxonomy": {
             "kind": "tool_mod",
@@ -456,6 +530,22 @@ PUBLIC_MOD_PREVIEWS = {
             "evidence": "host_integration_pending",
         },
     },
+}
+
+
+PUBLIC_PREVIEW_WORKLOADS = {
+    "traceloom": ["profiling_analysis"],
+    "latchmoe": ["moe", "memory_kv_pressure"],
+    "tricard-clm-lifecycle": ["lifecycle_control", "repeated_prefix_agent"],
+    "ascend-adaptive-quantized-kv": ["memory_kv_pressure"],
+    "dla": ["latency_slo"],
+    "stateaxis-automatic-prefix-cache": ["repeated_prefix_agent"],
+    "stateaxis-async-kv-transfer": ["memory_kv_pressure"],
+    "stateaxis-pipelined-weight-loading": ["service_cold_start"],
+    "cuda-mtp": ["decode_heavy"],
+    "memory-tracker": ["profiling_analysis"],
+    "ascend-mapped-kv-offload": ["memory_kv_pressure"],
+    "scheduler-policy-lab": ["latency_slo"],
 }
 
 
@@ -481,6 +571,8 @@ def publish_mod_previews(path, projected, original):
         projected["components"].update(
             {mod_id: entry["taxonomy"] for mod_id, entry in PUBLIC_MOD_PREVIEWS.items()}
         )
+    elif path == "data/plugin-workload-navigation.json":
+        projected["plugins"].update(PUBLIC_PREVIEW_WORKLOADS)
 
 
 def validate_mod_previews(path, data):
@@ -512,6 +604,9 @@ def validate_mod_previews(path, data):
     elif path == "data/mod-taxonomy.json":
         for mod_id, entry in PUBLIC_MOD_PREVIEWS.items():
             assert data["components"].pop(mod_id) == entry["taxonomy"], mod_id
+    elif path == "data/plugin-workload-navigation.json":
+        for mod_id, traits in PUBLIC_PREVIEW_WORKLOADS.items():
+            assert data["plugins"].pop(mod_id) == traits, mod_id
 
 
 def matches(value):
