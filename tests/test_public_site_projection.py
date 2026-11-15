@@ -176,15 +176,17 @@ def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
         projection.validate(output)
 
 
-
 def test_frozen_r6_mods_remain_public_after_projection(tmp_path):
     source = tmp_path / "source"
     data = source / "data"
     data.mkdir(parents=True)
     (source / "assets").mkdir()
     for filename in (
-        "index.html", "plugins.html", "dataset-introductions.html",
-        "leaderboard-runs.html", "assets/site.js",
+        "index.html",
+        "plugins.html",
+        "dataset-introductions.html",
+        "leaderboard-runs.html",
+        "assets/site.js",
     ):
         (source / filename).write_text("")
     source_data = MODULE.parents[1] / "website-publication" / "data"
@@ -206,7 +208,9 @@ def test_frozen_r6_mods_remain_public_after_projection(tmp_path):
     public = output / "data"
     registry = json.loads((public / "ecosystem.json").read_text(encoding="utf-8"))
     cards = {entry["id"]: entry for entry in registry["components"]}
-    classification = json.loads((public / "mod-taxonomy.json").read_text(encoding="utf-8"))
+    classification = json.loads(
+        (public / "mod-taxonomy.json").read_text(encoding="utf-8")
+    )
     expected = {
         "betterscale",
         "kv-materialization-arrival-control",
