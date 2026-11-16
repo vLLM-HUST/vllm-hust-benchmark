@@ -24,6 +24,10 @@ reviewer needs access to matching original bytes.
 - `study-metadata.json`: allowlisted configuration, client environment, and source hashes from the
   11 original experiment manifests; these are not backend runtime versions.
 
+- `run-summaries.json`: per-run aggregate metrics for seven ordinary-conversation studies, extracted
+  from existing report summaries and linked by source SHA-256. Each run covers at least six target
+  requests.
+
 - `SHA256SUMS`: hashes of the files in this publication.
 
 Before aggregation, each point's `result.json`, `requests.jsonl` and `routes.jsonl` was checked
