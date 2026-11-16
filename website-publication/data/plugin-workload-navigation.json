@@ -140,6 +140,10 @@
       "prefill_heavy",
       "decode_heavy"
     ],
+    "ascend-attention-boundary": [
+      "prefill_heavy",
+      "decode_heavy"
+    ],
     "core-attention-boundary": [
       "prefill_heavy",
       "decode_heavy"
@@ -211,6 +215,10 @@
       "lifecycle_control",
       "latency_slo"
     ],
+    "kv-controller": [
+      "repeated_prefix_agent",
+      "high_concurrency"
+    ],
     "request-throttling-controller": [
       "high_concurrency",
       "latency_slo",
@@ -267,6 +275,12 @@
     ],
     "sglang-prepared-dispatch": [
       "decode_heavy"
+    ],
+    "hust-m01-correction": [
+      "memory_kv_pressure"
+    ],
+    "hust-joint-packed": [
+      "memory_kv_pressure"
     ]
   }
 }

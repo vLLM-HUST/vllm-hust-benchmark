@@ -1,0 +1,172 @@
+{
+  "schema": "optimization-exploration-provenance/v1",
+  "report_date": "2026-11-15",
+  "source_repository": "vLLM-HUST/vllm-hust-engine",
+  "source_publication_commit": "a039ae0ea16296bc3367d31ea8630413b6ddd7c6",
+  "source_archive": {
+    "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/performance-exploration-20261115-r1/tradeoff-tuning-mod-v0.1.2.zip",
+    "sha256": "2ddfaa0280fd8be0b415b166ac41ff06950ecc32b7b6a6424f464297d489d9d6",
+    "bytes": 1211087,
+    "asset_id": 751568910,
+    "redownload_verified": true
+  },
+  "payloads": {
+    "tradeoff.json": {
+      "sha256": "660338aad600d2a25f80ca07ce41f0ed2c4aef9a0c8972a811c9f46e85133cfe",
+      "bytes": 57379
+    },
+    "tradeoff.svg": {
+      "sha256": "4efff3e4428c77ffb6820ec1a228c6544287d7a35d207e8a4aea672a4ac0f7d3",
+      "bytes": 179947
+    },
+    "all-trials.svg": {
+      "sha256": "2388dfc71c6d12ecc5985804ddf5c7216e5230a4d5cfbb9e506a2d9692a59039",
+      "bytes": 198950
+    },
+    "all-trials.csv": {
+      "sha256": "7e40eb9ed6f67a8be013cdc25119ff362f4ddef97ba0f3696ffe40d6d93b730c",
+      "bytes": 7662
+    }
+  },
+  "reference_identity": "OriginalND E09 is a historical B1-r6 internal control, not the official B0 arm",
+  "source_analyses": [
+    {
+      "path": "E02-capacity-v2/analyses/capacity-sealed4-v2.json",
+      "sha256": "3637a43c80ea4c2a8238ba311732380a555910d7370f131198feda21614248a4",
+      "trial_ids": [
+        "E02-01-E24",
+        "E02-02-E32",
+        "E02-03-E24",
+        "E02-04-E32"
+      ],
+      "schema": "vllm-hust-capacity-analysis/v2",
+      "protocol": "E02-mmlu200-execution24-vs32-20261115"
+    },
+    {
+      "path": "E04-padding-v4/analyses/padding-sealed4-v5.json",
+      "sha256": "ec756aad0aa2d51227586b461023b5c0459b0e36a29dd02d47af5dee2aedb84e",
+      "trial_ids": [
+        "E04-01-E24",
+        "E04-02-E26",
+        "E04-03-E24",
+        "E04-04-E26"
+      ],
+      "schema": "vllm-hust-padding-analysis/v5",
+      "protocol": "E04-mmlu200-execution24-vs26-20261115"
+    },
+    {
+      "path": "E05-state-policy-v5/analyses/policy-sealed2-v2.json",
+      "sha256": "65ad439fa56874fbddca4c435bfd79b3e6e6dd5dc8ef63b46aac0d8b761b7a0e",
+      "trial_ids": [
+        "E05-01-policy-on",
+        "E05-02-policy-off"
+      ],
+      "schema": "vllm-hust-state-policy-pilot-analysis/v2",
+      "protocol": "E05-cold-mmlu200-state-policy-pilot-20261115"
+    },
+    {
+      "path": "E06-native-overlap-v6/analyses/native-overlap-sealed2-v1.json",
+      "sha256": "c6f73b6592ddfefa17e9c5b112e73e7983d83d7d405c4331db99ddf6fdb4cc71",
+      "trial_ids": [
+        "E06-01-native-off",
+        "E06-02-native-on"
+      ],
+      "schema": "vllm-hust-native-overlap-pilot-analysis/v1",
+      "protocol": "E06-mmlu200-native-shared-expert-overlap-pilot-20261115"
+    },
+    {
+      "path": "E08-decode-capacity-v9/analyses/decode-sealed2-v1.json",
+      "sha256": "b97faea6a8db14e32d7a48bd9e1eab86e3a614811d63bc58b27c645c9fbb22eb",
+      "trial_ids": [
+        "E08-01-decode80",
+        "E08-02-decode72"
+      ],
+      "schema": "vllm-hust-decode-capacity-analysis/v1",
+      "protocol": "E08-mmlu200-decode-capacity72-pilot-20261115"
+    },
+    {
+      "path": "E09-weight-layout-v10/analyses/layout-sealed2-v1.json",
+      "sha256": "2e19d0f27a33fad2268c31b61951900779b745e29e34c9a8dc34db58edaebdb6",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E09-02-nz-mode2"
+      ],
+      "schema": "vllm-hust-native-weight-layout-analysis/v1",
+      "protocol": "E09-mmlu200-native-weight-nz2-pilot-20261115"
+    },
+    {
+      "path": "E11-nz-scalar-compat-v12/analyses/scalar-sealed1-v1.json",
+      "sha256": "5c9f93a0cf2a36859303e844963f220defb5ea9013e5cb1f906118b4e57e02ff",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E11-01-nz2-scalar-compat"
+      ],
+      "schema": "vllm-hust-nz-scalar-compat-analysis/v1",
+      "protocol": "E11-mmlu200-nz2-scalar-nd-compat-20261115"
+    },
+    {
+      "path": "E15-nz-gates-nd-v19/analyses/four-cell-sealed1-v2.json",
+      "sha256": "0da2239f229e7daf45a88d8d3c0a139abae8ecf9512264ac8f3033f6b659b09e",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E13-01-nz2-linear-compat",
+        "E14-01-nd-router-precast",
+        "E15-01-nz-gates-nd-no-cache"
+      ],
+      "schema": "vllm-hust-nz-layout-cache-four-cell-analysis/v1",
+      "protocol": "E15-mmlu200-nz-with-ND-scalar-router-no-precast-20261115"
+    },
+    {
+      "path": "E17-expert-nz-linear-nd-v21/analyses/expert-linear-sealed1-v1.json",
+      "sha256": "71d17ac02b1559bc8db2878526e8ab36e6d1bcc415f97ca734e1ff580f112c52",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E15-01-nz-gates-nd-no-cache",
+        "E17-01-expert-nz-linear-nd"
+      ],
+      "schema": "vllm-hust-expert-nz-linear-nd-analysis/v1",
+      "protocol": "E17-mmlu200-expert-NZ-ordinaryLinear-ND-20261115"
+    },
+    {
+      "path": "E18-joint-capacity-layout-overlap-v22/analyses/joint-sealed1-v1.json",
+      "sha256": "8b2b9cd6cfba448a47d51ac8ad78d5cd359094ba8ed2fa34a78b6d2b8a8ae379",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E17-01-expert-nz-linear-nd",
+        "E18-01-joint-E26-NZ-linearND-overlap"
+      ],
+      "schema": "vllm-hust-joint-policy-analysis/v1",
+      "protocol": "E18-joint-E26-expertNZ-linearND-nativeOverlap-20261115"
+    },
+    {
+      "path": "E19-E26-layout-overlap-off-v23/analyses/native-off-sealed1-v1.json",
+      "sha256": "f50768d916bec4c0b2317b47f1bca60e434de52b97fed7f3003e935ab10a612b",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E17-01-expert-nz-linear-nd",
+        "E18-01-joint-E26-NZ-linearND-overlap",
+        "E19-01-E26-NZ-linearND-native-off"
+      ],
+      "schema": "vllm-hust-native-off-ablation-analysis/v1",
+      "protocol": "E19-E26-selective-layout-native-off-20261115"
+    },
+    {
+      "path": "E20-capacity28-v24/analyses/capacity28-sealed1-v1.json",
+      "sha256": "6d219d7186197088508111f206d3246cc4fa761fa6fd1a1eaa9cea85e09d8bf2",
+      "trial_ids": [
+        "E09-01-nz-mode1",
+        "E20-01-E28-nativeND-off"
+      ],
+      "schema": "vllm-hust-native-capacity28-analysis/v1",
+      "protocol": "E20-MMLU200-capacity28-nativeND-nativeOff-20261115"
+    }
+  ],
+  "catalog_sha256": "3f2d4e58192eafffb2d5f1dd71543a4ce855a9bcacd12e0c768f37231fbb5d0f",
+  "hardware_inventory_sha256": "c53b9233258abaaac8304affa2786ef6d4ecc300e1d5b0df8be606f9e36f4ee8",
+  "scope": "Historical MMLU200 B1-internal exploration only. Each original native analyzer owns raw/input/clock/activation/compiler/cleanup admission. This export verifies projection/source identity and does not reexecute inference or revalidate private raw archives.",
+  "raw_access": "Native raw/source archives remain in the private Engine Release and require repository access; public files contain no request prompts, completions, gold answers or host paths.",
+  "quality_qualified": false,
+  "stability_qualified": false,
+  "formal_acceptance": false,
+  "candidate_promoted": false
+}

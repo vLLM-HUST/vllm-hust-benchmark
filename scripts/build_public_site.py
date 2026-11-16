@@ -59,6 +59,552 @@ PUBLIC_C16_RUN_IDS = frozenset(
     }
 )
 
+# The MOD card may show this historical service comparison. The separate
+# project page, raw artifacts, and all other BetterScale records stay filtered.
+BETTERSCALE_ID = "betterscale"
+BETTERSCALE_CARD = {
+    "id": BETTERSCALE_ID,
+    "name": "BetterScale",
+    "name_en": "BetterScale",
+    "name_zh": "BetterScale",
+    "artifact_type": "runtime_component",
+    "system_role": "graph_execution_policy",
+    "integration_contracts": [],
+    "execution_planes": ["worker", "native", "device"],
+    "deployment_topology": "in_process",
+    "delivery_model": "python_distribution",
+    "ownership": "hust_owned_subsystem",
+    "repository_relationship": "organization_native",
+    "repository_visibility": "private",
+    "maturity": "experimental",
+    "maintainers": ["CubeLander"],
+    "maintainer_profiles": [{"login": "CubeLander", "name": "田景远"}],
+    "summary_en": "Multi-device inference execution optimization for Ascend. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36.",
+    "summary_zh": "面向昇腾的多卡推理执行优化。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。",
+    "public_effect_status": "measured",
+    "public_effect_en": "Historical DeepSeek-V4-Flash HTTP test: output throughput rose 39.63% at DP8/C16 and 35.17% at TP8/C4 against their respective baselines.",
+    "public_effect_zh": "DeepSeek-V4-Flash 历史 HTTP 实测中，DP8／并发 16 和 TP8／并发 4 的输出吞吐分别较各自基线提高 39.63% 和 35.17%。",
+    "public_effect_detail_en": [
+        "2026-09-14 · DeepSeek-V4-Flash-0731 W8A8 on 8 × Ascend 910B2 (HCCS), vLLM 0.25.1 / vLLM-Ascend 0.25.1rc1, K5.",
+        "DP8, concurrency 16, 8 GiB KV/rank: 268.89 → 375.45 output tok/s (+39.63%), runs 158 → 155. The candidate included the DP startup preparation carried into 0.3.1.",
+        "TP8, concurrency 4, 12 GiB KV/rank: 155.13 → 209.68 output tok/s (+35.17%), runs 160 → 161. The baseline included the LCM startup compatibility fix.",
+        "Each comparison divides total output tokens by total timed duration across all nine synthetic HTTP rounds (three workloads, three repeats). Startup, the separately logged prelude and quality scoring were excluded. Each arm passed 32/32 retrieval questions. TP decode P99 chunk-gap worsened. These measurements do not establish maximum concurrency, SLO capacity, or performance of a newer wheel.",
+    ],
+    "public_effect_detail_zh": [
+        "2026-09-14 · DeepSeek-V4-Flash-0731 W8A8，8 张昇腾 910B2（HCCS），vLLM 0.25.1 / vLLM-Ascend 0.25.1rc1，K5。",
+        "DP8，并发 16，每 rank 8 GiB KV。原生基线 268.89 → 优化后 375.45 输出 token/s（+39.63%，run 158 → 155）。候选包含后续收录于 0.3.1 的 DP 启动预热。",
+        "TP8，并发 4，每 rank 12 GiB KV。含 LCM 启动兼容修复的基线 155.13 → 优化后 209.68 输出 token/s（+35.17%，run 160 → 161）。",
+        "各自按九组固定合成 HTTP 负载（三种负载，各三次）的输出 token 总数除以计时总长。启动、单独记录的预备阶段和质量评分不计时。各组检索 32/32，TP 解码 P99 输出块间隔变差。结果仅适用于上述实测工况，不能用于推断最大并发、SLO 容量或新版软件包性能。",
+    ],
+    "evidence_level": "hardware_verified",
+}
+BETTERSCALE_CATALOG_ENTRIES = {
+    "data/mod-taxonomy.json": {
+        "kind": "runtime_mod",
+        "capability": "execution_optimization",
+        "phases": ["prefill", "decode"],
+        "lifecycle": "implemented",
+        "evidence": "measured_beneficial",
+    },
+    "data/plugin-workload-navigation.json": ["distributed_pipeline"],
+}
+PUBLIC_ADVISOR_FIELDS = ("name_zh", "name_en", "relationship")
+
+
+def public_advisors(component):
+    return [
+        {key: advisor[key] for key in PUBLIC_ADVISOR_FIELDS}
+        for advisor in component.get("advisors", [])
+    ]
+
+
+def add_betterscale_card(path, projected, original):
+    if path == "data/ecosystem.json":
+        source = next(
+            (item for item in original["components"] if item["id"] == BETTERSCALE_ID),
+            None,
+        )
+        if source is not None:
+            card = copy.deepcopy(BETTERSCALE_CARD)
+            card["advisors"] = public_advisors(source)
+            projected["components"].append(card)
+    elif path in BETTERSCALE_CATALOG_ENTRIES:
+        key = (
+            "plugins"
+            if path == "data/plugin-workload-navigation.json"
+            else "components"
+        )
+        if BETTERSCALE_ID in original[key]:
+            projected[key][BETTERSCALE_ID] = copy.deepcopy(
+                BETTERSCALE_CATALOG_ENTRIES[path]
+            )
+
+
+def validate_betterscale_card(path, data):
+    if path == "data/ecosystem.json":
+        cards = [item for item in data["components"] if item["id"] == BETTERSCALE_ID]
+        assert len(cards) <= 1, path
+        if cards:
+            card = cards[0]
+            data["components"].remove(card)
+            advisors = card.pop("advisors")
+            assert isinstance(advisors, list), path
+            assert all(
+                isinstance(advisor, dict)
+                and set(advisor) == set(PUBLIC_ADVISOR_FIELDS)
+                and all(isinstance(value, str) and value for value in advisor.values())
+                for advisor in advisors
+            ), path
+            assert not matches(advisors), path
+            assert card == BETTERSCALE_CARD, path
+    elif path in BETTERSCALE_CATALOG_ENTRIES:
+        key = (
+            "plugins"
+            if path == "data/plugin-workload-navigation.json"
+            else "components"
+        )
+        if BETTERSCALE_ID in data[key]:
+            assert data[key].pop(BETTERSCALE_ID) == BETTERSCALE_CATALOG_ENTRIES[path], (
+                path
+            )
+
+
+# Explicit catalog-only scope for these MODs. Withdrawn pages and results retain their filters.
+PUBLIC_MOD_PREVIEWS = {
+    "traceloom": {
+        "card": {
+            "id": "traceloom",
+            "name": "TraceLoom",
+            "name_en": "TraceLoom",
+            "name_zh": "TraceLoom",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "private",
+            "summary_en": "Inference timeline analysis with scheduler-step attribution. Its analysis functions have been demonstrated on Ascend.",
+            "summary_zh": "推理时间线分析工具，可把 profiler 事件关联到调度步骤。已有昇腾上的分析功能验证。",
+            "system_role": "profiling_analysis",
+            "execution_planes": ["scheduler", "worker", "offline"],
+            "deployment_topology": "mixed",
+            "delivery_model": "python_distribution",
+            "ownership": "hust_owned_subsystem",
+            "repository_relationship": "organization_native",
+            "evidence_level": "hardware_verified",
+        },
+        "taxonomy": {
+            "kind": "tool_mod",
+            "capability": "observability_evaluation",
+            "phases": ["observability"],
+            "lifecycle": "implemented",
+            "evidence": "no_performance_claim",
+        },
+    },
+    "latchmoe": {
+        "card": {
+            "id": "latchmoe",
+            "name": "LatchMoE",
+            "name_en": "LatchMoE",
+            "name_zh": "LatchMoE",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "private",
+            "summary_en": "MoE expert weight offloading. Functional validation covers one Ascend NPU in TP1 PIECEWISE mode. Historical TP4 throughput regressed.",
+            "summary_zh": "MoE 专家权重卸载。功能验证限于昇腾单卡 TP1 PIECEWISE，历史 TP4 吞吐对照有回退。",
+            "system_role": "operator_runtime",
+            "execution_planes": ["worker", "native", "device"],
+            "deployment_topology": "in_process",
+            "delivery_model": "plugin_bundle",
+            "ownership": "hust_owned_subsystem",
+            "repository_relationship": "organization_native",
+            "evidence_level": "hardware_verified",
+        },
+        "taxonomy": {
+            "kind": "runtime_mod",
+            "capability": "operators_attention",
+            "phases": ["prefill", "decode"],
+            "lifecycle": "implemented_restricted",
+            "evidence": "qualified_restricted",
+        },
+    },
+    "tricard-clm-lifecycle": {
+        "card": {
+            "id": "tricard-clm-lifecycle",
+            "name": "Tricard CLM Lifecycle",
+            "name_en": "Tricard CLM Lifecycle",
+            "name_zh": "Tricard CLM 生命周期观察器",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "private",
+            "summary_en": "Lifecycle event observer for long conversations. Validation covers Bundle packaging and enablement intent.",
+            "summary_zh": "长会话生命周期事件观察组件。目前验证范围为 Bundle 打包和启用意图。",
+            "system_role": "lifecycle_control_plane",
+            "execution_planes": ["scheduler", "control_plane"],
+            "deployment_topology": "mixed",
+            "delivery_model": "plugin_bundle",
+            "ownership": "original_contributor_maintained",
+            "repository_relationship": "organization_native",
+            "evidence_level": "cpu_smoke",
+        },
+        "taxonomy": {
+            "kind": "control_plane",
+            "capability": "lifecycle_control",
+            "phases": ["service_lifecycle", "observability"],
+            "lifecycle": "implemented_restricted",
+            "evidence": "bridge_component",
+        },
+    },
+    "ascend-adaptive-quantized-kv": {
+        "card": {
+            "id": "ascend-adaptive-quantized-kv",
+            "name": "Adaptive Quantized KV",
+            "name_en": "Adaptive Quantized KV",
+            "name_zh": "自适应量化 KV",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "private",
+            "summary_en": "Adaptive KV-cache quantization research on Ascend. Installation, discovery, and inspection work. Runtime activation awaits host-interface qualification.",
+            "summary_zh": "昇腾 KV 缓存自适应量化研究。目前可安装、发现和检查，运行时启用待宿主接口验证。",
+            "compatibility": {"status": "inspect_only"},
+            "system_role": "kv_quantization_research",
+            "execution_planes": ["worker", "device"],
+            "deployment_topology": "in_process",
+            "delivery_model": "python_distribution",
+            "ownership": "hust_owned_subsystem",
+            "repository_relationship": "organization_native",
+            "evidence_level": "cpu_smoke",
+        },
+        "taxonomy": {
+            "kind": "runtime_mod",
+            "capability": "kv_management",
+            "phases": ["prefill", "decode", "state_lifecycle"],
+            "lifecycle": "pending",
+            "evidence": "activation_pending",
+        },
+    },
+    "dla": {
+        "card": {
+            "id": "dla",
+            "name": "DLA",
+            "name_en": "DLA",
+            "name_zh": "DLA 解码长度感知准入",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "private",
+            "summary_en": "Length-aware admission and preemption research. A known-output-budget experiment exercised admission checks and recorded zero deferrals or preemptions.",
+            "summary_zh": "输出长度感知的请求准入与抢占研究。已测版本使用已知输出预算，观测到准入检查，延后和抢占均未触发。",
+            "system_role": "scheduler_policy",
+            "execution_planes": ["scheduler"],
+            "deployment_topology": "in_process",
+            "delivery_model": "plugin_bundle",
+            "ownership": "hust_owned_subsystem",
+            "repository_relationship": "organization_native",
+            "evidence_level": "performance_verified",
+        },
+        "taxonomy": {
+            "kind": "runtime_mod",
+            "capability": "scheduling_routing",
+            "phases": ["request_admission"],
+            "lifecycle": "implemented_restricted",
+            "evidence": "measured_inconclusive",
+        },
+    },
+    "stateaxis-automatic-prefix-cache": {
+        "card": {
+            "id": "stateaxis-automatic-prefix-cache",
+            "name": "StateAxis Automatic Prefix Cache",
+            "name_en": "StateAxis Automatic Prefix Cache",
+            "name_zh": "StateAxis 自动前缀缓存",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "private",
+            "summary_en": "Historical testing verified activation and rollback, with zero prefix-cache hits in the measured window.",
+            "summary_zh": "历史测试验证了启用和回退，测试窗口中前缀缓存命中为零。",
+            "repository_relationship": "external_reference",
+            "system_role": "prefix_cache_policy",
+            "execution_planes": ["scheduler", "worker"],
+            "deployment_topology": "in_process",
+            "delivery_model": "python_distribution",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "runtime_activation_verified_performance_unqualified",
+        },
+        "taxonomy": {
+            "kind": "runtime_mod",
+            "capability": "kv_management",
+            "phases": ["prefill", "state_lifecycle"],
+            "lifecycle": "implemented_restricted",
+            "evidence": "runtime_effective_no_benefit_demonstrated",
+        },
+    },
+    "stateaxis-async-kv-transfer": {
+        "card": {
+            "id": "stateaxis-async-kv-transfer",
+            "name": "StateAxis Async KV Transfer",
+            "name_en": "StateAxis Async KV Transfer",
+            "name_zh": "StateAxis 异步 KV 传输",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "private",
+            "summary_en": "Historical component tests observed host-to-device KV restoration overlapping with compute. Online gains of the current artifact await validation.",
+            "summary_zh": "历史组件测试验证了主机到设备的 KV 恢复与计算重叠，当前制品的在线收益待验证。",
+            "repository_relationship": "external_reference",
+            "system_role": "kv_transfer_overlap",
+            "execution_planes": ["worker", "device"],
+            "deployment_topology": "in_process",
+            "delivery_model": "python_distribution",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "runtime_activation_verified_historical_performance_only",
+        },
+        "taxonomy": {
+            "kind": "runtime_mod",
+            "capability": "kv_management",
+            "phases": ["state_lifecycle"],
+            "lifecycle": "implemented_restricted",
+            "evidence": "historical_scoped_positive_current_unqualified",
+        },
+    },
+    "stateaxis-pipelined-weight-loading": {
+        "card": {
+            "id": "stateaxis-pipelined-weight-loading",
+            "name": "StateAxis Pipelined Weight Loading",
+            "name_en": "StateAxis Pipelined Weight Loading",
+            "name_zh": "StateAxis 流水化权重加载",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "private",
+            "summary_en": "Historical Ascend TP2 diagnostics found improvements in startup timing. Formal activation and steady-state performance remain pending.",
+            "summary_zh": "历史昇腾 TP2 诊断验证了部分启动阶段耗时改善，正式启用和稳态性能仍待验证。",
+            "repository_relationship": "external_reference",
+            "system_role": "model_weight_loading",
+            "execution_planes": ["worker", "native"],
+            "deployment_topology": "in_process",
+            "delivery_model": "python_distribution",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "hardware_startup_diagnostic",
+        },
+        "taxonomy": {
+            "kind": "runtime_mod",
+            "capability": "startup_deployment",
+            "phases": ["service_startup"],
+            "lifecycle": "implemented_restricted",
+            "evidence": "startup_diagnostic_formal_ecpa_pending",
+        },
+    },
+    "cuda-mtp": {
+        "card": {
+            "id": "cuda-mtp",
+            "name": "CUDA MTP",
+            "name_en": "CUDA MTP",
+            "name_zh": "CUDA MTP",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "public",
+            "summary_en": "CUDA activation carrier for Qwen3.5 native multi-token prediction. Bounded launch and functional checks ran on A6000 PP4/TP1.",
+            "summary_zh": "Qwen3.5 原生多词元预测的 CUDA 启用组件。已有 A6000 PP4/TP1 的有限启动与功能验证。",
+            "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-cuda-mtp",
+            "repository_relationship": "organization_native",
+            "system_role": "speculative_decoding",
+            "execution_planes": ["worker", "device"],
+            "delivery_model": "python_distribution",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "hardware_verified",
+        },
+        "taxonomy": {
+            "kind": "runtime_mod",
+            "capability": "decoding",
+            "phases": ["decode"],
+            "lifecycle": "qualification_pending",
+            "evidence": "hardware_validation_pending",
+        },
+    },
+    "memory-tracker": {
+        "card": {
+            "id": "memory-tracker",
+            "name": "Ascend Graph Memory Tracker",
+            "name_en": "Ascend Graph Memory Tracker",
+            "name_zh": "昇腾计算图显存跟踪器",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "private",
+            "summary_en": "Captures Ascend graph-memory allocations and exports Perfetto traces. Hardware validation covers one 910B2 and bounded capture sizes.",
+            "summary_zh": "采集昇腾计算图捕获的显存分配并导出 Perfetto 轨迹。实测覆盖单张 910B2 和有限捕获规格。",
+            "maintainers": ["CubeLander"],
+            "maintainer_profiles": [{"login": "CubeLander", "name": "田景远"}],
+            "system_role": "profiling_analysis",
+            "execution_planes": ["worker", "device"],
+            "delivery_model": "python_distribution",
+            "ownership": "original_contributor_maintained",
+            "repository_relationship": "organization_native",
+            "evidence_level": "hardware_verified",
+        },
+        "taxonomy": {
+            "kind": "tool_mod",
+            "capability": "observability_evaluation",
+            "phases": ["observability"],
+            "lifecycle": "implemented_restricted",
+            "evidence": "no_performance_claim",
+        },
+    },
+    "ascend-mapped-kv-offload": {
+        "card": {
+            "id": "ascend-mapped-kv-offload",
+            "name": "Ascend Mapped-host KV Offload",
+            "name_en": "Ascend Mapped-host KV Offload",
+            "name_zh": "昇腾映射主机内存 KV 卸载",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "public",
+            "summary_en": "Mapped-host memory KV offload adaptation for Ascend. The package supports installation and inspection while host integration and device validation are pending.",
+            "summary_zh": "昇腾映射主机内存的 KV 卸载适配。目前可安装和检查，等待宿主接入和设备验证。",
+            "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-mapped-kv-offload-hust",
+            "repository_relationship": "organization_native",
+            "compatibility": {"status": "inspect_only"},
+            "maintainers": ["CubeLander"],
+            "maintainer_profiles": [{"login": "CubeLander", "name": "田景远"}],
+            "system_role": "kv_tiering",
+            "execution_planes": ["worker", "device"],
+            "delivery_model": "plugin_bundle",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "cpu_smoke",
+        },
+        "taxonomy": {
+            "kind": "runtime_mod",
+            "capability": "kv_management",
+            "phases": ["state_lifecycle"],
+            "lifecycle": "pending",
+            "evidence": "activation_pending",
+        },
+    },
+    "scheduler-policy-lab": {
+        "card": {
+            "id": "scheduler-policy-lab",
+            "name": "Scheduler Policy Lab",
+            "name_en": "Scheduler Policy Lab",
+            "name_zh": "调度策略实验工作区",
+            "artifact_type": "runtime_component",
+            "integration_contracts": [],
+            "maturity": "experimental",
+            "public_surface": True,
+            "repository_visibility": "public",
+            "summary_en": "Research workspace for scheduler policies, baseline ports and observability. Host-independent policy code has tests. vLLM runtime integration is pending.",
+            "summary_zh": "调度策略、基线迁移和观测研究工作区。宿主无关的策略代码已有测试，vLLM 运行接入待完成。",
+            "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-scheduler-policy-lab",
+            "repository_relationship": "organization_native",
+            "compatibility": {"status": "inspect_only"},
+            "maintainers": ["Tkhkrnx"],
+            "maintainer_profiles": [{"login": "Tkhkrnx", "name": "彭浩然"}],
+            "system_role": "scheduler_policy",
+            "execution_planes": ["scheduler"],
+            "delivery_model": "source_toolkit",
+            "ownership": "original_contributor_maintained",
+            "evidence_level": "cpu_smoke",
+        },
+        "taxonomy": {
+            "kind": "tool_mod",
+            "capability": "scheduling_routing",
+            "phases": ["request_admission"],
+            "lifecycle": "research",
+            "evidence": "host_integration_pending",
+        },
+    },
+}
+
+
+PUBLIC_PREVIEW_WORKLOADS = {
+    "traceloom": ["profiling_analysis"],
+    "latchmoe": ["moe", "memory_kv_pressure"],
+    "tricard-clm-lifecycle": ["lifecycle_control", "repeated_prefix_agent"],
+    "ascend-adaptive-quantized-kv": ["memory_kv_pressure"],
+    "dla": ["latency_slo"],
+    "stateaxis-automatic-prefix-cache": ["repeated_prefix_agent"],
+    "stateaxis-async-kv-transfer": ["memory_kv_pressure"],
+    "stateaxis-pipelined-weight-loading": ["service_cold_start"],
+    "cuda-mtp": ["decode_heavy"],
+    "memory-tracker": ["profiling_analysis"],
+    "ascend-mapped-kv-offload": ["memory_kv_pressure"],
+    "scheduler-policy-lab": ["latency_slo"],
+}
+
+
+def publish_mod_previews(path, projected, original):
+    if path == "data/ecosystem.json":
+        sources = {item["id"]: item for item in original["components"]}
+        cards = []
+        for mod_id, entry in PUBLIC_MOD_PREVIEWS.items():
+            card = copy.deepcopy(entry["card"])
+            source = sources.get(mod_id, {})
+            for key in ("maintainers", "maintainer_profiles"):
+                if key in source:
+                    card[key] = copy.deepcopy(source[key])
+            if "advisors" in source:
+                card["advisors"] = public_advisors(source)
+            cards.append(card)
+        projected["components"] = [
+            item
+            for item in projected["components"]
+            if item["id"] not in PUBLIC_MOD_PREVIEWS
+        ] + cards
+    elif path == "data/mod-taxonomy.json":
+        projected["components"].update(
+            {mod_id: entry["taxonomy"] for mod_id, entry in PUBLIC_MOD_PREVIEWS.items()}
+        )
+    elif path == "data/plugin-workload-navigation.json":
+        projected["plugins"].update(PUBLIC_PREVIEW_WORKLOADS)
+
+
+def validate_mod_previews(path, data):
+    # Validate the exact public copy and role of each scoped entry before the
+    # remaining payload is checked against the withdrawal filters.
+    if path == "data/ecosystem.json":
+        previews = [
+            item for item in data["components"] if item["id"] in PUBLIC_MOD_PREVIEWS
+        ]
+        assert len(previews) == len(PUBLIC_MOD_PREVIEWS), path
+        assert {item["id"] for item in previews} == set(PUBLIC_MOD_PREVIEWS), path
+        for item in previews:
+            card = PUBLIC_MOD_PREVIEWS[item["id"]]["card"]
+            people_fields = {"maintainers", "maintainer_profiles", "advisors"}
+            assert {k: v for k, v in item.items() if k not in people_fields} == {
+                k: v for k, v in card.items() if k not in people_fields
+            }, item["id"]
+            people = {key: item[key] for key in people_fields if key in item}
+            assert not matches(people), item["id"]
+            assert all(
+                set(person) == {"login", "name"}
+                for person in people.get("maintainer_profiles", [])
+            ), item["id"]
+            assert all(
+                set(advisor) == set(PUBLIC_ADVISOR_FIELDS)
+                for advisor in people.get("advisors", [])
+            ), item["id"]
+            data["components"].remove(item)
+    elif path == "data/mod-taxonomy.json":
+        for mod_id, entry in PUBLIC_MOD_PREVIEWS.items():
+            assert data["components"].pop(mod_id) == entry["taxonomy"], mod_id
+    elif path == "data/plugin-workload-navigation.json":
+        for mod_id, traits in PUBLIC_PREVIEW_WORKLOADS.items():
+            assert data["plugins"].pop(mod_id) == traits, mod_id
+
 
 def matches(value):
     return bool(PROJECT.search(json.dumps(value, ensure_ascii=False)))
@@ -392,6 +938,8 @@ def build(source, destination, policy_revision):
         if projected is DROP:
             removed.append(name)
             continue
+        add_betterscale_card(name, projected, original)
+        publish_mod_previews(name, projected, original)
         out = (
             raw
             if projected == original
@@ -456,7 +1004,10 @@ def validate(destination):
         if path.name == "benchmark-source-manifest.json":
             continue
         data = json.loads(path.read_text())
-        if path.relative_to(destination).as_posix() == C16_EVIDENCE_PATH:
+        name = path.relative_to(destination).as_posix()
+        validate_betterscale_card(name, data)
+        validate_mod_previews(name, data)
+        if name == C16_EVIDENCE_PATH:
             for run in data.get("runs", []):
                 if run.get("run_id") in PUBLIC_C16_RUN_IDS:
                     run.clear()

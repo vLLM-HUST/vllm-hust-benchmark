@@ -92,6 +92,144 @@ def test_refuses_to_overwrite_or_write_inside_source(tmp_path):
         projection.build(tmp_path, tmp_path, "test")
 
 
+def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
+    advisor = {
+        "name_zh": "张书豪",
+        "name_en": "Shuhao Zhang",
+        "relationship": "internal",
+    }
+    source = tmp_path / "source"
+    (source / "data").mkdir(parents=True)
+    (source / "assets").mkdir()
+    for name in (
+        "index.html",
+        "plugins.html",
+        "dataset-introductions.html",
+        "leaderboard-runs.html",
+        "betterscale.html",
+        "assets/site.js",
+        "assets/betterscale.js",
+    ):
+        (source / name).write_text("")
+    payloads = {
+        "data/ecosystem.json": {
+            "components": [
+                {
+                    "id": "betterscale",
+                    "documentation_url": "./betterscale.html",
+                    "canonical_repository": "https://github.com/vLLM-HUST/BetterScale",
+                    "advisors": [{**advisor, "private_note": "unpublished"}],
+                },
+                {
+                    "id": "traceloom",
+                    "documentation_url": "./traceloom.html",
+                    "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-perf-analyzer",
+                    "advisors": [advisor],
+                },
+                {
+                    "id": "stateaxis-async-kv-transfer",
+                    "maintainers": ["example-maintainer"],
+                    "canonical_repository": "https://github.com/private-example/transfer",
+                    "summary_en": "Internal notes for private-example.",
+                },
+            ]
+        },
+        "data/mod-taxonomy.json": {"components": {"betterscale": {}}},
+        "data/plugin-workload-navigation.json": {"plugins": {"betterscale": []}},
+        "data/plugin-performance.json": {"entries": [{"id": "betterscale"}]},
+        "data/betterscale-results.json": {"secret-study": "unpublished"},
+    }
+    for name, value in payloads.items():
+        (source / name).write_text(json.dumps(value))
+    (source / "data/benchmark-source-manifest.json").write_text('{"files": []}')
+    output = tmp_path / "public"
+    projection.build(source, output, "test-policy")
+    projection.validate(output)
+    assert not (output / "data/betterscale-results.json").exists()
+    assert json.loads((output / "data/plugin-performance.json").read_text()) == {
+        "entries": []
+    }
+    catalog = output / "data/ecosystem.json"
+    data = json.loads(catalog.read_text())
+    cards = {item["id"]: item for item in data["components"]}
+    assert set(cards) == {"betterscale", *projection.PUBLIC_MOD_PREVIEWS}
+    assert cards["traceloom"]["advisors"] == [advisor]
+    assert "documentation_url" not in cards["traceloom"]
+    assert "canonical_repository" not in cards["traceloom"]
+    stateaxis = cards["stateaxis-async-kv-transfer"]
+    assert stateaxis["maintainers"] == ["example-maintainer"]
+    assert stateaxis["repository_visibility"] == "private"
+    assert "canonical_repository" not in stateaxis
+    assert "private-example" not in catalog.read_text(encoding="utf-8")
+    assert (
+        cards["ascend-mapped-kv-offload"]["compatibility"]["status"] == "inspect_only"
+    )
+    card = cards["betterscale"]
+    assert "documentation_url" not in card
+    assert "canonical_repository" not in card
+    assert card["advisors"] == [advisor]
+    assert "375.45" in " ".join(card["public_effect_detail_en"])
+    assert "209.68" in " ".join(card["public_effect_detail_zh"])
+    card["documentation_url"] = "./betterscale.html"
+    catalog.write_text(json.dumps(data), encoding="utf-8")
+    with pytest.raises(AssertionError):
+        projection.validate(output)
+
+
+def test_frozen_r6_mods_remain_public_after_projection(tmp_path):
+    source = tmp_path / "source"
+    data = source / "data"
+    data.mkdir(parents=True)
+    (source / "assets").mkdir()
+    for filename in (
+        "index.html",
+        "plugins.html",
+        "dataset-introductions.html",
+        "leaderboard-runs.html",
+        "assets/site.js",
+    ):
+        (source / filename).write_text("")
+    source_data = MODULE.parents[1] / "website-publication" / "data"
+    frozen = "five-datasets-r6-20261114/frozen-combination-v1.json"
+    for filename in (
+        "ecosystem.json",
+        "mod-taxonomy.json",
+        "plugin-workload-navigation.json",
+        frozen,
+    ):
+        path = data / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes((source_data / filename).read_bytes())
+    (data / "benchmark-source-manifest.json").write_text('{"files": []}')
+    output = tmp_path / "public"
+    projection.build(source, output, "test-policy")
+    projection.validate(output)
+
+    public = output / "data"
+    registry = json.loads((public / "ecosystem.json").read_text(encoding="utf-8"))
+    cards = {entry["id"]: entry for entry in registry["components"]}
+    classification = json.loads(
+        (public / "mod-taxonomy.json").read_text(encoding="utf-8")
+    )
+    expected = {
+        "betterscale",
+        "kv-materialization-arrival-control",
+        "prefill-microflow",
+        "hust-m01-correction",
+        "hust-joint-packed",
+    }
+    for identifier in expected:
+        assert "B1 r6" in cards[identifier]["summary_en"]
+        assert "B1 r6" in cards[identifier]["summary_zh"]
+        assert classification["components"][identifier]["kind"] == "runtime_mod"
+    for identifier in ("hust-m01-correction", "hust-joint-packed"):
+        card = cards[identifier]
+        assert card["canonical_repository"] is None
+        assert card["documentation_url"] == f"./data/{frozen}"
+        assert not any(key.startswith("public_effect_") for key in card)
+    assert (public / frozen).is_file()
+
+
 def test_combined_record_is_withheld_as_a_whole():
     record = {"id": "combined", "mods": ["PegaFlow", "LatchMoE"], "value": 42}
     assert projection.project_json([record], set()) == []

@@ -779,7 +779,7 @@
       "public_effect_en": "Historical report: all four ranks exercised expert mapping, host/device movement and graph replay with 48/48 stable-address checks. Four concurrent outputs, cancellation and exception recovery passed; output throughput was about 2.91 tok/s versus 23.57 tok/s without the plugin. Source link: existing benchmark source-audit snapshot, not raw run logs; original report currently not publicly retrievable.",
       "public_effect_zh": "历史报告：四个 rank 均实际执行专家映射、主机/设备换入换出与 graph replay，48/48 地址稳定性检查通过；四路并发输出、取消与异常恢复通过，但输出吞吐约 2.91 tok/s，显著低于无插件基线的 23.57 tok/s。来源链接为 benchmark 已公开的源码审计快照，不是运行原始日志；原报告当前无法公开访问。",
       "public_effect_status": "not-beneficial-in-tested-cell",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/f57dbc2b1020c6f50b7a0a36db43fcd8a0bd0198/reports/vllm-hust-midterm-20261019/b1-mod-source-audit-20261020.json",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/fd2ab4d3a28dac6dd49697081611389d069f9d57/reports/vllm-hust-midterm-20261019/b1-mod-source-audit-20261020.json",
       "functional_compatibility": {
         "status": "passed",
         "scope": "Qwen3-30B-A3B · Ascend TP4 · PIECEWISE graph; Qwen3.8-27B not applicable"
@@ -1156,7 +1156,7 @@
       "public_effect_en": "Three matched 900-second rounds at C1/C2/C4/C8/C16 reported 0.96%–17.52% higher throughput than the same two-replica random-routing deployment. Source-integrity gaps in several Prometheus files prevent per-request causal attribution.",
       "public_effect_zh": "C1/C2/C4/C8/C16 各三轮匹配的 900 秒实验，相对相同双副本随机路由部署记录到 0.96%–17.52% 的吞吐提升。部分 Prometheus 源文件存在完整性缺口，不能作逐请求因果归因。",
       "public_effect_status": "beneficial",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/f57dbc2b1020c6f50b7a0a36db43fcd8a0bd0198/website-publication/data/leaderboard_prefix_routing_mean_evidence.json",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/fd2ab4d3a28dac6dd49697081611389d069f9d57/website-publication/data/leaderboard_prefix_routing_mean_evidence.json",
       "compatibility": {
         "status": "experimental",
         "host": "External router over vLLM-HUST request fingerprint and KV events",
@@ -1612,7 +1612,7 @@
       "public_effect_en": "2026-11-02 TTFT admission follow-up on Qwen3.5-35B-A3B W8A8, Ascend 910B3 TP1/eager: the constructed 16K-prompt / 8192-token-floor cell reduced median TTFT by 45.9% and increased throughput by 12.6%, but approximate reuse answered only 5/12 correctly versus 12/12 for the paired disabled baseline. The original similarity replay (100 requests, one output token) changed warm TTFT by -1.5% and post-first-request throughput by +4.0%, with 92/100 outputs equal; it did not reproduce a 10% gain. The 8192-floor replay arm failed during startup and has no result. These diagnostics and earlier 5,000-request replays do not establish quality-qualified speedup.",
       "public_effect_zh": "2026-11-02 TTFT 准入复查（Qwen3.5-35B-A3B W8A8、Ascend 910B3 TP1/eager）：构造的 16K prompt / 8192-token 门槛单元 TTFT 中位数下降 45.9%、吞吐增加 12.6%，但近似复用仅答对 5/12，配对的禁用对照为 12/12。原始相似度回放（100 请求、单输出 token）热态 TTFT 变化 -1.5%、首请求后吞吐 +4.0%，92/100 输出一致，未复现 10% 收益；8192 门槛回放组启动失败，没有结果。这些诊断及旧 5,000 请求回放均未证明质量合格的加速。",
       "public_effect_status": "not-beneficial-in-tested-cell",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/4421300dd69ef033453205b874e71d1540cce4d7/reports/simllm-issue3-ttft-admission-20261102/README.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/d96216b09dfa6fb3e654a62a5731a5c6cfc62f1b/reports/simllm-issue3-ttft-admission-20261102/README.md",
       "compatibility": {
         "status": "experimental",
         "host": "vLLM Ascend HUST NPUModelRunner",
@@ -2470,8 +2470,8 @@
       "maturity": "incubating",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
       "upstream_repository": null,
-      "summary_en": "Arrival-time KV materialization MOD for full reuse, block-aligned partial reuse and recomputation. A unified Qwen3.5 plugin artifact exercised real scheduler decisions; the separate Qwen2.5-7B-Instruct M2 controller study remains a negative mechanism boundary.",
-      "summary_zh": "面向请求到达时刻完整复用、块对齐部分复用与重计算的 KV 物化 MOD。统一 Qwen3.5 插件制品已执行真实 scheduler 决策；独立的 Qwen2.5-7B-Instruct M2 controller 研究仍保留为负向机制边界。",
+      "summary_en": "Arrival-time KV materialization MOD for full reuse, block-aligned partial reuse and recomputation. A unified Qwen3.5 plugin artifact exercised real scheduler decisions; the separate Qwen2.5-7B-Instruct M2 controller study remains a negative mechanism boundary. The frozen B1 r6 profile pins vllm-kv-materialization 0.1.0 to per-request recomputation.",
+      "summary_zh": "面向请求到达时刻完整复用、块对齐部分复用与重计算的 KV 物化 MOD。统一 Qwen3.5 插件制品已执行真实 scheduler 决策；独立的 Qwen2.5-7B-Instruct M2 controller 研究仍保留为负向机制边界。B1 r6 冻结组合使用 vllm-kv-materialization 0.1.0 的逐请求重算策略。",
       "public_effect_en": "The unified Qwen3.5 five-point observation is +7.13% geometric mean versus its exact Native series, with recompute and reuse actions exercised. The separate Qwen2.5 M2 study did not beat the best fixed policy; neither result transfers to the other protocol.",
       "public_effect_zh": "统一 Qwen3.5 五点观察相对精确 Native 序列的几何平均变化为 +7.13%，且真实执行了 recompute 与 reuse。独立的 Qwen2.5 M2 研究未优于最佳固定策略；两项结果不得跨协议转移。",
       "public_effect_status": "measured",
@@ -2601,8 +2601,8 @@
       "repository_visibility": "private",
       "upstream_repository": null,
       "documentation_url": "./betterscale.html",
-      "summary_en": "Less host waiting. More device execution. BetterScale publishes separate bounded observations for DeepSeek V4 Flash and a Qwen3.5 TP2 small-fish prototype; their models, runtimes and protocols are not pooled.",
-      "summary_zh": "让设备少等调度，多做推理。BetterScale 分别公开 DeepSeek V4 Flash 与 Qwen3.5 TP2 small-fish 原型的有限观察；两者的模型、运行时与协议不会合并。",
+      "summary_en": "Less host waiting. More device execution. BetterScale publishes separate bounded observations for DeepSeek V4 Flash and a Qwen3.5 TP2 small-fish prototype; their models, runtimes and protocols are not pooled. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36.",
+      "summary_zh": "让设备少等调度，多做推理。BetterScale 分别公开 DeepSeek V4 Flash 与 Qwen3.5 TP2 small-fish 原型的有限观察；两者的模型、运行时与协议不会合并。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。",
       "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim.",
       "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。",
       "public_effect_status": "measured",
@@ -2794,15 +2794,14 @@
         }
       ],
       "advisors": [],
-      "canonical_repository": "https://example.invalid/private-source",
-      "repository_visibility": "public",
+      "repository_visibility": "private",
       "upstream_repository": null,
-      "summary_en": "Owner-maintained research MOD transferred to private source and withdrawn from the vLLM-HUST public catalog on 2026-11-05. Frozen historical activation and no-harm evidence remains available for review.",
-      "summary_zh": "由原作者维护的研究 MOD，已于 2026-11-05 转移至 private source 并从 vLLM-HUST 公开目录下架；冻结的历史激活与 no-harm 证据保留供复查。",
+      "summary_en": "Research MOD maintained by Shuhao Zhang. Historical activation and no-harm evidence remains available for review.",
+      "summary_zh": "由张书豪维护的研究 MOD。可查阅历史启用与 no-harm 验证。",
       "public_effect_en": "The frozen historical closure was exact and lifecycle-clean with 0.0256% throughput overhead, but exercised zero cache hits. It establishes a no-harm boundary only; it does not qualify an online gain or the independent MOD.",
       "public_effect_zh": "冻结的历史闭合验证保持精确且生命周期闭合，吞吐开销为 0.0256%，但 cache hit 为零。该结果只建立 no-harm 边界，不授予在线收益或独立 MOD 的性能资格。",
       "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/ddc4f6a3290e447260fc8f6c03ea36d3ca514e23/archive/mod-git-20261021/stateaxis-automatic-prefix-cache/snapshot/evidence/ISSUE95_BOUNDED_APC_CLOSURE_20260815.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/b523bc34f0cd5c00653efddb821c2161c072cea2/archive/mod-git-20261021/stateaxis-automatic-prefix-cache/snapshot/evidence/ISSUE95_BOUNDED_APC_CLOSURE_20260815.md",
       "functional_compatibility": {
         "status": "passed",
         "scope": "Manifest 0.3 hash-bound experimental activation contract; performance qualification remains separate"
@@ -2868,15 +2867,14 @@
         }
       ],
       "advisors": [],
-      "canonical_repository": "https://example.invalid/private-source",
-      "repository_visibility": "public",
+      "repository_visibility": "private",
       "upstream_repository": null,
-      "summary_en": "Owner-maintained research MOD transferred to private source and withdrawn from the vLLM-HUST public catalog on 2026-11-05. Frozen historical component measurements remain available with their original scope.",
-      "summary_zh": "由原作者维护的研究 MOD，已于 2026-11-05 转移至 private source 并从 vLLM-HUST 公开目录下架；冻结的历史组件测量按原范围保留。",
+      "summary_en": "Research MOD maintained by Shuhao Zhang. Historical component measurements remain available with their original scope.",
+      "summary_zh": "由张书豪维护的研究 MOD。历史组件测量按原范围保留。",
       "public_effect_en": "Historical Qwen2.5-14B matched component runs were exact and lifecycle-clean. Host-tier-hit P50 improved from 592.597 ms to 333.716 ms (-43.686%) and pair throughput from 3.291 to 5.626 ops/s, with overlap proven in 3/3 candidate runs. This does not qualify active version 0.2.0 or general serving throughput.",
       "public_effect_zh": "历史 Qwen2.5-14B 配对组件运行保持精确且生命周期闭合。host-tier-hit P50 由 592.597 ms 改善至 333.716 ms（-43.686%），配对吞吐由 3.291 提升至 5.626 ops/s，3/3 次候选运行均证明发生重叠。该结果不授予当前 0.2.0 版本或通用服务吞吐资格。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/ddc4f6a3290e447260fc8f6c03ea36d3ca514e23/archive/mod-git-20261021/stateaxis-async-kv-transfer/snapshot/evidence/issue76-async-transfer-20260815-r5/result.json",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/b523bc34f0cd5c00653efddb821c2161c072cea2/archive/mod-git-20261021/stateaxis-async-kv-transfer/snapshot/evidence/issue76-async-transfer-20260815-r5/result.json",
       "functional_compatibility": {
         "status": "passed",
         "scope": "Manifest 0.3 ECPA-only bounded transfer contract; fresh version-bound performance qualification pending"
@@ -2942,15 +2940,14 @@
         }
       ],
       "advisors": [],
-      "canonical_repository": "https://example.invalid/private-source",
-      "repository_visibility": "public",
+      "repository_visibility": "private",
       "upstream_repository": null,
-      "summary_en": "Owner-maintained research MOD transferred to private source and withdrawn from the vLLM-HUST public catalog on 2026-11-05. Frozen historical startup diagnostics remain available with their original scope.",
-      "summary_zh": "由原作者维护的研究 MOD，已于 2026-11-05 转移至 private source 并从 vLLM-HUST 公开目录下架；冻结的历史启动诊断按原范围保留。",
+      "summary_en": "Research MOD maintained by Shuhao Zhang. Historical startup diagnostics remain available with their original scope.",
+      "summary_zh": "由张书豪维护的研究 MOD。历史启动诊断按原范围保留。",
       "public_effect_en": "A matched 3+3 real-NPU carrier diagnostic on Qwen3.5-35B-A3B BF16 TP2 reduced median process-to-Ready time from 337.70 s to 301.62 s (10.68%) and median weight iteration from 166.20 s to 107.15 s (35.53%). This is startup evidence, not a steady-state throughput claim or a formal ECPA ON/OFF qualification.",
       "public_effect_zh": "Qwen3.5-35B-A3B BF16 TP2 的 3+3 次真实 NPU 配对载体诊断中，进程到 Ready 的中位时间由 337.70 秒降至 301.62 秒（10.68%），权重迭代中位时间由 166.20 秒降至 107.15 秒（35.53%）。这是启动阶段证据，不代表稳态吞吐提升，也不是正式 ECPA ON/OFF 资格结果。",
       "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/ddc4f6a3290e447260fc8f6c03ea36d3ca514e23/archive/mod-git-20261021/stateaxis-pipelined-weight-loading/snapshot/evidence/qwen35-loader-sharded-qualification-20261012/RESULT.json",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/b523bc34f0cd5c00653efddb821c2161c072cea2/archive/mod-git-20261021/stateaxis-pipelined-weight-loading/snapshot/evidence/qwen35-loader-sharded-qualification-20261012/RESULT.json",
       "functional_compatibility": {
         "status": "passed",
         "scope": "Manifest 0.3 identity-bound activation contract; formal matched performance qualification remains separate"
@@ -3027,7 +3024,7 @@
       "public_effect_en": "Current 0.2.0 code is not beneficial in the tested Qwen3.5-35B-A3B TP2 eager AgentX cells. Across four first-turn shapes (three retained repetitions each), total-time medians ranged from 0.60% faster to 0.81% slower, but TTFT regressed in every cell by 2.09% to 4.43%; exact 128-token output hashes matched in 0/4 cells. A real concurrency-2 probe failed closed and terminated the engine. A component-only host submission change was 18.33% faster while synchronized device time stayed near 68 us, so it does not establish end-to-end gain.",
       "public_effect_zh": "当前 0.2.0 代码在已测 Qwen3.5-35B-A3B、TP2、eager、AgentX 单元中不具收益。四种首轮形状（每格保留 3 次）端到端中位数变化为快 0.60% 至慢 0.81%，但 TTFT 在四格中均回退 2.09%–4.43%；128-token 输出哈希 0/4 一致。真实并发 2 探测 fail-closed，并导致引擎退出。组件级 host submission 降低 18.33%，但同步 device time 仍约 68 us，不能据此声称端到端收益。",
       "public_effect_status": "not-beneficial-in-tested-cell",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/819b1975f346dca514f58880ca62518850100b2d/archive/mod-git-20261022/gdn-state-codec/snapshot/evidence/qwen35-agentx-v020-expanded-20261009/ROUND-RESULTS.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/4709ab7ca83264c7c76cf4518044252ac4cb5164/archive/mod-git-20261022/gdn-state-codec/snapshot/evidence/qwen35-agentx-v020-expanded-20261009/ROUND-RESULTS.md",
       "functional_compatibility": {
         "status": "passed",
         "scope": "ECPA 0.3 managed activation · Qwen3.5-35B-A3B · 2 × Ascend 910B2 · TP2 eager · single request"
@@ -3103,7 +3100,7 @@
       "public_effect_en": "On Qwen2.5-7B-Instruct, Ascend 910B2/CANN 9.0.0, Graph/batch-invariant, a 64-request ShareGPT workload at concurrency 4 gave 3.82% lower steady-state TPOT and 5.24% higher output-token throughput across three matched rounds for linear-SwiGLU fusion. The published compatibility profile is a separate CANN 9.1 beta.3 line; cold-start performance and other paths are not covered by this result.",
       "public_effect_zh": "在 Qwen2.5-7B-Instruct、Ascend 910B2/CANN 9.0.0、batch-invariant Graph 模式下，Linear–SwiGLU 融合于 ShareGPT 64 请求、并发 4 的三轮配对测试中，稳态 TPOT 降低 3.82%，输出 token 吞吐提高 5.24%。已发布的兼容配置是另一条 CANN 9.1 beta.3 版本线；该结果不覆盖冷启动及其他执行路径。",
       "public_effect_status": "beneficial",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/819b1975f346dca514f58880ca62518850100b2d/archive/mod-git-20261022/vllm-hust-opset/snapshot/docs/optimizations/linear-swiglu-graph.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/4709ab7ca83264c7c76cf4518044252ac4cb5164/archive/mod-git-20261022/vllm-hust-opset/snapshot/docs/optimizations/linear-swiglu-graph.md",
       "compatibility": {
         "status": "verified",
         "host": "vLLM-HUST + vllm-ascend-hust",
@@ -3243,7 +3240,7 @@
       "public_effect_en": "Ascend validation covered real inference on four serving replicas and scale-down after draining.",
       "public_effect_zh": "昇腾真机验证覆盖四副本推理接流和排空后缩容。",
       "public_effect_status": "validated",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/06c7afc760fc470e5fafebe2f2d8adcdc52b42a6/reports/controller-milestone-20261113/README.md#instance-controller",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/85ef2f3cd2d13e558499952b097929b6fa85c504/reports/controller-milestone-20261113/README.md#instance-controller",
       "compatibility": {
         "status": "external_service",
         "host": "RIDE / Ray / vLLM",
@@ -3258,6 +3255,73 @@
         "requirements_zh": "需要已有 Ray 集群及由 RIDE 管理的模型服务。"
       },
       "evidence_level": "integration_tested"
+    },
+    {
+      "id": "kv-controller",
+      "public_surface": true,
+      "name": "KV Controller",
+      "name_en": "KV Controller",
+      "name_zh": "KV 控制器",
+      "artifact_type": "external_system",
+      "system_role": "kv_state_manager",
+      "integration_contracts": [
+        "RIDE SDK"
+      ],
+      "integration_surfaces": [
+        "RIDE model lifecycle API",
+        "KV backend plugins"
+      ],
+      "execution_planes": [
+        "control_plane"
+      ],
+      "deployment_topology": "separate_application",
+      "delivery_model": "external_service",
+      "ownership": "community_integration",
+      "maintainers": [
+        "yancanmao"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "yancanmao",
+          "name": "毛言粲"
+        }
+      ],
+      "advisors": [],
+      "repository_relationship": "external_reference",
+      "maturity": "experimental",
+      "repository_visibility": "private",
+      "canonical_repository": "https://github.com/yancanmao/kv-controller",
+      "upstream_repository": null,
+      "summary_en": "Decides when to prepare KV cache for an agent’s next model call during a tool wait. The RIDE interface also supports TokenCake CPU save and restore.",
+      "summary_zh": "Agent 等工具返回时，决定是否为下一轮推理准备 KV 缓存。RIDE 接口也已接通 TokenCake 的 CPU 保存与恢复。",
+      "public_effect_en": "Selective prewarming shortened two complete 24-program SWE-smith runs by 1.51% and 2.07%. TokenCake saved prefill work, while both full batches took longer.",
+      "public_effect_zh": "选择性预热在两次 24 个 program 的完整 SWE-smith 对照中分别提速 1.51% 和 2.07%。TokenCake 减少了 prefill 计算，但两次整批都变慢。",
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/c77453dc2edda566a261370cf7a76f850c8839c9/reports/kv-controller-swe-smith-20261114",
+      "compatibility": {
+        "status": "external_service",
+        "host": "RIDE / Ray / vLLM",
+        "versions": [
+          "RIDE 0.3.6",
+          "vLLM 0.22.0 (TokenCake experiment)"
+        ],
+        "platforms": [
+          "NVIDIA RTX A6000"
+        ],
+        "requirements_en": "Existing Ray cluster and RIDE-managed inference replicas. TokenCake uses an engine with its tool lifecycle API.",
+        "requirements_zh": "需要已有 Ray 集群及 RIDE 管理的推理副本。TokenCake 后端需要带工具生命周期接口的引擎。"
+      },
+      "evidence_level": "hardware_verified",
+      "public_effect_detail_en": [
+        "Two RTX A6000 GPUs, Qwen2.5-0.5B-Instruct, 437 foreground requests per arm. The baseline used cache-aware routing and simple background recompute. With selective prewarming, P95 for other requests overlapping baseline prewarming fell 17.3% and 24.8%. One of three 8-program pairs regressed.",
+        "In separate matched runs, TokenCake cut total computed prefill tokens by 20.41% and 23.86%, including eliminated background recompute. Batch time rose 8.36% and 16.37%.",
+        "Experimental RIDE integration. Standard Mod installation and rollback remain to be validated."
+      ],
+      "public_effect_detail_zh": [
+        "两张 RTX A6000，Qwen2.5-0.5B-Instruct，每组 437 轮前台请求。基线采用缓存感知路由加简单后台重算。选择性预热使基线中与预热重叠的其他请求 P95 分别下降 17.3% 和 24.8%。三组 8-program 对照中有一组退化。",
+        "单独对照中，TokenCake 使引擎实际计算的 prefill token 总量下降 20.41% 和 23.86%，其中包含省下的后台重算。整批耗时分别增加 8.36% 和 16.37%。",
+        "已完成 RIDE 真机接入，标准 Mod 安装与回滚待验收。"
+      ]
     },
     {
       "id": "request-throttling-controller",
@@ -3303,7 +3367,7 @@
       "public_effect_en": "A pinned 192-concurrency, no-keepalive run reported 86.025 steps/min for the thin adapter versus 65.625 for plain vLLM (1.31x) and 91.05 for the official path (94.5%), with zero recorded errors. This is one narrow historical cell, not a general performance guarantee or current-host ECPA NPU qualification. Link: historical public summary only; original report is not publicly retrievable and was not copied this round.",
       "public_effect_zh": "固定版本的 192 并发、no-keepalive 单点实验记录为：薄适配 86.025 steps/min，普通 vLLM 65.625（1.31 倍），官方路径 91.05（达到 94.5%），且记录错误数为零。这只是一个窄范围历史实验单元，不代表普遍性能保证，也不等同于当前宿主上的 ECPA NPU 资格。链接仅为历史公开摘要；原报告当前无法公开访问，本轮未复制原件。",
       "public_effect_status": "beneficial",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/f57dbc2b1020c6f50b7a0a36db43fcd8a0bd0198/website-publication/data/ecosystem.json",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/fd2ab4d3a28dac6dd49697081611389d069f9d57/website-publication/data/ecosystem.json",
       "compatibility": {
         "status": "external_service",
         "host": "OpenAI-compatible vLLM backend plus an external operator",
@@ -3448,11 +3512,11 @@
       ],
       "summary_en": "Experimental alpha for full-prompt prefill sliced across model layers while a separate decode runner advances. Installs as a default-off ECPA bundle with scheduler, worker and admission-policy class carriers; requires the pinned Ascend stack.",
       "summary_zh": "实验性 alpha：完整 prompt 的 prefill 按模型层推进，独立 decode runner 持续生成。以默认关闭的 ECPA 包安装，包含 scheduler、worker 与准入策略三个类载体；要求固定 Ascend 软件栈。",
-      "public_effect_status": "not-beneficial-in-tested-cell",
-      "public_effect_en": "The retained batch14 fresh-process quota control still reproduces answer degradation: q4 answers 6/8 correctly versus q40 5/8; case 01741 changes from E/590 to C/5551. All 16 full outputs are retained. Earlier installed-wheel TP4 functional checks cover output receipts, 12K prefill progress, cancellation and fresh native rollback, but do not establish exact output equivalence. No quality repair, 200-question qualification or current-package performance gain is established.",
-      "public_effect_zh": "已归档 batch14 新进程 quota 对照仍复现答案退化：q4 答对 6/8，q40 为 5/8；01741 从 E/590 变为 C/5551，保留全部 16 份完整输出。此前安装 wheel 的 TP4 功能检查覆盖输出回执、12K prefill、取消与新进程原生回滚，但未证明输出精确等价；尚未证明质量修复、200 题验收或当前包性能收益。",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/4421300dd69ef033453205b874e71d1540cce4d7/reports/muxpd-batch14-quota-control-20261030/README.md",
-      "qualification_report": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/19081ff39a25c3c8ac821ae7885688ea24a03e90/reports/muxpd-ecpa-20261025/RELEASE-QUALIFICATION.md",
+      "public_effect_status": "measured",
+      "public_effect_en": "Archived wl38/wl-2wiki-r1.6 on Qwen3.5-35B-A3B BF16: TP2 output throughput 161.68 → 199.37 token/s (+23.31%); TP4 174.51 → 187.42 (+7.40%). Each arm completed 229/229 requests. TP2 SLO attainment rose 4.37% → 55.90%, while median SSE gap rose 27.11 → 53.12 ms. Async FULL_DECODE_ONLY, APC off, TP+EP, max_num_seqs=16, max_num_batched_tokens=16384; MuxPD 43fcaf4 / core d0f22d2 / Ascend c182a9e. One single-pass pair per TP, MuxPD first; throughput includes drain time, ignore_eos=true, quality not evaluated. All six workloads and TP4 docchat SLO regression (-12.15 pp) remain in the report. Historical quality failures remain; Issue #23 closed only under revised ROW-versus-single-request-native criteria. ROW is default-off and performance unmeasured. This is not five-point leaderboard, general speedup, Manager or 0.2.0a1 wheel qualification; historical hardware/model byte identity is incomplete (see environment report).",
+      "public_effect_zh": "归档 wl38/wl-2wiki-r1.6、Qwen3.5-35B-A3B BF16：TP2 输出吞吐 161.68 → 199.37 token/s（+23.31%），TP4 为 174.51 → 187.42（+7.40%）；每臂均 229/229 请求成功。TP2 SLO 达标率 4.37% → 55.90%，但 SSE 间隔中位数 27.11 → 53.12 ms。配置为异步 FULL_DECODE_ONLY、关闭 APC、TP+EP、max_num_seqs=16、max_num_batched_tokens=16384；MuxPD 43fcaf4 / core d0f22d2 / Ascend c182a9e。每个 TP 单轮配对、MuxPD 先运行，吞吐计时含排空，ignore_eos=true，未评估答案质量。报告保留全部六种负载和 TP4 docchat SLO 退化（−12.15 个百分点）。历史质量失败仍保留；#23 仅按重新定义的 ROW 对 native 单请求一致性条件关闭，ROW 默认关闭且性能未测。不代表五并发点榜单、通用加速、Manager 或 0.2.0a1 安装包资格；历史硬件及模型字节身份不完整，详见环境报告。",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/ca7ded1a8ff5f604daa49d52316f67784316fb0b/reports/tech-outcomes-20261117/muxpd/README.md",
+      "qualification_report": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/c215d3532c960f8da2b633c2ffdbfac73d09d2be/reports/muxpd-ecpa-20261025/RELEASE-QUALIFICATION.md",
       "historical_evidence_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-tp4-goodput-20261011",
       "historical_evidence_scope": "Historical scoped TP4 Goodput study only; different software identity, not current-wheel qualification or performance.",
       "support_url": "https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/issues",
@@ -3698,10 +3762,6 @@
       "upstream_repository": null,
       "summary_en": "Import-only Hybrid Spec foundation for Qwen3.5 MTP2 state contracts. Activation and runtime/performance qualification remain closed.",
       "summary_zh": "面向 Qwen3.5 MTP2 状态契约的 Hybrid Spec 基础层；当前仅完成可安装/可发现基础，启用与运行时性能资格仍关闭。",
-      "public_effect_en": "Two bounded eager, single-request gamma-1 decode-metadata cells measured 5.97% and 8.00% lower mechanism time with 18 matching outputs. This does not qualify the complete Hybrid Spec MOD or the current unified-graph path.",
-      "public_effect_zh": "两个 eager、单请求、gamma-1 的有限 decode 元数据单元中，机制耗时分别降低 5.97% 与 8.00%，18 次输出一致；该结果不验收完整 Hybrid Spec，也不覆盖当前统一图路径。",
-      "public_effect_status": "inconclusive",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/d04a5ccbbc1b1f3d2b25e363b289b2f3d13a99a4/reports/gennova-mod-evidence-20261105",
       "compatibility": {
         "status": "source_scaffold",
         "host": "vLLM-HUST + vllm-ascend-hust",
@@ -3757,12 +3817,8 @@
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-prefill-microflow",
       "repository_visibility": "public",
       "upstream_repository": null,
-      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification.",
-      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。",
-      "public_effect_en": "The FA-only E24/R36 qualification completed 1,200/1,200 requests per arm across three OFF/ON pairs and measured a 1.3707% geometric-mean throughput increase. A reversed GDN+FA pairing regressed 10.40%, so the result remains configuration-specific.",
-      "public_effect_zh": "FA-only E24/R36 验收在三组 OFF/ON 配对中每臂完成 1,200/1,200 请求，吞吐配对几何平均提高 1.3707%；反序 GDN+FA 配对回退 10.40%，因此结果只适用于已记录配置。",
-      "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/d04a5ccbbc1b1f3d2b25e363b289b2f3d13a99a4/reports/gennova-mod-evidence-20261105",
+      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification. The frozen B1 r6 profile enables the school028 GDN and FlashAttention path from 0.1.0.dev0.",
+      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。B1 r6 冻结组合启用了 0.1.0.dev0 的 school028 GDN 与 FlashAttention 路径。",
       "compatibility": {
         "status": "experimental",
         "host": "Pinned BetterScale shared host on vLLM-HUST + vllm-ascend-hust",
@@ -3826,7 +3882,7 @@
       "public_effect_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: at fixed budget 32, capture sizes [1,2,4] → [1,2,4,8,16,32] reduced median batch completion by 57.0% across five process pairs. Package CPU checks pass; capture memory/startup costs also increase.",
       "public_effect_zh": "历史 Qwen3-0.6B FP16 / Ascend 910B2 TP1：保持总预算 32，捕获尺寸从 [1,2,4] 扩至 [1,2,4,8,16,32]，五组独立进程配对的批次完成时间中位数下降 57.0%。封装 CPU 检查通过；图内存与启动开销会增加。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/d3e46c425b2093aeb6e45ef602afb7ec225ba7ec/reports/independent-inference-optimizations-20261113/graph-coverage/README.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/802cc5ca4a9da1e1e95f333d5dd2a3a4a53cbb63/reports/independent-inference-optimizations-20261113/graph-coverage/README.md",
       "evidence_level": "hardware_verified",
       "compatibility": {
         "status": "experimental",
@@ -3887,7 +3943,7 @@
       "public_effect_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: cap 224 at unchanged global budget 256 reduced short-request first-token latency by 68.17% (126.746 → 40.342 ms); batch completion increased 2.02%. Five process pairs, 60 unprofiled batches; exact token agreement.",
       "public_effect_zh": "历史 Qwen3-0.6B FP16 / Ascend 910B2 TP1：全局预算保持 256、单请求 prefill 上限设为 224，短请求首字延迟下降 68.17%（126.746 → 40.342 ms），批次完成时间增加 2.02%。五组独立进程配对、60 个无 profiler 批次，输出 token 一致。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/d3e46c425b2093aeb6e45ef602afb7ec225ba7ec/reports/independent-inference-optimizations-20261113/prefill-admission/README.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/802cc5ca4a9da1e1e95f333d5dd2a3a4a53cbb63/reports/independent-inference-optimizations-20261113/prefill-admission/README.md",
       "evidence_level": "hardware_verified",
       "compatibility": {
         "status": "experimental",
@@ -3949,7 +4005,7 @@
       "public_effect_en": "Historical measured core: median throughput +9.35% over the accepted batch-copy baseline, four independent pairs, exact token/top1-ID/logprob agreement. The packaged adapter passes CPU tests; its separate device requalification is pending.",
       "public_effect_zh": "历史核心实现相对已接受的 batch-copy 基线，四组独立配对的吞吐提升中位数为 9.35%，token、top1 ID 与 logprob 一致。当前封装适配层已通过 CPU 测试，独立设备复验正在推进。",
       "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/d3e46c425b2093aeb6e45ef602afb7ec225ba7ec/reports/independent-inference-optimizations-20261113/sglang-prepared-dispatch/README.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/802cc5ca4a9da1e1e95f333d5dd2a3a4a53cbb63/reports/independent-inference-optimizations-20261113/sglang-prepared-dispatch/README.md",
       "evidence_level": "code_available",
       "compatibility": {
         "status": "experimental",
@@ -3970,6 +4026,61 @@
         "requirements_en": "Explicit mount into a dedicated pinned SGLang checkout, native rebuild and ENABLE=1 in every worker. Exact source/runtime/schema checks; startup kill switch wins. Only 28 FIA records and one live actual_seq_lengths_kv update. Stop workers and unmount to restore exact source bytes. Not a vLLM Extension Manager bundle.",
         "requirements_zh": "在独立的固定版本 SGLang 源码副本中显式 mount，重建 native 扩展，并向每个 worker 传入 ENABLE=1；校验源码、运行时及 schema，启动时 kill switch 优先。仅支持 28 条 FIA 记录和单组实时 actual_seq_lengths_kv 更新；停止 worker 后 unmount 精确恢复源文件。不是 vLLM Extension Manager bundle。"
       }
+    },
+    {
+      "id": "hust-m01-correction",
+      "name": "M01 State Correction",
+      "name_en": "M01 State Correction",
+      "name_zh": "M01 状态校正",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "repository_visibility": "private",
+      "documentation_url": "./data/five-datasets-r6-20261114/frozen-combination-v1.json",
+      "evidence_level": "integration_tested",
+      "system_role": "kv_state_manager",
+      "integration_surfaces": [
+        "vllm.general_plugins / hust_m01_correction",
+        "corrected_serving_runtime.CorrectedWorker"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "summary_en": "The frozen B1 r6 composition restores hust-m01-correction 1.0 for request-state correction and live snapshot checks in CorrectedWorker. Qualification is scoped to the combined engine.",
+      "summary_zh": "B1 r6 冻结组合包含 hust-m01-correction 1.0，由 CorrectedWorker 执行请求状态校正与活动快照校验。验证范围为整套引擎。"
+    },
+    {
+      "id": "hust-joint-packed",
+      "name": "Packed Pinned-Host State",
+      "name_en": "Packed Pinned-Host State",
+      "name_zh": "锁页状态合并分配",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "repository_visibility": "private",
+      "documentation_url": "./data/five-datasets-r6-20261114/frozen-combination-v1.json",
+      "evidence_level": "integration_tested",
+      "system_role": "kv_state_manager",
+      "integration_surfaces": [
+        "vllm.general_plugins / hust_joint_packed",
+        "B1 r6 per-object / per-dtype host-state allocation"
+      ],
+      "execution_planes": [
+        "worker",
+        "native"
+      ],
+      "summary_en": "The frozen B1 r6 composition restores hust-joint-packed 1.0 to pack pinned host state per object and dtype, within a 4 GiB per-rank host-state budget. Qualification is scoped to the combined engine.",
+      "summary_zh": "B1 r6 冻结组合包含 hust-joint-packed 1.0，在每 rank 4 GiB 主机状态预算内，按对象及 dtype 合并锁页状态分配。验证范围为整套引擎。"
     }
   ]
 }
