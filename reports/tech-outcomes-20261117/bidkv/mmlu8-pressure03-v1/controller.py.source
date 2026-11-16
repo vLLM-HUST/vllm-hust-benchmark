@@ -1,0 +1,304 @@
+"""Predeclared original-first8 AB pilot and conditional BA, with real owned waits."""
+
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+import traceback
+
+from mmlu_contract import (
+    DRIVER,
+    INPUT,
+    PROBE,
+    ROOT,
+    STAGES,
+    geometry,
+    load_inputs,
+    pilot_decision,
+    read,
+    sha,
+)
+
+PYTHON = str(ROOT / ".venv/bin/python")
+
+
+def save(path, value):
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+    temporary.replace(path)
+
+
+def publication_admission():
+    manifest = DRIVER / "source-manifest.json"
+    release = read(PROBE / "publication.json")
+    assert release["readback_verified"] is True and len(release["commit"]) == 40
+    assert release["source_manifest_sha256"] == sha(manifest)
+    assert release["plan_sha256"] == sha(DRIVER / "execution-plan.json")
+    assert release["study_scope"] == "supplemental_original_mmlu_first8_eos"
+    assert release["input_identity_sha256"] == sha(DRIVER / "input-identity.json")
+    cpu = read(PROBE / "metadata/cpu-admission.json")
+    assert cpu["passed"] is True and cpu["inference_generations"] == 0
+    assert cpu["source_manifest_sha256"] == sha(manifest)
+    assert cpu["input_identity_sha256"] == release["input_identity_sha256"]
+    assert release["cpu_admission_sha256"] == sha(PROBE / "metadata/cpu-admission.json")
+    assert read(DRIVER / "execution-plan.json")["stages"] == list(STAGES)
+    for name, checksum in read(manifest)["files"].items():
+        member = (DRIVER / name).resolve()
+        assert member.is_relative_to(DRIVER.resolve()) and sha(member) == checksum
+    return release
+
+
+def main():
+    os.umask(0o077)
+    release = publication_admission()
+    selected = load_inputs(INPUT, DRIVER)
+    clock_path = PROBE / "metadata/clock.json"
+    assert not clock_path.exists(), "Never reset/reuse a prior trial clock"
+    start = time.monotonic()
+    clock = {
+        "started_unix": time.time(),
+        "started_monotonic": start,
+        "deadline_monotonic": start + 14400,
+        "operation_limit_seconds": 14400,
+        "host_boot_id_sha256": sha(Path("/proc/sys/kernel/random/boot_id")),
+        "source_publication": release,
+        "scope": "One 4h overall clock; original-first8 pilot AB, conditional BA. All outcomes retained, no retry/publication park.",
+    }
+    save(clock_path, clock)
+    lifecycle = PROBE / "metadata/lifecycle.json"
+    assert not lifecycle.exists()
+    state = {
+        "phase": "starting",
+        "pid": os.getpid(),
+        "started_unix": time.time(),
+        "stages": [
+            {"name": stage, "planned": 8, "status": "not_executed"} for stage in STAGES
+        ],
+        "owned_waits": [],
+        "outside_cpu_tests_allowed_during_generation": False,
+    }
+    owners, released = {}, set()
+    reference = None
+
+    def checkpoint():
+        save(lifecycle, state)
+
+    def remaining():
+        assert (
+            sha(Path("/proc/sys/kernel/random/boot_id")) == clock["host_boot_id_sha256"]
+        )
+        return clock["deadline_monotonic"] - time.monotonic()
+
+    def cancel(number, _frame):
+        raise KeyboardInterrupt("Owned controller signal " + str(number))
+
+    for number in (signal.SIGTERM, signal.SIGINT):
+        signal.signal(number, cancel)
+
+    def stop_owner(stage):
+        if stage in released:
+            return
+        folder = PROBE / stage
+        if stage not in owners or not folder.exists():
+            return
+        (folder / "stop-requested").write_text(
+            "Owned requests drained/failed; no retry\n"
+        )
+        owner = owners[stage]
+        try:
+            code = owner.wait(timeout=180)
+        except subprocess.TimeoutExpired:
+            os.killpg(owner.pid, signal.SIGTERM)
+            try:
+                code = owner.wait(timeout=180)
+            except subprocess.TimeoutExpired:
+                os.killpg(owner.pid, signal.SIGKILL)
+                code = owner.wait(timeout=30)
+        state["owned_waits"].append(
+            {
+                "kind": stage + "-owner",
+                "pid": owner.pid,
+                "actual_returncode": code,
+                "wait_returned_unix": time.time(),
+            }
+        )
+        actual_api = read(folder / "api-owned-wait.json")
+        state["owned_waits"].append({"kind": stage + "-API", **actual_api})
+        sample = subprocess.check_output(["npu-smi", "info"], text=True, timeout=20)
+        (folder / "controller-npu-release.txt").write_text(sample)
+        assert sample.count("No running processes found in NPU") == 2
+        released.add(stage)
+        checkpoint()
+        assert code == 0 and actual_api["actual_returncode"] == 0, (
+            "Nonzero cleanup retained"
+        )
+
+    checkpoint()
+    try:
+        for stage_row in state["stages"]:
+            stage = stage_row["name"]
+            assert remaining() > 60, "Overall budget exhausted; no extension"
+            publication_admission()
+            state["phase"] = stage + "-admission"
+            stage_row.update(status="admission", started_unix=time.time())
+            checkpoint()
+            command = [
+                PYTHON,
+                "-B",
+                str(DRIVER / "admission_owner.py"),
+                "--stage",
+                stage,
+            ]
+            with (PROBE / "metadata" / (stage + "-owner.log")).open(
+                "ab", buffering=0
+            ) as log:
+                owner = subprocess.Popen(
+                    command,
+                    cwd=ROOT,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    start_new_session=True,
+                    env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                )
+            owners[stage] = owner
+            stage_row.update(owner_pid=owner.pid, owner_command=command)
+            checkpoint()
+            while True:
+                status_path = PROBE / stage / "status.json"
+                status = read(status_path) if status_path.exists() else {}
+                assert status.get("phase") != "failed" and owner.poll() is None
+                if status.get("phase") == "admitted":
+                    break
+                assert remaining() > 30
+                time.sleep(2)
+            actual = geometry(
+                read(PROBE / stage / "cache-groups-rpc.json"),
+                [item["frozen"] for item in selected],
+            )
+            save(PROBE / stage / "capacity-go.json", actual)
+            assert actual["go"] is True, (
+                "Actual single-context fit/multi-request pressure gate failed; zero generation"
+            )
+            if reference is None:
+                reference = actual["fingerprint_sha256"]
+            assert actual["fingerprint_sha256"] == reference, (
+                "Actual common geometry differs"
+            )
+            state["phase"] = stage
+            stage_row.update(
+                status="running", admitted_unix=time.time(), cache_fingerprint=reference
+            )
+            checkpoint()
+            command = [PYTHON, "-B", str(DRIVER / "client.py"), "--stage", stage]
+            with (PROBE / "metadata" / (stage + "-client.log")).open(
+                "ab", buffering=0
+            ) as log:
+                client = subprocess.Popen(
+                    command,
+                    cwd=ROOT,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    start_new_session=True,
+                    env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                )
+                stage_row.update(
+                    client_pid=client.pid,
+                    client_command=command,
+                    client_started_unix=time.time(),
+                )
+                checkpoint()
+                try:
+                    code = client.wait(timeout=max(1, min(1850, remaining() + 20)))
+                except BaseException:
+                    if client.poll() is None:
+                        os.killpg(client.pid, signal.SIGTERM)
+                        try:
+                            client.wait(timeout=30)
+                        except subprocess.TimeoutExpired:
+                            os.killpg(client.pid, signal.SIGKILL)
+                            client.wait(timeout=30)
+                    stage_row.update(
+                        actual_client_returncode=client.returncode,
+                        status="failed",
+                        client_ended_unix=time.time(),
+                    )
+                    checkpoint()
+                    raise
+            stage_row.update(
+                actual_client_returncode=code,
+                client_ended_unix=time.time(),
+                status="completed" if code == 0 else "failed",
+            )
+            checkpoint()
+            assert code == 0, "Failed whole cohort retained; no replacement/retry"
+            summary = read(PROBE / "batches" / stage / "summary.json")
+            stage_row["closed_summary"] = summary
+            stop_owner(stage)
+            if (
+                stage == STAGES[0]
+                and summary["counter_deltas"]["vllm:num_preemptions_total"] == 0
+            ):
+                state.update(
+                    phase="no_pressure_qualification",
+                    completed_unix=time.time(),
+                    unexecuted_reason="Native actual preemptions zero; no mechanism exposure",
+                    final_returncode=3,
+                )
+                checkpoint()
+                return 3
+            if stage == STAGES[1]:
+                decision = pilot_decision(
+                    state["stages"][0]["closed_summary"],
+                    summary,
+                    clean_runtime=not (
+                        PROBE / "metadata/runtime-interference.json"
+                    ).exists(),
+                    same_geometry=True,
+                    actual_waits_ok=all(
+                        item["actual_returncode"] == 0 for item in state["owned_waits"]
+                    )
+                    and len(state["owned_waits"]) == 4,
+                )
+                save(PROBE / "metadata/pilot-decision.json", decision)
+                state["pilot_decision"] = decision
+                if not decision["run_reverse_confirmation"]:
+                    state.update(
+                        phase="pilot_complete_confirmation_not_qualified",
+                        completed_unix=time.time(),
+                        unexecuted_reason=decision["reasons"],
+                        final_returncode=0,
+                    )
+                    checkpoint()
+                    return 0
+        state.update(
+            phase="completed",
+            completed_unix=time.time(),
+            final_returncode=0,
+            scope="Both AB and BA retained; completion is not a positive or quality-equivalence claim",
+        )
+        checkpoint()
+        return 0
+    except BaseException as error:
+        state.update(
+            phase="failed",
+            failed_unix=time.time(),
+            error=type(error).__name__ + ": " + str(error),
+            final_returncode=2,
+        )
+        checkpoint()
+        traceback.print_exc()
+        for stage in owners:
+            try:
+                stop_owner(stage)
+            except BaseException as failure:
+                state.setdefault("cleanup_errors", []).append(
+                    {"stage": stage, "type": type(failure).__name__}
+                )
+                checkpoint()
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

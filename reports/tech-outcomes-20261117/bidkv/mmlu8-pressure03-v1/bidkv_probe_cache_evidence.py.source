@@ -1,0 +1,171 @@
+"""Official worker-extension hook: describe cache metadata, never tensor values."""
+
+from enum import Enum
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+
+def integer(value, *, positive=False):
+    if type(value) is not int or (positive and value <= 0):
+        raise TypeError("Expected an integer cache metadata field")
+    return value
+
+
+def names(values):
+    if not isinstance(values, (list, tuple)) or not all(
+        type(value) is str for value in values
+    ):
+        raise TypeError("Expected layer-name metadata")
+    return list(values)
+
+
+def dtype_name(value):
+    # str(torch.dtype) is metadata. Never stringify a tensor or unknown object.
+    if type(value).__name__ != "dtype" or type(value).__module__ != "torch":
+        raise TypeError("Expected a torch.dtype metadata object, never a tensor")
+    return str(value)
+
+
+def describe_spec(spec):
+    kind = type(spec).__name__
+    if kind not in ["FullAttentionSpec", "MambaSpec"]:
+        raise TypeError("Unqualified cache-spec type; stop zero-generation admission")
+    result = {
+        "type": kind,
+        "block_size_tokens": integer(spec.block_size, positive=True),
+        "page_size_bytes": integer(spec.page_size_bytes, positive=True),
+        "page_size_padded": None
+        if spec.page_size_padded is None
+        else integer(spec.page_size_padded, positive=True),
+    }
+    if kind == "FullAttentionSpec":
+        result.update(
+            dtype=dtype_name(spec.dtype),
+            num_kv_heads=integer(spec.num_kv_heads, positive=True),
+            head_size=integer(spec.head_size, positive=True),
+            head_size_v=integer(spec.head_size_v, positive=True),
+            real_page_size_bytes=integer(spec.real_page_size_bytes, positive=True),
+            sliding_window=spec.sliding_window,
+            attention_chunk_size=spec.attention_chunk_size,
+        )
+        if (
+            result["sliding_window"] is not None
+            or result["attention_chunk_size"] is not None
+        ):
+            raise ValueError(
+                "Only the disclosed full-attention/Mamba profile is qualified"
+            )
+    else:
+        if not isinstance(spec.mamba_type, Enum):
+            raise TypeError("Expected Mamba backend enum metadata")
+        shapes = [[integer(size) for size in shape] for shape in spec.shapes]
+        if any(size < 0 for shape in shapes for size in shape):
+            raise ValueError("Invalid cache metadata shape")
+        result.update(
+            shapes=shapes,
+            dtypes=[dtype_name(value) for value in spec.dtypes],
+            mamba_type=spec.mamba_type.name,
+            mamba_cache_mode=spec.mamba_cache_mode,
+            num_speculative_blocks=integer(spec.num_speculative_blocks),
+        )
+        if (
+            result["mamba_cache_mode"] != "align"
+            or result["num_speculative_blocks"] < 0
+        ):
+            raise ValueError("Unexpected Mamba mode/speculative metadata")
+    return result
+
+
+class BidkvProbeCacheEvidenceWorkerExtension:
+    """A new metadata-only method; no Worker/runner method is overridden."""
+
+    def describe_bidkv_probe_cache_groups_v1(self):
+        config = self.model_runner.kv_cache_config
+        engine = self.vllm_config
+        cache = engine.cache_config
+        actual_profile = {
+            "max_model_len": integer(engine.model_config.max_model_len, positive=True),
+            "dtype": dtype_name(engine.model_config.dtype),
+            "tensor_parallel_size": integer(
+                engine.parallel_config.tensor_parallel_size, positive=True
+            ),
+            "pipeline_parallel_size": integer(
+                engine.parallel_config.pipeline_parallel_size, positive=True
+            ),
+            "data_parallel_size": integer(
+                engine.parallel_config.data_parallel_size, positive=True
+            ),
+            "max_num_seqs": integer(
+                engine.scheduler_config.max_num_seqs, positive=True
+            ),
+            "max_num_batched_tokens": integer(
+                engine.scheduler_config.max_num_batched_tokens, positive=True
+            ),
+            "async_scheduling": engine.scheduler_config.async_scheduling,
+            "kv_cache_memory_bytes": integer(
+                cache.kv_cache_memory_bytes, positive=True
+            ),
+            "enable_prefix_caching": cache.enable_prefix_caching,
+            "mamba_cache_mode": cache.mamba_cache_mode,
+            "speculative_num_tokens": integer(
+                engine.speculative_config.num_speculative_tokens, positive=True
+            ),
+            "enable_cpu_binding": engine.additional_config.get("enable_cpu_binding"),
+            "graph_mode": engine.compilation_config.cudagraph_mode.name,
+            "capture_sizes": [
+                integer(size, positive=True)
+                for size in engine.compilation_config.cudagraph_capture_sizes
+            ],
+        }
+        groups = []
+        for index, group in enumerate(config.kv_cache_groups):
+            layer_names = names(group.layer_names)
+            if type(group.is_eagle_group) is not bool:
+                raise TypeError("Expected group-kind metadata")
+            groups.append(
+                {
+                    "index": index,
+                    "layer_names": layer_names,
+                    "layer_count": len(layer_names),
+                    "is_eagle_group": group.is_eagle_group,
+                    "spec": describe_spec(group.kv_cache_spec),
+                }
+            )
+        tensors = []
+        for descriptor in config.kv_cache_tensors:
+            # KVCacheTensor is a Python size/shared_by descriptor, not torch.Tensor.
+            if type(descriptor).__name__ != "KVCacheTensor":
+                raise TypeError(
+                    "Expected a KVCacheTensor descriptor, never tensor storage"
+                )
+            tensors.append(
+                {
+                    "size_bytes": integer(descriptor.size, positive=True),
+                    "shared_by": names(descriptor.shared_by),
+                }
+            )
+        report = {
+            "schema": "actual-worker-cache-metadata/v1",
+            "rank": integer(self.rank),
+            "local_rank": integer(self.local_rank),
+            "num_blocks": integer(config.num_blocks, positive=True),
+            "groups": groups,
+            "actual_profile": actual_profile,
+            "tensor_descriptors": tensors,
+            "observer_source_sha256": hashlib.sha256(
+                Path(__file__).read_bytes()
+            ).hexdigest(),
+            "loaded_vllm_file": getattr(sys.modules.get("vllm"), "__file__", None),
+            "loaded_ascend_file": getattr(
+                sys.modules.get("vllm_ascend"), "__file__", None
+            ),
+            "scope": "Only runtime configuration metadata; no tensor values/repr/copy/data_ptr, no config or allocator mutation, no model generation",
+        }
+        report["metadata_sha256"] = hashlib.sha256(
+            json.dumps(
+                report, sort_keys=True, separators=(",", ":"), allow_nan=False
+            ).encode()
+        ).hexdigest()
+        return report

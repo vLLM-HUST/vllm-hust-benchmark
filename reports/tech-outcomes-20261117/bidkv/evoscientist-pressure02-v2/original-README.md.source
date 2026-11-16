@@ -1,0 +1,17 @@
+# BidKV：历史异构真实输入、自然EOS的独立压力诊断
+
+此profile不是冻结五项。用户要求撤回阶段性Issue评论，先确认正常触发和可复核收益；两条本轮评论已撤回，正式五项/Pega新模型暂缓，旧报告与所有失败原件保留。代码/安全数值继续通过PR审查，不以零调用或单个正值重发结论。
+
+输入是历史公开EvoScientist原first12，逐字节53588SHA、源顺序/各预算固定；input75–555tokens、output budgets1295–3048存在真实重算/剩余长度差异。与旧force-length不同，本轮完整prompt包成one user/defaultthinkingTrue，保留EOS，不执行文本中的指令或工具，不强追24148实际输出。
+
+四个fresh冷服务顺序Native1→Bid1→Bid2→Native2，C12/固定4rps、common1600MiB/rank/context4096/seq12；APC、MTP2、异步、图、默认CPU绑定共同保留。B1为历史preempt_weight5的明确preset，不写成default0.3收益；B0同参数关闭selector。缩小共同KV仅是明确的人工资源压力，不代表实际少用硬件卡或默认16GiB收益。
+
+旧TP4日志capacity20480/5x被用作压力匹配设计，未照抄512MiB到TP2；预计新71pool−1null=70、maxcontext14blocks≈5x。现场仍必须actual geometry/source/SDK/12tokenhash/亲和性全部过关、两臂metadata同指纹，才按预声明conditionalgo开始；potential不等于保证抢占。首Native无实际抢占则保留no-pressure资格并不花后续模型成本。
+
+所有源/计划/输入身份先一次性冻结公开读回，随后才建新150分钟clock/加载首模型，无发布park，无旧pressure01续时。每请求whole1200s、每冷启动1200s、各模型真实wait/释放记录。每阶段若有效则不按收益正负选择是否补反序，全部EOS/length/失败/未知usage保留。必须同时看真实preempt/calls/合法选择/changed-vs-builtin/abstain/fault与两对性能、初始化内存额外开销；没触发或无收益就如实报告。
+
+源manifest不包含原prompt文本，运行时只从受控副本读取既有公开53588原件；实际输入token-ID数组、答案和SSE留受控，公共只交付数字、配置、SHA与库存。CPU检查不是设备结果。详见execution-plan.json和historical-memory-rationale.json。
+
+## 首设备运行前的v2检查修正
+
+保留a7a1/v1为CPU-only未执行版本。v2为本未评分诊断单独允许完整reasoning-only响应（没有最终回答单列未决，content时延排除），不会把合法budget截断冒充传输错误；旧finite默认仍要求最终回答。accepted与observed usage/finish分别保留，真正未知不写0。监督器接收SIGTERM/SIGINT时转发给自己拥有的controller并真实wait，Linux CPU子进程用例验证取消收据。SDK/selector/原prompt/预算/EOS未因此变更。

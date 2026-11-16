@@ -1,0 +1,99 @@
+{
+  "schema": "pegaflow-default-true-c8-paired-summary/v1",
+  "source_manifest_sha256": "8e4ef4748eafd8ad0cdc6fd0c1d82df471576357cca2333ce1abc4abe168c34e",
+  "native_requests": 343,
+  "pegaflow_requests": 341,
+  "failed": 0,
+  "all_records_independently_replayed": true,
+  "phases": [
+    {
+      "phase": "4096-warmup",
+      "native_requests": 16,
+      "native_failures": 0,
+      "native_window_tokens_per_second": 65.00399805455747,
+      "native_phase_elapsed_seconds_including_drain": 63.01150886999676,
+      "native_drain_seconds": 3.01150886999676,
+      "native_ttft_mean_seconds": 22.93846791418855,
+      "native_tpot_mean_seconds": 0.03287186487769384,
+      "pegaflow_requests": 16,
+      "pegaflow_failures": 0,
+      "pegaflow_window_tokens_per_second": 65.64205906268819,
+      "pegaflow_phase_elapsed_seconds_including_drain": 62.39901761899819,
+      "pegaflow_drain_seconds": 2.3990176189981867,
+      "pegaflow_ttft_mean_seconds": 22.670774087187965,
+      "pegaflow_tpot_mean_seconds": 0.03283417246714759,
+      "throughput_change_percent": 0.9815719451520488
+    },
+    {
+      "phase": "4096-formal",
+      "native_requests": 231,
+      "native_failures": 0,
+      "native_window_tokens_per_second": 194.7915418774593,
+      "native_phase_elapsed_seconds_including_drain": 303.5860768390121,
+      "native_drain_seconds": 3.586076839012094,
+      "native_ttft_mean_seconds": 1.5604510074282303,
+      "native_tpot_mean_seconds": 0.03493318805147139,
+      "pegaflow_requests": 231,
+      "pegaflow_failures": 0,
+      "pegaflow_window_tokens_per_second": 195.06065030537712,
+      "pegaflow_phase_elapsed_seconds_including_drain": 303.16724519999116,
+      "pegaflow_drain_seconds": 3.1672451999911573,
+      "pegaflow_ttft_mean_seconds": 1.538737439004668,
+      "pegaflow_tpot_mean_seconds": 0.03499837160421072,
+      "throughput_change_percent": 0.13815200871869493
+    },
+    {
+      "phase": "16384-warmup",
+      "native_requests": 16,
+      "native_failures": 0,
+      "native_window_tokens_per_second": 61.53234759067382,
+      "native_phase_elapsed_seconds_including_drain": 66.56661350298964,
+      "native_drain_seconds": 6.5666135029896395,
+      "native_ttft_mean_seconds": 12.228858137499628,
+      "native_tpot_mean_seconds": 0.08074541745514652,
+      "pegaflow_requests": 16,
+      "pegaflow_failures": 0,
+      "pegaflow_window_tokens_per_second": 62.908959223686374,
+      "pegaflow_phase_elapsed_seconds_including_drain": 65.1099628820084,
+      "pegaflow_drain_seconds": 5.1099628820084035,
+      "pegaflow_ttft_mean_seconds": 12.701073338249444,
+      "pegaflow_tpot_mean_seconds": 0.07584509074681324,
+      "throughput_change_percent": 2.2372161747672425
+    },
+    {
+      "phase": "16384-formal",
+      "native_requests": 80,
+      "native_failures": 0,
+      "native_window_tokens_per_second": 66.41050991777034,
+      "native_phase_elapsed_seconds_including_drain": 308.3849231899949,
+      "native_drain_seconds": 8.384923189994879,
+      "native_ttft_mean_seconds": 6.131142510610516,
+      "native_tpot_mean_seconds": 0.09607981915784358,
+      "pegaflow_requests": 78,
+      "pegaflow_failures": 0,
+      "pegaflow_window_tokens_per_second": 65.28350593829644,
+      "pegaflow_phase_elapsed_seconds_including_drain": 305.8659260560089,
+      "pegaflow_drain_seconds": 5.865926056008902,
+      "pegaflow_ttft_mean_seconds": 6.411773700821915,
+      "pegaflow_tpot_mean_seconds": 0.09714970042025547,
+      "throughput_change_percent": -1.6970265412347474
+    }
+  ],
+  "pega_actual_storage_activation": {
+    "engine_counter_deltas": {
+      "vllm:pega_load_success_total": 0.0,
+      "vllm:pega_load_failure_total": 0.0,
+      "vllm:pega_save_success_total": 2476.0,
+      "vllm:pega_save_failure_total": 0.0
+    },
+    "sidecar_save_bytes": 116256702464.0,
+    "sidecar_lazy_save_counters_absent_before": [
+      "pegaflow_save_bytes_total"
+    ],
+    "actual_storage_save_activated": true,
+    "restore_successes": 0.0,
+    "failures": 0.0,
+    "scope": "Actual cold storage-save path activation only. Fresh salts require zero restores; no cache-restore performance benefit established."
+  },
+  "comparison_scope": "Original60/300s submission windows with all requests drained; numerator includes drain tokens and denominator is actual phase end-start. Fixed256/ignoreEOS separate from five EOS metrics. Zero restores establishes no offload benefit; no Bid policy fields."
+}

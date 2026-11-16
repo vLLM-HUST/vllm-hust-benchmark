@@ -1,0 +1,753 @@
+{
+  "schema": "bidkv-evo02-independent-numeric-audit/v2",
+  "source": {
+    "source_manifest_sha256": "319045c9c2a67dc8025dbd6c84679837fe4ef1ad63310b3055cc7ac90be7ab81",
+    "members_verified": 22,
+    "plan_sha256": "eeb71309ca9ac7d575bb46d2b1cf656a0fe0721292c650f291b3916a004c9663"
+  },
+  "planned_requests": 48,
+  "recorded_requests": 48,
+  "missing_requests": 0,
+  "lifecycle_phase": "completed",
+  "controller_actual_returncode": 0,
+  "stages": [
+    {
+      "stage": "native-r01",
+      "numeric": {
+        "planned": 12,
+        "recorded": 12,
+        "successful_audited": 12,
+        "failed_recorded": 0,
+        "missing_records": 0,
+        "whole_batch_wall_seconds": 289.7963293027133,
+        "accepted_output_tokens": 24148,
+        "observed_output_tokens_known_sum": 24148,
+        "observed_output_tokens_known_records": 12,
+        "output_tokens_per_second": 83.3274874740586,
+        "complete_valid_transport": true,
+        "finish_stop": 0,
+        "finish_length": 12,
+        "observed_finish_stop": 0,
+        "observed_finish_length": 12,
+        "record_unknown_final_usage": 0,
+        "unknown_final_usage": 0,
+        "no_final_content": 0,
+        "unresolved_no_final_content": 0,
+        "ttft_first_content_seconds": {
+          "samples": 12,
+          "mean": 114.20114963082597,
+          "p50": 33.12793152127415,
+          "p95": 246.85372446952388,
+          "p99": 247.79435942268
+        },
+        "tpot_first_content_seconds": {
+          "samples": 12,
+          "mean": 0.07266558656147706,
+          "p50": 0.0940107065521814,
+          "p95": 0.1315074614155176,
+          "p99": 0.1375489974973013
+        },
+        "ttft_excluded_successful_records": 0,
+        "tpot_excluded_successful_records": 0,
+        "quality_evaluation": "not_performed",
+        "unexpected_record_files": []
+      },
+      "metrics": {
+        "passed": true,
+        "issues": [],
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_queries_total": 0.0,
+          "vllm:num_preemptions_total": 303.0,
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_queries_total": 60799.0
+        },
+        "before_sha256": "3d951366fa8f6b72e137fccc22a07e1461392da7a61fc9979b58b0ccb845877d",
+        "after_sha256": "deb5d1640870964c75ab2c60dd73f229c43c9786e2f80f943b3a8df483a9a087",
+        "scope": "Internal APC/self-resume hits preserved; external restore must remain zero. Missing is null."
+      },
+      "mechanism": {
+        "passed": true,
+        "issues": [],
+        "counts": {
+          "decisions": 303,
+          "calls": 0,
+          "selections": 0,
+          "abstentions": 0,
+          "failures": 0,
+          "invalid_selections": 0
+        },
+        "known_counts_from_valid_journals": {
+          "decisions": 303,
+          "calls": 0,
+          "selections": 0,
+          "abstentions": 0,
+          "failures": 0,
+          "invalid_selections": 0
+        },
+        "changed_from_builtin": 0,
+        "decision_events": 303,
+        "legal_decisions": 303,
+        "journals": [
+          {
+            "sha256": "b040308d311f584fea8ffae9cf7c90f40e0ad04182b57dd63692675050bacb63",
+            "bytes": 717489,
+            "decision_events": 303
+          }
+        ],
+        "engine_preemptions_equal_journal_decisions": true
+      },
+      "admission": {
+        "passed": true,
+        "issues": [],
+        "tokenizations_verified": 12,
+        "geometry_fingerprint_sha256": "1c2238b3d1688e1b707e8f558dd47ea8663f0673097e49f01101a6d467b20e1b",
+        "actual_total_pool_blocks": 71,
+        "usable_pool_blocks": 70,
+        "maximum_context_upper_blocks": 14,
+        "first_admission_upper_count": 7,
+        "pressure_possible": true
+      },
+      "costs": {
+        "owner_started_unix": 1794630748.012491,
+        "api_spawn_begin_unix": 1794630749.521636,
+        "healthy_unix": 1794631167.9423785,
+        "admitted_unix": 1794631170.0538967,
+        "client_started_unix": 1794631170.0579634,
+        "client_ended_unix": 1794631460.160431,
+        "api_wait_returned_unix": 1794631470.2887692,
+        "source_cpu_admission_seconds": 1.5091450214385986,
+        "cold_model_initialization_seconds": 418.42074251174927,
+        "owner_reported_initialization_monotonic_seconds": 418.41737569868565,
+        "post_health_admission_seconds": 2.111518144607544,
+        "total_admission_seconds": 422.2108130455017,
+        "generation_client_seconds": 290.10246753692627,
+        "cleanup_after_client_seconds": 10.12833833694458,
+        "api_resident_seconds": 720.7671332359314,
+        "stage_total_seconds": 723.0711681842804,
+        "actual_client_returncode": 0,
+        "actual_owner_returncode": 0,
+        "actual_api_returncode": 0,
+        "startup_telemetry": {
+          "present": true,
+          "sha256": "a82ea0dffc9da2bb5943f7149be91208bec24fd1c496cbeabdadb3dcf933a4b3",
+          "samples": 40,
+          "sample_errors": 0,
+          "first_unix": 1794630749.521358,
+          "last_unix": 1794631164.5804224,
+          "memory_current_max_bytes": 10907344896,
+          "devices": [
+            {
+              "physical_npu": 6,
+              "hbm_used_max_mb": 41159,
+              "observations": 40
+            },
+            {
+              "physical_npu": 7,
+              "hbm_used_max_mb": 41153,
+              "observations": 40
+            }
+          ],
+          "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+        },
+        "generation_telemetry": {
+          "present": true,
+          "sha256": "d805f013c8f6fe390c0fbe6c276b0dfb95dc93b5c5250923bd21ecf5dd4d75f6",
+          "samples": 28,
+          "sample_errors": 0,
+          "first_unix": 1794631170.2725334,
+          "last_unix": 1794631456.2982128,
+          "memory_current_max_bytes": 12493119488,
+          "devices": [
+            {
+              "physical_npu": 6,
+              "hbm_used_max_mb": 41297,
+              "observations": 28
+            },
+            {
+              "physical_npu": 7,
+              "hbm_used_max_mb": 41292,
+              "observations": 28
+            }
+          ],
+          "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+        },
+        "scope": "Durations overlap: total admission includes CPU/source, model/capture and post-health admission; API residence overlaps generation. Do not sum nested costs. Currency and unit-token financial cost are unverified."
+      },
+      "client_summary_comparison": {
+        "passed": true,
+        "mismatched_numeric_fields": []
+      },
+      "unique_salts_verified": true,
+      "audit_passed": true
+    },
+    {
+      "stage": "bidkv-r01",
+      "numeric": {
+        "planned": 12,
+        "recorded": 12,
+        "successful_audited": 12,
+        "failed_recorded": 0,
+        "missing_records": 0,
+        "whole_batch_wall_seconds": 289.1511182375252,
+        "accepted_output_tokens": 24148,
+        "observed_output_tokens_known_sum": 24148,
+        "observed_output_tokens_known_records": 12,
+        "output_tokens_per_second": 83.51342421634163,
+        "complete_valid_transport": true,
+        "finish_stop": 0,
+        "finish_length": 12,
+        "observed_finish_stop": 0,
+        "observed_finish_length": 12,
+        "record_unknown_final_usage": 0,
+        "unknown_final_usage": 0,
+        "no_final_content": 0,
+        "unresolved_no_final_content": 0,
+        "ttft_first_content_seconds": {
+          "samples": 12,
+          "mean": 113.27319179289043,
+          "p50": 33.295889168046415,
+          "p95": 246.46563396928832,
+          "p99": 247.43996589398012
+        },
+        "tpot_first_content_seconds": {
+          "samples": 12,
+          "mean": 0.07194103726601805,
+          "p50": 0.09287358992821743,
+          "p95": 0.12741479032687325,
+          "p99": 0.13594818534012568
+        },
+        "ttft_excluded_successful_records": 0,
+        "tpot_excluded_successful_records": 0,
+        "quality_evaluation": "not_performed",
+        "unexpected_record_files": []
+      },
+      "metrics": {
+        "passed": true,
+        "issues": [],
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_queries_total": 0.0,
+          "vllm:num_preemptions_total": 304.0,
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_queries_total": 61968.0
+        },
+        "before_sha256": "f214dbf0651d4147b045387b353f0ed1f2d7d571faedee244dd8cb3ac8815980",
+        "after_sha256": "e333240ce4edb7607c0966cb7cc725830f015000725ca83aabbfd0c1b1156fde",
+        "scope": "Internal APC/self-resume hits preserved; external restore must remain zero. Missing is null."
+      },
+      "mechanism": {
+        "passed": true,
+        "issues": [],
+        "counts": {
+          "decisions": 304,
+          "calls": 304,
+          "selections": 5,
+          "abstentions": 299,
+          "failures": 0,
+          "invalid_selections": 0
+        },
+        "known_counts_from_valid_journals": {
+          "decisions": 304,
+          "calls": 304,
+          "selections": 5,
+          "abstentions": 299,
+          "failures": 0,
+          "invalid_selections": 0
+        },
+        "changed_from_builtin": 5,
+        "decision_events": 304,
+        "legal_decisions": 304,
+        "journals": [
+          {
+            "sha256": "6ddc785d51ba7cfc215bc1eac6817cba01b72a99a501ea54d44d19298ecec36f",
+            "bytes": 739026,
+            "decision_events": 304
+          }
+        ],
+        "engine_preemptions_equal_journal_decisions": true
+      },
+      "admission": {
+        "passed": true,
+        "issues": [],
+        "tokenizations_verified": 12,
+        "geometry_fingerprint_sha256": "1c2238b3d1688e1b707e8f558dd47ea8663f0673097e49f01101a6d467b20e1b",
+        "actual_total_pool_blocks": 71,
+        "usable_pool_blocks": 70,
+        "maximum_context_upper_blocks": 14,
+        "first_admission_upper_count": 7,
+        "pressure_possible": true
+      },
+      "costs": {
+        "owner_started_unix": 1794631471.6475396,
+        "api_spawn_begin_unix": 1794631473.1036515,
+        "healthy_unix": 1794631891.5262916,
+        "admitted_unix": 1794631893.6822484,
+        "client_started_unix": 1794631893.687221,
+        "client_ended_unix": 1794632183.1783385,
+        "api_wait_returned_unix": 1794632193.2536945,
+        "source_cpu_admission_seconds": 1.4561119079589844,
+        "cold_model_initialization_seconds": 418.42264008522034,
+        "owner_reported_initialization_monotonic_seconds": 418.4187579024583,
+        "post_health_admission_seconds": 2.155956745147705,
+        "total_admission_seconds": 422.2031672000885,
+        "generation_client_seconds": 289.491117477417,
+        "cleanup_after_client_seconds": 10.075356006622314,
+        "api_resident_seconds": 720.1500430107117,
+        "stage_total_seconds": 722.3853075504303,
+        "actual_client_returncode": 0,
+        "actual_owner_returncode": 0,
+        "actual_api_returncode": 0,
+        "startup_telemetry": {
+          "present": true,
+          "sha256": "616e27b4b585f07e4c37d6a104f629926161cf294b5e15b1759ff0d4b953c6b0",
+          "samples": 40,
+          "sample_errors": 0,
+          "first_unix": 1794631473.103365,
+          "last_unix": 1794631885.9791582,
+          "memory_current_max_bytes": 10648358912,
+          "devices": [
+            {
+              "physical_npu": 6,
+              "hbm_used_max_mb": 41143,
+              "observations": 40
+            },
+            {
+              "physical_npu": 7,
+              "hbm_used_max_mb": 41142,
+              "observations": 40
+            }
+          ],
+          "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+        },
+        "generation_telemetry": {
+          "present": true,
+          "sha256": "3770e08ebcff8ee4b645b104c3931cb74d7c61897b138d754a3c3263dede98bd",
+          "samples": 28,
+          "sample_errors": 0,
+          "first_unix": 1794631893.9077616,
+          "last_unix": 1794632180.2750142,
+          "memory_current_max_bytes": 12567105536,
+          "devices": [
+            {
+              "physical_npu": 6,
+              "hbm_used_max_mb": 41297,
+              "observations": 28
+            },
+            {
+              "physical_npu": 7,
+              "hbm_used_max_mb": 41292,
+              "observations": 28
+            }
+          ],
+          "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+        },
+        "scope": "Durations overlap: total admission includes CPU/source, model/capture and post-health admission; API residence overlaps generation. Do not sum nested costs. Currency and unit-token financial cost are unverified."
+      },
+      "client_summary_comparison": {
+        "passed": true,
+        "mismatched_numeric_fields": []
+      },
+      "unique_salts_verified": true,
+      "audit_passed": true
+    },
+    {
+      "stage": "bidkv-r02",
+      "numeric": {
+        "planned": 12,
+        "recorded": 12,
+        "successful_audited": 12,
+        "failed_recorded": 0,
+        "missing_records": 0,
+        "whole_batch_wall_seconds": 314.38983604311943,
+        "accepted_output_tokens": 24148,
+        "observed_output_tokens_known_sum": 24148,
+        "observed_output_tokens_known_records": 12,
+        "output_tokens_per_second": 76.80909886885794,
+        "complete_valid_transport": true,
+        "finish_stop": 0,
+        "finish_length": 12,
+        "observed_finish_stop": 0,
+        "observed_finish_length": 12,
+        "record_unknown_final_usage": 0,
+        "unknown_final_usage": 0,
+        "no_final_content": 0,
+        "unresolved_no_final_content": 0,
+        "ttft_first_content_seconds": {
+          "samples": 12,
+          "mean": 120.85420717438683,
+          "p50": 32.997073547914624,
+          "p95": 275.05487835789097,
+          "p99": 276.36502780096606
+        },
+        "tpot_first_content_seconds": {
+          "samples": 12,
+          "mean": 0.07899201348909002,
+          "p50": 0.10392090119829621,
+          "p95": 0.1315360953132272,
+          "p99": 0.13338699049779565
+        },
+        "ttft_excluded_successful_records": 0,
+        "tpot_excluded_successful_records": 0,
+        "quality_evaluation": "not_performed",
+        "unexpected_record_files": []
+      },
+      "metrics": {
+        "passed": true,
+        "issues": [],
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_queries_total": 0.0,
+          "vllm:num_preemptions_total": 316.0,
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_queries_total": 73357.0
+        },
+        "before_sha256": "d4206283fe7a1d19b71e5f31cbb86977c22a71b7a6e03ab46622cd22bf20116d",
+        "after_sha256": "c1d2dbc08b2ef711308c46001681b969d6c2ec0af1ac1c8a9e87d2cbf776adf5",
+        "scope": "Internal APC/self-resume hits preserved; external restore must remain zero. Missing is null."
+      },
+      "mechanism": {
+        "passed": true,
+        "issues": [],
+        "counts": {
+          "decisions": 316,
+          "calls": 316,
+          "selections": 8,
+          "abstentions": 308,
+          "failures": 0,
+          "invalid_selections": 0
+        },
+        "known_counts_from_valid_journals": {
+          "decisions": 316,
+          "calls": 316,
+          "selections": 8,
+          "abstentions": 308,
+          "failures": 0,
+          "invalid_selections": 0
+        },
+        "changed_from_builtin": 8,
+        "decision_events": 316,
+        "legal_decisions": 316,
+        "journals": [
+          {
+            "sha256": "0e44ce7ab1183683ebe3ff422016f877891ed02aaad328d55d089975134087d4",
+            "bytes": 767847,
+            "decision_events": 316
+          }
+        ],
+        "engine_preemptions_equal_journal_decisions": true
+      },
+      "admission": {
+        "passed": true,
+        "issues": [],
+        "tokenizations_verified": 12,
+        "geometry_fingerprint_sha256": "1c2238b3d1688e1b707e8f558dd47ea8663f0673097e49f01101a6d467b20e1b",
+        "actual_total_pool_blocks": 71,
+        "usable_pool_blocks": 70,
+        "maximum_context_upper_blocks": 14,
+        "first_admission_upper_count": 7,
+        "pressure_possible": true
+      },
+      "costs": {
+        "owner_started_unix": 1794632194.591749,
+        "api_spawn_begin_unix": 1794632196.0248542,
+        "healthy_unix": 1794632604.1119967,
+        "admitted_unix": 1794632606.656342,
+        "client_started_unix": 1794632606.6640525,
+        "client_ended_unix": 1794632921.3714354,
+        "api_wait_returned_unix": 1794632932.1513355,
+        "source_cpu_admission_seconds": 1.433105230331421,
+        "cold_model_initialization_seconds": 408.0871424674988,
+        "owner_reported_initialization_monotonic_seconds": 408.0839080233127,
+        "post_health_admission_seconds": 2.5443453788757324,
+        "total_admission_seconds": 412.23272013664246,
+        "generation_client_seconds": 314.7073829174042,
+        "cleanup_after_client_seconds": 10.779900074005127,
+        "api_resident_seconds": 736.126481294632,
+        "stage_total_seconds": 738.3339250087738,
+        "actual_client_returncode": 0,
+        "actual_owner_returncode": 0,
+        "actual_api_returncode": 0,
+        "startup_telemetry": {
+          "present": true,
+          "sha256": "9597526c4c55d737ef7980452c619c6e7dfc20f6d27833fddc6324d2142b2b82",
+          "samples": 39,
+          "sample_errors": 0,
+          "first_unix": 1794632196.0245948,
+          "last_unix": 1794632598.7940426,
+          "memory_current_max_bytes": 10678833152,
+          "devices": [
+            {
+              "physical_npu": 6,
+              "hbm_used_max_mb": 41149,
+              "observations": 39
+            },
+            {
+              "physical_npu": 7,
+              "hbm_used_max_mb": 41148,
+              "observations": 39
+            }
+          ],
+          "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+        },
+        "generation_telemetry": {
+          "present": true,
+          "sha256": "e5b593d90f26f3a8f8114314e3c02a6f7bc72b5332150395b5894e020487802b",
+          "samples": 30,
+          "sample_errors": 0,
+          "first_unix": 1794632606.8766747,
+          "last_unix": 1794632913.3469567,
+          "memory_current_max_bytes": 12588310528,
+          "devices": [
+            {
+              "physical_npu": 6,
+              "hbm_used_max_mb": 41357,
+              "observations": 30
+            },
+            {
+              "physical_npu": 7,
+              "hbm_used_max_mb": 41352,
+              "observations": 30
+            }
+          ],
+          "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+        },
+        "scope": "Durations overlap: total admission includes CPU/source, model/capture and post-health admission; API residence overlaps generation. Do not sum nested costs. Currency and unit-token financial cost are unverified."
+      },
+      "client_summary_comparison": {
+        "passed": true,
+        "mismatched_numeric_fields": []
+      },
+      "unique_salts_verified": true,
+      "audit_passed": true
+    },
+    {
+      "stage": "native-r02",
+      "numeric": {
+        "planned": 12,
+        "recorded": 12,
+        "successful_audited": 12,
+        "failed_recorded": 0,
+        "missing_records": 0,
+        "whole_batch_wall_seconds": 280.48444146476686,
+        "accepted_output_tokens": 24148,
+        "observed_output_tokens_known_sum": 24148,
+        "observed_output_tokens_known_records": 12,
+        "output_tokens_per_second": 86.09390194298302,
+        "complete_valid_transport": true,
+        "finish_stop": 0,
+        "finish_length": 12,
+        "observed_finish_stop": 0,
+        "observed_finish_length": 12,
+        "record_unknown_final_usage": 0,
+        "unknown_final_usage": 0,
+        "no_final_content": 0,
+        "unresolved_no_final_content": 0,
+        "ttft_first_content_seconds": {
+          "samples": 12,
+          "mean": 111.58762931187327,
+          "p50": 33.3098967326805,
+          "p95": 239.320539113041,
+          "p99": 239.98454579932616
+        },
+        "tpot_first_content_seconds": {
+          "samples": 12,
+          "mean": 0.0701110702696901,
+          "p50": 0.09089221183853674,
+          "p95": 0.12832810604621306,
+          "p99": 0.1318140088587091
+        },
+        "ttft_excluded_successful_records": 0,
+        "tpot_excluded_successful_records": 0,
+        "quality_evaluation": "not_performed",
+        "unexpected_record_files": []
+      },
+      "metrics": {
+        "passed": true,
+        "issues": [],
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_queries_total": 0.0,
+          "vllm:num_preemptions_total": 302.0,
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_queries_total": 53649.0
+        },
+        "before_sha256": "73610a48ccfe948fa4d300bf9413a3b34e397fd39ca45bf7cd17047275723b3b",
+        "after_sha256": "c4ba0941da0f81a4e6ae98045756861095121bac9928869db2231dd644ba97d6",
+        "scope": "Internal APC/self-resume hits preserved; external restore must remain zero. Missing is null."
+      },
+      "mechanism": {
+        "passed": true,
+        "issues": [],
+        "counts": {
+          "decisions": 302,
+          "calls": 0,
+          "selections": 0,
+          "abstentions": 0,
+          "failures": 0,
+          "invalid_selections": 0
+        },
+        "known_counts_from_valid_journals": {
+          "decisions": 302,
+          "calls": 0,
+          "selections": 0,
+          "abstentions": 0,
+          "failures": 0,
+          "invalid_selections": 0
+        },
+        "changed_from_builtin": 0,
+        "decision_events": 302,
+        "legal_decisions": 302,
+        "journals": [
+          {
+            "sha256": "1eff7ea26a16e53ce3b3fbe7647e9baae233ab458cf89199bb9b0ebb6df35c8f",
+            "bytes": 716816,
+            "decision_events": 302
+          }
+        ],
+        "engine_preemptions_equal_journal_decisions": true
+      },
+      "admission": {
+        "passed": true,
+        "issues": [],
+        "tokenizations_verified": 12,
+        "geometry_fingerprint_sha256": "1c2238b3d1688e1b707e8f558dd47ea8663f0673097e49f01101a6d467b20e1b",
+        "actual_total_pool_blocks": 71,
+        "usable_pool_blocks": 70,
+        "maximum_context_upper_blocks": 14,
+        "first_admission_upper_count": 7,
+        "pressure_possible": true
+      },
+      "costs": {
+        "owner_started_unix": 1794632933.5050957,
+        "api_spawn_begin_unix": 1794632934.9193866,
+        "healthy_unix": 1794633338.6907995,
+        "admitted_unix": 1794633339.5341973,
+        "client_started_unix": 1794633339.54004,
+        "client_ended_unix": 1794633620.3603954,
+        "api_wait_returned_unix": 1794633630.8433871,
+        "source_cpu_admission_seconds": 1.4142909049987793,
+        "cold_model_initialization_seconds": 403.77141284942627,
+        "owner_reported_initialization_monotonic_seconds": 403.7677975855768,
+        "post_health_admission_seconds": 0.843397855758667,
+        "total_admission_seconds": 406.1968677043915,
+        "generation_client_seconds": 280.82035541534424,
+        "cleanup_after_client_seconds": 10.482991695404053,
+        "api_resident_seconds": 695.9240005016327,
+        "stage_total_seconds": 698.1070742607117,
+        "actual_client_returncode": 0,
+        "actual_owner_returncode": 0,
+        "actual_api_returncode": 0,
+        "startup_telemetry": {
+          "present": true,
+          "sha256": "08fc9c96c8d5b3297364b4749b2fdc8f3e86760ea06a15e8468aa52e92f8ae6c",
+          "samples": 39,
+          "sample_errors": 0,
+          "first_unix": 1794632934.919096,
+          "last_unix": 1794633337.0917337,
+          "memory_current_max_bytes": 11586752512,
+          "devices": [
+            {
+              "physical_npu": 6,
+              "hbm_used_max_mb": 41148,
+              "observations": 39
+            },
+            {
+              "physical_npu": 7,
+              "hbm_used_max_mb": 41148,
+              "observations": 39
+            }
+          ],
+          "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+        },
+        "generation_telemetry": {
+          "present": true,
+          "sha256": "03e33dad705b351487284046dbd936ff63c1212ae12ecf9fe8bbdf1f070a9b55",
+          "samples": 27,
+          "sample_errors": 0,
+          "first_unix": 1794633339.7594814,
+          "last_unix": 1794633614.4905272,
+          "memory_current_max_bytes": 12469882880,
+          "devices": [
+            {
+              "physical_npu": 6,
+              "hbm_used_max_mb": 41297,
+              "observations": 27
+            },
+            {
+              "physical_npu": 7,
+              "hbm_used_max_mb": 41292,
+              "observations": 27
+            }
+          ],
+          "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+        },
+        "scope": "Durations overlap: total admission includes CPU/source, model/capture and post-health admission; API residence overlaps generation. Do not sum nested costs. Currency and unit-token financial cost are unverified."
+      },
+      "client_summary_comparison": {
+        "passed": true,
+        "mismatched_numeric_fields": []
+      },
+      "unique_salts_verified": true,
+      "audit_passed": true
+    }
+  ],
+  "pairs": [
+    {
+      "native_stage": "native-r01",
+      "candidate_stage": "bidkv-r01",
+      "run_order": [
+        "native-r01",
+        "bidkv-r01"
+      ],
+      "complete_numeric_pair": true,
+      "throughput_change_pct": 0.22313974406213966,
+      "native_output_tokens": 24148,
+      "candidate_output_tokens": 24148,
+      "evidence_audit_passed": true,
+      "pair_geometry_fingerprints_match": true,
+      "victim_selection_mechanism_observed": true,
+      "scope": "Natural EOS work/output totals may differ. Throughput sign, calls, legal selection and changed victim are separate; no cross-configuration token-equality or task-quality claim.",
+      "fully_validated_pair": true,
+      "qualified_closed_study_victim_selection": true
+    },
+    {
+      "native_stage": "native-r02",
+      "candidate_stage": "bidkv-r02",
+      "run_order": [
+        "bidkv-r02",
+        "native-r02"
+      ],
+      "complete_numeric_pair": true,
+      "throughput_change_pct": -10.784507223605777,
+      "native_output_tokens": 24148,
+      "candidate_output_tokens": 24148,
+      "evidence_audit_passed": true,
+      "pair_geometry_fingerprints_match": true,
+      "victim_selection_mechanism_observed": true,
+      "scope": "Natural EOS work/output totals may differ. Throughput sign, calls, legal selection and changed victim are separate; no cross-configuration token-equality or task-quality claim.",
+      "fully_validated_pair": true,
+      "qualified_closed_study_victim_selection": true
+    }
+  ],
+  "both_pairs_complete": true,
+  "mean_of_two_paired_throughput_changes_pct": -5.280683739771819,
+  "both_pair_effects_positive": false,
+  "stage_evidence_all_four_passed": true,
+  "observed_geometry_admissions": 4,
+  "observed_geometry_fingerprints_match": true,
+  "all_four_geometry_admissions_verified": true,
+  "common_geometry_fingerprints_match": true,
+  "all_four_stage_audits_passed": true,
+  "study_execution_complete": true,
+  "both_pairs_fully_validated": true,
+  "mean_of_two_fully_validated_pair_changes_pct": -5.280683739771819,
+  "input_membership_hash_verified": true,
+  "controlled_inputs_unchanged_during_export": true,
+  "snapshot_mode": false,
+  "quality_evaluation": "not_performed",
+  "formal_five_dataset_substitute": false,
+  "selection_rule": "Both prespecified AB and BA pairs retained, positive/negative/missing included; no best-round selection. Mean is null unless both numeric pairs complete.",
+  "limits": "Offline replay only. Missing usage/counters/timing remain null. Admission and whole-batch transport are separate from actual activation/changed victim/benefit. Costs overlap as marked; no monetary, hardware-saving, task-quality or four-goal acceptance inferred.",
+  "analysis_manifest_sha256": "172a5391e07b5a1c730664c2b56a45e96ef34d0f9c07a9976bff18c0b955bff4"
+}

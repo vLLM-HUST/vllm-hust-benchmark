@@ -1,0 +1,302 @@
+"""Twelve unchanged historical prompts, natural EOS, fixed4rps and no retries."""
+
+import argparse
+import hashlib
+import json
+import time
+import uuid
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+from cpu_rules import (
+    STAGES,
+    bind_internal_ids,
+    case_id,
+    load_inputs,
+    metric_delta,
+    read,
+)
+from measurement import distribution
+from observation import Sampler, snapshot, totals
+from pressure_transport import call
+
+ROOT = Path("/workspace/bidkv-five-datasets-20261113-01")
+PROBE = ROOT / "durable/probes/bidkv-evo-pressure-02"
+DRIVER = Path(__file__).resolve().parent
+
+
+def save(path, value):
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(
+        json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
+    )
+    temporary.replace(path)
+
+
+def policy_snapshot(stage):
+    result = []
+    for path in sorted((PROBE / stage / "policy").glob("*.jsonl")):
+        events = [
+            json.loads(line) for line in path.read_text().splitlines() if line.strip()
+        ]
+        assert events and events[0]["event"] == "initialized"
+        all_ids, decisions, different = set(), 0, 0
+        for event in events:
+            if event["event"] != "preemption-decision":
+                continue
+            context = event["context"]
+            ids = {row["request_id"] for row in context["candidates"]}
+            assert event["selected_id"] in ids
+            assert (
+                context["builtin_victim_id"] in ids
+                and context["requesting_request_id"] in ids
+            )
+            assert event["outcome"] not in ("exception-fallback", "invalid-fallback")
+            all_ids |= ids
+            decisions += 1
+            different += event["selected_id"] != context["builtin_victim_id"]
+        mapping = bind_internal_ids(all_ids, stage)
+        stats = events[-1]["stats"]
+        assert stats["enabled"] == stage.startswith("bidkv-")
+        assert stats["failures"] == stats["invalid_selections"] == 0
+        result.append(
+            {
+                "controlled_path": str(path),
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                "last_stats": stats,
+                "decisions_observed": decisions,
+                "selected_different_from_builtin": different,
+                "external_internal_mapping": mapping,
+            }
+        )
+    assert result, "No policy installation/activation journal"
+    return result
+
+
+def gate(stage):
+    manifest = (DRIVER / "source-manifest.json").read_bytes()
+    release = read(PROBE / "publication.json")
+    assert release["readback_verified"] is True
+    assert release["source_manifest_sha256"] == hashlib.sha256(manifest).hexdigest()
+    for name, expected in json.loads(manifest)["files"].items():
+        assert hashlib.sha256((DRIVER / name).read_bytes()).hexdigest() == expected
+    assert read(PROBE / "metadata/lifecycle.json")["phase"] == stage
+    admission = read(PROBE / stage / "status.json")
+    assert admission["phase"] == "admitted"
+    assert (
+        Path(f"/proc/{admission['api_pid']}/stat").read_text().split()[21]
+        == admission["api_start_ticks"]
+    )
+    assert read(PROBE / stage / "capacity-go.json")["go"] is True
+
+
+def completion_observations(records):
+    """Keep accepted completion and raw final observations distinct on failure."""
+    observations = []
+    for row in records:
+        accepted = row["status"] == "ok"
+        observed_usage = row.get("observed_usage")
+        if observed_usage is None:
+            observed_usage = row.get("usage")
+        observed_finish = row.get("observed_finish_reason")
+        if observed_finish is None:
+            observed_finish = row.get("finish_reason")
+        observations.append(
+            {
+                "case_id": row.get("case_id"),
+                "status": row["status"],
+                "accepted_usage": row.get("usage") if accepted else None,
+                "accepted_finish_reason": row.get("finish_reason")
+                if accepted
+                else None,
+                "observed_usage": observed_usage,
+                "observed_finish_reason": observed_finish,
+                "no_final_content": row.get("no_final_content"),
+                "unresolved_no_final_content": accepted
+                and row.get("no_final_content") is True,
+            }
+        )
+    return {
+        "finish_stop": sum(
+            row["accepted_finish_reason"] == "stop" for row in observations
+        ),
+        "finish_length": sum(
+            row["accepted_finish_reason"] == "length" for row in observations
+        ),
+        "accepted_usage_records": sum(
+            row["accepted_usage"] is not None for row in observations
+        ),
+        "observed_finish_stop": sum(
+            row["observed_finish_reason"] == "stop" for row in observations
+        ),
+        "observed_finish_length": sum(
+            row["observed_finish_reason"] == "length" for row in observations
+        ),
+        "observed_usage_records": sum(
+            row["observed_usage"] is not None for row in observations
+        ),
+        "observed_usage_on_failed_records": sum(
+            row["status"] != "ok" and row["observed_usage"] is not None
+            for row in observations
+        ),
+        "unknown_final_usage": sum(
+            row.get("usage") is None and row.get("observed_usage") is None
+            for row in records
+        ),
+        "no_final_content": sum(
+            row["no_final_content"] is True for row in observations
+        ),
+        "unresolved_no_final_content": sum(
+            row["unresolved_no_final_content"] for row in observations
+        ),
+        "completion_observations": observations,
+        "quality_evaluation": "not_performed; complete generation is not a task-quality pass",
+    }
+
+
+def run(stage):
+    gate(stage)
+    clock = read(PROBE / "metadata/clock.json")
+    assert (
+        clock["host_boot_id_sha256"]
+        == hashlib.sha256(
+            Path("/proc/sys/kernel/random/boot_id").read_bytes()
+        ).hexdigest()
+    )
+    cutoff = clock["deadline_monotonic"] - 30
+    assert cutoff > time.monotonic()
+    out = PROBE / "batches" / stage
+    out.mkdir(parents=True, exist_ok=False, mode=0o700)
+    (out / "records").mkdir()
+    receipt = read(DRIVER / "input-token-receipt.json")
+    source = load_inputs(PROBE / "input/evoscientist-first12.jsonl", receipt)
+    planned = []
+    for lane, (row, checked) in enumerate(
+        zip(source, receipt["requests"], strict=True)
+    ):
+        identity = case_id(stage, lane)
+        body = {
+            "model": "qwen3.5-35b",
+            "messages": [{"role": "user", "content": row["prompt"]}],
+            "temperature": 0,
+            "seed": 17,
+            "max_tokens": row["output_tokens"],
+            "stream": True,
+            "stream_options": {"include_usage": True},
+            "n": 1,
+            "tool_choice": "none",
+            "request_id": identity,
+            "cache_salt": uuid.uuid4().hex,
+        }
+        assert "ignore_eos" not in body and "chat_template_kwargs" not in body
+        planned.append(
+            {
+                "case_id": identity,
+                "lane": lane,
+                "scheduled_offset_seconds": lane / 4,
+                "input_tokens": checked["chat_input_tokens"],
+                "input_token_ids_sha256": checked["input_token_ids_sha256"],
+                "request": body,
+            }
+        )
+    save(out / "planned-requests.json", planned)
+    before = snapshot("http://127.0.0.1:18390", out, "before")
+    save(out / "before-policy.json", policy_snapshot(stage))
+    origin = time.monotonic()
+
+    def send(row):
+        due = origin + row["scheduled_offset_seconds"]
+        delay = due - time.monotonic()
+        if delay > 0:
+            time.sleep(delay)
+        identity = row["case_id"]
+        save(
+            out / "records" / (identity + "-call-entry.json"),
+            {
+                "case_id": identity,
+                "due_monotonic": due,
+                "call_entered_monotonic": time.monotonic(),
+                "call_entered_unix": time.time(),
+            },
+        )
+        record = call(
+            {
+                "base_url": "http://127.0.0.1:18390",
+                "timeout": min(1200, max(0.001, cutoff - time.monotonic())),
+            },
+            row["request"],
+            out / "transport" / identity,
+            fixed_length=False,
+            require_zero_reuse=False,
+            require_final_answer=False,
+        )
+        record.update(
+            case_id=identity,
+            stage=stage,
+            lane=row["lane"],
+            scheduled_offset_seconds=row["scheduled_offset_seconds"],
+            expected_input_tokens=row["input_tokens"],
+        )
+        if record["status"] == "ok":
+            if (
+                record.get("server_request_id") != "chatcmpl-" + identity
+                or record["usage"]["prompt_tokens"] != row["input_tokens"]
+            ):
+                record.update(
+                    status="identity_error",
+                    error="Frozen input/request identity did not match",
+                )
+        save(out / "records" / (identity + ".json"), record)
+        return record
+
+    with Sampler(out), ThreadPoolExecutor(max_workers=12) as pool:
+        records = list(pool.map(send, planned))
+    after = snapshot("http://127.0.0.1:18390", out, "after")
+    counters = metric_delta(totals(before), totals(after))
+    save(out / "counter-deltas.json", counters)
+    policies = policy_snapshot(stage)
+    save(out / "after-policy.json", policies)
+    good = [row for row in records if row["status"] == "ok"]
+    wall = max(row["end"]["monotonic"] for row in records) - min(
+        row["start"]["monotonic"] for row in records
+    )
+    tokens = sum(row["usage"]["completion_tokens"] for row in good)
+    ttft = [
+        row["first_token"]["monotonic"] - row["start"]["monotonic"]
+        for row in good
+        if row["first_token"] is not None
+    ]
+    tpot = [
+        (row["end"]["monotonic"] - row["first_token"]["monotonic"])
+        / (row["usage"]["completion_tokens"] - 1)
+        for row in good
+        if row["first_token"] is not None and row["usage"]["completion_tokens"] > 1
+    ]
+    summary = {
+        "stage": stage,
+        "planned": 12,
+        "recorded": len(records),
+        "successful": len(good),
+        "failed": 12 - len(good),
+        "whole_batch_wall_seconds": wall,
+        "accepted_output_tokens_in_successful_records": tokens,
+        "output_tokens_per_second": tokens / wall if len(good) == 12 else None,
+        **completion_observations(records),
+        "ttft_first_content_seconds": distribution(ttft),
+        "tpot_first_content_seconds": distribution(tpot),
+        "ttft_excluded_successful_records": len(good) - len(ttft),
+        "tpot_excluded_successful_records": len(good) - len(tpot),
+        "counter_deltas": counters,
+        "policy_observations": policies,
+        "eos_preserved": True,
+        "inference_retries": 0,
+        "scope": "Supplemental real historical prompts in current chat/EOS profile; complete reasoning-only work is retained as no-final-content/unresolved, not a task-quality pass. Such records are excluded from content TTFT/TPOT with counts retained. No tool execution, task quality/official five score or hardware savings inferred. Natural EOS/output differences remain visible; accepted and observed final usage/finish remain distinct.",
+    }
+    save(out / "summary.json", summary)
+    return 0 if len(good) == 12 else 2
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--stage", choices=STAGES, required=True)
+    raise SystemExit(run(parser.parse_args().stage))

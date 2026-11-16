@@ -1,0 +1,562 @@
+"""Read-only pressure SSE replay and numeric export, including incomplete attempts."""
+
+import argparse
+import base64
+import gzip
+import hashlib
+import json
+from pathlib import Path
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def read(path):
+    return json.loads(path.read_bytes()) if path.is_file() else None
+
+
+def recompute_batch(name, rows):
+    good = [row for row in rows if row.get("status") == "ok"]
+    full = len(good) == 8
+    span = (
+        max(row["end"]["monotonic"] for row in good)
+        - min(row["start"]["monotonic"] for row in good)
+        if full
+        else None
+    )
+    generated = [row for row in good if row.get("first_generated_event") is not None]
+    content = [row for row in good if row.get("first_token") is not None]
+    generated_n2 = [row for row in generated if row["usage"]["completion_tokens"] > 1]
+    content_n2 = [row for row in content if row["usage"]["completion_tokens"] > 1]
+
+    def mean(values):
+        return sum(values) / len(values) if values else None
+
+    gen_ttft = mean(
+        [
+            row["first_generated_event"]["monotonic"] - row["start"]["monotonic"]
+            for row in generated
+        ]
+    )
+    gen_tpot = mean(
+        [
+            (row["end"]["monotonic"] - row["first_generated_event"]["monotonic"])
+            / (row["usage"]["completion_tokens"] - 1)
+            for row in generated_n2
+        ]
+    )
+    return {
+        "name": name,
+        "full8_successful_records": full,
+        "batch_wall_seconds_if_complete": span,
+        "output_tokens_per_second_if_complete": sum(
+            row["usage"]["completion_tokens"] for row in good
+        )
+        / span
+        if full
+        else None,
+        "mean_ttft_first_generated_seconds_successful_only": gen_ttft,
+        "mean_tpot_seconds_successful_only": gen_tpot,
+        "legacy_tpot_reference": "first_generated_event; retained original diagnostic, not first content",
+        "mean_tpot_first_generated_seconds_successful_only": gen_tpot,
+        "mean_ttft_first_content_seconds_successful_only": mean(
+            [
+                row["first_token"]["monotonic"] - row["start"]["monotonic"]
+                for row in content
+            ]
+        ),
+        "mean_tpot_first_content_seconds_successful_only": mean(
+            [
+                (row["end"]["monotonic"] - row["first_token"]["monotonic"])
+                / (row["usage"]["completion_tokens"] - 1)
+                for row in content_n2
+            ]
+        ),
+        "successful_latency_population": len(good),
+        "first_generated_ttft_population": len(generated),
+        "first_content_ttft_population": len(content),
+        "first_generated_tpot_population_n_gt_1": len(generated_n2),
+        "first_content_tpot_population_n_gt_1": len(content_n2),
+        "successful_missing_first_generated_excluded": len(good) - len(generated),
+        "successful_missing_first_content_excluded": len(good) - len(content),
+        "successful_completion_n_le_1_excluded_from_tpot": sum(
+            row["usage"]["completion_tokens"] <= 1 for row in good
+        ),
+        "both_first_events_present": sum(
+            row.get("first_generated_event") is not None
+            and row.get("first_token") is not None
+            for row in good
+        ),
+        "first_generated_equals_first_content": sum(
+            row.get("first_generated_event") is not None
+            and row.get("first_generated_event") == row.get("first_token")
+            for row in good
+        ),
+        "tpot_denominator_note": "Both diagnostics divide by total accepted completion_tokens minus1; if reasoning exists, content-reference TPOT is not a separately measured content-token-only rate.",
+        "policy_and_cohort_validity_separate": True,
+    }
+
+
+def inspect_sse(path, record=None):
+    """Independent wire parser; keep content only in RAM for exact comparison."""
+    usage = finish = first = first_content = None
+    identifiers, content, reasoning = set(), [], []
+    done = False
+    lines = 0
+    parse_error = None
+    previous_clock = None
+    try:
+        with gzip.open(path, "rt", encoding="utf-8") as stream:
+            for line in stream:
+                event = json.loads(line)
+                stamp = event["clock"]
+                if previous_clock is not None:
+                    assert stamp["monotonic"] >= previous_clock
+                previous_clock = stamp["monotonic"]
+                raw = base64.b64decode(event["raw_b64"], validate=True)
+                lines += 1
+                if not raw.startswith(b"data:"):
+                    continue
+                body = raw[5:].strip()
+                if body == b"[DONE]":
+                    done = True
+                    continue
+                payload = json.loads(body)
+                assert not payload.get("error")
+                if payload.get("id") is not None:
+                    identifiers.add(payload["id"])
+                if payload.get("usage") is not None:
+                    usage = payload["usage"]
+                for choice in payload.get("choices", []):
+                    delta = choice.get("delta") or {}
+                    text = delta.get("content") or ""
+                    thought = (
+                        delta.get("reasoning_content") or delta.get("reasoning") or ""
+                    )
+                    assert isinstance(text, str) and isinstance(thought, str)
+                    content.append(text)
+                    reasoning.append(thought)
+                    if text and first_content is None:
+                        first_content = stamp
+                    if (text or thought) and first is None:
+                        first = stamp
+                    finish = choice.get("finish_reason") or finish
+    except (
+        EOFError,
+        OSError,
+        ValueError,
+        KeyError,
+        AssertionError,
+        TypeError,
+    ) as error:
+        parse_error = type(error).__name__
+    complete = done and parse_error is None and finish == "length" and usage is not None
+    verified = False
+    if record is not None and record["status"] == "ok":
+        assert complete and len(identifiers) == 1
+        assert record["stream_sha256"] == sha(path)
+        assert usage == record["usage"] and finish == record["finish_reason"]
+        assert usage["prompt_tokens"] == 16407 and usage["completion_tokens"] == 4096
+        assert first == record["first_generated_event"]
+        assert first_content == record["first_token"]
+        assert "".join(content) == record["content"]
+        assert "".join(reasoning) == record["reasoning"]
+        assert (
+            identifiers == {record["expected_wire_id"]} == {record["server_request_id"]}
+        )
+        verified = True
+    return {
+        "sha256": sha(path),
+        "bytes": path.stat().st_size,
+        "captured_lines": lines,
+        "done_seen": done,
+        "finish_reason_observed": finish,
+        "usage_observed": usage,
+        "first_generated_event": first,
+        "first_content_event": first_content,
+        "server_request_ids": sorted(identifiers),
+        "gzip_or_parse_error_type": parse_error,
+        "complete_wire": complete,
+        "successful_record_independently_verified": verified,
+        "usage_scope": "Observed server usage only; incomplete captures do not establish a completed accepted request",
+    }
+
+
+def export(root, out):
+    assert not out.exists()
+    lifecycle = read(root / "metadata/pressure-lifecycle.json")
+    assert lifecycle is None or lifecycle["phase"] in ["completed", "failed"]
+    supervisor = read(root / "metadata/generation-controller-owned-supervisor.json")
+    assert supervisor is None or supervisor["phase"] in ["completed", "failed"], (
+        "Wait for real controller child wait"
+    )
+    owners = {arm: read(root / arm / "status.json") for arm in ["native", "bidkv"]}
+    assert all(
+        value is None or value["phase"] in ["owned-model-released", "failed"]
+        for value in owners.values()
+    )
+    for arm, value in owners.items():
+        if value and value.get("api_pid"):
+            assert (root / arm / "api-owned-wait.json").is_file(), (
+                "Wait for actual owned API cleanup"
+            )
+            assert (root / arm / "npu-release.txt").is_file(), (
+                "Wait for actual release observation"
+            )
+    out.mkdir(parents=True, mode=0o700)
+    salts, ids, records, batches = set(), set(), [], []
+    for arm in ["native", "bidkv"]:
+        for repeat in [1]:
+            name = arm + f"-r{repeat:02}"
+            folder = root / "batches" / name
+            planned = read(folder / "planned-requests.json")
+            batch = {
+                "name": name,
+                "arm": arm,
+                "repeat": repeat,
+                "planned": 8,
+                "planned_records_present": planned is not None,
+                "status": read(folder / "status.json"),
+                "original_summary": read(folder / "summary.json"),
+                "cache_counter_scope": read(folder / "cache-counter-scope.json"),
+            }
+            if planned is not None:
+                assert len(planned) == 8 and {row["lane"] for row in planned} == set(
+                    range(8)
+                )
+            batches.append(batch)
+            for lane in range(8):
+                identifier = f"hust-bkprobe01-{'n' if arm == 'native' else 'b'}-r{repeat:02}-l{lane:02}".ljust(
+                    32, "0"
+                )
+                assert identifier not in ids
+                ids.add(identifier)
+                entry = {
+                    "case_id": identifier,
+                    "arm": arm,
+                    "repeat": repeat,
+                    "lane": lane,
+                    "planned_input_tokens": 16407,
+                    "planned_output_budget": 4096,
+                    "final_record_present": False,
+                    "call_entry_present": False,
+                    "sse": [],
+                }
+                if planned is not None:
+                    request = next(row for row in planned if row["lane"] == lane)
+                    body = request["request"]
+                    assert identifier == request["case_id"] == body["request_id"]
+                    assert body["max_tokens"] == 4096 and body["ignore_eos"] is True
+                    assert (
+                        body["temperature"] == 0
+                        and body["seed"] == 17
+                        and body["n"] == 1
+                    )
+                    assert request["input_tokens"] == 16407
+                    salt = body["cache_salt"]
+                    assert salt and salt not in salts
+                    salts.add(salt)
+                    entry.update(
+                        salt_sha256=hashlib.sha256(salt.encode()).hexdigest(),
+                        expected_wire_id=request["expected_wire_id"],
+                        input_token_ids_sha256=request["input_token_ids_sha256"],
+                    )
+                    marker = read(
+                        folder / "records" / (identifier + "-call-entry.json")
+                    )
+                    record = read(folder / "records" / (identifier + ".json"))
+                    entry["call_entry_present"] = marker is not None
+                    entry["call_entered_unix"] = (
+                        marker.get("call_entered_unix") if marker else None
+                    )
+                    if record:
+                        assert record["request"] == body
+                        entry["final_record_present"] = True
+                        for key in [
+                            "status",
+                            "attempted",
+                            "http_status",
+                            "start",
+                            "end",
+                            "first_token",
+                            "last_token",
+                            "first_generated_event",
+                            "last_generated_event",
+                            "finish_reason",
+                            "observed_finish_reason",
+                            "usage",
+                            "observed_usage",
+                            "cached_tokens_reported",
+                            "server_request_id",
+                            "elapsed_s",
+                        ]:
+                            entry[key] = record.get(key)
+                        entry["error_type"] = (
+                            record.get("error", "").split(":", 1)[0] or None
+                        )
+                    captures = sorted(
+                        (folder / "transport" / identifier).glob("*.sse.jsonl.gz")
+                    )
+                    for capture in captures:
+                        mapped = (
+                            record
+                            if record
+                            and Path(record["stream_capture"]).resolve()
+                            == capture.resolve()
+                            else None
+                        )
+                        entry["sse"].append(inspect_sse(capture, mapped))
+                    if record and record["status"] == "ok":
+                        assert (
+                            len(captures) == 1
+                            and entry["sse"][0][
+                                "successful_record_independently_verified"
+                            ]
+                        )
+                records.append(entry)
+    assert len(records) == len(ids) == 16
+    write(out / "requests.json", records)
+    policies = {}
+    valid_ids = {"chatcmpl-" + value for value in ids}
+    for arm in ["native", "bidkv"]:
+        journal_rows = []
+        for path in sorted((root / arm / "policy").glob("*.jsonl")):
+            events = [
+                json.loads(line)
+                for line in path.read_text().splitlines()
+                if line.strip()
+            ]
+            assert events[0]["event"] == "initialized"
+            numeric = []
+            for row in events:
+                item = {"event": row["event"], "stats": row["stats"]}
+                if row["event"] == "preemption-decision":
+                    context = row["context"]
+                    candidates = context["candidates"]
+                    assert {case["request_id"] for case in candidates} <= valid_ids
+                    assert row["selected_id"] in {
+                        case["request_id"] for case in candidates
+                    }
+                    item.update(
+                        outcome=row["outcome"],
+                        selected_id=row["selected_id"],
+                        context=context,
+                    )
+                numeric.append(item)
+            journal_rows.append(
+                {
+                    "controlled_path": str(path),
+                    "sha256": sha(path),
+                    "bytes": path.stat().st_size,
+                    "events": numeric,
+                }
+            )
+        log = root / arm / "service.log"
+        text = log.read_text(errors="replace") if log.exists() else ""
+        policies[arm] = {
+            "journals": journal_rows,
+            "last_stats_per_journal": [
+                item["events"][-1]["stats"] for item in journal_rows
+            ],
+            "selection_outcomes": {
+                "selected_different_from_builtin": sum(
+                    event.get("outcome") == "selected"
+                    and event["selected_id"] != event["context"]["builtin_victim_id"]
+                    for item in journal_rows
+                    for event in item["events"]
+                    if event["event"] == "preemption-decision"
+                ),
+                "selected_same_as_builtin": sum(
+                    event.get("outcome") == "selected"
+                    and event["selected_id"] == event["context"]["builtin_victim_id"]
+                    for item in journal_rows
+                    for event in item["events"]
+                    if event["event"] == "preemption-decision"
+                ),
+                "abstained": sum(
+                    event.get("outcome") == "abstained"
+                    for item in journal_rows
+                    for event in item["events"]
+                ),
+                "exception_or_invalid_fallback": sum(
+                    event.get("outcome") in ["exception-fallback", "invalid-fallback"]
+                    for item in journal_rows
+                    for event in item["events"]
+                ),
+            },
+            "selector_marker_counts": {
+                marker: text.count(marker)
+                for marker in [
+                    "[BidKV] UTILITY_ACTIVE",
+                    "[BidKV] LIVENESS_ABSTAIN",
+                    "[BidKV] CASCADE_ABSTAIN",
+                    "[BidKV] FALLBACK",
+                ]
+            },
+            "controlled_log_sha256": sha(log) if log.exists() else None,
+        }
+    write(out / "policies.json", policies)
+    for name in [
+        "clock",
+        "pressure-lifecycle",
+        "native-owned-supervisor",
+        "generation-controller-owned-supervisor",
+        "native-capacity-go-no-go",
+        "native-capacity-go-no-go-v2",
+        "bidkv-capacity-confirmation",
+        "generation-public-release",
+        "request-id-salt-audit",
+    ]:
+        path = root / "metadata" / (name + ".json")
+        if path.is_file():
+            (out / (name + ".json")).write_bytes(path.read_bytes())
+    for arm in ["native", "bidkv"]:
+        for name in [
+            "status.json",
+            "api-owned-wait.json",
+            "cache-groups-rpc.json",
+            "token-id-admission.json",
+            "core-sdk-metadata.json",
+            "binding-evidence.json",
+            "command.json",
+            "startup-telemetry.jsonl",
+        ]:
+            path = root / arm / name
+            if path.is_file():
+                (out / (arm + "-" + name)).write_bytes(path.read_bytes())
+    cost = {
+        "schema": "pressure-resource-time-accounting/v1",
+        "services": {},
+        "price_per_device_hour": None,
+        "charged_billing_seconds": None,
+        "incremental_module_memory_or_FLOP_efficiency": None,
+        "scope": "Observed model residency and init/park/batch clocks; device-seconds are a resource-time proxy, not a bill or isolated module cost. Artificial1GiB quota does not reduce64GiB hardware cost.",
+    }
+    for arm, owner in owners.items():
+        if owner is None:
+            cost["services"][arm] = {"executed": False}
+            continue
+        wait = read(root / arm / "api-owned-wait.json")
+        telemetry = root / arm / "startup-telemetry.jsonl"
+        samples = (
+            [
+                json.loads(line)
+                for line in telemetry.read_text().splitlines()
+                if line.strip()
+            ]
+            if telemetry.exists()
+            else []
+        )
+        residence = (
+            wait["wait_returned_unix"] - owner["api_spawn_return_unix"]
+            if wait and owner.get("api_spawn_return_unix")
+            else None
+        )
+        cost["services"][arm] = {
+            "executed": True,
+            "api_spawn_return_unix": owner.get("api_spawn_return_unix"),
+            "healthy_unix": owner.get("healthy_unix"),
+            "initialization_seconds": owner.get("initialization_seconds"),
+            "actual_API_wait_unix": wait.get("wait_returned_unix") if wait else None,
+            "model_residency_wall_seconds": residence,
+            "two_device_seconds_resource_proxy": 2 * residence
+            if residence is not None
+            else None,
+            "startup_sample_count": len(samples),
+            "peak_total_container_memory_current_bytes_observed_startup": max(
+                [
+                    int(row["memory.current"])
+                    for row in samples
+                    if "memory.current" in row
+                ],
+                default=None,
+            ),
+        }
+    write(out / "cost-accounting.json", cost)
+    recomputed = [
+        recompute_batch(
+            batch["name"],
+            [
+                row
+                for row in records
+                if row["arm"] == batch["arm"] and row["repeat"] == batch["repeat"]
+            ],
+        )
+        for batch in batches
+    ]
+    no_faults = all(
+        stats["failures"] == stats["invalid_selections"] == 0
+        for policy in policies.values()
+        for stats in policy["last_stats_per_journal"]
+    )
+    complete_valid = bool(
+        lifecycle
+        and lifecycle["phase"] == "completed"
+        and all(row.get("status") == "ok" for row in records)
+        and no_faults
+    )
+    write(
+        out / "summary.json",
+        {
+            "schema": "bidkv-supplemental-pressure-numeric/v2",
+            "planned_requests": 16,
+            "lifecycle_status": lifecycle["phase"]
+            if lifecycle
+            else "no_generation_controller_started",
+            "complete_valid_cohort": complete_valid,
+            "all_observed_policy_fault_counters_zero": no_faults,
+            "independently_recomputed_batch_metrics": recomputed,
+            "completed_ok": sum(row.get("status") == "ok" for row in records),
+            "recorded": sum(row["final_record_present"] for row in records),
+            "call_entries": sum(row["call_entry_present"] for row in records),
+            "successful_SSE_independently_verified": sum(
+                item["successful_record_independently_verified"]
+                for row in records
+                for item in row["sse"]
+            ),
+            "planned_salts_present": len(salts),
+            "batches": batches,
+            "scope": "Artificial1GiB synthetic16x4096 bounded cohort; every planned cell retained. Not normal16GiB/task quality/hardware savings. Local aggregate prefix hits permit only inference, not per-hit self-resume proof. Partial/unexecuted results are not a complete paired cohort.",
+        },
+    )
+    write(
+        out / "controlled-originals-index.json",
+        {
+            "controlled_root": str(root),
+            "originals_not_redistributed": True,
+            "files": [
+                {
+                    "path": path.relative_to(root).as_posix(),
+                    "bytes": path.stat().st_size,
+                    "sha256": sha(path),
+                }
+                for path in sorted(root.rglob("*"))
+                if path.is_file()
+            ],
+        },
+    )
+    write(
+        out / "manifest.json",
+        {
+            "files": [
+                {"path": path.name, "bytes": path.stat().st_size, "sha256": sha(path)}
+                for path in sorted(out.iterdir())
+                if path.is_file()
+            ]
+        },
+    )
+
+
+def write(path, value):
+    path.write_text(
+        json.dumps(value, indent=2, allow_nan=False) + "\n", encoding="utf-8"
+    )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    export(args.root, args.out)

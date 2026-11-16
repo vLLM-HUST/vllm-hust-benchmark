@@ -1,0 +1,109 @@
+{
+  "schema": "c8-policy-custody/v1",
+  "scope": "C8 service initialization and append-only journal statistics; zero calls are observed rather than inferred from throughput",
+  "access": "Authorized Coder/NAS access; originals remain controlled",
+  "arms": [
+    {
+      "arm": "native",
+      "server_pid": 35332,
+      "service_final_phase": "preflight-complete",
+      "journal_originals": [
+        {
+          "controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/native-02/policy/enginecore-38025.jsonl",
+          "bytes": 270,
+          "sha256": "328630b49dcd78c31191739471a26a80615d52b2d69967622ab35897399ef360",
+          "records": 1,
+          "initial_event": "initialized",
+          "initial_stats": {
+            "profile": "official-vllm-0.23-source-bridge/v1",
+            "policy": null,
+            "enabled": false,
+            "decisions": 0,
+            "calls": 0,
+            "selections": 0,
+            "abstentions": 0,
+            "failures": 0,
+            "invalid_selections": 0
+          },
+          "last_event": "initialized",
+          "last_stats": {
+            "profile": "official-vllm-0.23-source-bridge/v1",
+            "policy": null,
+            "enabled": false,
+            "decisions": 0,
+            "calls": 0,
+            "selections": 0,
+            "abstentions": 0,
+            "failures": 0,
+            "invalid_selections": 0
+          }
+        }
+      ],
+      "command_original": {
+        "path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/native-02/command.json",
+        "bytes": 2735,
+        "sha256": "e778954cd9cfe1dd7c56182f099be0f05d85b991e863eb9fde1f04ade07e976e"
+      },
+      "stop_original": {
+        "path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/native-02/stop.json",
+        "bytes": 58,
+        "sha256": "3441450bc7907e8c561f49d3430c736d118cdff2755c988f7b9ecdd07900d56b",
+        "value": {
+          "exit_code": 0,
+          "stopped_unix": 1794589105.0089579
+        }
+      }
+    },
+    {
+      "arm": "bidkv",
+      "server_pid": 74896,
+      "service_final_phase": "preflight-complete",
+      "journal_originals": [
+        {
+          "controlled_path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/bidkv-01/policy/enginecore-77368.jsonl",
+          "bytes": 322,
+          "sha256": "a69acc9cb0f3f4fdf88cf9983c8058b678cd2a35fba96c7f71ab3d177e4a0657",
+          "records": 1,
+          "initial_event": "initialized",
+          "initial_stats": {
+            "profile": "official-vllm-0.23-source-bridge/v1",
+            "policy": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy",
+            "enabled": true,
+            "decisions": 0,
+            "calls": 0,
+            "selections": 0,
+            "abstentions": 0,
+            "failures": 0,
+            "invalid_selections": 0
+          },
+          "last_event": "initialized",
+          "last_stats": {
+            "profile": "official-vllm-0.23-source-bridge/v1",
+            "policy": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy",
+            "enabled": true,
+            "decisions": 0,
+            "calls": 0,
+            "selections": 0,
+            "abstentions": 0,
+            "failures": 0,
+            "invalid_selections": 0
+          }
+        }
+      ],
+      "command_original": {
+        "path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/bidkv-01/command.json",
+        "bytes": 3294,
+        "sha256": "9a6b06608d41b2ecf0cabff43eea5cc3ddeebdd14cd6a8efb1a93cfb6def7247"
+      },
+      "stop_original": {
+        "path": "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/preflight/bidkv-01/stop.json",
+        "bytes": 58,
+        "sha256": "4e503edd2b20a39b078485989fa7a61b367b5f0c44636969f4bb9fa49ac28a08",
+        "value": {
+          "exit_code": 0,
+          "stopped_unix": 1794590466.6113234
+        }
+      }
+    }
+  ]
+}
