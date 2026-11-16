@@ -591,6 +591,9 @@ def verify():
         "aborted_cohort_controlled_answers_publicly_reverified": False,
         "five_dataset_formal_completion_established_by_this_capsule": bool(full),
         "full_five_numeric_and_custody_verification": full,
+        "final_cpu_custody_audit": runpy.run_path(str(ROOT / "verify_final_audit.py"))[
+            "verify"
+        ](),
         "selector_mechanism_gain_established": False,
     }
 

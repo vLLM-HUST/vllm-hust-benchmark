@@ -1,5 +1,10 @@
 # BidKV 冻结五数据集补跑与受控证据索引
 
+**2026-11-16 已完成最终原件核验，不再调优。**
+[最终审计与结果条目](final-audit-20261116/README.md)补充本次在81对2064条原始SSE的再次回放、4份原grader字节一致复算、144份冻结输入/评分文件的当前hash核对，以及历史压力诊断的全部闭合结果。没有新增推理实验。正式负载精确抢占计数和策略调用均0，因此保留完整配对结果，不能声称BidKV机制收益。
+
+[完整结果报告](five-results-v1/report/REPORT.md)｜[逐请求数字](five-results-v1/README.md)｜[历史压力诊断与质量代价](final-audit-20261116/diagnostics/README.md)。压力诊断能够触发，但Evo第二配对有16.93秒共享CPU干扰，MMLU首8诊断正确数8/8→6/8，均不能作为稳定且质量无损的收益证明。旧准备和失败记录保留在下文，最终结论以上述报告为准。
+
 完整五项已于2026-11-14 09:50+08闭合：两臂各672条solver、720条共同Native
 judge均执行，14stage和模型实际等待返回0，2064条原SSE受控独立重放、四份原质量CPU重算逐字节一致。见[完整报告与逐请求数字](five-results-v1/README.md)。策略启用但两臂solver调用/决策均0，尚未建立BidKV机制收益。五项吞吐变化依次+2.4967%/+0.1099%/+0.2341%/−1.6790%/+2.3398%，负SWE、质量回退和HLE未决均保留。
 
@@ -23,6 +28,6 @@ solver、另共同Native judge720计划输入；模型与标准身份见计划�
 完整五项另有[精确引擎抢占计数复核](full-exact-preemptions.json)：两臂五个 solver stage 的 `vllm:num_preemptions_total`
 前后均为零；没有误用计数器创建时间。这说明原五项负载没有提供实际抢占压力，仍不能验证 BidKV 在抢占时的机制收益。
 
-当前[独立 EOS 历史 Work 负载](evoscientist-pressure02-v2/README.md)在首个模型启动前公开源、配置、输入身份与 Linux38 项 CPU 检查，固定
+先前[独立 EOS 历史 Work 负载](evoscientist-pressure02-v2/README.md)在首个模型启动前公开源、配置、输入身份与 Linux38 项 CPU 检查，固定
 ABBA
-四冷启动，不按结果挑轮；尚无新收益结论。先前[合成压力失败报告及资源会计](pressure-failure-report-v1/README.md)保留原观测错误、partial、全部非零退出和真实驻留费用。
+四冷启动，不按结果挑轮；其闭合结果已纳入上述最终审计，没有建立稳定无损收益。先前[合成压力失败报告及资源会计](pressure-failure-report-v1/README.md)保留原观测错误、partial、全部非零退出和真实驻留费用。

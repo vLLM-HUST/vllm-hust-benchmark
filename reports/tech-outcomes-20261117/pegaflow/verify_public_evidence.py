@@ -199,6 +199,9 @@ def verify(archive=None, native_part=None):
         "native_full_request_stream_verified": False,
         "new_formal_900s_points": window_result["formal_900s_points"],
         "new_speedup_claim": False,
+        "full_five_numeric_and_custody_verification": runpy.run_path(
+            str(ROOT / "verify_full_five.py")
+        )["verify"](),
         "frozen_execution_sources_verified": execution_sources,
         "pegaflow_input_and_numeric_analysis_preparation_members": analysis_members,
         "fresh91_pre_model_cpu_and_frozen_source": runpy.run_path(

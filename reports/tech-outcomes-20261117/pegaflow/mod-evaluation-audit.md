@@ -1,5 +1,9 @@
 # MOD 提示词替换与 B0/B1 身份审计
 
+> 2026-11-16 状态更新：下文保留最初审计与整改历史。BidKV和PegaFlow的正式五项均已完成，当前81纯CPU原件复核也已通过；最终结果分别见
+> [BidKV](../bidkv/final-audit-20261116/README.md) 与
+> [PegaFlow](five-results-v1/README.md)。不再调优，未声称正收益或四目标验收。
+
 用户已明确用 MOD
 专用提示词替换此前文件。本轮`test_target=own_mod`、`selected_scope=full`；冻结五数据集、标准/指南SHA、任务顺序、生成预算、EOS、原评分器与统计口径不变。有效用户文件SHA为`43bc925a6ad749971a64e5244b86451f5d4cf3361e87423b1eda8ea0b0d04461`。参考Engine/SDK只是可选实现，不定义本轮B1，也不要求安装固定Torch2.13
 Engine替代待测MOD。
