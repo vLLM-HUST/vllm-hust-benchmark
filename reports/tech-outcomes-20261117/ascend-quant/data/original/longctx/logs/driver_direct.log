@@ -1,0 +1,60 @@
+nohup: ignoring input
+=== long-context suite 20261113T111012Z card=7 port=8230 ===
+run_dir=/data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z
+[p23] corpus 297053 tokens
+[p23] wrote 245 cases -> /data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z/out/niah_cases.jsonl
+=== [w8a8] label=w8a8 card=7 port=8230 ===
+[w8a8] ready after 410s
+[w8a8] NIAH ...
+[p23] w8a8: 245 cases (0 done)
+  20/245  single-L8192-d000-s19 hit=True n=1/1  (46.5s)
+  40/245  single-L8192-d025-s19 hit=True n=1/1  (78.4s)
+  60/245  single-L8192-d050-s19 hit=True n=1/1  (105.3s)
+  80/245  single-L8192-d075-s19 hit=True n=1/1  (133.3s)
+  100/245  single-L8192-d100-s19 hit=True n=1/1  (174.6s)
+  120/245  single-L32768-d000-s19 hit=True n=1/1  (284.7s)
+  140/245  single-L32768-d025-s19 hit=True n=1/1  (464.4s)
+  160/245  single-L32768-d050-s19 hit=True n=1/1  (607.5s)
+  180/245  single-L32768-d075-s19 hit=True n=1/1  (751.3s)
+  200/245  single-L32768-d100-s19 hit=True n=1/1  (927.1s)
+  220/245  single-L131072-d075-s04 hit=True n=1/1  (1472.0s)
+  240/245  multi-L131072-s04 hit=True n=3/3  (1934.6s)
+[p23] w8a8 done in 2087.4s -> /data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z/out/niah_w8a8.jsonl
+[w8a8] longgen ...
+  longgen-L32768-s00 exact=False rouge=0.303 d4=0.102 rep10=0.816 chars=2442 (19.5s)
+  longgen-L32768-s01 exact=True rouge=0.663 d4=0.5083 rep10=0.4814 chars=1833 (9.8s)
+  longgen-L32768-s02 exact=True rouge=0.350 d4=0.9376 rep10=0.0398 chars=4020 (18.6s)
+  longgen-L32768-s03 exact=True rouge=0.663 d4=0.4982 rep10=0.48 chars=1609 (9.6s)
+  longgen-L32768-s04 exact=True rouge=0.661 d4=0.5106 rep10=0.4784 chars=1869 (9.9s)
+  longgen-L32768-s05 exact=True rouge=0.971 d4=1.0 rep10=0.0 chars=954 (6.5s)
+  longgen-L32768-s06 exact=True rouge=0.359 d4=0.9385 rep10=0.0144 chars=4384 (19.2s)
+  longgen-L32768-s07 exact=True rouge=0.664 d4=0.5055 rep10=0.4796 chars=1945 (9.9s)
+  longgen-L32768-s08 exact=True rouge=0.663 d4=0.5112 rep10=0.4747 chars=1600 (9.7s)
+  longgen-L32768-s09 exact=False rouge=0.289 d4=0.9859 rep10=0.0 chars=4835 (20.6s)
+  longgen-L131072-s00 exact=True rouge=0.662 d4=0.5029 rep10=0.4825 chars=1995 (25.5s)
+  longgen-L131072-s01 exact=True rouge=0.662 d4=0.493 rep10=0.4737 chars=1433 (24.9s)
+  longgen-L131072-s02 exact=False rouge=0.269 d4=0.9945 rep10=0.0 chars=4564 (36.9s)
+  longgen-L131072-s03 exact=True rouge=0.659 d4=0.5126 rep10=0.4741 chars=1360 (25.0s)
+  longgen-L131072-s04 exact=False rouge=0.669 d4=0.5121 rep10=0.4726 chars=1275 (24.6s)
+[p23] w8a8 longgen done in 270.3s
+[w8a8] done
+=== [w4a8] label=w4a8 card=7 port=8230 ===
+ERROR: port 8230 busy
+
+=== NIAH (hit / n, Wilson 95% CI) ===
+single  L=8192   w8a8 100/100=100.0% [96.3,100.0] | w4a8 n/a
+single  L=32768  w8a8 100/100=100.0% [96.3,100.0] | w4a8 n/a
+single  L=131072 w8a8 25/25=100.0% [86.7,100.0] | w4a8 n/a
+multi   L=32768  w8a8 9/10=90.0% [59.6,98.2] | w4a8 n/a
+multi   L=131072 w8a8 9/10=90.0% [59.6,98.2] | w4a8 n/a
+Traceback (most recent call last):
+  File "/data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z/compare_stability.py", line 185, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z/compare_stability.py", line 145, in main
+    sa, sb = niah_sum["w8a8"][kind][L], niah_sum["w4a8"][kind][L]
+                                        ~~~~~~~~~~~~~~~~^^^^^^
+KeyError: 'single'
+=== DONE rc=1 ===
+run_dir=/data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z
+summary=/data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z/out/stability.json

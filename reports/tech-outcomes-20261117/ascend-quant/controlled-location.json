@@ -1,0 +1,110 @@
+{
+ "schema_version": 1,
+ "description": "Auditable index of originals that are not published in Git/Release. Hashes are SHA-256 unless noted.",
+ "items": [
+  {
+   "id": "model-bf16",
+   "description": "Qwen3.5-35B-A3B BF16",
+   "source_path": "/data/jxd/Qwen3.5-35B-A3B",
+   "bytes": 71927094299,
+   "index_path": "/data/jxd/Qwen3.5-35B-A3B/model.safetensors.index.json",
+   "index_sha256": "d8d0b7ca4e61ae107e3e87a3ff21136b3ac7c789e64bb24267227ca804e04205",
+   "custodian": "AproAkk / 量化组",
+   "access": "受控服务器 /data，按需申请；不随 Git/Release 公开",
+   "reason": "模型权重体积大，不适合 Git/Release；分片哈希见 artifact record"
+  },
+  {
+   "id": "model-w8a8",
+   "description": "Qwen3.5-35B-A3B official W8A8",
+   "source_path": "/data/jxd/Qwen3.5-35B-A3B-W8A8",
+   "bytes": 39810882313,
+   "index_path": "/data/jxd/Qwen3.5-35B-A3B-W8A8/quant_model_weights.safetensors.index.json",
+   "index_sha256": "375cade0403985c0d95be2225cde65e6c71770734254345de1d918e9c68da038",
+   "custodian": "AproAkk / 量化组",
+   "access": "受控服务器 /data，按需申请；不随 Git/Release 公开",
+   "reason": "模型权重体积大，不适合 Git/Release；分片哈希见 artifact record"
+  },
+  {
+   "id": "model-gdn-w8a8",
+   "description": "Qwen3.5-35B-A3B-W8A8-NoRot (W4A8 experts + GDN W8A8)",
+   "source_path": "/data/jxd/Qwen3.5-35B-A3B-W8A8-NoRot",
+   "bytes": 24096662520,
+   "index_path": "/data/jxd/Qwen3.5-35B-A3B-W8A8-NoRot/quant_model_weights.safetensors.index.json",
+   "index_sha256": "01030c6ce7875fdb02210dfdb0883ed887a6aa3299f7f0db2bfed1d7ab25ffa5",
+   "custodian": "AproAkk / 量化组",
+   "access": "受控服务器 /data，按需申请；不随 Git/Release 公开",
+   "reason": "模型权重体积大，不适合 Git/Release；分片哈希见 artifact record"
+  },
+  {
+   "id": "model-w4a8gcy",
+   "description": "gcy Qwen3.5-35B-A3B-W4A8 (experts int4, GDN bf16)",
+   "source_path": "/data/gcy/Qwen3.5-35B-A3B-W4A8",
+   "bytes": 25099795178,
+   "index_path": "/data/gcy/Qwen3.5-35B-A3B-W4A8/quant_model_weights.safetensors.index.json",
+   "index_sha256": "f76730c2ac6919e569d176aba42c9df35404ab33dd3a5dcff3becedbabb825a5",
+   "custodian": "AproAkk / 量化组",
+   "access": "受控服务器 /data，按需申请；不随 Git/Release 公开",
+   "reason": "模型权重体积大，不适合 Git/Release；分片哈希见 artifact record"
+  },
+  {
+   "id": "gcy-p12-layer-error-experts",
+   "description": "30,720 expert 模块逐模块误差 CSV",
+   "source_path": "/data/gcy/quant-Qwen3.5-35B-A3B/p1-2-layer-error/out/layer_error_experts.csv",
+   "bytes": 24301083,
+   "sha256": "0469ccb09cb70ab6139c353ed6db9dd2e55c0fa32cacd1beb464f4e72c760204",
+   "custodian": "AproAkk / 量化组",
+   "access": "受控服务器 /data，按需申请；可提供哈希核验",
+   "reason": "大体积原始记录；不随 Git/Release 公开"
+  },
+  {
+   "id": "gcy-p12-layer-error-jsonl",
+   "description": "逐张量误差 JSONL",
+   "source_path": "/data/gcy/quant-Qwen3.5-35B-A3B/p1-2-layer-error/out/layer_error.jsonl",
+   "bytes": 60742541,
+   "sha256": "fb3851ba50af9047e98a5aac3f1de3817ed5e1e3e43a12ec225020af465121d2",
+   "custodian": "AproAkk / 量化组",
+   "access": "受控服务器 /data，按需申请；可提供哈希核验",
+   "reason": "大体积原始记录；不随 Git/Release 公开"
+  },
+  {
+   "id": "gcy-p21-routed-bf16",
+   "description": "routing capture bf16",
+   "source_path": "/data/gcy/quant-Qwen3.5-35B-A3B/p2-1-routing-coupling/out/routed_bf16.npz",
+   "bytes": 92572192,
+   "sha256": "508be068e8b8f31326369c186909d5110e829c966dac7b14d39f51503a8d1363",
+   "custodian": "AproAkk / 量化组",
+   "access": "受控服务器 /data，按需申请；可提供哈希核验",
+   "reason": "大体积原始记录；不随 Git/Release 公开"
+  },
+  {
+   "id": "gcy-p21-routed-w8a8",
+   "description": "routing capture w8a8",
+   "source_path": "/data/gcy/quant-Qwen3.5-35B-A3B/p2-1-routing-coupling/out/routed_w8a8.npz",
+   "bytes": 92569901,
+   "sha256": "5e92a822aa033ff912bfa3a1da90ce40ea3f5178324f62acff9a740eef9d6efc",
+   "custodian": "AproAkk / 量化组",
+   "access": "受控服务器 /data，按需申请；可提供哈希核验",
+   "reason": "大体积原始记录；不随 Git/Release 公开"
+  },
+  {
+   "id": "gcy-p21-routed-w4a8",
+   "description": "routing capture w4a8",
+   "source_path": "/data/gcy/quant-Qwen3.5-35B-A3B/p2-1-routing-coupling/out/routed_w4a8.npz",
+   "bytes": 92581479,
+   "sha256": "1b46fdb9dddbe2ffa16ee7e403a46a7c2056981c5797129d72956d06a5612309",
+   "custodian": "AproAkk / 量化组",
+   "access": "受控服务器 /data，按需申请；可提供哈希核验",
+   "reason": "大体积原始记录；不随 Git/Release 公开"
+  },
+  {
+   "id": "gcy-p23-niah-cases",
+   "description": "gcy #547 P2-3 frozen NIAH cases (51,017,646 B)",
+   "source_path": "/data/gcy/quant-Qwen3.5-35B-A3B/p2-3-long-context-stability/out/niah_cases.jsonl",
+   "bytes": 51017646,
+   "sha256": "d3be9c98ef72fbc613ccd422094c5709ba7695c6a96df7f97b6c531fcf549ea9",
+   "custodian": "AproAkk / 量化组",
+   "access": "受控服务器 /data，按需申请；可提供哈希核验",
+   "reason": "大体积原始题面；不随 Git 公开"
+  }
+ ]
+}
