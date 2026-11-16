@@ -10,6 +10,11 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "website-publication/data"
 REPORT = ROOT / "reports/muxpd-ecpa-20261025"
 EVIDENCE_COMMIT = "19081ff39a25c3c8ac821ae7885688ea24a03e90"  # pragma: allowlist secret
+# History redaction remapped the public link; frozen Release receipts retain
+# their original commit identities. Both qualification blobs are byte-identical.
+QUALIFICATION_LINK_COMMIT = (
+    "c215d3532c960f8da2b633c2ffdbfac73d09d2be"  # pragma: allowlist secret
+)
 
 
 def read(path):
@@ -43,7 +48,7 @@ def test_muxpd_four_tables_join_without_expanding_qualification():
     )
     assert component["qualification_report"] == (
         "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/"
-        + EVIDENCE_COMMIT
+        + QUALIFICATION_LINK_COMMIT
         + "/reports/muxpd-ecpa-20261025/RELEASE-QUALIFICATION.md"
     )
     assert (
