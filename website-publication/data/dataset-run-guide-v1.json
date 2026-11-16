@@ -1,6 +1,6 @@
 {
   "schema": "dataset-run-guide/v1",
-  "guide_id": "five-datasets-run-guide-20261116-v1",
+  "guide_id": "five-datasets-run-guide-20261116-v2",
   "standard_id": "five-datasets-20261113-v1",
   "standard_sha256": "66c050b7c6d705853f10bc437e6ace1707a9b46d43b6bdb7159724045045b756",
   "modes": [
@@ -165,18 +165,18 @@
   },
   "execution": {
     "engine_repository": "vLLM-HUST/vllm-hust-engine",
-    "verified_runner_commit": "4a16450bfca25f1ea4e5ff540773bbf8a1f057e8",
+    "verified_runner_commit": "ceeff236d26e1922bc09448322defb7dcbf12b2d",
     "command_template": "python one_click.py --model /path/to/model --out /path/to/new-results --datasets {datasets}",
-    "note_zh": "当前固定r6执行器；按部署清单设置模型、SDK、卡号与新结果目录，默认跟随日志。有效算力自动核验并缓存原同工况参考分母，本轮效率另按匹配分子重算。",
-    "note_en": "Current pinned r6 runner with local model/SDK/device paths and live logs. Compute-reference denominator statistics are automatically verified and cached; current efficiency requires matched numerator measurements.",
+    "note_zh": "固定引擎r6、工具r7；计划记录实际版本、卡号和预热，旧声明单独归档。按部署清单配置本机路径，默认跟随日志。有效算力自动复用同工况参考分母，本轮效率按匹配分子重算。",
+    "note_en": "Engine r6 with tools r7: plans bind actual versions, devices and warmup; original claims stay in history. Configure local deployment paths and follow live logs. Compute reference denominators are reused; current efficiency requires matched numerator measurements.",
     "acceptance_zh": "报告逐项展示执行计数、质量、性能、参考算力、上下文与成本结论。",
     "acceptance_en": "The report lists execution counts, quality, performance, compute reference, context and cost results.",
-    "bootstrap_commit": "d7a6b4f9ebf93f5e7ddc4b12f9f42c73385b8316",
+    "bootstrap_commit": "e3c3e2bc3f896e40a5577c1181adb7df6c3c61a4",
     "public_bootstrap_repository": "vLLM-HUST/vllm-hust-engine",
     "public_bootstrap_path": "download_and_run.py",
-    "bootstrap_sha256": "56c5aacfc3bde01588c54d6ebc2020e18605a796de9f7dbd1b9f429719a848ef",
+    "bootstrap_sha256": "395194f8ace873dc84d9fc18fd1d5143aefe1ca08f55bcd4ee99ae25fad96d3b",
     "bootstrap_bytes": 9577,
-    "tools_release": "acceptance-tools-20261116-r6",
+    "tools_release": "acceptance-tools-20261116-r7",
     "engine_release": "full-answer-b1-20261113-r6",
     "compute_reference": {
       "mode": "qualified_reference_denominator_reuse",
@@ -190,6 +190,7 @@
     },
     "native_reference_cache_isolation": "New native-reference captures use a fresh namespace per capture and a distinct salt per warmup/measured request; the existing A01 used frozen toolsr4.",
     "project_milestone_scope": "Original qualified MMLU200/out256 already met50%; current-version efficiency is requalified independently and the90% final target is separate.",
-    "native_proc_controls": "Named worker RPCs, actual worker identity and unwrapped runner source identity. Unsupported inproc host-State M01 capture is rejected before model loading; this is not a new M01 efficiency qualification."
+    "native_proc_controls": "Named worker RPCs, actual worker identity and unwrapped runner source identity. Unsupported inproc host-State M01 capture is rejected before model loading; this is not a new M01 efficiency qualification.",
+    "current_plan_identity": "Current release, logical/physical cards and4GiB/rank budget are explicit. All original comparison/warmup/device/input claims remain under historical_claims; dataset-specific scoring is bound by the checked execution specification."
   }
 }
