@@ -49,15 +49,15 @@ weights within a condition. Controlled prefix-reuse scenarios were built from re
 concatenation, slicing, warmup, and gated background traffic. Ordinary ShareGPT conversations were
 replayed with fixed output lengths. These are independent replays, not same-state counterfactuals,
 and do not establish natural-traffic frequency or absence of regressions. Some ordinary studies had
-zero measured prefix hits. Apart from the pooled P95 for the ordinary C8 study in
-`run-summaries.json`, the aggregates do not contain P95/P99, throughput or individual request
-distributions and cannot establish tail-latency or throughput guarantees.
+zero measured prefix hits. The earlier studies include only the pooled P95 for the ordinary C8 study
+in `run-summaries.json`. The SWE diagnostic below also reports per-window P95 and throughput; these
+small samples cannot establish tail-latency or throughput guarantees.
 
 The measured experiments used four Ascend NPUs, two TP=2 Qwen3.5-35B-A3B backends, and the
 experiment-specific configurations identified by the private manifests and their published hashes.
-This record does not claim a rerun on the final PR head, a frozen five-dataset standard evaluation,
-or full publication of native runtime evidence. See the PR for the individual study designs,
-limitations and explicit request-count/Decode/queue configurations.
+The earlier studies do not claim a rerun on the final PR head, a frozen five-dataset standard
+evaluation, or full publication of native runtime evidence. See the PR for the individual study
+designs, limitations and explicit request-count/Decode/queue configurations.
 
 ## Plugin experiment record
 
