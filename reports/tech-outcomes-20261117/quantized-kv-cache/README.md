@@ -41,6 +41,6 @@ GSM8K 是独立短上下文子集，不能当作旧长上下文实验的联合�
 
 ## 实际贡献与后续安排
 
-历史 A3 与 GSM8K 实验实际执行人为 hustcui（维护者于本轮确认）；归档提交 [6c90e778](https://github.com/vLLM-HUST/vllm-hust-benchmark/commit/6c90e778db674dffa70674c0dcd945e6d675e323) 与 [87b2c103](https://github.com/vLLM-HUST/vllm-hust-benchmark/commit/87b2c10325f9ca763925a98c05941741a0b0ea84) 均保留原作者。插件贡献分工由 MOD 仓贡献说明关联实际提交；WenjuZhao 本轮不分配未经确认的职责。
+历史 A3 与 GSM8K 实验实际执行人为 hustcui（维护者于本轮确认）；归档提交 [6c90e778](https://github.com/vLLM-HUST/vllm-hust-benchmark/commit/6c90e778db674dffa70674c0dcd945e6d675e323) 与 [87b2c103](https://github.com/vLLM-HUST/vllm-hust-benchmark/commit/87b2c10325f9ca763925a98c05941741a0b0ea84) 均保留原作者。插件贡献分工由 MOD 仓贡献说明关联实际提交；WenjuZhao 负责 MOD 整体技术方向把控与团队协调（组长职责，由维护者在本轮确认），不据此推定具体代码或设备实验作者。
 
 本轮不申请新设备、不启动重测。若以后重新申请吞吐或稳定并发收益，须另立冻结计划：同时保存模型/运行时/插件身份与 diff、两臂完整命令、HBM 时序、实际 Running/Waiting、未四舍五入请求与 token 计数、同工况质量及错误/截断样本。未完成前沿用上述功能与容量限定表述。
