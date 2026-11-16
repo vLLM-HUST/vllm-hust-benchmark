@@ -12,12 +12,18 @@ reviewer needs access to matching original bytes.
 - `condition-aggregates.csv`: 63 groups from 426 completed experiment points. Groups combine
   repetitions and mirrored backend directions. Each group has at least six target requests. Means
   are weighted by the number of defined target or background requests, as appropriate.
+
 - `experiment-inventory.json`: planned/completed point counts and hashes of the selected compact
   private archives. These archives are not uploaded here.
+
 - `raw-record-hashes-a.json` and `raw-record-hashes-b.json`: SHA-256 and byte lengths for 3,691
   selected raw files, including result, request, routing and gate records. These hashes describe
   files retained privately; they do not include the large monitoring samples and backend logs
   omitted from the compact private archive.
+
+- `study-metadata.json`: allowlisted configuration, client environment, and source hashes from the
+  11 original experiment manifests; these are not backend runtime versions.
+
 - `SHA256SUMS`: hashes of the files in this publication.
 
 Before aggregation, each point's `result.json`, `requests.jsonl` and `routes.jsonl` was checked
@@ -60,7 +66,8 @@ The public PR describes the workload construction, concurrency, output lengths, 
 weights, selected results, and limitations of each reported study. The condition aggregates provide
 counts and mean values; individual request traces, complete per-run configurations, and raw server
 logs are not part of this public record. The exact NPU model, precision, backend runtime versions,
-per-study code revision and run timestamps are not established by this public summary. Do not infer
+per-study Git revision and run timestamps are not established by this public summary. Manifest
+source-file hashes identify recorded Router files without asserting a Git revision. Do not infer
 them from the machine name or the final Router PR revision. They require verification against the
 original run artifacts before being asserted. The PR's P95 examples likewise cannot be independently
 recalculated from the published condition means and hashes alone.
