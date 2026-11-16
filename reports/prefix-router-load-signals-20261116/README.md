@@ -47,3 +47,20 @@ experiment-specific configurations identified by the private manifests and their
 This record does not claim a rerun on the final PR head, a frozen five-dataset standard evaluation,
 or full publication of native runtime evidence. See the PR for the individual study designs,
 limitations and explicit request-count/Decode/queue configurations.
+
+## Plugin experiment record
+
+This is an exploratory Prefix Router plugin study, not an official leaderboard submission. The
+comparison is between Lifecycle routing configurations: the previous request-count default, the
+existing active-request cost set to 4, and separate opt-in Decode or Router connection-pool queue
+signals. The ordinary conversation replays and the deliberately constructed high-reuse contention
+cases answer different questions; they should not be combined into a single performance claim.
+
+The public PR describes the workload construction, concurrency, output lengths, repetitions,
+weights, selected results, and limitations of each reported study. The condition aggregates provide
+counts and mean values; individual request traces, complete per-run configurations, and raw server
+logs are not part of this public record. The exact NPU model, precision, backend runtime versions,
+per-study code revision and run timestamps are not established by this public summary. Do not infer
+them from the machine name or the final Router PR revision. They require verification against the
+original run artifacts before being asserted. The PR's P95 examples likewise cannot be independently
+recalculated from the published condition means and hashes alone.
