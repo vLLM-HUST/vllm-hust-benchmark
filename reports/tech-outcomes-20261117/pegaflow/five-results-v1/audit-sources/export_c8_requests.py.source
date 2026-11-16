@@ -1,0 +1,41 @@
+"""Publish numeric C8 records and phase boundaries without prompts or outputs."""
+
+import importlib.util
+import json
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location('access', 'E:/CodexData/Work/instrumented-repeats-20261108/coder_access.py')
+access = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(access)
+script = r'''
+import hashlib,json,time
+from pathlib import Path
+base=Path('/data/shared_upload/cybber695/pegaflow91-five-datasets-20261114-04')
+out=Path('/data/shared_upload/cybber695/final-closeout-20261116/pegaflow-audit/c8-request-numeric')
+out.mkdir(mode=0o700,exist_ok=False)
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+files={};index=[]
+keep=['case_id','phase','lane','input_tokens','status','attempted','http_status','start','first_token','last_token','first_generated_event','last_generated_event','end','elapsed_s','cached_tokens_reported','finish_reason','stream_sha256']
+for arm,count in [('native',343),('pegaflow',341)]:
+ folder=base/'qualification'/(arm+'-c8-01');rows=[]
+ for path in sorted(folder.glob('*-lane*.json')):
+  raw=json.loads(path.read_bytes());row={k:raw.get(k)for k in keep};row['usage']={k:raw['usage'][k]for k in ['prompt_tokens','completion_tokens','total_tokens']};row['controlled_record_sha256']=sha(path)
+  rows.append(row)
+  index.append({'arm':arm,'path':path.relative_to(base).as_posix(),'bytes':path.stat().st_size,'sha256':sha(path),'sse_sha256':raw['stream_sha256']})
+ assert len(rows)==count and all(r['status']=='ok'and r['usage']['completion_tokens']==256 for r in rows)
+ files[arm+'-requests.json']=rows
+ files[arm+'-phases.json']=json.loads((folder/'continuous.json').read_bytes())
+files['controlled-record-index.json']={'controlled_root':str(base),'scope':'Original C8 record metadata and already independently checked capture hashes only; no prompt, answer or raw SSE redistributed. The complete controlled campaign index also binds capture files.','files':index}
+manifest=[]
+for name,value in files.items():
+ path=out/name;path.write_text(json.dumps(value,indent=2)+'\n');manifest.append({'path':name,'bytes':path.stat().st_size,'sha256':sha(path)})
+files['manifest.json']={'schema':'public-numeric-c8-record-export/v1','checked_unix':time.time(),'native_requests':343,'pegaflow_requests':341,'files':manifest,'originals_changed':False,'scope':'CPU-only derivative of the already raw-SSE-verified frozen C8 batch; no model requests'}
+(out/'manifest.json').write_text(json.dumps(files['manifest.json'],indent=2)+'\n')
+print(json.dumps(files))
+'''
+value = json.loads(access.remote('ascend-81', script, timeout=120))
+root = Path(__file__).resolve().parent / 'collected/c8-request-numeric'
+root.mkdir(exist_ok=False)
+for name, data in value.items():
+    (root / name).write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8', newline='\n')
+print(json.dumps({'files':len(value),'records':len(value['native-requests.json'])+len(value['pegaflow-requests.json']),'raw_sse_replay':'already passed; not repeated','model_requests':0}))

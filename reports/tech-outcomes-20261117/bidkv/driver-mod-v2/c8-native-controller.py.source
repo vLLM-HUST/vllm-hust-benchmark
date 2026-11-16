@@ -1,0 +1,67 @@
+"""Wait for exact admission, run the sealed C8 transport, then release our model."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import signal
+import subprocess
+import time
+import traceback
+
+ROOT=Path('/workspace/bidkv-five-datasets-20261113-01')
+PERSIST=ROOT/'durable'
+OUT=PERSIST/'qualification/native-c8-02'
+META=PERSIST/'metadata/c8-native02-controller.json'
+PREFLIGHT=PERSIST/'preflight/native-03'
+DRIVER=PERSIST/'sources/bidkv81-mod-v2'
+CLIENT=None
+STATE={'phase':'waiting-exact-token-admission','pid':os.getpid(),'started_unix':time.time(),'original_c8_transport_commit':'b8a1c0c0062abce4b08e367ff003b1416df0afa2'}
+
+def save():
+    temp=META.with_suffix('.tmp');temp.write_text(json.dumps(STATE,indent=2)+'\n');temp.replace(META)
+
+def cancel_controller(signum,frame):
+    raise KeyboardInterrupt('Owned C8 controller cancelled by signal '+str(signum))
+signal.signal(signal.SIGTERM,cancel_controller)
+
+try:
+    os.umask(0o077);save()
+    assert shutil.disk_usage(PERSIST).free>=4*1024**3
+    plan=json.loads((DRIVER/'admission-plan.json').read_bytes())
+    for name,digest in plan['sources_sha256'].items():
+        assert hashlib.sha256((DRIVER/name).read_bytes()).hexdigest()==digest
+    deadline=time.monotonic()+1800
+    while True:
+        value=json.loads((PREFLIGHT/'status.json').read_bytes())
+        assert value['phase']!='failed',value
+        if value['phase']=='tokens-admitted-awaiting-execution-sources':
+            admission=json.loads((PREFLIGHT/'token-id-admission.json').read_bytes())
+            assert admission['complete'] and len(admission['checked'])==128
+            break
+        assert time.monotonic()<deadline,'Preflight wait deadline exceeded'
+        time.sleep(5)
+    binding=json.loads((PREFLIGHT/'binding-evidence.json').read_bytes());assert binding['requested_default_enable_cpu_binding'] is True
+    STATE.update(phase='running-native-c8',binding_warning_or_skip_seen=binding['warning_or_skip_seen']);save()
+    log=(PERSIST/'logs/c8-native02-client.log').open('ab',buffering=0)
+    result=subprocess.Popen([str(ROOT/'.venv/bin/python'),'-B',str(DRIVER/'continuous.py'),'--inputs',str(PERSIST/'controlled/initial-inputs-01/continuous-inputs-r1.json'),'--out',str(OUT)],cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+    CLIENT=result;result.wait()
+    STATE.update(client_exit_code=result.returncode,phase='releasing-owned-model');save()
+    (PREFLIGHT/'stop-requested').write_text('C8 fully drained or failed; release this owned service\n')
+    deadline=time.monotonic()+240
+    while True:
+        value=json.loads((PREFLIGHT/'status.json').read_bytes())
+        if value['phase'] in ['preflight-complete','failed']:break
+        assert time.monotonic()<deadline,'Owned model cleanup wait exceeded'
+        time.sleep(2)
+    STATE.update(model_final_phase=value['phase'],phase='completed' if result.returncode==0 else 'failed',completed_unix=time.time());save()
+    assert result.returncode==0,'C8 client returned nonzero; retained failure'
+except BaseException as error:
+    if CLIENT is not None and CLIENT.poll()is None:
+        os.killpg(CLIENT.pid,signal.SIGTERM)
+        try:CLIENT.wait(timeout=30)
+        except subprocess.TimeoutExpired:os.killpg(CLIENT.pid,signal.SIGKILL);CLIENT.wait(timeout=30)
+    if CLIENT is not None:STATE['client_actual_returncode']=CLIENT.returncode
+    STATE.update(phase='failed',error=type(error).__name__+': '+str(error),failed_unix=time.time());save();traceback.print_exc()
+    if PREFLIGHT.exists():(PREFLIGHT/'stop-requested').write_text('Controller failed; release only this owned model\n')
+    raise

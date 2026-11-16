@@ -1,0 +1,924 @@
+"""Build a report from public numeric derivatives; never read controlled content."""
+
+import argparse
+import hashlib
+import html
+from importlib import metadata
+import json
+import math
+from pathlib import Path
+import statistics
+import subprocess
+import sys
+
+EXPECTED = {"mmlu": 200, "hle": 200, "frontier": 160, "swe": 64, "terminal": 48}
+
+
+def read(path):
+    return json.loads(path.read_bytes())
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def safe_member(root, name):
+    path = (root / name).resolve()
+    if not path.is_relative_to(root.resolve()) or not path.is_file():
+        raise ValueError("Invalid public capsule member: " + name)
+    return path
+
+
+def quantile(values, fraction):
+    if not values:
+        return None
+    values = sorted(values)
+    position = (len(values) - 1) * fraction
+    low, high = math.floor(position), math.ceil(position)
+    return values[low] + (values[high] - values[low]) * (position - low)
+
+
+def distribution(values):
+    return {
+        "samples": len(values),
+        "mean": statistics.mean(values) if values else None,
+        **{
+            name: quantile(values, fraction)
+            for name, fraction in (("p50", 0.5), ("p95", 0.95), ("p99", 0.99))
+        },
+    }
+
+
+def observed(stage, root, planned):
+    rows = read(safe_member(root, stage["numeric_records_file"])) if stage else []
+    if len(rows) != len({row["case_id"] for row in rows}) or len(rows) > planned:
+        raise ValueError("Duplicate or excess numeric records")
+    attempted = [row for row in rows if row.get("attempted", True)]
+    good = [row for row in attempted if row["status"] == "ok"]
+    complete = len(attempted) == len(rows) == planned
+    ttft, tpot = [], []
+    for row in good:
+        start = row["start"]["monotonic"]
+        first = row["first_token"]["monotonic"]
+        end = row["end"]["monotonic"]
+        tokens = row["usage"]["completion_tokens"]
+        assert all(math.isfinite(item) for item in (start, first, end))
+        assert start <= first <= end and isinstance(tokens, int) and tokens >= 0
+        ttft.append(first - start)
+        if tokens > 1:
+            tpot.append((end - first) / (tokens - 1))
+    tokens = sum(row["usage"]["completion_tokens"] for row in good)
+    wall = None
+    if complete:
+        wall = max(row["end"]["monotonic"] for row in attempted) - min(
+            row["start"]["monotonic"] for row in attempted
+        )
+        assert math.isfinite(wall) and wall > 0
+    result = {
+        "planned": planned,
+        "recorded": len(rows),
+        "executed": len(attempted),
+        "successful": len(good),
+        "failed": len(attempted) - len(good),
+        "not_executed_or_unfinished": planned - len(attempted),
+        "length_stops": sum(
+            row.get("finish_reason", row.get("observed_finish_reason")) == "length"
+            for row in attempted
+        ),
+        "accepted_output_tokens_in_completed_records": tokens,
+        "whole_batch_interval_complete": complete,
+        "solver_batch_wall_seconds": wall,
+        "output_tokens_per_second": tokens / wall if wall is not None else None,
+        "ttft_seconds": distribution(ttft),
+        "tpot_seconds": distribution(tpot),
+        "tpot_excluded_output_tokens_le_one": len(good) - len(tpot),
+        "stage_status": stage["status"] if stage else "not_executed",
+        "unbound_sse_capture_files": stage.get("unbound_sse_capture_files")
+        if stage
+        else None,
+        "metric_subset_notice": None
+        if complete
+        else "Completed records only; no full-batch throughput or quality score inferred",
+    }
+    proof = stage.get("zero_reuse") if stage else None
+    audit = stage.get("independent_verification") if stage else None
+    result["protocol_and_controlled_audit_receipts_present"] = bool(
+        complete
+        and stage
+        and stage["status"] == "completed"
+        and isinstance(proof, dict)
+        and proof.get("passed") is True
+        and isinstance(audit, dict)
+        and audit.get("metrics_recomputed") is True
+        and audit.get("zero_reuse", {}).get("passed") is True
+        and audit.get("recorded") == planned
+    )
+    if stage and "summary" in stage:
+        stored = stage["summary"]
+        assert stored["accepted_output_tokens"] == tokens
+        for key in (
+            "planned",
+            "recorded",
+            "executed",
+            "successful",
+            "failed",
+            "length_stops",
+            "tpot_excluded_output_tokens_le_one",
+        ):
+            assert stored[key] == result[key], (stage["name"], key)
+        for key in ("solver_batch_wall_seconds", "output_tokens_per_second"):
+            a, b = stored[key], result[key]
+            assert (a is b is None) or (
+                a is not None
+                and b is not None
+                and math.isclose(a, b, rel_tol=1e-10, abs_tol=1e-9)
+            ), (stage["name"], key)
+        for key in ("ttft_seconds", "tpot_seconds"):
+            assert stored[key]["samples"] == result[key]["samples"]
+            for metric in ("mean", "p50", "p95", "p99"):
+                a, b = stored[key][metric], result[key][metric]
+                assert (a is b is None) or (
+                    a is not None
+                    and b is not None
+                    and math.isclose(a, b, rel_tol=1e-10, abs_tol=1e-9)
+                )
+        if "quality" in stored:
+            result["original_quality_summary"] = stored["quality"]
+            if "correct" in stored["quality"]:
+                assert stored["quality"]["correct"] == sum(
+                    row.get("correct") is True for row in rows
+                )
+    return result
+
+
+def change(baseline, candidate, improvement=False):
+    if baseline is None or candidate is None or baseline <= 0:
+        return None
+    return 1 - candidate / baseline if improvement else candidate / baseline - 1
+
+
+def number(value, percent=False):
+    if value is None:
+        return "未验证"
+    return f"{value * 100:+.3f}%" if percent else f"{value:.6f}"
+
+
+def original_quality_rows(files):
+    rows = []
+    for item in files:
+        name = item["path"].removeprefix("quality-").removesuffix("-summary.json")
+        dataset = "hle" if name.endswith("-hle") else "frontier"
+        arm = name.removesuffix("-" + dataset)
+        report = item["original_grader_summary"]
+        groups = report["groups"] if dataset == "hle" else report["tracks"]
+        expected = (
+            {
+                "gold/text": 64,
+                "gold/image": 10,
+                "revision/text": 113,
+                "revision/image": 13,
+            }
+            if dataset == "hle"
+            else {"olympiad": 100, "research": 60}
+        )
+        assert set(groups) == set(expected)
+        for group, count in expected.items():
+            value = groups[group]
+            assert value["total"] == count
+            assert 0 <= value["successes"] <= value["graded"] <= count
+            unresolved = (
+                value["unresolved"] if dataset == "hle" else value["judge_unresolved"]
+            )
+            rows.append(
+                {
+                    "dataset": dataset,
+                    "arm": arm,
+                    "group": group,
+                    "planned": count,
+                    "graded": value["graded"],
+                    "successes": value["successes"],
+                    "original_rate": value["accuracy"]
+                    if dataset == "hle"
+                    else value["success_rate"],
+                    "unresolved": unresolved,
+                    "solver_failures": value["solver_failures"],
+                    "judge_invalid": value["judge_invalid"],
+                    "judge_transport_failures": value["judge_transport_failures"],
+                    "solver_truncated": value["solver_truncated"],
+                    "judge_truncated": value["judge_truncated"],
+                    "judge_truncated_with_grade": value.get(
+                        "judge_truncated_with_grade"
+                    ),
+                    "judge_audit_flagged": value.get("judge_audit_flagged"),
+                    "observed_success_lower_bound": value["successes"] / count,
+                    "unresolved_correctness_upper_bound": (
+                        value["successes"] + unresolved
+                    )
+                    / count,
+                    "research_score_valid_only_out_of_10": value.get(
+                        "mean_research_score_valid_only"
+                    ),
+                    "scoring_policy": report["scoring_policy"],
+                    "source_file": item["path"],
+                }
+            )
+    return rows
+
+
+def plot_results(result, out):
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    keys = list(EXPECTED)
+    assert all(result["datasets"][key]["throughput_change"] is not None for key in keys)
+    values = [result["datasets"][key] for key in keys]
+    matplotlib.rcParams.update(
+        {
+            "svg.hashsalt": "mod-five-" + result["source_capsule_manifest_sha256"],
+            "font.size": 10,
+        }
+    )
+    fig, axes = plt.subplots(
+        2,
+        1,
+        figsize=(11, 7),
+        gridspec_kw={"height_ratios": [2, 1]},
+        layout="constrained",
+    )
+    x = list(range(len(keys)))
+    axes[0].bar(
+        [v - 0.19 for v in x],
+        [v["native"]["output_tokens_per_second"] for v in values],
+        0.38,
+        label="B0: MOD off",
+        color="#386b9f",
+    )
+    axes[0].bar(
+        [v + 0.19 for v in x],
+        [v["candidate"]["output_tokens_per_second"] for v in values],
+        0.38,
+        label="B1: MOD on",
+        color="#db8b38",
+    )
+    axes[0].set_ylabel("Accepted output tokens / whole batch second")
+    axes[0].set_xticks(x, keys)
+    axes[0].legend(frameon=False)
+    axes[0].set_title(result["project"] + ": frozen five-dataset paired observation")
+    changes = [100 * v["throughput_change"] for v in values]
+    axes[1].bar(
+        x, changes, color=["#337f69" if value >= 0 else "#b7534c" for value in changes]
+    )
+    axes[1].axhline(0, color="#8090a0", linewidth=0.8)
+    axes[1].set_xticks(x, keys)
+    axes[1].set_ylabel("B1 / B0 - 1 (%)")
+    pad = max(1, max(abs(value) for value in changes)) * 0.25
+    axes[1].set_ylim(min(0, min(changes)) - pad, max(0, max(changes)) + pad)
+    for index, value in enumerate(changes):
+        axes[1].annotate(
+            f"{value:+.2f}%",
+            (index, value),
+            xytext=(0, 5 if value >= 0 else -12),
+            textcoords="offset points",
+            ha="center",
+            fontsize=9,
+        )
+    for axis in axes:
+        axis.grid(axis="y", alpha=0.18)
+        axis.set_axisbelow(True)
+    fig.supxlabel(
+        "Different frozen scopes; one ordered cohort, no effect CI or mechanism attribution",
+        fontsize=9,
+    )
+    fig.savefig(out / "throughput.png", dpi=180)
+    fig.savefig(out / "throughput.svg", metadata={"Date": None})
+    svg = (out / "throughput.svg").read_text(encoding="utf-8")
+    (out / "throughput.svg").write_text(
+        "\n".join(line.rstrip() for line in svg.splitlines()) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    plt.close(fig)
+
+
+def main(args):
+    capsule = args.capsule.resolve()
+    manifest = read(capsule / "manifest.json")
+    for item in manifest["files"]:
+        path = safe_member(capsule, item["path"])
+        assert path.stat().st_size == item["bytes"] and sha(path) == item["sha256"]
+    summary = read(capsule / "summary.json")
+    plan = read(capsule / "execution-plan.json")
+    binding = read(args.binding)
+    assert (
+        summary["planned_solver_requests_per_arm"] == 672
+        and summary["planned_judge_inputs"] == 720
+    )
+    stages = summary["stages"]
+    solver = {
+        (item["arm"], item["dataset"]): item
+        for item in stages
+        if item["stage"] == "solver"
+    }
+    assert len(solver) == len([item for item in stages if item["stage"] == "solver"])
+    result = {
+        "schema": "public-mod-five-report/v1",
+        "project": args.project,
+        "candidate_arm": args.candidate_arm,
+        "source_capsule_manifest_sha256": sha(capsule / "manifest.json"),
+        "builder_sha256": sha(Path(__file__)),
+        "execution_status": summary["status"],
+        "formal_execution_complete": summary["formal_complete"],
+        "datasets": {},
+        "judge_stages": [item for item in stages if item["stage"] == "judge"],
+        "quality_summary_files": [],
+        "performance_uncertainty": "One prospectively ordered cohort; no independent repeated cohort or random interleaving. No population-effect CI or equivalence claim established.",
+        "quality_scope": "Frozen subsets and original graders; unresolved/failed/truncated cases retained. Trace task-solving quality not measured.",
+        "cost_scope": "Same-rate solver wall per accepted output token proxy only; initialization/diagnostic/judge/service overhead and currency charges are separate or unverified.",
+    }
+    base = binding["base_runtime"]
+    result["frozen_identity"] = {
+        "binding_sha256": sha(args.binding),
+        "model": plan["model"],
+        "model_revision": plan["model_revision"],
+        "chip": plan.get("chip") or args.chip,
+        "physical_npus": plan["physical_npus"],
+        "logical_npus": plan["logical_npus"],
+        "parallelism": plan["parallelism"],
+        "standard_id": plan["standard_id"],
+        "standard_sha256": plan["standard_sha256"],
+        "mod_repository": binding["mod_repository"],
+        "mod_revision": binding["mod_revision"],
+        "vllm_commit": base.get("vllm_commit", base.get("vllm")),
+        "ascend_commit": base.get("ascend_commit", base.get("ascend")),
+        "base_runtime": base,
+        "B0": binding["B0"],
+        "B1": binding["B1"],
+        "runtime_packages": plan.get(
+            "runtime", plan.get("core_packages", base.get("core_packages"))
+        ),
+        "server_profile": plan.get(
+            "server_profile",
+            {
+                key: plan.get(key)
+                for key in (
+                    "kv_bytes_per_rank",
+                    "max_model_len",
+                    "max_num_seqs",
+                    "max_num_batched_tokens",
+                    "image_limit",
+                    "video_limit",
+                    "mtp_tokens",
+                    "graph_mode",
+                    "graph_capture_sizes",
+                    "enable_cpu_binding",
+                )
+            },
+        ),
+        "identity_scope": "Frozen declared identities, linked to actual import/activation/input/SSE audit evidence; configuration presence alone is not mechanism benefit",
+    }
+    result["report_build_environment"] = {
+        "python": sys.version.split()[0],
+        "scope": "Report generation only, not the model SDK",
+        "packages": {},
+    }
+    for package in ("markdown-it-py", "mdformat", "matplotlib", "numpy"):
+        try:
+            result["report_build_environment"]["packages"][package] = metadata.version(
+                package
+            )
+        except metadata.PackageNotFoundError:
+            result["report_build_environment"]["packages"][package] = None
+    if args.mechanism_evidence:
+        evidence = read(args.mechanism_evidence)
+        assert evidence["source_manifest_sha256"] == sha(
+            capsule / "source-manifest.json"
+        )
+        result["solver_policy_observations"] = {
+            "evidence_sha256": sha(args.mechanism_evidence),
+            "arms": [],
+        }
+        for item in evidence["solver_policy_custody"]:
+            stats = [journal["last_stats"] for journal in item["journals"]]
+            result["solver_policy_observations"]["arms"].append(
+                {
+                    "arm": item["arm"],
+                    "enabled": all(value["enabled"] for value in stats),
+                    **{
+                        name: sum(value[name] for value in stats)
+                        for name in (
+                            "calls",
+                            "decisions",
+                            "selections",
+                            "failures",
+                            "invalid_selections",
+                        )
+                    },
+                }
+            )
+    if args.c8_summary:
+        c8 = read(args.c8_summary)
+        assert c8["source_manifest_sha256"] == sha(capsule / "source-manifest.json")
+        assert c8["all_records_independently_replayed"] is True
+        assert [item["phase"] for item in c8["phases"]] == [
+            "4096-warmup",
+            "4096-formal",
+            "16384-warmup",
+            "16384-formal",
+        ]
+        for phase in c8["phases"]:
+            a = phase["native_window_tokens_per_second"]
+            b = phase[f"{args.candidate_arm}_window_tokens_per_second"]
+            assert math.isclose(
+                phase["throughput_change_percent"],
+                100 * (b / a - 1),
+                rel_tol=1e-10,
+                abs_tol=1e-9,
+            )
+        result["separate_c8_qualification"] = {
+            "source_sha256": sha(args.c8_summary),
+            "linked_evidence": args.c8_link,
+            "original_summary": c8,
+        }
+    for dataset, count in EXPECTED.items():
+        baseline = observed(solver.get(("native", dataset)), capsule, count)
+        candidate = observed(solver.get((args.candidate_arm, dataset)), capsule, count)
+        a, b = (
+            baseline["output_tokens_per_second"],
+            candidate["output_tokens_per_second"],
+        )
+        validated_pair = (
+            baseline["protocol_and_controlled_audit_receipts_present"]
+            and candidate["protocol_and_controlled_audit_receipts_present"]
+        )
+        result["datasets"][dataset] = {
+            "native": baseline,
+            "candidate": candidate,
+            "throughput_change": change(a, b) if validated_pair else None,
+            "ttft_p95_improvement": change(
+                baseline["ttft_seconds"]["p95"], candidate["ttft_seconds"]["p95"], True
+            )
+            if validated_pair
+            else None,
+            "tpot_mean_improvement": change(
+                baseline["tpot_seconds"]["mean"],
+                candidate["tpot_seconds"]["mean"],
+                True,
+            )
+            if validated_pair
+            else None,
+            "same_rate_solver_cost_per_token_change": a / b - 1
+            if validated_pair and a is not None and b is not None and b > 0
+            else None,
+        }
+    for path in sorted(capsule.glob("quality-*-summary.json")):
+        result["quality_summary_files"].append(
+            {
+                "path": path.name,
+                "sha256": sha(path),
+                "original_grader_summary": read(path),
+            }
+        )
+    if summary["formal_complete"]:
+        assert len(result["quality_summary_files"]) == 4, (
+            "Missing original HLE/Frontier quality summary"
+        )
+        assert {item["path"] for item in result["quality_summary_files"]} == {
+            f"quality-{arm}-{dataset}-summary.json"
+            for arm in ("native", args.candidate_arm)
+            for dataset in ("hle", "frontier")
+        }
+    result["quality_rows"] = original_quality_rows(result["quality_summary_files"])
+    result["quality_unresolved_ranges"] = []
+    for dataset in ("hle", "frontier"):
+        for arm in ("native", args.candidate_arm):
+            selected = [
+                row
+                for row in result["quality_rows"]
+                if row["dataset"] == dataset and row["arm"] == arm
+            ]
+            if not selected:
+                continue
+            total = sum(row["planned"] for row in selected)
+            successes = sum(row["successes"] for row in selected)
+            unresolved = sum(row["unresolved"] for row in selected)
+            result["quality_unresolved_ranges"].append(
+                {
+                    "dataset": dataset,
+                    "arm": arm,
+                    "planned": total,
+                    "successes": successes,
+                    "unresolved": unresolved,
+                    "lower": successes / total,
+                    "upper": (successes + unresolved) / total,
+                    "scope": "Conditional missing-grade bounds holding resolved grades fixed; not a confidence interval or judge-accuracy bound",
+                }
+            )
+    for stage in result["judge_stages"]:
+        records = read(safe_member(capsule, stage["numeric_records_file"]))
+        stage["http_attempts_in_bound_final_records"] = sum(
+            row.get("attempted") is True for row in records
+        )
+        stage["http_attempt_unknown_final_records"] = sum(
+            row.get("attempted") is None and row["status"] != "solver_failed"
+            for row in records
+        )
+    mmlu_stages = [solver.get((arm, "mmlu")) for arm in ("native", args.candidate_arm)]
+    if all(stage and stage["recorded"] == 200 for stage in mmlu_stages):
+        mmlu = [
+            {
+                row["case_id"]: row.get("correct") is True
+                for row in read(safe_member(capsule, stage["numeric_records_file"]))
+            }
+            for stage in mmlu_stages
+        ]
+        assert mmlu[0].keys() == mmlu[1].keys() and len(mmlu[0]) == 200
+        only_native = sum(
+            value and not mmlu[1][identity] for identity, value in mmlu[0].items()
+        )
+        only_candidate = sum(
+            value and not mmlu[0][identity] for identity, value in mmlu[1].items()
+        )
+        discordant = only_native + only_candidate
+        exact_p = (
+            min(
+                1.0,
+                2
+                * sum(
+                    math.comb(discordant, k)
+                    for k in range(min(only_native, only_candidate) + 1)
+                )
+                / (2**discordant),
+            )
+            if discordant
+            else 1.0
+        )
+        result["mmlu_paired_diagnostic"] = {
+            "planned": 200,
+            "native_correct": sum(mmlu[0].values()),
+            "candidate_correct": sum(mmlu[1].values()),
+            "only_native_correct": only_native,
+            "only_candidate_correct": only_candidate,
+            "discordant_exact_two_sided_binomial_p": exact_p,
+            "scope": "Fixed-subset paired discordance diagnostic; no population-equivalence or decoding-repeatability inference",
+        }
+    for name in (
+        "runtime-overheads.json",
+        "diagnostic-overheads.json",
+        "original-grader-sources.json",
+        "actual-execution-identity.json",
+        "closure-and-quality-recompute.json",
+        "full-owned-lifecycle-policy.json",
+    ):
+        if (capsule / name).is_file():
+            result[name.removesuffix(".json").replace("-", "_")] = {
+                "path": name,
+                "sha256": sha(capsule / name),
+            }
+    runtime = (
+        read(capsule / "runtime-overheads.json")
+        if (capsule / "runtime-overheads.json").is_file()
+        else None
+    )
+    diagnostic = (
+        read(capsule / "diagnostic-overheads.json")
+        if (capsule / "diagnostic-overheads.json").is_file()
+        else None
+    )
+    if runtime:
+        result["initialization_resource_proxy"] = [
+            {
+                key: period.get(key)
+                for key in (
+                    "name",
+                    "status",
+                    "physical_device_count",
+                    "initialization_device_seconds",
+                )
+            }
+            for period in runtime["periods"]
+        ]
+        result["runtime_memory_observations"] = []
+        for period in runtime["periods"]:
+            samples = period.get("telemetry_numeric", [])
+            memory = [
+                row["memory_current_bytes"]
+                for row in samples
+                if row.get("memory_current_bytes") is not None
+            ]
+            by_device = {}
+            for row in samples:
+                for device in row.get("devices", []):
+                    if device.get("hbm_used_mb") is not None:
+                        by_device.setdefault(device["physical_npu"], []).append(
+                            device["hbm_used_mb"]
+                        )
+            result["runtime_memory_observations"].append(
+                {
+                    "name": period["name"],
+                    "samples": len(samples),
+                    "container_memory_samples": len(memory),
+                    "container_memory_peak_observed_bytes": max(memory)
+                    if memory
+                    else None,
+                    "physical_hbm_peak_observed_mb": {
+                        str(device): max(values)
+                        for device, values in sorted(by_device.items())
+                    },
+                    "sampling_error_present_count": sum(
+                        row.get("sampling_error_present") is True for row in samples
+                    ),
+                    "scope": "Total observations during retained sampling intervals; sampled maxima, not an allocation peak or isolated MOD increment. HBM MB is the original npu-smi label.",
+                }
+            )
+    if diagnostic:
+        assert diagnostic["planned"] == 4 and diagnostic["max_tokens"] == 32
+        result["extra_visual_qualification"] = [
+            {
+                key: arm.get(key)
+                for key in (
+                    "arm",
+                    "planned",
+                    "recorded",
+                    "attempted",
+                    "successful",
+                    "failed_final_records",
+                    "no_final_record",
+                    "length_stops",
+                    "device_seconds_from_completed_records",
+                    "cost_is_lower_bound_if_incomplete",
+                )
+            }
+            for arm in diagnostic["arms"]
+        ]
+    args.out.mkdir(parents=True, exist_ok=False)
+    (args.out / "summary.json").write_text(
+        json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    lines = [
+        f"# {args.project}：冻结五数据集MOD配对报告",
+        "",
+        f"执行状态：`{summary['status']}`；完整执行标记：`{summary['formal_complete']}`。这不是自动通过项目四目标。",
+        "",
+        "B0与B1使用同一基础引擎、模型、硬件及共同配置，分别关闭/开启目标MOD。具体身份与必要适配见本批冻结计划；不能用准备、HTTP成功或零调用宣称机制收益。",
+        "",
+        f"模型：{plan['model']}，修订`{plan['model_revision']}`。设备：{len(plan['physical_npus'])}×{result['frozen_identity']['chip']}，物理`{plan['physical_npus']}`/逻辑`{plan['logical_npus']}`，并行`{json.dumps(plan['parallelism'])}`。",
+        f"MOD：[{binding['mod_repository']}]({binding['mod_repository']})，源码`{binding['mod_revision']}`；基础vLLM`{result['frozen_identity']['vllm_commit']}`、Ascend`{result['frozen_identity']['ascend_commit']}`及披露的共同兼容/测量适配。标准`{plan['standard_id']}`/SHA`{plan['standard_sha256']}`。",
+        f"依赖：`{json.dumps(result['frozen_identity']['runtime_packages'])}`。完整身份与B0/B1开关见[绑定]({args.binding_link})，[冻结计划](../execution-plan.json)、[进程/初始化开销](../runtime-overheads.json)与[原始数字/独立核验](../summary.json)分别保留。",
+        "",
+        "| 数据集 | B0成功/计划 | B1成功/计划 | B0 tok/s | B1 tok/s | 吞吐变化 | TTFT P95改善 | TPOT均值改善 |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    if "solver_policy_observations" in result:
+        observations = result["solver_policy_observations"]["arms"]
+        lines[4:4] = [
+            "整个solver阶段策略观测："
+            + "；".join(
+                f"{item['arm']} enabled={item['enabled']}、calls={item['calls']}、selections={item['selections']}"
+                for item in observations
+            )
+            + "。零调用情况下，正吞吐比值与正确数变化不能归因于BidKV机制。",
+            "",
+        ]
+    if "actual_execution_identity" in result:
+        lines[4:4] = [
+            "[实际启动身份](../actual-execution-identity.json)保留Popen前构造完成的command.json argv/环境allowlist及实际PID/ready/wait绑定；正式服务没有独立/proc argv或loaded-import RPC直接观测，这两个字段保留null，资格import证据与正式服务分开。",
+            "",
+        ]
+    for dataset, data in result["datasets"].items():
+        a, b = data["native"], data["candidate"]
+        lines.append(
+            f"| {dataset} | {a['successful']}/{a['planned']} | {b['successful']}/{b['planned']} | {number(a['output_tokens_per_second'])} | {number(b['output_tokens_per_second'])} | {number(data['throughput_change'], True)} | {number(data['ttft_p95_improvement'], True)} | {number(data['tpot_mean_improvement'], True)} |"
+        )
+    if args.plots:
+        lines += ["", "![五项配对吞吐及全部正负比值](throughput.svg)"]
+    lines += [
+        "",
+        "吞吐为accepted输出token除以整个solver batch首提交至末响应时间；失败请求的计时仍在完整区间内。不完整残批不推算完整吞吐。TTFT取首content事件，TPOT按每请求(token>1)计算并均权；分位数按(n−1)q线性插值。单臂或部分记录不足以给出配对效果。",
+    ]
+    if args.c8_summary:
+        lines += [
+            "",
+            "## 单列的4K/16K C8资格",
+            "",
+            f"[完整证据、预热和实际退出]({args.c8_link})：两臂各按60秒预热/300秒正式提交窗口运行后排空，固定256输出。以下tok/s包含drain并除以phase end−start，不能称为固定[0,300)窗口产出。该资格与五项保留EOS的有限batch分别统计。",
+            "",
+            "| 正式phase | B0请求 | B1请求 | B0 tok/s | B1 tok/s | 吞吐变化 |",
+            "| --- | ---: | ---: | ---: | ---: | ---: |",
+        ]
+        for phase in c8["phases"]:
+            if phase["phase"].endswith("-formal"):
+                lines.append(
+                    f"| {phase['phase']} | {phase['native_requests']} | {phase[f'{args.candidate_arm}_requests']} | {number(phase['native_window_tokens_per_second'])} | {number(phase[f'{args.candidate_arm}_window_tokens_per_second'])} | {number(phase['throughput_change_percent'] / 100, True)} |"
+                )
+        lines += [
+            "",
+            "一次固定顺序资格不能证明32K长稳、总体时延等价或项目四目标；策略零调用时不能从该比值推断MOD机制收益。",
+        ]
+    lines += [
+        "",
+        "## 分母与失败",
+        "",
+        "正式controller的exit_code直接来自实际process.wait()；可选actual_client_returncode仅取消路径写入，本轮null不补填。全程owned等待、四份原grader无HTTP重算逐字节一致、各模型退出和双卡释放见[闭合审计](../closure-and-quality-recompute.json)及[生命周期](../full-owned-lifecycle-policy.json)。",
+        "",
+        "| 数据集/臂 | 有最终记录的attempted | 返回失败 | length stop | 未执行/未完成 | TPOT排除 |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for dataset, data in result["datasets"].items():
+        for arm in ("native", "candidate"):
+            item = data[arm]
+            lines.append(
+                f"| {dataset}/{arm} | {item['executed']} | {item['failed']} | {item['length_stops']} | {item['not_executed_or_unfinished']} | {item['tpot_excluded_output_tokens_le_one']} |"
+            )
+    lines += [
+        "",
+        "## 原质量与judge",
+        "",
+        "质量使用原金标准和原评分器；token相同或不同不作为质量判据。HLE四层、Frontier两轨和MMLU学科分组见原grader汇总。720只是计划judge输入；实际HTTP、solver_failed、invalid和未决按stage单列。SWE/Terminal只报告轨迹推理性能，没有执行历史工具，不给解决率。",
+        "",
+    ]
+    for item in result["quality_summary_files"]:
+        lines.append(
+            f"- 原汇总：[{item['path']}](../{item['path']})（SHA `{item['sha256']}`）。"
+        )
+    if result["quality_rows"]:
+        lines += [
+            "",
+            "| 数据集/臂/层或轨 | 已判成功/计划 | 有效grade | 原rate | 未决 | solver/judge length | 研究均分/10（仅有效） |",
+            "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        ]
+        for item in result["quality_rows"]:
+            rate = (
+                f"{100 * item['original_rate']:.2f}%"
+                if item["original_rate"] is not None
+                else "未决(null)"
+            )
+            score = (
+                f"{item['research_score_valid_only_out_of_10']:.4f}"
+                if item["research_score_valid_only_out_of_10"] is not None
+                else "不适用/未测"
+            )
+            lines.append(
+                f"| {item['dataset']}/{item['arm']}/{item['group']} | {item['successes']}/{item['planned']} | {item['graded']} | {rate} | {item['unresolved']} | {item['solver_truncated']}/{item['judge_truncated']} | {score} |"
+            )
+        lines += [
+            "",
+            "HLE沿冻结strict_json原评分：未决计入计划分母的非成功项，不能称为已证错误。Frontier沿冻结mmlu_extract_first：取首个完整显式VERDICT，length结尾满足原规则仍可解析；研究score为0–10、≥7成功。缺失/invalid/失败仍保留，原rate若null不以lower bound代填。研究均分只覆盖有效grade。两者均是Qwen替代judge的单次本地协议，不是官方leaderboard复现；HLE校准误差原工具未实现，保留未验证。",
+        ]
+    lines += [
+        "",
+        "| Judge所评solver/数据集 | 计划输入 | 已绑定HTTPattempted | 有效grade | invalid | solver_failed | transport失败 | length |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for stage in result["judge_stages"]:
+        value = stage.get("summary")
+        if value:
+            lines.append(
+                f"| {stage['solver_arm']}/{stage['dataset']} | {value['planned']} | {stage['http_attempts_in_bound_final_records']} | {value['successful']} | {value['invalid_judge']} | {value['solver_failed']} | {value['transport_failures']} | {value['length_stops']} |"
+            )
+        else:
+            lines.append(
+                f"| {stage['solver_arm']}/{stage['dataset']} | {stage['planned']} | 未执行/未完成 | 未验证 | 未验证 | 未验证 | 未验证 | 未验证 |"
+            )
+    if "mmlu_paired_diagnostic" in result:
+        item = result["mmlu_paired_diagnostic"]
+        lines += [
+            "",
+            f"MMLU原extractor：{item['native_correct']}/200→{item['candidate_correct']}/200；仅B0正确{item['only_native_correct']}题、仅B1正确{item['only_candidate_correct']}题。配对discordance双侧精确binomial诊断p={item['discordant_exact_two_sided_binomial_p']:.6f}；固定子集、单次解码的诊断不证明总体差异、等价或重复性。",
+        ]
+        qualities = [
+            result["datasets"]["mmlu"][arm].get("original_quality_summary")
+            for arm in ("native", "candidate")
+        ]
+        if all(value and "categories" in value for value in qualities):
+            assert (
+                qualities[0]["categories"].keys() == qualities[1]["categories"].keys()
+            )
+            assert len(qualities[0]["categories"]) == 14
+            lines += [
+                "",
+                "| MMLU学科 | 计划/臂 | B0正确 | B1正确 |",
+                "| --- | ---: | ---: | ---: |",
+            ]
+            for category in sorted(qualities[0]["categories"]):
+                a, b = [value["categories"][category] for value in qualities]
+                assert a["planned"] == b["planned"]
+                lines.append(
+                    f"| {category} | {a['planned']} | {a['correct']} | {b['correct']} |"
+                )
+            lines += [
+                "",
+                f"MMLU未解析答案：B0 {qualities[0]['unparsed']}，B1 {qualities[1]['unparsed']}；仍保留在200分母，不能只在可解析子集算正确率。",
+            ]
+    if result["quality_unresolved_ranges"]:
+        lines += [
+            "",
+            "仅将未决grade视为可正可负、保持已判grade不变时，已判成功占计划分母的条件范围如下；这不是统计置信区间，也没有包含judge误判的不确定性：",
+            "",
+            "| 数据集/臂 | 已判成功 | 未决 | 计划 | 条件范围 |",
+            "| --- | ---: | ---: | ---: | ---: |",
+        ]
+        for item in result["quality_unresolved_ranges"]:
+            lines.append(
+                f"| {item['dataset']}/{item['arm']} | {item['successes']} | {item['unresolved']} | {item['planned']} | {100 * item['lower']:.2f}%–{100 * item['upper']:.2f}% |"
+            )
+    lines += [
+        "",
+        "## 成本、适用范围与不确定性",
+        "",
+        "成本只可按相同费率比较solver wall/accepted输出token，初始化、图编译、诊断生成、judge和额外主机/设备内存另列；实际货币费用未验证。完整数值及原件hash见summary.json与本批数字胶囊。原问题、答案、对话和完整SSE保持受控，公共hash不冒充原SSE重新读取。",
+        "",
+        "| 数据集 | 同费率solver时间/输出token变化 |",
+        "| --- | ---: |",
+        *[
+            f"| {dataset} | {number(value['same_rate_solver_cost_per_token_change'], True)} |"
+            for dataset, value in result["datasets"].items()
+        ],
+        "",
+        "本轮为先B0后B1的固定顺序单批，时间漂移、队列相关性及单次运行的不确定性保留；不把不显著写成等价，不以有限batch的P95/P99证明连续16K或32K长期稳定，也不把冻结子集升级为上游全集或四目标验收。",
+        "",
+    ]
+    if runtime:
+        lines += ["", "| 完整五项服务 | 初始化资源代理（卡秒） |", "| --- | ---: |"]
+        for item in result["initialization_resource_proxy"]:
+            lines.append(
+                f"| {item['name']} | {number(item['initialization_device_seconds'])} |"
+            )
+        lines += [
+            "",
+            "以上仅完整五项的三次fresh初始化，不含另列的C8准备，也不是总账单。容器与HBM数值采样见runtime-overheads.json，属于总观测，不能自动当作MOD独占增量或有效FLOP证据。",
+            "",
+            "| 服务 | 留存样本 | 容器memory.current最大观测GiB | 各物理卡HBM最大观测MB | 采样错误记录 |",
+            "| --- | ---: | ---: | --- | ---: |",
+        ]
+        for item in result["runtime_memory_observations"]:
+            memory = item["container_memory_peak_observed_bytes"]
+            lines.append(
+                f"| {item['name']} | {item['samples']} | {number(memory / 2**30 if memory is not None else None)} | {json.dumps(item['physical_hbm_peak_observed_mb'])} | {item['sampling_error_present_count']} |"
+            )
+        lines += [
+            "",
+            "这些是留存采样区间内的总容器/设备最大观测，非精确分配峰值；缺样本保留未验证，不能用0或两臂总内存差冒充MOD独占内存。HBM单位沿用npu-smi原标记MB。",
+        ]
+    if diagnostic:
+        lines += [
+            "",
+            "原HLE额外red/blue资格每臂2条、max32、保留EOS，与672/720和正式window分开；记录及不完整下界见diagnostic-overheads.json。",
+        ]
+    markdown = "\n".join(lines)
+    from markdown_it import MarkdownIt
+
+    renderer = MarkdownIt("commonmark", {"html": False}).enable("table")
+    (args.out / "REPORT.md").write_text(markdown, encoding="utf-8", newline="\n")
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "mdformat",
+            "--wrap",
+            "100",
+            str(args.out / "REPORT.md"),
+        ],
+        check=True,
+    )
+    markdown = (args.out / "REPORT.md").read_text(encoding="utf-8")
+    if args.plots:
+        plot_results(result, args.out)
+    page = (
+        "<!doctype html><html lang='zh-CN'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>"
+        + html.escape(args.project)
+        + " MOD报告</title><style>body{max-width:1180px;margin:3rem auto;padding:0 1rem;font:16px/1.75 system-ui;color:#17283b;background:#fff}h1{font-size:2rem}h2{margin-top:2.5rem}table{border-collapse:collapse;width:100%;font-size:.9rem;margin:1.5rem 0}td,th{border-bottom:1px solid #d9e3ee;padding:.7rem;text-align:right}td:first-child,th:first-child{text-align:left}th{background:#eff4fa}code{overflow-wrap:anywhere;font-size:.85em}a{color:#1763a7}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6fa;padding:1rem}@media(max-width:800px){body{font-size:14px}table{display:block;overflow:auto}}</style>"
+        + renderer.render(markdown)
+        + "</html>\n"
+    )
+    (args.out / "report.html").write_text(page, encoding="utf-8", newline="\n")
+    print(
+        json.dumps(
+            {
+                "output": str(args.out),
+                "complete_execution": summary["formal_complete"],
+                "datasets": len(result["datasets"]),
+            }
+        )
+    )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--capsule", type=Path, required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--project", required=True)
+    parser.add_argument("--candidate-arm", required=True)
+    parser.add_argument("--binding", type=Path, required=True)
+    parser.add_argument(
+        "--binding-link", default="../../driver-mod-v4/mod-binding.json"
+    )
+    parser.add_argument("--chip", default="未在绑定内记录")
+    parser.add_argument("--mechanism-evidence", type=Path)
+    parser.add_argument("--c8-summary", type=Path)
+    parser.add_argument("--c8-link", default="../../c8-results-v2/README.md")
+    parser.add_argument("--plots", action="store_true")
+    main(parser.parse_args())

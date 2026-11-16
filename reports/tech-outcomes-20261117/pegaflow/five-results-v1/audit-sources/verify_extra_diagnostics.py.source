@@ -1,0 +1,38 @@
+"""Independently replay the four retained image-qualification SSE captures."""
+
+import importlib.util
+import json
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location('access', 'E:/CodexData/Work/instrumented-repeats-20261108/coder_access.py')
+access = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(access)
+script = r'''
+import hashlib,json,sys,time
+from pathlib import Path
+campaign=Path('/data/shared_upload/cybber695/pegaflow91-five-datasets-20261114-04')
+sys.path.insert(0,str(campaign/'sources/pegaflow91-analysis-v4'))
+from verify_pegaflow_finite import replay
+rows=[]
+for arm in ['native','pegaflow']:
+ for color in ['red','blue']:
+  path=campaign/'formal-01'/(arm+'-hle')/'image-qualification'/(color+'.json')
+  record=json.loads(path.read_bytes());wire=Path(record['stream_capture'])
+  assert wire.resolve().is_relative_to((campaign/'formal-01'/(arm+'-hle')).resolve())
+  assert hashlib.sha256(wire.read_bytes()).hexdigest()==record['stream_sha256']
+  raw=replay(wire)
+  for key,value in raw.items():assert record[key]==value,key
+  assert record['passed'] is True and record['status']=='ok'
+  assert record['request']['max_tokens']==32 and record['request']['temperature']==0 and record['request']['seed']==17
+  assert record['request']['chat_template_kwargs']['enable_thinking'] is False and not record['request'].get('ignore_eos',False)
+  rows.append({'arm':arm,'diagnostic_id':color,'passed':True,'raw_sse_verified':True,'controlled_record_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'sse_sha256':record['stream_sha256'],'usage':record['usage'],'finish_reason':record['finish_reason']})
+result={'schema':'pegaflow-extra-diagnostics-raw-sse-verification/v1','checked_unix':time.time(),'records':rows,'raw_sse_verified':len(rows),'model_requests':0,'scope':'Existing red/blue interface diagnostics only; separate from1344solver,720judge,684C8. No cache reuse claim for this diagnostic.'}
+path=Path('/data/shared_upload/cybber695/final-closeout-20261116/pegaflow-audit/diagnostic-raw-sse-verification.json')
+assert not path.exists();path.write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(result))
+'''
+value = json.loads(access.remote('ascend-81', script, timeout=120))
+root = Path(__file__).resolve().parent
+for target in [root / 'collected/diagnostic-raw-sse-verification.json', root / 'report-ready/audit/diagnostic-raw-sse-verification.json']:
+    target.write_text(json.dumps(value, indent=2) + '\n', encoding='utf-8', newline='\n')
+print(json.dumps({'extra_diagnostic_raw_sse_verified':value['raw_sse_verified'],'model_requests':0}))

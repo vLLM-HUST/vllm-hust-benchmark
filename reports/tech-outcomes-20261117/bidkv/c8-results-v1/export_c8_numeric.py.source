@@ -1,0 +1,77 @@
+"""Export independently checked C8 numeric evidence without messages or SSE."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+
+def sha(path):
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def save(path, value):
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False)+'\n', encoding='utf-8')
+
+
+def export(persist, arm, out):
+    source = persist/'qualification'/(arm+'-c8-01')
+    sys.path.insert(0, str(persist/'sources/finite-driver-v1'))
+    from verify_c8 import inspect
+    verification = inspect(source, persist/'controlled/initial-inputs-01/continuous-inputs-r1.json')
+    target = out/arm
+    target.mkdir(parents=True, exist_ok=False)
+    save(target/'independent-verification.json', verification)
+    report = json.loads((source/'continuous.json').read_bytes())
+    phase_rows = []
+    numeric_rows = []
+    for phase in report['phases']:
+        row = {key: phase[key] for key in ['name', 'start', 'submission_deadline_monotonic', 'end', 'seconds', 'requests', 'failed',
+                                           'drain_seconds', 'output_tokens_accepted_including_drain', 'ttft_generated_seconds',
+                                           'tpot_completion_seconds', 'throughput_scope']}
+        phase_rows.append(row)
+        for path in sorted(source.glob(phase['name']+'-lane*.json')):
+            raw = json.loads(path.read_bytes())
+            usage = raw['usage']
+            numeric_rows.append({'case_id': raw['case_id'], 'phase': raw['phase'], 'lane': raw['lane'],
+                                 'status': raw['status'], 'http_status': raw.get('http_status'),
+                                 'start': raw['start'], 'first_generated_event': raw['first_generated_event'],
+                                 'last_generated_event': raw['last_generated_event'],
+                                 'first_content_event': raw['first_token'], 'last_content_event': raw['last_token'],
+                                 'end': raw['end'], 'elapsed_s': raw['elapsed_s'],
+                                 'input_tokens': usage['prompt_tokens'], 'output_tokens': usage['completion_tokens'],
+                                 'finish_reason': raw['finish_reason'], 'cached_tokens_reported': raw['cached_tokens_reported'],
+                                 'controlled_record_sha256': sha(path), 'controlled_sse_sha256': raw['stream_sha256']})
+    save(target/'phases.json', phase_rows)
+    with (target/'requests.jsonl').open('w', encoding='utf-8', newline='\n') as stream:
+        for row in numeric_rows:
+            stream.write(json.dumps(row, ensure_ascii=False, allow_nan=False)+'\n')
+    original_files = [{'path': path.relative_to(source).as_posix(), 'bytes': path.stat().st_size, 'sha256': sha(path)}
+                      for path in sorted(source.rglob('*')) if path.is_file()]
+    save(target/'controlled-originals-index.json', {'controlled_root': str(source.resolve()), 'files': original_files,
+                                                  'access': 'Existing authorized Coder/NAS access; no public download link',
+                                                  'classification': 'Original requests, generated text and exact raw SSE remain controlled; numeric export omits them'})
+    plan = json.loads((source/'plan.json').read_bytes())
+    save(target/'execution-identity.json', {'arm': arm, 'public_c8_source_commit': 'b8a1c0c0062abce4b08e367ff003b1416df0afa2',
+                                          'candidate_launch_source_commit': 'dbd3e0627e8ba57850ada6424a90f4de1a925227' if arm == 'bidkv' else None,
+                                          'input_sha256': plan['input_sha256'], 'actual_source_files_sha256': plan['source_files'],
+                                          'independent_verifier_public_commit': 'dba199007aa62c78bcc4fbe54bad4d54a2bd5998',
+                                          'concurrency': 8, 'warmup_seconds_per_length': 60, 'formal_submission_seconds_per_length': 300,
+                                          'timeout_seconds': 180, 'actual_input_tokens': [4115, 16407], 'max_tokens': 256,
+                                          'ignore_eos': True, 'requests_verified': len(numeric_rows), 'qualification_only': True,
+                                          'ttft_scope': 'C8 original first generated content/reasoning event; the five finite datasets use first content event',
+                                          'no_five_dataset_quality_or_32k_stability_claim': True})
+    save(target/'manifest.json', {'schema': 'public-safe-c8-numeric-arm/v1', 'arm': arm,
+                                  'files': [{'path': path.name, 'bytes': path.stat().st_size, 'sha256': sha(path)}
+                                            for path in sorted(target.iterdir()) if path.is_file()]})
+    return {'arm': arm, 'verified': verification['passed'], 'requests': len(numeric_rows), 'output': str(target)}
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--persist', type=Path, required=True)
+    parser.add_argument('--arm', choices=['native', 'bidkv'], required=True)
+    parser.add_argument('--out', type=Path, required=True)
+    args = parser.parse_args()
+    print(json.dumps(export(args.persist, args.arm, args.out)))

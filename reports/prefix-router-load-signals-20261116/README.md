@@ -74,5 +74,31 @@ logs are not part of this public record. The exact NPU model, precision, backend
 per-study Git revision and run timestamps are not established by this public summary. Manifest
 source-file hashes identify recorded Router files without asserting a Git revision. Do not infer
 them from the machine name or the final Router PR revision. They require verification against the
-original run artifacts before being asserted. The PR's P95 examples likewise cannot be independently
-recalculated from the published condition means and hashes alone.
+original run artifacts before being asserted for those earlier studies. The PR's P95 examples
+likewise cannot be independently recalculated from the published condition means and hashes alone.
+
+## SWE C4 load-signal diagnostic
+
+`swe-c4-ablation.json` records eight completed windows from a SWE trace replay on four Ascend NPUs
+and two TP=2 Qwen3.5-35B-A3B BF16 backends using the final Router PR code. Four arms each ran two
+600-second windows at concurrency 4: A uses active request / Decode / Router queue weights 0/0/0, B
+uses 4/0/0, C uses 4/1/0 and D uses 4/0/1. Each backend's Router pool was constrained to two
+connections. The input was prepared from the bundled eight-trace sample of NVIDIA Open-SWE-Traces;
+four trajectories began in each window. The client omitted `cache_salt` because this Router version
+falls back on salted inputs. Cross-session cache reuse is therefore possible, so this diagnostic is
+not directly equivalent to the salted SWE experiment.
+
+All 256 requests succeeded with zero fingerprint fallbacks. Each window started 32 requests, 28
+completed in the timed window and four drained afterwards. Backend cache counters reported 141,312
+hits over 210,970 queried tokens per window (66.98%); these are token counters, not the fraction of
+requests with hits. A/B/C/D two-run mean TTFT over all 32 requests was approximately
+0.996/1.005/0.998/0.995 seconds. Output throughput within the 600-second windows was approximately
+17.67/17.44/17.44/17.61 tokens/s. Two short runs do not establish statistical significance or
+guarantee non-regression.
+
+The queue signal was zero at every recorded decision. The Decode signal was nonzero in 28 of 32
+decisions per run, but removing its cost from the recorded C-arm scores never made the selected
+candidate strictly more expensive than the best candidate; the same snapshot check held for the
+request cost in B. Ties and future state changes are not resolved by this check, and independent
+replays are not same-state counterfactuals. The source request, timing and routing records remain on
+the server; the JSON includes their SHA-256 values but not their contents.
