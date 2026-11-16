@@ -211,7 +211,33 @@
           "mean_e2e_s": 7.749538571205771,
           "mean_client_tpot_s": 0.2192989130842167
         }
-      ]
+      ],
+      "pooled_ttft": {
+        "source_requests_csv_sha256": "306cfa115dd96d53c26b60b73401637cf7b41079885d28990e36a6b5033ac948",
+        "description": "TTFT over all defined request values pooled across three repetitions; P95 uses linear interpolation at index (n - 1) * 0.95.",
+        "arms": {
+          "baseline": {
+            "requests": 744,
+            "mean_ttft_s": 0.9864320322891237,
+            "p95_ttft_s": 1.2677803890779615
+          },
+          "observed4": {
+            "requests": 744,
+            "mean_ttft_s": 1.3660177839394179,
+            "p95_ttft_s": 7.4852930137887785
+          },
+          "occupied1": {
+            "requests": 744,
+            "mean_ttft_s": 0.9784608181711206,
+            "p95_ttft_s": 1.337381113227457
+          },
+          "occupied4": {
+            "requests": 744,
+            "mean_ttft_s": 0.9127077175434478,
+            "p95_ttft_s": 1.1861899303272367
+          }
+        }
+      }
     },
     "ordinary-phase-repair-v3-c2": {
       "source_summary_sha256": "68273c60d1f9b5fc8a06e82eff50cd2966b820925d3f536e49aabf7dd2534b97",
