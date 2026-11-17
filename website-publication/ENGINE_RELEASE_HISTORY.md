@@ -22,3 +22,7 @@ Source URLs use fixed commits; SHA256 and byte lengths identify the original rec
 links require repository access. This projection contains no prompts, gold labels or full model
 responses. Historical protocols and their failure records are retained; this update launches no
 inference and rewrites no sealed evidence.
+
+The public visibility policy permits only this catalog’s exact SHA256-bound bytes. Changing a
+measured value and re-signing the source manifest still fails publication; unrelated withdrawn
+research records retain their existing filters.
