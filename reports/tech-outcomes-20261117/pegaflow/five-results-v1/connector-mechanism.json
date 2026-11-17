@@ -1,0 +1,815 @@
+{
+  "schema": "pegaflow-external-kv-mechanism/v1",
+  "source_manifest_sha256": "6d563ea9af874dae6e6248cc51155809878e352d029c069c446d6857ec133541",
+  "stages": [
+    {
+      "name": "native-mmlu",
+      "arm": "native",
+      "cache_admission": {
+        "arm": "native",
+        "prefix": {
+          "deltas": {
+            "vllm:external_prefix_cache_hits_total": 0.0,
+            "vllm:prefix_cache_hits_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false,
+          "required": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "passed": true
+        },
+        "prefix_counters_present": true,
+        "required_prefix_counter_names": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "external_connector_expected": false,
+        "engine_connector": null,
+        "passed": true,
+        "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+      }
+    },
+    {
+      "name": "native-hle",
+      "arm": "native",
+      "cache_admission": {
+        "arm": "native",
+        "prefix": {
+          "deltas": {
+            "vllm:external_prefix_cache_hits_total": 0.0,
+            "vllm:prefix_cache_hits_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false,
+          "required": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "passed": true
+        },
+        "prefix_counters_present": true,
+        "required_prefix_counter_names": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "external_connector_expected": false,
+        "engine_connector": null,
+        "passed": true,
+        "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+      }
+    },
+    {
+      "name": "native-frontier",
+      "arm": "native",
+      "cache_admission": {
+        "arm": "native",
+        "prefix": {
+          "deltas": {
+            "vllm:external_prefix_cache_hits_total": 0.0,
+            "vllm:prefix_cache_hits_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false,
+          "required": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "passed": true
+        },
+        "prefix_counters_present": true,
+        "required_prefix_counter_names": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "external_connector_expected": false,
+        "engine_connector": null,
+        "passed": true,
+        "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+      }
+    },
+    {
+      "name": "native-swe",
+      "arm": "native",
+      "cache_admission": {
+        "arm": "native",
+        "prefix": {
+          "deltas": {
+            "vllm:external_prefix_cache_hits_total": 0.0,
+            "vllm:prefix_cache_hits_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false,
+          "required": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "passed": true
+        },
+        "prefix_counters_present": true,
+        "required_prefix_counter_names": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "external_connector_expected": false,
+        "engine_connector": null,
+        "passed": true,
+        "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+      }
+    },
+    {
+      "name": "native-terminal",
+      "arm": "native",
+      "cache_admission": {
+        "arm": "native",
+        "prefix": {
+          "deltas": {
+            "vllm:external_prefix_cache_hits_total": 0.0,
+            "vllm:prefix_cache_hits_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false,
+          "required": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "passed": true
+        },
+        "prefix_counters_present": true,
+        "required_prefix_counter_names": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "external_connector_expected": false,
+        "engine_connector": null,
+        "passed": true,
+        "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+      }
+    },
+    {
+      "name": "pegaflow-mmlu",
+      "arm": "pegaflow",
+      "cache_admission": {
+        "arm": "pegaflow",
+        "prefix": {
+          "deltas": {
+            "vllm:external_prefix_cache_hits_total": 0.0,
+            "vllm:prefix_cache_hits_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false,
+          "required": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "passed": true
+        },
+        "prefix_counters_present": true,
+        "required_prefix_counter_names": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "external_connector_expected": true,
+        "engine_connector": {
+          "deltas": {
+            "vllm:pega_load_success_total": 0.0,
+            "vllm:pega_save_success_total": 12.0,
+            "vllm:pega_load_failure_total": 0.0,
+            "vllm:pega_save_failure_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false
+        },
+        "external_snapshots_present": true,
+        "passed": true,
+        "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+      },
+      "sidecar_metric_snapshots": {
+        "before": {
+          "pegaflow_hll_cardinality": 0.0,
+          "pegaflow_hll_total_requests": 0.0,
+          "pegaflow_pool_capacity_bytes": 32212254720.0,
+          "pegaflow_rpc_duration_seconds_bucket": 9.0,
+          "pegaflow_rpc_duration_seconds_sum": 0.358101149,
+          "pegaflow_rpc_duration_seconds_count": 2.0,
+          "pegaflow_rpc_requests_total": 2.0,
+          "target_info": 1.0
+        },
+        "after": {
+          "pegaflow_cache_block_hits_total": 0.0,
+          "pegaflow_cache_block_insertions_total": 6.0,
+          "pegaflow_cache_block_misses_total": 6.0,
+          "pegaflow_cache_resident_bytes": 276824064.0,
+          "pegaflow_cache_tier_block_requests_total": 6.0,
+          "pegaflow_hll_cardinality": 18.003296703320952,
+          "pegaflow_hll_total_requests": 18.0,
+          "pegaflow_inflight_bytes": 0.0,
+          "pegaflow_object_lifecycle_total": 24.0,
+          "pegaflow_object_resident_bytes": 276824064.0,
+          "pegaflow_pool_capacity_bytes": 32212254720.0,
+          "pegaflow_pool_used_bytes": 276824064.0,
+          "pegaflow_rpc_duration_seconds_bucket": 243.0,
+          "pegaflow_rpc_duration_seconds_sum": 0.360929433,
+          "pegaflow_rpc_duration_seconds_count": 20.0,
+          "pegaflow_rpc_requests_total": 20.0,
+          "pegaflow_save_bytes_total": 276824064.0,
+          "pegaflow_save_duration_seconds_bucket": 198.0,
+          "pegaflow_save_duration_seconds_sum": 0.11346844300000002,
+          "pegaflow_save_duration_seconds_count": 12.0,
+          "target_info": 1.0
+        },
+        "explicit_counter_deltas": {
+          "deltas": {
+            "pegaflow_cache_block_hits_total": null,
+            "pegaflow_cache_block_insertions_total": null,
+            "pegaflow_cache_block_misses_total": null,
+            "pegaflow_cache_tier_block_requests_total": null,
+            "pegaflow_object_lifecycle_total": null,
+            "pegaflow_rpc_duration_seconds_bucket": 234.0,
+            "pegaflow_rpc_duration_seconds_count": 18.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.0028282840000000142,
+            "pegaflow_rpc_requests_total": 18.0,
+            "pegaflow_save_bytes_total": null,
+            "pegaflow_save_duration_seconds_bucket": null,
+            "pegaflow_save_duration_seconds_count": null,
+            "pegaflow_save_duration_seconds_sum": null
+          },
+          "missing": [
+            "pegaflow_cache_block_hits_total",
+            "pegaflow_cache_block_insertions_total",
+            "pegaflow_cache_block_misses_total",
+            "pegaflow_cache_tier_block_requests_total",
+            "pegaflow_object_lifecycle_total",
+            "pegaflow_save_bytes_total",
+            "pegaflow_save_duration_seconds_bucket",
+            "pegaflow_save_duration_seconds_count",
+            "pegaflow_save_duration_seconds_sum"
+          ],
+          "counter_reset_seen": false
+        },
+        "gauge_names": [
+          "pegaflow_cache_resident_bytes",
+          "pegaflow_hll_cardinality",
+          "pegaflow_hll_total_requests",
+          "pegaflow_inflight_bytes",
+          "pegaflow_object_resident_bytes",
+          "pegaflow_pool_capacity_bytes",
+          "pegaflow_pool_used_bytes",
+          "target_info"
+        ],
+        "lazy_counters_absent_before": [
+          "pegaflow_cache_block_hits_total",
+          "pegaflow_cache_block_insertions_total",
+          "pegaflow_cache_block_misses_total",
+          "pegaflow_cache_resident_bytes",
+          "pegaflow_cache_tier_block_requests_total",
+          "pegaflow_inflight_bytes",
+          "pegaflow_object_lifecycle_total",
+          "pegaflow_object_resident_bytes",
+          "pegaflow_pool_used_bytes",
+          "pegaflow_save_bytes_total",
+          "pegaflow_save_duration_seconds_bucket",
+          "pegaflow_save_duration_seconds_sum",
+          "pegaflow_save_duration_seconds_count"
+        ],
+        "scope": "Counter deltas and gauge snapshots are distinct; gauge decreases are not counter resets. Missing metrics are unknown. Lazy sidecar positive activation is distinct from strict engine zero-restore proof; do not infer absent counters to zero."
+      }
+    },
+    {
+      "name": "pegaflow-hle",
+      "arm": "pegaflow",
+      "cache_admission": {
+        "arm": "pegaflow",
+        "prefix": {
+          "deltas": {
+            "vllm:external_prefix_cache_hits_total": 0.0,
+            "vllm:prefix_cache_hits_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false,
+          "required": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "passed": true
+        },
+        "prefix_counters_present": true,
+        "required_prefix_counter_names": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "external_connector_expected": true,
+        "engine_connector": {
+          "deltas": {
+            "vllm:pega_load_success_total": 0.0,
+            "vllm:pega_save_success_total": 8.0,
+            "vllm:pega_load_failure_total": 0.0,
+            "vllm:pega_save_failure_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false
+        },
+        "external_snapshots_present": true,
+        "passed": true,
+        "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+      },
+      "sidecar_metric_snapshots": {
+        "before": {
+          "pegaflow_cache_block_hits_total": 0.0,
+          "pegaflow_cache_block_insertions_total": 6.0,
+          "pegaflow_cache_block_misses_total": 6.0,
+          "pegaflow_cache_resident_bytes": 276824064.0,
+          "pegaflow_cache_tier_block_requests_total": 6.0,
+          "pegaflow_hll_cardinality": 18.003296703320952,
+          "pegaflow_hll_total_requests": 18.0,
+          "pegaflow_inflight_bytes": 0.0,
+          "pegaflow_object_lifecycle_total": 24.0,
+          "pegaflow_object_resident_bytes": 276824064.0,
+          "pegaflow_pool_capacity_bytes": 32212254720.0,
+          "pegaflow_pool_used_bytes": 276824064.0,
+          "pegaflow_rpc_duration_seconds_bucket": 243.0,
+          "pegaflow_rpc_duration_seconds_sum": 0.360929433,
+          "pegaflow_rpc_duration_seconds_count": 20.0,
+          "pegaflow_rpc_requests_total": 20.0,
+          "pegaflow_save_bytes_total": 276824064.0,
+          "pegaflow_save_duration_seconds_bucket": 198.0,
+          "pegaflow_save_duration_seconds_sum": 0.11346844300000002,
+          "pegaflow_save_duration_seconds_count": 12.0,
+          "target_info": 1.0
+        },
+        "after": {
+          "pegaflow_cache_block_hits_total": 0.0,
+          "pegaflow_cache_block_insertions_total": 10.0,
+          "pegaflow_cache_block_misses_total": 10.0,
+          "pegaflow_cache_resident_bytes": 461373440.0,
+          "pegaflow_cache_tier_block_requests_total": 10.0,
+          "pegaflow_hll_cardinality": 21.006136519106235,
+          "pegaflow_hll_total_requests": 21.0,
+          "pegaflow_inflight_bytes": 0.0,
+          "pegaflow_object_lifecycle_total": 40.0,
+          "pegaflow_object_resident_bytes": 461373440.0,
+          "pegaflow_pool_capacity_bytes": 32212254720.0,
+          "pegaflow_pool_used_bytes": 461373440.0,
+          "pegaflow_rpc_duration_seconds_bucket": 399.0,
+          "pegaflow_rpc_duration_seconds_sum": 0.362324982,
+          "pegaflow_rpc_duration_seconds_count": 32.0,
+          "pegaflow_rpc_requests_total": 32.0,
+          "pegaflow_save_bytes_total": 461373440.0,
+          "pegaflow_save_duration_seconds_bucket": 334.0,
+          "pegaflow_save_duration_seconds_sum": 0.16688474200000003,
+          "pegaflow_save_duration_seconds_count": 20.0,
+          "target_info": 1.0
+        },
+        "explicit_counter_deltas": {
+          "deltas": {
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 4.0,
+            "pegaflow_cache_block_misses_total": 4.0,
+            "pegaflow_cache_tier_block_requests_total": 4.0,
+            "pegaflow_object_lifecycle_total": 16.0,
+            "pegaflow_rpc_duration_seconds_bucket": 156.0,
+            "pegaflow_rpc_duration_seconds_count": 12.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.001395548999999996,
+            "pegaflow_rpc_requests_total": 12.0,
+            "pegaflow_save_bytes_total": 184549376.0,
+            "pegaflow_save_duration_seconds_bucket": 136.0,
+            "pegaflow_save_duration_seconds_count": 8.0,
+            "pegaflow_save_duration_seconds_sum": 0.053416299000000014
+          },
+          "missing": [],
+          "counter_reset_seen": false
+        },
+        "gauge_names": [
+          "pegaflow_cache_resident_bytes",
+          "pegaflow_hll_cardinality",
+          "pegaflow_hll_total_requests",
+          "pegaflow_inflight_bytes",
+          "pegaflow_object_resident_bytes",
+          "pegaflow_pool_capacity_bytes",
+          "pegaflow_pool_used_bytes",
+          "target_info"
+        ],
+        "lazy_counters_absent_before": [],
+        "scope": "Counter deltas and gauge snapshots are distinct; gauge decreases are not counter resets. Missing metrics are unknown. Lazy sidecar positive activation is distinct from strict engine zero-restore proof; do not infer absent counters to zero."
+      }
+    },
+    {
+      "name": "pegaflow-frontier",
+      "arm": "pegaflow",
+      "cache_admission": {
+        "arm": "pegaflow",
+        "prefix": {
+          "deltas": {
+            "vllm:external_prefix_cache_hits_total": 0.0,
+            "vllm:prefix_cache_hits_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false,
+          "required": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "passed": true
+        },
+        "prefix_counters_present": true,
+        "required_prefix_counter_names": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "external_connector_expected": true,
+        "engine_connector": {
+          "deltas": {
+            "vllm:pega_load_success_total": 0.0,
+            "vllm:pega_save_success_total": 0.0,
+            "vllm:pega_load_failure_total": 0.0,
+            "vllm:pega_save_failure_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false
+        },
+        "external_snapshots_present": true,
+        "passed": true,
+        "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+      },
+      "sidecar_metric_snapshots": {
+        "before": {
+          "pegaflow_cache_block_hits_total": 0.0,
+          "pegaflow_cache_block_insertions_total": 10.0,
+          "pegaflow_cache_block_misses_total": 10.0,
+          "pegaflow_cache_resident_bytes": 461373440.0,
+          "pegaflow_cache_tier_block_requests_total": 10.0,
+          "pegaflow_hll_cardinality": 21.006136519106235,
+          "pegaflow_hll_total_requests": 21.0,
+          "pegaflow_inflight_bytes": 0.0,
+          "pegaflow_object_lifecycle_total": 40.0,
+          "pegaflow_object_resident_bytes": 461373440.0,
+          "pegaflow_pool_capacity_bytes": 32212254720.0,
+          "pegaflow_pool_used_bytes": 461373440.0,
+          "pegaflow_rpc_duration_seconds_bucket": 399.0,
+          "pegaflow_rpc_duration_seconds_sum": 0.362324982,
+          "pegaflow_rpc_duration_seconds_count": 32.0,
+          "pegaflow_rpc_requests_total": 32.0,
+          "pegaflow_save_bytes_total": 461373440.0,
+          "pegaflow_save_duration_seconds_bucket": 334.0,
+          "pegaflow_save_duration_seconds_sum": 0.16688474200000003,
+          "pegaflow_save_duration_seconds_count": 20.0,
+          "target_info": 1.0
+        },
+        "after": {
+          "pegaflow_cache_block_hits_total": 0.0,
+          "pegaflow_cache_block_insertions_total": 10.0,
+          "pegaflow_cache_block_misses_total": 10.0,
+          "pegaflow_cache_resident_bytes": 461373440.0,
+          "pegaflow_cache_tier_block_requests_total": 10.0,
+          "pegaflow_hll_cardinality": 11.003083518962976,
+          "pegaflow_hll_total_requests": 11.0,
+          "pegaflow_inflight_bytes": 0.0,
+          "pegaflow_object_lifecycle_total": 40.0,
+          "pegaflow_object_resident_bytes": 461373440.0,
+          "pegaflow_pool_capacity_bytes": 32212254720.0,
+          "pegaflow_pool_used_bytes": 461373440.0,
+          "pegaflow_rpc_duration_seconds_bucket": 399.0,
+          "pegaflow_rpc_duration_seconds_sum": 0.362324982,
+          "pegaflow_rpc_duration_seconds_count": 32.0,
+          "pegaflow_rpc_requests_total": 32.0,
+          "pegaflow_save_bytes_total": 461373440.0,
+          "pegaflow_save_duration_seconds_bucket": 334.0,
+          "pegaflow_save_duration_seconds_sum": 0.16688474200000003,
+          "pegaflow_save_duration_seconds_count": 20.0,
+          "target_info": 1.0
+        },
+        "explicit_counter_deltas": {
+          "deltas": {
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 0.0,
+            "pegaflow_cache_block_misses_total": 0.0,
+            "pegaflow_cache_tier_block_requests_total": 0.0,
+            "pegaflow_object_lifecycle_total": 0.0,
+            "pegaflow_rpc_duration_seconds_bucket": 0.0,
+            "pegaflow_rpc_duration_seconds_count": 0.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.0,
+            "pegaflow_rpc_requests_total": 0.0,
+            "pegaflow_save_bytes_total": 0.0,
+            "pegaflow_save_duration_seconds_bucket": 0.0,
+            "pegaflow_save_duration_seconds_count": 0.0,
+            "pegaflow_save_duration_seconds_sum": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false
+        },
+        "gauge_names": [
+          "pegaflow_cache_resident_bytes",
+          "pegaflow_hll_cardinality",
+          "pegaflow_hll_total_requests",
+          "pegaflow_inflight_bytes",
+          "pegaflow_object_resident_bytes",
+          "pegaflow_pool_capacity_bytes",
+          "pegaflow_pool_used_bytes",
+          "target_info"
+        ],
+        "lazy_counters_absent_before": [],
+        "scope": "Counter deltas and gauge snapshots are distinct; gauge decreases are not counter resets. Missing metrics are unknown. Lazy sidecar positive activation is distinct from strict engine zero-restore proof; do not infer absent counters to zero."
+      }
+    },
+    {
+      "name": "pegaflow-swe",
+      "arm": "pegaflow",
+      "cache_admission": {
+        "arm": "pegaflow",
+        "prefix": {
+          "deltas": {
+            "vllm:external_prefix_cache_hits_total": 0.0,
+            "vllm:prefix_cache_hits_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false,
+          "required": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "passed": true
+        },
+        "prefix_counters_present": true,
+        "required_prefix_counter_names": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "external_connector_expected": true,
+        "engine_connector": {
+          "deltas": {
+            "vllm:pega_load_success_total": 0.0,
+            "vllm:pega_save_success_total": 402.0,
+            "vllm:pega_load_failure_total": 0.0,
+            "vllm:pega_save_failure_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false
+        },
+        "external_snapshots_present": true,
+        "passed": true,
+        "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+      },
+      "sidecar_metric_snapshots": {
+        "before": {
+          "pegaflow_cache_block_hits_total": 0.0,
+          "pegaflow_cache_block_insertions_total": 10.0,
+          "pegaflow_cache_block_misses_total": 10.0,
+          "pegaflow_cache_resident_bytes": 461373440.0,
+          "pegaflow_cache_tier_block_requests_total": 10.0,
+          "pegaflow_hll_cardinality": 11.003083518962976,
+          "pegaflow_hll_total_requests": 11.0,
+          "pegaflow_inflight_bytes": 0.0,
+          "pegaflow_object_lifecycle_total": 40.0,
+          "pegaflow_object_resident_bytes": 461373440.0,
+          "pegaflow_pool_capacity_bytes": 32212254720.0,
+          "pegaflow_pool_used_bytes": 461373440.0,
+          "pegaflow_rpc_duration_seconds_bucket": 399.0,
+          "pegaflow_rpc_duration_seconds_sum": 0.362324982,
+          "pegaflow_rpc_duration_seconds_count": 32.0,
+          "pegaflow_rpc_requests_total": 32.0,
+          "pegaflow_save_bytes_total": 461373440.0,
+          "pegaflow_save_duration_seconds_bucket": 334.0,
+          "pegaflow_save_duration_seconds_sum": 0.16688474200000003,
+          "pegaflow_save_duration_seconds_count": 20.0,
+          "target_info": 1.0
+        },
+        "after": {
+          "pegaflow_cache_block_hits_total": 0.0,
+          "pegaflow_cache_block_insertions_total": 737.0,
+          "pegaflow_cache_block_misses_total": 215.0,
+          "pegaflow_cache_resident_bytes": 21294284800.0,
+          "pegaflow_cache_tier_block_requests_total": 215.0,
+          "pegaflow_hll_cardinality": 626.9838348899307,
+          "pegaflow_hll_total_requests": 626.0,
+          "pegaflow_inflight_bytes": 0.0,
+          "pegaflow_object_lifecycle_total": 2256.0,
+          "pegaflow_object_resident_bytes": 21294284800.0,
+          "pegaflow_pool_capacity_bytes": 32212254720.0,
+          "pegaflow_pool_used_bytes": 21294284800.0,
+          "pegaflow_rpc_duration_seconds_bucket": 6080.0,
+          "pegaflow_rpc_duration_seconds_sum": 0.371080564,
+          "pegaflow_rpc_duration_seconds_count": 469.0,
+          "pegaflow_rpc_requests_total": 469.0,
+          "pegaflow_save_bytes_total": 21294284800.0,
+          "pegaflow_save_duration_seconds_bucket": 6832.0,
+          "pegaflow_save_duration_seconds_sum": 5.464422228000004,
+          "pegaflow_save_duration_seconds_count": 422.0,
+          "target_info": 1.0
+        },
+        "explicit_counter_deltas": {
+          "deltas": {
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 727.0,
+            "pegaflow_cache_block_misses_total": 205.0,
+            "pegaflow_cache_tier_block_requests_total": 205.0,
+            "pegaflow_object_lifecycle_total": 2216.0,
+            "pegaflow_rpc_duration_seconds_bucket": 5681.0,
+            "pegaflow_rpc_duration_seconds_count": 437.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.008755581999999984,
+            "pegaflow_rpc_requests_total": 437.0,
+            "pegaflow_save_bytes_total": 20832911360.0,
+            "pegaflow_save_duration_seconds_bucket": 6498.0,
+            "pegaflow_save_duration_seconds_count": 402.0,
+            "pegaflow_save_duration_seconds_sum": 5.297537486000004
+          },
+          "missing": [],
+          "counter_reset_seen": false
+        },
+        "gauge_names": [
+          "pegaflow_cache_resident_bytes",
+          "pegaflow_hll_cardinality",
+          "pegaflow_hll_total_requests",
+          "pegaflow_inflight_bytes",
+          "pegaflow_object_resident_bytes",
+          "pegaflow_pool_capacity_bytes",
+          "pegaflow_pool_used_bytes",
+          "target_info"
+        ],
+        "lazy_counters_absent_before": [],
+        "scope": "Counter deltas and gauge snapshots are distinct; gauge decreases are not counter resets. Missing metrics are unknown. Lazy sidecar positive activation is distinct from strict engine zero-restore proof; do not infer absent counters to zero."
+      }
+    },
+    {
+      "name": "pegaflow-terminal",
+      "arm": "pegaflow",
+      "cache_admission": {
+        "arm": "pegaflow",
+        "prefix": {
+          "deltas": {
+            "vllm:external_prefix_cache_hits_total": 0.0,
+            "vllm:prefix_cache_hits_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false,
+          "required": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "passed": true
+        },
+        "prefix_counters_present": true,
+        "required_prefix_counter_names": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "external_connector_expected": true,
+        "engine_connector": {
+          "deltas": {
+            "vllm:pega_load_success_total": 0.0,
+            "vllm:pega_save_success_total": 390.0,
+            "vllm:pega_load_failure_total": 0.0,
+            "vllm:pega_save_failure_total": 0.0
+          },
+          "missing": [],
+          "counter_reset_seen": false
+        },
+        "external_snapshots_present": true,
+        "passed": true,
+        "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+      },
+      "sidecar_metric_snapshots": {
+        "before": {
+          "pegaflow_cache_block_hits_total": 0.0,
+          "pegaflow_cache_block_insertions_total": 737.0,
+          "pegaflow_cache_block_misses_total": 215.0,
+          "pegaflow_cache_resident_bytes": 21294284800.0,
+          "pegaflow_cache_tier_block_requests_total": 215.0,
+          "pegaflow_hll_cardinality": 626.9838348899307,
+          "pegaflow_hll_total_requests": 626.0,
+          "pegaflow_inflight_bytes": 0.0,
+          "pegaflow_object_lifecycle_total": 2256.0,
+          "pegaflow_object_resident_bytes": 21294284800.0,
+          "pegaflow_pool_capacity_bytes": 32212254720.0,
+          "pegaflow_pool_used_bytes": 21294284800.0,
+          "pegaflow_rpc_duration_seconds_bucket": 6080.0,
+          "pegaflow_rpc_duration_seconds_sum": 0.371080564,
+          "pegaflow_rpc_duration_seconds_count": 469.0,
+          "pegaflow_rpc_requests_total": 469.0,
+          "pegaflow_save_bytes_total": 21294284800.0,
+          "pegaflow_save_duration_seconds_bucket": 6832.0,
+          "pegaflow_save_duration_seconds_sum": 5.464422228000004,
+          "pegaflow_save_duration_seconds_count": 422.0,
+          "target_info": 1.0
+        },
+        "after": {
+          "pegaflow_cache_block_evictions_total": 512.0,
+          "pegaflow_cache_block_hits_total": 0.0,
+          "pegaflow_cache_block_insertions_total": 1377.0,
+          "pegaflow_cache_block_misses_total": 411.0,
+          "pegaflow_cache_eviction_reclaimed_bytes_total": 14830067712.0,
+          "pegaflow_cache_resident_bytes": 25154748416.0,
+          "pegaflow_cache_tier_block_requests_total": 411.0,
+          "pegaflow_hll_cardinality": 1220.0186469113135,
+          "pegaflow_hll_total_requests": 1214.0,
+          "pegaflow_inflight_bytes": 0.0,
+          "pegaflow_object_age_seconds_bucket": 512.0,
+          "pegaflow_object_age_seconds_sum": 172061.80536012613,
+          "pegaflow_object_age_seconds_count": 512.0,
+          "pegaflow_object_lifecycle_total": 4736.0,
+          "pegaflow_object_resident_bytes": 25154748416.0,
+          "pegaflow_pool_capacity_bytes": 32212254720.0,
+          "pegaflow_pool_used_bytes": 25154748416.0,
+          "pegaflow_rpc_duration_seconds_bucket": 11774.0,
+          "pegaflow_rpc_duration_seconds_sum": 0.380296656,
+          "pegaflow_rpc_duration_seconds_count": 907.0,
+          "pegaflow_rpc_requests_total": 907.0,
+          "pegaflow_save_bytes_total": 40012283904.0,
+          "pegaflow_save_duration_seconds_bucket": 13271.0,
+          "pegaflow_save_duration_seconds_sum": 9.137493632000012,
+          "pegaflow_save_duration_seconds_count": 812.0,
+          "target_info": 1.0
+        },
+        "explicit_counter_deltas": {
+          "deltas": {
+            "pegaflow_cache_block_evictions_total": null,
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 640.0,
+            "pegaflow_cache_block_misses_total": 196.0,
+            "pegaflow_cache_eviction_reclaimed_bytes_total": null,
+            "pegaflow_cache_tier_block_requests_total": 196.0,
+            "pegaflow_object_age_seconds_bucket": null,
+            "pegaflow_object_age_seconds_count": null,
+            "pegaflow_object_age_seconds_sum": null,
+            "pegaflow_object_lifecycle_total": 2480.0,
+            "pegaflow_rpc_duration_seconds_bucket": 5694.0,
+            "pegaflow_rpc_duration_seconds_count": 438.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.009216092000000009,
+            "pegaflow_rpc_requests_total": 438.0,
+            "pegaflow_save_bytes_total": 18717999104.0,
+            "pegaflow_save_duration_seconds_bucket": 6439.0,
+            "pegaflow_save_duration_seconds_count": 390.0,
+            "pegaflow_save_duration_seconds_sum": 3.6730714040000088
+          },
+          "missing": [
+            "pegaflow_cache_block_evictions_total",
+            "pegaflow_cache_eviction_reclaimed_bytes_total",
+            "pegaflow_object_age_seconds_bucket",
+            "pegaflow_object_age_seconds_count",
+            "pegaflow_object_age_seconds_sum"
+          ],
+          "counter_reset_seen": false
+        },
+        "gauge_names": [
+          "pegaflow_cache_resident_bytes",
+          "pegaflow_hll_cardinality",
+          "pegaflow_hll_total_requests",
+          "pegaflow_inflight_bytes",
+          "pegaflow_object_resident_bytes",
+          "pegaflow_pool_capacity_bytes",
+          "pegaflow_pool_used_bytes",
+          "target_info"
+        ],
+        "lazy_counters_absent_before": [
+          "pegaflow_cache_block_evictions_total",
+          "pegaflow_cache_eviction_reclaimed_bytes_total",
+          "pegaflow_object_age_seconds_bucket",
+          "pegaflow_object_age_seconds_sum",
+          "pegaflow_object_age_seconds_count"
+        ],
+        "scope": "Counter deltas and gauge snapshots are distinct; gauge decreases are not counter resets. Missing metrics are unknown. Lazy sidecar positive activation is distinct from strict engine zero-restore proof; do not infer absent counters to zero."
+      }
+    }
+  ],
+  "qualification_actual_activation": {
+    "engine_counter_deltas": {
+      "vllm:pega_load_success_total": 0.0,
+      "vllm:pega_load_failure_total": 0.0,
+      "vllm:pega_save_success_total": 2476.0,
+      "vllm:pega_save_failure_total": 0.0
+    },
+    "sidecar_save_bytes": 116256702464.0,
+    "sidecar_lazy_save_counters_absent_before": [
+      "pegaflow_save_bytes_total"
+    ],
+    "actual_storage_save_activated": true,
+    "restore_successes": 0.0,
+    "failures": 0.0,
+    "scope": "Actual cold storage-save path activation only. Fresh salts require zero restores; no cache-restore performance benefit established."
+  },
+  "qualification_activation_sha256": "92b4cab8ee11e135eec1249808d3c5b66d17d949a83cb5fc3019a2f5c2bb8f38",
+  "benefit_scope": "Actual save/restore/failure/byte observations only. Zero successful restores do not establish an offload-cache benefit, regardless of numeric throughput sign. Native retains its own prefix-cache proof; no fabricated Bid0policy or internal-only assumption.",
+  "declared_host_pool": {
+    "argument": "30gb",
+    "declared_plan_gib": 30,
+    "verified_capacity_bytes": 32212254720.0,
+    "actual_capacity_gauge_observations": [
+      32212254720.0,
+      32212254720.0,
+      32212254720.0,
+      32212254720.0,
+      32212254720.0,
+      32212254720.0,
+      32212254720.0,
+      32212254720.0,
+      32212254720.0,
+      32212254720.0
+    ],
+    "residency_metrics": [
+      "pegaflow_pool_used_bytes",
+      "pegaflow_cache_resident_bytes",
+      "pegaflow_inflight_bytes"
+    ],
+    "scope": "Actual capacity gauge verifies reservation separately from cache residency and total host memory/RSS. Missing is unknown. Do not infer exclusive MOD incremental memory from total container samples."
+  }
+}

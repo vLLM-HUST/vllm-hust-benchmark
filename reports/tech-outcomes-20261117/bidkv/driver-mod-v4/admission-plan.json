@@ -1,0 +1,44 @@
+{
+  "schema": "own-mod-c8-qualification/v2",
+  "test_target": "own_mod",
+  "project": "BidKV",
+  "profile_id": "bidkv-default-true-common-topology-fix-20261114-v4",
+  "enable_cpu_binding": true,
+  "native_preflight": "native-05",
+  "bidkv_preflight": "bidkv-04",
+  "physical_npus": [
+    6,
+    7
+  ],
+  "logical_npus": [
+    0,
+    1
+  ],
+  "same_frozen_c8_input_sha256": "a73c9e1b2afa476dea80f91832e963867f6f4130e4988d97210dddfea5aeb392",
+  "scope": "Original separate fixed-length 4K/16K C8,60/300s,8lanes,ignore_eosTrue/max_tokens256. All five actual datasets preserve EOS.",
+  "sources_sha256": {
+    "transport.py": "e372ac8bdc271550b380b67a7294350d6ffd266f363cdb23359e07b2c0e869f2",
+    "measurement.py": "d4999f0f43d6f804fb298fa52ce930ca974c06c7e18438a09580a6a14863fe95",
+    "observation.py": "cae477ce93c7821a704fbebc211de1edba10ec16a7db2fe2d463943879ed784e",
+    "continuous.py": "046c427be605a8d97d785201032ffb82f5e9476d55667f355557fdbf363f764e",
+    "test_driver.py": "f371c00a234f9e2d21435e131975113060350598755b3bedae274631936bb9ff"
+  },
+  "common_ascend_compatibility": {
+    "base_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+    "source_original_sha256": "71719e397ab003b31ba5e46e1a6da4da658ae7221eeead04311b65ad4d12d533",
+    "source_prepared_sha256": "b7a84571c349c22935414b2c5a4c6cf91223414f80c0954f797340ad0f1f55f2",
+    "prepare_script_sha256": "fe00e47faa81a0a3713a368e79a53504290687f2f249e4bf693457c2f7341253",
+    "shared_both_arms": true,
+    "scope": "Only physical\u2192logical topology parsing; all1264installed files including804CANN assets and8prebuiltlibs preserved except one Python method; no manual IRQ/migration operations.",
+    "copied_carrier_source_admission_sha256": "55194e2e23ae7a590227ce93508c5c66f8718251952ed7b982d79de2f3f0a1d2",
+    "installed_file_count": 1264,
+    "installed_cann_asset_count": 804,
+    "installed_cann_asset_bytes": 65693604,
+    "prepared_root": "/workspace/bidkv-five-datasets-20261113-01/runtime/ascend023-cpubind03"
+  },
+  "prior_zero_generation_failure": {
+    "attempt": "native-04",
+    "source_version": "mod-v3",
+    "reason": "Copied Ascend package omitted untracked installed CANN operator metadata/kernel resources; health failed before any generation. Retain actual supervisorRC=-2/APIrc=-9 and raw evidence. New copy preserves full installed package original bytes except disclosed CPU parser."
+  }
+}
