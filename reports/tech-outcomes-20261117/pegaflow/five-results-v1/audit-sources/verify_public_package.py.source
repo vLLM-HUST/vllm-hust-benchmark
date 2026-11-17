@@ -1,0 +1,109 @@
+"""Verify public metrics, C8 records and package links; seal the final package."""
+
+import hashlib
+import json
+import math
+from pathlib import Path
+import re
+import shutil
+import statistics
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE / 'report-ready'
+
+
+def read(path):
+    return json.loads(Path(path).read_bytes())
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def save(path, value):
+    Path(path).write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + '\n', encoding='utf-8', newline='\n')
+
+
+def close(a, b):
+    assert math.isclose(a, b, rel_tol=1e-10, abs_tol=1e-9), (a, b)
+
+
+def main():
+    comparison = read(ROOT / 'COMPARISON.json')
+    formal = 0
+    forbidden = {'request', 'content', 'reasoning', 'gold', 'answer', 'response', 'raw_response'}
+    for dataset, pair in comparison['datasets'].items():
+        for arm, label in [('native', 'baseline'), ('pegaflow', 'candidate')]:
+            rows = read(ROOT / (arm + '-' + dataset + '-requests.json'))
+            assert all(not forbidden.intersection(row) for row in rows)
+            expected = pair[label]
+            assert len(rows) == expected['planned'] == expected['successful']
+            assert all(row['status'] == 'ok' for row in rows)
+            wall = max(row['end']['monotonic'] for row in rows) - min(row['start']['monotonic'] for row in rows)
+            tokens = sum(row['usage']['completion_tokens'] for row in rows)
+            close(wall, expected['solver_batch_wall_seconds'])
+            close(tokens / wall, expected['output_tokens_per_second'])
+            ttft = [row['first_token']['monotonic'] - row['start']['monotonic'] for row in rows]
+            tpot = [(row['end']['monotonic'] - row['first_token']['monotonic']) / (row['usage']['completion_tokens'] - 1) for row in rows if row['usage']['completion_tokens'] > 1]
+            for name, values in [('ttft_seconds', ttft), ('tpot_seconds', tpot)]:
+                close(statistics.mean(values), expected[name]['mean'])
+                ordered = sorted(values)
+                for key, q in [('p50', .5), ('p95', .95), ('p99', .99)]:
+                    position = (len(ordered) - 1) * q
+                    lo, hi = math.floor(position), math.ceil(position)
+                    close(ordered[lo] + (ordered[hi] - ordered[lo]) * (position - lo), expected[name][key])
+            formal += len(rows)
+    for name in ['judge-native-hle', 'judge-pegaflow-hle', 'judge-native-frontier', 'judge-pegaflow-frontier']:
+        rows = read(ROOT / (name + '-requests.json'))
+        assert all(not forbidden.intersection(row) for row in rows)
+        formal += len(rows)
+    assert formal == 2064
+    c8_count = 0
+    c8_summary = read(ROOT / 'c8/paired-summary.json')
+    for arm in ['native', 'pegaflow']:
+        rows = read(ROOT / 'c8/requests' / (arm + '-requests.json'))
+        phases = read(ROOT / 'c8/requests' / (arm + '-phases.json'))['phases']
+        assert all(not forbidden.intersection(row) for row in rows)
+        for phase in phases:
+            selected = [row for row in rows if row['phase'] == phase['name']]
+            assert len(selected) == phase['requests']
+            assert phase['seconds'] == (60 if phase['name'].endswith('warmup') else 300)
+            assert all(phase['start']['monotonic'] <= row['start']['monotonic'] < phase['submission_deadline_monotonic'] and row['end']['monotonic'] <= phase['end']['monotonic'] for row in selected)
+            assert sum(row['usage']['completion_tokens'] for row in selected) == phase['output_tokens_accepted_including_drain']
+            close(statistics.mean(row['first_generated_event']['monotonic'] - row['start']['monotonic'] for row in selected), phase['ttft_generated_seconds']['mean'])
+            close(statistics.mean((row['end']['monotonic'] - row['first_generated_event']['monotonic']) / 255 for row in selected), phase['tpot_completion_seconds']['mean'])
+            summary = next(row for row in c8_summary['phases'] if row['phase'] == phase['name'])
+            close(phase['output_tokens_accepted_including_drain'] / (phase['end']['monotonic'] - phase['start']['monotonic']), summary[arm + '_window_tokens_per_second'])
+        c8_count += len(rows)
+    assert c8_count == 684
+    for name in ['manifest.json', 'c8/requests/manifest.json']:
+        manifest = read(ROOT / name)
+        directory = (ROOT / name).parent
+        for row in manifest['files']:
+            path = directory / row['path']
+            assert path.stat().st_size == row['bytes'] and sha(path) == row['sha256']
+    diagnostics = read(ROOT / 'audit/diagnostic-raw-sse-verification.json')
+    assert diagnostics['raw_sse_verified'] == 4 and diagnostics['model_requests'] == 0
+    comparison['controlled_audit']['extra_image_diagnostic_raw_sse_verified'] = 4
+    save(ROOT / 'COMPARISON.json', comparison)
+    readme = (ROOT / 'README.md').read_text(encoding='utf-8')
+    readme = readme.replace('HLE额外红/蓝资格每臂2请求、max32，不计入672/720。', 'HLE额外红/蓝资格每臂2请求、max32，不计入672/720；这4份原始SSE另行独立重放通过，见[audit/diagnostic-raw-sse-verification.json](audit/diagnostic-raw-sse-verification.json)。')
+    readme = readme.replace('SWE和Terminal的任务解决质量未测。', 'HLE校准误差沿原冻结grader保留null及原始说明，没有替换上游分箱口径。SWE和Terminal的任务解决质量未测。')
+    (ROOT / 'README.md').write_text(readme, encoding='utf-8', newline='\n')
+    for name in ['verify_extra_diagnostics.py', 'verify_public_package.py']:
+        shutil.copy2(HERE / name, ROOT / 'audit-sources' / name)
+    missing = []
+    for path in ROOT.rglob('*.md'):
+        for link in re.findall(r'\]\(([^\)]+)\)', path.read_text(encoding='utf-8')):
+            if '://' not in link and not link.startswith('#') and not (path.parent / link.split('#')[0]).resolve().exists():
+                missing.append({'file': path.relative_to(ROOT).as_posix(), 'link': link})
+    assert not missing, missing
+    result = {'schema': 'pegaflow-public-package-verification/v1', 'formal_public_numeric_records': formal, 'c8_public_numeric_records': c8_count, 'formal_metric_means_quantiles_and_batch_TPS_recomputed': True, 'C8_windows_means_and_TPS_recomputed': True, 'raw_sse_verified_in_prior_CPU_steps': {'formal': 2064, 'C8': 684, 'extra_image_diagnostics': 4}, 'all_numeric_record_objects_exclude_prompt_output_gold_fields': True, 'source_numeric_manifest_members_verified': True, 'broken_relative_markdown_links': missing, 'plot_visual_QA': 'throughput.png viewed; both absolute bars and all five negative deltas visible without clipping', 'scope': 'Public numeric-only recomputation; original grading/raw-SSE proof separately retained. No new model requests.'}
+    save(ROOT / 'audit/public-package-verification.json', result)
+    files = [{'path': path.relative_to(ROOT).as_posix(), 'bytes': path.stat().st_size, 'sha256': sha(path)} for path in sorted(ROOT.rglob('*')) if path.is_file() and path != ROOT / 'package-manifest.json']
+    save(ROOT / 'package-manifest.json', {'schema': 'pegaflow-final-public-package/v1', 'files': files, 'scope': 'Numeric evidence, public code and hashes only; no controlled prompts/output/SSE or private grader code'})
+    print(json.dumps({'files': len(files), 'formal': formal, 'C8': c8_count, 'diagnostic_raw_sse_verified': 4, 'broken_links': 0}))
+
+
+if __name__ == '__main__':
+    main()
