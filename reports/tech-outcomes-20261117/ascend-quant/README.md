@@ -1,6 +1,6 @@
 # tech-outcomes-20261117 / ascend-quant
 
-状态：**DRAFT（本地证据整理，尚未提交 GitHub）** 整理日期：2026-11-13 范围：Qwen3.5-35B-A3B 混合量化制品（W4A8 experts + GDN W8A8
+状态：**已归档（2026-11-17，PR #695）** 整理日期：2026-11-13 范围：Qwen3.5-35B-A3B 混合量化制品（W4A8 experts + GDN W8A8
 linear）的吞吐、PPL、任务分数证据映射。
 
 > 本文只把已有实测结果绑定到制品、设备总量、评分器、输出和原始记录。 未测到的项目在“缺项”中明确列出，不用推算值补齐。
@@ -328,7 +328,11 @@ token 拉出，不能读成“量化更好”。 结论：**BF16 锚点下 W4A8 
 | 260K |     57060 ms / 19.5 ms / 4.1 |         57624 ms / 19.8 ms / 4.1 |
 
 W4A8 与 W8A8 的 TTFT 基本一致；W4A8 的 TPOT 略高 +0.6%～+2.2%， total tok/s 低约 1%。**没有看到 W4A8 在长文本上更快**；这是 C1
-单请求， 不是并发吞吐，也未采集 HBM。完整表见 [long-context-performance.md](long-context-performance.md)。
+单请求，不是并发吞吐，也未采集 HBM。完整表见 [long-context-performance.md](long-context-performance.md)。
+
+**并发档（`max-num-seqs 16`，同 KV 18.85 GiB）**：8K/32K C1–C8、128K C1–C4、260K C1–C2。
+W4A8 total tok/s 比 W8A8 低 0.4%～9.2%，32K C8 最差（−9.2%，TTFT 高 15.8%）；并发下没有 W4A8 优势。
+原始记录：`data/results/longperf_conc/`，`evidence-map.csv` 的 `longperf-conc` 行。
 
 ### 4.5 满 262,144 与 261K/260.8K 任务级（2026-11-16 补测）
 
@@ -406,12 +410,9 @@ swe-prefix-reuse run --workload prepared/qwen35.json \
 
 ### 5.4 MOD 仓配套文档（2026-11-17）
 
-- 合并证据索引：`vllm-ascend-quant-hust/docs/tech-outcomes-20261117/evidence-index-0.4.2-0.5.0.md`
-- 分工、版本与适用范围：`vllm-ascend-quant-hust/docs/tech-outcomes-20261117/contributions.md`
-- 0.5.0 PyPI
-  发布记录：`vllm-ascend-quant-hust/docs/releases/ascend-quant-toolkit-0.5.0-pypi-release-20261112.md`
-- MOD 仓本地 docs commit：`7bf54a11ae047a6b25bc24450f8bde40d2ed04d5`（分支 `docs/tech-outcomes-20261117`）；
-  push 后替换为 GitHub 固定链接。
+- 合并证据索引：`vllm-ascend-quant-hust/docs/evidence-index-0.4.2-0.5.0.md`
+- 0.5.0 发布：PyPI `https://pypi.org/project/ascend-quant-toolkit/0.5.0/`；
+  GitHub Release `442761073`（`https://github.com/vLLM-HUST/vllm-ascend-quant-hust/releases/tag/toolkit-v0.5.0`）。
 - 三人核对表：本目录 [`VERIFICATION.md`](VERIFICATION.md)。
 
 ## 6. 缺项与替代表述
@@ -421,7 +422,7 @@ swe-prefix-reuse run --workload prepared/qwen35.json \
 | 同 KV 预算的 W4A8 vs W8A8 正式对照 | 18.85 GiB 正式组已完整（C16 205.58 vs 203.39）；19.22 GiB 附录已补测（W8A8 auto 19.22 GiB / W4A8 pin 19.22 GiB，均 820,136 tokens；C2 −4.6%，C4–C16 +3.2～+4.3%，方向不一致）；33.49 GiB 容量组不能与它们比较 | 正式对照用 18.85 GiB；33.49 GiB 单独呈现；19.22 GiB 仅作 W8A8 绝对上限附录，不作加速结论                         |
 | 长上下文稳定性（完整 262,144）     | 满 262,144 capacity smoke 两臂均通过（262,143 prompt + 1 token）；任务级 NIAH 261K、长生成 260.8K 已测；260.8K 长生成 C3 触发（W4A8 2/5 vs W8A8 5/5，n=5，3 条截断；260K 方向相反）                           | 容量结论可写“262,144 两臂均通过”；任务级质量只写 260K 无可见退化 + 260.8K C3 触发/高方差，不声称稳定退化或无退化 |
 | gcy #547 矩阵                      | 已有实验，不重跑；小结果已进 `data/results/gcy-547/`；大原始在 `controlled-location.json`/Release                                                                                                             | P0/P1/P2 结果与 KV 见 §3.7；不声称 int4 加速/降精度                                                              |
-| 0.5.0 PyPI/Release 原始记录        | PyPI 0.5.0 已找到：wheel `ad3b320f...` 48,923 B、sdist `ea065055...` 66,144 B（2026-11-12）；无 GitHub Release；本地 dist wheel `9b55d3d1...` 不是 PyPI 字节                                                  | 引用 PyPI 固定链接/哈希；不写 GitHub Release；本地 wheel 只作本地构建                                            |
+| 0.5.0 PyPI/Release 原始记录        | PyPI 0.5.0 已找到：wheel `ad3b320f...` 48,923 B、sdist `ea065055...` 66,144 B（2026-11-12）；GitHub Release `442761073`（2026-11-12T09:59:48Z）；本地 dist wheel `9b55d3d1...` 不是 PyPI 字节                                                  | 引用 PyPI/Release 固定链接与哈希；本地 wheel 只作本地构建                                            |
 | 0.4.2 运行期 E2E 原件              | 旧 repo 的两份 E2E 文档不在当前 checkout                                                                                                                                                                      | 只链旧 Release/固定提交，不复制、不重跑；本报告不引用其数值                                                      |
 | issue #664 验证总表逐项对齐        | 已取得 #664 总表；按 `evidence-map.csv` 逐行映射                                                                                                                                                              | 提交回帖附 PR + Release + 缺项                                                                                   |
 | HLE 正式验收                       | `formal_acceptance=false`，自评分、单 trial                                                                                                                                                                   | 引用时带“非官方 leaderboard/自评分”限定                                                                          |
