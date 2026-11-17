@@ -14,7 +14,8 @@
 
 ## vSpec 0.15.2 专题证据（2026-11-17）
 
-[FrontierScience 与 HLE-Verified 两轮复测入口](reports/tech-outcomes-20261117/vspec/README.md)：各含 vSpec 与原生 MTP2/4/6/8 的冻结题单、脱敏吞吐、逐题号评分及独立 gamma 诊断 trace。公开目录不含题目、图像或回答正文；本地兼容补丁和质量限制见各报告。本集合是专题实验，不进入官方榜单。
+[FrontierScience 与 HLE-Verified 两轮复测入口](reports/tech-outcomes-20261117/vspec/README.md)：各含 vSpec 与原生
+MTP2/4/6/8 的冻结题单、脱敏吞吐、逐题号评分及独立 gamma 诊断 trace。公开目录不含题目、图像或回答正文；本地兼容补丁和质量限制见各报告。本集合是专题实验，不进入官方榜单。
 
 ## PegaFlow 本地缓存恢复慢尾归因（2026-11-10）
 
