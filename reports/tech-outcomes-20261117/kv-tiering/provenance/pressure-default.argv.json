@@ -1,0 +1,49 @@
+{
+  "label": "pressure-default",
+  "argv": [
+    "/root/CGCL/kv-tiering-benefit-search-20261108/runtime-venv-v1/bin/python",
+    "-u",
+    "-m",
+    "vllm.entrypoints.openai.api_server",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "18236",
+    "--model",
+    "/models/Qwen3.5-35B-A3B",
+    "--served-model-name",
+    "qwen3.5-35b-a3b",
+    "--dtype",
+    "bfloat16",
+    "--tensor-parallel-size",
+    "2",
+    "--max-model-len",
+    "262144",
+    "--enable-prefix-caching",
+    "--max-num-seqs",
+    "128",
+    "--max-num-batched-tokens",
+    "4096",
+    "--async-scheduling",
+    "--shutdown-timeout",
+    "60",
+    "--enforce-eager",
+    "--kv-transfer-config",
+    "{\"kv_connector\": \"HustTieringConnector\", \"kv_connector_module_path\": \"vllm_hust_kv_tiering.ascend_connector\", \"kv_role\": \"kv_both\", \"kv_connector_extra_config\": {\"spec_name\": \"HustTieringOffloadingSpec\", \"spec_module_path\": \"vllm_hust_kv_tiering.spec\", \"cpu_bytes_to_use\": 15032385536, \"ascend_copy_backend\": \"torch_async\", \"offload_prompt_only\": true, \"tiering_hbm_pressure_aware\": true, \"tiering_hbm_high_watermark\": 0.8, \"tiering_hbm_low_watermark\": 0.6, \"tiering_secondary_pressure_aware\": true, \"tiering_max_device_store_blocks_per_step\": 128, \"tiering_max_inflight_device_store_jobs\": 8, \"tiering_max_spill_jobs\": 4, \"lifecycle_cpu_high_watermark\": 0.9, \"lifecycle_cpu_low_watermark\": 0.7, \"lifecycle_idle_ttl_sec\": 0, \"lifecycle_delete_expired_secondary\": false, \"lifecycle_cpu_demote_after_sec\": 0, \"lifecycle_reclaim_batch_size\": 64, \"lifecycle_max_sessions\": 4096, \"residency_max_entries\": 64000, \"secondary_tiers\": [], \"tiering_working_set_aware\": true, \"tiering_working_set_window_sec\": 600.0, \"tiering_working_set_max_entries\": 64000, \"tiering_working_set_max_new_bytes\": 67108864}}",
+    "--gpu-memory-utilization",
+    "0.92"
+  ],
+  "env": {
+    "PYTHONPATH": "/root/CGCL/kv-tiering-working-set-20261116/revision-v2/plugin/src:/root/CGCL/kv-tiering-pr-validation-20261105/wheel-installed-final-v1:/root/CGCL/kv-tiering-bugfix-perf-20261106/core-mtp-offload-safe:/root/CGCL/kv-tiering-bugfix-perf-20261106/ascend-feedback-identity-safe",
+    "VLLM_VERSION": "0.25.1",
+    "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+    "VLLM_SERVER_DEV_MODE": "1"
+  },
+  "additional_sources": [
+    "/root/CGCL/kv-tiering-performance-recheck-20261116/pressure-measurements-v1/run_pressure_campaign.py",
+    "/root/CGCL/kv-tiering-performance-recheck-20261116/pressure-measurements-v1/plan.json",
+    "/root/CGCL/kv-tiering-performance-recheck-20261116/pressure-measurements-v1/swe-plan.json",
+    "/root/CGCL/kv-tiering-performance-recheck-20261116/swe128-pressure/prepare_pressure_swe.py",
+    "/root/CGCL/kv-tiering-performance-recheck-20261116/pressure-measurements-v1/fixtures/run_quality.py"
+  ]
+}

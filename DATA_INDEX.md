@@ -3,6 +3,11 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## KV-tiering 完整 SWE 历史回放补证（2026-11-17）
+
+[分项报告](https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/fbf4a916fb17e3923ed51a31a9318bcaecdfa6db/reports/tech-outcomes-20261117/kv-tiering/README.md)：完整历史实验的离线
+复核，区分两层性能和三层机制，保留零/负结果。公开9臂/9885条请求的数值与离线复算入口，完整原件以保管人和受控位置索引关联；当前为草稿，不进入官方榜单或任务质量验收。
+
 ## 真实上下文与四租户补测（2026-11-15）
 
 [双卡B0/B1配对报告](reports/context-tenant-a01-20261115/README.md)：保留全部窗口、原始流和局部负收益，追加长上下文与四租户工况判读；原五项数据不重跑。
