@@ -148,7 +148,7 @@
       "id": "r5",
       "frozen_date": "2026-11-13",
       "release": "full-answer-b1-20261113-r5",
-      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261113-r5",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261113-r5-rc2",
       "profile": {
         "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r5.json",
         "sha256": "0eb1d8ffd2fdf34faa1c787c601cf48bc0817a46e715f987948cae0990287945",
@@ -179,6 +179,7 @@
           "bytes": 1762
         }
       ],
+      "release_tag": "full-answer-b1-20261113-r5-rc2",
       "label_zh": "启动失败记录",
       "label_en": "Startup failure",
       "scope_zh": "r5在服务ready前失败，由r6修复替代；本版没有正式推理成绩。",
@@ -190,7 +191,7 @@
       "id": "r6",
       "frozen_date": "2026-11-13",
       "release": "full-answer-b1-20261113-r6",
-      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261113-r6",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261114-r6-rc2",
       "profile": {
         "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r6.json",
         "sha256": "ca985cd940064abfde7d099afec0f0d09c0d143ae4c900d05409f43f60cdd26e",
@@ -221,6 +222,7 @@
           "bytes": 1985
         }
       ],
+      "release_tag": "full-answer-b1-20261114-r6-rc2",
       "label_zh": "五项完整报告",
       "label_en": "Five-profile report",
       "scope_zh": "固定五数据集，另有上下文与四租户配对。",
@@ -391,5 +393,69 @@
       "scope_en": "New B0/r8 pairs, shown for published scenarios."
     }
   ],
-  "metric_policy": "Each observation retains its own control, protocol and source. No historical metric is substituted for an unmeasured version. All durations include response drain; TPOT is request-weighted."
+  "metric_policy": "Each observation retains its own control, protocol and source. No historical metric is substituted for an unmeasured version. All durations include response drain; TPOT is request-weighted.",
+  "attempt_order": [
+    "r3",
+    "r2",
+    "r1"
+  ],
+  "attempts": [
+    {
+      "id": "r1",
+      "kind": "pre-freeze-attempt",
+      "run": "continuous-b1-packed-r1",
+      "status": "failed",
+      "model_started": true,
+      "label_zh": "预热中止",
+      "label_en": "Warmup stopped",
+      "reason_zh": "预热期间触发容器内存保护：2GiB预留空间不足，随后退出。",
+      "reason_en": "Container memory protection stopped warmup when the 2GiB reserve was reached.",
+      "source": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/15b9269499d720be1920598ab68282eb8e99daf8/reports/full-answer-joint-20261030/attempt-history.json",
+        "sha256": "4eb726250909f4c3b9e3a251f2f536b188f30606b788ef7d6b57ca2f6ab16101",
+        "bytes": 4378
+      },
+      "receipt_sha256": "de3ffacb3cd0b70807f2629b76ebe9c8599b50f4ba78f68e26bb71e70b759304",
+      "source_manifest_sha256": "fbc7b00e85481268b34df06f067d7e32ba3fcfbb70f6ba1b39c803243a9a43d8",
+      "measurements": []
+    },
+    {
+      "id": "r2",
+      "kind": "pre-freeze-attempt",
+      "run": "continuous-b1-packed-r2",
+      "status": "failed",
+      "model_started": false,
+      "label_zh": "端口占用",
+      "label_en": "Port occupied",
+      "reason_zh": "端口绑定报EADDRINUSE，模型未启动，没有发出推理请求。",
+      "reason_en": "Port binding returned EADDRINUSE before model startup; no inference requests ran.",
+      "source": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/15b9269499d720be1920598ab68282eb8e99daf8/reports/full-answer-joint-20261030/attempt-history.json",
+        "sha256": "4eb726250909f4c3b9e3a251f2f536b188f30606b788ef7d6b57ca2f6ab16101",
+        "bytes": 4378
+      },
+      "receipt_sha256": "3cb9d6424afe61f5e92f27f4fa3c3f550a3251821fee10aa1f3722cdf2402435",
+      "source_manifest_sha256": "a3b1c9ebed1033afc1681f1e2f548f2c85ee086ee23e41cb8ebd6a0066dd581f",
+      "measurements": []
+    },
+    {
+      "id": "r3",
+      "kind": "pre-freeze-attempt",
+      "run": "continuous-b1-packed-r3",
+      "status": "failed",
+      "model_started": true,
+      "label_zh": "锁页分配失败",
+      "label_en": "Pinned allocation failed",
+      "reason_zh": "主机状态8GiB/rank；24条预热成功，正式16条成功、8条失败。rank1申请32MiB锁页内存报207001；16K及完整回答未执行。",
+      "reason_en": "Host state8GiB/rank:24 warmup successes,16 formal successes and8 failures. Rank1 failed a32MiB pinned allocation with207001;16K and full answers did not run.",
+      "source": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/15b9269499d720be1920598ab68282eb8e99daf8/reports/full-answer-joint-20261030/attempt-history.json",
+        "sha256": "4eb726250909f4c3b9e3a251f2f536b188f30606b788ef7d6b57ca2f6ab16101",
+        "bytes": 4378
+      },
+      "receipt_sha256": "d370b2a131c7f2dc86787d10f5397632909891be55d2d6536eb20d9213e04449",
+      "source_manifest_sha256": "181df30c7ae466acb92da25198222cf8e4f8877e8f0ef1f0debb5549ddfaf604",
+      "measurements": []
+    }
+  ]
 }
