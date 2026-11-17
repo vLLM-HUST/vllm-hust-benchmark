@@ -9,4 +9,4 @@
 
 两轮中，vSpec 的输出 token/s 均高于同轮四个原生 MTP 深度；自然停止造成各臂输出 token 总数不同，因此该吞吐倍率不能当作同工作量端到端加速比。质量判分存在波动，FrontierScience 的 Olympiad 正确数两轮均低于同轮 MTP4，不能宣称质量无损。
 
-公开候选包只含冻结题号、参数、客户端/运行脚本、脱敏吞吐与逐题号评分、独立 trace 以及文件哈希；不再分发题目、图像、请求或回答正文。本地运行环境还含尚未并入公开安装包的兼容补丁，详见各报告“复现与限制”及候选包 `README.md`。两个数据集的原始材料须由读者按上游条款自行取得。
+公开候选包只含冻结题号、参数、客户端/运行脚本、脱敏吞吐与逐题号评分、独立 trace 以及文件哈希；不再分发题目、图像、请求或回答正文。本地另用了[评测适配补丁](vSpec-v0.15.2/FrontierScience-v0.15.2/release-candidate/code/v0.15.2-local-compat.patch)：主要补齐原生 MTP2/4/6/8 对照的启动与校验、静态图形状适配，以及 HLE 混合题单评分和收据核验。对应代码已在 [e37218f](https://github.com/vLLM-HUST/vllm-hust-vSpec/commit/e37218fa636956d2203f14513f5ab7c0dd7dc27b) 提交，并随 [PR #19](https://github.com/vLLM-HUST/vllm-hust-vSpec/pull/19) 合入 main；它不是因 vSpec 动态投机算法故障而添加的修复。本轮仍是旧 wheel 加本地补丁的实测，并非从合并后的源码或 wheel 干净安装后原样复测。两个数据集的原始材料须由读者按上游条款自行取得。

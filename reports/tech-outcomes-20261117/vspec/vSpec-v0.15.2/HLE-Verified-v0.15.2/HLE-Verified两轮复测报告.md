@@ -42,6 +42,6 @@ Gold 文本 64、图像 10；Revision 文本 113、图像 13，共 200/1811 题�
 
 ## 复现与限制
 
-本地服务报告 `vllm-hust-vspec 0.15.2.post1`、`vllm 0.17.2rc1.dev5871+g762f85b31.empty`、`vllm_ascend 0.25.1rc2.dev0+hust.20260903.4.g4e57439e5.d20261111`。本地插件工作树基于 `ca9611d3f7494563069d7eda4330be2439f52da7`，但含[未提交的原生 MTP2/后端静态形状兼容修正](release-candidate/code/v0.15.2-local-compat.patch)，不能将五臂结果称作该公开 SHA 或 PyPI wheel 的原样复现。模型权重不随证据包再分发，且尚无旧路径与当前权重逐文件哈希一致性证明。
+本地服务报告 `vllm-hust-vspec 0.15.2.post1`、`vllm 0.17.2rc1.dev5871+g762f85b31.empty`、`vllm_ascend 0.25.1rc2.dev0+hust.20260903.4.g4e57439e5.d20261111`。本地插件工作树基于 `ca9611d3f7494563069d7eda4330be2439f52da7`，另应用了[评测适配补丁](release-candidate/code/v0.15.2-local-compat.patch)：补齐原生 MTP2/4/6/8 对照的启动与深度校验、静态图形状适配，以及 Gold＋Revision 混合题单评分和收据核验。对应代码已在 [e37218f](https://github.com/vLLM-HUST/vllm-hust-vSpec/commit/e37218fa636956d2203f14513f5ab7c0dd7dc27b) 提交，并随 [PR #19](https://github.com/vLLM-HUST/vllm-hust-vSpec/pull/19) 合入 main；它不是因 vSpec 动态投机算法故障而添加的修复。本轮测试早于合并，尚未用合并后的源码或 wheel 干净安装重跑，不能将五臂结果称作该合并提交或 PyPI wheel 的原样复现。模型权重不随证据包再分发。
 
 交付范围限定为本报告与[可公开候选包](release-candidate/README.md)中的题号、参数、脚本、脱敏运行/评分证据及 trace；不包含题干、图像或请求/回答正文。

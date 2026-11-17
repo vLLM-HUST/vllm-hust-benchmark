@@ -8,7 +8,7 @@
 - 运行配置见 `params/`，客户端源码见 `client_source/`，编排/评分脚本见 `scripts/`；这些脚本保留本机路径，迁移机器时须重设环境、模型和数据源。
 - 每臂 `solver-receipt-public.json` 保留总量、计时、配置哈希、以及未公开逐题响应的 SHA-256；`score-receipt.json`、`summary.json`、`per_case.csv` 仅含汇总与按题号的评分。
 - `trace/` 是独立诊断轮，非正式配对轮；其决策按调度批次记录。
-- `code/v0.15.2-local-compat.patch` 记录本地未提交修正。本轮不能被称为公开 wheel 或固定 SHA 的原样复现。
+- `code/v0.15.2-local-compat.patch` 保留本轮评测适配差异：补齐原生 MTP2/4/6/8 对照的启动与深度校验、静态图形状适配，以及 Gold＋Revision 混合题单评分和收据核验；对应代码已在 [e37218f](https://github.com/vLLM-HUST/vllm-hust-vSpec/commit/e37218fa636956d2203f14513f5ab7c0dd7dc27b) 提交并随 PR #19 合入 main。这不是 vSpec 动态投机算法的故障修复；本轮仍非合并后源码或公开 wheel 干净安装的原样复测。
 
 ## 原始输出吞吐
 
@@ -65,6 +65,6 @@ vSpec 两轮合计正确数为 57 和 49；同轮 MTP4 为 54 和 50，不能声
 
 ## 复现边界
 
-测试模型为 Qwen3.5-35B-A3B，Ascend 910B2 两卡、TP=2、EP、BF16；并发上限 16、T=0、seed=17、每题最多输出 16384 token、自动 KV、无额外客户端预热，vSpec 候选 2/4/6/8 且从 8 开始、桥接开关为 1。本地安装版本报告为 0.15.2.post1，并含额外未提交兼容修正；本地源码基线 SHA 为 `ca9611d3f7494563069d7eda4330be2439f52da7`，补丁 SHA-256 为 `fbf3901dd1756de221bd79bc4acda339610252bbaea8036cbd99c94abc3e0f15`；原始 wheel SHA-256 为 `62631e85bfd6572d7110ede300a068313f360a3716fe912f092c4b5c2de8fd30`。算子与后端环境需要按所附配置自行配置。不同物理卡映射与旧模型权重哈希未完全锁定，不能将结果表述为公开 wheel 的原样跨机复现。
+测试模型为 Qwen3.5-35B-A3B，Ascend 910B2 两卡、TP=2、EP、BF16；并发上限 16、T=0、seed=17、每题最多输出 16384 token、自动 KV、无额外客户端预热，vSpec 候选 2/4/6/8 且从 8 开始、桥接开关为 1。本地安装版本报告为 0.15.2.post1，并含后来已由 `e37218fa636956d2203f14513f5ab7c0dd7dc27b` 提交的评测兼容改动；本地源码基线 SHA 为 `ca9611d3f7494563069d7eda4330be2439f52da7`，补丁 SHA-256 为 `fbf3901dd1756de221bd79bc4acda339610252bbaea8036cbd99c94abc3e0f15`；原始 wheel SHA-256 为 `62631e85bfd6572d7110ede300a068313f360a3716fe912f092c4b5c2de8fd30`。算子与后端环境需要按所附配置自行配置。本轮未在合并后源码的干净安装环境重跑，且两轮物理卡映射不同，不能将结果表述为公开 wheel 的原样跨机复现。
 
 当前 `MANIFEST.sha256` 仅校验本候选包内文件；题目与回答原件不在包内，哈希只能对持有合法原件的人提供核验。

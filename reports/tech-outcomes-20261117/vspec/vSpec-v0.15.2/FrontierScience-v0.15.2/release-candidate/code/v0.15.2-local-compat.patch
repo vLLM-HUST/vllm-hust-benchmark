@@ -149,7 +149,7 @@ index 0aca58f..ccbafda 100644
      p = sub.add_parser("run", help="start one arm, time one frozen solver selection, then stop it")
      p.add_argument("--setup", required=True)
 diff --git a/examples/qwen35_three_datasets/test_examples.py b/examples/qwen35_three_datasets/test_examples.py
-index 3f5ef14..512f5ce 100644
+index 3f5ef14..48ab3d7 100644
 --- a/examples/qwen35_three_datasets/test_examples.py
 +++ b/examples/qwen35_three_datasets/test_examples.py
 @@ -206,7 +206,7 @@ class PublicExampleTests(unittest.TestCase):
@@ -161,6 +161,24 @@ index 3f5ef14..512f5ce 100644
              pair = paired.aligned_configs(
                  config, "/models/qwen", "test-solver", 18080, capacity
              )
+@@ -600,11 +600,14 @@ class PublicExampleTests(unittest.TestCase):
+         hle_summary = {
+             "contract_sha256": "plan",
+             "scoring_policy": "strict_json",
+-            "tracks": {"gold": {"total": 2, "successes": 1, "unresolved": 1}},
++            "tracks": {
++                "gold": {"total": 1, "successes": 1, "unresolved": 0},
++                "revision": {"total": 1, "successes": 0, "unresolved": 1},
++            },
+         }
+         hle_quality = paired._quality_from_summary("hle-verified", hle_summary, hle_solver)
+         self.assertEqual(hle_quality["observed_lower_bound"], 0.5)
+         self.assertEqual(hle_quality["unresolved"], 1)
+-        hle_summary["tracks"]["gold"]["total"] = 1
+-        with self.assertRaisesRegex(RuntimeError, "complete solver selection"):
++        hle_summary["tracks"]["gold"]["total"] = 0
++        with self.assertRaisesRegex(RuntimeError, "complete mixed selection"):
+             paired._quality_from_summary("hle-verified", hle_summary, hle_solver)
 diff --git a/src/vllm_hust_vspec/_vendor/ascend_hust/overlay/vllm_ascend/attention/q35_native_host_batch.py b/src/vllm_hust_vspec/_vendor/ascend_hust/overlay/vllm_ascend/attention/q35_native_host_batch.py
 index 3a7bece..7811f41 100644
 --- a/src/vllm_hust_vspec/_vendor/ascend_hust/overlay/vllm_ascend/attention/q35_native_host_batch.py
