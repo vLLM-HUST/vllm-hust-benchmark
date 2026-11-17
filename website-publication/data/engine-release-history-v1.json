@@ -66,7 +66,8 @@
               "correct": 153,
               "truncated": 16
             }
-          ]
+          ],
+          "baseline_id": "original018-cann8.5.1"
         },
         {
           "id": "4096-formal",
@@ -94,7 +95,8 @@
               "requests": 408,
               "failed": 0
             }
-          ]
+          ],
+          "baseline_id": "original018-cann8.5.1"
         },
         {
           "id": "16384-formal",
@@ -122,7 +124,8 @@
               "requests": 183,
               "failed": 0
             }
-          ]
+          ],
+          "baseline_id": "original018-cann8.5.1"
         }
       ],
       "sources": [
@@ -142,7 +145,8 @@
       "scope_zh": "2026-10-30 · MMLU200完整回答与4K/16K连续负载",
       "scope_en": "2026-10-30 · MMLU200 full answers and 4K/16K continuous load",
       "method_zh": "MMLU200：max8192、EOS开启、同时提交200题，无额外任务预热。连续负载：C8、out256，每档60秒预热、300秒提交后排空；B0沿用原封存轮。旧轮协议原样保留。",
-      "method_en": "MMLU200: max8192, EOS enabled, 200 simultaneous submissions, no extra task warmup. Continuous load: C8, out256, 60s warmup then 300s submissions and drain; B0 reuses its sealed original run. Original protocol retained."
+      "method_en": "MMLU200: max8192, EOS enabled, 200 simultaneous submissions, no extra task warmup. Continuous load: C8, out256, 60s warmup then 300s submissions and drain; B0 reuses its sealed original run. Original protocol retained.",
+      "baseline_id": "original018-cann8.5.1"
     },
     {
       "id": "r5",
@@ -185,7 +189,8 @@
       "scope_zh": "r5在服务ready前失败，由r6修复替代；本版没有正式推理成绩。",
       "scope_en": "r5 failed before service readiness and was superseded by r6; no formal inference scores exist for this version.",
       "method_zh": "增加token-progress预热与编译封边；r6随后修复compile-only positions预热对私有runner的使用。",
-      "method_en": "Added token-progress warmup and compilation sealing; r6 then fixed compile-only positions warmup to use a private runner."
+      "method_en": "Added token-progress warmup and compilation sealing; r6 then fixed compile-only positions warmup to use a private runner.",
+      "baseline_id": "original018-cann8.5.1"
     },
     {
       "id": "r6",
@@ -226,7 +231,8 @@
       "label_zh": "五项完整报告",
       "label_en": "Five-profile report",
       "scope_zh": "固定五数据集，另有上下文与四租户配对。",
-      "scope_en": "Five fixed profiles, with additional context and four-tenant pairs."
+      "scope_en": "Five fixed profiles, with additional context and four-tenant pairs.",
+      "baseline_id": "original018-cann8.5.1"
     },
     {
       "id": "r7",
@@ -257,6 +263,111 @@
         "kv_gib_per_rank": 20
       },
       "measurements": [
+        {
+          "id": "4096",
+          "label": "4K / C8",
+          "control": "B0",
+          "candidate": "r7",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 126.71624802199777,
+              "mean_ttft_ms": 1709.4214221250886,
+              "mean_tpot_ms": 56.21754155438561,
+              "output_tokens": 38912,
+              "duration_seconds": 307.07979921600054,
+              "requests": 152,
+              "failed": 0
+            },
+            {
+              "role": "r7",
+              "output_tokens_per_second": 385.3043929618423,
+              "mean_ttft_ms": 664.5371282758883,
+              "mean_tpot_ms": 18.16334488361116,
+              "output_tokens": 116736,
+              "duration_seconds": 302.9708514420199,
+              "requests": 456,
+              "failed": 0,
+              "ttft_p95_ms": 1252.5199619849445,
+              "ttft_p99_ms": 2555.792246479541
+            }
+          ],
+          "baseline_origin": {
+            "kind": "sealed-B0-reuse",
+            "run_id": "five-datasets-r6-matched-20261114-r3",
+            "seal_sha256": "979df5e948c8a0f2b1312727fdf02f43c65f958c69389e667875c6c4a2ce1924"
+          },
+          "baseline_id": "original018-cann8.5.1"
+        },
+        {
+          "id": "16384",
+          "label": "16K / C8",
+          "control": "B0",
+          "candidate": "r7",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 59.76816891608451,
+              "mean_ttft_ms": 5645.442650068505,
+              "mean_tpot_ms": 110.9640982979321,
+              "output_tokens": 18688,
+              "duration_seconds": 312.67479561300024,
+              "requests": 73,
+              "failed": 0
+            },
+            {
+              "role": "r7",
+              "output_tokens_per_second": 162.03229240790355,
+              "mean_ttft_ms": 3552.157198015922,
+              "mean_tpot_ms": 35.3786476521985,
+              "output_tokens": 49664,
+              "duration_seconds": 306.5068034399883,
+              "requests": 194,
+              "failed": 0,
+              "ttft_p95_ms": 8742.64786693384,
+              "ttft_p99_ms": 9996.581022947212
+            }
+          ],
+          "baseline_origin": {
+            "kind": "sealed-B0-reuse",
+            "run_id": "five-datasets-r6-matched-20261114-r3",
+            "seal_sha256": "979df5e948c8a0f2b1312727fdf02f43c65f958c69389e667875c6c4a2ce1924"
+          },
+          "baseline_id": "original018-cann8.5.1"
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r7-overlay.json",
+          "sha256": "b5dae9b117e08e77da3ef00901aaceb496ca22cc4d512bfb4da0c88e9635bf21",
+          "bytes": 2886
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/86b357a33cce0c55ceb95b6f00af31ccf5e690f9/experiments/optimization-20261115/B1-r7-C8-history-20261116-r1/analysis-v1.json",
+          "sha256": "f586b09711f6b66cc3d15b447b88e8cc8bf4bf1c74a23bed61ea71cc27bd8a51",
+          "bytes": 5775
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/15b9269499d720be1920598ab68282eb8e99daf8/website-publication/data/five-datasets-r6-20261114/summary-public-v3.json",
+          "sha256": "f36a7a4997934d9a000db101f4488e4bde90bdc92d8f5389b6802dc4453fb145",
+          "bytes": 214023
+        }
+      ],
+      "label_zh": "B0 对照实测",
+      "label_en": "B0 comparison",
+      "scope_zh": "B0 → B1 r7 · 4K/16K连续负载",
+      "scope_en": "B0 → B1 r7 · 4K/16K continuous load",
+      "method_zh": "复用r6完整报告中已封存的固定B0实测，与r7连续负载比较：同模型、C8、out256、71条共同启动预热，每档60秒预热、300秒提交后排空。两轮日期、B0封存身份和原始数值保留；r6→r7开发对照另列详情。",
+      "method_en": "Reuse the sealed fixed B0 observations from the r6 complete report for comparison with r7: same model, C8, out256,71 shared startup warmups,60s phase warmup then300s submissions and drain. Original run dates, B0 seal identity and values are retained; r6→r7 development comparisons are separate details.",
+      "quality": {
+        "profile": "MMLU200",
+        "correct": 138,
+        "requests": 200,
+        "failed": 0,
+        "historical_screen_minimum": 144,
+        "historical_screen_passed": false
+      },
+      "development_measurements": [
         {
           "id": "4096",
           "label": "4K / C8",
@@ -322,32 +433,7 @@
           ]
         }
       ],
-      "sources": [
-        {
-          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r7-overlay.json",
-          "sha256": "b5dae9b117e08e77da3ef00901aaceb496ca22cc4d512bfb4da0c88e9635bf21",
-          "bytes": 2886
-        },
-        {
-          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/86b357a33cce0c55ceb95b6f00af31ccf5e690f9/experiments/optimization-20261115/B1-r7-C8-history-20261116-r1/analysis-v1.json",
-          "sha256": "f586b09711f6b66cc3d15b447b88e8cc8bf4bf1c74a23bed61ea71cc27bd8a51",
-          "bytes": 5775
-        }
-      ],
-      "label_zh": "开发实测",
-      "label_en": "Development measurements",
-      "scope_zh": "r6 → r7历史连续负载对照；另列原始MMLU200质量记录。",
-      "scope_en": "Historical r6 → r7 continuous-load comparison; original MMLU200 quality recorded separately.",
-      "method_zh": "C8、out256，每档60秒预热、300秒提交后排空；共享71条启动预热。r6与r7为不同日期各一轮，不是B0/r7配对。",
-      "method_en": "C8, out256, 60s warmup then 300s submissions and drain; 71 shared startup warmups. One run per version on different dates, comparing r6 and r7.",
-      "quality": {
-        "profile": "MMLU200",
-        "correct": 138,
-        "requests": 200,
-        "failed": 0,
-        "historical_screen_minimum": 144,
-        "historical_screen_passed": false
-      }
+      "baseline_id": "original018-cann8.5.1"
     },
     {
       "id": "r8",
@@ -390,10 +476,25 @@
       "label_zh": "最新实测",
       "label_en": "Latest measurements",
       "scope_zh": "新B0/r8配对，按已发布场景展示。",
-      "scope_en": "New B0/r8 pairs, shown for published scenarios."
+      "scope_en": "New B0/r8 pairs, shown for published scenarios.",
+      "baseline_id": "original018-cann8.5.1"
     }
   ],
   "metric_policy": "Each observation retains its own control, protocol and source. No historical metric is substituted for an unmeasured version. All durations include response drain; TPOT is request-weighted.",
+  "baseline": {
+    "id": "original018-cann8.5.1",
+    "vllm": "0.18.0",
+    "vllm_ascend": "0.18.0",
+    "cann": "8.5.1",
+    "image_digest": "sha256:2467d259ff068ca4edd7b50b849152910f3c05e435f314639fc06bcc7a00f9fa",
+    "sdk_source_map_sha256": "a357ad8cf1ff6f8797fb2d6476e71a0deef5ee0899a55ea32ed65f07fe7773bc",
+    "profile": {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b0-vllm-v018.json",
+      "sha256": "db62cef07b9e2677be6b4895d92db4bab3c9178b0422a6020de77a90c282568a",
+      "bytes": 15343
+    },
+    "observation_policy": "Fixed B0 engine/image/configuration across releases. Dated measurements retain their own protocol, original values and seal; baseline reuse is explicit. B1-vs-B1 development pairs are never the main comparison denominator."
+  },
   "attempt_order": [
     "r3",
     "r2",

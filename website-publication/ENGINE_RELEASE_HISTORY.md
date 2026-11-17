@@ -12,10 +12,9 @@ verify its publication hash before display.
 - r5: failed before service readiness; the r6 overlay explicitly records the fix. No r5 formal
   inference values are present.
 - r6: the existing five-profile report remains the complete source and renderer.
-- r7: one historical r6 run versus one r7 run at C8, with the original control identity retained.
-  The 138/200 MMLU result and original 144/200 internal screen remain separate from this
-  short-output performance comparison. P95/P99 values remain available, including the higher r7 P95
-  TTFT.
+- r7: compare against the sealed fixed B0 C8 observations from the r6 report. The B0 seal and reuse
+  identity are explicit. The original r6-to-r7 development comparison remains separately under
+  `development_measurements`, with quality and tail values retained.
 - r8: the existing new B0/r8 report remains the current source and renderer.
 
 Source URLs use fixed commits; SHA256 and byte lengths identify the original records. Engine source
@@ -26,3 +25,7 @@ inference and rewrites no sealed evidence.
 The public visibility policy permits only this catalog’s exact SHA256-bound bytes. Changing a
 measured value and re-signing the source manifest still fails publication; unrelated withdrawn
 research records retain their existing filters.
+
+All primary version comparisons use the fixed B0 vLLM0.18 / Ascend0.18 / CANN8.5.1 identity, image
+and SDK source-map hash. Each observation keeps its original measurement values, warmup protocol and
+seal. A B1 release is never used as the primary denominator.

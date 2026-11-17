@@ -74,3 +74,33 @@ def test_resigning_manifest_cannot_publish_changed_history(tmp_path):
     manifest.write_text(json.dumps(value))
     with pytest.raises(ValueError, match="release history"):
         projection.build(source, tmp_path / "public", "test-policy")
+
+
+def test_primary_release_comparisons_use_fixed_B0_not_another_B1():
+    catalog = json.loads(
+        (ROOT / "website-publication/data/engine-release-history-v1.json").read_text()
+    )
+    baseline = catalog["baseline"]
+    assert baseline["id"] == "original018-cann8.5.1"
+    assert baseline["vllm"] == baseline["vllm_ascend"] == "0.18.0"
+    for entry in catalog["entries"]:
+        assert entry["baseline_id"] == baseline["id"]
+        for measurement in entry["measurements"]:
+            assert measurement["control"] == measurement["arms"][0]["role"] == "B0"
+            assert measurement["baseline_id"] == baseline["id"]
+    r7 = next(entry for entry in catalog["entries"] if entry["id"] == "r7")
+    reference = json.loads(
+        (
+            ROOT
+            / "website-publication/data/five-datasets-r6-20261114/summary-public-v3.json"
+        ).read_text()
+    )
+    for row in r7["measurements"]:
+        original = reference["continuous"]["B0"]["groups"][row["id"] + "-formal"]
+        for metric in ["output_tokens_per_second", "mean_ttft_ms", "mean_tpot_ms"]:
+            assert row["arms"][0][metric] == original[metric]
+        assert (
+            row["baseline_origin"]["seal_sha256"]
+            == reference["continuous"]["B0"]["source_seal_sha256"]
+        )
+    assert all(row["control"] == "r6" for row in r7["development_measurements"])
