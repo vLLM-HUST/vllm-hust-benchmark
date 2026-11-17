@@ -1,0 +1,47 @@
+{
+  "label": "pressure-native",
+  "argv": [
+    "/root/CGCL/kv-tiering-benefit-search-20261108/runtime-venv-v1/bin/python",
+    "-u",
+    "-m",
+    "vllm.entrypoints.openai.api_server",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "18236",
+    "--model",
+    "/models/Qwen3.5-35B-A3B",
+    "--served-model-name",
+    "qwen3.5-35b-a3b",
+    "--dtype",
+    "bfloat16",
+    "--tensor-parallel-size",
+    "2",
+    "--max-model-len",
+    "262144",
+    "--enable-prefix-caching",
+    "--max-num-seqs",
+    "128",
+    "--max-num-batched-tokens",
+    "4096",
+    "--async-scheduling",
+    "--shutdown-timeout",
+    "60",
+    "--enforce-eager",
+    "--gpu-memory-utilization",
+    "0.92"
+  ],
+  "env": {
+    "PYTHONPATH": "/root/CGCL/kv-tiering-working-set-20261116/revision-v2/plugin/src:/root/CGCL/kv-tiering-pr-validation-20261105/wheel-installed-final-v1:/root/CGCL/kv-tiering-bugfix-perf-20261106/core-mtp-offload-safe:/root/CGCL/kv-tiering-bugfix-perf-20261106/ascend-feedback-identity-safe",
+    "VLLM_VERSION": "0.25.1",
+    "VLLM_WORKER_MULTIPROC_METHOD": "spawn",
+    "VLLM_SERVER_DEV_MODE": "1"
+  },
+  "additional_sources": [
+    "/root/CGCL/kv-tiering-performance-recheck-20261116/pressure-measurements-v1/run_pressure_campaign.py",
+    "/root/CGCL/kv-tiering-performance-recheck-20261116/pressure-measurements-v1/plan.json",
+    "/root/CGCL/kv-tiering-performance-recheck-20261116/pressure-measurements-v1/swe-plan.json",
+    "/root/CGCL/kv-tiering-performance-recheck-20261116/swe128-pressure/prepare_pressure_swe.py",
+    "/root/CGCL/kv-tiering-performance-recheck-20261116/pressure-measurements-v1/fixtures/run_quality.py"
+  ]
+}
