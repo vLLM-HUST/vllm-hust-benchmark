@@ -1,0 +1,168 @@
+"""Pure metadata, exact-ID, input and metric checks for the new EOS study."""
+
+import hashlib
+import json
+import math
+from pathlib import Path
+import re
+
+STAGES = ("native-r01", "bidkv-r01", "bidkv-r02", "native-r02")
+KV_BYTES = 1677721600
+INPUT_SHA = "53588fc1a06bbe59b6737b434a0664b58fd673a7dfe38a493749b3faed921d8d"
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def read(path):
+    return json.loads(Path(path).read_bytes())
+
+
+def case_id(stage, lane):
+    assert stage in STAGES and lane in range(12)
+    arm, repeat = stage.split("-")
+    return f"hust-evo02-{'n' if arm == 'native' else 'b'}-{repeat}-l{lane:02}".ljust(
+        32, "0"
+    )
+
+
+def bind_internal_ids(identifiers, stage):
+    expected = {"chatcmpl-" + case_id(stage, lane) for lane in range(12)}
+    result = {}
+    for value in identifiers:
+        base, separator, suffix = value.rpartition("-")
+        assert separator and base in expected and re.fullmatch("[0-9a-f]{8}", suffix)
+        assert result.get(base, value) == value, (
+            "Ambiguous internal ID for one external request"
+        )
+        result[base] = value
+    return result
+
+
+def load_inputs(path, receipt):
+    assert sha(path) == INPUT_SHA
+    rows = [
+        json.loads(line)
+        for line in Path(path).read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    assert len(rows) == 12
+    assert sum(row["output_tokens"] for row in rows) == 24148
+    assert all(set(row) == {"prompt", "output_tokens"} for row in rows)
+    assert receipt["source"]["sha256"] == INPUT_SHA and len(receipt["requests"]) == 12
+    for index, (row, checked) in enumerate(zip(rows, receipt["requests"], strict=True)):
+        assert checked["source_row_1based"] == index + 1
+        assert (
+            hashlib.sha256(row["prompt"].encode()).hexdigest()
+            == checked["prompt_sha256"]
+        )
+        messages = [{"role": "user", "content": row["prompt"]}]
+        actual = hashlib.sha256(
+            json.dumps(
+                messages, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+            ).encode()
+        ).hexdigest()
+        assert actual == checked["messages_sha256"]
+        assert row["output_tokens"] == checked["requested_output_budget"]
+    return rows
+
+
+def geometry(payload, inputs):
+    ranks = payload["results"]
+    assert len(ranks) == 2 and {row["rank"] for row in ranks} == {0, 1}
+    fields = (
+        "num_blocks",
+        "groups",
+        "tensor_descriptors",
+        "actual_profile",
+        "observer_source_sha256",
+        "loaded_vllm_file",
+        "loaded_ascend_file",
+    )
+    common = [{key: row[key] for key in fields} for row in ranks]
+    assert common[0] == common[1], "Rank cache geometry differs"
+    row = ranks[0]
+    profile = row["actual_profile"]
+    assert (
+        profile["max_model_len"] == 4096
+        and profile["kv_cache_memory_bytes"] == KV_BYTES
+    )
+    assert profile["max_num_seqs"] == 12 and profile["speculative_num_tokens"] == 2
+    assert len(inputs) == 12 and all(
+        0 < item["tokens"] + item["max_tokens"] <= 4096 for item in inputs
+    )
+    usable = row["num_blocks"] - 1
+    first, end, maximum = [0] * 12, [0] * 12, 0
+    for group in row["groups"]:
+        assert group["is_eagle_group"] is False
+        spec = group["spec"]
+        block = spec["block_size_tokens"]
+        assert type(block) is int and block > 0
+        if spec["type"] == "FullAttentionSpec":
+            assert (
+                spec["sliding_window"] is None and spec["attention_chunk_size"] is None
+            )
+            first = [
+                value + math.ceil(item["tokens"] / block)
+                for value, item in zip(first, inputs)
+            ]
+            end = [
+                value + math.ceil((item["tokens"] + item["max_tokens"] + 2) / block)
+                for value, item in zip(end, inputs)
+            ]
+            maximum += math.ceil(4096 / block)
+        else:
+            assert spec["type"] == "MambaSpec" and spec["mamba_cache_mode"] == "align"
+            extra = spec["num_speculative_blocks"]
+            assert type(extra) is int and extra >= 0
+            first = [value + 1 + extra for value in first]
+            end = [value + 2 + extra for value in end]
+            maximum += 2 + extra
+    admitted = 0
+    for value in first:
+        if sum(first[: admitted + 1]) > usable:
+            break
+        admitted += 1
+    nominal = usable / maximum
+    pressure_possible = admitted >= 2 and sum(end[:admitted]) > usable
+    go = maximum <= usable and 4 <= nominal <= 6 and pressure_possible
+    return {
+        "go": go,
+        "actual_total_pool_blocks": row["num_blocks"],
+        "reserved_null_blocks": 1,
+        "usable_pool_blocks": usable,
+        "first_prefill_blocks_per_case": first,
+        "end_upper_blocks_per_case": end,
+        "maximum_context_upper_blocks": maximum,
+        "first_admission_upper_count_in_original_order": admitted,
+        "nominal_max_context_concurrency_upper": nominal,
+        "nominal_max_context_token_capacity": nominal * 4096,
+        "pressure_possible": pressure_possible,
+        "fingerprint_sha256": hashlib.sha256(
+            json.dumps(common[0], sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest(),
+        "scope": "Metadata-only bounds; Mamba align and shared pool rules, not exact scheduling. 4–6 max-context concurrency targets historical5x without copying TP4 bytes. Actual preemptions/calls must still be measured; EOS may prevent pressure.",
+    }
+
+
+def metric_delta(before, after):
+    names = {
+        "vllm:num_preemptions_total",
+        "vllm:prefix_cache_hits_total",
+        "vllm:external_prefix_cache_hits_total",
+    }
+    names |= {
+        key
+        for key in before | after
+        if "prefix_cache" in key and key.endswith("_total")
+    }
+    assert names <= before.keys() and names <= after.keys(), (
+        "Missing explicit initialized counter"
+    )
+    delta = {key: after[key] - before[key] for key in sorted(names)}
+    assert all(math.isfinite(value) and value >= 0 for value in delta.values()), (
+        "Counter reset/nonfinite"
+    )
+    assert delta["vllm:external_prefix_cache_hits_total"] == 0
+    return delta

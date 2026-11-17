@@ -1,0 +1,43 @@
+"""Export exact historical waits omitted by the older generic receipt exporter."""
+
+import importlib.util
+import json
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location('access', 'E:/CodexData/Work/instrumented-repeats-20261108/coder_access.py')
+access = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(access)
+script = r'''
+import hashlib,json,time
+from pathlib import Path
+campaign=Path('/data/shared_upload/cybber695/pegaflow91-five-datasets-20261114-04')
+out=Path('/data/shared_upload/cybber695/final-closeout-20261116/pegaflow-audit')
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+fields=['phase','pid','supervisor_pid','child_pid','child_start_ticks','started_unix','started_monotonic','ended_unix','completed_unix','completed_monotonic','actual_returncode','child_returncode','supervisor_returncode','signals','model_startups','generation_requests']
+waits={}
+for path in sorted((campaign/'metadata').glob('*wait*.json')):
+ raw=json.loads(path.read_bytes())
+ waits[path.name]={'controlled_sha256':sha(path),'bytes':path.stat().st_size,'observed':{key:raw.get(key)for key in fields},'actual_fields_present':[key for key in fields if key in raw]}
+sources={}
+for name,manifest in [('pegaflow91-mod-v4-final01','source-manifest.json'),('pegaflow91-analysis-v4','analysis-manifest.json')]:
+ folder=campaign/'sources'/name
+ files=json.loads((folder/manifest).read_bytes())['files']
+ assert all(sha(folder/file)==digest for file,digest in files.items())
+ sources[name]={'manifest_sha256':sha(folder/manifest),'files_verified':len(files)}
+services=[]
+for folder in [campaign/'qualification/service-native',campaign/'qualification/service-pegaflow',campaign/'formal-01/service-native',campaign/'formal-01/service-pegaflow',campaign/'formal-01/service-judge']:
+ row={'name':str(folder.relative_to(campaign))}
+ for name in ['stop.json','preparation-ready.json','source-admission-cost.json']:
+  path=folder/name;raw=json.loads(path.read_bytes())
+  row[name]={'controlled_sha256':sha(path),'data':{k:v for k,v in raw.items()if k in ['stopped_unix','server_exit_code','sidecar_exit_code','ready_unix','total_preparation_seconds','seconds','completed_unix','scope']}}
+ path=folder/'npu-release.txt';row['cleanup']={'controlled_sha256':sha(path),'empty_allocated_devices':path.read_text().count('No running processes found in NPU')==2}
+ services.append(row)
+value={'schema':'pegaflow-exact-historical-wait-supplement/v1','checked_unix':time.time(),'actual_wait_receipts':waits,'historical_service_lifecycle':services,'source_reverified_after_CPU_audit':sources,'scope':'Actual stored historical wait values only. Missing values remain null. Fixes older exporter lookup of input-admitted-launcher-wait instead of outer-campaign-actual-wait; no old files altered. Fresh CPU audit per-step returncodes were observed with subprocess.wait; audit-status actual_returncode is the worker function result, not a separately observed worker-parent wait.'}
+path=out/'historical-receipts-supplement-v2.json';assert not path.exists();path.write_text(json.dumps(value,indent=2)+'\n')
+print(json.dumps(value))
+'''
+value = json.loads(access.remote('ascend-81', script, timeout=120))
+path = Path(__file__).resolve().parent / 'collected/historical-receipts-supplement-v2.json'
+path.parent.mkdir(exist_ok=True)
+path.write_text(json.dumps(value, indent=2) + '\n', encoding='utf-8', newline='\n')
+print(json.dumps({'wait_receipts':len(value['actual_wait_receipts']),'all_five_services_released':all(row['cleanup']['empty_allocated_devices']for row in value['historical_service_lifecycle']),'source_packages_reverified':len(value['source_reverified_after_CPU_audit'])}))

@@ -1,0 +1,35 @@
+171: Loading safetensors checkpoint shards: 100% Completed | 14/14 [01:02<00:00,  4.44s/it]
+172: (Worker_TP0 pid=570852) 
+173: (Worker_TP0 pid=570852) INFO 11-13 17:22:39 [default_loader.py:397] Loading weights took 62.15 seconds
+174: (Worker_TP0 pid=570852) INFO 11-13 17:22:39 [model_runner_v1.py:3743] Loading drafter model...
+175: (Worker_TP0 pid=570852) INFO 11-13 17:22:39 [vllm.py:999] Asynchronous scheduling is enabled.
+176: (Worker_TP0 pid=570852) WARNING 11-13 17:22:39 [vllm.py:1023] Disabling cascade attention (not yet compatible with async speculative decoding).
+197: Loading safetensors checkpoint shards: 100% Completed | 14/14 [00:04<00:00,  2.92it/s]
+198: (Worker_TP0 pid=570852) 
+199: (Worker_TP0 pid=570852) INFO 11-13 17:22:44 [default_loader.py:397] Loading weights took 4.85 seconds
+200: (Worker_TP0 pid=570852) INFO 11-13 17:22:44 [llm_base_proposer.py:440] [spec_decode/base] Detected MTP model. Sharing target model embedding weights with the draft model.
+201: (Worker_TP0 pid=570852) INFO 11-13 17:22:44 [llm_base_proposer.py:496] [spec_decode/base] Wrapping draft model with ACLGraphWrapper: runtime_mode=FULL, use_eagle=True, enable_enpu=False
+202: (Worker_TP0 pid=570852) INFO 11-13 17:22:45 [model_runner_v1.py:3794] Loading model weights took 33.6860 GB
+208: (Worker_TP0 pid=570852) INFO 11-13 17:23:27 [backends.py:393] Compiling a graph for compile range (1, 4096) takes 26.06 s
+209: (Worker_TP0 pid=570852) INFO 11-13 17:23:33 [decorators.py:708] saved AOT compiled function to /workspace/pegaflow-capacity-probe-20261114-01/cache/vllm/torch_compile_cache/torch_aot_compile/5526df7225d0347fa1939f8815c08429e22a803fffbb071500e8512cfc45c7fd/rank_0_0/model
+210: (Worker_TP0 pid=570852) INFO 11-13 17:23:33 [monitor.py:53] torch.compile took 47.28 s in total
+211: (EngineCore pid=570181) INFO 11-13 17:23:46 [patch_shm_broadcast.py:74] No available shared memory broadcast block found in 60 seconds. This typically happens when some processes are hanging or doing some time-consuming work (e.g. compilation, weight/kv cache quantization).
+212: (Worker_TP0 pid=570852) INFO 11-13 17:23:50 [monitor.py:81] Initial profiling/warmup run took 17.14 s
+213: (Worker_TP1 pid=570853) INFO 11-13 17:23:50 [compiler_interface.py:248] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False}
+214: (Worker_TP0 pid=570852) INFO 11-13 17:23:50 [compiler_interface.py:248] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False}
+215: (Worker_TP0 pid=570852) INFO 11-13 17:23:50 [backends.py:1089] Using cache directory: /workspace/pegaflow-capacity-probe-20261114-01/cache/vllm/torch_compile_cache/5539d7942b/rank_0_0/eagle_head for vLLM's torch.compile
+217: (Worker_TP0 pid=570852) INFO 11-13 17:23:51 [backends.py:393] Compiling a graph for compile range (1, 4096) takes 0.83 s
+218: (Worker_TP0 pid=570852) INFO 11-13 17:23:51 [decorators.py:708] saved AOT compiled function to /workspace/pegaflow-capacity-probe-20261114-01/cache/vllm/torch_compile_cache/torch_aot_compile/dacf29f2620f43a8249e0697c1fe54201edaf06373a75667a0852226c5ac8554/rank_0_0/model
+219: (Worker_TP0 pid=570852) INFO 11-13 17:23:51 [monitor.py:53] torch.compile took 1.77 s in total
+220: (Worker_TP0 pid=570852) INFO 11-13 17:23:51 [monitor.py:81] Initial profiling/warmup run took 0.04 s
+221: (Worker_TP0 pid=570852) INFO 11-13 17:23:52 [worker.py:542] Initial free memory 60.61 GiB, reserved 3.00 GiB for KV Cache as specified by kv_cache_memory_bytes, skipping memory profiling. This does not respect the gpu_memory_utilization config. Only use kv_cache_memory_bytes when you want manual control of KV cache memory size. If OOM'ed, check the difference of initial free memory between the current run and the previous run where kv_cache_memory_bytes is suggested and update it correspondingly.
+222: (Worker_TP1 pid=570853) INFO 11-13 17:23:52 [worker.py:542] Initial free memory 60.61 GiB, reserved 3.00 GiB for KV Cache as specified by kv_cache_memory_bytes, skipping memory profiling. This does not respect the gpu_memory_utilization config. Only use kv_cache_memory_bytes when you want manual control of KV cache memory size. If OOM'ed, check the difference of initial free memory between the current run and the previous run where kv_cache_memory_bytes is suggested and update it correspondingly.
+223: (EngineCore pid=570181) WARNING 11-13 17:23:52 [kv_cache_utils.py:1174] Add 3 padding layers, may waste at most 10.00% KV cache memory
+224: (EngineCore pid=570181) ERROR 11-13 17:23:52 [core.py:1195] EngineCore failed to start.
+225: (EngineCore pid=570181) ERROR 11-13 17:23:52 [core.py:1195] Traceback (most recent call last):
+226: (EngineCore pid=570181) ERROR 11-13 17:23:52 [core.py:1195]   File "/vllm-workspace/vllm/vllm/v1/engine/core.py", line 1164, in run_engine_core
+227: (EngineCore pid=570181) ERROR 11-13 17:23:52 [core.py:1195]     engine_core = EngineCoreProc(*args, engine_index=dp_rank, **kwargs)
+245: (EngineCore pid=570181) ERROR 11-13 17:23:52 [core.py:1195]   File "/vllm-workspace/vllm/vllm/v1/core/kv_cache_utils.py", line 740, in _check_enough_kv_cache_memory
+246: (EngineCore pid=570181) ERROR 11-13 17:23:52 [core.py:1195]     raise ValueError(
+247: (EngineCore pid=570181) ERROR 11-13 17:23:52 [core.py:1195] ValueError: To serve at least one request with the model's max seq len (262144), (3.07 GiB KV cache is needed, which is larger than the available KV cache memory (3.0 GiB). Based on the available memory, the estimated maximum model length is 253952. Try increasing `gpu_memory_utilization` (which also controls CPU memory on the CPU backend) or decreasing `max_model_len` when initializing the engine. See https://docs.vllm.ai/en/latest/configuration/conserving_memory/ for more details.
+248: (Worker_TP0 pid=570852) INFO 11-13 17:39:15 [multiproc_executor.py:790] Parent process exited, terminating worker queues
