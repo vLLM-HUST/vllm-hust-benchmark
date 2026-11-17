@@ -1,8 +1,8 @@
 {
   "schema_version": "quantized-kv-tech-outcomes/v1",
-  "scope": "int8_dynamic; functionality and capacity only",
+  "scope": "int8_dynamic; functionality/capacity plus scoped single-pair frozen MMLU-Pro output-rate observation",
   "performance_gain_claim": false,
-  "new_model_experiments": false,
+  "new_model_experiments": true,
   "experiment_operator": "hustcui",
   "operator_attribution": "Maintainer confirmation in the task conversation on 2026-11-16; historical Git authors retained.",
   "existing_evidence": [
@@ -71,10 +71,19 @@
     "public_archive": true
   },
   "missing": [
-    "Historical startup log underlying the 90.14/126.20 theoretical concurrency estimate",
-    "Paired, contemporaneous HBM samples at matched load",
-    "Long-context task-quality evaluation",
-    "Complete experiment-time source and model-weight identities for historical A3 campaign"
+    "Historical startup log underlying 90.14/126.20 theoretical estimate",
+    "Same-load HBM savings evidence (new raw samples exist, but do not establish savings)",
+    "Task-quality evidence for historical long-context A3 runs",
+    "Complete experiment-time identity for historical A3; new campaign has post-run weight hashes and tracked diffs, but shared compiler cache/untracked unit tests not fully snapshotted"
   ],
-  "historical_archive_branch": "archive/int8-kv-evidence-20261105"
+  "historical_archive_branch": "archive/int8-kv-evidence-20261105",
+  "new_experiment_note": "Maintainer supplied completed 2026-11-16 campaign; this publication only audits offline, no new inference.",
+  "quick_test": {
+    "report": "quick-test-20261116/README.md",
+    "manifest": "quick-test-20261116/manifest.json",
+    "unrounded_results": "quick-test-20261116/audited-results.json",
+    "quality_pairs": "quick-test-20261116/quality-pairs.json",
+    "offline_verifier": "quick-test-20261116/verify.py",
+    "claim_type": "descriptive single-pair output token rate, not validated performance gain"
+  }
 }
