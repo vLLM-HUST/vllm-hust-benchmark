@@ -12,6 +12,10 @@
 [TP8 历史争用与 wl38 默认模式报告](reports/tech-outcomes-20261117/muxpd/README.md)： 复核 TP8 出词间隔改善及首 token
 代价，首次归档 wl38 六种真实文本派生负载在 TP2/TP4 的全部 24 份结果， 含 SLO 计算、请求身份、正负结果和原件哈希。单轮性能结果不替代质量验收，也不进入官方榜单。
 
+## vSpec 0.15.2 专题证据（2026-11-17）
+
+[FrontierScience 与 HLE-Verified 两轮复测入口](reports/tech-outcomes-20261117/vspec/README.md)：各含 vSpec 与原生 MTP2/4/6/8 的冻结题单、脱敏吞吐、逐题号评分及独立 gamma 诊断 trace。公开目录不含题目、图像或回答正文；本地兼容补丁和质量限制见各报告。本集合是专题实验，不进入官方榜单。
+
 ## PegaFlow 本地缓存恢复慢尾归因（2026-11-10）
 
 [跨宿主机调查记录](reports/pegaflow-restore-causal-20261110/README.md)：四张 910B2 的 178 次固定缓冲区恢复， 以及独立
