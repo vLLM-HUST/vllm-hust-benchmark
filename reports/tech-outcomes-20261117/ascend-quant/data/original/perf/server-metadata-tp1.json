@@ -1,0 +1,135 @@
+{
+  "schema": "swe-prefix-reuse/server-metadata/v1",
+  "recorded_at_utc": "2026-10-14T03:29Z",
+  "recorded_by": "本机实测 (Ascend 910B3 x1) 单卡曲线重跑 tp1: 与已发布 TP2 曲线 (w8a8kv, 2026-09-29) 同客户端/同 prepared workload/同协议/同硬件型号/同软件栈 (vLLM 源码树 + vllm-ascend 树 + 两个契约补丁 md5 逐字节一致), 差别只有单卡 TP1 + 随 TP1 缩小的 KV 预算; 目的是回答\"该 W8A8 模型能否在一张卡上完成这份 SWE 前缀复用负载\"",
+  "engine": {
+    "name": "vLLM",
+    "version": "0.28.1.post1.dev143+gf18cf803c",
+    "commit": "f18cf803c5f63625e2c71253ddaf8b0bad0bad1a",
+    "source": "本地源码树 /data/jxd/src/vllm-hust-v1 (vLLM-HUST 构建)",
+    "backend": {
+      "name": "vllm-ascend",
+      "version": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+      "commit": "74f0c0a272376412b51e1c1864803d5f3a0f1b5f"
+    },
+    "mod": {
+      "enabled": true,
+      "note": "两个 engine 契约补丁 (相对上游 vllm-ascend 树 HEAD 74f0c0a 的最小改动), 用于让 MTP2 在 vLLM 0.28.1 契约下可用; 未使用 synthetic sampler 或固定 acceptance 覆盖, 投机解码为真实接受/拒绝",
+      "patches": [
+        {
+          "file": "vllm_ascend/platform.py",
+          "change": "NPUPlatform.check_runner_kv_caches_multi_layer() 新增 no-op 声明 (对齐 CUDA/ROCm/CPU/XPU)",
+          "patched_md5": "d5d882ed6a6868b778528a30e65daad9",
+          "backup": "/tmp/platform.py.bak_exp5_prepatch"
+        },
+        {
+          "file": "vllm_ascend/worker/model_runner_v1.py",
+          "line": 898,
+          "change": "mamba_state_copy_funcs=self.model.get_mamba_state_copy_func()(tuple, 0.25.1 契约) -> self._get_mamba_state_copy_funcs()(dict, 0.28.1 契约, 与 CUDA gpu_model_runner.py:1615 一致)",
+          "patched_md5": "4d4ec2b2b544e4054f133dab7e0d3f0b",
+          "backup": "/tmp/model_runner_v1.py.bak_exp4"
+        }
+      ]
+    },
+    "python_stack": {
+      "torch": "2.13.0+cpu",
+      "torch_npu": "2.13.0.rc1",
+      "transformers": "5.14.1",
+      "python": "3.11.15"
+    }
+  },
+  "model": {
+    "name": "Qwen3.5-35B-A3B (W8A8 离线量化)",
+    "architecture": "Qwen3_5MoeForConditionalGeneration + Qwen3_5MoeMTP (MoE, 混合 linear/full attention)",
+    "served_model_name": "qwen35-a3b-w8a8",
+    "weights_path": "/data/jxd/Qwen3.5-35B-A3B-W8A8",
+    "weights_revision": "本地固定量化产物 (38 GB, quant_model_description.json + quant_model_weights-00001..00010-of-00010.safetensors, 含 mtp.layers.0.*)",
+    "weights_fingerprint": {
+      "quant_model_description.json.sha256": "049331a167909d4223126199c7879ca5b58d78fa34439cf99977266081555dde",
+      "quant_model_weights.safetensors.index.json.sha256": "375cade0403985c0d95be2225cde65e6c71770734254345de1d918e9c68da038"
+    },
+    "base_weights_path": "/data/jxd/Qwen3.5-35B-A3B (BF16, msModelSlim 26.1.0 量化配方输入)",
+    "tokenizer": {
+      "path": "/data/jxd/Qwen3.5-35B-A3B",
+      "identity": "与量化权重目录 /data/jxd/Qwen3.5-35B-A3B-W8A8 的 tokenizer.json 逐字节一致",
+      "tokenizer.json.sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+      "chat_template": "chat_template.jinja (thinking-enabled, prepare 时 enable_thinking=True)",
+      "server_side_transformers": "5.14.1 (vllm-hust 运行环境)",
+      "client_side_transformers": "5.17.0 (swe-prefix-reuse 客户端 venv, prepare 编译 workload 时使用)"
+    }
+  },
+  "precision": {
+    "weights": "W8A8 (int8 权重 / int8 激活, msModelSlim ascendv1 离线量化产物)",
+    "compute": "int8 量化算子 + bf16 回退 (vllm-ascend --quantization ascend)",
+    "kv_cache": "bf16 (未量化 KV)",
+    "fallbacks": "linear_attention 层的 state/conv 缓存按 mamba_ssm_dtype=float32 保存; MTP 层保持 BF16"
+  },
+  "hardware": {
+    "chip": "Ascend 910B3 (64 GB HBM/chip)",
+    "accelerator_count": 1,
+    "visible_devices": "0",
+    "driver_version": "25.3.rc1",
+    "cann": "Ascend CANN 9.1.0 (逐进程临时环境: /data/jxd/Ascend-9.1.0/{ascend-toolkit,nnal/atb}; 系统自带 /usr/local/Ascend CANN 8.5.0 未改动、未覆盖), ATB CXX ABI=1",
+    "cann_note": "已发布 Frontier 条目的环境块记录 cann=9.1.0; 本机系统安装只有 8.5.0, 因此通过 CANN_SET_ENV/ATB_SET_ENV 指向 /data 下解压的 9.1.0。CANN 版本对 W8A8 是必需的",
+    "note": "accelerator_count=1 = 全部参与加速卡; 单卡单副本 TP1, 无多副本、无 DP。与已发布 TP2 点相比: 权重与 KV 都要装进同一张 64 GB 卡 (权重 38.18 GiB + KV 18.85 GiB)"
+  },
+  "serving": {
+    "tensor_parallel_size": 1,
+    "pipeline_parallel_size": 1,
+    "data_parallel_size": 1,
+    "max_model_len": 262144,
+    "gpu_memory_utilization": 0.95,
+    "max_num_seqs": 16,
+    "max_cudagraph_capture_size": "256 (显式限制; 262144 上下文下单卡默认图尺寸集会触发 EE1023)",
+    "cudagraph_mode_requested": "FULL",
+    "cudagraph_mode_effective": "FULL_DECODE_ONLY (平台自动降级: compilation.py:1418 'CUDAGraphMode.FULL is not supported with AscendGDNAttentionBackend (support: AttentionCGSupport.UNIFORM_BATCH)')",
+    "quantization": "ascend",
+    "trust_remote_code": true,
+    "prefix_caching": "vLLM 默认开启 (enable_prefix_caching=True; mamba_cache_mode=align, block_size=2048, mamba_block_size=2048, kv_cache_size_tokens=805156, kv_cache_max_concurrency=3.07x, 4 个 KV cache group = 1 full-attn + 3 Mamba)",
+    "mtp": "已启用 (method=mtp, num_speculative_tokens=2, 真实接受/拒绝; 接受率见服务端 metrics 的 spec_decode_num_draft_tokens_total / spec_decode_num_accepted_tokens_total)",
+    "explicitly_set_args": "显式设置: --max-num-seqs 16 / --kv-cache-memory-bytes 20242376704 / --max-num-batched-tokens 4096 / --speculative-config {\"method\":\"mtp\",\"num_speculative_tokens\":2} / --compilation-config {\"max_cudagraph_capture_size\":256,\"cudagraph_mode\":\"FULL\"}; 其余为默认值 (服务端 non-default args 日志逐字记录)",
+    "kv_cache_memory_bytes": "20242376704 (18.85 GiB, 显式; TP1 下按同一 gpu_memory_utilization=0.95 重新标定)",
+    "max_num_batched_tokens": 4096
+  },
+  "endpoint": "http://127.0.0.1:8100/v1/completions",
+  "launch_port": 8100,
+  "launch_command_redacted": "ASCEND_RT_VISIBLE_DEVICES=0 TP=1 PORT=8100 MAX_MODEL_LEN=262144 GPU_MEM_UTIL=0.95 VLLM_ENGINE_READY_TIMEOUT_S=3600 LABEL=w8a8 EXTRA_SERVER_ARGS='--max-num-seqs 16 --kv-cache-memory-bytes 20242376704 --max-num-batched-tokens 4096 --speculative-config {\"method\":\"mtp\",\"num_speculative_tokens\":2} --compilation-config {\"max_cudagraph_capture_size\":256,\"cudagraph_mode\":\"FULL\"}' ./run_swe_server.sh   # 展开后: vllm serve /data/jxd/Qwen3.5-35B-A3B-W8A8 --served-model-name qwen35-a3b-w8a8 --tensor-parallel-size 1 --max-model-len 262144 --gpu-memory-utilization 0.95 --trust-remote-code --host 127.0.0.1 --port 8100 --quantization ascend --max-num-seqs 16 --kv-cache-memory-bytes 20242376704 --max-num-batched-tokens 4096 --speculative-config {\"method\":\"mtp\",\"num_speculative_tokens\":2} --compilation-config {\"max_cudagraph_capture_size\":256,\"cudagraph_mode\":\"FULL\"}",
+  "launch_script": "/data/jxd/quant-Qwen3.5-35B-A3B/run_swe_server.sh (前置: COMPILE_CUSTOM_KERNELS=1、Ascend Triton npu_utils 预编译缓存复用、启动前隔离 torch_aot_compile/*)",
+  "environment_overrides": {
+    "CANN_SET_ENV": "/data/jxd/Ascend-9.1.0/ascend-toolkit/set_env.sh",
+    "ATB_SET_ENV": "/data/jxd/Ascend-9.1.0/nnal/atb/set_env.sh",
+    "VENDOR_OPP": "1 → 把 vllm_ascend/_cann_ops_custom/vendors/custom_transformer 追加到 ASCEND_CUSTOM_OPP_PATH 与 LD_LIBRARY_PATH",
+    "PERF_FIX_KERNELS_SO": "0 (不替换 libvllm_ascend_kernels.so, 使用树内交付产物)",
+    "TORCHINDUCTOR_AUTOGRAD_CACHE": "0 (关闭 torch>=2.13 默认开启的 AOT autograd 本地缓存)",
+    "PERF_CACHE_ROOT": "/data/jxd/cache/cann91-w8a8 (编译/图缓存独立目录)",
+    "why": "W8A8 的 norm_quant 融合 pass 在注册期即执行 torch.ops._C_ascend.npu_add_rms_norm_bias → aclnnAddRmsNormBias; 该符号只在 custom_transformer 自定义算子包中, 且只有 CANN 9.1 的 opapi 加载器会按 ASCEND_CUSTOM_OPP_PATH 加载。TORCHINDUCTOR_AUTOGRAD_CACHE=0 是因为本机 910B3 被硬件画像判定不支持 npugraph_ex → 走 fusion_pass_compile 分支, 该分支不返回 OutputCode, 会被 torch 的 AOT 缓存 bundle 断言拒绝"
+  },
+  "runtime_artifacts": {
+    "libvllm_ascend_kernels.so.sha256": "eb5c3a249569ee9c6cb7f1fb430538035ad4b190d8f680d7d5563bc902ff4384",
+    "libvllm_ascend_kernels.so.note": "2026-06-03 构建的 CANN8.5 兼容产物; support/ 另存 2026-09-17 CANN9 原版 sha256=c7a7ff6751c8c7468a913ac19d59ed1a17b586b7861df019040ab8d2816031af, 本轮未使用",
+    "vendor_libcust_opapi.so.sha256": "39474f300ecbf9f6bbaa61046dd96a39f0cfdcc325f00a78ac32d398eea93ee5"
+  },
+  "client": {
+    "tool": "swe-prefix-reuse",
+    "version": "0.1.2",
+    "commit": "6861242dbd9f17b707003191e4200b7752911d7c",
+    "python": "3.11.15",
+    "workload": "prepared/qwen35.json (source data/open-swe-sample.json.gz, max_context=262144, 8/8 会话接受, 360 轮)",
+    "data_parallel_size_flag": "未使用 (服务端 DP=1, 单副本, 无 rank header 路由)"
+  },
+  "known_limitations": [
+    "客户端与 engine 同机 (127.0.0.1), 客户端调度/JSON/网络开销仍在观测路径内",
+    "未做预热: 每个 play 使用新 cache_salt 冷启动, 窗口结束排空在途请求",
+    "本轮为 60s 短测 → 900s 固定窗口两个显式测量, 无自动认证语义",
+    "首次冷编译: 因关闭 torch AOT autograd 缓存, 每轮启动都要重跑 torch.compile (~67s) + ACL 图捕获, 该时间不计入测量窗口",
+    "CANN 9.1 为逐进程临时环境 (未覆盖系统 8.5.0); 引擎实际加载的 CANN 版本见启动日志的 ASCEND_HOME_PATH",
+    "样例 workload 仅 8 条轨迹/360 轮, 非统计代表性 SWE 样本; 最长会话 141269 tokens, 未触及 262144 上限",
+    "MTP 特有: 请求的 cudagraph_mode=FULL 被平台降级为 FULL_DECODE_ONLY (AscendGDNAttentionBackend 仅声明 UNIFORM_BATCH)",
+    "MTP 特有: 每次带 MTP 的运行都会留下一条不可用的 AOT 编译缓存条目 (运行期即打 unable to save AOT compiled function ... 'NoneType' object is not callable); 下一次启动若加载它会在 profile_run 崩 'NoneType' object is not callable, 故每轮实验前需隔离 torch_aot_compile/*",
+    "MTP 特有: 前缀复用可用, 但受 EAGLE/MTP 尾块丢弃语义影响, 每个请求比无 MTP 时少复用 1 个 block (2048 token); 该代价已由实测 Δhits 量化 (见 CONTROL-EXPS-capture-mtp.md 实验 8)",
+    "两个 engine 契约补丁为本地最小改动, 未进入上游; 若上游修复该契约, 本点的 mod 块需相应更新",
+    "本文件为判定实验 (capkv1) 记录: 相对 exp10 曲线批次只增 3 个服务参数, 客户端/prepared workload/协议/硬件未变; 结果仅用于定位 running=1 的成因, 不构成新成绩点",
+    "TP1 特有: 单卡 KV 预算 18.85 GiB -> 805156 token -> 262144 上下文下最大并发 3.07x, 低于 TP2 的 9.87x; 本 workload 的 prompt_p50≈16k, 该上限不构成瓶颈 (见并发档位实测的 running 数)",
+    "TP1 特有: 服务端同样打印 kv_cache_utils.py:2163 的 \"no KV cache group could be identified ... prefix-cache reuse across requests will be disabled\" 告警。该告警在 0.28.1 上过宽: 本机用同判据 (vllm:prefix_cache_hits_total 增量, 探针 ≥2*block_size=4096 token) 实测 shared-pair d_hits=12288 / unshared-pair d_hits=0 (prompt≈16.3k token, TP1 服务上), 即前缀复用真实生效。TP2 已发布点在同一告警下测得 78.2% 命中率, 两侧条件一致, 曲线可比"
+  ]
+}

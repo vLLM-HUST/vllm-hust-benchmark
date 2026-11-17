@@ -1,0 +1,28 @@
+[env] 已挂 custom_transformer 算子包: /data/jxd/src/vllm-ascend-hust-v1/vllm_ascend/_cann_ops_custom/vendors/custom_transformer
+[env] python : /data/jxd/envs/vllm-hust-v1-cann91/bin/python3
+[env] vllm   : /data/jxd/envs/vllm-hust-v1-cann91/bin/vllm
+[env] CANN   : /data/jxd/Ascend-9.1.0/cann-9.1.0
+[env] caches : /data/jxd/cache/p23-256k-w4a8/vllm / /data/jxd/cache/p23-256k-w4a8/triton
+[env] 提示   : 起服务用 ./run_swe_server.sh (已含同一套前置); 退出用 deactivate
+===================== run_swe_server_ab.sh =====================
+utc             : 2026-11-16T13:20:38Z
+label           : w4a8
+model_path      : /data/jxd/Qwen3.5-35B-A3B-W8A8-NoRot
+served_name     : qwen35-a3b-w8a8nr
+cards           : 6 (tp=1)
+port            : 8232
+max_model_len   : 262144
+gpu_mem_util    : 0.9
+cann            : /data/jxd/Ascend-9.1.0/ascend-toolkit/set_env.sh
+atb             : /data/jxd/Ascend-9.1.0/nnal/atb/set_env.sh
+cache_root      : /data/jxd/cache/p23-256k-w4a8
+vendor_opp      : 1
+fix_kernels_so  : 0
+extra_args      : --no-enable-prefix-caching --max-num-seqs 2 --max-num-batched-tokens 4096 --kv-cache-memory-bytes 8589934592
+command         : /data/jxd/envs/vllm-hust-v1-cann91/bin/vllm serve /data/jxd/Qwen3.5-35B-A3B-W8A8-NoRot --served-model-name qwen35-a3b-w8a8nr --tensor-parallel-size 1 --max-model-len 262144 --gpu-memory-utilization 0.9 --trust-remote-code --host 127.0.0.1 --port 8232 --quantization ascend --no-enable-prefix-caching --max-num-seqs 2 --max-num-batched-tokens 4096 --kv-cache-memory-bytes 8589934592
+===============================================================
+[swe] server pid : 30667 (pid file /data/user8/tech-outcomes-20261117/ascend-quant/long-context-262144/run_20261116T123518Z/logs/swe_server_ab_w4a8.pid)
+[swe] server log : /data/user8/tech-outcomes-20261117/ascend-quant/long-context-262144/run_20261116T123518Z/logs/swe_server_ab_w4a8_20261116T132038Z.log
+[swe] stop       : kill -- -30667
+[swe] SERVER_READY after 320s -> http://127.0.0.1:8232/v1/completions
+[swe] 服务保持运行
