@@ -3,6 +3,11 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## Request Throttling Controller 第八版对照（2026-11-18）
+
+[多轮缓存竞争与四项固定负载](reports/controller-r8-20261118/README.md)：完整保留正收益、退化、输出量和原评分；多轮新输入为合成token-ID并继承真实输出，不是完整Agent解决率。Humanity’s
+Last Exam按要求暂缓。
+
 ## 真实上下文与四租户补测（2026-11-15）
 
 [双卡B0/B1配对报告](reports/context-tenant-a01-20261115/README.md)：保留全部窗口、原始流和局部负收益，追加长上下文与四租户工况判读；原五项数据不重跑。
