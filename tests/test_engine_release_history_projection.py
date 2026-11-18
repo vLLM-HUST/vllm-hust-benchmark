@@ -104,3 +104,38 @@ def test_primary_release_comparisons_use_fixed_B0_not_another_B1():
             == reference["continuous"]["B0"]["source_seal_sha256"]
         )
     assert all(row["control"] == "r6" for row in r7["development_measurements"])
+
+
+def test_r8_fixed_five_measurements_survive_release_catalog_publication():
+    """Completed sealed performance pairs must not disappear from the catalog."""
+    report = json.loads(
+        (ROOT / "reports/r8-fixed-five-20261118/summary-public-v2.json").read_text()
+    )
+    catalog = json.loads(
+        (ROOT / "website-publication/data/engine-release-history-v1.json").read_text()
+    )
+    entry = next(row for row in catalog["entries"] if row["id"] == "r8")
+    assert entry["measurements"] == report["measurements"]
+    assert [row["id"] for row in entry["measurements"]] == [
+        "mmlu",
+        "hle",
+        "frontier",
+        "swe",
+        "terminal",
+    ]
+    assert [row["arms"][0]["requests"] for row in entry["measurements"]] == [
+        200,
+        200,
+        160,
+        64,
+        48,
+    ]
+    for row in entry["measurements"]:
+        assert [arm["role"] for arm in row["arms"]] == ["B0", "r8"]
+        for arm in row["arms"]:
+            assert arm["failed"] == 0
+            assert arm["output_tokens"] / arm["duration_seconds"] == pytest.approx(
+                arm["output_tokens_per_second"]
+            )
+    assert len(report["seal_audit"]) == 16
+    assert sum(row["files"] for row in report["seal_audit"]) == 13021
