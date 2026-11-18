@@ -1,0 +1,562 @@
+{
+  "schema": "vllm-hust-engine-release-history/v1",
+  "default_release": "r8",
+  "order": [
+    "r8",
+    "r7",
+    "r6",
+    "r5",
+    "r4"
+  ],
+  "entries": [
+    {
+      "id": "r4",
+      "frozen_date": "2026-10-30",
+      "release": "full-answer-b1-20261030-r4",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261030-r4",
+      "profile": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r4.json",
+        "sha256": "4da45c08368e58a74e5ac795d0440d16831db8190a3970fb35547cef22b5b984",
+        "bytes": 6714
+      },
+      "mods": [
+        "Extension Manager",
+        "BetterScale",
+        "Microflow",
+        "KV materialization",
+        "M01 correction",
+        "Packed host state"
+      ],
+      "settings": {
+        "E": 24,
+        "R": 36,
+        "MTP": 2,
+        "graph": "FULL",
+        "state_gib_per_rank": 4,
+        "kv_gib_per_rank": 20
+      },
+      "measurements": [
+        {
+          "id": "mmlu200",
+          "label": "MMLU200",
+          "control": "B0",
+          "candidate": "r4",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 495.8359344194495,
+              "mean_ttft_ms": 610288.1058002636,
+              "mean_tpot_ms": 41.6217346100354,
+              "output_tokens": 706796,
+              "duration_seconds": 1425.4634465482086,
+              "requests": 200,
+              "failed": 0,
+              "correct": 143,
+              "truncated": 23
+            },
+            {
+              "role": "r4",
+              "output_tokens_per_second": 944.4737634862181,
+              "mean_ttft_ms": 290879.2939969152,
+              "mean_tpot_ms": 21.320452117450586,
+              "output_tokens": 661040,
+              "duration_seconds": 699.9029783103615,
+              "requests": 200,
+              "failed": 0,
+              "correct": 153,
+              "truncated": 16
+            }
+          ],
+          "baseline_id": "original018-cann8.5.1"
+        },
+        {
+          "id": "4096-formal",
+          "label": "4K / C8",
+          "control": "B0",
+          "candidate": "r4",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 126.2930721641761,
+              "mean_ttft_ms": 1511.1649369005283,
+              "mean_tpot_ms": 56.409037938024255,
+              "output_tokens": 39168,
+              "duration_seconds": 310.1357764825225,
+              "requests": 153,
+              "failed": 0
+            },
+            {
+              "role": "r4",
+              "output_tokens_per_second": 341.373188618264,
+              "mean_ttft_ms": 781.0332509415115,
+              "mean_tpot_ms": 20.13571577252994,
+              "output_tokens": 104448,
+              "duration_seconds": 305.96427453123033,
+              "requests": 408,
+              "failed": 0
+            }
+          ],
+          "baseline_id": "original018-cann8.5.1"
+        },
+        {
+          "id": "16384-formal",
+          "label": "16K / C8",
+          "control": "B0",
+          "candidate": "r4",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 60.00486093956158,
+              "mean_ttft_ms": 5697.469031361685,
+              "mean_tpot_ms": 110.14199103032377,
+              "output_tokens": 18688,
+              "duration_seconds": 311.4414350334555,
+              "requests": 73,
+              "failed": 0
+            },
+            {
+              "role": "r4",
+              "output_tokens_per_second": 153.84159603068855,
+              "mean_ttft_ms": 3362.594380771202,
+              "mean_tpot_ms": 38.75974423047381,
+              "output_tokens": 46848,
+              "duration_seconds": 304.52102167904377,
+              "requests": 183,
+              "failed": 0
+            }
+          ],
+          "baseline_id": "original018-cann8.5.1"
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/15b9269499d720be1920598ab68282eb8e99daf8/reports/full-answer-joint-20261030/joint-summary.json",
+          "sha256": "279d0245612d8e66c99e96f0d4b244e9e3efaab3f38a9c10f61b66b52396b094",
+          "bytes": 216392
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/15b9269499d720be1920598ab68282eb8e99daf8/reports/full-answer-joint-20261030/continuous-summary.json",
+          "sha256": "d2ea05339baec6ab037378136d43a9c98a56b36caca2282073333ed80ef6f2c7",
+          "bytes": 471492
+        }
+      ],
+      "label_zh": "原始配对",
+      "label_en": "Original pairs",
+      "scope_zh": "2026-10-30 · MMLU200完整回答与4K/16K连续负载",
+      "scope_en": "2026-10-30 · MMLU200 full answers and 4K/16K continuous load",
+      "method_zh": "MMLU200：max8192、EOS开启、同时提交200题，无额外任务预热。连续负载：C8、out256，每档60秒预热、300秒提交后排空；B0沿用原封存轮。旧轮协议原样保留。",
+      "method_en": "MMLU200: max8192, EOS enabled, 200 simultaneous submissions, no extra task warmup. Continuous load: C8, out256, 60s warmup then 300s submissions and drain; B0 reuses its sealed original run. Original protocol retained.",
+      "baseline_id": "original018-cann8.5.1"
+    },
+    {
+      "id": "r5",
+      "frozen_date": "2026-11-13",
+      "release": "full-answer-b1-20261113-r5",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261113-r5-rc2",
+      "profile": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r5.json",
+        "sha256": "0eb1d8ffd2fdf34faa1c787c601cf48bc0817a46e715f987948cae0990287945",
+        "bytes": 1111
+      },
+      "mods": [
+        "Extension Manager",
+        "BetterScale",
+        "Microflow",
+        "KV materialization",
+        "M01 correction",
+        "Packed host state",
+        "Sealed serving warmup"
+      ],
+      "settings": {
+        "E": 24,
+        "R": 36,
+        "MTP": 2,
+        "graph": "FULL",
+        "state_gib_per_rank": 4,
+        "kv_gib_per_rank": 20
+      },
+      "measurements": [],
+      "sources": [
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r5-overlay.json",
+          "sha256": "4e40eb70a9bb8f3942bbf0b4b07a23ee9bbac7483349ecb456a9d57af57d237b",
+          "bytes": 1762
+        }
+      ],
+      "release_tag": "full-answer-b1-20261113-r5-rc2",
+      "label_zh": "启动失败记录",
+      "label_en": "Startup failure",
+      "scope_zh": "r5在服务ready前失败，由r6修复替代；本版没有正式推理成绩。",
+      "scope_en": "r5 failed before service readiness and was superseded by r6; no formal inference scores exist for this version.",
+      "method_zh": "增加token-progress预热与编译封边；r6随后修复compile-only positions预热对私有runner的使用。",
+      "method_en": "Added token-progress warmup and compilation sealing; r6 then fixed compile-only positions warmup to use a private runner.",
+      "baseline_id": "original018-cann8.5.1"
+    },
+    {
+      "id": "r6",
+      "frozen_date": "2026-11-13",
+      "release": "full-answer-b1-20261113-r6",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261114-r6-rc2",
+      "profile": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r6.json",
+        "sha256": "ca985cd940064abfde7d099afec0f0d09c0d143ae4c900d05409f43f60cdd26e",
+        "bytes": 2266
+      },
+      "mods": [
+        "Extension Manager",
+        "BetterScale",
+        "Microflow",
+        "KV materialization",
+        "M01 correction",
+        "Packed host state",
+        "Sealed serving warmup"
+      ],
+      "settings": {
+        "E": 24,
+        "R": 36,
+        "MTP": 2,
+        "graph": "FULL",
+        "state_gib_per_rank": 4,
+        "kv_gib_per_rank": 20
+      },
+      "measurements": [],
+      "sources": [
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r6-overlay.json",
+          "sha256": "e46705b8884b16850ffd5711c4adc56acc524333f22aed64ef38f606331fd349",
+          "bytes": 1985
+        }
+      ],
+      "release_tag": "full-answer-b1-20261114-r6-rc2",
+      "label_zh": "五项完整报告",
+      "label_en": "Five-profile report",
+      "scope_zh": "固定五数据集，另有上下文与四租户配对。",
+      "scope_en": "Five fixed profiles, with additional context and four-tenant pairs.",
+      "baseline_id": "original018-cann8.5.1"
+    },
+    {
+      "id": "r7",
+      "frozen_date": "2026-11-16",
+      "release": "full-answer-b1-20261116-r7",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261116-r7",
+      "profile": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r7.json",
+        "sha256": "4dfd6b8dcd5197ea2ce798a118d0d4df3ff7eccf25a25ec04208505a06c0a76a",
+        "bytes": 2067
+      },
+      "mods": [
+        "Extension Manager",
+        "BetterScale",
+        "Microflow",
+        "KV materialization",
+        "M01 correction",
+        "Packed host state",
+        "Sealed serving warmup",
+        "Guarded progress async"
+      ],
+      "settings": {
+        "E": 24,
+        "R": 36,
+        "MTP": 2,
+        "graph": "FULL",
+        "state_gib_per_rank": 4,
+        "kv_gib_per_rank": 20
+      },
+      "measurements": [
+        {
+          "id": "4096",
+          "label": "4K / C8",
+          "control": "B0",
+          "candidate": "r7",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 126.71624802199777,
+              "mean_ttft_ms": 1709.4214221250886,
+              "mean_tpot_ms": 56.21754155438561,
+              "output_tokens": 38912,
+              "duration_seconds": 307.07979921600054,
+              "requests": 152,
+              "failed": 0
+            },
+            {
+              "role": "r7",
+              "output_tokens_per_second": 385.3043929618423,
+              "mean_ttft_ms": 664.5371282758883,
+              "mean_tpot_ms": 18.16334488361116,
+              "output_tokens": 116736,
+              "duration_seconds": 302.9708514420199,
+              "requests": 456,
+              "failed": 0,
+              "ttft_p95_ms": 1252.5199619849445,
+              "ttft_p99_ms": 2555.792246479541
+            }
+          ],
+          "baseline_origin": {
+            "kind": "sealed-B0-reuse",
+            "run_id": "five-datasets-r6-matched-20261114-r3",
+            "seal_sha256": "979df5e948c8a0f2b1312727fdf02f43c65f958c69389e667875c6c4a2ce1924"
+          },
+          "baseline_id": "original018-cann8.5.1"
+        },
+        {
+          "id": "16384",
+          "label": "16K / C8",
+          "control": "B0",
+          "candidate": "r7",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 59.76816891608451,
+              "mean_ttft_ms": 5645.442650068505,
+              "mean_tpot_ms": 110.9640982979321,
+              "output_tokens": 18688,
+              "duration_seconds": 312.67479561300024,
+              "requests": 73,
+              "failed": 0
+            },
+            {
+              "role": "r7",
+              "output_tokens_per_second": 162.03229240790355,
+              "mean_ttft_ms": 3552.157198015922,
+              "mean_tpot_ms": 35.3786476521985,
+              "output_tokens": 49664,
+              "duration_seconds": 306.5068034399883,
+              "requests": 194,
+              "failed": 0,
+              "ttft_p95_ms": 8742.64786693384,
+              "ttft_p99_ms": 9996.581022947212
+            }
+          ],
+          "baseline_origin": {
+            "kind": "sealed-B0-reuse",
+            "run_id": "five-datasets-r6-matched-20261114-r3",
+            "seal_sha256": "979df5e948c8a0f2b1312727fdf02f43c65f958c69389e667875c6c4a2ce1924"
+          },
+          "baseline_id": "original018-cann8.5.1"
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r7-overlay.json",
+          "sha256": "b5dae9b117e08e77da3ef00901aaceb496ca22cc4d512bfb4da0c88e9635bf21",
+          "bytes": 2886
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/86b357a33cce0c55ceb95b6f00af31ccf5e690f9/experiments/optimization-20261115/B1-r7-C8-history-20261116-r1/analysis-v1.json",
+          "sha256": "f586b09711f6b66cc3d15b447b88e8cc8bf4bf1c74a23bed61ea71cc27bd8a51",
+          "bytes": 5775
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/15b9269499d720be1920598ab68282eb8e99daf8/website-publication/data/five-datasets-r6-20261114/summary-public-v3.json",
+          "sha256": "f36a7a4997934d9a000db101f4488e4bde90bdc92d8f5389b6802dc4453fb145",
+          "bytes": 214023
+        }
+      ],
+      "label_zh": "B0 对照实测",
+      "label_en": "B0 comparison",
+      "scope_zh": "B0 → B1 r7 · 4K/16K连续负载",
+      "scope_en": "B0 → B1 r7 · 4K/16K continuous load",
+      "method_zh": "复用r6完整报告中已封存的固定B0实测，与r7连续负载比较：同模型、C8、out256、71条共同启动预热，每档60秒预热、300秒提交后排空。两轮日期、B0封存身份和原始数值保留；r6→r7开发对照另列详情。",
+      "method_en": "Reuse the sealed fixed B0 observations from the r6 complete report for comparison with r7: same model, C8, out256,71 shared startup warmups,60s phase warmup then300s submissions and drain. Original run dates, B0 seal identity and values are retained; r6→r7 development comparisons are separate details.",
+      "quality": {
+        "profile": "MMLU200",
+        "correct": 138,
+        "requests": 200,
+        "failed": 0,
+        "historical_screen_minimum": 144,
+        "historical_screen_passed": false
+      },
+      "development_measurements": [
+        {
+          "id": "4096",
+          "label": "4K / C8",
+          "control": "r6",
+          "candidate": "r7",
+          "arms": [
+            {
+              "role": "r6",
+              "output_tokens_per_second": 346.51056038796344,
+              "mean_ttft_ms": 690.6729389245412,
+              "mean_tpot_ms": 20.395569694126934,
+              "output_tokens": 104960,
+              "duration_seconds": 302.9056311659988,
+              "requests": 410,
+              "failed": 0,
+              "ttft_p95_ms": 1220.1365833989255,
+              "ttft_p99_ms": 2626.818642310027
+            },
+            {
+              "role": "r7",
+              "output_tokens_per_second": 385.3043929618423,
+              "mean_ttft_ms": 664.5371282758883,
+              "mean_tpot_ms": 18.16334488361116,
+              "output_tokens": 116736,
+              "duration_seconds": 302.9708514420199,
+              "requests": 456,
+              "failed": 0,
+              "ttft_p95_ms": 1252.5199619849445,
+              "ttft_p99_ms": 2555.792246479541
+            }
+          ]
+        },
+        {
+          "id": "16384",
+          "label": "16K / C8",
+          "control": "r6",
+          "candidate": "r7",
+          "arms": [
+            {
+              "role": "r6",
+              "output_tokens_per_second": 152.73177150468365,
+              "mean_ttft_ms": 3715.9957444397387,
+              "mean_tpot_ms": 37.829714622516626,
+              "output_tokens": 46592,
+              "duration_seconds": 305.0576808020014,
+              "requests": 182,
+              "failed": 0,
+              "ttft_p95_ms": 8112.219920301502,
+              "ttft_p99_ms": 10175.404774560338
+            },
+            {
+              "role": "r7",
+              "output_tokens_per_second": 162.03229240790355,
+              "mean_ttft_ms": 3552.157198015922,
+              "mean_tpot_ms": 35.3786476521985,
+              "output_tokens": 49664,
+              "duration_seconds": 306.5068034399883,
+              "requests": 194,
+              "failed": 0,
+              "ttft_p95_ms": 8742.64786693384,
+              "ttft_p99_ms": 9996.581022947212
+            }
+          ]
+        }
+      ],
+      "baseline_id": "original018-cann8.5.1"
+    },
+    {
+      "id": "r8",
+      "frozen_date": "2026-11-17",
+      "release": "full-answer-b1-20261117-r8",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261117-r8",
+      "profile": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r8.json",
+        "sha256": "77e7c339f89b4f2c01b46fbc1b68eb4e7bdc23838888e71aef4a2748597a95cf",
+        "bytes": 12140
+      },
+      "mods": [
+        "Extension Manager",
+        "BetterScale",
+        "Microflow",
+        "KV materialization",
+        "M01 correction",
+        "Packed host state",
+        "Sealed serving warmup",
+        "Guarded progress async",
+        "Capacity tuning",
+        "Short prefill tail"
+      ],
+      "settings": {
+        "E": 36,
+        "R": 54,
+        "MTP": 2,
+        "graph": "FULL",
+        "state_gib_per_rank": 4,
+        "kv_gib_per_rank": 20
+      },
+      "measurements": [],
+      "sources": [
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r8-overlay.json",
+          "sha256": "2e17d4edf6232850052abba5f921e536aaf21f7fb46e0292b0a668b2607c9746",
+          "bytes": 3089
+        }
+      ],
+      "label_zh": "最新实测",
+      "label_en": "Latest measurements",
+      "scope_zh": "新B0/r8配对，按已发布场景展示。",
+      "scope_en": "New B0/r8 pairs, shown for published scenarios.",
+      "baseline_id": "original018-cann8.5.1"
+    }
+  ],
+  "metric_policy": "Each observation retains its own control, protocol and source. No historical metric is substituted for an unmeasured version. All durations include response drain; TPOT is request-weighted.",
+  "baseline": {
+    "id": "original018-cann8.5.1",
+    "vllm": "0.18.0",
+    "vllm_ascend": "0.18.0",
+    "cann": "8.5.1",
+    "image_digest": "sha256:2467d259ff068ca4edd7b50b849152910f3c05e435f314639fc06bcc7a00f9fa",
+    "sdk_source_map_sha256": "a357ad8cf1ff6f8797fb2d6476e71a0deef5ee0899a55ea32ed65f07fe7773bc",
+    "profile": {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b0-vllm-v018.json",
+      "sha256": "db62cef07b9e2677be6b4895d92db4bab3c9178b0422a6020de77a90c282568a",
+      "bytes": 15343
+    },
+    "observation_policy": "Fixed B0 engine/image/configuration across releases. Dated measurements retain their own protocol, original values and seal; baseline reuse is explicit. B1-vs-B1 development pairs are never the main comparison denominator."
+  },
+  "attempt_order": [
+    "r3",
+    "r2",
+    "r1"
+  ],
+  "attempts": [
+    {
+      "id": "r1",
+      "kind": "pre-freeze-attempt",
+      "run": "continuous-b1-packed-r1",
+      "status": "failed",
+      "model_started": true,
+      "label_zh": "预热中止",
+      "label_en": "Warmup stopped",
+      "reason_zh": "预热期间触发容器内存保护：2GiB预留空间不足，随后退出。",
+      "reason_en": "Container memory protection stopped warmup when the 2GiB reserve was reached.",
+      "source": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/15b9269499d720be1920598ab68282eb8e99daf8/reports/full-answer-joint-20261030/attempt-history.json",
+        "sha256": "4eb726250909f4c3b9e3a251f2f536b188f30606b788ef7d6b57ca2f6ab16101",
+        "bytes": 4378
+      },
+      "receipt_sha256": "de3ffacb3cd0b70807f2629b76ebe9c8599b50f4ba78f68e26bb71e70b759304",
+      "source_manifest_sha256": "fbc7b00e85481268b34df06f067d7e32ba3fcfbb70f6ba1b39c803243a9a43d8",
+      "measurements": []
+    },
+    {
+      "id": "r2",
+      "kind": "pre-freeze-attempt",
+      "run": "continuous-b1-packed-r2",
+      "status": "failed",
+      "model_started": false,
+      "label_zh": "端口占用",
+      "label_en": "Port occupied",
+      "reason_zh": "端口绑定报EADDRINUSE，模型未启动，没有发出推理请求。",
+      "reason_en": "Port binding returned EADDRINUSE before model startup; no inference requests ran.",
+      "source": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/15b9269499d720be1920598ab68282eb8e99daf8/reports/full-answer-joint-20261030/attempt-history.json",
+        "sha256": "4eb726250909f4c3b9e3a251f2f536b188f30606b788ef7d6b57ca2f6ab16101",
+        "bytes": 4378
+      },
+      "receipt_sha256": "3cb9d6424afe61f5e92f27f4fa3c3f550a3251821fee10aa1f3722cdf2402435",
+      "source_manifest_sha256": "a3b1c9ebed1033afc1681f1e2f548f2c85ee086ee23e41cb8ebd6a0066dd581f",
+      "measurements": []
+    },
+    {
+      "id": "r3",
+      "kind": "pre-freeze-attempt",
+      "run": "continuous-b1-packed-r3",
+      "status": "failed",
+      "model_started": true,
+      "label_zh": "锁页分配失败",
+      "label_en": "Pinned allocation failed",
+      "reason_zh": "主机状态8GiB/rank；24条预热成功，正式16条成功、8条失败。rank1申请32MiB锁页内存报207001；16K及完整回答未执行。",
+      "reason_en": "Host state8GiB/rank:24 warmup successes,16 formal successes and8 failures. Rank1 failed a32MiB pinned allocation with207001;16K and full answers did not run.",
+      "source": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/15b9269499d720be1920598ab68282eb8e99daf8/reports/full-answer-joint-20261030/attempt-history.json",
+        "sha256": "4eb726250909f4c3b9e3a251f2f536b188f30606b788ef7d6b57ca2f6ab16101",
+        "bytes": 4378
+      },
+      "receipt_sha256": "d370b2a131c7f2dc86787d10f5397632909891be55d2d6536eb20d9213e04449",
+      "source_manifest_sha256": "181df30c7ae466acb92da25198222cf8e4f8877e8f0ef1f0debb5549ddfaf604",
+      "measurements": []
+    }
+  ]
+}
