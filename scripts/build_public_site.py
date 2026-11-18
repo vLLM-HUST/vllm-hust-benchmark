@@ -15,7 +15,7 @@ from urllib.parse import unquote, urlsplit
 from pathlib import Path
 
 PUBLIC_ENGINE_HISTORY_PATH = "data/engine-release-history-v1.json"
-PUBLIC_ENGINE_HISTORY_SHA256 = "86accdcc0cacf215c38aba334e10498660627c77fb3e2f48d0abec888a9821e0"  # pragma: allowlist secret -- fixed public release catalog
+PUBLIC_ENGINE_HISTORY_SHA256 = "e91f71ccfbdd3e9ff7869d61cf2021837fe495090bc423a16bdb62b38069f56f"  # pragma: allowlist secret -- fixed public release catalog
 
 
 PROJECT = re.compile(

@@ -33,3 +33,9 @@ research records retain their existing filters.
 All primary version comparisons use the fixed B0 vLLM0.18 / Ascend0.18 / CANN8.5.1 identity, image
 and SDK source-map hash. Each observation keeps its original measurement values, warmup protocol and
 seal. A B1 release is never used as the primary denominator.
+
+## r8 上下文与四租户补充
+
+`r8.context_tenant_supplement` 保存本轮 original018 / 冻结 r8 的真实4K、16K、32K和四租户配对、全部窗口与租户分布；原五项 `measurements` 字节内容保持原来源。输入为五份完整公开 SWE / Terminal 历史、C8/四租户C24、out256，正式提交300秒后排空；它不替代完整回答预算，也不产生有效算力效率。
+
+[报告与原件](../reports/r8-context-tenant-20261119/README.md)和 `data/r8-context-tenant-20261119/` 是新增来源。网站消费更新后的固定 benchmark 提交及目录摘要，所有版本继续保留缺项、固定五项与相同补测位置。

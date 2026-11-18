@@ -3,6 +3,10 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## r8 上下文与四租户补齐（2026-11-18 UTC）
+
+[冻结 r8 / original018 配对补测](reports/r8-context-tenant-20261119/README.md)：真实公开历史的4K、16K、32K及四租户正式阶段全部完成，保留五窗口、租户分布、原始流与完整封存摘要；原五项不重跑。有效算力参考单独认证，不把本专项采样利用率当作效率。
+
 ## Request Throttling Controller 第八版对照（2026-11-18）
 
 [多轮缓存竞争与四项固定负载](reports/controller-r8-20261118/README.md)：完整保留正收益、退化、输出量和原评分；多轮新输入为合成token-ID并继承真实输出，不是完整Agent解决率。Humanity’s
