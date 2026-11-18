@@ -26,3 +26,16 @@ data hash.
 The initial bootstrap is an exact archival import of public website data. Until its benchmark commit
 is published, the manifest explicitly says `local-unpublished` and must not be presented as deployed
 evidence.
+
+## Public metadata automation
+
+Public GitHub/PyPI facts are refreshed by benchmark's `refresh-public-site-status.yml`. It preserves
+curated acceptance evidence and proposes a benchmark data PR with regenerated navigation. The writer
+uses the existing dataset credential so PR checks run; it never pushes main or automatically
+approves runtime compatibility. Review and merge the source PR, then update the website publication
+lock.
+
+Website's version workflow renders only README from that reviewed lock and proposes a documentation
+PR. It cannot commit website data. Benchmark snapshot previews are data-only artifacts under
+`output/leaderboard-preview/`; they do not contain frozen leadership pins or form a deployable
+website. Explicit frozen-target migrations retain the full target-object guard.
