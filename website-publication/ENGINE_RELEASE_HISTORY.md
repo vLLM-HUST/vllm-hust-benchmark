@@ -15,7 +15,11 @@ verify its publication hash before display.
 - r7: compare against the sealed fixed B0 C8 observations from the r6 report. The B0 seal and reuse
   identity are explicit. The original r6-to-r7 development comparison remains separately under
   `development_measurements`, with quality and tail values retained.
-- r8: the existing new B0/r8 report remains the current source and renderer.
+- r8: all five fixed performance pairs completed on 2026-11-18, with 672 requests per arm and zero
+  failures. The catalog includes the scalar observations from
+  [the audited r8 report](../reports/r8-fixed-five-20261118/README.md); existing 4K/16K continuous
+  observations remain additional rows. Same-model grading and unresolved cases are disclosed
+  separately; performance completeness does not assert complete project acceptance.
 
 Source URLs use fixed commits; SHA256 and byte lengths identify the original records. Engine source
 links require repository access. This projection contains no prompts, gold labels or full model

@@ -1,0 +1,180 @@
+{
+  "schema": "controller-experiment-progress/v1",
+  "updated": "2026-11-18",
+  "model": "Qwen3.5-35B-A3B",
+  "platform": "9450 / ascend87 / 2 × Ascend 910B2",
+  "engine_release": "full-answer-b1-20261113-r6",
+  "max_num_seqs": 24,
+  "state_resident_seats": 80,
+  "report_path": "reports/controller-resident80-9450-20261118/README.md",
+  "result": {
+    "completed_pair": true,
+    "direct": {
+      "tasks": 112,
+      "completed_tasks": 112,
+      "unfinished_tasks": 0,
+      "successful_requests": 336,
+      "failed_requests": 0,
+      "elapsed_seconds": 338.5452,
+      "input_tokens": 5992408,
+      "cached_input_percent": 35.20419504145913,
+      "zero_hit_continuations": 106,
+      "output_tokens": 43516,
+      "cached_input_tokens": 2109579,
+      "first_round_cached_input_tokens": 0,
+      "task_latency_seconds": {
+        "mean": 263.5096,
+        "p50": 274.2991,
+        "p90": 323.5998,
+        "p99": 333.2862,
+        "maximum": 338.5452
+      },
+      "request_latency_seconds": {
+        "mean": 85.194,
+        "p50": 70.3782,
+        "p90": 167.624,
+        "p99": 296.2031,
+        "maximum": 321.5779
+      },
+      "controller_admission_seconds": {},
+      "derived_uncached_input_tokens": 3882829,
+      "peak_cache_fraction_while_running": 0.9983277591973244,
+      "samples_in_motion": 324
+    },
+    "request_throttling_controller": {
+      "tasks": 112,
+      "completed_tasks": 112,
+      "unfinished_tasks": 0,
+      "successful_requests": 336,
+      "failed_requests": 0,
+      "elapsed_seconds": 236.7936,
+      "input_tokens": 5992408,
+      "cached_input_percent": 60.248234098879784,
+      "zero_hit_continuations": 21,
+      "output_tokens": 43516,
+      "cached_input_tokens": 3610320,
+      "first_round_cached_input_tokens": 0,
+      "task_latency_seconds": {
+        "mean": 174.0095,
+        "p50": 189.0868,
+        "p90": 222.2436,
+        "p99": 230.6464,
+        "maximum": 236.7936
+      },
+      "request_latency_seconds": {
+        "mean": 55.3841,
+        "p50": 37.4045,
+        "p90": 147.5586,
+        "p99": 209.2799,
+        "maximum": 211.9931
+      },
+      "controller_admission_seconds": {},
+      "derived_uncached_input_tokens": 2382088,
+      "peak_cache_fraction_while_running": 0.9983277591973244,
+      "samples_in_motion": 222
+    },
+    "matched_prompt_token_hashes": 170,
+    "seconds_saved": 101.75160000000002,
+    "time_reduction_percent": 30.055543543373236,
+    "runtime_command_match": {
+      "runtime_match": true,
+      "engine_arguments_match": true,
+      "normalized_command_sha256": "4a596d1589e9de250b6f8615b2f4eaa46c34983993b79d1a9213cb5f5792e594",
+      "vllm": "0.28.1.post1.dev143+gf18cf803c",
+      "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+      "cann": "/usr/local/Ascend/cann-9.1.0",
+      "plugins": "ascend,ascend_model,ascend_model_loader,ascend_kv_connector,hust_m01_correction,hust_joint_packed,ie_ascend_kv_copy"
+    },
+    "controller_drained": true,
+    "cache_hit_percentage_point_increase": 25.044039057420655
+  },
+  "workload_sha256": "78e29e2a60ca71f9e87808cdea6277a4d353a6996e034398ea84267c377672a9",
+  "repetitions_per_arm": 1,
+  "task_quality_evaluated": false,
+  "profiles": [
+    {
+      "id": "swe-smith",
+      "label_zh": "SWE-smith 三轮回放",
+      "label_en": "SWE-smith three-turn replay",
+      "engine_comparison": "historical_b1_replay",
+      "controller_comparison": "complete"
+    },
+    {
+      "id": "mmlu",
+      "label_zh": "MMLU-Pro 200 题",
+      "label_en": "MMLU-Pro 200",
+      "engine_comparison": "published",
+      "controller_comparison": "pending"
+    },
+    {
+      "id": "hle",
+      "label_zh": "Humanity’s Last Exam 200 题",
+      "label_en": "Humanity’s Last Exam 200",
+      "engine_comparison": "published",
+      "controller_comparison": "pending"
+    },
+    {
+      "id": "frontier",
+      "label_zh": "FrontierScience 160 题",
+      "label_en": "FrontierScience 160",
+      "engine_comparison": "published",
+      "controller_comparison": "pending"
+    },
+    {
+      "id": "swe-trace",
+      "label_zh": "SWE trace（官网 64 请求）",
+      "label_en": "SWE trace (64 website requests)",
+      "engine_comparison": "published",
+      "controller_comparison": "pending"
+    },
+    {
+      "id": "terminal",
+      "label_zh": "Terminal-Bench 轨迹回放",
+      "label_en": "Terminal-Bench trace replay",
+      "engine_comparison": "published",
+      "controller_comparison": "pending"
+    }
+  ],
+  "changelog": [
+    {
+      "date": "2026-11-18",
+      "zh": "9450 完成驻留数 80 的直连 B1 / B1 加原版 ThunderAgent 对照，112 个三轮任务全部完成。",
+      "en": "Completed the 9450 comparison at 80 resident states; all 112 three-turn tasks completed in both arms."
+    },
+    {
+      "date": "2026-11-18",
+      "zh": "继续补跑官网五项输入：MMLU-Pro 200、Humanity’s Last Exam 200、FrontierScience 160、SWE trace 64、Terminal-Bench trace 48。输入已冻结并传入9450客户端；两卡工作区因CPU配额不足排队，尚未提交请求。",
+      "en": "Prepared all five frozen website inputs. The 9450 two-card workspace is waiting for CPU capacity; no new model requests have been submitted."
+    },
+    {
+      "date": "2026-11-17",
+      "zh": "128个最多十轮任务的完整对照：直连393.30秒，限流396.72秒；缓存命中11.97%降至10.86%。保留负结果，第二次配对按用户要求取消。",
+      "en": "The 128-task, up-to-ten-turn comparison took 393.30 s directly and 396.72 s with throttling; cache hits fell from 11.97% to 10.86%. The second pair was cancelled at the user’s request."
+    },
+    {
+      "date": "2026-11-17",
+      "zh": "144个三轮任务对照：596.54秒降至564.87秒，缩短5.31%；缓存命中5.11%升至10.25%。不能与驻留数80的新配对合并统计。",
+      "en": "The 144-task three-turn comparison improved from 596.54 to 564.87 s (5.31%), with cache hits rising from 5.11% to 10.25%. It is a separate configuration from the 80-state pair."
+    },
+    {
+      "date": "2026-11-17",
+      "zh": "驻留数显式设为 80，执行上限固定 24；两组共同启用跨轮缓存。",
+      "en": "Set resident states explicitly to 80 and execution limit to 24, with cross-turn caching in both arms."
+    },
+    {
+      "date": "2026-11-17",
+      "zh": "单参数诊断中，省略驻留数后回退到 28；续轮命中率下降，保留诊断结果。",
+      "en": "Single-parameter diagnosis found that omission falls back to 28 resident states and reduces continuation hits."
+    },
+    {
+      "date": "2026-11-17",
+      "zh": "9443 设备占用冲突阻塞启动，随后转到 9450；下载故障恢复后完成运行。",
+      "en": "9443 device ownership conflicts blocked startup; the experiment moved to 9450 and completed after download recovery."
+    },
+    {
+      "date": "2026-11-04",
+      "zh": "保留历史四组回放、负结果和未解决的数值诊断，见原报告。",
+      "en": "Retain the historical four-arm replay, negative result and unresolved numerical diagnosis in the original report."
+    }
+  ]
+}

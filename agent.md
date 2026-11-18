@@ -1,5 +1,9 @@
 # Agent Operating Constraints
 
+Read [AGENTS.md](AGENTS.md) and the shared [release/evaluation/website workflow](AGENT_WORKFLOW.md)
+with this file. The workflow unifies Engine, benchmark and website responsibilities; this file
+retains the official leaderboard, hardware and data-integrity boundaries below.
+
 ## Data navigation
 
 Before reading, adding, or editing data, use [DATA_INDEX.md](DATA_INDEX.md) and the generated
@@ -14,8 +18,10 @@ not prove that remote inventory or deployment is still current.
 
 This repository is the source of truth for vllm-hust benchmark specs, raw submissions, leaderboard
 snapshots, and CI performance-gate inputs. Agents must preserve the distinction between public
-benchmark data and private/CI smoke tests. When in doubt, stop and ask for clarification instead of
-making a compatibility shortcut.
+benchmark data and private/CI smoke tests. Resolve routine choices from the current frozen contracts
+and the user's confirmed instructions. Ask a specific question only when missing information blocks
+the next necessary action, and continue independent authorized work. Never invent evidence or use a
+compatibility shortcut to hide a failed contract.
 
 ## Hardware Truth
 
@@ -45,8 +51,11 @@ making a compatibility shortcut.
 
 ## Benchmark Data Integrity
 
-- Do not fabricate, replay, simulate, or manually edit benchmark metrics to make leaderboard lines
-  look better. Submissions must come from real runs.
+- Do not fabricate metrics, publish simulated/reused timings as a new hardware run, or manually
+  improve leaderboard values. Submissions must come from real runs. CPU reconstruction from sealed
+  original streams is an audit, not a new measurement. Frozen public SWE/Terminal trace requests may
+  be submitted to a real engine under the trace inference contract; this does not measure full agent
+  task success. Preserve the original streams, planned denominator and each run identity.
 - Do not use `--enforce-eager` for formal leaderboard data, official baselines, historical PR
   backfills, or website-facing snapshots. Do not enable eager mode through wrapper flags,
   environment variables, empty same-spec fields, retry fallbacks, or generated argument lists. If
@@ -82,3 +91,17 @@ making a compatibility shortcut.
   intended path.
 - If you change a hardware label or precision, update documentation explaining why the new value is
   verified and where the evidence came from.
+
+## Release evaluation and publication
+
+Follow [AGENT_WORKFLOW.md](AGENT_WORKFLOW.md) for the fixed five-profile full test, MMLU200 quick
+test, explicit sealed-stage reuse, qualified reference denominator, release/MOD identity and
+publication acceptance. Project B0/B1 evaluation has its own confirmed model/precision scope; it is
+not automatically an official leaderboard submission. Do not apply the official FP16 leaderboard
+restriction above to relabel an already confirmed BF16/35B project experiment.
+
+All website versions retain the same profile and metric sections, including failures and missing
+data. Publish source data here, then update fixed-source consumers and verify the canonical site.
+Keep package metadata sync, release catalog updates, measurement publication and website deployment
+distinct. A catalog entry, a successful CI run or a deployed page is not evidence that inference or
+all four acceptance goals completed. Preserve raw failures and version corrections separately.
