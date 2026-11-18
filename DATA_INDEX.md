@@ -5,6 +5,8 @@
 
 ## KV-tiering 完整 SWE 历史回放补证（2026-11-17）
 
+[2026-11-18 SWE前8轮压力诊断](reports/tech-outcomes-20261117/kv-tiering/diagnostics/swe-pressure-8turn-20261118/README.md)：新增一次1016请求/组、固定输出的Native/MOD配对，公开2032条数值及CPU复算；全流程吞吐+17.63%，同时保留TPOT回退、FS配额耗尽与后台错误。与正式五项和此前两层全量实验分开，不作为榜单或质量验收。
+
 [分项报告](https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/fbf4a916fb17e3923ed51a31a9318bcaecdfa6db/reports/tech-outcomes-20261117/kv-tiering/README.md)：完整历史实验的离线
 复核，区分两层性能和三层机制，保留零/负结果。公开9臂/9885条请求的数值与离线复算入口，完整原件以保管人和受控位置索引关联；当前为草稿，不进入官方榜单或任务质量验收。
 

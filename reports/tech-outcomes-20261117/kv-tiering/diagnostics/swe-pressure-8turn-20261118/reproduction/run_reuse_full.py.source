@@ -1,0 +1,206 @@
+"""Full five-dataset reuse comparison, no skips, Native versus CPU+FS tiering."""
+import concurrent.futures
+import hashlib
+import json
+import os
+from pathlib import Path
+import time
+import subprocess
+import threading
+import traceback
+
+import run_pair as engine
+
+ROOT = Path(__file__).resolve().parent
+RUN = ROOT / os.environ.get('KV_REUSE_RUN_NAME', 'reuse-five-03')
+PROFILES = [('mmlu', 200, 200), ('hle', 200, 16), ('frontier', 160, 16),
+            ('swe', 64, 8), ('terminal', 48, 8)]
+
+
+def load_tasks(dataset):
+    name = {'hle': 'hle-tasks', 'frontier': 'frontier-tasks'}.get(dataset, dataset)
+    return engine.read(ROOT / 'prepared' / (name + '.json'))
+
+
+def request(dataset, task):
+    body = dict(engine.body_for(dataset, task), model=engine.MODEL, stream=True,
+                stream_options={'include_usage': True},
+                cache_salt='kv-tiering-reuse-five-full-v1:' + dataset)
+    assert not body.get('ignore_eos', False)
+    return body
+
+
+def counter_rows(raw):
+    """Keep labels; do not sum different transfer kinds or subtract gauges."""
+    result = {}
+    for line in raw.splitlines():
+        if not line or line.startswith('#'):
+            continue
+        identity, value = line.rsplit(None, 1)
+        name = identity.split('{', 1)[0]
+        if name.endswith(('_total', '_sum', '_count')) and any(
+                token in name for token in ('prefix_cache', 'kv_offload', 'prefill_kv_computed',
+                                            'num_preemptions', 'prompt_tokens_by_source', 'kv_tiering', 'secondary', 'hust_fs')):
+            result[identity] = float(value)
+    return result
+
+
+def counter_evidence(before, after):
+    left, right = counter_rows(before), counter_rows(after)
+    return {key: {'before': left.get(key), 'after': value,
+                  'delta': value - left[key] if key in left else None,
+                  'baseline_known': key in left}
+            for key, value in right.items()}
+
+
+def batch(arm, dataset, phase, tasks, concurrency):
+    out = RUN / arm / dataset / phase
+    out.mkdir(parents=True, exist_ok=False)
+    before = engine.snapshot(engine.BASE, out, 'before')
+    engine.state(arm + '-' + dataset + '-' + phase, planned=len(tasks),
+                 scope='reuse-enabled diagnostic; not zero-reuse standard')
+
+    def one(task):
+        body = request(dataset, task)
+        timeout = 6600 if dataset == 'mmlu' else 1800 if dataset in ('hle', 'frontier') else 600
+        row = engine.call({'base_url': engine.BASE, 'timeout': timeout}, body, out / 'sse', require_zero_reuse=False)
+        row.update(case_id=task['case_id'], dataset=dataset, phase=phase,
+                   input_identity=engine.digest(task))
+        engine.save(out / 'requests' / (task['case_id'] + '.json'), row)
+        print(arm, dataset, phase, task['case_id'], row['status'], flush=True)
+        return row
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=concurrency) as pool:
+        rows = list(pool.map(one, tasks))
+    after = engine.snapshot(engine.BASE, out, 'after')
+    summary = engine.summarize([task['case_id'] for task in tasks], rows)
+    summary.pop('zero_cache_admission', None)
+    summary.update(profile='kv-tiering-five-reuse-cpu-fs-full-v1', phase=phase,
+                   cache_policy='Stable namespace per dataset, identical across arms and passes; APC enabled in both arms',
+                   counters=counter_evidence(before, after))
+    engine.save(out / 'summary.json', summary)
+    if dataset == 'mmlu':
+        outcomes = []
+        for task, row in zip(tasks, rows):
+            answer = engine.extract_answer(row.get('content', '')) if row['status'] == 'ok' else None
+            outcomes.append({'case_id': task['case_id'], 'category': task['category'],
+                             'prediction': answer, 'correct': bool(answer and answer == task['answer'] and
+                                                                  answer in 'ABCDEFGHIJ'[:task['option_count']])})
+        engine.save(out / 'quality.json', {'planned': len(tasks),
+                    'correct': sum(row['correct'] for row in outcomes), 'outcomes': outcomes})
+    return rows, summary
+
+
+def combine(arm, dataset, rounds, wall):
+    rows = []
+    for phase, records in rounds:
+        for record in records:
+            rows.append(dict(record, case_id=phase + ':' + record['case_id']))
+    summary = engine.summarize([row['case_id'] for row in rows], rows)
+    summary.pop('zero_cache_admission', None)
+    summary.update(profile='kv-tiering-five-reuse-cpu-fs-full-v1',
+                   cold_and_revisit_included=True, full_workflow_wall_seconds=wall,
+                   full_workflow_output_tokens_per_second=summary['accepted_output_tokens'] / wall,
+                   score_scope='MMLU original scorer available per round; HLE/Frontier judge paused; trace solve rate not measured')
+    engine.save(RUN / arm / dataset / 'combined-summary.json', summary)
+
+
+def compare():
+    report = {'profile': 'kv-tiering-five-reuse-cpu-fs-full-v1', 'datasets': {},
+              'limits': ['One paired campaign, not repeated confirmation.',
+                         'Same frozen requests repeated once; not a new live-agent conversation.',
+                         'Stable salts permit reuse but do not guarantee CPU restores or speedup.',
+                         'HLE/Frontier answer quality is ungraded; prior standard grading paused by user.']}
+    for dataset, count, _ in PROFILES:
+        sections = {}
+        for phase in ('cold', 'revisit', 'combined'):
+            suffix = 'combined-summary.json' if phase == 'combined' else phase + '/summary.json'
+            summaries = {arm: engine.read(RUN / arm / dataset / suffix) for arm in ('B0', 'B1')}
+            changes = {}
+            for metric in ('output_tokens_per_second', 'ttft_seconds', 'tpot_seconds'):
+                values = [summaries[arm][metric] for arm in ('B0', 'B1')]
+                if isinstance(values[0], dict):
+                    values = [value['mean'] for value in values]
+                changes[metric] = ((values[1] / values[0] - 1) if metric == 'output_tokens_per_second'
+                                    else (1 - values[1] / values[0])) if all(v is not None for v in values) and values[0] > 0 else None
+            if phase == 'combined':
+                a, b = [summaries[arm]['full_workflow_output_tokens_per_second'] for arm in ('B0', 'B1')]
+                changes['full_workflow_throughput_change'] = b / a - 1 if a > 0 else None
+            sections[phase] = {'arms': summaries, 'relative_changes': changes}
+        report['datasets'][dataset] = sections
+    engine.save(RUN / 'comparison.json', report)
+
+
+def main():
+    engine.RUN = RUN
+    RUN.mkdir(exist_ok=False)
+    (RUN / 'controller.pid').write_text(str(os.getpid()) + '\n')
+    engine.state('freezing-reuse-plan')
+    try:
+        cfg = engine.read(engine.PLUGIN / 'examples/swe-prefix-replay.json')
+        extra = cfg['kv_connector_extra_config']
+        tier = engine.read(engine.PLUGIN / 'examples/pressure-tiering.json')['kv_connector_extra_config']['secondary_tiers']
+        tier[0]['root_dir'] = str(RUN / 'B1/fs-cache')
+        extra['secondary_tiers'] = tier
+        assert extra['cpu_bytes_to_use'] == 14 * 1024**3
+        assert extra['lifecycle_cpu_demote_after_sec'] == extra['lifecycle_idle_ttl_sec'] == 0
+        available = os.statvfs(RUN).f_bavail * os.statvfs(RUN).f_frsize
+        assert available >= 80 * 1024**3
+        media = subprocess.check_output(['df', '-T', str(RUN)], text=True)
+        assert 'tmpfs' not in media
+        (RUN / 'filesystem-medium.txt').write_text(media)
+        engine.save(RUN / 'cpu-fs-config.json', cfg)
+        prepared = {}
+        for dataset, count, concurrency in PROFILES:
+            tasks = load_tasks(dataset)
+            assert len(tasks) == count and len({task['case_id'] for task in tasks}) == count
+            bodies = [request(dataset, task) for task in tasks]
+            expected_budget = {'mmlu': 8192, 'hle': 16384, 'frontier': 16384, 'swe': 2048, 'terminal': 2048}[dataset]
+            assert all(body.get('max_tokens', body.get('max_completion_tokens')) == expected_budget for body in bodies)
+            prepared[dataset] = {'tasks': count, 'concurrency': concurrency,
+                                 'input_identity': engine.digest(tasks), 'request_identity': engine.digest(bodies)}
+        engine.save(RUN / 'plan.json', {
+            'profile': 'kv-tiering-five-reuse-cpu-fs-full-v1', 'scope': list(prepared), 'inputs': prepared,
+            'purpose': 'Compare Native APC and Native APC + KV tiering with reuse allowed',
+            'public_parameters': 'Exactly the prior run-04 Native service configuration; graph mode, BF16 TP2, .92 automatic HBM, maxlen65536, maxseq24, batched4096; no MTP',
+            'only_arm_parameter_difference': 'B1 adds original swe-prefix-replay policy plus CPU14GiB and hust_fs64GiB, independent directory, CRC32, CPU pressure90/70%; age spill and TTL disabled',
+            'skip_policy': 'No dataset skips; all full budgets and both passes must be attempted; hardware/service failures retained',
+            'supersedes': 'reuse-five-01/02 early-stop campaigns; no partial results reused',
+            'rounds': ['cold', 'revisit'], 'round_barrier': 'Drain entire dataset before its revisit; then move to next dataset',
+            'planned_requests_per_arm': 1344, 'planned_requests_total': 2688,
+            'cache_salt': 'kv-tiering-reuse-five-full-v1:<dataset>, stable across tasks/passes and identical across arms',
+            'service_lifetime': 'Fresh isolated service/cache per arm; no cross-dataset namespace reuse; read-only weights/OS page cache shared',
+            'arrival': 'Same original order and max client concurrency per dataset; asynchronous HTTP arrival is not bitwise scheduling control',
+            'EOS': 'preserved in all solver requests', 'no_retries': True,
+            'qualification': 'Prior same-machine C8 kept separately; /tokenize rechecked per fresh arm',
+            'quality': 'MMLU original scorer per round; HLE/Frontier grading paused, no automatic judge in this performance campaign',
+            'original_standard_campaign': 'run-04 retained; grading explicitly paused by user',
+            'source_sha256': {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+                              for path in [Path(__file__), ROOT / 'run_pair.py']}})
+        with engine.Sampler(RUN):
+            for arm in ('B0', 'B1'):
+                try:
+                    engine.start(arm, kv_config_path=RUN / 'cpu-fs-config.json' if arm == 'B1' else None)
+                    engine.qualify(arm)
+                    for dataset, _, concurrency in PROFILES:
+                        tasks = load_tasks(dataset)
+                        begin = time.monotonic()
+                        rounds = []
+                        for phase in ('cold', 'revisit'):
+                            rows, _ = batch(arm, dataset, phase, tasks, concurrency)
+                            rounds.append((phase, rows))
+                        combine(arm, dataset, rounds, time.monotonic() - begin)
+                finally:
+                    engine.stop()
+        compare()
+        engine.state('performance-finished-quality-grading-paused-report-pending')
+        return 0
+    except BaseException as error:
+        engine.state('failed', error=repr(error))
+        traceback.print_exc()
+        engine.stop()
+        return 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
