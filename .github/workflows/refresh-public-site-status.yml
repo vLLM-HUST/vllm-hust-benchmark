@@ -46,13 +46,13 @@ jobs:
           retention-days: 7
       - name: Check publication writer credential
         env:
-          WRITER_TOKEN: ${{ secrets.DATASET_WRITE_TOKEN || secrets.ORG_DISPATCH_TOKEN }}
+          WRITER_TOKEN: ${{ secrets.ORG_DISPATCH_TOKEN }}
         run: |
           test -n "$WRITER_TOKEN" || { echo 'Configure the existing dataset writer credential before publishing metadata PRs.'; exit 1; }
       - name: Open or update the benchmark data PR
         uses: peter-evans/create-pull-request@v8
         with:
-          token: ${{ secrets.DATASET_WRITE_TOKEN || secrets.ORG_DISPATCH_TOKEN }}
+          token: ${{ secrets.ORG_DISPATCH_TOKEN }}
           branch: automation/public-site-metadata
           base: main
           add-paths: |
