@@ -1,0 +1,70 @@
+name: Refresh public website metadata
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 2 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-site-metadata-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Refresh canonical public metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/refresh_public_site_status.py --refresh
+      - name: Validate refresh behavior
+        run: |
+          python -m pip install pytest
+          python -m pytest tests/test_refresh_public_site_status.py -q
+      - name: Regenerate affected navigation
+        run: |
+          git add website-publication/data/issues.json website-publication/data/version_meta.json
+          python scripts/refresh_data_navigation.py --write
+      - name: Retain reviewed candidate files
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-site-metadata-candidate
+          path: |
+            website-publication/data/issues.json
+            website-publication/data/version_meta.json
+          retention-days: 7
+      - name: Check publication writer credential
+        env:
+          WRITER_TOKEN: ${{ secrets.DATASET_WRITE_TOKEN || secrets.ORG_DISPATCH_TOKEN }}
+        run: |
+          test -n "$WRITER_TOKEN" || { echo 'Configure the existing dataset writer credential before publishing metadata PRs.'; exit 1; }
+      - name: Open or update the benchmark data PR
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.DATASET_WRITE_TOKEN || secrets.ORG_DISPATCH_TOKEN }}
+          branch: automation/public-site-metadata
+          base: main
+          add-paths: |
+            website-publication/data/issues.json
+            website-publication/data/version_meta.json
+            website-publication/data/benchmark-evidence-links.json
+            docs/data-index.json
+            docs/data-entrypoints.json
+          commit-message: 'data: refresh public GitHub and package metadata'
+          title: 'data: refresh public GitHub and package metadata'
+          body: |
+            Refresh public GitHub/PyPI facts while preserving curated acceptance evidence.
+            Snapshot refresh tests and navigation regeneration have passed.
+            Review and merge this data PR, then advance the website publication lock.
+            A repository snapshot or registry release does not approve a production runtime.
