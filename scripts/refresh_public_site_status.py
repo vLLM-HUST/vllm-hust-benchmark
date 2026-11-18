@@ -7,6 +7,8 @@ import argparse
 import copy
 import json
 import os
+import time
+from urllib.error import HTTPError, URLError
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
@@ -28,8 +30,19 @@ def read_json(url: str) -> dict:
     token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
     if token and url.startswith("https://api.github.com/"):
         headers["Authorization"] = f"Bearer {token}"
-    with urlopen(Request(url, headers=headers), timeout=20) as response:
-        result = json.load(response)
+    for attempt in range(4):
+        try:
+            with urlopen(Request(url, headers=headers), timeout=20) as response:
+                result = json.load(response)
+            break
+        except HTTPError as error:
+            if error.code not in {429, 500, 502, 503, 504} or attempt == 3:
+                raise
+            time.sleep(2**attempt)
+        except (URLError, TimeoutError):
+            if attempt == 3:
+                raise
+            time.sleep(2**attempt)
     if not isinstance(result, dict):
         raise ValueError("Expected an object from the public metadata endpoint")
     return result

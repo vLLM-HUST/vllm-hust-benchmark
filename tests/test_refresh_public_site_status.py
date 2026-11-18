@@ -39,7 +39,9 @@ def issue_reader(url):
 
 
 def test_refresh_preserves_original_acceptance_and_does_not_mutate_input():
-    old = json.loads((ROOT / "website-publication/data/issues.json").read_text())
+    old = json.loads(
+        (ROOT / "website-publication/data/issues.json").read_text(encoding="utf-8")
+    )
     before = copy.deepcopy(old)
     new = MODULE.refresh_issues(old, issue_reader, NOW)
     assert old == before
@@ -54,7 +56,9 @@ def test_refresh_preserves_original_acceptance_and_does_not_mutate_input():
 
 
 def test_failure_does_not_replace_known_data():
-    old = json.loads((ROOT / "website-publication/data/issues.json").read_text())
+    old = json.loads(
+        (ROOT / "website-publication/data/issues.json").read_text(encoding="utf-8")
+    )
     before = copy.deepcopy(old)
 
     def unavailable(url):
@@ -123,3 +127,36 @@ def test_noncanonical_repository_fails_closed(field, value):
 )
 def test_freshness(timestamp, stale):
     assert MODULE.is_stale(timestamp, NOW) is stale
+
+
+def test_json_reader_retries_transport_errors(monkeypatch):
+    import io
+    from urllib.error import URLError
+
+    calls = []
+
+    def request(*args, **kwargs):
+        calls.append(1)
+        if len(calls) < 3:
+            raise URLError("transient transport failure")
+        return io.StringIO('{"verified": true}')
+
+    monkeypatch.setattr(MODULE, "urlopen", request)
+    monkeypatch.setattr(MODULE.time, "sleep", lambda seconds: None)
+    assert MODULE.read_json("https://pypi.org/pypi/example/json") == {"verified": True}
+    assert len(calls) == 3
+
+
+def test_json_reader_does_not_retry_missing_records(monkeypatch):
+    from urllib.error import HTTPError
+
+    calls = []
+
+    def request(*args, **kwargs):
+        calls.append(1)
+        raise HTTPError("https://example.org", 404, "missing", {}, None)
+
+    monkeypatch.setattr(MODULE, "urlopen", request)
+    with pytest.raises(HTTPError):
+        MODULE.read_json("https://example.org")
+    assert len(calls) == 1
