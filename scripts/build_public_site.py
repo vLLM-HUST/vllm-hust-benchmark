@@ -14,6 +14,10 @@ import zipfile
 from urllib.parse import unquote, urlsplit
 from pathlib import Path
 
+PUBLIC_ENGINE_HISTORY_PATH = "data/engine-release-history-v1.json"
+PUBLIC_ENGINE_HISTORY_SHA256 = "86accdcc0cacf215c38aba334e10498660627c77fb3e2f48d0abec888a9821e0"  # pragma: allowlist secret -- fixed public release catalog
+
+
 PROJECT = re.compile(
     r"betterscale|traceloom|gennova|latchmoe|tricard|"
     r"prefix-cache-routing-reliability|prefix[ _-]routing|pr173-dev4|"
@@ -909,6 +913,11 @@ def build(source, destination, policy_revision):
             continue
         if suffix == ".json" and name != "data/benchmark-source-manifest.json":
             data = json.loads(raw)
+            if name == PUBLIC_ENGINE_HISTORY_PATH:
+                if hashlib.sha256(raw).hexdigest() != PUBLIC_ENGINE_HISTORY_SHA256:
+                    raise ValueError("Unreviewed engine release history bytes")
+                documents[name] = (data, copy.deepcopy(data), raw)
+                continue
             projected = project_json(
                 data,
                 removed_ids,
@@ -928,10 +937,14 @@ def build(source, destination, policy_revision):
             changed.append(name)
     # Repeat with the full removed-id set so cross-file references cannot expose orphan records.
     for name, (original, _, raw) in documents.items():
-        projected = project_json(
-            original,
-            removed_ids,
-            retained_runs=PUBLIC_C16_RUN_IDS if name == C16_EVIDENCE_PATH else (),
+        projected = (
+            copy.deepcopy(original)
+            if name == PUBLIC_ENGINE_HISTORY_PATH
+            else project_json(
+                original,
+                removed_ids,
+                retained_runs=PUBLIC_C16_RUN_IDS if name == C16_EVIDENCE_PATH else (),
+            )
         )
         prune_frontier(projected, removed_ids)
         prune_removed_artifact_links(projected, set(removed))
@@ -1005,6 +1018,12 @@ def validate(destination):
             continue
         data = json.loads(path.read_text())
         name = path.relative_to(destination).as_posix()
+        if name == PUBLIC_ENGINE_HISTORY_PATH:
+            assert (
+                hashlib.sha256(path.read_bytes()).hexdigest()
+                == PUBLIC_ENGINE_HISTORY_SHA256
+            ), path
+            continue
         validate_betterscale_card(name, data)
         validate_mod_previews(name, data)
         if name == C16_EVIDENCE_PATH:
