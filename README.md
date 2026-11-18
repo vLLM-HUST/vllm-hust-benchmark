@@ -22,6 +22,8 @@ V1：[从全新 CPU 工作区部署并运行一个真实 Agent](docs/SWE_BENCH_P
 
 Benchmark orchestration, workload data, immutable evidence and website publication sources.
 
+生信原生任务的代表模型执行、统计和复核入口见[生信 Benchmark 使用说明](docs/BIO_NATIVE_BENCHMARK.zh-CN.md)。
+
 GenNova 与 GenNova Autotune 的产品级独立测试结果统一维护在
 [GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)（私有仓库，需授权）。 历史
 MOD 证据入口见 [迁移记录](reports/gennova-mod-evidence-20261105/README.md)。
