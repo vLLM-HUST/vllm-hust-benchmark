@@ -465,19 +465,228 @@
         "state_gib_per_rank": 4,
         "kv_gib_per_rank": 20
       },
-      "measurements": [],
+      "measurements": [
+        {
+          "id": "mmlu",
+          "label": "MMLU200",
+          "control": "B0",
+          "candidate": "r8",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 506.23911514513577,
+              "mean_ttft_ms": 516926.28600326163,
+              "mean_tpot_ms": 40.32025335120394,
+              "output_tokens": 721900,
+              "duration_seconds": 1426.005969121994,
+              "requests": 200,
+              "failed": 0,
+              "correct": 139,
+              "truncated": 23,
+              "unparsed": 0,
+              "source_seal_sha256": "b879abd7204d5f719132000a54c87a066c11abf148fc0c056f7e33a7546d6659",
+              "unresolved": 0
+            },
+            {
+              "role": "r8",
+              "output_tokens_per_second": 1445.905611681983,
+              "mean_ttft_ms": 153215.83218120824,
+              "mean_tpot_ms": 21.437139275963567,
+              "output_tokens": 690468,
+              "duration_seconds": 477.5332458920311,
+              "requests": 200,
+              "failed": 0,
+              "correct": 147,
+              "truncated": 26,
+              "unparsed": 0,
+              "source_seal_sha256": "d4f70c9e9c116f04c2bc8ac68c7390c2027fc2aa4ec35a6581fe5973b23d115f",
+              "unresolved": 0
+            }
+          ]
+        },
+        {
+          "id": "hle",
+          "label": "HLE200",
+          "control": "B0",
+          "candidate": "r8",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 559.9211256940399,
+              "mean_ttft_ms": 572.1570441743825,
+              "mean_tpot_ms": 27.48568454179799,
+              "output_tokens": 2175297,
+              "duration_seconds": 3885.0061199310003,
+              "requests": 200,
+              "failed": 0,
+              "truncated": 122,
+              "source_seal_sha256": "252b06216894a9631a59649e781ca20862788ae07b583245944fdc4e75368079",
+              "correct": 57,
+              "unresolved": 1,
+              "judge_invalid": 1
+            },
+            {
+              "role": "r8",
+              "output_tokens_per_second": 1029.135823051449,
+              "mean_ttft_ms": 305.12776681163814,
+              "mean_tpot_ms": 15.465988965588618,
+              "output_tokens": 2214211,
+              "duration_seconds": 2151.5245610970305,
+              "requests": 200,
+              "failed": 0,
+              "truncated": 125,
+              "source_seal_sha256": "abd49c591642412900017bdc290ed1a07cf4b2b2f561fb8b95002edeed963643",
+              "correct": 52,
+              "unresolved": 1,
+              "judge_invalid": 1
+            }
+          ]
+        },
+        {
+          "id": "frontier",
+          "label": "Frontier160",
+          "control": "B0",
+          "candidate": "r8",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 388.5947175026914,
+              "mean_ttft_ms": 819.7433263350831,
+              "mean_tpot_ms": 38.92342869990322,
+              "output_tokens": 1178893,
+              "duration_seconds": 3033.7339827370015,
+              "requests": 160,
+              "failed": 0,
+              "truncated": 39,
+              "source_seal_sha256": "c5907da1ff3d4bd769acc6f432d99f0e43fe9bbdf8e71693320dedc410c4aaec",
+              "correct": 65,
+              "unresolved": 4,
+              "judge_invalid": 4
+            },
+            {
+              "role": "r8",
+              "output_tokens_per_second": 988.8199591668886,
+              "mean_ttft_ms": 293.9845828292164,
+              "mean_tpot_ms": 15.087085354904016,
+              "output_tokens": 1138891,
+              "duration_seconds": 1151.7678111590212,
+              "requests": 160,
+              "failed": 0,
+              "truncated": 36,
+              "source_seal_sha256": "3727707ea9462401e25606300aea5ae39ee7ebd0c4dd7f9d203994eb26fa1cd3",
+              "correct": 66,
+              "unresolved": 8,
+              "judge_invalid": 8
+            }
+          ]
+        },
+        {
+          "id": "swe",
+          "label": "SWE trace64",
+          "control": "B0",
+          "candidate": "r8",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 50.879628511381554,
+              "mean_ttft_ms": 3122.073883968369,
+              "mean_tpot_ms": 121.89023352741987,
+              "output_tokens": 8170,
+              "duration_seconds": 160.57507177302614,
+              "requests": 64,
+              "failed": 0,
+              "truncated": 2,
+              "ttft_p95_ms": 8620.084374787972,
+              "ttft_p99_ms": 10767.090871949325,
+              "tpot_p95_ms": 153.81091061745792,
+              "tpot_p99_ms": 162.3602032220813,
+              "source_seal_sha256": "8fc75c65e91244737b10514552cac0d3c971c9ca7f6b1dc8ed82ede548c8d9a7"
+            },
+            {
+              "role": "r8",
+              "output_tokens_per_second": 136.7040067203789,
+              "mean_ttft_ms": 1704.197388270586,
+              "mean_tpot_ms": 47.552687655058094,
+              "output_tokens": 8181,
+              "duration_seconds": 59.8446248670225,
+              "requests": 64,
+              "failed": 0,
+              "truncated": 2,
+              "ttft_p95_ms": 4113.197825374662,
+              "ttft_p99_ms": 5389.563230117201,
+              "tpot_p95_ms": 69.36026787367386,
+              "tpot_p99_ms": 83.80083002868783,
+              "source_seal_sha256": "5c6194a164c643589b467efac8b41d4873c069cef708ef76cb510ceeba46ed77"
+            }
+          ]
+        },
+        {
+          "id": "terminal",
+          "label": "Terminal trace48",
+          "control": "B0",
+          "candidate": "r8",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "output_tokens_per_second": 77.27129953272089,
+              "mean_ttft_ms": 3965.2407299230013,
+              "mean_tpot_ms": 81.76412729078463,
+              "output_tokens": 13530,
+              "duration_seconds": 175.097352857003,
+              "requests": 48,
+              "failed": 0,
+              "truncated": 3,
+              "ttft_p95_ms": 10064.780495350713,
+              "ttft_p99_ms": 13391.481095652563,
+              "tpot_p95_ms": 151.75672209032356,
+              "tpot_p99_ms": 159.0188959924054,
+              "source_seal_sha256": "f01b880eebe70b83dfe69daa739c85be3ebd855b3bd784731556268bec41bc47"
+            },
+            {
+              "role": "r8",
+              "output_tokens_per_second": 217.1330147920728,
+              "mean_ttft_ms": 1937.2756961711275,
+              "mean_tpot_ms": 34.61003701327142,
+              "output_tokens": 13813,
+              "duration_seconds": 63.61538347002352,
+              "requests": 48,
+              "failed": 0,
+              "truncated": 3,
+              "ttft_p95_ms": 5134.829776926198,
+              "ttft_p99_ms": 6339.094793086407,
+              "tpot_p95_ms": 67.14074778884728,
+              "tpot_p99_ms": 90.2093062432441,
+              "source_seal_sha256": "8680a2dfcfd7c6bf4b30922cee9e7f7088e9ae948780bfa84ca1412a95022aef"
+            }
+          ]
+        }
+      ],
       "sources": [
         {
           "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b1-r8-overlay.json",
           "sha256": "2e17d4edf6232850052abba5f921e536aaf21f7fb46e0292b0a668b2607c9746",
           "bytes": 3089
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/full-answer-b1-20261117-r8/r8-fixed-five-publication-v2.json",
+          "sha256": "c002426f6882a7733621e6ae784d4beeb007e8731c4f56d2ff401ec772279168",
+          "bytes": 11470
         }
       ],
-      "label_zh": "最新实测",
-      "label_en": "Latest measurements",
-      "scope_zh": "新B0/r8配对，按已发布场景展示。",
-      "scope_en": "New B0/r8 pairs, shown for published scenarios.",
-      "baseline_id": "original018-cann8.5.1"
+      "label_zh": "五项配对实测",
+      "label_en": "Five-profile measurements",
+      "scope_zh": "固定五项性能配对全部完成，每臂672请求、零失败；另有4K/16K连续负载。",
+      "scope_en": "All five performance pairs completed: 672 requests per arm, zero failures; additional 4K/16K continuous load.",
+      "baseline_id": "original018-cann8.5.1",
+      "method_zh": "固定MMLU200、HLE四层比例200、Frontier160、SWE32任务/64请求、Terminal32任务/48请求。两臂使用各自冻结预算和共同预热协议，预热及同模型辅助评分不计入正式性能。吞吐计入整批排空；TPOT按请求等权平均。连续负载另按C8/out256/300秒提交后排空。",
+      "method_en": "Fixed MMLU200, stratified HLE200, Frontier160, SWE32 tasks/64 requests and Terminal32 tasks/48 requests. Both arms retain the frozen answer budgets and common warmup protocol. Warmup and same-model grading are excluded from performance. Throughput includes cohort drain; TPOT is request-weighted. Continuous load separately uses C8/out256 and 300s submissions plus drain.",
+      "quality_note_zh": "HLE每臂各1题评分未解析，Frontier为4/8题；均保留在原计划分母。长度终止单列。SWE/Terminal仅测轨迹推理性能，不测Agent解决率。",
+      "quality_note_en": "One unresolved HLE grade per arm; Frontier has 4/8. All remain in the planned denominator. Length stops are separate. SWE/Terminal measure trace inference, not agent solve rates."
     }
   ],
   "metric_policy": "Each observation retains its own control, protocol and source. No historical metric is substituted for an unmeasured version. All durations include response drain; TPOT is request-weighted.",
