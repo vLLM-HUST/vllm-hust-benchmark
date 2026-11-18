@@ -144,7 +144,9 @@ def test_r8_fixed_five_measurements_survive_release_catalog_publication():
 def test_r8_context_tenant_supplement_keeps_own_seals_windows_and_budget():
     report_path = ROOT / "reports/r8-context-tenant-20261119/summary-public-v1.json"
     report = json.loads(report_path.read_text())
-    catalog = json.loads((ROOT / "website-publication/data/engine-release-history-v1.json").read_text())
+    catalog = json.loads(
+        (ROOT / "website-publication/data/engine-release-history-v1.json").read_text()
+    )
     entry = next(row for row in catalog["entries"] if row["id"] == "r8")
     assert entry["context_tenant_supplement"] == report
     assert report["engine_release"] == entry["release"]
@@ -153,14 +155,21 @@ def test_r8_context_tenant_supplement_keeps_own_seals_windows_and_budget():
     assert report["quality_measured"] is False
     assert report["efficiency_percent"] is None
     assert [row["phase"] for row in report["comparisons"]] == [
-        "4096-formal", "16384-formal", "32768-formal", "multi-tenant-formal"
+        "4096-formal",
+        "16384-formal",
+        "32768-formal",
+        "multi-tenant-formal",
     ]
     assert report["protocol"]["output_tokens"] == 256
     for row in report["comparisons"]:
         for role in ("B0", "B1"):
             assert len(row[role]["windows"]) == 5
             assert row[role]["metrics"]["failed"] == 0
-    source = next(row for row in entry["sources"] if row["url"].endswith("r8-context-tenant-publication-v1.json"))
+    source = next(
+        row
+        for row in entry["sources"]
+        if row["url"].endswith("r8-context-tenant-publication-v1.json")
+    )
     assert source["sha256"] == hashlib.sha256(report_path.read_bytes()).hexdigest()
     chart = ROOT / "website-publication" / report["chart"]["path"]
     assert hashlib.sha256(chart.read_bytes()).hexdigest() == report["chart"]["sha256"]
