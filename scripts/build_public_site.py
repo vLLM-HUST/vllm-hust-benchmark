@@ -68,9 +68,9 @@ PUBLIC_C16_RUN_IDS = frozenset(
 BETTERSCALE_ID = "betterscale"
 BETTERSCALE_CARD = {
     "id": BETTERSCALE_ID,
-    "name": "BetterScale",
-    "name_en": "BetterScale",
-    "name_zh": "BetterScale",
+    "name": "BetterScale Execution and State Scheduling",
+    "name_en": "BetterScale Execution and State Scheduling",
+    "name_zh": "BetterScale 执行与状态调度",
     "artifact_type": "runtime_component",
     "system_role": "graph_execution_policy",
     "integration_contracts": [],
@@ -178,9 +178,9 @@ PUBLIC_MOD_PREVIEWS = {
     "traceloom": {
         "card": {
             "id": "traceloom",
-            "name": "TraceLoom",
-            "name_en": "TraceLoom",
-            "name_zh": "TraceLoom",
+            "name": "TraceLoom Inference Timeline Analysis",
+            "name_en": "TraceLoom Inference Timeline Analysis",
+            "name_zh": "TraceLoom 推理时间线分析",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -207,9 +207,9 @@ PUBLIC_MOD_PREVIEWS = {
     "latchmoe": {
         "card": {
             "id": "latchmoe",
-            "name": "LatchMoE",
-            "name_en": "LatchMoE",
-            "name_zh": "LatchMoE",
+            "name": "LatchMoE Expert-Weight Offload",
+            "name_en": "LatchMoE Expert-Weight Offload",
+            "name_zh": "LatchMoE 专家权重卸载",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -236,9 +236,9 @@ PUBLIC_MOD_PREVIEWS = {
     "tricard-clm-lifecycle": {
         "card": {
             "id": "tricard-clm-lifecycle",
-            "name": "Tricard CLM Lifecycle",
-            "name_en": "Tricard CLM Lifecycle",
-            "name_zh": "Tricard CLM 生命周期观察器",
+            "name": "Tricard Lifecycle Observation",
+            "name_en": "Tricard Lifecycle Observation",
+            "name_zh": "Tricard 生命周期观测",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -265,9 +265,9 @@ PUBLIC_MOD_PREVIEWS = {
     "ascend-adaptive-quantized-kv": {
         "card": {
             "id": "ascend-adaptive-quantized-kv",
-            "name": "Adaptive Quantized KV",
-            "name_en": "Adaptive Quantized KV",
-            "name_zh": "自适应量化 KV",
+            "name": "Ascend Adaptive KV Quantization",
+            "name_en": "Ascend Adaptive KV Quantization",
+            "name_zh": "昇腾自适应 KV 量化",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -295,9 +295,9 @@ PUBLIC_MOD_PREVIEWS = {
     "dla": {
         "card": {
             "id": "dla",
-            "name": "DLA",
-            "name_en": "DLA",
-            "name_zh": "DLA 解码长度感知准入",
+            "name": "DLA Output-Length-Aware Admission",
+            "name_en": "DLA Output-Length-Aware Admission",
+            "name_zh": "DLA 输出长度感知准入",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -411,9 +411,9 @@ PUBLIC_MOD_PREVIEWS = {
     "cuda-mtp": {
         "card": {
             "id": "cuda-mtp",
-            "name": "CUDA MTP",
-            "name_en": "CUDA MTP",
-            "name_zh": "CUDA MTP",
+            "name": "CUDA Multi-Token Prediction",
+            "name_en": "CUDA Multi-Token Prediction",
+            "name_zh": "CUDA 多词元预测（MTP）",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -502,9 +502,9 @@ PUBLIC_MOD_PREVIEWS = {
     "scheduler-policy-lab": {
         "card": {
             "id": "scheduler-policy-lab",
-            "name": "Scheduler Policy Lab",
-            "name_en": "Scheduler Policy Lab",
-            "name_zh": "调度策略实验工作区",
+            "name": "Scheduling Policy Research",
+            "name_en": "Scheduling Policy Research",
+            "name_zh": "调度策略研究与测试",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
