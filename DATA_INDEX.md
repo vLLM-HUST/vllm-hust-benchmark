@@ -3,6 +3,11 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## Instance Controller 扩缩容实测（2026-11-20）
+
+[单峰和双峰真机配对](reports/instance-controller-scaling-20261120/README.md)记录完成请求、延迟、峰内接单和预约资源，覆盖默认 CUDA
+Graph 模式。
+
 ## SR系列探索与候选处置（2026-11-20）
 
 [统一探索台账](reports/sr-exploration-20261120/README.md)登记已发布SR1/SR2、早期vSpec组合消融、Engine
