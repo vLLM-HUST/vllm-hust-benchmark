@@ -19,3 +19,7 @@ includes throughput, TTFT, TPOT, end-to-end P95/P99, scoring where available and
 positions.
 [Private B1-sr2 Release](https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/b1-sr2-20261119)
 contains source overlays, raw evidence, run receipts and checksums.
+
+## 跨实验记录
+
+[SR探索台账与候选处置](../sr-exploration-20261120/README.md)汇总本实验、早期vSpec消融及其他已探索机制，记录不重复推荐原负收益配置的条件。该追加导航不改变上文实验身份、数据、失败或原件。

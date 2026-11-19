@@ -3,6 +3,11 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## SR系列探索与候选处置（2026-11-20）
+
+[统一探索台账](reports/sr-exploration-20261120/README.md)登记已发布SR1/SR2、早期vSpec组合消融、Engine
+C/E/K探索及完整MOD目录处置。已包含、无收益、退化、质量/兼容失败与尚未完成资格分别保留；推荐当前引擎增量前先核对此表。
+
 ## KV Controller 路由真机回放（2026-11-19）
 
 [同后端配对及公开数据](reports/kv-controller-routing-20261119/README.md)记录 24 与 48 个 SWE-smith program 的整批和请求
