@@ -55,7 +55,21 @@
       "summary_zh": "Provider-neutral 的发现、兼容性、配置、状态、plan、render、check 与受监管运行层。ECPA 0.3.0 在双 Python CI、clean-wheel 验收及一次带进程观测证据的原生昇腾生命周期通过后，以固定 GitHub Release 制品发布；这不代表所有 MOD、Provider 或性能结论都自动升级为稳定支持。",
       "evidence_level": "integration_tested",
       "name_en": "Extension Manager",
-      "name_zh": "Extension Manager"
+      "name_zh": "扩展发现与启用管理",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Extension discovery, validation and activation are included in the frozen engine stack.",
+      "public_effect_zh": "扩展发现、校验与统一启用已接入冻结引擎。",
+      "public_effect_url": "https://vllm-hust.sage.org.ai/engine.html#composition",
+      "public_effect_status": "functional"
     },
     {
       "id": "vllm-production-stack",
@@ -220,11 +234,11 @@
     },
     {
       "id": "mooncake-vllm-connectors",
-      "name": "Mooncake vLLM Connectors",
+      "name": "Mooncake KV Storage and Transfer",
       "catalog_project_id": "mooncake",
       "catalog_primary_component": "mooncake-vllm-connectors",
-      "catalog_project_name_en": "Mooncake",
-      "catalog_project_name_zh": "Mooncake",
+      "catalog_project_name_en": "Mooncake KV Storage and Transfer",
+      "catalog_project_name_zh": "Mooncake KV 存储与传输",
       "catalog_project_summary_en": "One Mooncake project with two separately governed components: the external KV service and the official vLLM connector. They are shown together here; HUST validates the Ascend integration without claiming ownership of either upstream component.",
       "catalog_project_summary_zh": "同一个 Mooncake 项目包含两个治理边界不同的组件：外部 KV 服务与官方 vLLM connector。页面合并展示二者；HUST 只验证昇腾集成，不主张任一上游组件的所有权。",
       "catalog_role_en": "Official vLLM connector and the HUST-validated Ascend integration path.",
@@ -268,7 +282,22 @@
         "requirements_en": "A separately operated Mooncake service is required.",
         "requirements_zh": "需要单独运行并运维 Mooncake 服务。"
       },
-      "evidence_level": "integration_tested"
+      "evidence_level": "integration_tested",
+      "name_en": "Mooncake KV Storage and Transfer",
+      "name_zh": "Mooncake KV 存储与传输",
+      "upstream_creators": [
+        {
+          "name_en": "vLLM community",
+          "name_zh": "vLLM 社区",
+          "url": "https://github.com/vllm-project/vllm"
+        },
+        {
+          "name_en": "Mooncake community",
+          "name_zh": "Mooncake 社区",
+          "url": "https://github.com/kvcache-ai/Mooncake"
+        }
+      ],
+      "advisors": []
     },
     {
       "id": "pegaflow",
@@ -322,11 +351,11 @@
     },
     {
       "id": "pegaflow-vllm-connectors",
-      "name": "PegaFlow vLLM Connectors",
+      "name": "PegaFlow KV Transfer",
       "catalog_project_id": "pegaflow",
       "catalog_primary_component": "pegaflow-vllm-connectors",
-      "catalog_project_name_en": "PegaFlow",
-      "catalog_project_name_zh": "PegaFlow",
+      "catalog_project_name_en": "PegaFlow KV Transfer",
+      "catalog_project_name_zh": "PegaFlow KV 传输",
       "catalog_project_summary_en": "One PegaFlow project developed by the upstream PPIO / Novita AI team. The external KV service and its vLLM connector are shown as components of that project; HUST maintains only the Ascend/NPU and ECPA adaptation.",
       "catalog_project_summary_zh": "PegaFlow 是派欧云团队开发的一个项目。外部 KV 服务与 vLLM connector 在这里作为同一项目的两个组件合并展示；HUST 只维护昇腾/NPU 与 ECPA 国产化适配。",
       "catalog_role_en": "vLLM connector plus the HUST Ascend/NPU and ECPA adaptation.",
@@ -403,7 +432,9 @@
           "Qwen3.5-35B-A3B — unified BF16 setting verified"
         ]
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "name_en": "PegaFlow KV Transfer",
+      "name_zh": "PegaFlow KV 传输"
     },
     {
       "id": "adm",
@@ -492,9 +523,9 @@
     },
     {
       "id": "bidkv",
-      "name": "BidKV",
-      "name_en": "BidKV",
-      "name_zh": "BidKV",
+      "name": "BidKV Cache Preemption",
+      "name_en": "BidKV Cache Preemption",
+      "name_zh": "BidKV 缓存抢占策略",
       "artifact_type": "runtime_component",
       "system_role": "scheduler_policy",
       "integration_contracts": [
@@ -578,13 +609,23 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "MingqiWang-coder",
+          "name": "王明琪"
+        },
+        {
+          "login": "cybber695",
+          "name": "陈彦博"
+        }
       ]
     },
     {
       "id": "diffspec",
-      "name": "DiffSpec",
-      "name_en": "DiffSpec",
-      "name_zh": "DiffSpec",
+      "name": "DiffSpec Speculative Decoding",
+      "name_en": "DiffSpec Speculative Decoding",
+      "name_zh": "DiffSpec 投机解码",
       "artifact_type": "runtime_component",
       "system_role": "decoding_mechanism",
       "integration_contracts": [
@@ -656,6 +697,12 @@
           "name_zh": "黄禹",
           "name_en": "Yu Huang",
           "relationship": "internal"
+        }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "dzcixy",
+          "name": "杜忠承"
         }
       ]
     },
@@ -732,13 +779,19 @@
         "requirements_en": "Use the published model pair and verify the host ABI with vllm-hust-vspec-doctor before enablement. Manager discovery is static; enabling requires an explicit compatibility check, and runtime effectiveness must be verified from live speculative-decoding counters.",
         "requirements_zh": "请使用已发布的模型组合，并在启用前通过 vllm-hust-vspec-doctor 核对宿主 ABI。Manager 仅作静态发现；启用前必须显式完成兼容性检查，运行时是否生效还需查看真实投机解码计数器。"
       },
-      "evidence_level": "hardware_verified"
+      "evidence_level": "hardware_verified",
+      "maintainer_profiles": [
+        {
+          "login": "Renty-0",
+          "name": "任天宇"
+        }
+      ]
     },
     {
       "id": "latchmoe",
-      "name": "LatchMoE",
-      "name_en": "LatchMoE",
-      "name_zh": "LatchMoE",
+      "name": "LatchMoE Expert-Weight Offload",
+      "name_en": "LatchMoE Expert-Weight Offload",
+      "name_zh": "LatchMoE 专家权重卸载",
       "artifact_type": "runtime_component",
       "system_role": "operator_runtime",
       "integration_contracts": [
@@ -830,9 +883,9 @@
     },
     {
       "id": "opfuse",
-      "name": "OpFuse",
-      "name_en": "OpFuse — Operator Fusion",
-      "name_zh": "OpFuse（算子融合）",
+      "name": "OpFuse Operator Fusion",
+      "name_en": "OpFuse Operator Fusion",
+      "name_zh": "OpFuse 算子融合",
       "artifact_type": "runtime_component",
       "system_role": "operator_fusion",
       "integration_contracts": [
@@ -908,7 +961,7 @@
     {
       "id": "ascend-adaptive-quantized-kv",
       "public_surface": false,
-      "name": "Adaptive Quantized KV",
+      "name": "Ascend Adaptive KV Quantization",
       "artifact_type": "runtime_component",
       "system_role": "kv_quantization_research",
       "integration_contracts": [
@@ -963,11 +1016,20 @@
         "requirements_en": "Observer and ACL Graph lifecycle contracts are not available yet.",
         "requirements_zh": "observer 与 ACL Graph 生命周期合同尚未提供。"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "name_en": "Ascend Adaptive KV Quantization",
+      "name_zh": "昇腾自适应 KV 量化",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "ascend-quant-toolkit",
-      "name": "Ascend Quant Toolkit",
+      "name": "Ascend Model Quantization Toolkit",
       "artifact_type": "tool",
       "system_role": "offline_model_quantization",
       "integration_contracts": [
@@ -1010,13 +1072,15 @@
       "public_effect_zh": "仅用于离线产物准备和合同校验。已验收包通过三个 Python 版本的 CPU CI、构建与 wheel/sdist 检查，覆盖混合 scheme 元数据、shard 清单及 fail-closed 拒绝；不声明在线延迟、吞吐、质量或 NPU 运行时收益。",
       "public_effect_status": "preview",
       "public_effect_url": "https://github.com/vLLM-HUST/vllm-ascend-quant-hust/tree/7fa9222f84bacaf190814e763691ac52e6bfbaa0",
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "name_en": "Ascend Model Quantization Toolkit",
+      "name_zh": "昇腾模型量化工具"
     },
     {
       "id": "kvcompress-ascend",
-      "name": "Ascend KV Compression",
-      "name_en": "Ascend KV Compression",
-      "name_zh": "昇腾 KV 压缩",
+      "name": "Ascend KV Cache Compression",
+      "name_en": "Ascend KV Cache Compression",
+      "name_zh": "昇腾 KV 缓存压缩",
       "artifact_type": "runtime_component",
       "system_role": "kv_state_manager",
       "integration_contracts": [
@@ -1098,7 +1162,7 @@
     },
     {
       "id": "prefix-router-migration",
-      "name": "Prefix Router",
+      "name": "Prefix-Aware Request Router",
       "artifact_type": "external_system",
       "system_role": "request_router",
       "integration_contracts": [
@@ -1175,14 +1239,16 @@
         "requirements_en": "Operate the router as a separate service and keep tokenizer, block size, hash algorithm, host version and PYTHONHASHSEED aligned with workers. The published measurements compare Prefix ON with random routing, not with a no-proxy native server.",
         "requirements_zh": "Router 需作为独立服务运维，并与 worker 对齐 tokenizer、block size、hash algorithm、宿主版本及 PYTHONHASHSEED。已发布测量对比 Prefix ON 与随机路由，而非无代理 Native 服务。"
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "name_en": "Prefix-Aware Request Router",
+      "name_zh": "Prefix Router 前缀感知路由"
     },
     {
       "id": "kv-tiering-migration",
       "public_surface": true,
-      "name": "KV Tiering",
-      "name_en": "KV Tiering",
-      "name_zh": "KV 分层",
+      "name": "KV Cache Tiering",
+      "name_en": "KV Cache Tiering",
+      "name_zh": "KV 缓存分层管理",
       "artifact_type": "runtime_component",
       "system_role": "kv_residency_provider",
       "integration_contracts": [
@@ -1236,14 +1302,20 @@
           "name_en": "Jin Zhao",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "JieYang2001",
+          "name": "杨杰"
+        }
       ]
     },
     {
       "id": "knorm-migration",
       "public_surface": true,
-      "name": "KNorm",
-      "name_en": "KNorm",
-      "name_zh": "KNorm",
+      "name": "KNorm KV Compression",
+      "name_en": "KNorm KV Compression",
+      "name_zh": "KNorm KV 压缩",
       "artifact_type": "runtime_component",
       "system_role": "kv_compression_method",
       "integration_contracts": [
@@ -1302,14 +1374,24 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "kotoriqaq0",
+          "name": "韦若皓"
+        },
+        {
+          "login": "SuccinctPaul",
+          "name": "程月甲"
+        }
       ]
     },
     {
       "id": "pyramidkv-ascend-migration",
       "public_surface": true,
-      "name": "PyramidKV Ascend",
-      "name_en": "PyramidKV Ascend",
-      "name_zh": "PyramidKV 昇腾版",
+      "name": "PyramidKV Cache Compression",
+      "name_en": "PyramidKV Cache Compression",
+      "name_zh": "PyramidKV 缓存压缩",
       "artifact_type": "runtime_component",
       "system_role": "kv_compression_provider",
       "integration_contracts": [],
@@ -1372,7 +1454,7 @@
     },
     {
       "id": "slicegpt-migration",
-      "name": "SliceGPT",
+      "name": "SliceGPT Model Pruning",
       "artifact_type": "tool",
       "system_role": "model_artifact_preparation",
       "integration_contracts": [
@@ -1432,11 +1514,13 @@
         "requirements_en": "Use the versioned converted artifact and pass host compatibility checks. Real-device model loading, inference correctness, rollback and performance still require qualification.",
         "requirements_zh": "需使用版本化转换产物并通过宿主兼容检查；真实设备模型加载、推理正确性、回滚和性能仍需验收。"
       },
-      "evidence_level": "integration_tested"
+      "evidence_level": "integration_tested",
+      "name_en": "SliceGPT Model Pruning",
+      "name_zh": "SliceGPT 模型剪枝"
     },
     {
       "id": "ride-control-plane",
-      "name": "RIDE Control Plane",
+      "name": "RIDE Cross-Instance Control Plane",
       "artifact_type": "external_system",
       "system_role": "control_plane",
       "integration_contracts": [],
@@ -1445,14 +1529,26 @@
       ],
       "deployment_topology": "separate_application",
       "delivery_model": "external_service",
-      "ownership": "community_integration",
-      "repository_relationship": "external_reference",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
       "maturity": "concept",
-      "canonical_repository": null,
+      "canonical_repository": "https://github.com/vLLM-HUST/ride",
       "upstream_repository": null,
       "summary_en": "External cross-instance decision system for admission, placement, routing, and global policy.",
       "summary_zh": "负责准入、放置、路由与全局策略的外部跨实例决策系统。",
-      "evidence_level": "descriptor_only"
+      "evidence_level": "descriptor_only",
+      "name_en": "RIDE Cross-Instance Control Plane",
+      "name_zh": "RIDE 跨实例服务控制面",
+      "maintainers": [
+        "yancanmao"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "yancanmao",
+          "name": "毛言粲"
+        }
+      ],
+      "advisors": []
     },
     {
       "id": "vllm-local-control-host",
@@ -1479,7 +1575,19 @@
       "upstream_repository": null,
       "summary_en": "Default-off core host that authenticates bounded same-UID Unix-socket actions and executes the fixed read-only health probe through a process boundary.",
       "summary_zh": "默认关闭的核心本地宿主：认证同 UID 的有界 Unix socket action，并通过进程边界执行固定只读健康探针。",
-      "evidence_level": "integration_tested"
+      "evidence_level": "integration_tested",
+      "name_en": "vLLM Local Control Host",
+      "name_zh": "vLLM 本地控制接口",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": []
     },
     {
       "id": "ride-runtime-bridge",
@@ -1505,13 +1613,25 @@
       "upstream_repository": null,
       "summary_en": "Separately built TLS 1.3 mutual-authentication sidecar that allowlists remote certificate fingerprints and transparently forwards bounded signed frames into the vLLM local control host.",
       "summary_zh": "独立构建的 TLS 1.3 双向认证 sidecar：按证书指纹允许远程身份，并将有界签名帧透明转发到 vLLM 本地控制宿主。",
-      "evidence_level": "integration_tested"
+      "evidence_level": "integration_tested",
+      "name_en": "RIDE Remote Runtime Sidecar",
+      "name_zh": "RIDE 远程运行时边车",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": []
     },
     {
       "id": "quantized-kv-cache-migration",
       "name": "Quantized KV Cache",
       "name_en": "Quantized KV Cache",
-      "name_zh": "量化 KV Cache",
+      "name_zh": "KV 缓存量化",
       "artifact_type": "runtime_component",
       "system_role": "kv_quantization_research",
       "integration_contracts": [],
@@ -1570,14 +1690,24 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "hustcui",
+          "name": "崔钰嘉"
+        },
+        {
+          "login": "SuccinctPaul",
+          "name": "程月甲"
+        }
       ]
     },
     {
       "id": "simllm-migration",
       "public_surface": true,
-      "name": "SimLLM",
-      "name_en": "SimLLM",
-      "name_zh": "SimLLM",
+      "name": "SimLLM Approximate Prefix Reuse",
+      "name_en": "SimLLM Approximate Prefix Reuse",
+      "name_zh": "SimLLM 近似前缀复用",
       "artifact_type": "runtime_component",
       "system_role": "kv_reuse_policy",
       "integration_contracts": [
@@ -1636,7 +1766,13 @@
         "requirements_zh": "需通过 Extension Manager 显式启用并设置 VLLM_ASCEND_SIMLLM_ENABLED=1，同时匹配已测宿主内部接口、block size、cache 与 prefill 配置。近似复用依赖特定负载，长生成性能尚未验证。",
         "followup_url": "https://github.com/vLLM-HUST/vllm-ascend-simllm-hust/issues/2"
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "maintainer_profiles": [
+        {
+          "login": "GuMorming",
+          "name": "谷昌伟"
+        }
+      ]
     },
     {
       "id": "unified-communication-migration",
@@ -1702,13 +1838,19 @@
         "requirements_zh": "宿主接入已实现并保留原生回退。在多卡 HCCL/NCCL 正确性、故障与回滚验收记录完成前，独立扩展仍保持 import-only。",
         "followup_url": "https://github.com/vLLM-HUST/vllm-hust-unified-comm/issues/2"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "maintainer_profiles": [
+        {
+          "login": "machuanhu",
+          "name": "马川湖"
+        }
+      ]
     },
     {
       "id": "split-batch-full-graph-migration",
-      "name": "Split-Batch / Full-Graph Parallel",
-      "name_en": "Split-Batch / Full-Graph Parallel",
-      "name_zh": "分批次 / 全图并行",
+      "name": "Split-Batch and Full-Graph Parallelism",
+      "name_en": "Split-Batch and Full-Graph Parallelism",
+      "name_zh": "分批次与全图并行",
       "artifact_type": "runtime_component",
       "system_role": "graph_execution_policy",
       "integration_contracts": [],
@@ -1779,9 +1921,9 @@
     {
       "id": "kv-transfer-observability-migration",
       "public_surface": true,
-      "name": "KV Transfer Observability",
-      "name_en": "KV Transfer Observability",
-      "name_zh": "KV 传输可观测性",
+      "name": "KV Transfer Tracing",
+      "name_en": "KV Transfer Tracing",
+      "name_zh": "KV 传输追踪",
       "artifact_type": "runtime_component",
       "system_role": "telemetry_provider",
       "integration_contracts": [
@@ -1839,6 +1981,16 @@
           "name_zh": "张书豪",
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
+        }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "xiehanlong834-gif",
+          "name": "谢汉龙"
+        },
+        {
+          "login": "Remygred",
+          "name": "刘世峰"
         }
       ]
     },
@@ -1913,7 +2065,7 @@
       "public_surface": false,
       "name": "Activation Sparsity",
       "name_en": "Activation Sparsity",
-      "name_zh": "激活稀疏",
+      "name_zh": "激活稀疏推理",
       "artifact_type": "runtime_component",
       "system_role": "operator_runtime",
       "integration_contracts": [],
@@ -2047,9 +2199,9 @@
     {
       "id": "qos-scheduler-migration",
       "public_surface": false,
-      "name": "QoS Scheduler",
-      "name_en": "QoS Scheduler",
-      "name_zh": "QoS 调度器",
+      "name": "QoS-Aware Scheduler",
+      "name_en": "QoS-Aware Scheduler",
+      "name_zh": "QoS 服务质量调度",
       "artifact_type": "runtime_component",
       "system_role": "scheduler_policy",
       "integration_contracts": [],
@@ -2180,9 +2332,9 @@
     },
     {
       "id": "tricard-clm-lifecycle",
-      "name": "Tricard CLM Lifecycle",
-      "name_en": "Tricard CLM Lifecycle",
-      "name_zh": "Tricard CLM 生命周期观察器",
+      "name": "Tricard Lifecycle Observation",
+      "name_en": "Tricard Lifecycle Observation",
+      "name_zh": "Tricard 生命周期观测",
       "artifact_type": "runtime_component",
       "system_role": "lifecycle_control_plane",
       "integration_contracts": [
@@ -2313,9 +2465,9 @@
     },
     {
       "id": "llm-serving-cost-pricing-model",
-      "name": "LLM Serving Cost Pricing Model",
-      "name_en": "LLM Serving Cost Pricing Model",
-      "name_zh": "LLM 服务成本定价模型",
+      "name": "Inference Service Cost Estimation",
+      "name_en": "Inference Service Cost Estimation",
+      "name_zh": "推理服务成本估算",
       "artifact_type": "tool",
       "system_role": "profiling_analysis",
       "integration_contracts": [
@@ -2373,9 +2525,9 @@
     },
     {
       "id": "clm-lifecycle",
-      "name": "CLM Lifecycle",
-      "name_en": "CLM Lifecycle",
-      "name_zh": "CLM 生命周期控制面",
+      "name": "CLM Request Lifecycle Observation",
+      "name_en": "CLM Request Lifecycle Observation",
+      "name_zh": "CLM 请求生命周期观测",
       "artifact_type": "runtime_component",
       "system_role": "lifecycle_control_plane",
       "integration_contracts": [
@@ -2441,9 +2593,9 @@
     },
     {
       "id": "kv-materialization-arrival-control",
-      "name": "KV materialization",
-      "name_en": "KV materialization",
-      "name_zh": "KV materialization",
+      "name": "KV Materialization and Recomputation",
+      "name_en": "KV Materialization and Recomputation",
+      "name_zh": "KV 物化与重算",
       "artifact_type": "runtime_component",
       "system_role": "kv_materialization_policy",
       "integration_contracts": [],
@@ -2570,9 +2722,9 @@
     },
     {
       "id": "betterscale",
-      "name": "BetterScale",
-      "name_en": "BetterScale",
-      "name_zh": "BetterScale",
+      "name": "BetterScale Execution and State Scheduling",
+      "name_en": "BetterScale Execution and State Scheduling",
+      "name_zh": "BetterScale 执行与状态调度",
       "artifact_type": "runtime_component",
       "system_role": "graph_execution_policy",
       "integration_contracts": [],
@@ -2646,9 +2798,9 @@
     {
       "id": "ascend-attention-boundary",
       "public_surface": true,
-      "name": "Ascend Attention Boundary",
-      "name_en": "Ascend Attention Boundary",
-      "name_zh": "Ascend 注意力边界",
+      "name": "Ascend Attention Boundary Optimization",
+      "name_en": "Ascend Attention Boundary Optimization",
+      "name_zh": "昇腾注意力计算边界调优",
       "artifact_type": "runtime_component",
       "system_role": "attention_execution_policy",
       "integration_contracts": [],
@@ -2712,9 +2864,9 @@
     {
       "id": "dla",
       "public_surface": false,
-      "name": "DLA",
-      "name_en": "DLA",
-      "name_zh": "DLA（解码长度感知准入/预占）",
+      "name": "DLA Output-Length-Aware Admission",
+      "name_en": "DLA Output-Length-Aware Admission",
+      "name_zh": "DLA 输出长度感知准入",
       "artifact_type": "runtime_component",
       "system_role": "scheduler_policy",
       "integration_contracts": [
@@ -2760,7 +2912,20 @@
         "requirements_en": "The Qwen3.5 card result belongs to a pinned known-output-budget carrier whose admission checks ran but took no control action; it does not qualify the learned predictor. Core PR vllm-HUST/vllm-hust#8 is still required for the legacy victim-selector group and predicted_length channel.",
         "requirements_zh": "Qwen3.5 卡片结果属于固定版本的已知输出预算 carrier；准入检查执行了，但没有采取控制动作，因此不能验证学习型预测器。旧 victim-selector 组与 predicted_length 通道仍需要 vllm-HUST/vllm-hust#8。"
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "maintainer_profiles": [
+        {
+          "login": "xiehanlong834-gif",
+          "name": "谢汉龙"
+        }
+      ],
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "stateaxis-automatic-prefix-cache",
@@ -2983,9 +3148,9 @@
     },
     {
       "id": "gdn-state-codec",
-      "name": "GDN State Codec",
-      "name_en": "GDN State Codec",
-      "name_zh": "GDN 状态编解码器",
+      "name": "GDN State Compression",
+      "name_en": "GDN State Compression",
+      "name_zh": "GDN 状态压缩与恢复",
       "artifact_type": "runtime_component",
       "system_role": "recurrent_state_compression",
       "integration_contracts": [
@@ -3128,11 +3293,17 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "keridone",
+          "name": "周升晖"
+        }
       ]
     },
     {
       "id": "traceloom",
-      "name": "TraceLoom",
+      "name": "TraceLoom Inference Timeline Analysis",
       "artifact_type": "runtime_component",
       "system_role": "profiling_analysis",
       "integration_contracts": [],
@@ -3154,8 +3325,8 @@
       "summary_en": "Standalone timeline analysis and an opt-in vLLM runtime plugin. Organize profiler events into reusable structures, join supplied scheduler steps, and query or visualize the captured execution.",
       "summary_zh": "独立时间线分析工具与可选的 vLLM 运行时插件。将 profiler 事件组织成可复用结构，关联采集到的 scheduler step，以查询和可视化理解推理执行。",
       "evidence_level": "hardware_verified",
-      "name_en": "TraceLoom",
-      "name_zh": "TraceLoom",
+      "name_en": "TraceLoom Inference Timeline Analysis",
+      "name_zh": "TraceLoom 推理时间线分析",
       "repository_relationship": "organization_native",
       "public_surface": true,
       "documentation_url": "./traceloom.html",
@@ -3204,9 +3375,9 @@
     {
       "id": "instance-controller",
       "public_surface": true,
-      "name": "Instance Controller",
-      "name_en": "Instance Controller",
-      "name_zh": "实例控制器",
+      "name": "Instance Scaling Controller",
+      "name_en": "Instance Scaling Controller",
+      "name_zh": "实例扩缩容控制器",
       "artifact_type": "external_system",
       "system_role": "lifecycle_control_plane",
       "integration_contracts": [
@@ -3261,9 +3432,9 @@
     {
       "id": "kv-controller",
       "public_surface": true,
-      "name": "KV Controller",
-      "name_en": "KV Controller",
-      "name_zh": "KV 控制器",
+      "name": "Next-Turn KV Preparation Controller",
+      "name_en": "Next-Turn KV Preparation Controller",
+      "name_zh": "下一轮 KV 准备控制器",
       "artifact_type": "external_system",
       "system_role": "kv_state_manager",
       "integration_contracts": [
@@ -3330,7 +3501,7 @@
       "public_surface": true,
       "name": "Request Throttling Controller",
       "name_en": "Request Throttling Controller",
-      "name_zh": "请求节流控制器",
+      "name_zh": "请求限流控制器",
       "artifact_type": "bridge",
       "system_role": "request_admission_control_plane",
       "integration_contracts": [
@@ -3394,9 +3565,9 @@
     {
       "id": "core-attention-boundary",
       "public_surface": true,
-      "name": "Core Attention Boundary",
-      "name_en": "Core Attention Boundary",
-      "name_zh": "Core 注意力边界",
+      "name": "Core Attention Boundary Optimization",
+      "name_en": "Core Attention Boundary Optimization",
+      "name_zh": "核心注意力计算边界调优",
       "artifact_type": "runtime_component",
       "system_role": "attention_execution_policy",
       "integration_contracts": [],
@@ -3609,9 +3780,9 @@
     },
     {
       "id": "runtime-micro-optimizations",
-      "name": "Runtime Micro-optimizations",
-      "name_en": "Runtime Micro-optimizations",
-      "name_zh": "运行时微开销优化集",
+      "name": "Inference Runtime Overhead Optimizations",
+      "name_en": "Inference Runtime Overhead Optimizations",
+      "name_zh": "推理运行时开销优化",
       "artifact_type": "runtime_component",
       "system_role": "runtime_overhead_optimization",
       "integration_contracts": [
@@ -3733,9 +3904,9 @@
     },
     {
       "id": "hybrid-spec",
-      "name": "Hybrid Spec",
-      "name_en": "Hybrid Spec",
-      "name_zh": "混合状态推测解码",
+      "name": "Hybrid-State Speculative Decoding",
+      "name_en": "Hybrid-State Speculative Decoding",
+      "name_zh": "Hybrid Spec 混合状态投机解码",
       "artifact_type": "runtime_component",
       "system_role": "speculative_decoding",
       "integration_contracts": [
@@ -3786,13 +3957,19 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "Li-changwu",
+          "name": "李昶吾"
+        }
       ]
     },
     {
       "id": "prefill-microflow",
-      "name": "Microflow",
-      "name_en": "Microflow",
-      "name_zh": "Microflow",
+      "name": "Microflow Prefill Pipeline",
+      "name_en": "Microflow Prefill Pipeline",
+      "name_zh": "Microflow 预填充流水线",
       "artifact_type": "runtime_component",
       "system_role": "prefill_pipeline_optimization",
       "integration_contracts": [
@@ -3853,9 +4030,9 @@
     },
     {
       "id": "graph-coverage",
-      "name": "Graph Capture Coverage",
-      "name_en": "Graph Capture Coverage",
-      "name_zh": "图捕获覆盖配置",
+      "name": "Graph Capture Coverage Configuration",
+      "name_en": "Graph Capture Coverage Configuration",
+      "name_zh": "计算图捕获范围配置",
       "artifact_type": "runtime_component",
       "system_role": "graph_execution_policy",
       "integration_contracts": [],
@@ -3914,9 +4091,9 @@
     },
     {
       "id": "prefill-admission",
-      "name": "Prefill Admission",
-      "name_en": "Prefill Admission",
-      "name_zh": "短请求准入配置",
+      "name": "Short-Request Prefill Admission",
+      "name_en": "Short-Request Prefill Admission",
+      "name_zh": "短请求预填充准入",
       "artifact_type": "runtime_component",
       "system_role": "scheduler_policy_research",
       "integration_contracts": [],
@@ -3975,9 +4152,9 @@
     },
     {
       "id": "sglang-prepared-dispatch",
-      "name": "SGLang Prepared Dispatch",
-      "name_en": "SGLang Prepared Dispatch",
-      "name_zh": "SGLang 预封装派发",
+      "name": "SGLang Prepared Attention Dispatch",
+      "name_en": "SGLang Prepared Attention Dispatch",
+      "name_zh": "SGLang 注意力调用预封装",
       "artifact_type": "runtime_component",
       "system_role": "operator_dispatch",
       "integration_contracts": [],
@@ -4069,13 +4246,14 @@
           "login": "ShuhaoZhangTony",
           "name": "张书豪"
         }
-      ]
+      ],
+      "advisors": []
     },
     {
       "id": "hust-joint-packed",
-      "name": "Packed host state",
-      "name_en": "Packed host state",
-      "name_zh": "Packed host state",
+      "name": "Packed Pinned-Host State",
+      "name_en": "Packed Pinned-Host State",
+      "name_zh": "锁页主机状态合并",
       "artifact_type": "runtime_component",
       "integration_contracts": [],
       "deployment_topology": "in_process",
@@ -4106,7 +4284,329 @@
           "login": "ShuhaoZhangTony",
           "name": "张书豪"
         }
-      ]
+      ],
+      "advisors": []
+    },
+    {
+      "id": "cuda-mtp",
+      "name": "CUDA Multi-Token Prediction",
+      "name_en": "CUDA Multi-Token Prediction",
+      "name_zh": "CUDA 多词元预测（MTP）",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "maturity": "experimental",
+      "public_surface": true,
+      "repository_visibility": "public",
+      "summary_en": "CUDA activation carrier for Qwen3.5 native multi-token prediction. Bounded launch and functional checks ran on A6000 PP4/TP1.",
+      "summary_zh": "Qwen3.5 原生多词元预测的 CUDA 启用组件。已有 A6000 PP4/TP1 的有限启动与功能验证。",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-cuda-mtp",
+      "repository_relationship": "organization_native",
+      "system_role": "speculative_decoding",
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "delivery_model": "python_distribution",
+      "ownership": "original_contributor_maintained",
+      "evidence_level": "hardware_verified",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Bounded startup and functional checks cover A6000 PP4/TP1. The tested setup reduced available KV capacity and produced one answer mismatch; it does not establish a general speed or quality gain.",
+      "public_effect_zh": "已有 A6000 PP4/TP1 的有限启动与功能检查。该配置可用 KV 容量下降，且出现一次回答不一致；尚不能据此确认普遍的速度或质量收益。",
+      "public_effect_status": "preview",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-cuda-mtp#readme",
+      "deployment_topology": "in_process"
+    },
+    {
+      "id": "memory-tracker",
+      "name": "Ascend Graph Memory Tracker",
+      "name_en": "Ascend Graph Memory Tracker",
+      "name_zh": "昇腾计算图显存跟踪器",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "maturity": "experimental",
+      "public_surface": true,
+      "repository_visibility": "private",
+      "summary_en": "Captures Ascend graph-memory allocations and exports Perfetto traces. Hardware validation covers one 910B2 and bounded capture sizes.",
+      "summary_zh": "采集昇腾计算图捕获的显存分配并导出 Perfetto 轨迹。实测覆盖单张 910B2 和有限捕获规格。",
+      "maintainers": [
+        "CubeLander"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "CubeLander",
+          "name": "田景远"
+        }
+      ],
+      "system_role": "profiling_analysis",
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "delivery_model": "python_distribution",
+      "ownership": "original_contributor_maintained",
+      "repository_relationship": "organization_native",
+      "evidence_level": "hardware_verified",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ],
+      "deployment_topology": "in_process",
+      "canonical_repository": null
+    },
+    {
+      "id": "ascend-mapped-kv-offload",
+      "name": "Ascend Mapped-host KV Offload",
+      "name_en": "Ascend Mapped-host KV Offload",
+      "name_zh": "昇腾映射主机内存 KV 卸载",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "maturity": "experimental",
+      "public_surface": true,
+      "repository_visibility": "public",
+      "summary_en": "Mapped-host memory KV offload adaptation for Ascend. The package supports installation and inspection while host integration and device validation are pending.",
+      "summary_zh": "昇腾映射主机内存的 KV 卸载适配。目前可安装和检查，等待宿主接入和设备验证。",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-mapped-kv-offload-hust",
+      "repository_relationship": "organization_native",
+      "maintainers": [
+        "CubeLander"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "CubeLander",
+          "name": "田景远"
+        }
+      ],
+      "system_role": "kv_tiering",
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "delivery_model": "plugin_bundle",
+      "ownership": "original_contributor_maintained",
+      "evidence_level": "cpu_smoke",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ],
+      "deployment_topology": "in_process",
+      "public_effect_en": "Installation and inspection are available; host integration and device validation remain pending. No performance benefit is claimed.",
+      "public_effect_zh": "目前可安装与检查；宿主接入及设备验证待完成，尚无性能收益结论。",
+      "public_effect_status": "pending",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-ascend-mapped-kv-offload-hust#readme"
+    },
+    {
+      "id": "scheduler-policy-lab",
+      "name": "Scheduling Policy Research",
+      "name_en": "Scheduling Policy Research",
+      "name_zh": "调度策略研究与测试",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "maturity": "experimental",
+      "public_surface": true,
+      "repository_visibility": "public",
+      "summary_en": "Research workspace for scheduler policies, baseline ports and observability. Host-independent policy code has tests. vLLM runtime integration is pending.",
+      "summary_zh": "调度策略、基线迁移和观测研究工作区。宿主无关的策略代码已有测试，vLLM 运行接入待完成。",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-scheduler-policy-lab",
+      "repository_relationship": "organization_native",
+      "maintainers": [
+        "Tkhkrnx"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "Tkhkrnx",
+          "name": "彭浩然"
+        }
+      ],
+      "system_role": "scheduler_policy",
+      "execution_planes": [
+        "scheduler"
+      ],
+      "delivery_model": "source_toolkit",
+      "ownership": "original_contributor_maintained",
+      "evidence_level": "cpu_smoke",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ],
+      "deployment_topology": "in_process"
+    },
+    {
+      "id": "sealed-serving-warmup",
+      "name": "Serving Warmup and Compilation Sealing",
+      "name_en": "Serving Warmup and Compilation Sealing",
+      "name_zh": "服务预热与编译封锁",
+      "artifact_type": "runtime_component",
+      "system_role": "startup_guard",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r8 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./engine.html#composition",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "Warms the prescribed serving shapes before readiness and rejects unprepared Torch/Triton compilation during measured requests. Delivered with the frozen B1 r8 engine.",
+      "summary_zh": "在服务就绪前完成规定形状的预热，并在正式请求中拦截未预热的 Torch/Triton 编译。 随冻结 B1 r8 引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Included in the r8 combined-engine validation.",
+      "public_effect_zh": "已纳入 r8 整套引擎的组合验证。",
+      "public_effect_url": "https://vllm-hust.sage.org.ai/engine.html#composition",
+      "public_effect_status": "functional"
+    },
+    {
+      "id": "guarded-progress-async",
+      "name": "Guarded Asynchronous Progress Copy",
+      "name_en": "Guarded Asynchronous Progress Copy",
+      "name_zh": "受保护的异步进度复制",
+      "artifact_type": "runtime_component",
+      "system_role": "kv_state_manager",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r8 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./engine.html#composition",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "Uses guarded asynchronous H2D progress copies with CorrectedWorker ownership and source-lifecycle checks in r8. Delivered with the frozen B1 r8 engine.",
+      "summary_zh": "r8 使用受保护的异步 H2D 进度复制，由 CorrectedWorker 检查状态拥有权与源生命周期。 随冻结 B1 r8 引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Included in the r8 combined-engine validation.",
+      "public_effect_zh": "已纳入 r8 整套引擎的组合验证。",
+      "public_effect_url": "https://vllm-hust.sage.org.ai/engine.html#composition",
+      "public_effect_status": "functional"
+    },
+    {
+      "id": "capacity-tuning",
+      "name": "Execution and Resident Capacity Tuning",
+      "name_en": "Execution and Resident Capacity Tuning",
+      "name_zh": "执行与常驻席位调优",
+      "artifact_type": "runtime_component",
+      "system_role": "scheduler_policy",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r8 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./engine.html#composition",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "The frozen r8 profile uses 36 execution seats and 54 resident seats to configure execution and state-residency capacity. Delivered with the frozen B1 r8 engine.",
+      "summary_zh": "冻结 r8 采用 36 个执行席位与 54 个常驻席位，调节并发执行和状态驻留容量。 随冻结 B1 r8 引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Included in the r8 combined-engine validation.",
+      "public_effect_zh": "已纳入 r8 整套引擎的组合验证。",
+      "public_effect_url": "https://vllm-hust.sage.org.ai/engine.html#composition",
+      "public_effect_status": "functional"
+    },
+    {
+      "id": "short-prefill-tail",
+      "name": "Short Prefill Tail Scheduling",
+      "name_en": "Short Prefill Tail Scheduling",
+      "name_zh": "短预填充尾段优先调度",
+      "artifact_type": "runtime_component",
+      "system_role": "scheduler_policy",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r8 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./engine.html#composition",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "Prioritizes eligible 1–256-token prefill tails in r8. Delivered with the frozen B1 r8 engine.",
+      "summary_zh": "r8 优先执行满足资格条件的 1–256 token 预填充尾段。 随冻结 B1 r8 引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Included in the r8 combined-engine validation.",
+      "public_effect_zh": "已纳入 r8 整套引擎的组合验证。",
+      "public_effect_url": "https://vllm-hust.sage.org.ai/engine.html#composition",
+      "public_effect_status": "functional"
     }
   ]
 }
