@@ -1,0 +1,406 @@
+{
+  "schema": "vllm-hust-sr-development/v1",
+  "control": "B1-r8",
+  "entries": [
+    {
+      "id": "sr1",
+      "name": "DiffSpec",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/b1-sr1-evidence-20261118",
+      "rows": [
+        {
+          "id": "mmlu",
+          "label": "MMLU200",
+          "variant": "",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 1499.314552020488,
+              "mean_ttft_ms": 169552.6407927135,
+              "mean_tpot_ms": 21.547721954577767,
+              "ttft_p95_ms": 378380.2347794641,
+              "ttft_p99_ms": 388613.7295244634,
+              "end_to_end_p95_ms": 438109.5424194354,
+              "end_to_end_p99_ms": 465066.5528848115,
+              "correct": 150,
+              "requests": 200,
+              "truncated": 21,
+              "unresolved": 0
+            },
+            {
+              "output_tokens_per_second": 131.85995213528875,
+              "mean_ttft_ms": 1865749.918355248,
+              "mean_tpot_ms": 256.1486219929231,
+              "ttft_p95_ms": 4513819.661141187,
+              "ttft_p99_ms": 4611397.202852508,
+              "end_to_end_p95_ms": 5128761.298557278,
+              "end_to_end_p99_ms": 5365803.115764316,
+              "correct": 151,
+              "requests": 200,
+              "truncated": 26,
+              "unresolved": 0
+            }
+          ]
+        },
+        {
+          "id": "4096-formal",
+          "label": "4K / C8",
+          "variant": "",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 386.6923683151607,
+              "mean_ttft_ms": 647.776673774131,
+              "mean_tpot_ms": 18.184461834159855,
+              "ttft_p95_ms": 1267.8865130990744,
+              "ttft_p99_ms": 1826.5495656058192,
+              "end_to_end_p95_ms": 5825.115139223635,
+              "end_to_end_p99_ms": 6313.572297133505
+            },
+            {
+              "output_tokens_per_second": 95.67675922450388,
+              "mean_ttft_ms": 1319.871941407732,
+              "mean_tpot_ms": 77.63451568301967,
+              "ttft_p95_ms": 2416.4560199715197,
+              "ttft_p99_ms": 3218.4548888076088,
+              "end_to_end_p95_ms": 23065.184967359528,
+              "end_to_end_p99_ms": 23415.869729509577
+            }
+          ]
+        },
+        {
+          "id": "16384-formal",
+          "label": "16K / C8",
+          "variant": "",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 159.69055571224402,
+              "mean_ttft_ms": 2604.4946337461865,
+              "mean_tpot_ms": 39.8525192964749,
+              "ttft_p95_ms": 6415.707832062613,
+              "ttft_p99_ms": 9740.6148160994,
+              "end_to_end_p95_ms": 14194.802119256929,
+              "end_to_end_p99_ms": 15382.993947388599
+            },
+            {
+              "output_tokens_per_second": 69.36423298737377,
+              "mean_ttft_ms": 4067.3902408696363,
+              "mean_tpot_ms": 97.95129473473601,
+              "ttft_p95_ms": 9968.947968212888,
+              "ttft_p99_ms": 11489.732742263006,
+              "end_to_end_p95_ms": 32899.88850499503,
+              "end_to_end_p99_ms": 35022.89524758235
+            }
+          ]
+        }
+      ],
+      "scope_zh": "实验冻结。C8 和 MMLU-Pro 各一次双卡同卡配对。HLE、Frontier、SWE 和 Terminal 缺少完整配对。",
+      "scope_en": "Experimental freeze. One matched-card pair each for C8 and MMLU-Pro. No complete pairs for HLE, Frontier, SWE or Terminal."
+    },
+    {
+      "id": "sr2",
+      "name": "PyramidKV",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/b1-sr2-20261119",
+      "rows": [
+        {
+          "id": "mmlu",
+          "label": "MMLU200",
+          "variant": "v2",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 1499.314552020488,
+              "mean_ttft_ms": 169552.6407927135,
+              "mean_tpot_ms": 21.547721954577767,
+              "ttft_p95_ms": 378380.2347794641,
+              "ttft_p99_ms": 388613.7295244634,
+              "end_to_end_p95_ms": 438109.5424194354,
+              "end_to_end_p99_ms": 465066.5528848115,
+              "correct": 150,
+              "requests": 200,
+              "truncated": 21,
+              "unresolved": 0
+            },
+            {
+              "output_tokens_per_second": 1474.2404562382517,
+              "mean_ttft_ms": 161491.71070090495,
+              "mean_tpot_ms": 21.540682301089646,
+              "ttft_p95_ms": 345671.0959703661,
+              "ttft_p99_ms": 366881.59805229865,
+              "end_to_end_p95_ms": 436727.3954274597,
+              "end_to_end_p99_ms": 466715.1271465793,
+              "correct": 144,
+              "requests": 200,
+              "truncated": 22,
+              "unresolved": 0
+            }
+          ]
+        },
+        {
+          "id": "hle",
+          "label": "HLE200",
+          "variant": "v2",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 1029.135823051449,
+              "mean_ttft_ms": 305.12776681163814,
+              "mean_tpot_ms": 15.465988965588618,
+              "ttft_p95_ms": 734.9885666459799,
+              "ttft_p99_ms": 1034.8984616124626,
+              "end_to_end_p95_ms": 249473.74466930926,
+              "end_to_end_p99_ms": 252728.90044616399,
+              "correct": 52,
+              "requests": 200,
+              "truncated": 125,
+              "unresolved": 1
+            },
+            {
+              "output_tokens_per_second": 1026.1320375384862,
+              "mean_ttft_ms": 288.47588874865323,
+              "mean_tpot_ms": 15.56051474615822,
+              "ttft_p95_ms": 664.7522332191459,
+              "ttft_p99_ms": 1035.0067263603205,
+              "end_to_end_p95_ms": 251785.41211943625,
+              "end_to_end_p99_ms": 254794.27185713768,
+              "correct": 52,
+              "requests": 200,
+              "truncated": 122,
+              "unresolved": 0
+            }
+          ]
+        },
+        {
+          "id": "frontier",
+          "label": "Frontier160",
+          "variant": "v2",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 988.8199591668886,
+              "mean_ttft_ms": 293.9845828292164,
+              "mean_tpot_ms": 15.087085354904016,
+              "ttft_p95_ms": 701.4726813465356,
+              "ttft_p99_ms": 1125.7295014679432,
+              "end_to_end_p95_ms": 242238.9738967538,
+              "end_to_end_p99_ms": 246864.46166443228,
+              "correct": 66,
+              "requests": 160,
+              "truncated": 36,
+              "unresolved": 8
+            },
+            {
+              "output_tokens_per_second": 1008.2715695083256,
+              "mean_ttft_ms": 270.3930048213806,
+              "mean_tpot_ms": 15.055712053322624,
+              "ttft_p95_ms": 955.5198389053345,
+              "ttft_p99_ms": 966.7813144016266,
+              "end_to_end_p95_ms": 242520.3936330795,
+              "end_to_end_p99_ms": 248009.43153636932,
+              "correct": 67,
+              "requests": 160,
+              "truncated": 41,
+              "unresolved": 3
+            }
+          ]
+        },
+        {
+          "id": "swe",
+          "label": "SWE trace64",
+          "variant": "v2",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 136.7040067203789,
+              "mean_ttft_ms": 1704.197388270586,
+              "mean_tpot_ms": 47.552687655058094,
+              "ttft_p95_ms": 4113.19782539606,
+              "ttft_p99_ms": 5389.563230104446,
+              "end_to_end_p95_ms": 7342.817525586485,
+              "end_to_end_p99_ms": 39366.09169642204
+            },
+            {
+              "output_tokens_per_second": 125.50670411367416,
+              "mean_ttft_ms": 1969.2733456176938,
+              "mean_tpot_ms": 47.634403773007364,
+              "ttft_p95_ms": 4334.697718048094,
+              "ttft_p99_ms": 5174.3961102676385,
+              "end_to_end_p95_ms": 7641.123990154263,
+              "end_to_end_p99_ms": 43210.00688947671
+            }
+          ]
+        },
+        {
+          "id": "terminal",
+          "label": "Terminal trace48",
+          "variant": "v2",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 217.1330147920728,
+              "mean_ttft_ms": 1937.2756961711275,
+              "mean_tpot_ms": 34.61003701327142,
+              "ttft_p95_ms": 5134.8297769248475,
+              "ttft_p99_ms": 6339.0947930717475,
+              "end_to_end_p95_ms": 30006.51727864742,
+              "end_to_end_p99_ms": 52908.36558488072
+            },
+            {
+              "output_tokens_per_second": 201.7767886163862,
+              "mean_ttft_ms": 1869.3385993052896,
+              "mean_tpot_ms": 37.501320011812844,
+              "ttft_p95_ms": 4838.183346033095,
+              "ttft_p99_ms": 6557.41465136528,
+              "end_to_end_p95_ms": 32452.21756472587,
+              "end_to_end_p99_ms": 57997.63047887803
+            }
+          ]
+        },
+        {
+          "id": "4096-formal",
+          "label": "4K / C8",
+          "variant": "v3",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 386.6923683151607,
+              "mean_ttft_ms": 647.776673774131,
+              "mean_tpot_ms": 18.184461834159855,
+              "ttft_p95_ms": 1267.8865130990744,
+              "ttft_p99_ms": 1826.5495656058192,
+              "end_to_end_p95_ms": 5825.115139223635,
+              "end_to_end_p99_ms": 6313.572297133505
+            },
+            {
+              "output_tokens_per_second": 386.44046748208905,
+              "mean_ttft_ms": 729.327569085966,
+              "mean_tpot_ms": 17.878897310603705,
+              "ttft_p95_ms": 1515.7380502671003,
+              "ttft_p99_ms": 2213.8459707051516,
+              "end_to_end_p95_ms": 6007.318510487675,
+              "end_to_end_p99_ms": 6371.065657325089
+            }
+          ]
+        },
+        {
+          "id": "16384-formal",
+          "label": "16K / C8",
+          "variant": "v3",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 159.69055571224402,
+              "mean_ttft_ms": 2604.4946337461865,
+              "mean_tpot_ms": 39.8525192964749,
+              "ttft_p95_ms": 6415.707832062613,
+              "ttft_p99_ms": 9740.6148160994,
+              "end_to_end_p95_ms": 14194.802119256929,
+              "end_to_end_p99_ms": 15382.993947388599
+            },
+            {
+              "output_tokens_per_second": 160.80393664185158,
+              "mean_ttft_ms": 2884.401930808163,
+              "mean_tpot_ms": 38.467690198768395,
+              "ttft_p95_ms": 5466.752028092742,
+              "ttft_p99_ms": 9848.777563218026,
+              "end_to_end_p95_ms": 14440.412980038673,
+              "end_to_end_p99_ms": 16444.985118228935
+            }
+          ]
+        }
+      ],
+      "scope_zh": "实验冻结。v3 为双卡同卡 C8；v2 五项中 MMLU-Pro 为同卡，其余沿用不同卡位的同口径对照。v4 因宿主内存余量中止。SWE 与 Terminal 仅计请求回放性能。",
+      "scope_en": "Experimental freeze. v3 C8 uses matched cards. In the five-profile v2 snapshot, MMLU-Pro uses matched cards and the other four use protocol-matched controls on different cards. v4 stopped at the host memory reserve guard. SWE and Terminal measure request replay performance only."
+    }
+  ]
+}
