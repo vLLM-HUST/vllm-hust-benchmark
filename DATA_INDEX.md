@@ -3,6 +3,11 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## KV Controller 路由真机回放（2026-11-19）
+
+[同后端配对及公开数据](reports/kv-controller-routing-20261119/README.md)记录 24 与 48 个 SWE-smith program 的整批和请求
+P95。
+
 ## 课题四送测方案 V2（2026-11-19）
 
 [固定 B0 与送测时最新 B1 的四项测试方案](docs/topic4-submission-v2-20261119.md)：明确同轮 F/T、独立参考分母、五项固定范围、16K/32K

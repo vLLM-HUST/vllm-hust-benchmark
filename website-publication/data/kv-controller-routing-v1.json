@@ -1,0 +1,101 @@
+{
+  "schema": "kv-controller-routing/v1",
+  "version": "0.1.6",
+  "date": "2026-11-19",
+  "workload": "SWE-smith",
+  "model": "Qwen2.5-0.5B-Instruct",
+  "hardware": "2 × RTX A6000",
+  "cpu_kv_gib_per_replica": 1,
+  "gpu_kv_mib_per_replica": 512,
+  "source_sha256": {
+    "r12-matched-final.json": "ad900c56af98d18f480e27686e8c1ccfb72ec8971a807e8d2852eef8850c825a",
+    "r13-matched-final.json": "348ff4610e9b770bac8a2f9157d89bb06bbb0f3e731198bd37400fbcc0d62fe3"
+  },
+  "report_path": "reports/kv-controller-routing-20261119/README.md",
+  "groups": [
+    {
+      "programs": 24,
+      "batch_reduction_percent": 4.353901641674362,
+      "throughput_increase_percent": 4.552095397935663,
+      "p95_reduction_range_percent": [
+        67.19096585906912,
+        71.90933772939066
+      ],
+      "gate_passed": false,
+      "pairs": [
+        {
+          "requests": 479,
+          "baseline_seconds": 112.568,
+          "candidate_seconds": 107.6669,
+          "baseline_p95_seconds": 5.565938820150494,
+          "candidate_p95_seconds": 1.5635090761572137,
+          "busy_subset_count": 282,
+          "busy_subset_p95_reduction_percent": 84.73952039989886,
+          "route_rpc_p95_ms": 9.08954069018364
+        },
+        {
+          "requests": 479,
+          "baseline_seconds": 116.2517,
+          "candidate_seconds": 107.5839,
+          "baseline_p95_seconds": 4.569294641587135,
+          "candidate_p95_seconds": 1.4991414389580484,
+          "busy_subset_count": 278,
+          "busy_subset_p95_reduction_percent": 83.88797999733002,
+          "route_rpc_p95_ms": 8.989423513412476
+        },
+        {
+          "requests": 497,
+          "baseline_seconds": 172.3659,
+          "candidate_seconds": 165.0194,
+          "baseline_p95_seconds": 4.2803259755849865,
+          "candidate_p95_seconds": 1.2964113423973345,
+          "busy_subset_count": 308,
+          "busy_subset_p95_reduction_percent": 80.1915681733661,
+          "route_rpc_p95_ms": 9.92809422314167
+        }
+      ]
+    },
+    {
+      "programs": 48,
+      "batch_reduction_percent": 14.709263844698828,
+      "throughput_increase_percent": 17.246027537991402,
+      "p95_reduction_range_percent": [
+        37.51787587739012,
+        56.550997197546046
+      ],
+      "gate_passed": true,
+      "pairs": [
+        {
+          "requests": 965,
+          "baseline_seconds": 148.8205,
+          "candidate_seconds": 126.9301,
+          "baseline_p95_seconds": 6.456647517615551,
+          "candidate_p95_seconds": 3.446926663237811,
+          "busy_subset_count": 839,
+          "busy_subset_p95_reduction_percent": 83.78204864430079,
+          "route_rpc_p95_ms": 9.984856471419334
+        },
+        {
+          "requests": 965,
+          "baseline_seconds": 150.2956,
+          "candidate_seconds": 126.6868,
+          "baseline_p95_seconds": 8.434557464134691,
+          "candidate_p95_seconds": 3.664731108966471,
+          "busy_subset_count": 821,
+          "busy_subset_p95_reduction_percent": 83.58065362254953,
+          "route_rpc_p95_ms": 9.957250207662582
+        },
+        {
+          "requests": 1021,
+          "baseline_seconds": 164.2236,
+          "candidate_seconds": 146.0897,
+          "baseline_p95_seconds": 5.932155110496282,
+          "candidate_p95_seconds": 3.7065365192860327,
+          "busy_subset_count": 918,
+          "busy_subset_p95_reduction_percent": 79.00562708192895,
+          "route_rpc_p95_ms": 10.180674493312836
+        }
+      ]
+    }
+  ]
+}
