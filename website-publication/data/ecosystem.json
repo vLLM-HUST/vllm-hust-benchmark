@@ -31,7 +31,7 @@
     },
     {
       "id": "vllm-hust-extension-manager",
-      "name": "vLLM-HUST Extension Manager",
+      "name": "Extension Manager",
       "artifact_type": "tool",
       "system_role": "extension_management",
       "integration_contracts": [
@@ -53,7 +53,9 @@
       "upstream_repository": null,
       "summary_en": "Provider-neutral discovery, compatibility, configuration, state, plan, render, check, and supervised-run layer. ECPA 0.3.0 is published as pinned GitHub Release artifacts after dual-Python CI, clean-wheel qualification, and one process-observed native Ascend lifecycle. This release does not promote every MOD, Provider, or performance claim to stable support.",
       "summary_zh": "Provider-neutral 的发现、兼容性、配置、状态、plan、render、check 与受监管运行层。ECPA 0.3.0 在双 Python CI、clean-wheel 验收及一次带进程观测证据的原生昇腾生命周期通过后，以固定 GitHub Release 制品发布；这不代表所有 MOD、Provider 或性能结论都自动升级为稳定支持。",
-      "evidence_level": "integration_tested"
+      "evidence_level": "integration_tested",
+      "name_en": "Extension Manager",
+      "name_zh": "Extension Manager"
     },
     {
       "id": "vllm-production-stack",
@@ -2439,9 +2441,9 @@
     },
     {
       "id": "kv-materialization-arrival-control",
-      "name": "KV Materialization Arrival Control",
-      "name_en": "KV Materialization Arrival Control",
-      "name_zh": "KV 物化到达控制",
+      "name": "KV materialization",
+      "name_en": "KV materialization",
+      "name_zh": "KV materialization",
       "artifact_type": "runtime_component",
       "system_role": "kv_materialization_policy",
       "integration_contracts": [],
@@ -3788,9 +3790,9 @@
     },
     {
       "id": "prefill-microflow",
-      "name": "Prefill Microflow",
-      "name_en": "Prefill Microflow",
-      "name_zh": "Prefill Microflow（GDN + FA）",
+      "name": "Microflow",
+      "name_en": "Microflow",
+      "name_zh": "Microflow",
       "artifact_type": "runtime_component",
       "system_role": "prefill_pipeline_optimization",
       "integration_contracts": [
@@ -3840,6 +3842,12 @@
           "name_zh": "张书豪",
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
+        }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "CubeLander",
+          "name": "田景远"
         }
       ]
     },
@@ -4029,9 +4037,9 @@
     },
     {
       "id": "hust-m01-correction",
-      "name": "M01 State Correction",
-      "name_en": "M01 State Correction",
-      "name_zh": "M01 状态校正",
+      "name": "Request State Correction",
+      "name_en": "Request State Correction",
+      "name_zh": "请求状态校正",
       "artifact_type": "runtime_component",
       "integration_contracts": [],
       "deployment_topology": "in_process",
@@ -4052,13 +4060,22 @@
         "worker"
       ],
       "summary_en": "The frozen B1 r6 composition restores hust-m01-correction 1.0 for request-state correction and live snapshot checks in CorrectedWorker. Qualification is scoped to the combined engine.",
-      "summary_zh": "B1 r6 冻结组合包含 hust-m01-correction 1.0，由 CorrectedWorker 执行请求状态校正与活动快照校验。验证范围为整套引擎。"
+      "summary_zh": "B1 r6 冻结组合包含 hust-m01-correction 1.0，由 CorrectedWorker 执行请求状态校正与活动快照校验。验证范围为整套引擎。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ]
     },
     {
       "id": "hust-joint-packed",
-      "name": "Packed Pinned-Host State",
-      "name_en": "Packed Pinned-Host State",
-      "name_zh": "锁页状态合并分配",
+      "name": "Packed host state",
+      "name_en": "Packed host state",
+      "name_zh": "Packed host state",
       "artifact_type": "runtime_component",
       "integration_contracts": [],
       "deployment_topology": "in_process",
@@ -4080,7 +4097,16 @@
         "native"
       ],
       "summary_en": "The frozen B1 r6 composition restores hust-joint-packed 1.0 to pack pinned host state per object and dtype, within a 4 GiB per-rank host-state budget. Qualification is scoped to the combined engine.",
-      "summary_zh": "B1 r6 冻结组合包含 hust-joint-packed 1.0，在每 rank 4 GiB 主机状态预算内，按对象及 dtype 合并锁页状态分配。验证范围为整套引擎。"
+      "summary_zh": "B1 r6 冻结组合包含 hust-joint-packed 1.0，在每 rank 4 GiB 主机状态预算内，按对象及 dtype 合并锁页状态分配。验证范围为整套引擎。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ]
     }
   ]
 }
