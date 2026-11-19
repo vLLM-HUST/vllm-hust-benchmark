@@ -42,3 +42,8 @@ seal. A B1 release is never used as the primary denominator.
 
 [报告与原件](../reports/r8-context-tenant-20261119/README.md)和 `data/r8-context-tenant-20261119/`
 是新增来源。网站消费更新后的固定 benchmark 提交及目录摘要，所有版本继续保留缺项、固定五项与相同补测位置。
+
+## r8 有效算力参考（2026-11-19）
+
+r8.compute_reference
+接入已封存的固定MMLU200/out256三轮完整参考分母复用认证。B1下界89.7838%，50%里程碑达成、90%最终目标未达成；不消去不同F。[统计、原件与复算](../reports/r8-compute-reference-20261119-v2/README.md)。

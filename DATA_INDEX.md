@@ -268,3 +268,7 @@ python -m pytest -q tests/test_data_index.py
 ## B1 r6固定五项复测（2026-11-14）
 
 [15阶段封存复核与四目标验收](reports/five-datasets-r6-20261114/README.md)：10阶段复用、5阶段新增，672条solver/trace请求每臂均完成；保留质量下降、裁判未决、当前MMLU参考及16K/32K、多租户证据缺口。
+
+## r8 当前有效算力参考（2026-11-19）
+
+[已封存三轮认证与网站发布订正](reports/r8-compute-reference-20261119-v2/README.md)：固定MMLU200/out256、BF16/TP2，保留六份必要算量、六份同步原生计时和原完整参考分母。B1效率下界89.7838%，50%里程碑达成、90%最终目标未达成；本次补接已有结果，新增推理0轮。

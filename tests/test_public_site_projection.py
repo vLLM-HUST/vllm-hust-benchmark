@@ -365,3 +365,69 @@ def test_c16_pair_is_restored_intact_only_in_its_evidence_file(tmp_path):
     manifest_path.write_text(json.dumps(manifest))
     with pytest.raises(AssertionError):
         projection.validate(output)
+
+
+def test_current_r8_reference_preserves_certificate_and_denominator_bytes(tmp_path):
+    """A published result must survive the policy projection with its source hashes."""
+    root = MODULE.parents[1]
+    catalog_path = root / "website-publication/data/engine-release-history-v1.json"
+    catalog = json.loads(catalog_path.read_bytes())
+    current = next(row for row in catalog["entries"] if row["id"] == "r8")[
+        "compute_reference"
+    ]
+    assert (
+        current["certificate_kind"] == "qualified_full_reference_denominator_reuse/v1"
+    )
+    source = tmp_path / "source"
+    (source / "data").mkdir(parents=True)
+    for name in (
+        "index.html",
+        "plugins.html",
+        "dataset-introductions.html",
+        "leaderboard-runs.html",
+    ):
+        (source / name).write_text("<main>Inference results</main>")
+    (source / "assets").mkdir()
+    (source / "assets/site.js").write_text("// shared presentation\n")
+    paths = [projection.PUBLIC_ENGINE_HISTORY_PATH] + [
+        current[key]["path"]
+        for key in ("chart", "report", "certificate", "reference_statistics")
+    ]
+    entries = []
+    for name in paths:
+        raw = (root / "website-publication" / name).read_bytes()
+        target = source / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(raw)
+        entries.append(
+            {
+                "website_path": name,
+                "benchmark_path": "website-publication/" + name,
+                "sha256": hashlib.sha256(raw).hexdigest(),
+                "bytes": len(raw),
+            }
+        )
+    (source / "data/benchmark-source-manifest.json").write_text(
+        json.dumps(
+            {
+                "repository": "vLLM-HUST/vllm-hust-benchmark",
+                "files": entries,
+            }
+        )
+    )
+    output = tmp_path / "public"
+    projection.build(source, output, "test-current-reference")
+    projection.validate(output)
+    for name in paths:
+        assert (output / name).read_bytes() == (source / name).read_bytes(), name
+    pair = json.loads((output / current["certificate"]["path"]).read_bytes())
+    stats_path = output / current["reference_statistics"]["path"]
+    assert (
+        pair["qualified_full_reference_statistics_sha256"]
+        == hashlib.sha256(stats_path.read_bytes()).hexdigest()
+    )
+    assert (
+        pair["arms"]["B1"]["efficiency_lower_percent"]
+        == current["arms"]["B1"]["efficiency_lower_percent"]
+    )
+    assert current["milestone_met"] is True and current["final_numeric_met"] is False
