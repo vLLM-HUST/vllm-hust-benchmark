@@ -103,6 +103,28 @@
       ]
     },
     {
+      "id": "sr4-shared-expert-swiglu",
+      "name_zh": "共享专家 MatMul–SwiGLU 与 r8 组合",
+      "aliases": [
+        "sr4",
+        "shared-expert MatMul–SwiGLU"
+      ],
+      "stage": "full_model",
+      "verdict": "regressed",
+      "baseline": "frozen B1-r8; 910B2x2 TP2 BF16 E36/R54",
+      "result_zh": "场景型实验冻结。4K C8 端到端尾延迟两轮改善，16K 吞吐两轮提升，16K TTFT P95 与 MMLU/FrontierScience 答对数回退。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "针对回退机制有实质变更或新增瓶颈证据后，建立新的同口径对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "c6059a6d3d1cf7ea16340d79cccf7bb1a13fa661",
+          "path": "b1-sr4-20261120",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/b1-sr4-20261120"
+        }
+      ]
+    },
+    {
       "id": "vspec-local-argmax",
       "name_zh": "vSpec 局部 argmax",
       "aliases": [
