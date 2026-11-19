@@ -105,3 +105,31 @@ data. Publish source data here, then update fixed-source consumers and verify th
 Keep package metadata sync, release catalog updates, measurement publication and website deployment
 distinct. A catalog entry, a successful CI run or a deployed page is not evidence that inference or
 all four acceptance goals completed. Preserve raw failures and version corrections separately.
+
+## Archive ownership for new work
+
+Each agent that generates or collects new research data is responsible for archiving that data
+as part of its own task. The central historical-container recovery task does not continuously
+back up newly created files. Complete archiving at a stable stage boundary or task handoff;
+do not interrupt another chat to delegate this responsibility.
+
+- Archive actual file bytes, including raw records, failures and negative results, together with
+  the source scripts, configurations and inputs needed to reconstruct them. A reference, path list,
+  URL or index alone is not a data archive. Preserve original versions; corrections are new versions.
+- Route vLLM, ANISE, LUMI, LLMWorkloadSuite and PrefixCache Routing materials to
+  `vLLM-HUST/vllm-hust-benchmark`; route GenNova materials to
+  `GenNova-HUST/gennova-benchmark`. Follow the destination's existing privacy and publication rules;
+  this reminder does not authorize a new public release. Keep private keys and live credentials out
+  of uploads, and retain the existing protected-original handling where applicable.
+- Include source/version identities, original-to-restored path mappings, file counts, byte counts,
+  SHA256 manifests and a runnable recovery command. Check script and data dependencies, permissions,
+  links and required directories. List intentionally excluded runtimes or model weights and how to
+  provision them separately; do not describe unverified dependencies as recovered.
+- Download the uploaded artifacts again, verify archive and original-file hashes, and test recovery
+  into a fresh directory. Report the repository, immutable commit or Release asset, checksums,
+  recovery entry point, actual verification result and any remaining gaps in the task handoff.
+  Successful upload, an index entry or a passing CI job alone does not prove recoverability.
+- Only clean redundant local copies within the user's authorized scope after the remote bytes and
+  fresh recovery have been verified. Preserve unique originals, frozen historical evidence and
+  required local decryption identities. Archiving does not require rerunning experiments or taking
+  additional devices.
