@@ -428,6 +428,10 @@ PUBLIC_MOD_PREVIEWS = {
             "delivery_model": "python_distribution",
             "ownership": "original_contributor_maintained",
             "evidence_level": "hardware_verified",
+            "public_effect_en": "Bounded startup and functional checks cover A6000 PP4/TP1. The tested setup reduced available KV capacity and produced one answer mismatch; it does not establish a general speed or quality gain.",
+            "public_effect_zh": "已有 A6000 PP4/TP1 的有限启动与功能检查。该配置可用 KV 容量下降，且出现一次回答不一致；尚不能据此确认普遍的速度或质量收益。",
+            "public_effect_status": "preview",
+            "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-cuda-mtp#readme",
         },
         "taxonomy": {
             "kind": "runtime_mod",
