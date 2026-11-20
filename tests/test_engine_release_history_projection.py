@@ -61,6 +61,7 @@ def test_release_history_survives_actual_public_build(tmp_path):
         "r7",
         "r8",
         "r9",
+        "r10",
     }
     assert {entry["id"] for entry in value["attempts"]} == {"r1", "r2", "r3"}
     assert json.loads((output / "data/unrelated.json").read_text()) == {"records": []}
@@ -266,3 +267,32 @@ def test_independent_fixed_b0_survives_projection_and_rejects_resigned_changes(
     manifest.write_text(json.dumps(data))
     with pytest.raises(ValueError, match="release history"):
         projection.build(source, tmp_path / "resigned-baseline", "test-policy")
+
+
+def test_r10_candidate_keeps_audited_pairs_and_official_default():
+    catalog = json.loads(
+        (ROOT / "website-publication/data/engine-release-history-v1.json").read_bytes()
+    )
+    source = (ROOT / "reports/r10-fixed-five-20261120/summary.json").read_bytes()
+    entry = next(row for row in catalog["entries"] if row["id"] == "r10")
+    assert entry["publication_status"] == "frozen-candidate"
+    assert catalog["default_release"] != entry["id"]
+    assert entry["measurements"] == json.loads(source)["measurements"]
+    assert [row["id"] for row in entry["measurements"]] == [
+        "mmlu",
+        "hle",
+        "frontier",
+        "swe",
+        "terminal",
+        "4096-formal",
+        "16384-formal",
+    ]
+    assert [
+        arm["requests"] for row in entry["measurements"][:5] for arm in row["arms"]
+    ] == [200, 200, 200, 200, 160, 160, 64, 64, 48, 48]
+    assert entry["sources"][-1]["sha256"] == hashlib.sha256(source).hexdigest()
+    assert all(
+        arm["failed"] == 0 and arm["end_to_end_p99_ms"] >= arm["end_to_end_p95_ms"] > 0
+        for row in entry["measurements"]
+        for arm in row["arms"]
+    )

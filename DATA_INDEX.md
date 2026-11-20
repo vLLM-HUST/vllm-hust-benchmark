@@ -12,6 +12,10 @@
 [单峰和双峰真机配对](reports/instance-controller-scaling-20261120/README.md)记录完成请求、延迟、峰内接单和预约资源，覆盖默认 CUDA
 Graph 模式。
 
+## r10 固定五项与 C8（2026-11-20）
+
+[B1-r10 一键实测](reports/r10-fixed-five-20261120/README.md)包含固定五项、4K/16K C8、两臂评分和封存来源。
+
 ## SR系列探索与候选处置（2026-11-20）
 
 [B1-sr4 共享专家融合](reports/b1-sr4-20261120/README.md)记录两轮 C8、候选 C1 和固定五项的可公开配对结果。
