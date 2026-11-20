@@ -3,6 +3,10 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## R9 书生模型集成验证（2026-11-20）
+
+[原生单模型实测及可恢复证据](reports/r9-intern-native-20261120/README.md)记录MMLU200、C8连续4K/16K与公开R8参考的全部收益、取舍、SDK字节等价和安装/复算回执；不作为Original018或项目完整验收。
+
 ## Instance Controller 扩缩容实测（2026-11-20）
 
 [单峰和双峰真机配对](reports/instance-controller-scaling-20261120/README.md)记录完成请求、延迟、峰内接单和预约资源，覆盖默认 CUDA
