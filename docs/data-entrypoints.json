@@ -62,7 +62,7 @@
     "website-publication/data/dataset_validation_v1.b0.json": "806660ab87d26bd426bcaddacc30e9bc030028f57c0ea62b23c8560eb7298584",
     "website-publication/data/dataset_validation_v1.empty.json": "c2ee55aa22a212142b7b313d2b178acf8c4bf8ba713a1d98b87e34914fe10ef5",
     "website-publication/data/ecosystem.json": "2f10a01c7c4c1e8078319812a237a898d8118cb34838ca0ed971c5a7e4880484",
-    "website-publication/data/engine-release-history-v1.json": "58f70ce670689a5d77b35143256e99bbcff29e8f2dab1e2a0c91c0122bb539ba",
+    "website-publication/data/engine-release-history-v1.json": "8b1bd2cad8ce08c354aced504d69cd90b5848c68b3a09a1271e3c47ab4a5608e",
     "website-publication/data/examples/frontier-submission/README.md": "fd9b6dd05694594a5473e604932e646569c5937bc76678a8710d62e019590311",
     "website-publication/data/examples/frontier-submission/evidence.json": "54b69199c24872c6638263a3afefd60a5dc167c93e6648d6b00c98884670e086",
     "website-publication/data/examples/frontier-submission/snapshot.json": "7a6526c3688c60ce03b6124c0fabbf67161f1e81b66105deba9eab00ca0f8fca",
@@ -96,6 +96,7 @@
     "website-publication/data/five-datasets-standard-20261113/summary-public-v2.json": "9d54429c34c7a4dadd1f3f3bbe948d388c8f162858d979a4b88c5af141637b10",
     "website-publication/data/five-datasets-standard-20261113/throughput-latency.png": "018741de8483f04da92a6dd67f8b5fc7bd1ff5c38069640b9b732b1e97d507b2",
     "website-publication/data/five-datasets-standard-20261113/throughput-latency.svg": "56bb77463fff6e595098368ce8f4f4d498ad51c24b8cb6145907dacd466d6910",
+    "website-publication/data/fixed-b0-original018-v1.json": "8b5bbddb6ae681513f8476e02f27ec5333a486a51a45848ac01092b310f27d4d",
     "website-publication/data/frontierscience-20261013/manifest.json": "83835de839ecfd2c6f92ca79d7fd8e0c8c3a662fd6ec3cc47e8a5b8de7a378cd",
     "website-publication/data/frontierscience-20261013/original-manifest.json.gz": "fe07f1a5e853fd2fc97e149497843cb3d337ece79d7cf4e5c6efb04490ccf8c3",
     "website-publication/data/frontierscience-20261013/report.json": "d40cb9dd3c46a3438b3b8846a2d44eef509317dfba84fe87c86c0b1d2708147f",
@@ -749,7 +750,7 @@
       "storage_paths": [
         "website-publication/data/engine-release-history-v1.json"
       ],
-      "sha256": "58f70ce670689a5d77b35143256e99bbcff29e8f2dab1e2a0c91c0122bb539ba",
+      "sha256": "8b1bd2cad8ce08c354aced504d69cd90b5848c68b3a09a1271e3c47ab4a5608e",
       "snapshot_publication_status": "not-in-snapshot"
     },
     {
@@ -1047,6 +1048,15 @@
         "website-publication/data/five-datasets-standard-20261113/throughput-latency.svg"
       ],
       "sha256": "56bb77463fff6e595098368ce8f4f4d498ad51c24b8cb6145907dacd466d6910",
+      "snapshot_publication_status": "not-in-snapshot"
+    },
+    {
+      "website_path": "data/fixed-b0-original018-v1.json",
+      "benchmark_path": "website-publication/data/fixed-b0-original018-v1.json",
+      "storage_paths": [
+        "website-publication/data/fixed-b0-original018-v1.json"
+      ],
+      "sha256": "8b5bbddb6ae681513f8476e02f27ec5333a486a51a45848ac01092b310f27d4d",
       "snapshot_publication_status": "not-in-snapshot"
     },
     {
@@ -4834,6 +4844,14 @@
       "resolution": "mapped"
     },
     {
+      "target": "data/fixed-b0-original018-v1.json",
+      "consumers": [
+        "website-publication/data/engine-release-history-v1.json"
+      ],
+      "benchmark_path": "website-publication/data/fixed-b0-original018-v1.json",
+      "resolution": "mapped"
+    },
+    {
       "target": "data/frontierscience-20261013/report.json",
       "consumers": [
         "website-publication/data/dataset-matrix-v1.json"
@@ -5382,6 +5400,7 @@
       "target": "data/r8-compute-reference-20261119-v2/compute-reference/matched-reference-pair.json",
       "consumers": [
         "website-publication/data/engine-release-history-v1.json",
+        "website-publication/data/fixed-b0-original018-v1.json",
         "website-publication/data/r8-compute-reference-20261119-v2/summary-public-v1.json"
       ],
       "benchmark_path": "website-publication/data/r8-compute-reference-20261119-v2/compute-reference/matched-reference-pair.json",
@@ -5391,6 +5410,7 @@
       "target": "data/r8-compute-reference-20261119-v2/compute-reference/qualified-full-reference-statistics.json",
       "consumers": [
         "website-publication/data/engine-release-history-v1.json",
+        "website-publication/data/fixed-b0-original018-v1.json",
         "website-publication/data/r8-compute-reference-20261119-v2/summary-public-v1.json"
       ],
       "benchmark_path": "website-publication/data/r8-compute-reference-20261119-v2/compute-reference/qualified-full-reference-statistics.json",
@@ -8861,7 +8881,8 @@
     {
       "target": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/bd5448c9f266cc0301c3d4cef2a10b9ab98f7205/engines/b0-vllm-v018.json",
       "consumers": [
-        "website-publication/data/engine-release-history-v1.json"
+        "website-publication/data/engine-release-history-v1.json",
+        "website-publication/data/fixed-b0-original018-v1.json"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -8995,6 +9016,7 @@
       "target": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/performance-exploration-20261115-r1/r8-context-tenant-pair-20261119-r6-raw.zip",
       "consumers": [
         "website-publication/data/engine-release-history-v1.json",
+        "website-publication/data/fixed-b0-original018-v1.json",
         "website-publication/data/r8-context-tenant-20261119/summary-public-v1.json"
       ],
       "resolution": "literal-external-link-not-fetched"
@@ -11900,6 +11922,22 @@
         "website-publication/data/five-datasets-standard-20261113/summary-public-v2.json"
       ],
       "benchmark_path": "reports/project-final-goals-20261113/source-excerpt.txt",
+      "resolution": "tracked-evidence-path"
+    },
+    {
+      "target": "reports/r8-context-tenant-20261119/summary-public-v1.json",
+      "consumers": [
+        "website-publication/data/fixed-b0-original018-v1.json"
+      ],
+      "benchmark_path": "reports/r8-context-tenant-20261119/summary-public-v1.json",
+      "resolution": "tracked-evidence-path"
+    },
+    {
+      "target": "reports/r8-fixed-five-20261118/summary-public-v2.json",
+      "consumers": [
+        "website-publication/data/fixed-b0-original018-v1.json"
+      ],
+      "benchmark_path": "reports/r8-fixed-five-20261118/summary-public-v2.json",
       "resolution": "tracked-evidence-path"
     },
     {
@@ -16326,6 +16364,14 @@
         "website:assets/midterm-report.js"
       ],
       "benchmark_path": "website-publication/data/mmlu-pro-20261012/report.json",
+      "resolution": "tracked-evidence-path"
+    },
+    {
+      "target": "website-publication/data/r8-compute-reference-20261119-v2/summary-public-v1.json",
+      "consumers": [
+        "website-publication/data/fixed-b0-original018-v1.json"
+      ],
+      "benchmark_path": "website-publication/data/r8-compute-reference-20261119-v2/summary-public-v1.json",
       "resolution": "tracked-evidence-path"
     },
     {
@@ -21103,8 +21149,8 @@
     }
   ],
   "counts": {
-    "publication_bindings": 243,
-    "references": 1395,
+    "publication_bindings": 244,
+    "references": 1399,
     "releases": 33,
     "assets": 478
   }

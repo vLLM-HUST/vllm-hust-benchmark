@@ -15,7 +15,9 @@ from urllib.parse import unquote, urlsplit
 from pathlib import Path
 
 PUBLIC_ENGINE_HISTORY_PATH = "data/engine-release-history-v1.json"
-PUBLIC_ENGINE_HISTORY_SHA256 = "58f70ce670689a5d77b35143256e99bbcff29e8f2dab1e2a0c91c0122bb539ba"  # pragma: allowlist secret -- fixed public release catalog
+PUBLIC_FIXED_B0_PATH = "data/fixed-b0-original018-v1.json"
+PUBLIC_FIXED_B0_SHA256 = "8b5bbddb6ae681513f8476e02f27ec5333a486a51a45848ac01092b310f27d4d"  # pragma: allowlist secret -- fixed public B0 observations
+PUBLIC_ENGINE_HISTORY_SHA256 = "8b1bd2cad8ce08c354aced504d69cd90b5848c68b3a09a1271e3c47ab4a5608e"  # pragma: allowlist secret -- fixed public release catalog
 
 
 PROJECT = re.compile(
@@ -917,8 +919,12 @@ def build(source, destination, policy_revision):
             continue
         if suffix == ".json" and name != "data/benchmark-source-manifest.json":
             data = json.loads(raw)
-            if name == PUBLIC_ENGINE_HISTORY_PATH:
-                if hashlib.sha256(raw).hexdigest() != PUBLIC_ENGINE_HISTORY_SHA256:
+            if name in (PUBLIC_ENGINE_HISTORY_PATH, PUBLIC_FIXED_B0_PATH):
+                if hashlib.sha256(raw).hexdigest() != (
+                    PUBLIC_ENGINE_HISTORY_SHA256
+                    if name == PUBLIC_ENGINE_HISTORY_PATH
+                    else PUBLIC_FIXED_B0_SHA256
+                ):
                     raise ValueError("Unreviewed engine release history bytes")
                 documents[name] = (data, copy.deepcopy(data), raw)
                 continue
@@ -943,7 +949,7 @@ def build(source, destination, policy_revision):
     for name, (original, _, raw) in documents.items():
         projected = (
             copy.deepcopy(original)
-            if name == PUBLIC_ENGINE_HISTORY_PATH
+            if name in (PUBLIC_ENGINE_HISTORY_PATH, PUBLIC_FIXED_B0_PATH)
             else project_json(
                 original,
                 removed_ids,
@@ -1022,10 +1028,11 @@ def validate(destination):
             continue
         data = json.loads(path.read_text())
         name = path.relative_to(destination).as_posix()
-        if name == PUBLIC_ENGINE_HISTORY_PATH:
-            assert (
-                hashlib.sha256(path.read_bytes()).hexdigest()
-                == PUBLIC_ENGINE_HISTORY_SHA256
+        if name in (PUBLIC_ENGINE_HISTORY_PATH, PUBLIC_FIXED_B0_PATH):
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == (
+                PUBLIC_ENGINE_HISTORY_SHA256
+                if name == PUBLIC_ENGINE_HISTORY_PATH
+                else PUBLIC_FIXED_B0_SHA256
             ), path
             continue
         validate_betterscale_card(name, data)
