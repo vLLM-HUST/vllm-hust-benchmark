@@ -42,4 +42,10 @@ website. Explicit frozen-target migrations retain the full target-object guard.
 
 ## Fixed B0 observations
 
-`data/fixed-b0-original018-v1.json` independently preserves the published original018 B0: five fixed profiles, four context/tenant phases, and original native compute/reference statistics. Regenerate with `python scripts/build_fixed_baseline_observations.py`; `--check` compares every published byte and the catalog descriptor against unchanged source reports. Candidate releases do not own or clear this record. Displaying B0 alone never supplies a missing B1, a new pair, or a new acceptance result. Keep the original model, workload, dates, source seals and reference denominator. Existing paired reports retain their own admitted B0 observations.
+`data/fixed-b0-original018-v1.json` independently preserves the published original018 B0: five fixed
+profiles, four context/tenant phases, and original native compute/reference statistics. Regenerate
+with `python scripts/build_fixed_baseline_observations.py`; `--check` compares every published byte
+and the catalog descriptor against unchanged source reports. Candidate releases do not own or clear
+this record. Displaying B0 alone never supplies a missing B1, a new pair, or a new acceptance
+result. Keep the original model, workload, dates, source seals and reference denominator. Existing
+paired reports retain their own admitted B0 observations.
