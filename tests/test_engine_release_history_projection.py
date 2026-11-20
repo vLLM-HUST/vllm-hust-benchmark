@@ -234,3 +234,35 @@ def test_r9_single_model_data_cannot_be_borrowed_as_original018_acceptance():
         ],
         check=True,
     )
+
+
+def test_independent_fixed_b0_survives_projection_and_rejects_resigned_changes(
+    tmp_path,
+):
+    source, _ = prepare(tmp_path)
+    path = ROOT / "website-publication/data/fixed-b0-original018-v1.json"
+    raw = path.read_bytes()
+    target = source / projection.PUBLIC_FIXED_B0_PATH
+    target.write_bytes(raw)
+    manifest = source / "data/benchmark-source-manifest.json"
+    data = json.loads(manifest.read_bytes())
+    data["files"].append(
+        dict(
+            website_path=projection.PUBLIC_FIXED_B0_PATH,
+            sha256=hashlib.sha256(raw).hexdigest(),
+            bytes=len(raw),
+        )
+    )
+    manifest.write_text(json.dumps(data))
+    output = tmp_path / "baseline-public"
+    projection.build(source, output, "test-policy")
+    projection.validate(output)
+    assert (output / projection.PUBLIC_FIXED_B0_PATH).read_bytes() == raw
+    changed = json.loads(raw)
+    changed["profiles"][0]["arm"]["output_tokens_per_second"] *= 2
+    raw = json.dumps(changed).encode()
+    target.write_bytes(raw)
+    data["files"][-1].update(sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw))
+    manifest.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="release history"):
+        projection.build(source, tmp_path / "resigned-baseline", "test-policy")
