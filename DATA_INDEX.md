@@ -33,6 +33,7 @@ P95。
 
 [多轮缓存竞争与四项固定负载](reports/controller-r8-20261118/README.md)：完整保留正收益、退化、输出量和原评分；多轮新输入为合成token-ID并继承真实输出，不是完整Agent解决率。Humanity’s
 Last Exam按要求暂缓。
+[时延补充数据](website-publication/data/controller-r8-latency-v1.json)从已封存的请求与引擎计数器复算，区分客户端和引擎口径。
 
 ## 真实上下文与四租户补测（2026-11-15）
 
