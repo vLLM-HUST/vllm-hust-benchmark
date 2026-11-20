@@ -9,7 +9,7 @@ import shutil
 import re
 
 SOURCE_MANIFEST_SHA256 = (  # pragma: allowlist secret -- immutable public evidence identity
-    "32f6ac06dd4a6be03e26591c2e2e1aca437a01dbace9a1757e74e1e1a15fe5f7"
+    "32f6ac06dd4a6be03e26591c2e2e1aca437a01dbace9a1757e74e1e1a15fe5f7"  # pragma: allowlist secret -- public manifest hash
 )
 SOURCE_COMMIT = "72a677b591f9c5c0d911e9a280759278bc0f4a74"  # pragma: allowlist secret -- immutable public evidence identity
 
