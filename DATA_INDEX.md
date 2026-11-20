@@ -5,7 +5,8 @@
 
 ## DeepLinkEngine 安装与流程原件（2026-11-20）
 
-[安装、API 实测和未完成流程的可恢复存档](reports/deeplinkengine-user-journey-20261120/README.md)补齐独立 HTTP 验证，保留失败和停止原因；新增推理实验 0 次，不替代 R9/R10 或完整项目验收。
+[安装、API 实测和未完成流程的可恢复存档](reports/deeplinkengine-user-journey-20261120/README.md)补齐独立 HTTP
+验证，保留失败和停止原因；新增推理实验 0 次，不替代 R9/R10 或完整项目验收。
 
 ## R9 书生模型集成验证（2026-11-20）
 
