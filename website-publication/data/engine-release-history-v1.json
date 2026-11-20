@@ -2380,6 +2380,284 @@
           "Utilization is a time-weighted device sample estimate, separate from effective compute.",
           "Preserve the original qualitative context/tenant requirements; no new numerical pass threshold is imposed."
         ]
+      },
+      "compute_reference": {
+        "schema": "engine-current-compute-reference/v1",
+        "engine_release": "full-answer-b1-20261117-r8",
+        "baseline_id": "original018-cann8.5.1",
+        "status": "measured",
+        "full_model_certificate": true,
+        "accepted_scope": "topic4_submission_v2_fixed200_max256_three_formal_runs",
+        "certificate_kind": "qualified_full_reference_denominator_reuse/v1",
+        "efficiency_exact_percent": null,
+        "hardware_peak_utilization_percent": null,
+        "model": "Qwen3.5-35B-A3B",
+        "precision": "BF16",
+        "tensor_parallel_size": 2,
+        "chip_model": "Ascend 910B2",
+        "protocol": {
+          "requests": 200,
+          "max_completion_tokens": 256,
+          "formal_repetitions": 3,
+          "temperature": 0,
+          "seed": 0,
+          "eos": "enabled",
+          "quality_plan_sha256": "f4ed4ce5956c9ed08f360400b5a996ef92a217ce295d50648d4dc06443db768e"
+        },
+        "source_status_sha256": "11cfcadce524b2e8a505e8d882dc780754b67603308d4e07683059cbee93028f",
+        "source_pair_sha256": "fef1f015501b1b6b78ee344e3222c793ebc70338e0bc9e4c25b27d9d7c8b6bcb",
+        "source_repository": "DeepLinkNext/DeepLinkEngine",
+        "source_revision": "72a677b591f9c5c0d911e9a280759278bc0f4a74",
+        "source_manifest_sha256": "32f6ac06dd4a6be03e26591c2e2e1aca437a01dbace9a1757e74e1e1a15fe5f7",
+        "raw_asset": {
+          "url": "https://github.com/DeepLinkNext/DeepLinkEngine/releases/download/r8-evaluation-reference-20261119-v3/r8-current-work-and-timing-20261119-v1.zip",
+          "sha256": "8cc9f36228ea321ee4234a39925c9517bda2f55382e14e05d889fd58768af102",
+          "bytes": 159723,
+          "asset_id": 769719017,
+          "redownload_verified": true,
+          "scope": "Six current necessary-work records and six synchronized native timing records; source seals preserved; complete source and reference reconstruction are linked separately."
+        },
+        "arms": {
+          "B0": {
+            "F_interval": [
+              "5412318178236308",
+              "5441387470064231"
+            ],
+            "T_seconds": "453.985942159",
+            "formal_repetitions": 3,
+            "achieved_tflops_per_card_interval": [
+              "5.960887414814207839599889975235439105155",
+              "5.992903044736226470834068230106964746968"
+            ],
+            "reference_F_interval": [
+              "5487388087149780",
+              "5488258327989369"
+            ],
+            "reference_seconds_lower": "102.3231709195348958960064",
+            "reference_seconds_exact": null,
+            "reference_tflops_per_card_upper": "26.81825767648090573566921216250915821371",
+            "efficiency_lower_percent": "22.22697494640671988678248116022501679767",
+            "efficiency_exact_percent": null,
+            "original_reference_repetitions": [
+              {
+                "name": "uninstrumented-1",
+                "F_interval": [
+                  1829129362383260,
+                  1829419442663123
+                ],
+                "Tref_lower_seconds": "34.1077236398449652986688",
+                "requests": 200,
+                "input_tokens": 282265,
+                "output_tokens": 51200,
+                "source_sha256": "0c51f8f42043eff8f82ec23888702cdd1583a9d68835135e32190c7514c8feff"
+              },
+              {
+                "name": "uninstrumented-2",
+                "F_interval": [
+                  1829129362383260,
+                  1829419442663123
+                ],
+                "Tref_lower_seconds": "34.1077236398449652986688",
+                "requests": 200,
+                "input_tokens": 282265,
+                "output_tokens": 51200,
+                "source_sha256": "6db7784be4bb652d1d0179e6673f7405314a2cb5077adf0321c765cb152ab30d"
+              },
+              {
+                "name": "uninstrumented-3",
+                "F_interval": [
+                  1829129362383260,
+                  1829419442663123
+                ],
+                "Tref_lower_seconds": "34.1077236398449652986688",
+                "requests": 200,
+                "input_tokens": 282265,
+                "output_tokens": 51200,
+                "source_sha256": "b91eb934d213473b74f2cc499f94b2c72d167682082a4e520254c9a6cb35eb82"
+              }
+            ],
+            "repetitions": [
+              {
+                "repetition": 1,
+                "F_interval": [
+                  1804159232956559,
+                  1813847989643210
+                ],
+                "T_seconds": "149.063354205",
+                "geometry_sha256": "8e14ce5f0298aefaa6a79efa64032c5da5179bab730903a4f5945f242ea2f4dc",
+                "timing_sha256": "d1e7eab183f3bbe14fa9ad043b4e0f1c45f8d45c4e012230d2ddc039ee91a16f",
+                "work_sha256": "1ac53e5e63d37820520fec54b473208322936babfd90a6b3c6130ef004e69c82",
+                "native_source_seal_sha256": "45943096b5e7116d0eaaf6f99f03d4e4542f1b04e587d094d3da538fce549f17"
+              },
+              {
+                "repetition": 2,
+                "F_interval": [
+                  1804144929773416,
+                  1813837266790113
+                ],
+                "T_seconds": "148.908074954",
+                "geometry_sha256": "c987cc58489af679241678c41fa873cb3bf2bd57d7c5149c4209a4d00208cbe8",
+                "timing_sha256": "5797030fd7d9b29974b4fe201c391567fd053c776f1b79207e937cc5124d0d61",
+                "work_sha256": "45c74f27250e1ff8334638d5da9d2b7da196118cb5adef23fafb674c9d7daabd",
+                "native_source_seal_sha256": "45943096b5e7116d0eaaf6f99f03d4e4542f1b04e587d094d3da538fce549f17"
+              },
+              {
+                "repetition": 3,
+                "F_interval": [
+                  1804014015506333,
+                  1813702213630908
+                ],
+                "T_seconds": "156.014513",
+                "geometry_sha256": "330b1aa3f76215d2961c9d6ee740bec8e9ee92e9b139589c2e9620b855d768e2",
+                "timing_sha256": "458767e1eb4f1bfe210b640c398deea6896bdc7842449f0c30cd2e82829f92dd",
+                "work_sha256": "7a1f94d1fcb677939e0f79fbd07ac7b0974b165eef93859843c80687d1d09e8b",
+                "native_source_seal_sha256": "45943096b5e7116d0eaaf6f99f03d4e4542f1b04e587d094d3da538fce549f17"
+              }
+            ],
+            "shared_work_cancellation_used": false,
+            "hardware_peak_utilization_percent": null,
+            "source_and_timing_qualified": true,
+            "full_model_certificate": true,
+            "statistic": "100 * C_current_lower / C_reference_upper; original F_reference and T_reference retained; sum all current repetitions before division",
+            "native_checksums_sha256": "45943096b5e7116d0eaaf6f99f03d4e4542f1b04e587d094d3da538fce549f17",
+            "necessary_work_sha256": "cb959a7c6e3a360782dc57415177991be6e84d71f8c83210ba6c1d1fb1acf4ee",
+            "reference_graph_sha256": "52998fa44bcd5e401162228a3b00343f8512e14add0fd4b271cf7d12ffd09e4e"
+          },
+          "B1": {
+            "F_interval": [
+              "5412083385456264",
+              "5441167790478965"
+            ],
+            "T_seconds": "155.837258899",
+            "formal_repetitions": 3,
+            "achieved_tflops_per_card_interval": [
+              "17.36453600279218294183427903544724296376",
+              "17.45785259866978032811554913924448878470"
+            ],
+            "reference_F_interval": [
+              "5438115361780845",
+              "5438638334450385"
+            ],
+            "reference_seconds_lower": "140.60316791316519",
+            "reference_seconds_exact": null,
+            "reference_tflops_per_card_upper": "19.34038334687175052309470403284461724716",
+            "efficiency_lower_percent": "89.78382533250482332421774762109257529198",
+            "efficiency_exact_percent": null,
+            "original_reference_repetitions": [
+              {
+                "name": "uninstrumented-1",
+                "F_interval": [
+                  1812705120593615,
+                  1812879444816795
+                ],
+                "Tref_lower_seconds": "46.86772263772173",
+                "requests": 200,
+                "input_tokens": 282265,
+                "output_tokens": 51200,
+                "source_sha256": "0407c570c288265d9b5038a7e2a87eb1e8ea87553551785c7f6695a073ab2a86"
+              },
+              {
+                "name": "uninstrumented-2",
+                "F_interval": [
+                  1812705120593615,
+                  1812879444816795
+                ],
+                "Tref_lower_seconds": "46.86772263772173",
+                "requests": 200,
+                "input_tokens": 282265,
+                "output_tokens": 51200,
+                "source_sha256": "c5bea9d69988f75e68fe6c141965a13e23d8a34533a11fb84a00bff465c12a10"
+              },
+              {
+                "name": "uninstrumented-3",
+                "F_interval": [
+                  1812705120593615,
+                  1812879444816795
+                ],
+                "Tref_lower_seconds": "46.86772263772173",
+                "requests": 200,
+                "input_tokens": 282265,
+                "output_tokens": 51200,
+                "source_sha256": "9a198f5dcb9e6a062b9caac2a69040508e82d4210c852fd8b007f1f671113746"
+              }
+            ],
+            "repetitions": [
+              {
+                "repetition": 1,
+                "F_interval": [
+                  1804020997629578,
+                  1813718590892487
+                ],
+                "T_seconds": "52.243462998",
+                "geometry_sha256": "44e679c8688495ec1c9d9b9dd7e596fffbc1dd31f358c235150e21604add218c",
+                "timing_sha256": "b2f8e221469d9213b59ae756bbade8bbc4786dec58ef7fae8374f00a3efd5db5",
+                "work_sha256": "ae9a303514311fd0bc6cdc7d536fc2ec7ab51ecccfb5f3b6e5f5733972779374",
+                "native_source_seal_sha256": "80a93a97928211d5cc44af1bcc2ad097c4c79f342106922293852ed95b0cd1f3"
+              },
+              {
+                "repetition": 2,
+                "F_interval": [
+                  1804020997629578,
+                  1813718590892487
+                ],
+                "T_seconds": "52.233316732",
+                "geometry_sha256": "44e679c8688495ec1c9d9b9dd7e596fffbc1dd31f358c235150e21604add218c",
+                "timing_sha256": "2cfaee878ab4b8d3eb16a912ab2cf90ab49d9f575d6a432e9e2eca8d133f1594",
+                "work_sha256": "ae9a303514311fd0bc6cdc7d536fc2ec7ab51ecccfb5f3b6e5f5733972779374",
+                "native_source_seal_sha256": "80a93a97928211d5cc44af1bcc2ad097c4c79f342106922293852ed95b0cd1f3"
+              },
+              {
+                "repetition": 3,
+                "F_interval": [
+                  1804041390197108,
+                  1813730608693991
+                ],
+                "T_seconds": "51.360479169",
+                "geometry_sha256": "f7c503a9fc499432621bce40f00fd69d8cce60c1dc915fcb5d6621a131357518",
+                "timing_sha256": "49afe4cae35d335dd24f188d4638b81f09974825c2229a5f757e815b4d83ebc5",
+                "work_sha256": "6091f9876ecb7dbc66e43c047a09716de83f88246cdaa20513f3ba5a7b471aa9",
+                "native_source_seal_sha256": "80a93a97928211d5cc44af1bcc2ad097c4c79f342106922293852ed95b0cd1f3"
+              }
+            ],
+            "shared_work_cancellation_used": false,
+            "hardware_peak_utilization_percent": null,
+            "source_and_timing_qualified": true,
+            "full_model_certificate": true,
+            "statistic": "100 * C_current_lower / C_reference_upper; original F_reference and T_reference retained; sum all current repetitions before division",
+            "native_checksums_sha256": "80a93a97928211d5cc44af1bcc2ad097c4c79f342106922293852ed95b0cd1f3",
+            "necessary_work_sha256": "cb959a7c6e3a360782dc57415177991be6e84d71f8c83210ba6c1d1fb1acf4ee",
+            "reference_graph_sha256": "52998fa44bcd5e401162228a3b00343f8512e14add0fd4b271cf7d12ffd09e4e"
+          }
+        },
+        "milestone_met": true,
+        "final_numeric_met": false,
+        "chart": {
+          "path": "data/r8-compute-reference-20261119-v2/current-reference-bounds.svg",
+          "sha256": "6a65f60288cb6e6e46d84c23d1ff771b9bce78bb44408f77189e27635ff0e89e",
+          "bytes": 47499
+        },
+        "report": {
+          "path": "data/r8-compute-reference-20261119-v2/report.html",
+          "sha256": "4af52c7a22fdad63bb8e8d3f176ac2a0dc5455bae7e2a74af226ef7c57f2078e",
+          "bytes": 3205
+        },
+        "certificate": {
+          "path": "data/r8-compute-reference-20261119-v2/compute-reference/matched-reference-pair.json",
+          "sha256": "fef1f015501b1b6b78ee344e3222c793ebc70338e0bc9e4c25b27d9d7c8b6bcb",
+          "bytes": 9683
+        },
+        "reference_statistics": {
+          "path": "data/r8-compute-reference-20261119-v2/compute-reference/qualified-full-reference-statistics.json",
+          "sha256": "6611fee282b552092f8a807ad02ec517cbadaccde08423376acd7d6e8b439870",
+          "bytes": 6395
+        },
+        "recomputation_url": "https://github.com/DeepLinkNext/DeepLinkEngine/blob/72a677b591f9c5c0d911e9a280759278bc0f4a74/benchmark/reports/r8-compute-reference-20261119-v1/README.md",
+        "original_reference_work_and_time_retained": true,
+        "original_efficiency_used": false,
+        "shared_work_cancellation_used": false,
+        "source_and_workload_applicability_qualified": true,
+        "clean_native_clock_source_qualified": true,
+        "full_reference_denominator_qualified": true
       }
     }
   ],
