@@ -3,6 +3,11 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## DeepLinkEngine 安装与流程原件（2026-11-20）
+
+[安装、API 实测和未完成流程的可恢复存档](reports/deeplinkengine-user-journey-20261120/README.md)补齐独立 HTTP
+验证，保留失败和停止原因；新增推理实验 0 次，不替代 R9/R10 或完整项目验收。
+
 ## R9 书生模型集成验证（2026-11-20）
 
 [原生单模型实测及可恢复证据](reports/r9-intern-native-20261120/README.md)记录MMLU200、C8连续4K/16K与公开R8参考的全部收益、取舍、SDK字节等价和安装/复算回执；不作为Original018或项目完整验收。
