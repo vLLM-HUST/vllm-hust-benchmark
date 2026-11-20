@@ -1,7 +1,8 @@
 {
   "schema": "vllm-hust-engine-release-history/v1",
-  "default_release": "r8",
+  "default_release": "r9",
   "order": [
+    "r9",
     "r8",
     "r7",
     "r6",
@@ -2658,6 +2659,82 @@
         "source_and_workload_applicability_qualified": true,
         "clean_native_clock_source_qualified": true,
         "full_reference_denominator_qualified": true
+      }
+    },
+    {
+      "id": "r9",
+      "frozen_date": "2026-11-19",
+      "release": "full-answer-b1-20261119-r9",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261119-r9",
+      "profile": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/84cc5dcd02a6b0ac7b346ff3cd96fbb2765d301f/engines/b1-r9.json",
+        "sha256": "76321840aee0cd876431efb8b56b49a5d02aae2c46c153bdb0fcb7a109c9486b",
+        "bytes": 2962
+      },
+      "mods": [
+        "Extension Manager",
+        "BetterScale",
+        "Microflow",
+        "KV materialization",
+        "M01 correction",
+        "Packed host state",
+        "Sealed serving warmup",
+        "Guarded progress async",
+        "Capacity tuning",
+        "Short prefill tail",
+        "intern-s2",
+        "state-page-copy"
+      ],
+      "settings": {
+        "E": 36,
+        "R": 54,
+        "MTP": 2,
+        "graph": "FULL",
+        "state_gib_per_rank": 4,
+        "kv_gib_per_rank": 20
+      },
+      "measurements": [],
+      "sources": [
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/84cc5dcd02a6b0ac7b346ff3cd96fbb2765d301f/engines/b1-r9-overlay.json",
+          "sha256": "eb35bf643d955751510333ad2e069d5b9738e7773630d4c199909963cbe26a27",
+          "bytes": 7421
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/84cc5dcd02a6b0ac7b346ff3cd96fbb2765d301f/mods/active-stack-r9.json",
+          "sha256": "a00fdce8117f7770128fba51e0e4573ca0ee469b6a3a37dde777c1b21a7aca20",
+          "bytes": 5453
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/full-answer-b1-20261119-r9/native-published-reference-v20.json",
+          "sha256": "0a394374301810d19fad4c9740c55e394baa3712d650963db503eb5824d60774",
+          "bytes": 12627
+        }
+      ],
+      "label_zh": "书生模型集成实测",
+      "label_en": "Intern-S2 model integration",
+      "baseline_id": "original018-cann8.5.1",
+      "scope_zh": "书生完成MMLU200及C8连续4K/16K单模型验证，与此前公开R8数据对照；本版尚无Original018固定五项、上下文与四租户配对结果。",
+      "scope_en": "Intern-S2 completed MMLU200 and continuous C8 4K/16K single-model qualification against published R8 data. This version has no Original018 fixed-five, context or four-tenant pairs.",
+      "method_zh": "MMLU200保留原题序、8192输出预算及共同预热和编译封边。连续C8按60秒不计分预热、300秒正式提交后排空，out256、seed17、ignore_eos；客户端仅修改服务模型别名，长度用书生原生tokenizer验证。按用户要求复用网站已发布R8参考，不重跑Qwen。",
+      "method_en": "MMLU200 retains original order,8192 output budget,warmup and compilation seals. Continuous C8 uses60s untimed warmup,300s submissions plus drain,out256,seed17 and ignored EOS; only the served-model alias changes and Intern-native lengths are verified. Published website R8 results are reused as requested; Qwen is not rerun.",
+      "quality_note_zh": "书生162/200正确，17题长度终止，无失败或评分未解析；该单模型成绩不记为Original018配对质量。",
+      "quality_note_en": "Intern-S2 is162/200 correct,17 length stops,zero failed/unparsed; this single-model result is separate from Original018 paired quality.",
+      "model_integration": {
+        "schema": "vllm-hust-model-integration-descriptor/v1",
+        "summary": {
+          "path": "data/r9-intern-native-20261120/summary.json",
+          "sha256": "9dacfd5ee439c2d9b2ad5a3d5b2d2cdb8ba8417ecbfe5d1f82da9c5d9305a836",
+          "bytes": 5830
+        },
+        "chart": {
+          "path": "data/r9-intern-native-20261120/comparison.svg",
+          "sha256": "ef772819b91f0fca25028601203fc1d4116bb3d1c639651209186d91ab070f77",
+          "bytes": 66151,
+          "original_sha256": "e200b888007021cc54964ecf1434080136524f541f60daf6f902a82c6e3e8ba7",
+          "transport": "LF-normalized SVG; original figure bytes retained in native capsule",
+          "transport_note": "SVG publication copy normalizes line endings and trailing whitespace; original chart bytes remain in the immutable replay capsule."
+        }
       }
     }
   ],

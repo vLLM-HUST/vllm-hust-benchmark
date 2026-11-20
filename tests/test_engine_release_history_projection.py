@@ -54,7 +54,14 @@ def test_release_history_survives_actual_public_build(tmp_path):
     projection.validate(output)
     assert (output / projection.PUBLIC_ENGINE_HISTORY_PATH).read_bytes() == raw
     value = json.loads(raw)
-    assert {entry["id"] for entry in value["entries"]} == {"r4", "r5", "r6", "r7", "r8"}
+    assert {entry["id"] for entry in value["entries"]} == {
+        "r4",
+        "r5",
+        "r6",
+        "r7",
+        "r8",
+        "r9",
+    }
     assert {entry["id"] for entry in value["attempts"]} == {"r1", "r2", "r3"}
     assert json.loads((output / "data/unrelated.json").read_text()) == {"records": []}
 
@@ -173,3 +180,57 @@ def test_r8_context_tenant_supplement_keeps_own_seals_windows_and_budget():
     assert source["sha256"] == hashlib.sha256(report_path.read_bytes()).hexdigest()
     chart = ROOT / "website-publication" / report["chart"]["path"]
     assert hashlib.sha256(chart.read_bytes()).hexdigest() == report["chart"]["sha256"]
+
+
+def test_r9_single_model_data_cannot_be_borrowed_as_original018_acceptance():
+    import gzip
+    import subprocess
+    import sys
+
+    catalog = json.loads(
+        (ROOT / "website-publication/data/engine-release-history-v1.json").read_bytes()
+    )
+    entry = next(row for row in catalog["entries"] if row["id"] == "r9")
+    assert catalog["default_release"] == catalog["order"][0] == "r9"
+    assert entry["measurements"] == []
+    assert not entry.get("compute_reference") and not entry.get(
+        "context_tenant_supplement"
+    )
+    assert len(entry["mods"]) == len(set(entry["mods"])) == 12
+    descriptor = entry["model_integration"]
+    path = ROOT / "website-publication" / descriptor["summary"]["path"]
+    summary = json.loads(path.read_bytes())
+    assert (
+        hashlib.sha256(path.read_bytes()).hexdigest() == descriptor["summary"]["sha256"]
+    )
+    assert summary["scope"]["original018_pair"] is False
+    assert summary["scope"]["project_full_five"] is False
+    assert summary["scope"]["qwen_performance_repeated"] is False
+    assert summary["candidate"]["release"] == entry["release"]
+    assert summary["reference"]["kind"] == "previously-published-website-reference"
+    original = gzip.decompress(
+        (ROOT / summary["source"]["benchmark_path"]).read_bytes()
+    )
+    assert hashlib.sha256(original).hexdigest() == summary["source"]["original_sha256"]
+    native = json.loads(original)
+    assert summary["quality"] == {
+        k: native["current_mmlu200"][k]
+        for k in ("requests", "correct", "truncated", "failed", "unparsed")
+    }
+    for row in summary["workloads"]:
+        for metric in ("output_tokens_per_second", "mean_ttft_ms", "mean_tpot_ms"):
+            assert row["change_percent"][metric] == pytest.approx(
+                100 * (row["candidate"][metric] / row["reference"][metric] - 1)
+            )
+    chart = ROOT / "website-publication" / descriptor["chart"]["path"]
+    assert (
+        hashlib.sha256(chart.read_bytes()).hexdigest() == descriptor["chart"]["sha256"]
+    )
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "reports/r9-intern-native-20261120/reproduce_publication.py"),
+            "--check",
+        ],
+        check=True,
+    )
