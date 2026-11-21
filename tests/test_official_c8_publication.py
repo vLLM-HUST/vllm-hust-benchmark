@@ -14,13 +14,20 @@ def test_official_c8_descriptor_and_partial_scope():
     baseline = next(
         row for row in catalog["comparison_baselines"] if row["id"] == "official-0.23.0"
     )
-    descriptor = baseline["observations"]
-    raw = (ROOT / "website-publication" / descriptor["path"]).read_bytes()
+    # The immutable C8 archive remains distinct from the later full-report view.
+    raw = (
+        ROOT
+        / "website-publication/data/official-b0-023-c8-20261121-v1/observations.json"
+    ).read_bytes()
     assert (
-        hashlib.sha256(raw).hexdigest() == descriptor["sha256"]
-        and len(raw) == descriptor["bytes"]
+        hashlib.sha256(raw).hexdigest()
+        == "269121dbff72665503f29ccb66616789e63fecf8da44a3cab7c377473c05e15f"
     )
     observation = json.loads(raw)
+    assert (
+        baseline["previous_evidence"][0]["sha256"]
+        == "26123ca7151fe25533c5661635b264df98a4e43a2fb4f52a83fb3670c503bd93"
+    )
     assert (
         baseline["status"] == "partial"
         and baseline["pairs"] is observation["pairs"] is None
