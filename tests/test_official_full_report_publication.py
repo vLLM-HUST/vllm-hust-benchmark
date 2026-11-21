@@ -22,8 +22,11 @@ def test_full_report_matches_sealed_original_population_and_metrics():
     report_raw = (
         ROOT / "reports/official-b0-023-full-report-20261122-v1/original-report.json"
     ).read_bytes()
-    assert hashlib.sha256(report_raw).hexdigest() == (
-        "7afe8a3def16a567901e12f34c3382efc4973655aabb0ece071ba45448715302"
+    assert (
+        hashlib.sha256(report_raw).hexdigest()
+        == (
+            "7afe8a3def16a567901e12f34c3382efc4973655aabb0ece071ba45448715302"  # pragma: allowlist secret -- public original report SHA256
+        )
     )
     report = json.loads(report_raw)
     old = json.loads(

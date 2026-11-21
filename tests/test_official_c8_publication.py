@@ -21,12 +21,12 @@ def test_official_c8_descriptor_and_partial_scope():
     ).read_bytes()
     assert (
         hashlib.sha256(raw).hexdigest()
-        == "269121dbff72665503f29ccb66616789e63fecf8da44a3cab7c377473c05e15f"
+        == "269121dbff72665503f29ccb66616789e63fecf8da44a3cab7c377473c05e15f"  # pragma: allowlist secret -- public immutable C8 observation SHA256
     )
     observation = json.loads(raw)
     assert (
         baseline["previous_evidence"][0]["sha256"]
-        == "26123ca7151fe25533c5661635b264df98a4e43a2fb4f52a83fb3670c503bd93"
+        == "26123ca7151fe25533c5661635b264df98a4e43a2fb4f52a83fb3670c503bd93"  # pragma: allowlist secret -- public immutable C8 archive SHA256
     )
     assert (
         baseline["status"] == "partial"
