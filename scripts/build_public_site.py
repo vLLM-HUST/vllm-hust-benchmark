@@ -17,7 +17,7 @@ from pathlib import Path
 PUBLIC_ENGINE_HISTORY_PATH = "data/engine-release-history-v1.json"
 PUBLIC_FIXED_B0_PATH = "data/fixed-b0-original018-v1.json"
 PUBLIC_FIXED_B0_SHA256 = "8b5bbddb6ae681513f8476e02f27ec5333a486a51a45848ac01092b310f27d4d"  # pragma: allowlist secret -- fixed public B0 observations
-PUBLIC_ENGINE_HISTORY_SHA256 = "cedef1dec9cd810e2dc6a66ca02b3230bd8eb15bc90556b98cb978e89f7116a1"  # pragma: allowlist secret -- fixed public release catalog
+PUBLIC_ENGINE_HISTORY_SHA256 = "713e0209818fd35f697300d7547960b8f0dde2d329fb1b9c7bb7a0ef6b596867"  # pragma: allowlist secret -- fixed public release catalog
 
 
 PROJECT = re.compile(
