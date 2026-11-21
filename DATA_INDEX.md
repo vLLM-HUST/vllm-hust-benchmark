@@ -10,7 +10,8 @@
 
 ## R9 Qwen 已完成阶段（2026-11-21）
 
-[Original018/R9 配对实测与原件复算](reports/r9-qwen-partial-20261121/README.md)补接 MMLU200、Frontier160、C8 4K/16K，保留 HLE 启动失败及未执行阶段，不新增推理。
+[Original018/R9 配对实测与原件复算](reports/r9-qwen-partial-20261121/README.md)补接 MMLU200、Frontier160、C8
+4K/16K，保留 HLE 启动失败及未执行阶段，不新增推理。
 
 ## R9 书生模型集成验证（2026-11-20）
 
@@ -97,16 +98,16 @@ pilot， 比较 CANN 异步与预准备描述符的同步旁路，单列成本�
 原生调度适配验收见 [2026-11-09 报告](reports/pegaflow-native-scheduler-20261109/README.md)： 单容器双 910B2 的 36
 次真实请求、687 轮调度状态对照及 6 项原生接口测试。该集合验证 调度/缓存状态适配，耗时预测误差需单独评估。
 
-| 想做的事 | 权威入口 | 写入规则 |
+| 想做的事                                 | 权威入口                                                                                                              | 写入规则                                                            |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| 查一次运行的原始输入、输出、环境和校验和 | [submissions/](submissions/)：每轮目录中的 manifest、原始结果、日志、checksums | 新运行建新目录；不手改旧指标或覆盖原件 |
-| 查专题实验、分析及验收边界 | [reports/](reports/)：先 README，再报告引用的原件/manifest | 原始证据保持不变；订正另存新版本并说明 supersedes，不抹掉失败 |
-| 查正式榜单、模型配置、数据集验证 | [leaderboard-data/README.md](leaderboard-data/README.md)、[dataset-validation/](leaderboard-data/dataset-validation/) | 先验证准入，再通过已有生产流程更新；不要把所有 submissions 自动入榜 |
-| 改网站展示数据 | [website-publication/README.md](website-publication/README.md)、[data/](website-publication/data/) | 在 benchmark 修改来源，通过校验后以固定提交发布；不先改网站副本 |
-| 查历史 MOD、迁移数据、Release 附件 | [archive/](archive/)：对应 README、manifest、release.json | 冻结原件只追加；Release/嵌套包按 manifest 核验，不执行其中代码 |
-| 改实验规格、验收口径、数据结构 | [docs/](docs/)、[schemas/](schemas/)、[包内契约](src/vllm_hust_benchmark/data/) | 修改契约及其测试/生成物；不能用改口径掩盖实验失败 |
-| 改生产、校验、迁移工具 | [scripts/](scripts/) 和对应 tests | 先查现有工具，不将新实验结果写入测试 fixture |
-| 查测试用例 | [tests/fixtures/](tests/fixtures/) | 测试数据不是实测数据，不可用于网站成绩 |
+| 查一次运行的原始输入、输出、环境和校验和 | [submissions/](submissions/)：每轮目录中的 manifest、原始结果、日志、checksums                                        | 新运行建新目录；不手改旧指标或覆盖原件                              |
+| 查专题实验、分析及验收边界               | [reports/](reports/)：先 README，再报告引用的原件/manifest                                                            | 原始证据保持不变；订正另存新版本并说明 supersedes，不抹掉失败       |
+| 查正式榜单、模型配置、数据集验证         | [leaderboard-data/README.md](leaderboard-data/README.md)、[dataset-validation/](leaderboard-data/dataset-validation/) | 先验证准入，再通过已有生产流程更新；不要把所有 submissions 自动入榜 |
+| 改网站展示数据                           | [website-publication/README.md](website-publication/README.md)、[data/](website-publication/data/)                    | 在 benchmark 修改来源，通过校验后以固定提交发布；不先改网站副本     |
+| 查历史 MOD、迁移数据、Release 附件       | [archive/](archive/)：对应 README、manifest、release.json                                                             | 冻结原件只追加；Release/嵌套包按 manifest 核验，不执行其中代码      |
+| 改实验规格、验收口径、数据结构           | [docs/](docs/)、[schemas/](schemas/)、[包内契约](src/vllm_hust_benchmark/data/)                                       | 修改契约及其测试/生成物；不能用改口径掩盖实验失败                   |
+| 改生产、校验、迁移工具                   | [scripts/](scripts/) 和对应 tests                                                                                     | 先查现有工具，不将新实验结果写入测试 fixture                        |
+| 查测试用例                               | [tests/fixtures/](tests/fixtures/)                                                                                    | 测试数据不是实测数据，不可用于网站成绩                              |
 
 Archive 与 reports 内也可能同时包含代码、报告和原始数据；上述规则是安全默认值，不意味着 每个 JSON 都是原始测量。修改前读该集合的契约和
 provenance。涉及原件订正时保留旧字节及说明， 不要仅重新计算 SHA256 来掩盖内容改变。
