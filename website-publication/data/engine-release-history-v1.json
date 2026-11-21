@@ -3362,16 +3362,26 @@
           "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/r10-fixed-five-20261120/summary.json",
           "sha256": "1be500e9bb7083ad5f19e5e9af385f2ae4f93b3ede4ec40cb5f95f0a9841d0bd",
           "bytes": 16458
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/r10-native-rms-20261121/README.md",
+          "bytes": 3148,
+          "sha256": "c96e1d0e2edc74cb32a57bd782b4d5c2f7861e637fe779dbe52001502f1a3280"
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/r10-native-rms-20261121/summary.json",
+          "bytes": 64237,
+          "sha256": "f550b8e3b092fbd8100bdacbfc1edcec713ebb0ad7ada4d003954c7847bf7396"
         }
       ],
       "label_zh": "冻结候选 · Qwen 固定五项配对实测",
       "label_en": "Frozen candidate · Qwen fixed-five paired measurements",
       "scope_zh": "源码冻结的 r10 候选。双 Ascend 910B2，Qwen3.5-35B-A3B BF16 TP2。固定五项每臂 672 条请求，另有 4K、16K C8。B0 为封存 Original018 实测。HLE 和 FrontierScience 的两臂分别调用同一 r10 裁判。",
       "scope_en": "Source-pinned R10 candidate. Dual Ascend 910B2, Qwen3.5-35B-A3B BF16 TP2. The fixed five contain 672 requests per arm, with separate 4K and 16K C8 cohorts. B0 uses admitted Original018 measurements. Both HLE and FrontierScience arms are graded separately by the same R10 model.",
-      "method_zh": "固定题目、请求预算与预热。复用经原件复核的 B0、两臂 MMLU 和 r10 C8。C8 每档提交 300 秒，每请求输出 256 token。吞吐计入排空，裁判请求独立计时。SWE 与 Terminal 按冻结公开轨迹测服务性能。",
-      "method_en": "Fixed inputs, budgets and warmup. B0, both MMLU arms and R10 C8 reuse replay-verified seals. Each C8 cohort submits for 300 seconds with 256 output tokens per request. Throughput includes drain. Judging is timed separately. SWE and Terminal measure frozen public trace inference.",
-      "quality_note_zh": "HLE 和 FrontierScience 的未决保留在计划分母，长度终止单列。SWE 和 Terminal 只统计推理服务性能。",
-      "quality_note_en": "Unresolved HLE and FrontierScience grades remain in the planned denominator. Length stops are recorded separately. SWE and Terminal measure inference-service performance only.",
+      "method_zh": "固定题目、请求预算与预热。复用经原件复核的 B0、两臂 MMLU 和 r10 C8。C8 每档提交 300 秒，每请求输出 256 token。吞吐计入排空，裁判请求独立计时。SWE 与 Terminal 按冻结公开轨迹测服务性能。 原始证据包含独立的原生 RMS 修订配对、C8 和连续写回组件报告。",
+      "method_en": "Fixed inputs, budgets and warmup. B0, both MMLU arms and R10 C8 reuse replay-verified seals. Each C8 cohort submits for 300 seconds with 256 output tokens per request. Throughput includes drain. Judging is timed separately. SWE and Terminal measure frozen public trace inference. Original evidence also includes the separate native RMS revision pairs, C8, and contiguous-write component study.",
+      "quality_note_zh": "HLE 和 FrontierScience 的未决保留在计划分母，长度终止单列。SWE 和 Terminal 只统计推理服务性能。 原生 RMS 修复版同期复查为 HLE 65/200、FrontierScience 66/160。修复版与组件原型的完整结果见原始证据。",
+      "quality_note_en": "Unresolved HLE and FrontierScience grades remain in the planned denominator. Length stops are recorded separately. SWE and Terminal measure inference-service performance only. The native RMS revision scored 65/200 on HLE and 66/160 on FrontierScience. Its full results and component prototype evidence are in Original evidence.",
       "baseline_id": "original018-cann8.5.1"
     }
   ],
