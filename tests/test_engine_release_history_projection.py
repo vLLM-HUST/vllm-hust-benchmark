@@ -195,24 +195,83 @@ def test_r9_single_model_data_cannot_be_borrowed_as_original018_acceptance():
     assert catalog["default_release"] == catalog["order"][0] == "r9"
     assert [row["id"] for row in entry["measurements"]] == [
         "mmlu",
+        "hle",
         "frontier",
+        "swe",
+        "terminal",
         "4096-formal",
         "16384-formal",
     ]
-    paired = json.loads(
-        (ROOT / "reports/r9-qwen-partial-20261121/summary.json").read_text()
-    )
+    publication = entry["submission_assessment"]
+    path = ROOT / "website-publication" / publication["path"]
+    raw = path.read_bytes()
+    assert len(raw) == publication["bytes"]
+    assert hashlib.sha256(raw).hexdigest() == publication["sha256"]
+    paired = json.loads(raw)
+    assert paired["execution_complete"] and paired["b0_inference_reruns"] == 0
     assert entry["measurements"] == paired["measurements"]
-    assert (
-        paired["full_five_complete"] is False and paired["new_inference_requests"] == 0
-    )
     assert all(
         row["control"] == "B0" and [arm["role"] for arm in row["arms"]] == ["B0", "r9"]
         for row in paired["measurements"]
     )
-    assert not entry.get("compute_reference") and not entry.get(
-        "context_tenant_supplement"
-    )
+    cross_card = {
+        row["id"]
+        for row in paired["measurements"]
+        if row["arms"][0]["physical_cards"] != row["arms"][1]["physical_cards"]
+    }
+    assert cross_card == {"hle", "swe", "terminal"}
+    for row in paired["measurements"]:
+        assert row["arms"][0]["physical_cards"] == [1, 6]
+        assert row["arms"][1]["physical_cards"] == (
+            [0, 3] if row["id"] in cross_card else [1, 6]
+        )
+    for phase in entry["context_tenant_supplement"]["comparisons"]:
+        assert phase["B0"]["physical_cards"] == [1, 6]
+        assert phase["B1"]["physical_cards"] == [0, 3]
+        assert phase["B1"]["metrics"]["failed"] == 0
+    native = entry["compute_reference"]
+    assert native["arms"]["B0"]["physical_cards"] == [1, 6]
+    assert native["arms"]["B1"]["physical_cards"] == [0, 3]
+    assert native["full_reference_denominator_qualified"] is True
+    assert native["original_efficiency_used"] is False
+    assert len(native["arms"]["B1"]["repetitions"]) == 3
+
+    expected = {
+        "4.1": (True, False),
+        "4.2": (True, True),
+        "4.3": (True, False),
+        "4.4": (True, True),
+    }
+    for metric, decisions in expected.items():
+        assert (
+            tuple(
+                paired["targets"][metric][gate]["met"]
+                for gate in ("milestone", "final")
+            )
+            == decisions
+        )
+    assert paired["targets"]["4.2"]["final_datasets"]["hle"]["met"] is False
+    cost = paired["targets"]["4.4"]
+    assert cost["cost_basis"] == "published_rental"
+    assert cost["rental_quote"]["cny_per_card_month"] == 1875
+    for key, expected_gain in (("mmlu", 66.1313904), ("four_tenant", 63.2543189)):
+        row = cost["formal_cost"][key]
+        unit_cost = {}
+        for role, arm in row["arms"].items():
+            unit_cost[role] = (
+                10**6
+                * 1875
+                * arm["occupied_cards"]
+                * float(arm["window_seconds"])
+                / (30 * 86400 * arm["successful_output_tokens"])
+            )
+            assert float(arm["unit_cny_per_million_output_tokens"]) == pytest.approx(
+                unit_cost[role]
+            )
+        assert 100 * (1 - unit_cost["B1"] / unit_cost["B0"]) == pytest.approx(
+            expected_gain
+        )
+        assert float(row["reduction_percent"]) == pytest.approx(expected_gain)
     assert len(entry["mods"]) == len(set(entry["mods"])) == 12
     descriptor = entry["model_integration"]
     path = ROOT / "website-publication" / descriptor["summary"]["path"]

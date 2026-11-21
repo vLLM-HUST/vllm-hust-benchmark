@@ -1,0 +1,291 @@
+{
+  "schema": "engine-current-compute-reference/v1",
+  "engine_release": "full-answer-b1-20261119-r9",
+  "baseline_id": "original018-cann8.5.1",
+  "status": "measured",
+  "accepted_scope": "topic4_submission_v2_fixed200_max256_three_formal_runs",
+  "model": "Qwen3.5-35B-A3B",
+  "precision": "BF16",
+  "tensor_parallel_size": 2,
+  "chip_model": "Ascend 910B2",
+  "hardware_peak_utilization_percent": null,
+  "protocol": {
+    "requests": 200,
+    "max_completion_tokens": 256,
+    "temperature": 0,
+    "seed": 0,
+    "eos": "enabled",
+    "quality_plan_sha256": "f4ed4ce5956c9ed08f360400b5a996ef92a217ce295d50648d4dc06443db768e",
+    "http_binding_max_completion_tokens": 8192,
+    "formal_repetitions": 3
+  },
+  "source_status_sha256": "78e4c48974f261d1f5558832e763f38e05b3d7f1fb3a93eef08d90d64d5224da",
+  "source_pair_sha256": "bf7929270309595140af0f29c6b97e51636318fffc9f590eebe5ebe38ce86c52",
+  "source_repository": "DeepLinkNext/DeepLinkEngine",
+  "source_revision": "ef75b648fcbf2b0091849c3a6b11abbf354f8dbc",
+  "source_manifest_sha256": "e5a4d728a71b9d4f1464651d31462e6f8831eff710c368a68cd2c0e5625a1c11",
+  "raw_asset": {
+    "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/full-answer-b1-20261119-r9/r9-qwen-completed-evidence-projection-20261121-v1.tar.gz",
+    "sha256": "0b7d4f8ab2ace2ce325c681476c77de1c8b38d0eee369ce3b607cddf47e11d2a",
+    "bytes": 254206,
+    "asset_id": 776039136,
+    "redownload_verified": true,
+    "public_download": {
+      "path": "data/r9-qwen-run29-20261121/r9-qwen-completed-evidence-projection-20261121-v1.tar.gz",
+      "sha256": "0b7d4f8ab2ace2ce325c681476c77de1c8b38d0eee369ce3b607cddf47e11d2a",
+      "bytes": 254206
+    }
+  },
+  "chart": {
+    "path": "data/r9-qwen-run29-20261121/compute-reference.svg",
+    "sha256": "d91cad57e97d415a8448928a487a5592af866af93a64f5abcbc3b1be841f35f0",
+    "bytes": 56715
+  },
+  "certificate": {
+    "path": "data/r9-qwen-run29-20261121/matched-reference-pair.json",
+    "sha256": "bf7929270309595140af0f29c6b97e51636318fffc9f590eebe5ebe38ce86c52",
+    "bytes": 10765
+  },
+  "reference_statistics": {
+    "path": "data/r9-qwen-run29-20261121/qualified-full-reference-statistics.json",
+    "sha256": "823628969e727821941857bae8f020922a88eb35e10ddf8aed60f7625ffc638d",
+    "bytes": 6248
+  },
+  "recomputation_url": "https://github.com/DeepLinkNext/DeepLinkEngine/blob/ef75b648fcbf2b0091849c3a6b11abbf354f8dbc/benchmark/one-click-kit/scripts/reference_statistics.py",
+  "source_and_workload_applicability_qualified": true,
+  "arms": {
+    "B0": {
+      "F_interval": [
+        "5412318178236308",
+        "5441387470064231"
+      ],
+      "T_seconds": "453.985942159",
+      "formal_repetitions": 3,
+      "achieved_tflops_per_card_interval": [
+        "5.960887414814207839599889975235439105155",
+        "5.992903044736226470834068230106964746968"
+      ],
+      "reference_F_interval": [
+        "5487388087149780",
+        "5488258327989369"
+      ],
+      "reference_seconds_lower": "102.3231709195348958960064",
+      "reference_seconds_exact": null,
+      "reference_tflops_per_card_upper": "26.81825767648090573566921216250915821371",
+      "efficiency_lower_percent": "22.22697494640671988678248116022501679767",
+      "efficiency_exact_percent": null,
+      "original_reference_repetitions": [
+        {
+          "name": "uninstrumented-1",
+          "F_interval": [
+            1829129362383260,
+            1829419442663123
+          ],
+          "Tref_lower_seconds": "34.1077236398449652986688",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "0c51f8f42043eff8f82ec23888702cdd1583a9d68835135e32190c7514c8feff"
+        },
+        {
+          "name": "uninstrumented-2",
+          "F_interval": [
+            1829129362383260,
+            1829419442663123
+          ],
+          "Tref_lower_seconds": "34.1077236398449652986688",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "6db7784be4bb652d1d0179e6673f7405314a2cb5077adf0321c765cb152ab30d"
+        },
+        {
+          "name": "uninstrumented-3",
+          "F_interval": [
+            1829129362383260,
+            1829419442663123
+          ],
+          "Tref_lower_seconds": "34.1077236398449652986688",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "b91eb934d213473b74f2cc499f94b2c72d167682082a4e520254c9a6cb35eb82"
+        }
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "F_interval": [
+            1804159232956559,
+            1813847989643210
+          ],
+          "T_seconds": "149.063354205",
+          "geometry_sha256": "8e14ce5f0298aefaa6a79efa64032c5da5179bab730903a4f5945f242ea2f4dc",
+          "timing_sha256": "d1e7eab183f3bbe14fa9ad043b4e0f1c45f8d45c4e012230d2ddc039ee91a16f",
+          "work_sha256": "312ff46e2dec56bc51638d4e83ad77396b20c561e58f13731ee8e211662322e0",
+          "native_source_seal_sha256": "45943096b5e7116d0eaaf6f99f03d4e4542f1b04e587d094d3da538fce549f17"
+        },
+        {
+          "repetition": 2,
+          "F_interval": [
+            1804144929773416,
+            1813837266790113
+          ],
+          "T_seconds": "148.908074954",
+          "geometry_sha256": "c987cc58489af679241678c41fa873cb3bf2bd57d7c5149c4209a4d00208cbe8",
+          "timing_sha256": "5797030fd7d9b29974b4fe201c391567fd053c776f1b79207e937cc5124d0d61",
+          "work_sha256": "022fead8cfad3dfe3100bbba38592b7f36a74d220be2b35cdd3b17f876a37b0f",
+          "native_source_seal_sha256": "45943096b5e7116d0eaaf6f99f03d4e4542f1b04e587d094d3da538fce549f17"
+        },
+        {
+          "repetition": 3,
+          "F_interval": [
+            1804014015506333,
+            1813702213630908
+          ],
+          "T_seconds": "156.014513",
+          "geometry_sha256": "330b1aa3f76215d2961c9d6ee740bec8e9ee92e9b139589c2e9620b855d768e2",
+          "timing_sha256": "458767e1eb4f1bfe210b640c398deea6896bdc7842449f0c30cd2e82829f92dd",
+          "work_sha256": "bc03cc5c18b7dd7e344fb4e66e619407d2922cfb1fb093efcaefe570215f9e6b",
+          "native_source_seal_sha256": "45943096b5e7116d0eaaf6f99f03d4e4542f1b04e587d094d3da538fce549f17"
+        }
+      ],
+      "shared_work_cancellation_used": false,
+      "hardware_peak_utilization_percent": null,
+      "source_and_timing_qualified": true,
+      "full_model_certificate": true,
+      "statistic": "100 * C_current_lower / C_reference_upper; original F_reference and T_reference retained; sum all current repetitions before division",
+      "physical_cards": [
+        1,
+        6
+      ],
+      "native_checksums_sha256": "d2c94d67f796df1412b4349866a7925a95b4367d0bb315ac7a297626df588fcb",
+      "necessary_work_sha256": "448e3ea7a0c0453d7080885ea97e7bc78a5a83f9b29ba1eac59ce0af4eecc748",
+      "reference_graph_sha256": "710aa178266a4072a6d1664945d9fc90c7831359a6fbdc6a46db969fd2ba3bbd"
+    },
+    "B1": {
+      "F_interval": [
+        "5412083385456264",
+        "5441167790478965"
+      ],
+      "T_seconds": "156.275440283",
+      "formal_repetitions": 3,
+      "achieved_tflops_per_card_interval": [
+        "17.31584750507019628973775053843532033967",
+        "17.40890245014036182915420108463211553299"
+      ],
+      "reference_F_interval": [
+        "5438115361780845",
+        "5438638334450385"
+      ],
+      "reference_seconds_lower": "140.60316791316519",
+      "reference_seconds_exact": null,
+      "reference_tflops_per_card_upper": "19.34038334687175052309470403284461724716",
+      "efficiency_lower_percent": "89.53208007570844306128260183644895633833",
+      "efficiency_exact_percent": null,
+      "original_reference_repetitions": [
+        {
+          "name": "uninstrumented-1",
+          "F_interval": [
+            1812705120593615,
+            1812879444816795
+          ],
+          "Tref_lower_seconds": "46.86772263772173",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "0407c570c288265d9b5038a7e2a87eb1e8ea87553551785c7f6695a073ab2a86"
+        },
+        {
+          "name": "uninstrumented-2",
+          "F_interval": [
+            1812705120593615,
+            1812879444816795
+          ],
+          "Tref_lower_seconds": "46.86772263772173",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "c5bea9d69988f75e68fe6c141965a13e23d8a34533a11fb84a00bff465c12a10"
+        },
+        {
+          "name": "uninstrumented-3",
+          "F_interval": [
+            1812705120593615,
+            1812879444816795
+          ],
+          "Tref_lower_seconds": "46.86772263772173",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "9a198f5dcb9e6a062b9caac2a69040508e82d4210c852fd8b007f1f671113746"
+        }
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "F_interval": [
+            1804041390197108,
+            1813730608693991
+          ],
+          "T_seconds": "51.581625417",
+          "geometry_sha256": "f7c503a9fc499432621bce40f00fd69d8cce60c1dc915fcb5d6621a131357518",
+          "timing_sha256": "ed929407c85eb5598d9128ec55e62136ad185dce9248fb6db2289b6072c5748a",
+          "work_sha256": "a893e220c72b875a911fc42ad75e9768b903382f8b6c67dc032aa13bd3b4f528",
+          "native_source_seal_sha256": "631b62f8a3e6a7ebcd8b9bee2794127ac784564a165298f0a8566d53c8e695c2"
+        },
+        {
+          "repetition": 2,
+          "F_interval": [
+            1804020997629578,
+            1813718590892487
+          ],
+          "T_seconds": "52.375112811",
+          "geometry_sha256": "44e679c8688495ec1c9d9b9dd7e596fffbc1dd31f358c235150e21604add218c",
+          "timing_sha256": "6e8b3cb5d59d7e524095495f33045519a52eb0f248b42d65b02682068c367024",
+          "work_sha256": "851a6f4fb879d92bf1fcd17a26ec119e209f27d1180028a25412d450c54b7519",
+          "native_source_seal_sha256": "631b62f8a3e6a7ebcd8b9bee2794127ac784564a165298f0a8566d53c8e695c2"
+        },
+        {
+          "repetition": 3,
+          "F_interval": [
+            1804020997629578,
+            1813718590892487
+          ],
+          "T_seconds": "52.318702055",
+          "geometry_sha256": "44e679c8688495ec1c9d9b9dd7e596fffbc1dd31f358c235150e21604add218c",
+          "timing_sha256": "bd7222aa0e6ba7c209f025eb876f7c6e452cc9f593832f6f172f703a3d4dedaf",
+          "work_sha256": "851a6f4fb879d92bf1fcd17a26ec119e209f27d1180028a25412d450c54b7519",
+          "native_source_seal_sha256": "631b62f8a3e6a7ebcd8b9bee2794127ac784564a165298f0a8566d53c8e695c2"
+        }
+      ],
+      "shared_work_cancellation_used": false,
+      "hardware_peak_utilization_percent": null,
+      "source_and_timing_qualified": true,
+      "full_model_certificate": true,
+      "statistic": "100 * C_current_lower / C_reference_upper; original F_reference and T_reference retained; sum all current repetitions before division",
+      "physical_cards": [
+        0,
+        3
+      ],
+      "native_checksums_sha256": "b40044b28a1f49a1148a633f84d29258d31d6d03e503443e00838f4cc4bd1522",
+      "necessary_work_sha256": "c27ab13b2e49a1762c642ac1c8818ce557416b8ad8029d69725d9707015ab2e9",
+      "reference_graph_sha256": "50a29e5a8019df3cffe3ccd515dd963d65c82c03fbd5df292aa5d0f40aa37f1a"
+    }
+  },
+  "certificate_kind": "qualified_full_reference_denominator_reuse/v1",
+  "full_model_certificate": true,
+  "efficiency_exact_percent": null,
+  "milestone_met": true,
+  "final_numeric_met": false,
+  "original_reference_work_and_time_retained": true,
+  "original_efficiency_used": false,
+  "shared_work_cancellation_used": false,
+  "clean_native_clock_source_qualified": true,
+  "full_reference_denominator_qualified": true,
+  "report": {
+    "path": "data/r9-qwen-run29-20261121/report.html",
+    "sha256": "64492cd335dd046126b775437a1263eb67cb998ef902caaa38b8b4b23b894e85",
+    "bytes": 4322
+  }
+}
