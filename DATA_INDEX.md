@@ -3,6 +3,12 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## 课题四正式送测与补测
+
+[V2 证据导航和补测清单](docs/topic4-evidence-map.md)集中列出在途 B1/扩展对照、已有原件、四指标验收缺口和入库方式。先核对是否已有可复算证据，再安排新增测量。
+
+算力方法以[送测 V2](docs/topic4-submission-v2-20261119.md)为准；[早期 M01 方法与配对](docs/B0_REFERENCE_COMPUTE.md)保留原计时协议和结论，供追溯。
+
 ## DeepLinkEngine 安装与流程原件（2026-11-20）
 
 [安装、API 实测和未完成流程的可恢复存档](reports/deeplinkengine-user-journey-20261120/README.md)补齐独立 HTTP
