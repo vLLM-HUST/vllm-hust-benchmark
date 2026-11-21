@@ -3459,5 +3459,58 @@
       "source_manifest_sha256": "181df30c7ae466acb92da25198222cf8e4f8877e8f0ef1f0debb5549ddfaf604",
       "measurements": []
     }
+  ],
+  "comparison_baselines": [
+    {
+      "id": "official-0.23.0",
+      "label": "vLLM 0.23.0 / Ascend 0.23.0",
+      "status": "pending",
+      "model": "Qwen3.5-35B-A3B",
+      "precision": "BF16",
+      "tensor_parallel_size": 2,
+      "cann": "9.1.0",
+      "observations": null,
+      "pairs": null,
+      "profile": {
+        "url": "https://github.com/DeepLinkNext/DeepLinkEngine/blob/7ffd13b7fe9f5c9d0cdf010d2ef6a977706c34c6/engine/official-baselines/0.23.0.json"
+      },
+      "image_digest": "sha256:4ee78def8f33d59d48f116d1dfa793332c23c99ecab4f0d7dd5cd62d0fb4e6c1"
+    },
+    {
+      "id": "candidate-0.28.0rc1-source",
+      "label": "vLLM 0.28.0 / Ascend 0.28.0.rc1 · 源码候选",
+      "status": "candidate-pending",
+      "model": "Qwen3.5-35B-A3B",
+      "precision": "BF16",
+      "tensor_parallel_size": 2,
+      "cann": "9.1.0",
+      "observations": null,
+      "pairs": null,
+      "profile": {
+        "url": "https://github.com/vllm-project/vllm-ascend/tree/96df623103f921df1a4488170d106f36689acb59"
+      },
+      "source_identity": {
+        "kind": "source-build-candidate",
+        "base_image_digest": "sha256:4ee78def8f33d59d48f116d1dfa793332c23c99ecab4f0d7dd5cd62d0fb4e6c1",
+        "vllm_source_commit": "2cf0a6915ce544dc493a0990f2ea38d81601128a",
+        "ascend_source_commit": "96df623103f921df1a4488170d106f36689acb59"
+      },
+      "label_en": "vLLM 0.28.0 / Ascend 0.28.0.rc1 · source candidate"
+    },
+    {
+      "id": "official-0.30.0",
+      "label": "vLLM 0.30.0 / Ascend 0.30.0",
+      "status": "pending",
+      "model": "Qwen3.5-35B-A3B",
+      "precision": "BF16",
+      "tensor_parallel_size": 2,
+      "cann": "9.2.1",
+      "observations": null,
+      "pairs": null,
+      "profile": {
+        "url": "https://github.com/DeepLinkNext/DeepLinkEngine/blob/7ffd13b7fe9f5c9d0cdf010d2ef6a977706c34c6/engine/official-baselines/0.30.0.json"
+      },
+      "image_digest": "sha256:61584d790fa3668e7c43f0eb50a3e3a86d94b3eed15bce5ac82391ed383df229"
+    }
   ]
 }
