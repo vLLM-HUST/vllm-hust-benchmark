@@ -32,7 +32,24 @@ def test_original_baseline_is_independent_and_reproducible():
     assert all("B1" not in r for r in value["context"]["observations"])
     assert len(value["compute"]["arm"]["repetitions"]) == 3
     catalog = json.loads((ROOT / producer.CATALOG).read_text())
-    assert next(e for e in catalog["entries"] if e["id"] == "r9")["measurements"] == []
+    candidate = next(e for e in catalog["entries"] if e["id"] == "r9")
+    original = {row["id"]: row["arm"] for row in value["profiles"]}
+    # Existing paired observations must use the independent fixed B0 values.
+    # Candidate completeness never controls whether the baseline is preserved.
+    for row in candidate["measurements"]:
+        if row["id"] not in original:
+            continue
+        assert row["control"] == "B0"
+        for key in (
+            "role",
+            "requests",
+            "output_tokens",
+            "output_tokens_per_second",
+            "mean_ttft_ms",
+            "mean_tpot_ms",
+            "source_seal_sha256",
+        ):
+            assert row["arms"][0][key] == original[row["id"]][key]
     assert catalog["baseline"]["observations"]["sha256"] == producer.sha(
         producer.render(value)
     )
