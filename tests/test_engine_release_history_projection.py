@@ -193,7 +193,23 @@ def test_r9_single_model_data_cannot_be_borrowed_as_original018_acceptance():
     )
     entry = next(row for row in catalog["entries"] if row["id"] == "r9")
     assert catalog["default_release"] == catalog["order"][0] == "r9"
-    assert entry["measurements"] == []
+    assert [row["id"] for row in entry["measurements"]] == [
+        "mmlu",
+        "frontier",
+        "4096-formal",
+        "16384-formal",
+    ]
+    paired = json.loads(
+        (ROOT / "reports/r9-qwen-partial-20261121/summary.json").read_text()
+    )
+    assert entry["measurements"] == paired["measurements"]
+    assert (
+        paired["full_five_complete"] is False and paired["new_inference_requests"] == 0
+    )
+    assert all(
+        row["control"] == "B0" and [arm["role"] for arm in row["arms"]] == ["B0", "r9"]
+        for row in paired["measurements"]
+    )
     assert not entry.get("compute_reference") and not entry.get(
         "context_tenant_supplement"
     )

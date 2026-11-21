@@ -8,6 +8,11 @@
 [安装、API 实测和未完成流程的可恢复存档](reports/deeplinkengine-user-journey-20261120/README.md)补齐独立 HTTP
 验证，保留失败和停止原因；新增推理实验 0 次，不替代 R9/R10 或完整项目验收。
 
+## R9 Qwen 已完成阶段（2026-11-21）
+
+[Original018/R9 配对实测与原件复算](reports/r9-qwen-partial-20261121/README.md)补接 MMLU200、Frontier160、C8
+4K/16K，保留 HLE 启动失败及未执行阶段，不新增推理。
+
 ## R9 书生模型集成验证（2026-11-20）
 
 [原生单模型实测及可恢复证据](reports/r9-intern-native-20261120/README.md)记录MMLU200、C8连续4K/16K与公开R8参考的全部收益、取舍、SDK字节等价和安装/复算回执；不作为Original018或项目完整验收。
