@@ -306,7 +306,18 @@ def test_r10_candidate_keeps_audited_pairs_and_official_default():
     assert [
         arm["requests"] for row in entry["measurements"][:5] for arm in row["arms"]
     ] == [200, 200, 200, 200, 160, 160, 64, 64, 48, 48]
-    assert entry["sources"][-1]["sha256"] == hashlib.sha256(source).hexdigest()
+    source_root = "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/"
+    evidence = {binding["url"]: binding for binding in entry["sources"]}
+    original = "reports/r10-fixed-five-20261120/summary.json"
+    assert (
+        evidence[source_root + original]["sha256"] == hashlib.sha256(source).hexdigest()
+    )
+    for filename in ("README.md", "summary.json"):
+        path = f"reports/r10-native-rms-20261121/{filename}"
+        payload = (ROOT / path).read_bytes()
+        binding = evidence[source_root + path]
+        assert binding["sha256"] == hashlib.sha256(payload).hexdigest()
+        assert binding["bytes"] == len(payload)
     assert all(
         arm["failed"] == 0 and arm["end_to_end_p99_ms"] >= arm["end_to_end_p95_ms"] > 0
         for row in entry["measurements"]
