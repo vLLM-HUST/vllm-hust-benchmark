@@ -19,3 +19,5 @@
 标识，发布结果后仍保留“源码候选”名称。
 
 独立原测可与所选 B1 并列显示。`pairs` 当前为 `null`，不自动生成收益、成本比率或验收结论。正式配对和算力适用性须使用各自经过核验的版本化契约，不能继承原 0.18 的资格。
+
+原封存未记录驱动时，`hardware.driver_version` 为 `null`，`driver_version_status` 为 `not-recorded`；`npu_smi_version` 单独保留工具版本，不代替驱动版本。
