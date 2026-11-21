@@ -314,3 +314,8 @@ python -m pytest -q tests/test_data_index.py
 
 [原件与 CPU 复算](reports/official-b0-023-c8-20261121-v1/README.md)：4K/16K 合成 C8 正式阶段与独立预热；原整轮失败、新 F/T
 未认证，驱动未记录。
+
+## 官方 B0 0.23 固定全套报告（2026-11-22）
+
+[报告与匿名复算](reports/official-b0-023-full-report-20261122-v1/README.md)：固定五项、真实上下文、四租户及三次原生
+T；自动算量适用性未通过，F 与效率留空。旧 C8 原件保留，元数据归档不包含完整 SSE。

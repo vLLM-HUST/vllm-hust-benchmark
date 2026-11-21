@@ -22,3 +22,7 @@
 
 原封存未记录驱动时，`hardware.driver_version` 为 `null`，`driver_version_status` 为
 `not-recorded`；`npu_smi_version` 单独保留工具版本，不代替驱动版本。
+
+官方 0.23 的完整固定配置报告保留原 C8 profile，并增加固定五项和 `real-context-*`。`quality` 保留各 track
+的计划、已评分、成功和未解析数；不能拼成完整准确率。`native_timing` 只记录原三次 T，不放入五项吞吐图。`automatic_ft_audit` 的适用性拒绝保留反例，F
+与效率仍为空，不据此推断运行时正确性。归档为报告元数据闭包，非完整原始流。
