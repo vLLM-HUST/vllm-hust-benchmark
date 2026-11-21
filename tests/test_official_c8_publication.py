@@ -63,11 +63,11 @@ def test_raw_execution_and_cpu_reporter_sources_are_separate():
     )
     assert (
         manifest["raw_execution_source"]["commit"]
-        == "7ffd13b7fe9f5c9d0cdf010d2ef6a977706c34c6"
+        == "7ffd13b7fe9f5c9d0cdf010d2ef6a977706c34c6"  # pragma: allowlist secret -- public original execution commit
     )
     assert (
         manifest["cpu_reporter_source"]["commit"]
-        == "12cf909492e63d5015cb5e548d7e3e83641db9ef"
+        == "12cf909492e63d5015cb5e548d7e3e83641db9ef"  # pragma: allowlist secret -- public CPU reporter commit
     )
     assert manifest["model_requests_executed_by_replay"] == 0
     assert manifest["original_campaign_status"] == "failed"
