@@ -35,6 +35,8 @@ Graph 模式。
 [原生 RMS 修订实测与连续写回复查](reports/r10-native-rms-20261121/README.md)包含 HLE、FrontierScience、4K/16K C8
 与双卡组件数据。
 
+[r10 native-rms 五项配对](reports/r10-native-rms-fixed-five-20261121/README.md)记录其全部五项、C8 和封存证据。
+
 ## SR系列探索与候选处置（2026-11-20）
 
 [B1-sr4 共享专家融合](reports/b1-sr4-20261120/README.md)记录两轮 C8、候选 C1 和固定五项的可公开配对结果。
