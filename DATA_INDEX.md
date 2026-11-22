@@ -34,6 +34,8 @@ Graph 模式。
 
 ## r10 固定五项与 C8（2026-11-20）
 
+[两版修复候选的 V2 4.1–4.4 证据](docs/topic4-evidence-map.md#r10-%E4%B8%A4%E4%B8%AA%E4%BF%AE%E5%A4%8D%E5%80%99%E9%80%89%E7%9A%84-v2-%E8%AF%81%E6%8D%AE)按候选保存实测、数据集、判定及封存来源。
+
 [B1-r10 一键实测](reports/r10-fixed-five-20261120/README.md)包含固定五项、4K/16K C8、两臂评分和封存来源。
 
 [原生 RMS 修订实测与连续写回复查](reports/r10-native-rms-20261121/README.md)包含 HLE、FrontierScience、4K/16K C8

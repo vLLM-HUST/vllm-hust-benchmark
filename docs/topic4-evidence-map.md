@@ -11,10 +11,36 @@ Qwen3.5-35B-A3B、BF16、双 Ascend 910B2、TP2。判据、样本及计时以
 | B0 0.23.0 · 已上线          | [固定配置报告及 CPU 复算](../reports/official-b0-023-full-report-20261122-v1/README.md)已封存固定五项、4K/16K/32K 和四租户、三次原生计时。HLE 的 200 题中有 99 题评分未解析。自动算量适用性未通过，F 与效率留空。[两档 C8 历史原件](../reports/official-b0-023-c8-20261121-v1/README.md)独立保留，4K 为 225.504618 tok/s，16K 为 115.897037 tok/s，均双卡合计且零失败。 |
 | B0 0.30.0 · 已上线          | [固定配置报告及 CPU 复算](../reports/official-b0-030-full-report-20261122-v1/README.md)已封存固定五项、4K/16K/32K 和四租户、三次原生计时。原整轮状态保留 failed，自动算量适用性未通过。合成 C8 保留原计数和时钟。                                                                                                                                                       |
 | B1 r9 · 默认展示            | [固定 0.18 完整配对](../reports/r9-qwen-run29-20261121/README.md)已封存固定五项、C8、有效算力及四个长上下文与四租户阶段。四租户 C24 使用 Terminal-Bench 2.1 的五条 4K 任务历史。4.4 按公开租赁报价折算，里程碑和结题均达成。[此前阶段记录](../reports/r9-qwen-partial-20261121/README.md)保留。                                                                         |
-| B1 r10 · 冻结候选           | [原始 r10](../reports/r10-fixed-five-20261120/README.md)、[原生 RMS 修订](../reports/r10-native-rms-fixed-five-20261121/README.md)和[连续写回候选](../reports/r10-contiguous-restore-fixed-five-20261121/README.md)各自封存固定五项和 C8。引用时保留各自的运行时、配对来源和评分。                                                                                      |
+| B1 r10 · 两个修复候选       | [两版 V2 实测与复算](#r10-%E4%B8%A4%E4%B8%AA%E4%BF%AE%E5%A4%8D%E5%80%99%E9%80%89%E7%9A%84-v2-%E8%AF%81%E6%8D%AE)已补齐 4.1–4.4。原始 r10、原生 RMS 和连续写回的[历史五项与 C8](../DATA_INDEX.md#r10-%E5%9B%BA%E5%AE%9A%E4%BA%94%E9%A1%B9%E4%B8%8E-c82026-11-20)各自留档。                                                                                               |
 | 固定 0.18 / r8 · 历史已封存 | [固定五项](../reports/r8-fixed-five-20261118/README.md)、[三轮参考证书](../reports/r8-compute-reference-20261119-v2/README.md)、[真实轨迹上下文及四租户](../reports/r8-context-tenant-20261119/README.md)分别保留，复算和引用时保留原 B1 身份。                                                                                                                         |
 
 正式判定使用固定 0.18。0.23 和 0.30 在线上选择器中按独立观测列示，两版的长上下文与四租户均使用 Terminal-Bench 2.1 的五条任务历史。
+
+## r10 两个修复候选的 V2 证据
+
+两版均使用 Qwen3.5-35B-A3B、BF16、双 Ascend 910B2、TP2，分别与固定 vLLM 0.18.0 / vLLM-Ascend 0.18.0 B0 比较。
+判定按里程碑／结题排列。完整身份、两臂物理卡号、各阶段封存 SHA-256 和 CPU
+复算回执摘要见[机器可读证据](../website-publication/data/r10-v2-assessment-20261122.json)。
+
+| 指标与数据集                                                                                                 | r10-native-rms                                                                                  | r10-contiguous-restore                                                                                                  | 封存来源                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 4.1 MMLU-Pro 固定 200 题，原生 out256，每臂三轮                                                              | B1 有效算力下界 17.24 TFLOP/s/卡，效率下界 89.14%。通过／未达 90%。                             | B1 有效算力下界 18.10 TFLOP/s/卡，效率下界 93.59%。通过／通过。                                                         | [各版原生计时、必要算量与独立参考](https://github.com/DeepLinkNext/DeepLinkEngine/blob/a19dee013f62c52db82b32eb34d026c17246fe05/evidence/r10-v2-compute-supplement.json)                                                                                                                                                                                                                                                                 |
+| 4.2 MMLU-Pro 200、HLE-Verified 200、FrontierScience 160、SWE-bench Pro 公开轨迹、Terminal-Bench 2.1 公开轨迹 | 通过／通过。HLE 未达结题吞吐门槛。                                                              | 通过／通过。HLE 未达结题吞吐门槛。FrontierScience Olympiad 从 64/100 降到 58/100，降幅 6 个百分点，超出两阶段质量门槛。 | [固定五项原请求、评分与复算封存](https://github.com/DeepLinkNext/DeepLinkEngine/blob/a19dee013f62c52db82b32eb34d026c17246fe05/evidence/r10-original-evidence-audit-v1.json)                                                                                                                                                                                                                                                              |
+| 4.3 Terminal-Bench 2.1 固定五条任务历史。4K、16K、32K 各 C8                                                  | 未通过／未通过。16K 的 TTFT P95 为本版 4K 的 3.100×。32K 的窗口 TTFT P95/P99 和 TPOT P95 超限。 | 通过／通过。16K/4K 吞吐为 68.84%，TTFT P95 比为 1.603×。32K 窗口吞吐最大/最小为 1.420×，尾时延均达标。                  | [两臂上下文和四租户原始封存及复算](https://github.com/DeepLinkNext/DeepLinkEngine/blob/a19dee013f62c52db82b32eb34d026c17246fe05/evidence/r10-v2-context-supplement.json)                                                                                                                                                                                                                                                                 |
+| 4.4 里程碑为 MMLU-Pro 固定 200 题完整回答。结题为 Terminal-Bench 2.1 固定五条 4K 历史、四租户 C24            | 通过／通过。每百万成功输出词元成本较固定 B0 分别降低 66.03%／63.65%。                           | 通过／通过。每百万成功输出词元成本较固定 B0 分别降低 66.01%／66.93%。                                                   | [完整回答采样](https://github.com/DeepLinkNext/DeepLinkEngine/blob/a19dee013f62c52db82b32eb34d026c17246fe05/evidence/r10-original-evidence-audit-v1.json)及[四租户采样](https://github.com/DeepLinkNext/DeepLinkEngine/blob/a19dee013f62c52db82b32eb34d026c17246fe05/evidence/r10-v2-context-supplement.json)。[机器可读证据](../website-publication/data/r10-v2-assessment-20261122.json)保存同一公开租赁报价 1,875 元/卡月和折算依据。 |
+
+Terminal-Bench 2.1 的 4.3 和 4.4 使用同一组任务来源。任务 ID 为
+`terminal:dna-insert`、`terminal:db-wal-recovery`、`terminal:winning-avg-corewars`、`terminal:rstan-to-pystan`、`terminal:mcmc-sampling-stan`。
+固定五项中的 Terminal-Bench 2.1 使用其独立的 32 任务公开轨迹配置。
+
+4.1 两版 B1 分别实测原生计时和必要算量观测，复用通过同工况核验的固定 B0 与独立参考分母。连续写回的原启动器回执保留退出时的设备采样异常。 独立审计重新核对了三轮共 600
+条请求的终止栅栏和全部两卡采样；对应原封存和审计摘要见 4.1 来源。已采集的五项性能和评分从各版封存 CPU 复算。
+
+复算使用
+[DeepLinkEngine 合入版](https://github.com/DeepLinkNext/DeepLinkEngine/tree/a19dee013f62c52db82b32eb34d026c17246fe05)的
+`run_all.py --report-only --engine-version r10-native-rms` 和
+`run_all.py --report-only --engine-version r10-contiguous-restore`。 两次复算新增模型请求和 NPU 任务均为 0。网站正式默认仍为
+r9，两版 r10 均登记为冻结候选。
 
 ## 在途与待收件
 
@@ -57,7 +83,7 @@ Qwen3.5-35B-A3B、BF16、双 Ascend 910B2、TP2。判据、样本及计时以
 
 ## 专题按产品目标决定
 
-- 若选 r10 为正式 B1，先按选定的运行时核对已有固定五项、C8 和完整一键入口的 4.1–4.4 回执，再处理仍缺的阶段。
+- 连续写回是两版中达到全部 V2 门槛的候选。公开稳定发行与普通安装入口按原实测配置定版后，再同步默认版本身份。
 - [控制面 sr5](../reports/controller-r8-20261118/README.md)的 HLE 曾暂停。若控制器对外承诺五项覆盖，再测同配置直连与经过控制器的
   HLE；其余已测正负结果保留。
 - [r9 书生适配](../reports/r9-intern-native-20261120/README.md)与 Qwen 的开发对照独立。书生全五项、SWE/Terminal
