@@ -192,7 +192,6 @@ def test_r9_single_model_data_cannot_be_borrowed_as_original018_acceptance():
         (ROOT / "website-publication/data/engine-release-history-v1.json").read_bytes()
     )
     entry = next(row for row in catalog["entries"] if row["id"] == "r9")
-    assert catalog["default_release"] == catalog["order"][0] == "r9"
     assert [row["id"] for row in entry["measurements"]] == [
         "mmlu",
         "hle",
@@ -344,15 +343,32 @@ def test_independent_fixed_b0_survives_projection_and_rejects_resigned_changes(
         projection.build(source, tmp_path / "resigned-baseline", "test-policy")
 
 
-def test_r10_candidate_keeps_audited_pairs_and_official_default():
+def test_r10_default_uses_the_sealed_contiguous_restore_pairs():
     catalog = json.loads(
         (ROOT / "website-publication/data/engine-release-history-v1.json").read_bytes()
     )
     source = (ROOT / "reports/r10-fixed-five-20261120/summary.json").read_bytes()
     entry = next(row for row in catalog["entries"] if row["id"] == "r10")
-    assert entry["publication_status"] == "frozen-candidate"
-    assert catalog["default_release"] != entry["id"]
-    assert entry["measurements"] == json.loads(source)["measurements"]
+    installed = entry["stable_evidence"]
+    assert entry["publication_status"] == "stable"
+    assert catalog["default_release"] == entry["id"]
+    assert entry["original_candidate_release"] == json.loads(source)["engine_release"]
+    measured_path = "reports/r10-contiguous-restore-fixed-five-20261121/summary.json"
+    measured_raw = (ROOT / measured_path).read_bytes()
+    measured = json.loads(measured_raw)
+    assert installed["kind"] == "contiguous-restore"
+    assert (
+        measured["release"]
+        == installed["measured_release"]
+        == entry["release"] + "-contiguous-restore"
+    )
+    assert measured["baseline_id"] == entry["baseline_id"] == catalog["baseline"]["id"]
+    for row in entry["measurements"]:
+        pair = measured["measurements"][row["id"]]
+        assert row["arms"] == [
+            {**pair["B0"], "role": "B0"},
+            {**pair["candidate"], "role": "r10"},
+        ]
     assert [row["id"] for row in entry["measurements"]] == [
         "mmlu",
         "hle",
@@ -367,6 +383,9 @@ def test_r10_candidate_keeps_audited_pairs_and_official_default():
     ] == [200, 200, 200, 200, 160, 160, 64, 64, 48, 48]
     source_root = "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/"
     evidence = {binding["url"]: binding for binding in entry["sources"]}
+    measured_binding = evidence[source_root + measured_path]
+    assert measured_binding["sha256"] == hashlib.sha256(measured_raw).hexdigest()
+    assert measured_binding["bytes"] == len(measured_raw)
     original = "reports/r10-fixed-five-20261120/summary.json"
     assert (
         evidence[source_root + original]["sha256"] == hashlib.sha256(source).hexdigest()
