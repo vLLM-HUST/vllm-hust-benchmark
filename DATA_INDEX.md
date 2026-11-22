@@ -65,6 +65,10 @@ P95。
 
 [冻结 r8 / original018 配对补测](reports/r8-context-tenant-20261119/README.md)：真实公开历史的4K、16K、32K及四租户正式阶段全部完成，保留五窗口、租户分布、原始流与完整封存摘要；原五项不重跑。有效算力参考单独认证，不把本专项采样利用率当作效率。
 
+## SWE Trace Heavy Load 第八版请求限流控制器复测（2026-11-22）
+
+[完整批次、分层时延和逐程序结果](reports/controller-r8-20261122-repeat/README.md)保留第二组真实双卡配对和设备采样；[网站复测数据](website-publication/data/controller-r8-heavy-load-repeat-v1.json)与首轮结果各自可追溯。
+
 ## Request Throttling Controller 第八版对照（2026-11-18）
 
 [多轮缓存竞争与四项固定负载](reports/controller-r8-20261118/README.md)：完整保留正收益、退化、输出量和原评分；多轮新输入为合成token-ID并继承真实输出，不是完整Agent解决率。Humanity’s
