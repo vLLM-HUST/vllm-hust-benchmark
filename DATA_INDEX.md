@@ -65,6 +65,10 @@ P95。
 
 [冻结 r8 / original018 配对补测](reports/r8-context-tenant-20261119/README.md)：真实公开历史的4K、16K、32K及四租户正式阶段全部完成，保留五窗口、租户分布、原始流与完整封存摘要；原五项不重跑。有效算力参考单独认证，不把本专项采样利用率当作效率。
 
+## 第八版请求限流控制器全指标复测（2026-11-22）
+
+[固定五项、SWE Trace Heavy Load 和闭环并发 8](reports/controller-r8-full-coverage-20261122/README.md)保留配对性能、尾部时延、评分、服务侧算力下界、单位成本、双卡利用率和原始归档摘要。
+
 ## 第八版请求限流控制器上下文与四租户实测（2026-11-22）
 
 [三档上下文及四租户同引擎配对](reports/controller-r8-context-tenant-20261122/README.md)保留整阶段、五个提交窗口、逐租户请求和双卡使用率。[网站数据投影](website-publication/data/controller-r8-context-tenant-v1.json)
