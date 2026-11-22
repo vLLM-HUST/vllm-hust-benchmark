@@ -10,8 +10,8 @@ Qwen3.5-35B-A3B、BF16、双 Ascend 910B2、TP2。判据、样本及计时以
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | B0 0.23.0 · 已上线          | [固定配置报告及 CPU 复算](../reports/official-b0-023-full-report-20261122-v1/README.md)已封存固定五项、4K/16K/32K 和四租户、三次原生计时。HLE 的 200 题中有 99 题评分未解析。自动算量适用性未通过，F 与效率留空。[两档 C8 历史原件](../reports/official-b0-023-c8-20261121-v1/README.md)独立保留，4K 为 225.504618 tok/s，16K 为 115.897037 tok/s，均双卡合计且零失败。 |
 | B0 0.30.0 · 已上线          | [固定配置报告及 CPU 复算](../reports/official-b0-030-full-report-20261122-v1/README.md)已封存固定五项、4K/16K/32K 和四租户、三次原生计时。原整轮状态保留 failed，自动算量适用性未通过。合成 C8 保留原计数和时钟。                                                                                                                                                       |
-| B1 r9 · 默认展示            | [固定 0.18 完整配对](../reports/r9-qwen-run29-20261121/README.md)已封存固定五项、C8、有效算力及四个长上下文与四租户阶段。四租户 C24 使用 Terminal-Bench 2.1 的五条 4K 任务历史。4.4 按公开租赁报价折算，里程碑和结题均达成。[此前阶段记录](../reports/r9-qwen-partial-20261121/README.md)保留。                                                                         |
-| B1 r10 · 两个修复候选       | [两版 V2 实测与复算](#r10-%E4%B8%A4%E4%B8%AA%E4%BF%AE%E5%A4%8D%E5%80%99%E9%80%89%E7%9A%84-v2-%E8%AF%81%E6%8D%AE)已补齐 4.1–4.4。原始 r10、原生 RMS 和连续写回的[历史五项与 C8](../DATA_INDEX.md#r10-%E5%9B%BA%E5%AE%9A%E4%BA%94%E9%A1%B9%E4%B8%8E-c82026-11-20)各自留档。                                                                                               |
+| B1 r9 · 历史稳定版          | [固定 0.18 完整配对](../reports/r9-qwen-run29-20261121/README.md)已封存固定五项、C8、有效算力及四个长上下文与四租户阶段。四租户 C24 使用 Terminal-Bench 2.1 的五条 4K 任务历史。4.4 按公开租赁报价折算，里程碑和结题均达成。[此前阶段记录](../reports/r9-qwen-partial-20261121/README.md)保留。                                                                         |
+| B1 r10 · 默认稳定版         | [连续写回 PyPI 发行](https://pypi.org/project/vllm-hust-engine/2026.11.21.10/)沿用[连续写回固定五项、C8 原件](../reports/r10-contiguous-restore-fixed-five-20261121/README.md)及[两版 V2 实测与复算](#r10-%E4%B8%A4%E4%B8%AA%E4%BF%AE%E5%A4%8D%E5%80%99%E9%80%89%E7%9A%84-v2-%E8%AF%81%E6%8D%AE)。原始 r10 和原生 RMS 各自留档。                                        |
 | 固定 0.18 / r8 · 历史已封存 | [固定五项](../reports/r8-fixed-five-20261118/README.md)、[三轮参考证书](../reports/r8-compute-reference-20261119-v2/README.md)、[真实轨迹上下文及四租户](../reports/r8-context-tenant-20261119/README.md)分别保留，复算和引用时保留原 B1 身份。                                                                                                                         |
 
 正式判定使用固定 0.18。0.23 和 0.30 在线上选择器中按独立观测列示，两版的长上下文与四租户均使用 Terminal-Bench 2.1 的五条任务历史。
@@ -39,8 +39,8 @@ Terminal-Bench 2.1 的 4.3 和 4.4 使用同一组任务来源。任务 ID 为
 复算使用
 [DeepLinkEngine 合入版](https://github.com/DeepLinkNext/DeepLinkEngine/tree/a19dee013f62c52db82b32eb34d026c17246fe05)的
 `run_all.py --report-only --engine-version r10-native-rms` 和
-`run_all.py --report-only --engine-version r10-contiguous-restore`。 两次复算新增模型请求和 NPU 任务均为 0。网站正式默认仍为
-r9，两版 r10 均登记为冻结候选。
+`run_all.py --report-only --engine-version r10-contiguous-restore`。 两次复算新增模型请求和 NPU 任务均为
+0。正式默认使用连续写回 r10（PyPI 2026.11.21.10）。发行包重建出的 9,256 个安装文件与连续写回实测清单一致，原生 RMS 的实测继续独立保留。
 
 ## 在途与待收件
 
