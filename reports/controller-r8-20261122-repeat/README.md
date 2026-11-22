@@ -30,3 +30,7 @@
 - 端到端程序时延包含工具等待，完成率对应回放请求。有效算力、固定上下文和问答评分由对应实验核算。[原始日志及复算来源摘要](source-seals.json)
 
 ![批次耗时、分层时延和程序分布](figures/paired-performance.svg)
+
+![正式批次内的缓存占用与加速卡使用率](figures/resource-timeline.png)
+
+虚线标出该组批次结束。缓存占用包含可驱逐的已缓存前缀，每张卡的利用率来自正式批次窗口内的设备采样。[曲线取样摘要](figures/resource-timeline-sources.json)
