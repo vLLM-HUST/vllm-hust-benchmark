@@ -70,7 +70,7 @@
     "website-publication/data/dataset_validation_v1.b0.json": "806660ab87d26bd426bcaddacc30e9bc030028f57c0ea62b23c8560eb7298584",
     "website-publication/data/dataset_validation_v1.empty.json": "c2ee55aa22a212142b7b313d2b178acf8c4bf8ba713a1d98b87e34914fe10ef5",
     "website-publication/data/ecosystem.json": "2f10a01c7c4c1e8078319812a237a898d8118cb34838ca0ed971c5a7e4880484",
-    "website-publication/data/engine-release-history-v1.json": "f8e25230083b8d962d63f79fdb2130c37e581e9f110dfbe37360826441e9f416",
+    "website-publication/data/engine-release-history-v1.json": "01d4fb91984d13f97722bf28e7f2dabf35956a5c7091535a2542560cc48a5eb8",
     "website-publication/data/examples/frontier-submission/README.md": "fd9b6dd05694594a5473e604932e646569c5937bc76678a8710d62e019590311",
     "website-publication/data/examples/frontier-submission/evidence.json": "54b69199c24872c6638263a3afefd60a5dc167c93e6648d6b00c98884670e086",
     "website-publication/data/examples/frontier-submission/snapshot.json": "7a6526c3688c60ce03b6124c0fabbf67161f1e81b66105deba9eab00ca0f8fca",
@@ -225,6 +225,7 @@
     "website-publication/data/r10-contiguous-restore-fixed-five-20261121/summary.json": "06087f1fe2805c004202610df80a13bd884a3da46bb80dcf9e02f077f4939201",
     "website-publication/data/r10-native-rms-20261121/summary.json": "f550b8e3b092fbd8100bdacbfc1edcec713ebb0ad7ada4d003954c7847bf7396",
     "website-publication/data/r10-native-rms-fixed-five-20261121/summary.json": "2ee1b5b5319be86b45f83e91e2d9b4bcc401d325cfe3114ef98f36ff335828d1",
+    "website-publication/data/r10-v2-assessment-20261122.json": "3a755da18489d98dd16f6539ea1d695a52c9122e9f13fa9fb4412e468faf2d05",
     "website-publication/data/r8-compute-reference-20261119-v2/compute-reference/matched-reference-pair.json": "fef1f015501b1b6b78ee344e3222c793ebc70338e0bc9e4c25b27d9d7c8b6bcb",
     "website-publication/data/r8-compute-reference-20261119-v2/compute-reference/necessary-work-audit.json": "cb959a7c6e3a360782dc57415177991be6e84d71f8c83210ba6c1d1fb1acf4ee",
     "website-publication/data/r8-compute-reference-20261119-v2/compute-reference/qualified-full-reference-statistics.json": "6611fee282b552092f8a807ad02ec517cbadaccde08423376acd7d6e8b439870",
@@ -846,7 +847,7 @@
       "storage_paths": [
         "website-publication/data/engine-release-history-v1.json"
       ],
-      "sha256": "f8e25230083b8d962d63f79fdb2130c37e581e9f110dfbe37360826441e9f416",
+      "sha256": "01d4fb91984d13f97722bf28e7f2dabf35956a5c7091535a2542560cc48a5eb8",
       "snapshot_publication_status": "not-in-snapshot"
     },
     {
@@ -2201,6 +2202,15 @@
         "website-publication/data/r10-native-rms-fixed-five-20261121/summary.json"
       ],
       "sha256": "2ee1b5b5319be86b45f83e91e2d9b4bcc401d325cfe3114ef98f36ff335828d1",
+      "snapshot_publication_status": "not-in-snapshot"
+    },
+    {
+      "website_path": "data/r10-v2-assessment-20261122.json",
+      "benchmark_path": "website-publication/data/r10-v2-assessment-20261122.json",
+      "storage_paths": [
+        "website-publication/data/r10-v2-assessment-20261122.json"
+      ],
+      "sha256": "3a755da18489d98dd16f6539ea1d695a52c9122e9f13fa9fb4412e468faf2d05",
       "snapshot_publication_status": "not-in-snapshot"
     },
     {
@@ -5653,6 +5663,14 @@
       "resolution": "mapped"
     },
     {
+      "target": "data/r10-v2-assessment-20261122.json",
+      "consumers": [
+        "website-publication/data/engine-release-history-v1.json"
+      ],
+      "benchmark_path": "website-publication/data/r10-v2-assessment-20261122.json",
+      "resolution": "mapped"
+    },
+    {
       "target": "data/r8-compute-reference-20261119-v2/compute-reference/matched-reference-pair.json",
       "consumers": [
         "website-publication/data/engine-release-history-v1.json",
@@ -8729,7 +8747,8 @@
     {
       "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/r10-contiguous-restore-fixed-five-20261121/summary.json",
       "consumers": [
-        "website-publication/data/engine-release-history-v1.json"
+        "website-publication/data/engine-release-history-v1.json",
+        "website-publication/data/r10-v2-assessment-20261122.json"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -8764,7 +8783,8 @@
     {
       "target": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/r10-native-rms-fixed-five-20261121/summary.json",
       "consumers": [
-        "website-publication/data/engine-release-history-v1.json"
+        "website-publication/data/engine-release-history-v1.json",
+        "website-publication/data/r10-v2-assessment-20261122.json"
       ],
       "resolution": "literal-external-link-not-fetched"
     },
@@ -21612,8 +21632,8 @@
     }
   ],
   "counts": {
-    "publication_bindings": 268,
-    "references": 1427,
+    "publication_bindings": 269,
+    "references": 1428,
     "releases": 33,
     "assets": 478
   }
