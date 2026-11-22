@@ -5804,7 +5804,8 @@
         }
       ],
       "scope_zh": "固定五项、上下文与四租户原测；自动 F/T 适用性未通过。",
-      "scope_en": "Fixed-five and context/tenant observations; automatic F/T applicability ineligible."
+      "scope_en": "Fixed-five and context/tenant observations; automatic F/T applicability ineligible.",
+      "context_input_sha256": "5156a6ae436c7e32364a5ecbb028b52f26da1808be883c02e8e230defd556559"
     },
     {
       "id": "candidate-0.28.0rc1-source",
@@ -5853,7 +5854,22 @@
         "scope": "sealed-report-metadata; raw SSE omitted"
       },
       "scope_zh": "固定五项、真实上下文与四租户原测；自动 F/T 核验拒绝，原报告保留失败状态。",
-      "scope_en": "Fixed-five, real-context and tenant observations; automatic F/T ineligible, original failed report retained."
+      "scope_en": "Fixed-five, real-context and tenant observations; automatic F/T ineligible, original failed report retained.",
+      "context_input_sha256": "5156a6ae436c7e32364a5ecbb028b52f26da1808be883c02e8e230defd556559"
     }
-  ]
+  ],
+  "context_workloads": {
+    "5156a6ae436c7e32364a5ecbb028b52f26da1808be883c02e8e230defd556559": {
+      "datasets": [
+        "Terminal-Bench 2.1"
+      ],
+      "task_ids": [
+        "terminal:dna-insert",
+        "terminal:db-wal-recovery",
+        "terminal:winning-avg-corewars",
+        "terminal:rstan-to-pystan",
+        "terminal:mcmc-sampling-stan"
+      ]
+    }
+  }
 }

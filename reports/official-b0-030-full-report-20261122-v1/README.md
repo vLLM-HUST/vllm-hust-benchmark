@@ -3,6 +3,10 @@
 Qwen3.5-35B-A3B、BF16、两卡原测：固定五项、4K/16K/32K 真实上下文、四租户及三次原生 T。独立 companion 完成 200 请求后，自动核验拒绝算量合同，F
 与效率为空；原整轮报告保持 failed。
 
+4K/16K/32K 长上下文与 4K 四租户 C24 均回放 Terminal-Bench 2.1 的五条任务历史。该轮封存的输入 SHA-256 与
+[r9 专项](../r9-qwen-run29-20261121/README.md) 的冻结输入一致，为
+`5156a6ae436c7e32364a5ecbb028b52f26da1808be883c02e8e230defd556559`。合成 C8 使用独立输入配方。
+
 [公开原件、曲线和 CPU 复算](https://github.com/DeepLinkNext/DeepLinkEngine/releases/tag/official-b0-0.30-full-report-20261122-v1)、[归档清单](archive-manifest.json)、[原报告](original-report.json)、[自动拒绝](automatic-ft-rejection.json)、[来源链](source-chain.json)、[匿名下载复算](anonymous-replay.json)。
 
 [GitHub 托管双系统 CPU 复算](https://github.com/DeepLinkNext/DeepLinkEngine/actions/runs/44961521784)已复现同一算量拒绝，原始日志另行归档。

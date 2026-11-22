@@ -3,6 +3,10 @@
 Qwen3.5-35B-A3B，BF16，Ascend 910B2 × 2。包含固定五项、4K/16K/32K、四租户、三次原生计时与自动 F/T 核验报告。此处 full
 指固定配置，不是所有上游题目。
 
+4K/16K/32K 长上下文与 4K 四租户 C24 均回放 Terminal-Bench 2.1 的五条任务历史。该轮封存的输入 SHA-256 与
+[r9 专项](../r9-qwen-run29-20261121/README.md) 的冻结输入一致，为
+`5156a6ae436c7e32364a5ecbb028b52f26da1808be883c02e8e230defd556559`。合成 C8 使用独立输入配方。
+
 MMLU 为 152/200；Frontier 的 olympiad、research 分别为 64/100、4/60，未解析保留。HLE 固定 200/1811，已评分 101，未解析
 99；不得作为完整准确率。SWE/Terminal 为公开轨迹推理，不测 Agent 任务成功率。
 
