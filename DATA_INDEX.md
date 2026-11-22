@@ -334,6 +334,10 @@ python -m pytest -q tests/test_data_index.py
 [报告与匿名复算](reports/official-b0-023-full-report-20261122-v1/README.md)：固定五项、真实上下文、四租户及三次原生
 T；自动算量适用性未通过，F 与效率留空。旧 C8 原件保留，元数据归档不包含完整 SSE。
 
+## B0 0.23 / 0.30 MTP KV 补丁复测
+
+[独立 F/T 复测与 CPU 复算](reports/b0-mtp-kv-prefix-repair-v1/README.md)：Qwen3.5-35B-A3B，TP2。每个补丁版三轮正式计时，附算量和有效算力区间。
+
 ## 官方 B0 0.30 固定配置报告（2026-11-22）
 
 [报告、原件与匿名复算](reports/official-b0-030-full-report-20261122-v1/README.md)：固定五项、真实上下文、四租户和原三次 T。200
