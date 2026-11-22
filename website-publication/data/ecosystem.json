@@ -2501,10 +2501,6 @@
       "upstream_repository": null,
       "summary_en": "Serving cost/pricing analysis scaffold packaged as an explicit Manifest 0.3 offline CLI. Version 0.1.1 removes the misleading in-process load marker and serving launcher, so ECPA keeps it inspect-only by design.",
       "summary_zh": "已打包为显式 Manifest 0.3 离线 CLI 的服务成本/定价分析脚手架。0.1.1 移除了误导性的进程内加载标记与 serving launcher，因此 ECPA 按设计保持 inspect-only。",
-      "public_effect_en": "Analysis preview: repository tests, a pinned shared-workload integration, wheel construction, and clean-wheel removal pass. No in-process pricing action or performance claim is made.",
-      "public_effect_zh": "分析预览：仓库测试、固定 shared-workload 集成、wheel 构建与 clean-wheel 移除通过；不声明进程内定价动作或性能收益。",
-      "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/llm-serving-cost-pricing-model/pull/2",
       "compatibility": {
         "status": "inspect_only",
         "host": "Offline user CLI; no in-process serving carrier",
@@ -4606,6 +4602,86 @@
       "public_effect_en": "Included in the r8 combined-engine validation.",
       "public_effect_zh": "已纳入 r8 整套引擎的组合验证。",
       "public_effect_url": "https://vllm-hust.sage.org.ai/engine.html#composition",
+      "public_effect_status": "functional"
+    },
+    {
+      "id": "intern-s2",
+      "name": "Intern-S2 Model Adapter",
+      "name_en": "Intern-S2 Model Adapter",
+      "name_zh": "Intern-S2（书生）模型适配",
+      "artifact_type": "runtime_component",
+      "system_role": "runtime_extension",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r9 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./b0-b1.html?release=r9",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "Adds a dedicated Intern-S2 worker, vocabulary checks and Ascend admission to the R9 engine. The Intern-S2 entry point ships with the engine.",
+      "summary_zh": "在 R9 引擎中接入 Intern-S2 专用 worker、词表检查和昇腾准入，随引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Native Intern-S2 integration completed MMLU-Pro 200 and 4K/16K closed-loop load at concurrency 8. Its development reference was the published Qwen R8 run. See the separate R9 Qwen results for the Original018 comparison.",
+      "public_effect_zh": "书生原生集成完成 MMLU-Pro 200 题及 4K／16K、并发 8 闭环压测，开发对照使用公开的 Qwen R8 参考。Original018 正式配对见独立的 R9 Qwen 结果。",
+      "public_effect_url": "./data/r9-intern-native-20261120/summary.json",
+      "public_effect_status": "functional"
+    },
+    {
+      "id": "state-page-copy",
+      "name": "State FA Page-Copy Adapter",
+      "name_en": "State FA Page-Copy Adapter",
+      "name_zh": "State FA 状态页复制适配",
+      "artifact_type": "runtime_component",
+      "system_role": "kv_state_manager",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r9 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./b0-b1.html?release=r9",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "Adapts the State FA page-copy path to the engine-owned state storage shared by the R9 Qwen and Intern-S2 workers. It ships with the R9 engine.",
+      "summary_zh": "为 R9 的 Qwen 和 Intern-S2 worker 适配共用的引擎自有状态存储与 State FA 页复制路径，随引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Included in the sealed R9 engine composition. The R9 results characterize the entire composition, with no isolated page-copy speed measurement.",
+      "public_effect_zh": "已纳入 R9 封存组合。R9 实测反映整套组合的表现，尚无页复制组件的独立性能对照。",
+      "public_effect_url": "./b0-b1.html?release=r9",
       "public_effect_status": "functional"
     }
   ]
