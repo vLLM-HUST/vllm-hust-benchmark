@@ -1,20 +1,19 @@
 # Agent Operating Constraints
 
-Read [AGENTS.md](AGENTS.md) and the shared [release/evaluation/website workflow](AGENT_WORKFLOW.md)
-with this file. The workflow unifies Engine, benchmark and website responsibilities; this file
-retains the official leaderboard, hardware and data-integrity boundaries below.
+[AGENTS.md](AGENTS.md) is the repository entry point. This file specifies benchmark data custody and
+leaderboard admission. See the [shared workflow](AGENT_WORKFLOW.md) for project evaluation and
+cross-repository publication.
 
 ## Data navigation
 
-Before reading, adding, or editing data, use [DATA_INDEX.md](DATA_INDEX.md) and the generated
-[collection index](docs/data-index.json). Distinguish immutable originals, versioned analysis,
-contracts, publication sources, and synthetic fixtures. After adding/removing tracked data paths,
-regenerate the index with `python scripts/data_index.py --write` and validate with `--check`. An
-index entry is not experimental acceptance or permission to overwrite evidence or run devices. For
-website references and Release assets, use [linked entry points](docs/data-entrypoints.json) and
-`python scripts/data_entrypoints.py --query <term>`. Regenerate with `--write` after publication
-data changes; refresh remote snapshots explicitly as documented in DATA_INDEX.md. Offline CI does
-not prove that remote inventory or deployment is still current.
+Before accessing data, use [DATA_INDEX.md](DATA_INDEX.md) and the generated
+[collection index](docs/data-index.json). Classify immutable originals, versioned analysis,
+contracts, publication sources and synthetic fixtures. For website and Release references, use
+[linked entry points](docs/data-entrypoints.json) or
+`python scripts/data_entrypoints.py --query <term>`. Follow the refresh commands in
+[DATA_INDEX.md](DATA_INDEX.md) when changing indexed inputs.
+`python scripts/refresh_data_navigation.py --check` verifies the local generated navigation. Read
+the remote inventory and deployed site separately when the task requires current status.
 
 This repository is the source of truth for vllm-hust benchmark specs, raw submissions, leaderboard
 snapshots, and CI performance-gate inputs. Agents must preserve the distinction between public
@@ -25,9 +24,9 @@ compatibility shortcut to hide a failed contract.
 
 ## Hardware Truth
 
-- The current active Ascend benchmark machines are **910B2**. Do not introduce new active/default
-  `910B3` specs, workflow defaults, submissions, or leaderboard records unless a real run artifact
-  explicitly proves the hardware was 910B3.
+- The active Ascend leaderboard target is **910B2**. Read the device mapping, accelerator and lease
+  from the actual run environment before launch. Introduce another hardware series only with
+  verified run evidence and the applicable spec.
 - Never infer `910B2` or `910B3` from a filename, directory name, branch name, PR title, old archive
   path, or screenshot. Hardware labels must come from actual run artifacts or a verified machine
   inventory.
@@ -94,17 +93,11 @@ compatibility shortcut to hide a failed contract.
 
 ## Release evaluation and publication
 
-Follow [AGENT_WORKFLOW.md](AGENT_WORKFLOW.md) for the fixed five-profile full test, MMLU200 quick
-test, explicit sealed-stage reuse, qualified reference denominator, release/MOD identity and
-publication acceptance. Project B0/B1 evaluation has its own confirmed model/precision scope; it is
-not automatically an official leaderboard submission. Do not apply the official FP16 leaderboard
-restriction above to relabel an already confirmed BF16/35B project experiment.
-
-All website versions retain the same profile and metric sections, including failures and missing
-data. Publish source data here, then update fixed-source consumers and verify the canonical site.
-Keep package metadata sync, release catalog updates, measurement publication and website deployment
-distinct. A catalog entry, a successful CI run or a deployed page is not evidence that inference or
-all four acceptance goals completed. Preserve raw failures and version corrections separately.
+Use the [shared workflow](AGENT_WORKFLOW.md) for the fixed five-profile full test, MMLU200 quick
+test, sealed-stage reuse, qualified 4.1 reference denominator, Release/MOD identity and website
+acceptance. Use the [evidence map](docs/topic4-evidence-map.md) to locate current project evidence.
+A project result enters the official leaderboard only if it independently satisfies that
+leaderboard's current spec and submission rules.
 
 ## Archive ownership for new work
 
