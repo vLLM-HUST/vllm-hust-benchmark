@@ -65,8 +65,8 @@ PUBLIC_C16_RUN_IDS = frozenset(
     }
 )
 
-# The MOD card may show this historical service comparison. The separate
-# project page, raw artifacts, and all other BetterScale records stay filtered.
+# Allowlisted MOD card with the historical service comparison and R10 component aggregate.
+# The separate project page, raw artifacts, and other BetterScale records stay filtered.
 BETTERSCALE_ID = "betterscale"
 BETTERSCALE_CARD = {
     "id": BETTERSCALE_ID,
@@ -88,19 +88,21 @@ BETTERSCALE_CARD = {
     "summary_en": "Multi-device inference execution optimization for Ascend. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36.",
     "summary_zh": "面向昇腾的多卡推理执行优化。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。",
     "public_effect_status": "measured",
-    "public_effect_en": "Historical DeepSeek-V4-Flash HTTP test: output throughput rose 39.63% at DP8/C16 and 35.17% at TP8/C4 against their respective baselines.",
-    "public_effect_zh": "DeepSeek-V4-Flash 历史 HTTP 实测中，DP8／并发 16 和 TP8／并发 4 的输出吞吐分别较各自基线提高 39.63% 和 35.17%。",
+    "public_effect_en": "Historical DeepSeek-V4-Flash HTTP test: output throughput rose 39.63% at DP8/C16 and 35.17% at TP8/C4 against their respective baselines. R10 Qwen3.5-35B-A3B BF16 on Ascend 910B2: fusing accepted-token state publication reduced synchronized component time at 8/10 active rows from 162.89/158.30 μs to 69.22/67.50 μs. End-to-end throughput and quality are pending.",
+    "public_effect_zh": "DeepSeek-V4-Flash 历史 HTTP 实测中，DP8／并发 16 和 TP8／并发 4 的输出吞吐分别较各自基线提高 39.63% 和 35.17%。 R10 Qwen3.5-35B-A3B BF16 的昇腾 910B2 组件测试中，融合已接受 token 的状态写回后，8／10 活跃行的同步完成时间由 162.89／158.30 μs 降至 69.22／67.50 μs。整模吞吐和质量尚待验证。",
     "public_effect_detail_en": [
         "2026-09-14 · DeepSeek-V4-Flash-0731 W8A8 on 8 × Ascend 910B2 (HCCS), vLLM 0.25.1 / vLLM-Ascend 0.25.1rc1, K5.",
         "DP8, concurrency 16, 8 GiB KV/rank: 268.89 → 375.45 output tok/s (+39.63%), runs 158 → 155. The candidate included the DP startup preparation carried into 0.3.1.",
         "TP8, concurrency 4, 12 GiB KV/rank: 155.13 → 209.68 output tok/s (+35.17%), runs 160 → 161. The baseline included the LCM startup compatibility fix.",
         "Each comparison divides total output tokens by total timed duration across all nine synthetic HTTP rounds (three workloads, three repeats). Startup, the separately logged prelude and quality scoring were excluded. Each arm passed 32/32 retrieval questions. TP decode P99 chunk-gap worsened. These measurements do not establish maximum concurrency, SLO capacity, or performance of a newer wheel.",
+        "2026-11-23 · R10 component only. It combines the gathering of accepted-token counts and the writes to the active prefix and padded tail into one launch, after the existing H2D and outside the model graph. 144 CPU parity cases passed. Seven NPU shapes passed in eager mode and three graph replays per shape. At 8/10 active rows, the graph event interval changed from 18.74/18.58 μs to 18.18/18.05 μs.",
     ],
     "public_effect_detail_zh": [
         "2026-09-14 · DeepSeek-V4-Flash-0731 W8A8，8 张昇腾 910B2（HCCS），vLLM 0.25.1 / vLLM-Ascend 0.25.1rc1，K5。",
         "DP8，并发 16，每 rank 8 GiB KV。原生基线 268.89 → 优化后 375.45 输出 token/s（+39.63%，run 158 → 155）。候选包含后续收录于 0.3.1 的 DP 启动预热。",
         "TP8，并发 4，每 rank 12 GiB KV。含 LCM 启动兼容修复的基线 155.13 → 优化后 209.68 输出 token/s（+35.17%，run 160 → 161）。",
         "各自按九组固定合成 HTTP 负载（三种负载，各三次）的输出 token 总数除以计时总长。启动、单独记录的预备阶段和质量评分不计时。各组检索 32/32，TP 解码 P99 输出块间隔变差。结果仅适用于上述实测工况，不能用于推断最大并发、SLO 容量或新版软件包性能。",
+        "2026-11-23 · R10 组件对照。在既有 H2D 之后、模型图之外，把接受计数收集与活跃前缀及尾部填充值的写回合成一次提交。144 组 CPU 一致性测试通过，7 种 NPU 形状通过即时执行和各 3 次图重放。在 8／10 活跃行，图重放事件区间由 18.74／18.58 μs 降至 18.18／18.05 μs。",
     ],
     "evidence_level": "hardware_verified",
 }
