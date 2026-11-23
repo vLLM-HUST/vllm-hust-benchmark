@@ -51,4 +51,5 @@ PYTHONPATH=src python -m unittest discover -s tests -p 'test_bio_benchmark.py' -
 
 ## 注册与驱动接入
 
-默认入口已迁移到版本化注册套件；现有测量边界和数值门槛保留。五类接口、兼容范围和新增模型步骤见 [接入指南](BIO_ONBOARDING.zh-CN.md)。旧 `phase2_suite.json` 可继续显式选择。
+默认入口已迁移到版本化注册套件；现有测量边界和数值门槛保留。五类接口、兼容范围和新增模型步骤见 [接入指南](BIO_ONBOARDING.zh-CN.md)。旧
+`phase2_suite.json` 可继续显式选择。
