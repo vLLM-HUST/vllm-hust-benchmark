@@ -15,7 +15,9 @@ from urllib.parse import unquote, urlsplit
 from pathlib import Path
 
 PUBLIC_ENGINE_HISTORY_PATH = "data/engine-release-history-v1.json"
-PUBLIC_ENGINE_HISTORY_SHA256 = "86accdcc0cacf215c38aba334e10498660627c77fb3e2f48d0abec888a9821e0"  # pragma: allowlist secret -- fixed public release catalog
+PUBLIC_FIXED_B0_PATH = "data/fixed-b0-original018-v1.json"
+PUBLIC_FIXED_B0_SHA256 = "8b5bbddb6ae681513f8476e02f27ec5333a486a51a45848ac01092b310f27d4d"  # pragma: allowlist secret -- fixed public B0 observations
+PUBLIC_ENGINE_HISTORY_SHA256 = "0260529ee42bdb94a40b1eb24ba7fd5b492ac62157eae7e13a085be7c9e7c02c"  # pragma: allowlist secret -- fixed public release catalog
 
 
 PROJECT = re.compile(
@@ -68,9 +70,9 @@ PUBLIC_C16_RUN_IDS = frozenset(
 BETTERSCALE_ID = "betterscale"
 BETTERSCALE_CARD = {
     "id": BETTERSCALE_ID,
-    "name": "BetterScale",
-    "name_en": "BetterScale",
-    "name_zh": "BetterScale",
+    "name": "BetterScale Execution and State Scheduling",
+    "name_en": "BetterScale Execution and State Scheduling",
+    "name_zh": "BetterScale 执行与状态调度",
     "artifact_type": "runtime_component",
     "system_role": "graph_execution_policy",
     "integration_contracts": [],
@@ -178,9 +180,9 @@ PUBLIC_MOD_PREVIEWS = {
     "traceloom": {
         "card": {
             "id": "traceloom",
-            "name": "TraceLoom",
-            "name_en": "TraceLoom",
-            "name_zh": "TraceLoom",
+            "name": "TraceLoom Inference Timeline Analysis",
+            "name_en": "TraceLoom Inference Timeline Analysis",
+            "name_zh": "TraceLoom 推理时间线分析",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -207,9 +209,9 @@ PUBLIC_MOD_PREVIEWS = {
     "latchmoe": {
         "card": {
             "id": "latchmoe",
-            "name": "LatchMoE",
-            "name_en": "LatchMoE",
-            "name_zh": "LatchMoE",
+            "name": "LatchMoE Expert-Weight Offload",
+            "name_en": "LatchMoE Expert-Weight Offload",
+            "name_zh": "LatchMoE 专家权重卸载",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -236,9 +238,9 @@ PUBLIC_MOD_PREVIEWS = {
     "tricard-clm-lifecycle": {
         "card": {
             "id": "tricard-clm-lifecycle",
-            "name": "Tricard CLM Lifecycle",
-            "name_en": "Tricard CLM Lifecycle",
-            "name_zh": "Tricard CLM 生命周期观察器",
+            "name": "Tricard Lifecycle Observation",
+            "name_en": "Tricard Lifecycle Observation",
+            "name_zh": "Tricard 生命周期观测",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -265,9 +267,9 @@ PUBLIC_MOD_PREVIEWS = {
     "ascend-adaptive-quantized-kv": {
         "card": {
             "id": "ascend-adaptive-quantized-kv",
-            "name": "Adaptive Quantized KV",
-            "name_en": "Adaptive Quantized KV",
-            "name_zh": "自适应量化 KV",
+            "name": "Ascend Adaptive KV Quantization",
+            "name_en": "Ascend Adaptive KV Quantization",
+            "name_zh": "昇腾自适应 KV 量化",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -295,9 +297,9 @@ PUBLIC_MOD_PREVIEWS = {
     "dla": {
         "card": {
             "id": "dla",
-            "name": "DLA",
-            "name_en": "DLA",
-            "name_zh": "DLA 解码长度感知准入",
+            "name": "DLA Output-Length-Aware Admission",
+            "name_en": "DLA Output-Length-Aware Admission",
+            "name_zh": "DLA 输出长度感知准入",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -411,9 +413,9 @@ PUBLIC_MOD_PREVIEWS = {
     "cuda-mtp": {
         "card": {
             "id": "cuda-mtp",
-            "name": "CUDA MTP",
-            "name_en": "CUDA MTP",
-            "name_zh": "CUDA MTP",
+            "name": "CUDA Multi-Token Prediction",
+            "name_en": "CUDA Multi-Token Prediction",
+            "name_zh": "CUDA 多词元预测（MTP）",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -428,6 +430,10 @@ PUBLIC_MOD_PREVIEWS = {
             "delivery_model": "python_distribution",
             "ownership": "original_contributor_maintained",
             "evidence_level": "hardware_verified",
+            "public_effect_en": "Bounded startup and functional checks cover A6000 PP4/TP1. The tested setup reduced available KV capacity and produced one answer mismatch; it does not establish a general speed or quality gain.",
+            "public_effect_zh": "已有 A6000 PP4/TP1 的有限启动与功能检查。该配置可用 KV 容量下降，且出现一次回答不一致；尚不能据此确认普遍的速度或质量收益。",
+            "public_effect_status": "preview",
+            "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-cuda-mtp#readme",
         },
         "taxonomy": {
             "kind": "runtime_mod",
@@ -502,9 +508,9 @@ PUBLIC_MOD_PREVIEWS = {
     "scheduler-policy-lab": {
         "card": {
             "id": "scheduler-policy-lab",
-            "name": "Scheduler Policy Lab",
-            "name_en": "Scheduler Policy Lab",
-            "name_zh": "调度策略实验工作区",
+            "name": "Scheduling Policy Research",
+            "name_en": "Scheduling Policy Research",
+            "name_zh": "调度策略研究与测试",
             "artifact_type": "runtime_component",
             "integration_contracts": [],
             "maturity": "experimental",
@@ -913,8 +919,12 @@ def build(source, destination, policy_revision):
             continue
         if suffix == ".json" and name != "data/benchmark-source-manifest.json":
             data = json.loads(raw)
-            if name == PUBLIC_ENGINE_HISTORY_PATH:
-                if hashlib.sha256(raw).hexdigest() != PUBLIC_ENGINE_HISTORY_SHA256:
+            if name in (PUBLIC_ENGINE_HISTORY_PATH, PUBLIC_FIXED_B0_PATH):
+                if hashlib.sha256(raw).hexdigest() != (
+                    PUBLIC_ENGINE_HISTORY_SHA256
+                    if name == PUBLIC_ENGINE_HISTORY_PATH
+                    else PUBLIC_FIXED_B0_SHA256
+                ):
                     raise ValueError("Unreviewed engine release history bytes")
                 documents[name] = (data, copy.deepcopy(data), raw)
                 continue
@@ -939,7 +949,7 @@ def build(source, destination, policy_revision):
     for name, (original, _, raw) in documents.items():
         projected = (
             copy.deepcopy(original)
-            if name == PUBLIC_ENGINE_HISTORY_PATH
+            if name in (PUBLIC_ENGINE_HISTORY_PATH, PUBLIC_FIXED_B0_PATH)
             else project_json(
                 original,
                 removed_ids,
@@ -1018,10 +1028,11 @@ def validate(destination):
             continue
         data = json.loads(path.read_text())
         name = path.relative_to(destination).as_posix()
-        if name == PUBLIC_ENGINE_HISTORY_PATH:
-            assert (
-                hashlib.sha256(path.read_bytes()).hexdigest()
-                == PUBLIC_ENGINE_HISTORY_SHA256
+        if name in (PUBLIC_ENGINE_HISTORY_PATH, PUBLIC_FIXED_B0_PATH):
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == (
+                PUBLIC_ENGINE_HISTORY_SHA256
+                if name == PUBLIC_ENGINE_HISTORY_PATH
+                else PUBLIC_FIXED_B0_SHA256
             ), path
             continue
         validate_betterscale_card(name, data)

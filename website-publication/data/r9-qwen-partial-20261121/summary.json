@@ -1,0 +1,252 @@
+{
+  "schema": "r9-qwen-partial-publication/v1",
+  "engine_release": "full-answer-b1-20261119-r9",
+  "model": "Qwen3.5-35B-A3B",
+  "precision": "BF16",
+  "tensor_parallel_size": 2,
+  "chip_model": "Ascend 910B2",
+  "physical_cards": [
+    1,
+    6
+  ],
+  "baseline_id": "original018-cann8.5.1",
+  "new_inference_requests": 0,
+  "full_five_complete": false,
+  "measurements": [
+    {
+      "id": "mmlu",
+      "label": "MMLU200",
+      "control": "B0",
+      "candidate": "r9",
+      "baseline_id": "original018-cann8.5.1",
+      "arms": [
+        {
+          "role": "B0",
+          "requests": 200,
+          "failed": 0,
+          "output_tokens": 721900,
+          "duration_seconds": 1426.005969121994,
+          "output_tokens_per_second": 506.23911514513577,
+          "mean_ttft_ms": 516926.28600326163,
+          "mean_tpot_ms": 40.32025335120394,
+          "truncated": 23,
+          "source_seal_sha256": "b879abd7204d5f719132000a54c87a066c11abf148fc0c056f7e33a7546d6659",
+          "correct": 139,
+          "unresolved": 0,
+          "source_completed_utc": "2026-11-17T14:14:10.882176+00:00"
+        },
+        {
+          "role": "r9",
+          "requests": 200,
+          "failed": 0,
+          "output_tokens": 707350,
+          "duration_seconds": 473.23409574094694,
+          "output_tokens_per_second": 1494.7147856971203,
+          "mean_ttft_ms": 163848.00662081165,
+          "mean_tpot_ms": 21.353920021733167,
+          "truncated": 24,
+          "source_seal_sha256": "8711e21835bb648c5b3c23903ff79c947c3d558910d23acc70c4d2b207161d6b",
+          "correct": 143,
+          "unresolved": 0,
+          "source_completed_utc": "2026-11-20T10:34:24.797754+00:00"
+        }
+      ]
+    },
+    {
+      "id": "frontier",
+      "label": "Frontier160",
+      "control": "B0",
+      "candidate": "r9",
+      "baseline_id": "original018-cann8.5.1",
+      "arms": [
+        {
+          "role": "B0",
+          "requests": 160,
+          "failed": 0,
+          "output_tokens": 1178893,
+          "duration_seconds": 3033.7339827370015,
+          "output_tokens_per_second": 388.5947175026914,
+          "mean_ttft_ms": 819.7433263350831,
+          "mean_tpot_ms": 38.92342869990322,
+          "truncated": 39,
+          "source_seal_sha256": "c5907da1ff3d4bd769acc6f432d99f0e43fe9bbdf8e71693320dedc410c4aaec",
+          "correct": 69,
+          "unresolved": 9,
+          "quality_tracks": {
+            "olympiad": {
+              "total": 100,
+              "graded": 94,
+              "successes": 65,
+              "solver_failures": 0,
+              "judge_unresolved": 6,
+              "judge_invalid": 6,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 2,
+              "judge_audit_flagged": 2,
+              "solver_truncated": 33,
+              "judge_truncated": 8,
+              "success_rate": 0.65,
+              "observed_success_lower_bound": 0.65,
+              "mean_research_score_valid_only": null
+            },
+            "research": {
+              "total": 60,
+              "graded": 57,
+              "successes": 4,
+              "solver_failures": 0,
+              "judge_unresolved": 3,
+              "judge_invalid": 3,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 2,
+              "judge_audit_flagged": 6,
+              "solver_truncated": 6,
+              "judge_truncated": 5,
+              "success_rate": 0.06666666666666667,
+              "observed_success_lower_bound": 0.06666666666666667,
+              "mean_research_score_valid_only": 2.341666666666667
+            }
+          },
+          "source_completed_utc": "2026-11-17T18:01:36.345321+00:00"
+        },
+        {
+          "role": "r9",
+          "requests": 160,
+          "failed": 0,
+          "output_tokens": 1254371,
+          "duration_seconds": 1269.433490310097,
+          "output_tokens_per_second": 988.1344785488386,
+          "mean_ttft_ms": 304.39557136342046,
+          "mean_tpot_ms": 15.188409031308073,
+          "truncated": 42,
+          "source_seal_sha256": "3e901b4ce5a5142d6df4bb8d824ae6e5c3de71109f679f6e9acbb5e3fb0cad0e",
+          "correct": 65,
+          "unresolved": 8,
+          "quality_tracks": {
+            "olympiad": {
+              "total": 100,
+              "graded": 96,
+              "successes": 62,
+              "solver_failures": 0,
+              "judge_unresolved": 4,
+              "judge_invalid": 4,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 1,
+              "judge_audit_flagged": 1,
+              "solver_truncated": 32,
+              "judge_truncated": 5,
+              "success_rate": 0.62,
+              "observed_success_lower_bound": 0.62,
+              "mean_research_score_valid_only": null
+            },
+            "research": {
+              "total": 60,
+              "graded": 56,
+              "successes": 3,
+              "solver_failures": 0,
+              "judge_unresolved": 4,
+              "judge_invalid": 4,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 5,
+              "judge_audit_flagged": 5,
+              "solver_truncated": 10,
+              "judge_truncated": 9,
+              "success_rate": 0.05,
+              "observed_success_lower_bound": 0.05,
+              "mean_research_score_valid_only": 2.253214285714286
+            }
+          },
+          "source_completed_utc": "2026-11-20T14:36:51.282899+00:00"
+        }
+      ]
+    },
+    {
+      "id": "4096-formal",
+      "label": "4K / C8",
+      "control": "B0",
+      "candidate": "r9",
+      "baseline_id": "original018-cann8.5.1",
+      "arms": [
+        {
+          "role": "B0",
+          "requests": 152,
+          "failed": 0,
+          "output_tokens": 38912,
+          "duration_seconds": 308.22856341302395,
+          "output_tokens_per_second": 126.2439780698008,
+          "mean_ttft_ms": 1655.1112870166482,
+          "mean_tpot_ms": 56.39988700156132,
+          "truncated": 152,
+          "source_seal_sha256": "55e3d0aded9cf14baefde733042c1a82265142e0e316b31809e72691941249b0",
+          "source_completed_utc": "2026-11-19T23:32:51.209786+00:00"
+        },
+        {
+          "role": "r9",
+          "requests": 455,
+          "failed": 0,
+          "output_tokens": 116480,
+          "duration_seconds": 303.10824608197436,
+          "output_tokens_per_second": 384.28515721904336,
+          "mean_ttft_ms": 839.3761466495222,
+          "mean_tpot_ms": 17.526029208241575,
+          "truncated": 455,
+          "source_seal_sha256": "fdfff7b163f478a5580d6261f028b9409a4201a7e6fa99c8bfa243cb8140bce0",
+          "source_completed_utc": "2026-11-20T08:32:51.855781+00:00"
+        }
+      ]
+    },
+    {
+      "id": "16384-formal",
+      "label": "16K / C8",
+      "control": "B0",
+      "candidate": "r9",
+      "baseline_id": "original018-cann8.5.1",
+      "arms": [
+        {
+          "role": "B0",
+          "requests": 73,
+          "failed": 0,
+          "output_tokens": 18688,
+          "duration_seconds": 313.719726889045,
+          "output_tokens_per_second": 59.56909431649955,
+          "mean_ttft_ms": 5786.16316898643,
+          "mean_tpot_ms": 110.6630329851608,
+          "truncated": 73,
+          "source_seal_sha256": "55e3d0aded9cf14baefde733042c1a82265142e0e316b31809e72691941249b0",
+          "source_completed_utc": "2026-11-19T23:32:51.209786+00:00"
+        },
+        {
+          "role": "r9",
+          "requests": 189,
+          "failed": 0,
+          "output_tokens": 48384,
+          "duration_seconds": 303.26738864800427,
+          "output_tokens_per_second": 159.54237683023095,
+          "mean_ttft_ms": 3070.9273480759716,
+          "mean_tpot_ms": 38.17255685770861,
+          "truncated": 189,
+          "source_seal_sha256": "fdfff7b163f478a5580d6261f028b9409a4201a7e6fa99c8bfa243cb8140bce0",
+          "source_completed_utc": "2026-11-20T08:32:51.855781+00:00"
+        }
+      ]
+    }
+  ],
+  "raw_asset": {
+    "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/full-answer-b1-20261119-r9/r9-qwen-partial-originals-20261121-v1.tar.gz",
+    "bytes": 131040800,
+    "sha256": "a73f661e451f5fe606094978416330a42bca1c45777d01487cf6532e7cd9226c",
+    "redownload_verified": true
+  },
+  "unfinished": {
+    "hle": "NPUModelRunner initialization failed with aclrtMallocHostWithCfg 207001; zero formal requests in this attempt",
+    "swe": "Not executed after HLE startup failure",
+    "terminal": "Not executed after HLE startup failure",
+    "compute_reference": "R9 native numerator and current HTTP work observation not executed",
+    "context_tenant": "R9 supplementary four-phase run not executed"
+  },
+  "recovery": {
+    "code_fix": "https://github.com/DeepLinkNext/DeepLinkEngine/pull/37",
+    "hardware": "Original physical cards1,6 required by sealed same-device admission; current workspace exposes0,3 with different PCI addresses"
+  },
+  "quality_scoring": "Original MMLU rule scoring; Frontier both answer arms judged by same R9 model; unresolved retained in fixed denominator. C8 is performance-only and distinct from context/tenant supplement.",
+  "reference_reuse": "Existing full reference denominator is retained separately; no old efficiency percentage or old B1 context result is substituted."
+}

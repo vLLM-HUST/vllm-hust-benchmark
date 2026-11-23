@@ -1,0 +1,410 @@
+{
+  "schema": "controller-r8-ai-core-utilization/v1",
+  "engine_release": "full-answer-b1-20261117-r8",
+  "state_resident_seats": 80,
+  "window": "First client request start to last HTTP response end, excluding evaluation and warmup. Heavy load uses the declared batch clock.",
+  "method": "Time-weighted previous-value hold, then equal weighting of the two assigned cards. Host npu-smi uses sample wall-clock midpoints. Humanity's Last Exam uses both arms' original pod-scoped Prometheus samples at approximately 10-second cadence.",
+  "sources": {
+    "fixed": {
+      "sha256": "0b7e2d796fcd53dfba62127e2ceef363d975f04d418c8cc566ff4ef25752ffb1",
+      "bytes": 4795906,
+      "sample_source": "npu-smi"
+    },
+    "hle": {
+      "sha256": "9524397b282a43f9d990a4c96561155cb46e8cd225225f9f5563693ad345cb9c",
+      "bytes": 37815,
+      "sample_source": "pod-scoped Prometheus Ascend exporter"
+    },
+    "stream": {
+      "sha256": "935812606c99dea1546c9bcd94dcf15b50490a463513f678578015cf916310d9",
+      "bytes": 3219719,
+      "sample_source": "npu-smi"
+    }
+  },
+  "rows": {
+    "mmlu": {
+      "direct": {
+        "window_start_wall": 1795323445.0340416,
+        "window_end_wall": 1795323924.2453215,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 78.56897346542682,
+            "covered_seconds": 479.2112798690796,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 188,
+            "max_hold_interval_before_clipping_seconds": 2.6999411582946777
+          },
+          "6": {
+            "mean_percent": 79.11703492650662,
+            "covered_seconds": 479.2112798690796,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 188,
+            "max_hold_interval_before_clipping_seconds": 2.6999411582946777
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 78.84300419596673
+      },
+      "controller": {
+        "window_start_wall": 1795327396.4609532,
+        "window_end_wall": 1795327899.7723904,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 77.73878519623796,
+            "covered_seconds": 503.31143712997437,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 197,
+            "max_hold_interval_before_clipping_seconds": 2.620690107345581
+          },
+          "6": {
+            "mean_percent": 77.92825594409747,
+            "covered_seconds": 503.31143712997437,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 197,
+            "max_hold_interval_before_clipping_seconds": 2.620690107345581
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 77.8335205701677
+      }
+    },
+    "frontier": {
+      "direct": {
+        "window_start_wall": 1795323924.34105,
+        "window_end_wall": 1795325164.832625,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 78.0784722471898,
+            "covered_seconds": 1240.4915750026703,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 484,
+            "max_hold_interval_before_clipping_seconds": 2.6490862369537354
+          },
+          "6": {
+            "mean_percent": 78.1216235025925,
+            "covered_seconds": 1240.4915750026703,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 484,
+            "max_hold_interval_before_clipping_seconds": 2.6490862369537354
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 78.10004787489115
+      },
+      "controller": {
+        "window_start_wall": 1795327899.9026585,
+        "window_end_wall": 1795329146.1082337,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 77.46606844803514,
+            "covered_seconds": 1246.2055752277374,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 486,
+            "max_hold_interval_before_clipping_seconds": 2.694258689880371
+          },
+          "6": {
+            "mean_percent": 77.58545765908548,
+            "covered_seconds": 1246.2055752277374,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 486,
+            "max_hold_interval_before_clipping_seconds": 2.694258689880371
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 77.52576305356031
+      }
+    },
+    "swe": {
+      "direct": {
+        "window_start_wall": 1795323386.6466846,
+        "window_end_wall": 1795323445.0066214,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 79.46316788465901,
+            "covered_seconds": 58.35993671417236,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 22,
+            "max_hold_interval_before_clipping_seconds": 2.579484224319458
+          },
+          "6": {
+            "mean_percent": 79.72737035101446,
+            "covered_seconds": 58.35993671417236,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 22,
+            "max_hold_interval_before_clipping_seconds": 2.579484224319458
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 79.59526911783674
+      },
+      "controller": {
+        "window_start_wall": 1795327338.4297452,
+        "window_end_wall": 1795327396.3948407,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 79.09468473173308,
+            "covered_seconds": 57.96509552001953,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 23,
+            "max_hold_interval_before_clipping_seconds": 2.557521343231201
+          },
+          "6": {
+            "mean_percent": 79.37310403145678,
+            "covered_seconds": 57.96509552001953,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 23,
+            "max_hold_interval_before_clipping_seconds": 2.557521343231201
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 79.23389438159492
+      }
+    },
+    "terminal": {
+      "direct": {
+        "window_start_wall": 1795323325.9339328,
+        "window_end_wall": 1795323386.6018724,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 78.51448560150067,
+            "covered_seconds": 60.66793966293335,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 24,
+            "max_hold_interval_before_clipping_seconds": 2.6496646404266357
+          },
+          "6": {
+            "mean_percent": 75.97963891991388,
+            "covered_seconds": 60.66793966293335,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 24,
+            "max_hold_interval_before_clipping_seconds": 2.6496646404266357
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 77.24706226070728
+      },
+      "controller": {
+        "window_start_wall": 1795327275.990586,
+        "window_end_wall": 1795327338.336582,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 78.2525407721954,
+            "covered_seconds": 62.34599590301514,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 24,
+            "max_hold_interval_before_clipping_seconds": 2.6028003692626953
+          },
+          "6": {
+            "mean_percent": 79.01555323202015,
+            "covered_seconds": 62.34599590301514,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 24,
+            "max_hold_interval_before_clipping_seconds": 2.6028003692626953
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 78.63404700210778
+      }
+    },
+    "hle": {
+      "direct": {
+        "window_start_wall": 1795322646.5277312,
+        "window_end_wall": 1795324784.517138,
+        "max_hold_seconds": 20.0,
+        "cards": {
+          "3": {
+            "mean_percent": 79.78910092358986,
+            "covered_seconds": 2137.989406824112,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 213,
+            "max_hold_interval_before_clipping_seconds": 10.104000091552734
+          },
+          "4": {
+            "mean_percent": 78.86488020325201,
+            "covered_seconds": 2137.989406824112,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 214,
+            "max_hold_interval_before_clipping_seconds": 10.101999998092651
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 79.32699056342094
+      },
+      "controller": {
+        "window_start_wall": 1795326380.3342679,
+        "window_end_wall": 1795328483.8680556,
+        "max_hold_seconds": 20.0,
+        "cards": {
+          "3": {
+            "mean_percent": 79.2595216916381,
+            "covered_seconds": 2103.533787727356,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 210,
+            "max_hold_interval_before_clipping_seconds": 10.075000047683716
+          },
+          "4": {
+            "mean_percent": 79.66621362982995,
+            "covered_seconds": 2103.533787727356,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 210,
+            "max_hold_interval_before_clipping_seconds": 10.19700002670288
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 79.46286766073402
+      }
+    },
+    "swe-heavy": {
+      "direct": {
+        "window_start_wall": 1795327503.0928645,
+        "window_end_wall": 1795327812.5622644,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 90.19857704625537,
+            "covered_seconds": 309.46939992904663,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 121,
+            "max_hold_interval_before_clipping_seconds": 2.6182141304016113
+          },
+          "2": {
+            "mean_percent": 91.227441740142,
+            "covered_seconds": 309.46939992904663,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 121,
+            "max_hold_interval_before_clipping_seconds": 2.6182141304016113
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 90.71300939319869
+      },
+      "controller": {
+        "window_start_wall": 1795330045.743311,
+        "window_end_wall": 1795330271.1200109,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 85.36082477677414,
+            "covered_seconds": 225.376699924469,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 88,
+            "max_hold_interval_before_clipping_seconds": 2.667816400527954
+          },
+          "2": {
+            "mean_percent": 82.8842097641393,
+            "covered_seconds": 225.376699924469,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 88,
+            "max_hold_interval_before_clipping_seconds": 2.667816400527954
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 84.12251727045671
+      }
+    },
+    "4096-formal": {
+      "direct": {
+        "window_start_wall": 1795327880.2447958,
+        "window_end_wall": 1795328181.966354,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 76.29272044054001,
+            "covered_seconds": 301.72155809402466,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 117,
+            "max_hold_interval_before_clipping_seconds": 2.672234058380127
+          },
+          "2": {
+            "mean_percent": 78.2786795718082,
+            "covered_seconds": 301.72155809402466,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 117,
+            "max_hold_interval_before_clipping_seconds": 2.672234058380127
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 77.2857000061741
+      },
+      "controller": {
+        "window_start_wall": 1795330343.3080974,
+        "window_end_wall": 1795330646.2649586,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 76.12945465218226,
+            "covered_seconds": 302.9568612575531,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 119,
+            "max_hold_interval_before_clipping_seconds": 2.6776280403137207
+          },
+          "2": {
+            "mean_percent": 77.45482658234943,
+            "covered_seconds": 302.9568612575531,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 119,
+            "max_hold_interval_before_clipping_seconds": 2.6776280403137207
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 76.79214061726584
+      }
+    },
+    "16384-formal": {
+      "direct": {
+        "window_start_wall": 1795328246.4423733,
+        "window_end_wall": 1795328550.948791,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 84.18734196890664,
+            "covered_seconds": 304.50641775131226,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 118,
+            "max_hold_interval_before_clipping_seconds": 2.678189277648926
+          },
+          "2": {
+            "mean_percent": 86.05533307138482,
+            "covered_seconds": 304.50641775131226,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 118,
+            "max_hold_interval_before_clipping_seconds": 2.678189277648926
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 85.12133752014573
+      },
+      "controller": {
+        "window_start_wall": 1795330711.8680735,
+        "window_end_wall": 1795331016.5246315,
+        "max_hold_seconds": 8.0,
+        "cards": {
+          "1": {
+            "mean_percent": 85.94572466739544,
+            "covered_seconds": 304.6565580368042,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 119,
+            "max_hold_interval_before_clipping_seconds": 2.6988165378570557
+          },
+          "2": {
+            "mean_percent": 86.33588356132984,
+            "covered_seconds": 304.6565580368042,
+            "unobserved_seconds": 0.0,
+            "in_window_samples": 119,
+            "max_hold_interval_before_clipping_seconds": 2.6988165378570557
+          }
+        },
+        "coverage_complete": true,
+        "mean_percent": 86.14080411436264
+      }
+    }
+  }
+}
