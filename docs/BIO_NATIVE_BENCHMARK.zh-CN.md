@@ -48,3 +48,7 @@ PYTHONPATH=src python -m unittest discover -s tests -p 'test_bio_benchmark.py' -
 ```
 
 本入口的实验与原件进入所选项目评测目录，交付状态由对应 `result.json`、`summary.json` 与 `report.md` 共同记录。对现有测量结果的复核通过独立输出目录生成。
+
+## 注册与驱动接入
+
+默认入口已迁移到版本化注册套件；现有测量边界和数值门槛保留。五类接口、兼容范围和新增模型步骤见 [接入指南](BIO_ONBOARDING.zh-CN.md)。旧 `phase2_suite.json` 可继续显式选择。

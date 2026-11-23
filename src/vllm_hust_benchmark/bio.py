@@ -26,10 +26,13 @@ def configure_scientist(path):
     return path
 
 
-def source_snapshot(scientist):
+def source_snapshot(scientist, registry=None):
     from experiments.benchmark.contracts import file_digest
     from experiments.benchmark.phase1 import source_manifest
 
+    from experiments.benchmark.representative.suite import load_registry
+
+    registry = registry or load_registry()
     scientist_files = source_manifest()
     for path in [
         *(scientist / "experiments/benchmark/representative").glob("*.py"),
@@ -41,6 +44,7 @@ def source_snapshot(scientist):
         scientist / "tests/unit/test_bio_encoder.py",
         scientist / "tests/unit/test_progen_attention.py",
         scientist / "tests/unit/test_benchmark_representative.py",
+        scientist / "tests/unit/test_benchmark_registered.py",
     ]:
         if path.is_file():
             scientist_files[str(path.relative_to(scientist))] = file_digest(path)
@@ -53,7 +57,32 @@ def source_snapshot(scientist):
         "docs/BIO_NATIVE_BENCHMARK.zh-CN.md",
         "README.md",
     ]
+    for path in [
+        *(scientist / "docs/benchmark").glob("registered_*"),
+        scientist / "docs/benchmark/native_registry.json",
+    ]:
+        scientist_files[str(path.relative_to(scientist))] = file_digest(path)
+    benchmark_files += [
+        "src/vllm_hust_benchmark/bio_registry.py",
+        "src/vllm_hust_benchmark/bio_interfaces.py",
+        "src/vllm_hust_benchmark/data/bio_registry.schema.json",
+        "tests/test_bio_registry.py",
+        "docs/BIO_ONBOARDING.zh-CN.md",
+    ]
+    for path in registry.source_files():
+        if path.is_relative_to(scientist):
+            scientist_files[str(path.relative_to(scientist))] = file_digest(path)
+        elif path.is_relative_to(BENCHMARK_ROOT):
+            benchmark_files.append(str(path.relative_to(BENCHMARK_ROOT)))
+        elif path != registry.source:
+            raise ValueError(
+                "Registered component source must belong to a selected source checkout"
+            )
     return {
+        "registry": registry.identity(),
+        "asset_definitions_sha256": file_digest(
+            registry.source.parent / registry.document["asset_manifest"]
+        ),
         "scientist": {
             "head": subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=scientist, text=True
@@ -85,6 +114,7 @@ def archive_sources(snapshot, scientist, output):
 def child_command(args, scientist, mode, item):
     flags = {
         "suite": str(args.suite.resolve()),
+        "registry": str(args.registry.resolve()),
         "data": str(args.data.resolve()),
         "assets": str(args.assets.resolve()),
         "upstream": str(args.upstream.resolve()),
@@ -116,7 +146,8 @@ def run(args, scientist):
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     args.output = output
-    suite, cases = validate_suite(args.suite, args.data)
+    registry = args._registry
+    suite, cases = validate_suite(args.suite, args.data, registry)
     protocol = dict(suite["protocol"])
     if args.pilot:
         protocol.update(
@@ -142,9 +173,11 @@ def run(args, scientist):
                     "directory": profile + "/start" + str(start),
                 }
             )
-    initial = source_snapshot(scientist)
+    initial = source_snapshot(scientist, registry)
     manifest = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "registry": registry.identity(),
+        "registry_source": str(args.registry.resolve()),
         "pilot": args.pilot,
         "sources": initial,
         "started_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -158,6 +191,9 @@ def run(args, scientist):
     }
     write_json(output / "manifest.json", manifest)
     shutil.copyfile(args.suite, output / "suite.json")
+    shutil.copyfile(args.registry, output / "registry.json")
+    asset_file = registry.source.parent / registry.document["asset_manifest"]
+    shutil.copyfile(asset_file, output / registry.document["asset_manifest"])
     (output / "data").mkdir()
     for definition in suite["data"].values():
         shutil.copyfile(
@@ -182,6 +218,8 @@ def run(args, scientist):
         for label, root, pattern in [
             ("scientist", scientist, "test_benchmark_representative.py"),
             ("benchmark", BENCHMARK_ROOT, "test_bio_benchmark.py"),
+            ("scientist_registry", scientist, "test_benchmark_registered.py"),
+            ("benchmark_registry", BENCHMARK_ROOT, "test_bio_registry.py"),
         ]:
             environment = worker_environment()
             environment["PYTHONPATH"] = (
@@ -192,7 +230,9 @@ def run(args, scientist):
                 + environment["PYTHONPATH"]
             )
             directory = (
-                "tests/unit" if label == "scientist" else str(BENCHMARK_ROOT / "tests")
+                "tests/unit"
+                if label.startswith("scientist")
+                else str(BENCHMARK_ROOT / "tests")
             )
             command = [
                 str(args.python),
@@ -230,7 +270,9 @@ def run(args, scientist):
         record("existing_model_unit_regression", existing["exit_code"] == 0, existing)
         if existing["exit_code"] != 0:
             raise ValueError("Existing scientific adapter unit regression failed")
-        assets = check_assets(args.assets, args.upstream)
+        assets = check_assets(
+            args.assets, args.upstream, registry.asset_definitions(profiles)
+        )
         write_json(output / "assets.json", assets)
         record(
             "assets",
@@ -249,26 +291,29 @@ def run(args, scientist):
             + os.pathsep
             + effective.get("PYTHONPATH", "")
         )
-        regression = run_process(
-            [
-                str(args.python),
-                "-m",
-                "experiments.benchmark.phase1",
-                "accept",
-                "--assets",
-                str(args.assets.resolve()),
-                "--upstream",
-                str(args.upstream.resolve()),
-                "--output",
-                str(output / "phase1-regression"),
-            ],
-            log=output / "phase1-regression.log",
-            timeout=1800,
-            env=effective,
-        )
-        record("phase1_regression", regression["exit_code"] == 0, regression)
-        if regression["exit_code"] != 0:
-            raise ValueError("Existing phase-1 native and reference regression failed")
+        if registry.document["legacy_phase1_regression"]:
+            regression = run_process(
+                [
+                    str(args.python),
+                    "-m",
+                    "experiments.benchmark.phase1",
+                    "accept",
+                    "--assets",
+                    str(args.assets.resolve()),
+                    "--upstream",
+                    str(args.upstream.resolve()),
+                    "--output",
+                    str(output / "phase1-regression"),
+                ],
+                log=output / "phase1-regression.log",
+                timeout=1800,
+                env=effective,
+            )
+            record("phase1_regression", regression["exit_code"] == 0, regression)
+            if regression["exit_code"] != 0:
+                raise ValueError(
+                    "Existing phase-1 native and reference regression failed"
+                )
         for item in runs:
             for mode in ["native"] if item["fault"] else ["native", "reference"]:
                 logfile = item["directory"].replace("/", "-") + "-" + mode + ".log"
@@ -327,7 +372,9 @@ def run(args, scientist):
             summary == recomputed,
             "Recomputed raw clocks, work, numerical outputs and statistics",
         )
-        final_assets = check_assets(args.assets, args.upstream)
+        final_assets = check_assets(
+            args.assets, args.upstream, registry.asset_definitions(profiles)
+        )
         write_json(output / "assets-after.json", final_assets)
         record(
             "asset_consistency",
@@ -351,7 +398,7 @@ def run(args, scientist):
             and all(environment[key] == final_environment[key] for key in keys),
             "Before/after runtime identity",
         )
-        validate_suite(args.suite, args.data)
+        validate_suite(args.suite, args.data, registry)
         record(
             "dataset_consistency",
             True,
@@ -365,14 +412,12 @@ def run(args, scientist):
         )
     record(
         "source_consistency",
-        source_snapshot(scientist) == initial,
+        source_snapshot(scientist, registry) == initial,
         "Before/after sources and configurations",
     )
     result = {
         "schema_version": 1,
-        "stage": "representative_models_pilot"
-        if args.pilot
-        else "representative_models",
+        "stage": "registered_tasks_pilot" if args.pilot else "registered_tasks",
         "finished_at_utc": datetime.now(timezone.utc).isoformat(),
         "passed": all(item["passed"] for item in checks),
         "checks": checks,
@@ -391,6 +436,18 @@ def verify(output, scientist):
     from vllm_hust_benchmark.bio_report import read_json
 
     result = read_json(output / "result.json")
+    manifest = read_json(output / "manifest.json")
+    registry = None
+    if "registry" in manifest:
+        from vllm_hust_benchmark.bio_registry import Registry
+
+        registry = Registry.load(output / "registry.json")
+        current = Registry.load(manifest["registry_source"])
+        if (
+            registry.identity() != manifest["registry"]
+            or current.identity() != registry.identity()
+        ):
+            raise ValueError("Registered bindings differ from the tested registry")
     required = {
         "suite_contract",
         "scientist_unit_regression",
@@ -406,6 +463,12 @@ def verify(output, scientist):
         "dataset_consistency",
         "source_consistency",
     }
+    if registry is not None:
+        required.update(
+            {"scientist_registry_unit_regression", "benchmark_registry_unit_regression"}
+        )
+    if registry is not None and not registry.document["legacy_phase1_regression"]:
+        required.remove("phase1_regression")
     names = [item["name"] for item in result["checks"]]
     if (
         len(set(names)) != len(names)
@@ -434,7 +497,7 @@ def verify(output, scientist):
     manifest = read_json(output / "manifest.json")
     from experiments.benchmark.representative.suite import validate_suite
 
-    suite, cases = validate_suite(output / "suite.json", output / "data")
+    suite, cases = validate_suite(output / "suite.json", output / "data", registry)
     expected_protocol = dict(suite["protocol"])
     if manifest["pilot"]:
         expected_protocol.update(
@@ -449,7 +512,10 @@ def verify(output, scientist):
         )
     if file_digest(output / "suite.json") != manifest["suite_sha256"]:
         raise ValueError("The archived suite differs from the executed configuration")
-    if source_snapshot(scientist) != manifest["sources"]:
+    if (
+        source_snapshot(scientist, current if registry is not None else None)
+        != manifest["sources"]
+    ):
         raise ValueError(
             "Current source differs from the tested cross-repository snapshot"
         )
@@ -457,9 +523,8 @@ def verify(output, scientist):
         for mode in ["native"] if item["fault"] else ["native", "reference"]:
             if item["directory"] + "/" + mode not in names:
                 raise ValueError("Missing subprocess acceptance check")
-    if result["stage"] != (
-        "representative_models_pilot" if manifest["pilot"] else "representative_models"
-    ):
+    stage = "registered_tasks" if registry is not None else "representative_models"
+    if result["stage"] != (stage + "_pilot" if manifest["pilot"] else stage):
         raise ValueError("Pilot and full-stage identities disagree")
     actual = summarize(output)
     if (
@@ -482,6 +547,7 @@ def main():
     )
     parser.add_argument("--python", type=Path, default=Path(sys.executable))
     parser.add_argument("--suite", type=Path)
+    parser.add_argument("--registry", type=Path)
     parser.add_argument("--data", type=Path)
     parser.add_argument("--assets", type=Path)
     parser.add_argument("--upstream", type=Path)
@@ -503,7 +569,14 @@ def main():
             environment,
         )
     scientist = configure_scientist(args.scientist_root)
-    args.suite = args.suite or scientist / "docs/benchmark/phase2_suite.json"
+    from experiments.benchmark.representative.suite import (
+        DEFAULT_REGISTRY,
+        load_registry,
+    )
+
+    args.registry = args.registry or DEFAULT_REGISTRY
+    args._registry = load_registry(args.registry)
+    args.suite = args.suite or scientist / "docs/benchmark/registered_suite.json"
     args.data = args.data or scientist / ".local/acceptance/data"
     args.assets = args.assets or scientist / ".local/models"
     args.upstream = args.upstream or scientist / ".local/upstream"
@@ -511,7 +584,8 @@ def main():
     from experiments.benchmark.representative.suite import validate_suite
 
     if args.command == "check":
-        suite, cases = validate_suite(args.suite, args.data)
+        registry = args._registry
+        suite, cases = validate_suite(args.suite, args.data, registry)
         print(
             json.dumps(
                 {

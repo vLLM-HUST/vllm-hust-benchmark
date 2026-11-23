@@ -88,7 +88,7 @@ def worker_exited(identity):
     return int(fields[19]) != identity["pid_start_ticks"] or fields[0] == "Z"
 
 
-def check_outputs(directory, suite, cases, rows, native):
+def check_outputs(directory, suite, cases, rows, native, registry=None):
     from safetensors.numpy import load_file
     from experiments.benchmark.contracts import file_digest
     from experiments.benchmark.representative.native import work_counts
@@ -98,6 +98,8 @@ def check_outputs(directory, suite, cases, rows, native):
     )
 
     comparison = read_json(directory / "comparison.json")
+    if registry is not None and comparison.get("registry") != registry.identity():
+        raise ValueError("Reference registry differs from the archived registry")
     if not comparison["passed"]:
         raise ValueError("Independent reference comparison failed")
     for filename, expected in [
@@ -123,16 +125,19 @@ def check_outputs(directory, suite, cases, rows, native):
         ):
             raise ValueError("Recorded input differs from the frozen dataset windows")
         actual = materialize(row["output"], actual_arrays)
-        if work_counts(case, identity, actual) != row["work"]:
+        if work_counts(case, identity, actual, registry) != row["work"]:
             raise ValueError("Work counters differ from actual inputs and outputs")
         recorded = comparisons[row["request_id"]]
         expected = materialize(
             comparison["references"][recorded["reference_id"]], expected_arrays
         )
         diagnostic = materialize(native["diagnostics"].get(case["id"]), actual_arrays)
-        metrics = compare_output(
-            case, identity, actual, expected, diagnostic, suite["gates"]
+        compare = (
+            registry.bind(case["profile_id"], case["task_id"]).compare
+            if registry is not None
+            else compare_output
         )
+        metrics = compare(case, identity, actual, expected, diagnostic, suite["gates"])
         if (
             not recorded["passed"]
             or recorded["case_id"] != row["case_id"]
@@ -150,6 +155,13 @@ def summarize(root, *, numeric=True):
     root = Path(root)
     manifest = read_json(root / "manifest.json")
     suite = read_json(root / "suite.json")
+    registry = None
+    if "registry" in manifest:
+        from vllm_hust_benchmark.bio_registry import Registry
+
+        registry = Registry.load(root / "registry.json")
+        if registry.identity() != manifest["registry"]:
+            raise ValueError("Archived registry identity differs from the run manifest")
     cases = {case["id"]: case for case in manifest["resolved_cases"]}
     protocol = manifest["effective_protocol"]
     definitions = [item for item in manifest["runs"] if not item["fault"]]
@@ -159,6 +171,8 @@ def summarize(root, *, numeric=True):
     for item in manifest["runs"]:
         directory = root / item["directory"]
         native = read_json(directory / "native.json")
+        if registry is not None and native.get("registry") != registry.identity():
+            raise ValueError("Native registry differs from the archived registry")
         if not native["closed"] or not worker_exited(native["worker_initial"]):
             raise ValueError("An owned native worker remains active")
         if item["fault"]:
@@ -218,15 +232,34 @@ def summarize(root, *, numeric=True):
         observed = {row["case_id"] for row in rows if row["phase"] != "recovery"}
         if observed != expected_cases:
             raise ValueError("Native execution omitted planned cases")
+        expected_probes = (
+            registry.profiles[item["profile_id"]]["rejection_probes"]
+            if registry is not None
+            else None
+        )
+        expected_count = len(expected_probes) if expected_probes is not None else 8
+        names = [probe["name"] for probe in native["rejections"]]
         if (
-            len(native["rejections"]) != 8
-            or len({item["name"] for item in native["rejections"]}) != 8
+            len(names) != expected_count
+            or len(set(names)) != expected_count
+            or (expected_probes is not None and names != expected_probes)
+            or (
+                registry is not None
+                and native.get("expected_rejections") != expected_probes
+            )
         ):
             raise ValueError("Native input rejection coverage is incomplete")
         recovery = [row for row in rows if row["phase"] == "recovery"]
-        if len(recovery) != 8:
+        if len(recovery) != expected_count or sorted(
+            row["repetition"] for row in recovery
+        ) != list(range(expected_count)):
             raise ValueError("A rejected input lacks a successful recovery request")
-        if item["profile_id"] == "progen2-small" and not any(
+        stop_required = (
+            any(cases[key].get("require_early_stop", False) for key in expected_cases)
+            if registry is not None
+            else item["profile_id"] == "progen2-small"
+        )
+        if stop_required and not any(
             row["work"].get("early_stop_sequences", 0) for row in rows
         ):
             raise ValueError(
@@ -313,7 +346,9 @@ def summarize(root, *, numeric=True):
             )
             case_runs.setdefault(case_id, []).append((result, latencies))
         if numeric:
-            numerical_checks += check_outputs(directory, suite, cases, rows, native)
+            numerical_checks += check_outputs(
+                directory, suite, cases, rows, native, registry
+            )
         engine_runs.append(
             {
                 "profile_id": item["profile_id"],
