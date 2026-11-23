@@ -411,7 +411,7 @@
       "public_effect_en": "On the exact Qwen3.5-35B BF16 setting, the five-point geometric-mean output-throughput change is +6.34% versus the shared Native series; C1 regresses while C2-C16 improve. R10 offline 2,048-token block audit: the upper bounds are 20.35% and 1.61% of prompt tokens for 48 Terminal and 64 SWE requests, respectively. The frozen replay isolates each request’s cache. R10 GDN/MTP restoration and end-to-end gains remain unverified.",
       "public_effect_zh": "在完全相同的 Qwen3.5-35B BF16 设定下，相对统一 Native 曲线，五点输出吞吐几何平均变化为 +6.34%；C1 回退，C2-C16 提升。 R10 离线前缀审计（2,048-token 整块）：Terminal 48 条和 SWE 64 条的理论上限各为 20.35% 和 1.61% 的输入 token。冻结回放逐请求隔离缓存；这两个比例不是实际命中率。尚未验证 GDN/MTP 状态恢复或 R10 整模收益。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5fdd55f33ae15f6e28919fe71d2bfd63dd1d9904/website-publication/data/r10-mod-followup-20261123/summary.json#L16",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L16",
       "compatibility": {
         "status": "verified",
         "host": "vLLM-HUST 0.25.1 reference runtime + vLLM-Ascend-HUST",
@@ -746,10 +746,10 @@
       "upstream_repository": null,
       "summary_en": "vSpec is an in-process speculative-decoding MOD for vLLM-HUST and vLLM-Ascend-HUST. It exposes Draft and EAGLE launchers, dynamic gamma, and online/profile adaptive control while keeping the host model registry unchanged through delayed plugin registration.",
       "summary_zh": "vSpec 是面向 vLLM-HUST 与 vLLM-Ascend-HUST 的进程内投机解码 MOD，提供 Draft / EAGLE 启动器、动态 gamma 与 online/profile 自适应控制，并通过延迟插件注册保持宿主模型注册表不变。",
-      "public_effect_en": "The repository reports a same-card GSM8K B128 recovery result of 1.518x. That result is specific to the published Qwen2.5 configuration; adaptive control does not guarantee a gain for other models, batch sizes, or request distributions. R10 native MTP2 · 190 MMLU-Pro cases at concurrency 10: across 254,360 draft rounds, the first position was accepted in 90.07% and the second in 77.32%. These counters do not support reducing the draft length globally; there is no matched vSpec result on R10.",
-      "public_effect_zh": "仓库公开了同卡 GSM8K B128 的 1.518x 恢复验证；该结果仅适用于已发布的 Qwen2.5 配置，自适应控制不保证其他模型、batch 或请求分布同样获益。 R10 原生 MTP2 · MMLU-Pro 190 题、并发 10：254,360 轮 draft 中，第一个位置接受 90.07%，第二个位置接受 77.32%。数据不足以支持全局减步；本轮未得到 vSpec 在 R10 的对照成绩。",
+      "public_effect_en": "The repository reports a same-card GSM8K B128 recovery result of 1.518x. That result is specific to the published Qwen2.5 configuration; adaptive control does not guarantee a gain for other models, batch sizes, or request distributions. R10 native MTP2 · 190 MMLU-Pro cases at concurrency 10: the first and second positions were accepted in 90.07% and 77.32% of 254,360 rounds. A trailing 32-round second-position acceptance gate below 40% flagged only 0.25% of rounds offline; about 60% of flagged rounds still accepted the second token. No matched vSpec run on R10.",
+      "public_effect_zh": "仓库公开了同卡 GSM8K B128 的 1.518x 恢复验证；该结果仅适用于已发布的 Qwen2.5 配置，自适应控制不保证其他模型、batch 或请求分布同样获益。 R10 原生 MTP2 · MMLU-Pro 190 题、并发 10：254,360 轮中，两个位置各有 90.07% 和 77.32% 的轮次接受。用过去 32 轮第二位置接受率低于 40% 作减步条件，离线只触发 0.25% 的轮次，其中约 60% 仍接受第二个 token。暂无 R10 vSpec 对照成绩。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5fdd55f33ae15f6e28919fe71d2bfd63dd1d9904/website-publication/data/r10-mod-followup-20261123/summary.json#L369",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L369",
       "runtime_state_dimensions": [
         "installed",
         "configured",
@@ -2756,7 +2756,7 @@
       "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim. An R10 candidate fuses accepted-token state publication into one launch. In the 910B2 component test, synchronized completion at 8/10 active rows fell from 162.89/158.30 μs to 69.22/67.50 μs. This covers state preparation outside the model graph; end-to-end throughput and quality are pending.",
       "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。 R10 新候选将已接受 token 的状态写回合为一次提交。910B2 组件测试中，8／10 活跃行同步完成时间由 162.89／158.30 μs 降至 69.22／67.50 μs；只覆盖图外状态准备，暂无整模吞吐和质量结果。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5fdd55f33ae15f6e28919fe71d2bfd63dd1d9904/website-publication/data/r10-mod-followup-20261123/summary.json#L396",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L432",
       "functional_compatibility": {
         "status": "passed",
         "scope": "DeepSeek-V4-Flash-0731-w8a8 · Ascend 910B2 TP8 / TP1-DP8-EP8, bounded K5 configurations"
@@ -3263,7 +3263,7 @@
       "public_effect_en": "On Qwen2.5-7B-Instruct, Ascend 910B2/CANN 9.0.0, Graph/batch-invariant, a 64-request ShareGPT workload at concurrency 4 gave 3.82% lower steady-state TPOT and 5.24% higher output-token throughput across three matched rounds for linear-SwiGLU fusion. The published compatibility profile is a separate CANN 9.1 beta.3 line; cold-start performance and other paths are not covered by this result. R10 sealed launch and source review: batch-invariant dispatch was disabled on both ranks, so this persistent linear path was inactive. No R10 performance gain for the path was measured.",
       "public_effect_zh": "在 Qwen2.5-7B-Instruct、Ascend 910B2/CANN 9.0.0、batch-invariant Graph 模式下，Linear–SwiGLU 融合于 ShareGPT 64 请求、并发 4 的三轮配对测试中，稳态 TPOT 降低 3.82%，输出 token 吞吐提高 5.24%。已发布的兼容配置是另一条 CANN 9.1 beta.3 版本线；该结果不覆盖冷启动及其他执行路径。 R10 启动及源码复核：两 rank 未启用 batch-invariant，未进入这条 persistent linear 路径，本轮没有为该路径登记 R10 性能增益。",
       "public_effect_status": "beneficial",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5fdd55f33ae15f6e28919fe71d2bfd63dd1d9904/website-publication/data/r10-mod-followup-20261123/summary.json#L437",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L473",
       "compatibility": {
         "status": "verified",
         "host": "vLLM-HUST + vllm-ascend-hust",
@@ -4063,7 +4063,7 @@
       "public_effect_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: at fixed budget 32, capture sizes [1,2,4] → [1,2,4,8,16,32] reduced median batch completion by 57.0% across five process pairs. Package CPU checks pass; capture memory/startup costs also increase. R10 diagnostic: 24 fixed-output requests at concurrency 6/8/10 produced 78 FULL dispatches, all with zero dispatcher padding. CPU replay identified no missing capture size in this window. Other layers and workloads were outside scope.",
       "public_effect_zh": "历史 Qwen3-0.6B FP16 / Ascend 910B2 TP1：保持总预算 32，捕获尺寸从 [1,2,4] 扩至 [1,2,4,8,16,32]，五组独立进程配对的批次完成时间中位数下降 57.0%。封装 CPU 检查通过；图内存与启动开销会增加。 R10 诊断：并发 6／8／10，24 个固定输出请求，78 次 FULL 图分发，观测到的分发 padding 全为 0。CPU 按冻结分发器重放未发现需要增补的规格；结论仅限这个窗口和分发层。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5fdd55f33ae15f6e28919fe71d2bfd63dd1d9904/website-publication/data/r10-mod-followup-20261123/summary.json#L117",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L117",
       "evidence_level": "hardware_verified",
       "compatibility": {
         "status": "experimental",
@@ -4725,7 +4725,7 @@
         "requirements_zh": "已测 BF16、MTP2、FULL 图。只对符合条件、无额外采样约束且无需 logprobs 的纯贪心请求启用。"
       },
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5fdd55f33ae15f6e28919fe71d2bfd63dd1d9904/website-publication/data/r10-mod-followup-20261123/summary.json#L260",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L260",
       "public_effect_en": "MMLU-Pro · concurrency 10. 10-case screen: output throughput +6.08%, P95 TPOT −4.23%, 8→9 correct. 190 new cases: throughput −0.45%, P95 TPOT −2.08%, 141→139 correct. Experimental overlay; outside the frozen engine stack. v2 used the same cards in a separate 10-case session at concurrency 10: observed throughput +19.67%, P95 TTFT +2.77%, P95 TPOT −3.28%, and 8→9 correct. The longest output changed from 8,192 capped tokens to 6,687 tokens with EOS; the throughput difference cannot be attributed to the MOD alone.",
       "public_effect_zh": "MMLU-Pro · 并发 10。10 题筛选吞吐 +6.08%、P95 每 token 耗时 −4.23%、答对 8→9。新增 190 题吞吐 −0.45%、P95 每 token 耗时 −2.08%、答对 141→139。当前为实验补丁，尚未晋级冻结组合。 v2 另测同卡、不同场次的 10 题（并发 10）：观察到吞吐 +19.67%、P95 首字 +2.77%、P95 每 token 耗时 −3.28%、答对 8→9。最长输出从 8,192 token 截断变为 6,687 token 正常结束，吞吐增幅无法单独归因于 MOD。",
       "repository_visibility": "public",
