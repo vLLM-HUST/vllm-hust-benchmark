@@ -368,8 +368,8 @@
     },
     "vspec": {
       "historical_or_prior_public_source": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-vSpec/snapshot/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
-      "followup_zh": "R10 原生 MTP2 · MMLU-Pro 190 题、并发 10：254,360 轮 draft 中，第一个位置接受 90.07%，第二个位置接受 77.32%。数据不足以支持全局减步；本轮未得到 vSpec 在 R10 的对照成绩。",
-      "followup_en": "R10 native MTP2 · 190 MMLU-Pro cases at concurrency 10: across 254,360 draft rounds, the first position was accepted in 90.07% and the second in 77.32%. These counters do not support reducing the draft length globally; there is no matched vSpec result on R10.",
+      "followup_zh": "R10 原生 MTP2 · MMLU-Pro 190 题、并发 10：254,360 轮中，两个位置各有 90.07% 和 77.32% 的轮次接受。用过去 32 轮第二位置接受率低于 40% 作减步条件，离线只触发 0.25% 的轮次，其中约 60% 仍接受第二个 token。暂无 R10 vSpec 对照成绩。",
+      "followup_en": "R10 native MTP2 · 190 MMLU-Pro cases at concurrency 10: the first and second positions were accepted in 90.07% and 77.32% of 254,360 rounds. A trailing 32-round second-position acceptance gate below 40% flagged only 0.25% of rounds offline; about 60% of flagged rounds still accepted the second token. No matched vSpec run on R10.",
       "observations": [
         {
           "kind": "frozen-r10-runtime-counter-deltas",
@@ -390,6 +390,42 @@
           "retained_reference_archive_sha256": "c2100c6b5cb7ad8e31ef32383b208499f1a23f5cf14f13112b27583e6f851d7f",
           "limitation_en": "Aggregate counters cannot identify a request-level low-acceptance gate or the cost of removing a draft step. No vSpec arm was run.",
           "limitation_zh": "聚合计数不能识别逐请求的低接受率条件，也不能估计去掉一步的执行成本。本次没有运行 vSpec 对照组。"
+        },
+        {
+          "kind": "offline-sealed-per-request-mtp2-gate-diagnostic",
+          "requests_with_detailed_final_sse_metrics": 190,
+          "draft_round_total": 254360,
+          "by_number_of_accepted_draft_tokens": [
+            25267,
+            32433,
+            196660
+          ],
+          "request_second_acceptance_percent": {
+            "minimum": 61.4849,
+            "median": 77.0987,
+            "maximum": 93.9163
+          },
+          "trailing_window_rounds": 32,
+          "lagged_gate_examples": [
+            {
+              "preceding_32_draft_round_second_acceptance_strictly_below_percent": 25.0,
+              "flagged_requests": 0,
+              "flagged_rounds": 0,
+              "share_of_all_rounds_percent": 0.0,
+              "flagged_rounds_that_accepted_second": 0,
+              "flagged_round_second_acceptance_percent": null
+            },
+            {
+              "preceding_32_draft_round_second_acceptance_strictly_below_percent": 40.0,
+              "flagged_requests": 51,
+              "flagged_rounds": 632,
+              "share_of_all_rounds_percent": 0.2485,
+              "flagged_rounds_that_accepted_second": 379,
+              "flagged_round_second_acceptance_percent": 59.9684
+            }
+          ],
+          "limitation_zh": "使用同一固定 MTP2 流里前 32 轮的历史记录判断下一轮。没有用未来数据，也没有执行单步预测、测量收益或验证变长图兼容。",
+          "limitation_en": "The gate uses only the preceding 32 rounds in the fixed MTP2 trace. No one-step decoding, speed measurement, or variable-graph compatibility test was performed."
         }
       ]
     },
