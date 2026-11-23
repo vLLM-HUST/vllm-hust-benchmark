@@ -4683,6 +4683,51 @@
       "public_effect_zh": "已纳入 R9 封存组合。R9 实测反映整套组合的表现，尚无页复制组件的独立性能对照。",
       "public_effect_url": "./b0-b1.html?release=r9",
       "public_effect_status": "functional"
+    },
+    {
+      "id": "greedy-bf16-native",
+      "name": "Native BF16 Greedy Sampling",
+      "name_en": "Native BF16 Greedy Sampling",
+      "name_zh": "BF16 直接贪心采样",
+      "artifact_type": "runtime_component",
+      "system_role": "decoding_mechanism",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "R10 Ascend rejection sampler source overlay"
+      ],
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "source_mod",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "public_surface": true,
+      "evidence_level": "measured",
+      "summary_en": "Takes a single row-wise argmax directly on BF16 full-vocabulary scores for eligible R10 greedy MTP requests, then selects target and bonus token IDs.",
+      "summary_zh": "符合条件的 R10 纯贪心 MTP 请求直接在 BF16 全词表分数上按行取一次最大值，再取目标和补位 token ID。",
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM-HUST Engine",
+        "versions": [
+          "R10 (2026.11.21.10) + experimental overlay"
+        ],
+        "platforms": [
+          "Ascend 910B2 ×2, TP2"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B"
+        ],
+        "requirements_en": "Tested with BF16, MTP2 and FULL graphs. The guarded path is limited to eligible all-greedy requests without extra sampling constraints or logprobs.",
+        "requirements_zh": "已测 BF16、MTP2、FULL 图。只对符合条件、无额外采样约束且无需 logprobs 的纯贪心请求启用。"
+      },
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/4454890cd31346163fbfa32dfdc81524d8e95af4/website-publication/data/greedy-bf16-native-20261123/summary.json",
+      "public_effect_en": "MMLU-Pro · concurrency 10. 10-case screen: output throughput +6.08%, P95 TPOT −4.23%, 8→9 correct. 190 new cases: throughput −0.45%, P95 TPOT −2.08%, 141→139 correct. Experimental overlay; outside the frozen engine stack.",
+      "public_effect_zh": "MMLU-Pro · 并发 10。10 题筛选吞吐 +6.08%、P95 每 token 耗时 −4.23%、答对 8→9。新增 190 题吞吐 −0.45%、P95 每 token 耗时 −2.08%、答对 141→139。当前为实验补丁，尚未晋级冻结组合。"
     }
   ]
 }
