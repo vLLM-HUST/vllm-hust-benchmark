@@ -15,8 +15,10 @@ python scripts/sync_website_publication.py check \
 ```
 
 The generated website manifest records the benchmark commit, repository path, SHA256 and byte count
-for every data file. Publication rejects uncommitted changes and unknown website data. The original
-report generators must update these publication artifacts when publishing new measurements.
+for every data file. Publication checks the complete source path set and each file against the
+requested commit before staging output. It rejects missing paths, unknown website data and multiple
+source files that resolve to the same public path. Update these publication artifacts through the
+original report generators when publishing new measurements.
 
 Files exceeding 1 MB are stored as deterministic gzip archives split into 900,000-byte parts. A
 `.publication.json` descriptor records each part's hash; the publisher verifies and reconstructs the

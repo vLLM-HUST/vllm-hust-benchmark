@@ -34,6 +34,9 @@ Graph 模式。
 
 ## r10 固定五项与 C8（2026-11-20）
 
+[R10 稳定包与补丁 B0 原生 F/T 对照](reports/r10-stable-patched-b0-ft-20261123-v1/README.md)
+包含两组配对的有效算力区间、原生三轮回执、源码资格复核及公开算术复算包。
+
 [两版修复候选的 V2 4.1–4.4 证据](docs/topic4-evidence-map.md#r10-%E4%B8%A4%E4%B8%AA%E4%BF%AE%E5%A4%8D%E5%80%99%E9%80%89%E7%9A%84-v2-%E8%AF%81%E6%8D%AE)按候选保存实测、数据集、判定及封存来源。
 
 [B1-r10 一键实测](reports/r10-fixed-five-20261120/README.md)包含固定五项、4K/16K C8、两臂评分和封存来源。
