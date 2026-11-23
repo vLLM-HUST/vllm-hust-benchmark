@@ -1,0 +1,461 @@
+{
+  "schema": "vllm-hust-r10-mod-followup/v1",
+  "date": "2026-11-23",
+  "reference": {
+    "release": "full-answer-b1-20261121-r10",
+    "package_version": "2026.11.21.10",
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "BF16",
+    "device": "Ascend 910B2",
+    "tensor_parallel": 2,
+    "graph_mode": "FULL",
+    "draft_steps": 2,
+    "max_model_length": 32768
+  },
+  "plugins": {
+    "pegaflow-vllm-connectors": {
+      "historical_or_prior_public_source": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-website/snapshot/docs/FRONTIER-QWEN35-PEGAFLOW.md",
+      "followup_zh": "R10 离线前缀审计（2,048-token 整块）：Terminal 48 条和 SWE 64 条的理论上限各为 20.35% 和 1.61% 的输入 token。冻结回放逐请求隔离缓存；这两个比例不是实际命中率。尚未验证 GDN/MTP 状态恢复或 R10 整模收益。",
+      "followup_en": "R10 offline 2,048-token block audit: the upper bounds are 20.35% and 1.61% of prompt tokens for 48 Terminal and 64 SWE requests, respectively. The frozen replay isolates each request’s cache. R10 GDN/MTP restoration and end-to-end gains remain unverified.",
+      "observations": [
+        {
+          "kind": "historical-throughput-vs-existing-native-series",
+          "setup": "0.25.1 reference, FULL_AND_PIECEWISE, 16 max sequences, external 30 GiB pinned pool",
+          "hardware": "Qwen3.5-35B-A3B BF16 / Ascend 910B2 TP2, PP1, DP1, APC with Mamba align and MTP2",
+          "connector_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+          "baseline": "existing 20260927 native series, not a fresh pair",
+          "candidate_window": "one 900-second candidate window per concurrency",
+          "rows": [
+            {
+              "concurrency": "C1",
+              "native_tok_s": 91.54555555555555,
+              "pegaflow_tok_s": 65.52333333333333,
+              "throughput_delta_percent": -28.425434816909622
+            },
+            {
+              "concurrency": "C2",
+              "native_tok_s": 152.7211111111111,
+              "pegaflow_tok_s": 167.14333333333335,
+              "throughput_delta_percent": 9.443502680994431
+            },
+            {
+              "concurrency": "C4",
+              "native_tok_s": 217.47555555555556,
+              "pegaflow_tok_s": 237.96777777777777,
+              "throughput_delta_percent": 9.422770375214572
+            },
+            {
+              "concurrency": "C8",
+              "native_tok_s": 291.1066666666667,
+              "pegaflow_tok_s": 361.4411111111111,
+              "throughput_delta_percent": 24.161055893983118
+            },
+            {
+              "concurrency": "C16",
+              "native_tok_s": 359.75,
+              "pegaflow_tok_s": 459.71555555555557,
+              "throughput_delta_percent": 27.787506756235047
+            }
+          ],
+          "geomean_throughput_delta_percent": 6.342297886583825
+        },
+        {
+          "kind": "historical-four-arm-transfer-scheduling",
+          "source": "https://github.com/vLLM-HUST/pegaflow-hust/blob/2e4cd2e9a244f7aefd732a442f9662a2acc88049/docs/experiments/issue23-hybrid-four-arm-results-20261014.md",
+          "scope": "Eager, synchronous P/D. Smoothed vs concentrated transfers with RDMA; both arms use the connector.",
+          "bundle_ms": {
+            "concentrated": 43.87,
+            "smoothed": 22.884
+          },
+          "mean_ttft_s": {
+            "concentrated": 3.217,
+            "smoothed": 3.454
+          }
+        },
+        {
+          "kind": "offline-exact-same-task-prefix-block-upper-bound",
+          "block_size_tokens": 2048,
+          "input_protocol_sha256": "eacf3628cda8d7accc2e39b20fce687b1deb1cb0b0f470e8b11c8dd4517f71f8",
+          "cohorts": {
+            "swe": {
+              "requests": 64,
+              "same_task_pairs": 32,
+              "total_prompt_tokens": 509607,
+              "pairs_with_2048_tokens": 4,
+              "pairs_with_4096_tokens": 0,
+              "pairs_with_8192_tokens": 0,
+              "max_prefix": 2862,
+              "whole_2048_block_token_upper_bound": 8192,
+              "prefix_length_bands": {
+                "0": 28,
+                "2048": 4
+              },
+              "whole_2048_block_prompt_share_upper_bound_percent": 1.6075
+            },
+            "terminal": {
+              "requests": 48,
+              "same_task_pairs": 16,
+              "total_prompt_tokens": 462869,
+              "pairs_with_2048_tokens": 16,
+              "pairs_with_4096_tokens": 15,
+              "pairs_with_8192_tokens": 0,
+              "max_prefix": 7543,
+              "whole_2048_block_token_upper_bound": 94208,
+              "prefix_length_bands": {
+                "2048": 1,
+                "6144": 15
+              },
+              "whole_2048_block_prompt_share_upper_bound_percent": 20.3531
+            }
+          },
+          "assumption": "Same-task predecessor cache would have to be available and reusable; the frozen benchmark uses independent request salts.",
+          "connector_cpu_fixtures_passed": 7,
+          "qualification_gap": "R10 keeps GDN/MTP resident checkpoint identity on its own state path; the FA-only lookup does not prove recoverability."
+        }
+      ]
+    },
+    "graph-coverage": {
+      "historical_or_prior_public_source": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/802cc5ca4a9da1e1e95f333d5dd2a3a4a53cbb63/reports/independent-inference-optimizations-20261113/graph-coverage/README.md",
+      "followup_zh": "R10 诊断：并发 6／8／10，24 个固定输出请求，78 次 FULL 图分发，观测到的分发 padding 全为 0。CPU 按冻结分发器重放未发现需要增补的规格；结论仅限这个窗口和分发层。",
+      "followup_en": "R10 diagnostic: 24 fixed-output requests at concurrency 6/8/10 produced 78 FULL dispatches, all with zero dispatcher padding. CPU replay identified no missing capture size in this window. Other layers and workloads were outside scope.",
+      "observations": [
+        {
+          "kind": "npu-dispatcher-diagnostic-and-exact-cpu-replay",
+          "fixed_output_tokens_per_request": 64,
+          "windows": [
+            {
+              "concurrency": 6,
+              "requests": 6,
+              "completion_tokens": 384,
+              "rows": [
+                {
+                  "unpadded": 24,
+                  "padded": 24,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 23
+                },
+                {
+                  "unpadded": 256,
+                  "padded": 256,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 1
+                },
+                {
+                  "unpadded": 3,
+                  "padded": 3,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 1
+                },
+                {
+                  "unpadded": 1024,
+                  "padded": 1024,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 1
+                }
+              ]
+            },
+            {
+              "concurrency": 8,
+              "requests": 8,
+              "completion_tokens": 512,
+              "rows": [
+                {
+                  "unpadded": 24,
+                  "padded": 24,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 23
+                },
+                {
+                  "unpadded": 256,
+                  "padded": 256,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 1
+                },
+                {
+                  "unpadded": 3,
+                  "padded": 3,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 1
+                },
+                {
+                  "unpadded": 1024,
+                  "padded": 1024,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 1
+                }
+              ]
+            },
+            {
+              "concurrency": 10,
+              "requests": 10,
+              "completion_tokens": 640,
+              "rows": [
+                {
+                  "unpadded": 40,
+                  "padded": 40,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 23
+                },
+                {
+                  "unpadded": 256,
+                  "padded": 256,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 1
+                },
+                {
+                  "unpadded": 3,
+                  "padded": 3,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 1
+                },
+                {
+                  "unpadded": 1536,
+                  "padded": 1536,
+                  "pad": 0,
+                  "mode": "FULL",
+                  "count": 1
+                }
+              ]
+            }
+          ],
+          "dispatcher_source_sha256": "51f632753af729aeee6ce4a802d9d74b64f22eef02a524f36e2a24b07ef0cf63",
+          "capture_sizes": [
+            3,
+            6,
+            12,
+            16,
+            24,
+            32,
+            40,
+            48,
+            64,
+            80,
+            96,
+            108,
+            128,
+            256,
+            512,
+            1024,
+            1536,
+            2048,
+            4096
+          ],
+          "new_sizes_supported_by_replay": [],
+          "historical_package_commit": "518415a3f55dc249f92b4a244fd14b6d232d704f",
+          "retained_service_log_sha256": "16411f80ad4db2fd9bc7a8918bc1c99b76c56d5a7fe0ef69e061fb9f21a36f4f"
+        }
+      ]
+    },
+    "greedy-bf16-native": {
+      "historical_or_prior_public_source": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/4454890cd31346163fbfa32dfdc81524d8e95af4/website-publication/data/greedy-bf16-native-20261123/summary.json",
+      "followup_zh": "v2 另测同卡、不同场次的 10 题（并发 10）：观察到吞吐 +19.67%、P95 首字 +2.77%、P95 每 token 耗时 −3.28%、答对 8→9。最长输出从 8,192 token 截断变为 6,687 token 正常结束，吞吐增幅无法单独归因于 MOD。",
+      "followup_en": "v2 used the same cards in a separate 10-case session at concurrency 10: observed throughput +19.67%, P95 TTFT +2.77%, P95 TPOT −3.28%, and 8→9 correct. The longest output changed from 8,192 capped tokens to 6,687 tokens with EOS; the throughput difference cannot be attributed to the MOD alone.",
+      "observations": [
+        {
+          "kind": "component-cpu-and-cann-graph-comparison-v2-vs-v1",
+          "exact_cpu_forwards": 320,
+          "int32_index_graph_shapes": {
+            "one_mtp2": {
+              "v1": {
+                "host_us": 187.08195312499998,
+                "device_us": 185.71083744366962
+              },
+              "v2": {
+                "host_us": 171.12565104166666,
+                "device_us": 169.8508361975352
+              },
+              "correctness_replays": 20
+            },
+            "ten_mixed": {
+              "v1": {
+                "host_us": 179.518234375,
+                "device_us": 177.72864301999408
+              },
+              "v2": {
+                "host_us": 162.33019791666666,
+                "device_us": 160.88927288850147
+              },
+              "correctness_replays": 20
+            },
+            "ten_mtp2": {
+              "v1": {
+                "host_us": 180.95476041666666,
+                "device_us": 179.32979265848797
+              },
+              "v2": {
+                "host_us": 164.65928125,
+                "device_us": 163.38781515757245
+              },
+              "correctness_replays": 20
+            },
+            "full_execution_mtp2": {
+              "v1": {
+                "host_us": 181.748671875,
+                "device_us": 180.09385466575623
+              },
+              "v2": {
+                "host_us": 165.26522916666667,
+                "device_us": 163.94781072934467
+              },
+              "correctness_replays": 20
+            }
+          }
+        },
+        {
+          "kind": "same-card-different-session-ten-case-screen-v2-vs-r10",
+          "concurrency": 10,
+          "raw_streams_recomputed": 20,
+          "candidate_source_sha256": "cdf8cd46a7a7de6d338a06c57d35f02da53af419956fbceaa6ae52578132df02",
+          "window_change_percent": {
+            "wall_s": -17.642930134175096,
+            "output_tok_s": 19.673403845829874,
+            "mean_ttft_ms": 3.804940814598745,
+            "p95_ttft_ms": 2.771490265309673,
+            "mean_tpot_ms": -2.566904782855617,
+            "p95_tpot_ms": -3.2789270131454384
+          },
+          "r10": {
+            "cases": 10,
+            "completed": 10,
+            "failed": 0,
+            "correct": 8,
+            "unparsed": 0,
+            "truncated": 1,
+            "wall_s": 69.41219176098821,
+            "output_tok_s": 366.04520553808646,
+            "mean_ttft_ms": 755.6406630930724,
+            "p95_ttft_ms": 1087.155949343287,
+            "mean_tpot_ms": 12.198469433711526,
+            "p95_tpot_ms": 13.771229609220265,
+            "output_tokens": 25408
+          },
+          "candidate": {
+            "cases": 10,
+            "completed": 10,
+            "failed": 0,
+            "correct": 9,
+            "unparsed": 0,
+            "truncated": 0,
+            "wall_s": 57.16584726399742,
+            "output_tok_s": 438.0587570818922,
+            "mean_ttft_ms": 784.3923430948053,
+            "p95_ttft_ms": 1117.2863706480712,
+            "mean_tpot_ms": 11.885346338382405,
+            "p95_tpot_ms": 13.319681041521259,
+            "output_tokens": 25042
+          },
+          "longest_output_tokens": {
+            "r10_capped": 8192,
+            "candidate_eos": 6687
+          },
+          "raw_archives_sha256": {
+            "r10": "fef850a6b3ba3707f263218eba7aba2fc249f55c431b4706f118a2e9dd519ed7",
+            "candidate": "877272b6837c8f898b5d7884991e60e9db979e3e0f84f6039c63d9bb364e57e8"
+          }
+        }
+      ]
+    },
+    "vspec": {
+      "historical_or_prior_public_source": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-vSpec/snapshot/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+      "followup_zh": "R10 原生 MTP2 · MMLU-Pro 190 题、并发 10：254,360 轮 draft 中，第一个位置接受 90.07%，第二个位置接受 77.32%。数据不足以支持全局减步；本轮未得到 vSpec 在 R10 的对照成绩。",
+      "followup_en": "R10 native MTP2 · 190 MMLU-Pro cases at concurrency 10: across 254,360 draft rounds, the first position was accepted in 90.07% and the second in 77.32%. These counters do not support reducing the draft length globally; there is no matched vSpec result on R10.",
+      "observations": [
+        {
+          "kind": "frozen-r10-runtime-counter-deltas",
+          "workload": "MMLU-Pro, 190 cases excluding the ten-case screen, concurrency 10, isolated prefix caches",
+          "draft_rounds": 254360,
+          "drafted_tokens": 508720,
+          "accepted_tokens": 425753,
+          "accepted_draft_tokens_percent": 83.691,
+          "accepted_rounds_by_position": {
+            "first": 229093,
+            "second": 196660
+          },
+          "percent_of_rounds_by_position": {
+            "first": 90.0664,
+            "second": 77.3156
+          },
+          "percent_second_given_first_accepted": 85.8429,
+          "retained_reference_archive_sha256": "c2100c6b5cb7ad8e31ef32383b208499f1a23f5cf14f13112b27583e6f851d7f",
+          "limitation_en": "Aggregate counters cannot identify a request-level low-acceptance gate or the cost of removing a draft step. No vSpec arm was run.",
+          "limitation_zh": "聚合计数不能识别逐请求的低接受率条件，也不能估计去掉一步的执行成本。本次没有运行 vSpec 对照组。"
+        }
+      ]
+    },
+    "betterscale": {
+      "historical_or_prior_public_source": "https://vllm-hust.sage.org.ai/betterscale.html#service-throughput",
+      "followup_zh": "R10 新候选将已接受 token 的状态写回合为一次提交。910B2 组件测试中，8／10 活跃行同步完成时间由 162.89／158.30 μs 降至 69.22／67.50 μs；只覆盖图外状态准备，暂无整模吞吐和质量结果。",
+      "followup_en": "An R10 candidate fuses accepted-token state publication into one launch. In the 910B2 component test, synchronized completion at 8/10 active rows fell from 162.89/158.30 μs to 69.22/67.50 μs. This covers state preparation outside the model graph; end-to-end throughput and quality are pending.",
+      "observations": [
+        {
+          "kind": "candidate-component-only-cpu-and-ascend-910b2",
+          "baseline_source_sha256": "fd8e334e31fa385e55049c3234b5c17ee3949782cff1709a880f2da8522f707a",
+          "candidate_source_sha256": "e428fc00edc9bba73c902fede19048d412199b365ab4efb05848c7e85da6c186",
+          "cpu_parity_cases": 144,
+          "npu_shapes": [
+            0,
+            1,
+            8,
+            10,
+            21,
+            35,
+            36
+          ],
+          "graph_correctness_replays_per_shape": 3,
+          "shape_timings": [
+            {
+              "active_rows": 8,
+              "r10_eager_completion_us": 162.89,
+              "candidate_eager_completion_us": 69.22,
+              "r10_graph_event_us": 18.74,
+              "candidate_graph_event_us": 18.18
+            },
+            {
+              "active_rows": 10,
+              "r10_eager_completion_us": 158.3,
+              "candidate_eager_completion_us": 67.5,
+              "r10_graph_event_us": 18.58,
+              "candidate_graph_event_us": 18.05
+            }
+          ],
+          "scope": "Reorder seats, gather accepted-token counts and publish prefix and sentinel tail after the existing H2D; no end-to-end model load.",
+          "retained_component_record_sha256": "e47f442ce50b4cf22a793e7dfe72c248a47dfdcb7052d78b5b73c574af05a5db"
+        }
+      ]
+    },
+    "vllm-hust-opset": {
+      "historical_or_prior_public_source": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/4709ab7ca83264c7c76cf4518044252ac4cb5164/archive/mod-git-20261022/vllm-hust-opset/snapshot/docs/optimizations/linear-swiglu-graph.md",
+      "followup_zh": "R10 启动及源码复核：两 rank 未启用 batch-invariant，未进入这条 persistent linear 路径，本轮没有为该路径登记 R10 性能增益。",
+      "followup_en": "R10 sealed launch and source review: batch-invariant dispatch was disabled on both ranks, so this persistent linear path was inactive. No R10 performance gain for the path was measured.",
+      "observations": [
+        {
+          "kind": "frozen-source-and-sealed-launch-audit",
+          "batch_invariant_env_in_prior_launch": null,
+          "batch_invariant_ascend_flag_in_prior_launch": false,
+          "worker_registration_lines_in_prior_log": 0,
+          "source_sha256": {
+            "source_environment_default": "5ad790c28c0438fc994b9badaa7378fc044dbf7afefaf3291a0a7cd630a7585b",
+            "ascend_config_default": "bb7001aca0cb6ed459f18e652d827e777907807f45216563551c1aa89bc6694f",
+            "ascend_registration": "a1cfbb025db53cc4cff5dea33955aead1349082c9382b222d608cd2ec52edc57",
+            "only_persistent_linear_caller": "2c42c1ab8110d4bc17bece46d379cc6c83044a36debd0411efe4bc2d292af20c",
+            "worker_hook": "a76507345101b416ecc2d34b61112a779e42c7b491405dfbbd3ec6487bfa5d43",
+            "prior_sealed_launch": "81f92c28413508526d37133168b6b0058aadc3e2c48e149821505ff2757e0fd7",
+            "prior_sealed_service_log": "9771b0d624570cb9be76e592df30f773f3344ff7dda133bcba710c67932d4c4c",
+            "prior_sealed_receipt": "db6f9bce72738d6843f79b8ea7c44c419f018fa149a7f094b91809a9f8284e3b"
+          }
+        }
+      ]
+    }
+  }
+}
