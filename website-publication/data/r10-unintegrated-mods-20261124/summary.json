@@ -1,0 +1,320 @@
+{
+  "schema": "vllm-hust-r10-mod-experiments/v1",
+  "date": "2026-11-24",
+  "reference": {
+    "engine": "2026.11.21.10",
+    "release": "full-answer-b1-20261121-r10",
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "BF16",
+    "device_model": "Ascend 910B2",
+    "tensor_parallel": 2,
+    "graph": "FULL",
+    "speculative_steps": 2
+  },
+  "admission_reviews": {
+    "stateaxis-pipelined-weight-loading": {
+      "kind": "runtime-admission-audit",
+      "candidate_commit": "c28890ec48ed69dad9e980be3e4e6d10422465d2",
+      "authorization_manifest_hash_valid": true,
+      "requires_host_provider": "stateaxis",
+      "qwen2_only": true,
+      "frozen_model_type": "qwen3_5_moe",
+      "pipelined_loader_parser_in_scanned_provider_files": false,
+      "candidate_launch_attempted": false
+    }
+  },
+  "plugins": {
+    "prefill-admission": {
+      "prior_evidence": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/802cc5ca4a9da1e1e95f333d5dd2a3a4a53cbb63/reports/independent-inference-optimizations-20261113/prefill-admission/README.md",
+      "result": {
+        "all_sampled_peer_cards_idle": true,
+        "all_services_completed": true,
+        "arm_data_sha256": {
+          "candidate": "0a789b246986544257ed5d66345fcbfd4dbfa19c22c876d961e7ad3cb2f2c87e",
+          "r10": "334be7c1d4d6746ee6d3ccc4776d6a70bcf53d29c8163e171c202e1f5a1cbc93"
+        },
+        "both_arm_devices_idle_after_release": true,
+        "candidate_manager_args": [
+          "--long-prefill-token-threshold",
+          "3072"
+        ],
+        "experiment": "r10-prefill-admission-capped3072",
+        "receipt_sha256": "64989f26afe6c96bff2ea07870336f7aad0cc8cc641dddaf54890761456c0357",
+        "synthetic_pairs": [
+          {
+            "arm_metrics": {
+              "candidate": {
+                "long_p50_ttft_ms": 540.9706,
+                "long_p95_ttft_ms": 556.4641,
+                "median_batch_ms": 838.0544150131755
+              },
+              "r10": {
+                "long_p50_ttft_ms": 439.0725,
+                "long_p95_ttft_ms": 449.855,
+                "median_batch_ms": 747.4411429720931
+              }
+            },
+            "batches_per_arm": 5,
+            "delta_percent": {
+              "long_p50_ttft_ms": 23.2076,
+              "long_p95_ttft_ms": 23.6985,
+              "median_batch_ms": 12.1231
+            },
+            "exact_output_requests": 5,
+            "long_prompt_tokens": 6144,
+            "long_requests_per_batch": 1,
+            "output_token_ids_available_both_arms": true,
+            "paired_batch_ms": [
+              [
+                715.793,
+                832.488
+              ],
+              [
+                749.67,
+                829.492
+              ],
+              [
+                747.441,
+                848.662
+              ],
+              [
+                755.888,
+                845.684
+              ],
+              [
+                730.796,
+                838.054
+              ]
+            ],
+            "requests_per_arm": 5,
+            "short_requests_per_batch": 0
+          },
+          {
+            "arm_metrics": {
+              "candidate": {
+                "long_p50_ttft_ms": 538.3829,
+                "long_p95_ttft_ms": 549.0248,
+                "median_batch_ms": 904.7884639585391,
+                "short_p50_ttft_ms": 484.3008,
+                "short_p95_ttft_ms": 493.3159
+              },
+              "r10": {
+                "long_p50_ttft_ms": 436.9749,
+                "long_p95_ttft_ms": 448.7451,
+                "median_batch_ms": 812.8667379496619,
+                "short_p50_ttft_ms": 383.3789,
+                "short_p95_ttft_ms": 395.1918
+              }
+            },
+            "batches_per_arm": 5,
+            "delta_percent": {
+              "long_p50_ttft_ms": 23.2068,
+              "long_p95_ttft_ms": 22.3467,
+              "median_batch_ms": 11.3083,
+              "short_p50_ttft_ms": 26.3243,
+              "short_p95_ttft_ms": 24.8295
+            },
+            "exact_output_requests": 20,
+            "long_prompt_tokens": 6144,
+            "long_requests_per_batch": 1,
+            "output_token_ids_available_both_arms": true,
+            "paired_batch_ms": [
+              [
+                802.616,
+                900.398
+              ],
+              [
+                812.867,
+                899.713
+              ],
+              [
+                812.577,
+                904.788
+              ],
+              [
+                828.143,
+                941.491
+              ],
+              [
+                825.999,
+                936.231
+              ]
+            ],
+            "requests_per_arm": 20,
+            "short_requests_per_batch": 3
+          },
+          {
+            "arm_metrics": {
+              "candidate": {
+                "long_p50_ttft_ms": 1729.6526,
+                "long_p95_ttft_ms": 2133.814,
+                "median_batch_ms": 2476.641674002167,
+                "short_p50_ttft_ms": 1232.2686,
+                "short_p95_ttft_ms": 1246.1252
+              },
+              "r10": {
+                "long_p50_ttft_ms": 1379.9098,
+                "long_p95_ttft_ms": 1698.8205,
+                "median_batch_ms": 2058.6050039855763,
+                "short_p50_ttft_ms": 1236.2293,
+                "short_p95_ttft_ms": 1250.0418
+              }
+            },
+            "batches_per_arm": 5,
+            "delta_percent": {
+              "long_p50_ttft_ms": 25.3453,
+              "long_p95_ttft_ms": 25.6056,
+              "median_batch_ms": 20.3068,
+              "short_p50_ttft_ms": -0.3204,
+              "short_p95_ttft_ms": -0.3133
+            },
+            "exact_output_requests": 40,
+            "long_prompt_tokens": 12288,
+            "long_requests_per_batch": 2,
+            "output_token_ids_available_both_arms": true,
+            "paired_batch_ms": [
+              [
+                2048.226,
+                2472.289
+              ],
+              [
+                2047.217,
+                2476.642
+              ],
+              [
+                2058.741,
+                2476.154
+              ],
+              [
+                2063.742,
+                2497.265
+              ],
+              [
+                2058.605,
+                2486.227
+              ]
+            ],
+            "requests_per_arm": 40,
+            "short_requests_per_batch": 6
+          }
+        ],
+        "retained_raw_archive_sha256": "d648057c7ab7553c905a8ee1214d5034ca006d760517fcd85d1ab3b1f133e6aa"
+      },
+      "method": "Apply the MOD mechanism through the native R10 scheduler CLI. Control uses the unmodified threshold 0. Candidate uses 3072 at the same 4096 global budget. Long prompts precede short arrivals by 100 ms; each emits 48 tokens. C1/C4/C8 are separate cohorts.",
+      "upstream_recipe_cpu_check": {
+        "upstream_revision": "3ed43319727eb861c44b831c6a52ec260946a466",
+        "upstream_qualified_threshold": 224,
+        "upstream_step_budget": 256,
+        "r10_individually_rejected_recipe_fields": {
+          "max_num_seqs": 36,
+          "enable_prefix_caching": true,
+          "max_num_batched_tokens": 4096
+        },
+        "r10_integration": "native threshold mechanism port, not installation of the recipe carrier"
+      },
+      "initial_chunk_alignment_cpu_replay": {
+        "kind": "cpu-source-replay-of-first-nonfinal-prefill-boundary",
+        "attention_block_size_reported_at_startup": 2048,
+        "rows": [
+          {
+            "configured_cap": 0,
+            "original_allocation": 4096,
+            "aligned_nonfinal_chunk": 4096
+          },
+          {
+            "configured_cap": 3072,
+            "original_allocation": 3072,
+            "aligned_nonfinal_chunk": 2048
+          },
+          {
+            "configured_cap": 3584,
+            "original_allocation": 3584,
+            "aligned_nonfinal_chunk": 2048
+          }
+        ],
+        "scope": "Isolated 6,144-token prompt at position zero, no cache hit or shared junction. No NPU scheduling trace."
+      },
+      "followup_zh": "R10 机制移植，4,096-token 总预算，长请求单步上限 3,072。合成混合批次的 C4／C8 短请求首字 P50 +26.32%／-0.32%，整批耗时中位 +11.31%／+20.31%。输出 token ID一致 65／65。每规格五批，同卡各一次服务。该档位未通过性能筛选。",
+      "followup_en": "R10 mechanism port with a 4,096-token step budget and a 3,072-token per-long-request cap. Synthetic C4/C8 short-request P50 TTFT changed +26.32%/-0.32%. Median batch time changed +11.31%/+20.31%. Exact token ID agreement 65/65. Five batches per shape with one process per arm on the same cards. The tested cap did not pass the performance screen."
+    },
+    "betterscale": {
+      "result": {
+        "all_sampled_peer_cards_idle": true,
+        "all_services_completed": true,
+        "arm_metrics": {
+          "candidate": {
+            "completion_tokens": 25888,
+            "correct": 6,
+            "mean_tpot_ms": 12.337329973091276,
+            "mean_ttft_ms": 827.5468974024989,
+            "output_tok_s": 383.317410017195,
+            "p95_tpot_ms": 13.894526893450763,
+            "p95_ttft_ms": 1157.895817804092,
+            "truncated": 0,
+            "wall_s": 67.53671845700592
+          },
+          "r10": {
+            "completion_tokens": 28592,
+            "correct": 10,
+            "mean_tpot_ms": 12.071057578298651,
+            "mean_ttft_ms": 828.5352220962523,
+            "output_tok_s": 409.4776370692657,
+            "p95_tpot_ms": 13.46147611913668,
+            "p95_ttft_ms": 1158.9449429535307,
+            "truncated": 1,
+            "wall_s": 69.82554701800109
+          }
+        },
+        "arm_records_sha256": {
+          "candidate": "4c2cf4d18a1aa1b83484415622212f6ac1005dff91c61a786d27b902906b51e4",
+          "r10": "fe71a9ad42ccf5bc6ea57e809856cb67ca6fa96aadb1d6f4932ed492a8cde8bd"
+        },
+        "both_arm_devices_idle_after_release": true,
+        "both_tp_ranks_activated": true,
+        "both_tp_ranks_compiled_before_seal": true,
+        "delta_percent": {
+          "mean_tpot_ms": 2.2059,
+          "mean_ttft_ms": -0.1193,
+          "output_tok_s": -6.3887,
+          "p95_tpot_ms": 3.217,
+          "p95_ttft_ms": -0.0905,
+          "wall_s": -3.2779
+        },
+        "experiment": "r10-accepted-state-publication-experimental",
+        "launch_recovery": {
+          "candidate_seeded_with_readback_triton_cache": true,
+          "fresh_control_reused": true,
+          "initial_candidate_failure": "kernel cache miss after JIT seal",
+          "startup_excluded_from_performance": true
+        },
+        "newly_correct": 0,
+        "newly_wrong": 4,
+        "receipt_sha256": "6244658ca0ff6cfc670ad1415c0497eaa4979c682ab1f6bafe22b4fc6b19241f",
+        "request_plan_sha256": "0b8f6a85272a1882644dd35b6716e688e4829df8842b3ebdea6d8b585c6dbc66",
+        "retained_raw_archive_sha256": "74257c8feffaafa946b7ae6a266db81b1a4588f8de3340bad3563fe62623bb4c",
+        "raw_streams_recomputed": 20,
+        "exact_output_text_pairs": 0,
+        "max_observed_output_tokens": {
+          "candidate": 7808,
+          "r10": 8192
+        }
+      },
+      "unmodified_control_variation": {
+        "same_node_cards_request_plan_and_launch": true,
+        "correct_across_separate_control_runs": [
+          7,
+          10
+        ],
+        "wall_s_across_separate_control_runs": [
+          70.3741455830168,
+          69.82554701800109
+        ]
+      },
+      "method": "Read-only private-source overlay of accepted-token state publication after host-to-device copies. Candidate activation verified during warmup on both TP ranks.",
+      "followup_zh": "R10 整模十题筛选（并发 10，双 rank 活动）：输出吞吐 -6.39%，P95 首字 -0.09%，P95 每 token 耗时 +3.22%，答对 10→6。同卡各一场，未通过集成筛选。",
+      "followup_en": "R10 ten-case end-to-end screen at concurrency 10 with both TP ranks active: output throughput -6.39%, P95 TTFT -0.09%, P95 TPOT +3.22%, and 10 to 6 correct. One process per arm on the same cards. The candidate did not pass the integration screen.",
+      "review_zh": "2026-11-24 · 冻结 R10 MMLU-Pro 前 10 题，同一对 910B2，输出 token 总量 28592→25888，截断 1→0，从对转错 4 题。复算 20 段原始流，生成文本完全一致 0／10。新内核在封存前由双 rank 预编译。相同 R10 启动和题单的两场原生对照分别答对 7 和 10 题。 输出量变化会影响整批吞吐的归因。",
+      "review_en": "2026-11-24 · First ten frozen R10 MMLU-Pro cases on the same two 910B2 devices. Output tokens 28592 to 25888. Truncations 1 to 0. Newly incorrect 4. All 20 raw streams were recomputed. Generated text matched exactly in 0/10 pairs. Both ranks precompiled the new kernel before sealing. Separate unmodified R10 runs using the same cards, launch and case plan scored 7 and 10 correct. Output length differences affect how the throughput change can be attributed."
+    }
+  }
+}
