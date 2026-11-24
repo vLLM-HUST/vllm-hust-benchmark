@@ -3992,8 +3992,8 @@
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-prefill-microflow",
       "repository_visibility": "public",
       "upstream_repository": null,
-      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification. The frozen B1 r6 profile enables the school028 GDN and FlashAttention path from 0.1.0.dev0.",
-      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。B1 r6 冻结组合启用了 0.1.0.dev0 的 school028 GDN 与 FlashAttention 路径。",
+      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification. The frozen B1 r6 profile enables the school028 GDN and FlashAttention path from 0.1.0.dev0. The R10 FA output-gate fusion passed non-NaN BF16 bitwise checks. Grouped graph replay was 0.33% faster at 8 rows, 4.47% slower at 54 rows and 8.61% slower at 4096 rows. The component screen did not qualify the change for integration.",
+      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。B1 r6 冻结组合启用了 0.1.0.dev0 的 school028 GDN 与 FlashAttention 路径。 冻结 R10 的 FA 输出门控融合通过非 NaN BF16 逐位校验。分组图回放中，8 行略快 0.33%，54 行耗时增加 4.47%，4096 行增加 8.61%。组件筛选未达到集成条件。",
       "compatibility": {
         "status": "experimental",
         "host": "Pinned BetterScale shared host on vLLM-HUST + vllm-ascend-hust",
@@ -4023,10 +4023,7 @@
           "name": "田景远"
         }
       ],
-      "public_effect_zh": "冻结 R10 的 FA 输出门控融合通过非 NaN BF16 逐位校验。分组图回放中，8 行略快 0.33%，54 行耗时增加 4.47%，4096 行增加 8.61%。组件筛选未达到集成条件。",
-      "public_effect_en": "The R10 FA output-gate fusion passed non-NaN BF16 bitwise checks. Grouped graph replay was 0.33% faster at 8 rows, 4.47% slower at 54 rows and 8.61% slower at 4096 rows. The component screen did not qualify the change for integration.",
-      "public_effect_status": "not-beneficial-in-tested-cell",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L146"
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L146"
     },
     {
       "id": "graph-coverage",
