@@ -120,3 +120,9 @@ MOD不重复计增量，不补造SR编号，也不把跨模型差异当成独立
   1→0，从对转错 4 题。复算 20 段原始流，生成文本完全一致 0／10。新内核在封存前由双 rank 预编译。相同 R10 启动和题单的两场原生对照分别答对 7 和 10 题。
   输出量变化会影响整批吞吐的归因。
 - StateAxis 流水化权重加载。R10 准入复核中，当前扩展清单限定 StateAxis 宿主和 Qwen2，冻结 R10 使用 Qwen3.5 MoE，未运行候选。
+
+## 已接受 Token 状态写回融合
+
+上文的 BetterScale 状态写回融合现以独立实验 MOD 登记。该试验依赖冻结 R10
+的宿主状态路径。代码包默认关闭，沿用已入库的组件结果和整模未通过结论。[独立仓库](https://github.com/vLLM-HUST/vllm-hust-accepted-state-fusion)
+· [公开证据](../../website-publication/data/accepted-state-fusion-20261124/summary.json)
