@@ -552,10 +552,10 @@
       "upstream_repository": null,
       "summary_en": "BidKV uses the merged vLLM-HUST preemption-policy API v1 with bounded safe abstention. The latest Qwen3.5-35B-A3B TP4 KV-pressure campaign preserves two positive C12 pairs, active policy selections, negative tuning trials and shutdown diagnostics; it remains separate from the older TP2/SWE and Qwen3.8 observations.",
       "summary_zh": "BidKV 使用已合并的 vLLM-HUST preemption-policy API v1 与有界安全弃权。最新 Qwen3.5-35B-A3B TP4 KV-pressure 实验保留两轮 C12 正向配对、真实策略选择、负向调参试验与退出诊断，并与旧 TP2/SWE 和 Qwen3.8 观察严格分开。",
-      "public_effect_en": "In the Qwen3.5 TP4 C12 cell with 512 MiB KV per NPU, two alternating-order pairs improved output throughput by 17.11% and 10.65% (13.83% geometric mean; 13.88% arithmetic mean). BidKV made 10 and 7 active selections with zero policy failures. Other retained cells are negative or not exercised, so this is a tested-cell result, not a general speedup claim.",
-      "public_effect_zh": "在 Qwen3.5 TP4 C12、每 NPU 512 MiB KV 的测试单元中，两轮交替顺序配对的输出吞吐分别提升 17.11% 与 10.65%（几何平均 13.83%，算术平均 13.88%）。BidKV 分别执行 10 与 7 次有效选择，策略失败为 0。其余保留单元为负向或未触发，因此这只是已测单元结果，不代表普遍加速。",
+      "public_effect_en": "In the Qwen3.5 TP4 C12 cell with 512 MiB KV per NPU, two alternating-order pairs improved output throughput by 17.11% and 10.65% (13.83% geometric mean; 13.88% arithmetic mean). BidKV made 10 and 7 active selections with zero policy failures. Other retained cells are negative or not exercised, so this is a tested-cell result, not a general speedup claim. BidKV passed 1,006 CPU checks against the frozen R10 preemption interface, covering the native selector and fail-closed behavior. In 1,000 synthetic pressure cases, 412 selected a different victim. The paired model pressure run is pending.",
+      "public_effect_zh": "在 Qwen3.5 TP4 C12、每 NPU 512 MiB KV 的测试单元中，两轮交替顺序配对的输出吞吐分别提升 17.11% 与 10.65%（几何平均 13.83%，算术平均 13.88%）。BidKV 分别执行 10 与 7 次有效选择，策略失败为 0。其余保留单元为负向或未触发，因此这只是已测单元结果，不代表普遍加速。 BidKV 与冻结 R10 抢占接口完成 1,006 组 CPU 核对，覆盖真实宿主选择器和异常回退。1,000 组模拟压力中，412 组选择与原生不同。该结果限于接口机制，整模压力配对待测。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-bidkv/snapshot/results/qwen35-evoscientist-20260929/README.md#high-concurrency-kv-pressure-result",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L206",
       "functional_compatibility": {
         "status": "passed",
         "scope": "Qwen3.5-35B-A3B · Ascend TP4 · FULL_AND_PIECEWISE graph; Qwen3.8-27B · Ascend TP4 · FULL_DECODE_ONLY graph"
@@ -2753,10 +2753,10 @@
       "documentation_url": "./betterscale.html",
       "summary_en": "Less host waiting. More device execution. BetterScale publishes separate bounded observations for DeepSeek V4 Flash and a Qwen3.5 TP2 small-fish prototype; their models, runtimes and protocols are not pooled. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36. The R10 fusion experiment is recorded under Accepted Token State Fusion.",
       "summary_zh": "让设备少等调度，多做推理。BetterScale 分别公开 DeepSeek V4 Flash 与 Qwen3.5 TP2 small-fish 原型的有限观察；两者的模型、运行时与协议不会合并。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。 已接受 Token 状态写回融合的 R10 试验记录见同名独立 MOD 条目。",
-      "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim. An",
-      "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。",
+      "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim. An R10 single-card component test of 16-row resident-slot tiling. All six decode and mixed shapes passed bitwise checks on graph replay with changed inputs. At 54 live rows, decode fell from 21.45 to 8.74 μs and mixed from 33.90 to 15.16 μs. The 1/2/4/8-warp settings generated identical device binaries within each branch. Model-level validation is pending.",
+      "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。 冻结 R10 单卡组件对照中，驻留状态槽改为 16 行分块。六种解码和混合形状均通过动态输入图回放逐位核对。54 活跃行时，解码 21.45→8.74 μs，混合 33.90→15.16 μs。1／2／4／8 warp 在同一分支生成相同设备二进制。分块仅取得组件证据，整模待验证。",
       "public_effect_status": "measured",
-      "public_effect_url": "./betterscale.html#service-throughput",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L5",
       "functional_compatibility": {
         "status": "passed",
         "scope": "DeepSeek-V4-Flash-0731-w8a8 · Ascend 910B2 TP8 / TP1-DP8-EP8, bounded K5 configurations"
@@ -4022,7 +4022,11 @@
           "login": "CubeLander",
           "name": "田景远"
         }
-      ]
+      ],
+      "public_effect_zh": "冻结 R10 的 FA 输出门控融合通过非 NaN BF16 逐位校验。分组图回放中，8 行略快 0.33%，54 行耗时增加 4.47%，4096 行增加 8.61%。组件筛选未达到集成条件。",
+      "public_effect_en": "The R10 FA output-gate fusion passed non-NaN BF16 bitwise checks. Grouped graph replay was 0.33% faster at 8 rows, 4.47% slower at 54 rows and 8.61% slower at 4096 rows. The component screen did not qualify the change for integration.",
+      "public_effect_status": "not-beneficial-in-tested-cell",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L146"
     },
     {
       "id": "graph-coverage",
