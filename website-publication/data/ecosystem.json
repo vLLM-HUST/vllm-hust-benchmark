@@ -2751,12 +2751,12 @@
       "repository_visibility": "private",
       "upstream_repository": null,
       "documentation_url": "./betterscale.html",
-      "summary_en": "Less host waiting. More device execution. BetterScale publishes separate bounded observations for DeepSeek V4 Flash and a Qwen3.5 TP2 small-fish prototype; their models, runtimes and protocols are not pooled. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36.",
-      "summary_zh": "让设备少等调度，多做推理。BetterScale 分别公开 DeepSeek V4 Flash 与 Qwen3.5 TP2 small-fish 原型的有限观察；两者的模型、运行时与协议不会合并。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。",
-      "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim. An R10 candidate fuses accepted-token state publication into one launch. In the 910B2 component test, synchronized completion at 8/10 active rows fell from 162.89/158.30 μs to 69.22/67.50 μs. This covers state preparation outside the model graph; end-to-end throughput and quality are pending. R10 ten-case end-to-end screen at concurrency 10 with both TP ranks active: output throughput -6.39%, P95 TTFT -0.09%, P95 TPOT +3.22%, and 10 to 6 correct. One process per arm on the same cards. The candidate did not pass the integration screen.",
-      "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。 R10 新候选将已接受 token 的状态写回合为一次提交。910B2 组件测试中，8／10 活跃行同步完成时间由 162.89／158.30 μs 降至 69.22／67.50 μs；只覆盖图外状态准备，暂无整模吞吐和质量结果。 R10 整模十题筛选（并发 10，双 rank 活动）：输出吞吐 -6.39%，P95 首字 -0.09%，P95 每 token 耗时 +3.22%，答对 10→6。同卡各一场，未通过集成筛选。",
+      "summary_en": "Less host waiting. More device execution. BetterScale publishes separate bounded observations for DeepSeek V4 Flash and a Qwen3.5 TP2 small-fish prototype; their models, runtimes and protocols are not pooled. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36. The R10 fusion experiment is recorded under Accepted Token State Fusion.",
+      "summary_zh": "让设备少等调度，多做推理。BetterScale 分别公开 DeepSeek V4 Flash 与 Qwen3.5 TP2 small-fish 原型的有限观察；两者的模型、运行时与协议不会合并。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。 已接受 Token 状态写回融合的 R10 试验记录见同名独立 MOD 条目。",
+      "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim. An",
+      "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L432",
+      "public_effect_url": "./betterscale.html#service-throughput",
       "functional_compatibility": {
         "status": "passed",
         "scope": "DeepSeek-V4-Flash-0731-w8a8 · Ascend 910B2 TP8 / TP1-DP8-EP8, bounded K5 configurations"
@@ -4744,6 +4744,61 @@
           "login": "ShuhaoZhangTony",
           "name": "张书豪"
         }
+      ]
+    },
+    {
+      "id": "accepted-state-fusion",
+      "name": "Accepted Token State Fusion",
+      "name_en": "Accepted Token State Fusion",
+      "name_zh": "已接受 Token 状态写回融合",
+      "artifact_type": "runtime_component",
+      "system_role": "kv_state_manager",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "R10 resident-state source overlay",
+        "Triton compile-only startup warmup"
+      ],
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "source_mod",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
+      "maturity": "experimental",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-accepted-state-fusion",
+      "repository_visibility": "public",
+      "public_surface": true,
+      "evidence_level": "measured",
+      "summary_zh": "将已接受 token 的计数收集、活跃前缀写回和尾部填充融合成一次 Triton 调用。实验覆盖层默认关闭。",
+      "summary_en": "Fuses gathering accepted-token counts, writing the active prefix and filling the tail into one Triton launch. The experimental overlay is default-off.",
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM-HUST Engine R10 · BetterScale",
+        "versions": [
+          "R10 2026.11.21.10"
+        ],
+        "platforms": [
+          "Ascend 910B2 ×2, TP2"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B BF16"
+        ],
+        "requirements_zh": "依赖冻结 R10 已集成的宿主状态路径。仅在基线准入后用隔离覆盖层启动，须在两个 rank 封存前完成预编译。覆盖输入按哈希校验。",
+        "requirements_en": "Depends on the resident-state path in frozen R10. Apply the isolated overlay after base admission and precompile on both ranks before sealing. Source and output identities are hash-verified."
+      },
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/249cd6b44d0d63fcd3afe8d868ed542ac5969667/website-publication/data/accepted-state-fusion-20261124/summary.json",
+      "public_effect_zh": "910B2 组件对照中，8／10 活跃行同步完成时间从 162.89／158.30 μs 降到 69.22／67.50 μs。R10 并发 10 的 MMLU-Pro 十题整模筛选中，吞吐 −6.39%，P95 每 token 耗时 +3.22%，答对 10→6。未通过整模筛选。",
+      "public_effect_en": "910B2 component timing at 8/10 active rows changed from 162.89/158.30 μs to 69.22/67.50 μs. In the R10 ten-case MMLU-Pro screen at concurrency 10, throughput changed −6.39%, P95 TPOT +3.22%, and correct answers 10→6. The end-to-end screen did not pass.",
+      "public_effect_detail_zh": [
+        "144 组 CPU 一致性和 7 种 NPU 形状通过验证。整模筛选确认两个 TP rank 均在封存前预编译并在服务中执行该路径。",
+        "整模两臂同卡各一次。两场原生 R10 对照曾分别答对 7 和 10 题，答题差异只作为筛选观察。"
+      ],
+      "public_effect_detail_en": [
+        "144 CPU parity cases and seven device shapes passed. Both TP ranks precompiled before sealing and executed the path during serving.",
+        "The model screen used one session per arm on the same cards. Two native control runs scored 7 and 10 correct. Answer differences are screening observations."
       ]
     }
   ]
