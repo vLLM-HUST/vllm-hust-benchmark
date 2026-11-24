@@ -70,6 +70,11 @@ P95。
 
 [冻结 r8 / original018 配对补测](reports/r8-context-tenant-20261119/README.md)：真实公开历史的4K、16K、32K及四租户正式阶段全部完成，保留五窗口、租户分布、原始流与完整封存摘要；原五项不重跑。有效算力参考单独认证，不把本专项采样利用率当作效率。
 
+## 35B 限流层真实 Agent 单题资格（2026-11-24）
+
+[两条 B1 路径的单题执行、评分和复算](reports/request-throttling-real-agent-single-task-20261124/README.md)保存六次执行、两组评分对照与独立
+B0 启动来源。
+
 ## 第八版请求限流控制器全指标复测（2026-11-22）
 
 [固定五项、SWE Trace Heavy Load 和闭环并发 8](reports/controller-r8-full-coverage-20261122/README.md)保留配对性能、尾部时延、评分、服务侧算力下界、单位成本、双卡利用率和原始归档摘要。
