@@ -294,6 +294,13 @@ class RegistryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "Invalid registry"):
                 Registry(self.doc)
 
+    def test_registered_scientist_sources_use_portable_relative_paths(self):
+        valid = document() | {"scientist_sources": ["runtime/translation_client.py"]}
+        self.assertNotEqual(Registry(valid).identity(), Registry(document()).identity())
+        for invalid in ["/tmp/source.py", "../source.py", "runtime/../source.py"]:
+            with self.subTest(path=invalid), self.assertRaises(ValueError):
+                Registry(document() | {"scientist_sources": [invalid]})
+
     def test_registry_identity_tracks_bound_configuration(self):
         registry = Registry(self.doc)
         before = registry.identity()

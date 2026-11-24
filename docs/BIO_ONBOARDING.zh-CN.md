@@ -97,3 +97,11 @@ Scientist 的 `docs/benchmark/registered_cross_series_registry.json`
 提供四发布物绑定；`registered_cross_series_suite.json` 运行新两模型，`registered_cross_series_all_suite.json`
 可运行四模型。输入、作者默认值、BPE边界、受保护公共代码及RNA contact非有限输出的分层判定见同目录
 `registered_cross_series_protocol.zh-CN.md`。实际通过与科学有效性以运行证据分别判定。
+
+## ProstT5 配对翻译与条件评分
+
+在配套 Scientist 工作区中，`docs/benchmark/registered_prostt5_registry.json` 注册双向翻译与条件评分，
+`docs/benchmark/registered_prostt5_suite.json` 选择用例。将两个路径分别传给现有 CLI 的 `--registry`、`--suite`，并将
+`--data` 指向同工作区的 `docs/benchmark/data/prostt5`。 用例使用 1CRN 同一条链的氨基酸与结构字母窗口。评分区分源长度、目标长度和实际参与计分的位置，
+翻译对照独立参考的 token 与解码文本。源码依赖可以在注册表的 `scientist_sources` 中按仓库相对路径声明， 运行时随注册适配器一起归档并核验。完整协议见 Scientist
+工作区的 `docs/benchmark/prostt5_protocol.zh-CN.md`。

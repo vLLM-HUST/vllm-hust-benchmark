@@ -69,6 +69,11 @@ def source_snapshot(scientist, registry=None):
         "tests/test_bio_registry.py",
         "docs/BIO_ONBOARDING.zh-CN.md",
     ]
+    for relative in registry.document.get("scientist_sources", []):
+        path = (scientist / relative).resolve(strict=True)
+        if not path.is_relative_to(scientist) or not path.is_file():
+            raise ValueError(f"Invalid registered Scientist source: {relative}")
+        scientist_files[relative] = file_digest(path)
     for path in registry.source_files():
         if path.is_relative_to(scientist):
             scientist_files[str(path.relative_to(scientist))] = file_digest(path)
