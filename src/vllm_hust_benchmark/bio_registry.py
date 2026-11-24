@@ -195,7 +195,14 @@ class Registry:
             if engine_options["max_model_len"] > limits["max_context"]:
                 raise ValueError("Execution context exceeds the publication limit")
             if (
-                len(case["sequences"]) > 1
+                len(
+                    next(
+                        case[key]
+                        for key in ("cells", "sequences", "structures")
+                        if key in case
+                    )
+                )
+                > 1
                 and not binding.profile["capabilities"]["batch"]
             ):
                 raise ValueError("Profile does not support logical batches")

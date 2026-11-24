@@ -120,9 +120,8 @@ def check_outputs(directory, suite, cases, rows, native, registry=None):
         case = cases[row["case_id"]]
         identity = native["inputs"][row["case_id"]]
         if (
-            identity["sequences"] != case["sequences"]
-            or identity["source_samples"] != case["samples"]
-        ):
+            "sequences" in case and identity["sequences"] != case["sequences"]
+        ) or identity["source_samples"] != case["samples"]:
             raise ValueError("Recorded input differs from the frozen dataset windows")
         actual = materialize(row["output"], actual_arrays)
         if work_counts(case, identity, actual, registry) != row["work"]:
@@ -340,6 +339,27 @@ def summarize(root, *, numeric=True):
                     row["memory_after"]["peak_reserved_bytes"] for row in subset
                 ),
             }
+            if "cells" in cases[case_id]:
+                spans = []
+                for row in steady:
+                    raw = row["raw_counts_started_ns"]
+                    if type(raw) is not int or not 0 < raw < row["started_ns"]:
+                        raise ValueError("Invalid raw count preprocessing clock")
+                    spans.append(
+                        (
+                            (row["started_ns"] - raw) / 1e6,
+                            (row["finished_ns"] - raw) / 1e6,
+                        )
+                    )
+                for column, label in enumerate(
+                    ["preprocessing", "raw_counts_to_embedding"]
+                ):
+                    result[label] = latency_statistics(
+                        [span[column] for span in spans], protocol["quantiles"]
+                    )
+                result["raw_counts_cells_per_active_second"] = (
+                    work["cells"] * 1000 / sum(s[1] for s in spans)
+                )
             rss = [row["memory_after"].get("rss_bytes") for row in subset]
             result["max_observed_worker_rss_bytes"] = (
                 max(rss) if all(value is not None for value in rss) else None
@@ -426,6 +446,60 @@ def render_markdown(summary):
         lines.append(
             f"| {case['case_id']} | {case['independent_starts']} | {values['count']} | {values['mean_ms']:.3f} | {values['quantiles_ms']['0.5']:.3f} | {values['quantiles_ms']['0.9']:.3f} | {case['rates_per_second']['jobs']:.3f} |"
         )
+    iteration_cases = [
+        case for case in summary["cases"] if "observed_iterations" in case["work"]
+    ]
+    if iteration_cases:
+        lines.extend(
+            [
+                "",
+                "Observed graph work across steady requests (diagnostic calls excluded).",
+                "",
+                "| Case | Jobs | Configured iterations | Observed iterations | Extra network calls | Resampled rows | Total network calls |",
+                "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+            ]
+        )
+        for case in iteration_cases:
+            work = case["work"]
+            lines.append(
+                f"| {case['case_id']} | {work['jobs']} | {work['configured_iterations']} | {work['observed_iterations']}"
+                f" | {work['resample_calls']} | {work['resampled_rows']} | {work['network_calls']} |"
+            )
+    structure_cases = [
+        case for case in summary["cases"] if "backbone_residues" in case["work"]
+    ]
+    if structure_cases:
+        lines.extend(
+            [
+                "",
+                "Structure latency includes PDB materialization, parsing, featurization and CPU result delivery. The roundtrip also includes native rescoring.",
+                "",
+                "| Case | Structures/s | Backbone residues/s |",
+                "| --- | ---: | ---: |",
+            ]
+        )
+        for case in structure_cases:
+            rates = case["rates_per_second"]
+            lines.append(
+                f"| {case['case_id']} | {rates['structures']:.3f} | {rates['backbone_residues']:.3f} |"
+            )
+    cell_cases = [case for case in summary["cases"] if "cells" in case["work"]]
+    if cell_cases:
+        lines.extend(
+            [
+                "",
+                "| Case | Start | Preprocess p50/p90 ms | Counts to CPU embedding p50/p90 ms | Cells/s (active counts to CPU) |",
+                "| --- | ---: | ---: | ---: | ---: |",
+            ]
+        )
+        for case in cell_cases:
+            for start in case["per_start"]:
+                prep = start["preprocessing"]["quantiles_ms"]
+                total = start["raw_counts_to_embedding"]["quantiles_ms"]
+                lines.append(
+                    f"| {case['case_id']} | {start['start_index']} | {prep['0.5']:.3f}/{prep['0.9']:.3f}"
+                    f" | {total['0.5']:.3f}/{total['0.9']:.3f} | {start['raw_counts_cells_per_active_second']:.3f} |"
+                )
     lines.extend(
         [
             "",

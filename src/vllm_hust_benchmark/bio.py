@@ -407,7 +407,7 @@ def run(args, scientist):
         record(
             "dataset_consistency",
             True,
-            "FASTA sources and all sequence windows revalidated",
+            "Dataset sources and resolved samples revalidated",
         )
     except Exception as error:
         record(
