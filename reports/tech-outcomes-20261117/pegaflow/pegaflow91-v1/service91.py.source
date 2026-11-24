@@ -1,0 +1,210 @@
+"""Owned official0.23 Native/PegaFlow services for the separate frozen-five cohort."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+import urllib.request
+
+ROOT=Path('/workspace/pegaflow-five-datasets-20261114-01')
+PERSIST=ROOT/'durable'
+OLD=Path('/workspace/pegaflow-techoutcomes-20261113-02')
+MODEL=Path('/data/shared_models/Qwen3.5-35B-A3B')
+MODEL_REVISION='712cf74392b05026a6db2bf213d343747d1f6d45'  # pragma: allowlist secret -- fixed public model revision
+
+
+def save(path,value):
+    path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
+    temp=path.with_suffix(path.suffix+'.tmp');temp.write_text(json.dumps(value,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');temp.replace(path)
+
+
+def sha(path):
+    with Path(path).open('rb')as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
+
+
+def npu():
+    return subprocess.check_output(['npu-smi','info'],text=True,timeout=30)
+
+
+def ticks(process):
+    return Path(f'/proc/{process.pid}/stat').read_text().split()[21]
+
+
+def stop_owned(process,start_ticks):
+    if process is not None and process.poll()is None:
+        assert ticks(process)==start_ticks,'PID ownership changed'
+        os.killpg(process.pid,signal.SIGTERM)
+        try:process.wait(timeout=120)
+        except subprocess.TimeoutExpired:
+            assert ticks(process)==start_ticks
+            os.killpg(process.pid,signal.SIGKILL);process.wait(timeout=30)
+
+
+def mapping():
+    raw=subprocess.check_output(['npu-smi','info','-m'],text=True,timeout=30)
+    found={}
+    for line in raw.splitlines():
+        words=line.split()
+        if len(words)>=3 and words[0].isdigit()and words[1]=='0'and words[2].isdigit():found[int(words[0])]=int(words[2])
+    assert [found.get(index)for index in[3,4]]==[0,1],'Physical allocation changed; do not guess a mapping'
+    return raw
+
+
+def owned_npus(snapshot,roots):
+    observed=set()
+    for line in snapshot.splitlines():
+        cells=[value.strip()for value in line.split('|')[1:-1]]
+        if len(cells)!=5 or not cells[-1].isdigit():continue
+        device=cells[0].split()
+        if len(device)!=2 or not all(value.isdigit()for value in device):continue
+        observed.add(int(device[0]));pid=int(cells[-1])
+        for _ in range(32):
+            if pid in roots:break
+            status=Path(f'/proc/{pid}/status')
+            assert status.exists(),'NPU process disappeared before ownership admission'
+            parent=next(int(row.split()[1])for row in status.read_text().splitlines()if row.startswith('PPid:'))
+            assert parent>1 and parent!=pid,'Foreign NPU process observed'
+            pid=parent
+        else:raise AssertionError('NPU process ancestry exceeded')
+    assert observed=={3,4},'Expected both allocated physical3/4 workers'
+
+
+def identity():
+    result={}
+    expected={'torch':'2.10.0+cpu','torch-npu':'2.10.0.post4','vllm':'0.23.0+empty',
+              'vllm-ascend':'0.23.0','transformers':'5.5.4','tokenizers':'0.22.2'}
+    probe='import importlib.metadata as m,json;print(json.dumps({k:m.version(k)for k in '+repr(list(expected))+'}))'
+    versions=json.loads(subprocess.check_output([str(OLD/'.venv/bin/python'),'-B','-c',probe],text=True,timeout=60))
+    assert versions==expected,'Pinned core SDK changed'
+    result['core_packages']=versions
+    for name,path,expected in [('vllm','/vllm-workspace/vllm','0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665'),('ascend','/vllm-workspace/vllm-ascend','5cb98caaadeff42b5b62b996e34bb2aaa29d20fd')]:  # pragma: allowlist secret -- fixed public official0.23 source commits
+        head=subprocess.check_output(['git','-C',path,'rev-parse','HEAD'],text=True).strip()
+        diff=subprocess.check_output(['git','-C',path,'diff','--binary','HEAD'])
+        assert head==expected and not diff,'Official framework source drift'
+        result[name]={'commit':head,'diff_sha256':hashlib.sha256(diff).hexdigest()}
+    old=json.loads((OLD/'evidence/formal-runtime-identity.json').read_bytes())
+    files=old['pegaflow']['binaries']
+    package=OLD/'.venv/lib/python3.12/site-packages/pegaflow'
+    for name,digest in files.items():assert sha(package/name)==digest,'PegaFlow artifact changed: '+name
+    result['pegaflow']=old['pegaflow']
+    result['model_weight_verification']=json.loads((OLD/'model-hash-status.json').read_bytes())
+    assert result['model_weight_verification']['all_weights_match']
+    return result
+
+
+def command(arm):
+    argv=[str(ROOT/'.venv/bin/python'),'-m','vllm.entrypoints.cli.main','serve',str(MODEL),
+          '--host','127.0.0.1','--port','18390','--served-model-name','qwen3.5-35b',
+          '--tensor-parallel-size','2','--pipeline-parallel-size','1','--distributed-executor-backend','mp',
+          '--dtype','bfloat16','--max-model-len','65536','--max-num-seqs','16','--max-num-batched-tokens','4096',
+          '--kv-cache-memory-bytes',str(16*1024**3),'--gpu-memory-utilization','0.95','--seed','17',
+          '--enable-prefix-caching','--mamba-cache-mode','align','--async-scheduling','--enable-prompt-tokens-details',
+          '--speculative-config',json.dumps({'method':'mtp','num_speculative_tokens':2}),
+          '--compilation-config',json.dumps({'cudagraph_mode':'FULL_AND_PIECEWISE','cudagraph_capture_sizes':[3,6,12,24,48],'max_cudagraph_capture_size':48}),
+          '--generation-config','vllm','--override-generation-config',json.dumps({'temperature':0.,'top_p':1.,'top_k':-1}),
+          '--default-chat-template-kwargs',json.dumps({'enable_thinking':True}),
+          '--limit-mm-per-prompt',json.dumps({'image':1,'video':0}),
+          '--additional-config',json.dumps({'enable_cpu_binding':False}),'--shutdown-timeout','60']
+    if arm=='pegaflow':
+        argv+=['--kv-transfer-config',json.dumps({'kv_connector':'PegaKVConnector','kv_connector_module_path':'pegaflow.connector','kv_role':'kv_both',
+            'kv_connector_extra_config':{'pegaflow.mode':'read_write','pegaflow.model_revision':MODEL_REVISION,'pegaflow.host':'http://127.0.0.1','pegaflow.port':18391}})]
+    else:assert arm=='native'
+    return argv
+
+
+class Service:
+    def __init__(self,arm,folder,name):
+        self.arm,self.folder,self.name=arm,Path(folder),name
+        self.process=self.sidecar=None
+        self.start_ticks=self.sidecar_ticks=None
+
+    def __enter__(self):
+        self.folder.mkdir(parents=True,exist_ok=False,mode=0o700)
+        try:self.start();return self
+        except BaseException:self.__exit__(None,None,None);raise
+
+    def start(self):
+        assert npu().count('No running processes found in NPU')==2,'Allocated devices are busy'
+        (self.folder/'npu-admission.txt').write_text(npu())
+        (self.folder/'device-mapping.txt').write_text(mapping())
+        save(self.folder/'runtime-identity.json',identity())
+        environment=dict(os.environ)
+        environment.update(json.loads((OLD/'run-env.json').read_bytes()))
+        environment.update({'PYTHONDONTWRITEBYTECODE':'1','PYTHONUNBUFFERED':'1','HF_HUB_OFFLINE':'1',
+            'VLLM_WORKER_MULTIPROC_METHOD':'spawn','TMPDIR':'/workspace/pf-'+self.name+'-t','VLLM_RPC_BASE_PATH':'/workspace/pf-'+self.name+'-r',
+            'VLLM_CACHE_ROOT':str(ROOT/'cache'/self.name/'vllm'),'TRITON_CACHE_DIR':str(ROOT/'cache'/self.name/'triton'),
+            'TORCHINDUCTOR_CACHE_DIR':str(ROOT/'cache'/self.name/'inductor'),'ASCEND_CACHE_PATH':str(ROOT/'cache'/self.name/'ascend'),
+            'ASCEND_WORK_PATH':str(ROOT/'logs'/self.name/'ascend')})
+        for key in ['TMPDIR','VLLM_RPC_BASE_PATH']:Path(environment[key]).mkdir(mode=0o700,exist_ok=False)
+        if self.arm=='pegaflow':
+            sidecar=[str(ROOT/'.venv/bin/pegaflow-server'),'--addr','127.0.0.1:18391','--http-addr','127.0.0.1:18392','--pool-size','30gb','--devices','0,1','--log-level','info']
+            save(self.folder/'sidecar-command.json',{'argv':sidecar})
+            log=(self.folder/'sidecar.log').open('ab',buffering=0)
+            self.sidecar=subprocess.Popen(sidecar,cwd=ROOT,env=environment,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+            self.sidecar_ticks=ticks(self.sidecar)
+            self.health(self.sidecar,'http://127.0.0.1:18392/health',300,False)
+        argv=command(self.arm)
+        save(self.folder/'command.json',{'argv':argv,'environment':{key:environment.get(key)for key in[
+            'PYTHONPATH','LD_LIBRARY_PATH','ASCEND_HOME_PATH','ASCEND_TOOLKIT_HOME','HF_HUB_OFFLINE','VLLM_WORKER_MULTIPROC_METHOD',
+            'OMP_NUM_THREADS','MKL_NUM_THREADS','TMPDIR','VLLM_RPC_BASE_PATH','VLLM_CACHE_ROOT','TRITON_CACHE_DIR',
+            'TORCHINDUCTOR_CACHE_DIR','ASCEND_CACHE_PATH','ASCEND_WORK_PATH','ASCEND_RT_VISIBLE_DEVICES','LD_PRELOAD']}})
+        log=(self.folder/'service.log').open('ab',buffering=0)
+        self.process=subprocess.Popen(argv,cwd=ROOT,env=environment,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+        self.start_ticks=ticks(self.process)
+        save(self.folder/'processes.json',{'server_pid':self.process.pid,'server_start_ticks':self.start_ticks,
+            'sidecar_pid':self.sidecar.pid if self.sidecar else None,'sidecar_start_ticks':self.sidecar_ticks})
+        self.health(self.process,'http://127.0.0.1:18390/health',1200,True)
+
+    def health(self,process,url,maximum,model):
+        begin=time.monotonic();advice=[]
+        while True:
+            assert process.poll()is None,'Owned process exited before readiness'
+            assert time.monotonic()-begin<maximum,'Original startup deadline exceeded'
+            if model:
+                stats={k:int(v)for k,v in(line.split()for line in Path('/sys/fs/cgroup/memory.stat').read_text().splitlines())}
+                if stats['file']>16*1024**3:
+                    for item in json.loads((OLD/'model-expected-weights.json').read_bytes()):
+                        descriptor=os.open(MODEL/item['path'],os.O_RDONLY)
+                        try:os.posix_fadvise(descriptor,0,0,os.POSIX_FADV_DONTNEED)
+                        finally:os.close(descriptor)
+                    advice.append({'elapsed':time.monotonic()-begin,'file_cache_before':stats['file'],'memory_current_after':Path('/sys/fs/cgroup/memory.current').read_text()})
+                    save(self.folder/'startup-cache-advice.json',advice)
+            try:
+                with urllib.request.urlopen(url,timeout=5)as response:assert response.status==200
+                break
+            except Exception:time.sleep(2)
+        save(self.folder/('ready-model.json'if model else'ready-sidecar.json'),{'healthy_unix':time.time(),'startup_seconds':time.monotonic()-begin})
+
+    def sidecar_metrics(self,name):
+        if self.arm=='pegaflow':
+            with urllib.request.urlopen('http://127.0.0.1:18392/metrics',timeout=30)as response:
+                (self.folder/(name+'-sidecar-metrics.txt')).write_bytes(response.read())
+
+    def check(self):
+        assert self.process.poll()is None and ticks(self.process)==self.start_ticks,'Model process no longer owned/alive'
+        raw=npu()
+        roots={self.process.pid}
+        if self.sidecar is not None:roots.add(self.sidecar.pid)
+        owned_npus(raw,roots)
+        (self.folder/'last-owned-npu.txt').write_text(raw)
+        if self.sidecar is not None:
+            assert self.sidecar.poll()is None and ticks(self.sidecar)==self.sidecar_ticks
+            from observation import totals
+            with urllib.request.urlopen('http://127.0.0.1:18390/metrics',timeout=30)as response:metrics=totals(response.read().decode())
+            keys=[key for key in metrics if key.endswith(('pega_load_failure_total','pega_save_failure_total'))]
+            assert len(keys)==2 and all(metrics[key]==0 for key in keys),'Pega failure evidence missing or nonzero'
+        save(self.folder/'last-owned-check.json',{'checked_unix':time.time(),'server_pid':self.process.pid})
+
+    def __exit__(self,*args):
+        stop_owned(self.process,self.start_ticks)
+        stop_owned(self.sidecar,self.sidecar_ticks)
+        save(self.folder/'stop.json',{'stopped_unix':time.time(),'server_exit_code':self.process.poll()if self.process else None,
+            'sidecar_exit_code':self.sidecar.poll()if self.sidecar else None})
+        begin=time.monotonic()
+        while True:
+            raw=npu();(self.folder/'npu-release.txt').write_text(raw)
+            if raw.count('No running processes found in NPU')==2:break
+            assert time.monotonic()-begin<90,'Owned mappings did not release after exit'
+            time.sleep(2)

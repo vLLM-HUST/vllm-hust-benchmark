@@ -1,0 +1,97 @@
+# 课题四 V2 证据导航与一键入口核对
+
+2026-11-23 更新证据导航。正式送测使用固定 **vLLM 0.18.0 / vLLM-Ascend 0.18.0** 和送测时选定的冻结 B1。两臂的正式模型为
+Qwen3.5-35B-A3B、BF16、双 Ascend 910B2、TP2。判据、样本及计时以
+[送测方案 V2](topic4-submission-v2-20261119.md)为准。本页按证据用途导航，运行状态在封存和核验后更新。
+
+## 已封存可接入
+
+| 任务                        | 证据与使用范围                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| B0 0.23.0 · 已上线          | [固定配置报告及 CPU 复算](../reports/official-b0-023-full-report-20261122-v1/README.md)已封存固定五项、4K/16K/32K 和四租户、三次原生计时。HLE 的 200 题中有 99 题评分未解析。自动算量适用性未通过，F 与效率留空。[两档 C8 历史原件](../reports/official-b0-023-c8-20261121-v1/README.md)独立保留，4K 为 225.504618 tok/s，16K 为 115.897037 tok/s，均双卡合计且零失败。 |
+| B0 0.30.0 · 已上线          | [固定配置报告及 CPU 复算](../reports/official-b0-030-full-report-20261122-v1/README.md)已封存固定五项、4K/16K/32K 和四租户、三次原生计时。原整轮状态保留 failed，自动算量适用性未通过。合成 C8 保留原计数和时钟。                                                                                                                                                       |
+| B1 r9 · 历史稳定版          | [固定 0.18 完整配对](../reports/r9-qwen-run29-20261121/README.md)已封存固定五项、C8、有效算力及四个长上下文与四租户阶段。四租户 C24 使用 Terminal-Bench 2.1 的五条 4K 任务历史。4.4 按公开租赁报价折算，里程碑和结题均达成。[此前阶段记录](../reports/r9-qwen-partial-20261121/README.md)保留。                                                                         |
+| B1 r10 · 默认稳定版         | [连续写回 PyPI 发行](https://pypi.org/project/vllm-hust-engine/2026.11.21.10/)沿用[连续写回固定五项、C8 原件](../reports/r10-contiguous-restore-fixed-five-20261121/README.md)及[两版 V2 实测与复算](#r10-%E4%B8%A4%E4%B8%AA%E4%BF%AE%E5%A4%8D%E5%80%99%E9%80%89%E7%9A%84-v2-%E8%AF%81%E6%8D%AE)。原始 r10 和原生 RMS 各自留档。                                        |
+| 固定 0.18 / r8 · 历史已封存 | [固定五项](../reports/r8-fixed-five-20261118/README.md)、[三轮参考证书](../reports/r8-compute-reference-20261119-v2/README.md)、[真实轨迹上下文及四租户](../reports/r8-context-tenant-20261119/README.md)分别保留，复算和引用时保留原 B1 身份。                                                                                                                         |
+
+正式判定使用固定 0.18。0.23 和 0.30 在发布目录中按独立观测列示，其长上下文与四租户使用 Terminal-Bench 2.1 的五条任务历史。
+
+- [R10 稳定包对两版补丁 B0 的原生 F/T](../reports/r10-stable-patched-b0-ft-20261123-v1/README.md)使用同一组 R10
+  三轮原生计时，分别对照 0.23.0 和 0.30.0 的补丁变体。按该配对报告引用 F、T 和有效算力区间。4.1 资格仍按对应工况的独立参考分母核验。
+- [B0 0.28 RC 源码候选观测](../website-publication/data/official-b0-028-source-full-report-20261123-v1/observations.json)
+  保存五项、三个上下文长度和四租户的逐阶段结果。原整轮状态为 failed，F 与效率留空，算力资格为 ineligible。
+
+## r10 两个修复候选的 V2 证据
+
+两版均使用 Qwen3.5-35B-A3B、BF16、双 Ascend 910B2、TP2，分别与固定 vLLM 0.18.0 / vLLM-Ascend 0.18.0 B0 比较。
+判定按里程碑／结题排列。完整身份、两臂物理卡号、各阶段封存 SHA-256 和 CPU
+复算回执摘要见[机器可读证据](../website-publication/data/r10-v2-assessment-20261122.json)。
+
+| 指标与数据集                                                                                                 | r10-native-rms                                                                                  | r10-contiguous-restore                                                                                                  | 封存来源                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 4.1 MMLU-Pro 固定 200 题，原生 out256，每臂三轮                                                              | B1 有效算力下界 17.24 TFLOP/s/卡，效率下界 89.14%。通过／未达 90%。                             | B1 有效算力下界 18.10 TFLOP/s/卡，效率下界 93.59%。通过／通过。                                                         | [各版原生计时、必要算量与独立参考](https://github.com/DeepLinkNext/DeepLinkEngine/blob/a19dee013f62c52db82b32eb34d026c17246fe05/evidence/r10-v2-compute-supplement.json)                                                                                                                                                                                                                                                                 |
+| 4.2 MMLU-Pro 200、HLE-Verified 200、FrontierScience 160、SWE-bench Pro 公开轨迹、Terminal-Bench 2.1 公开轨迹 | 通过／通过。HLE 未达结题吞吐门槛。                                                              | 通过／通过。HLE 未达结题吞吐门槛。FrontierScience Olympiad 从 64/100 降到 58/100，降幅 6 个百分点，超出两阶段质量门槛。 | [固定五项原请求、评分与复算封存](https://github.com/DeepLinkNext/DeepLinkEngine/blob/a19dee013f62c52db82b32eb34d026c17246fe05/evidence/r10-original-evidence-audit-v1.json)                                                                                                                                                                                                                                                              |
+| 4.3 Terminal-Bench 2.1 固定五条任务历史。4K、16K、32K 各 C8                                                  | 未通过／未通过。16K 的 TTFT P95 为本版 4K 的 3.100×。32K 的窗口 TTFT P95/P99 和 TPOT P95 超限。 | 通过／通过。16K/4K 吞吐为 68.84%，TTFT P95 比为 1.603×。32K 窗口吞吐最大/最小为 1.420×，尾时延均达标。                  | [两臂上下文和四租户原始封存及复算](https://github.com/DeepLinkNext/DeepLinkEngine/blob/a19dee013f62c52db82b32eb34d026c17246fe05/evidence/r10-v2-context-supplement.json)                                                                                                                                                                                                                                                                 |
+| 4.4 里程碑为 MMLU-Pro 固定 200 题完整回答。结题为 Terminal-Bench 2.1 固定五条 4K 历史、四租户 C24            | 通过／通过。每百万成功输出词元成本较固定 B0 分别降低 66.03%／63.65%。                           | 通过／通过。每百万成功输出词元成本较固定 B0 分别降低 66.01%／66.93%。                                                   | [完整回答采样](https://github.com/DeepLinkNext/DeepLinkEngine/blob/a19dee013f62c52db82b32eb34d026c17246fe05/evidence/r10-original-evidence-audit-v1.json)及[四租户采样](https://github.com/DeepLinkNext/DeepLinkEngine/blob/a19dee013f62c52db82b32eb34d026c17246fe05/evidence/r10-v2-context-supplement.json)。[机器可读证据](../website-publication/data/r10-v2-assessment-20261122.json)保存同一公开租赁报价 1,875 元/卡月和折算依据。 |
+
+Terminal-Bench 2.1 的 4.3 和 4.4 使用同一组任务来源。任务 ID 为
+`terminal:dna-insert`、`terminal:db-wal-recovery`、`terminal:winning-avg-corewars`、`terminal:rstan-to-pystan`、`terminal:mcmc-sampling-stan`。
+固定五项中的 Terminal-Bench 2.1 使用其独立的 32 任务公开轨迹配置。
+
+4.1 两版 B1 分别实测原生计时和必要算量观测，复用通过同工况核验的固定 B0 与独立参考分母。连续写回的原启动器回执保留退出时的设备采样异常。 独立审计重新核对了三轮共 600
+条请求的终止栅栏和全部两卡采样；对应原封存和审计摘要见 4.1 来源。已采集的五项性能和评分从各版封存 CPU 复算。
+
+复算使用
+[DeepLinkEngine 合入版](https://github.com/DeepLinkNext/DeepLinkEngine/tree/a19dee013f62c52db82b32eb34d026c17246fe05)的
+`run_all.py --report-only --engine-version r10-native-rms` 和
+`run_all.py --report-only --engine-version r10-contiguous-restore`。 两次复算新增模型请求和 NPU 任务均为
+0。正式默认使用连续写回 r10（PyPI 2026.11.21.10）。发行包重建出的 9,256 个安装文件与连续写回实测清单一致，原生 RMS 的实测继续独立保留。
+
+## 在途与待收件
+
+先收取现有轮次的回执、裁判、机器可读汇总和可恢复原件。扩展对照分别绑定版本、镜像或源码及设备，独立运行的两臂经可比性核验后才可组成配对。
+
+## 正式一键入口与证据核对
+
+使用
+[DeepLinkEngine 完整入口](https://github.com/DeepLinkNext/DeepLinkEngine/blob/97b75ba5b0ce2f9632f2d893e12af19f82c39865/benchmark/README.md#%E5%AE%8C%E6%95%B4%E6%B5%8B%E8%AF%95%E4%B8%8E%E7%AC%AC%E4%B8%89%E6%96%B9%E9%AA%8C%E8%AF%81)
+`run_all.py`，在配置中固定送测 B1。入口依次运行固定五项及原生算力、真实长上下文与四租户，并生成完整报告。固定五项候选报告、扩展基线单臂报告和完整入口的阶段回执分别核验。
+
+接续已封存轮次使用 `--reuse-completed-run`；按需显式带入 `--reuse-context-baseline-arm` 与
+`--reuse-compute-baseline-arm`。入口在启动模型前检查固定 B0 的复用来源。
+
+| 指标             | 完整入口编排                                                                                                                                                               | 回执与证据核对                                                                                                                                                      |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 4.1 有效算力     | 默认 `submission-v2` 在流程内执行 MMLU200、最多输出 256 词元、每臂三轮的必要算量及双卡同步计时。                                                                           | 核验当轮 `compute-reference` 及分母适用性。匹配的固定 0.18 原生计时和独立参考原件按入口校验复用。r8 的 89.7838% 下界归属 r8。                                       |
+| 4.2 吞吐与时延   | `run-fixed-five` 生成固定场景配对和质量回执，HLE、Frontier 的共同裁判单独计量。                                                                                            | 按 V2 对同一场景核验质量、服务要求、原始请求、均值与排除数。五项执行完成和指标达标分别看报告。                                                                      |
+| 4.3 长上下文     | `run-context-tenant` 自动执行真实公开历史 4K、16K、32K，并统计正式窗口、排空及尾时延。                                                                                     | 核验 `context-tenant` 阶段回执及原件。r8 专项的 16K/4K 吞吐为 67.18%。32K 五窗口 TTFT P95 最大/最小在历史线性口径为 2.191×，用原请求时钟按 V2 最近秩复算为 1.917×。 |
+| 4.4 单位词元成本 | 固定五项和专项分别采集 MMLU200 完整回答及 4K 四租户 C24 的输出、区间时间与双卡 AI Core 采样。 C24 使用冻结 4K 档的五条公开任务历史，实际数据集和任务 ID 从原测量输入读出。 | 按 V2 使用 MMLU200 完整回答判定里程碑，使用四租户判定结题。正式报告按同一公开租赁报价和两臂封存记录估算单位成本。                                                   |
+
+[一键报告的数据来源和最近秩复算](https://github.com/DeepLinkNext/DeepLinkEngine/pull/64)记录原件投影规则。
+
+优先查看 `results.json`、`fixed-five/campaign.json`、`context-tenant/execution.json` 和
+`full-report/summary.json`。有完整回执的先收件或用 `--report-only`
+复算。在跑的沿现有任务跟进。若完整入口中途退出，核验兼容性后按支持的恢复路径接续，并复用已封存同版阶段和合格固定 B0
+原件。若冻结入口无法编排或接续所需阶段，先在入口层处理，再沿统一流程执行。上述项目属于完整入口的阶段核对清单。
+
+使用 `--report-only` 可在 CPU
+上按[一键报告的公开租赁报价口径](https://github.com/DeepLinkNext/DeepLinkEngine/pull/69)复算。[10 月 30 日联合配对](../reports/full-answer-joint-20261030/README.md)可复核历史计算与采样方法。
+
+第三方交付用干净目录核验固定安装入口、文件摘要、恢复流程与报告复算。[DeepLinkEngine 现有实机证据](../reports/deeplinkengine-user-journey-20261120/README.md)覆盖安装、加载、HTTP
+调用和退出清理，原整轮失败保留。第三方回执随所选 B1 的完整执行与判定收取。
+
+## 专题按产品目标决定
+
+- 连续写回对应当前列示的 R10 稳定发行。按本页的 V2 表引用各阶段结论，并保留 HLE 吞吐缺口和 FrontierScience Olympiad 质量退化。
+- [控制面 sr5](../reports/controller-r8-20261118/README.md)的 HLE 曾暂停。若控制器对外承诺五项覆盖，再测同配置直连与经过控制器的
+  HLE；其余已测正负结果保留。
+- [r9 书生适配](../reports/r9-intern-native-20261120/README.md)与 Qwen 的开发对照独立。书生全五项、SWE/Terminal
+  端到端解题率及扩规格仅随独立目标安排；V2 的 SWE、Terminal 是固定公开轨迹推理性能。
+
+## 仓库收件
+
+1. [冻结契约](topic4-submission-v2-20261119.md)和[五项标准](../website-publication/data/dataset-standard-v1/standard.json)确定任务、预算和门槛。
+1. [原件与回执](../submissions/)按轮保留配置、权重与环境身份、请求、时钟、评分、逐卡采样和失败。跨目录依赖随原件归档并验证恢复。
+1. [报告](../reports/)登记本轮实际完成、复用及未执行的阶段，附封存摘要、可复算入口和产物身份。订正追加版本。
+1. [网站发布源](../website-publication/README.md)消费已审查结果；单臂、配对、专项目标和开发对照分别登记。
+   [数据导航和自动索引](../DATA_INDEX.md)用于定位；发布后核查实际页面的来源和版本。

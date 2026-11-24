@@ -1,0 +1,179 @@
+"""Run the predeclared BidKV full-five cohort and a fixed native shared judge."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+import traceback
+
+from service81 import ROOT, PERSIST, Service, save, stop_owned, ticks
+from verify_c8 import inspect as inspect_c8
+
+COMMON = Path('/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled')
+DATASETS = [('mmlu', 200), ('hle', 200), ('frontier', 160), ('swe', 64), ('terminal', 48)]
+
+
+def sha(path):
+    with Path(path).open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def cancelled(signum, frame):
+    raise KeyboardInterrupt('Owned campaign cancelled by signal '+str(signum))
+
+
+def run(args):
+    os.umask(0o077)
+    for signum in [signal.SIGINT, signal.SIGTERM]:
+        signal.signal(signum, cancelled)
+    driver = Path(__file__).resolve().parent
+    source_manifest = json.loads((driver/'source-manifest.json').read_bytes())
+    plan = json.loads((driver/'execution-plan.json').read_bytes())
+    assert plan['stage_order'] == ['native-all-five', 'bidkv-all-five', 'native-shared-judge']
+    assert plan['standard_sha256'] == '66c050b7c6d705853f10bc437e6ace1707a9b46d43b6bdb7159724045045b756'
+    out = args.out
+    out.mkdir(parents=True, exist_ok=False, mode=0o700)
+    stages = [{'name': arm+'-'+name, 'arm': arm, 'dataset': name, 'stage': 'solver', 'planned': count, 'status': 'not_executed'}
+              for arm in ['native', 'bidkv'] for name, count in DATASETS]
+    stages += [{'name': 'judge-'+arm+'-'+name, 'arm': 'native', 'solver_arm': arm, 'dataset': name, 'stage': 'judge',
+                'planned': count, 'status': 'not_executed'} for name, count in DATASETS if name in ['hle', 'frontier'] for arm in ['native', 'bidkv']]
+    state = {'phase': 'waiting-inputs-and-qualification', 'started_unix': time.time(), 'pid': os.getpid(), 'stages': stages,
+             'source_manifest_sha256': sha(driver/'source-manifest.json'), 'execution_plan_sha256': sha(driver/'execution-plan.json'),
+             'mod_reference_sha256':'43bc925a6ad749971a64e5244b86451f5d4cf3361e87423b1eda8ea0b0d04461',
+             'profile':'own-mod/default-cpu-binding-true/common-topology-fix/v3','planned_solver_requests_per_arm': 672, 'planned_judge_inputs': 720, 'formal_complete': False}
+
+    def checkpoint():
+        save(out/'execution-checklist.json', state)
+
+    def source_admission():
+        for name, expected in source_manifest['files'].items():
+            assert sha(driver/name) == expected, 'Execution source changed after prospective publication: '+name
+        assert sha(driver/'execution-plan.json') == state['execution_plan_sha256']
+        for name, expected in state.get('plan_files', {}).items():
+            assert sha(COMMON/'plans'/name) == expected, 'Controlled plan changed after prospective freeze: '+name
+
+    def invoke(stage):
+        source_admission()
+        stage.update(status='running', started_unix=time.time())
+        checkpoint()
+        command = [str(ROOT/'.venv/bin/python'), '-B', str(driver/'finite.py'), '--dataset', stage['dataset'],
+                   '--stage', stage['stage'], '--tools', str(COMMON/'reference-tools'), '--plan', str(COMMON/'plans'/stage['dataset']),
+                   '--out', str(out/stage['name'])]
+        if stage['stage'] == 'judge':
+            command += ['--responses', str(out/(stage['solver_arm']+'-'+stage['dataset'])/'evaluation')]
+        log = (out/(stage['name']+'-client.log')).open('ab', buffering=0)
+        process = subprocess.Popen(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+        start_ticks = ticks(process)
+        stage.update(command=command, client_pid=process.pid, client_start_ticks=start_ticks)
+        checkpoint()
+        try:
+            result = process.wait()
+        except BaseException:
+            stop_owned(process, start_ticks)
+            stage.update(status='cancelled',actual_client_returncode=process.returncode,completed_unix=time.time())
+            checkpoint()
+            raise
+        stage.update(status='completed' if result == 0 else 'failed', exit_code=result, completed_unix=time.time())
+        checkpoint()
+        assert result == 0, 'Retained failed stage; remaining stages remain unexecuted: '+stage['name']
+
+    try:
+        checkpoint()
+        source_admission()
+        deadline = time.monotonic()+7200
+        while True:
+            path = COMMON/'input-status.json'
+            current = json.loads(path.read_bytes()) if path.exists() else {}
+            assert current.get('phase') != 'failed', current
+            qualified=[]
+            for name in ['c8-native03-controller.json','c8-bidkv03-controller.json']:
+                path=PERSIST/'metadata'/name
+                value=json.loads(path.read_bytes())if path.exists()else{}
+                assert value.get('phase')!='failed',value
+                qualified.append(value.get('phase')=='completed')
+            if current.get('phase') == 'all-controlled-inputs-admitted' and all(qualified):
+                break
+            assert time.monotonic() < deadline, 'Controlled inputs not admitted before operational wait deadline'
+            time.sleep(15)
+        state['phase'] = 'independent-c8-evidence-admission'
+        checkpoint()
+        for arm in ['native', 'bidkv']:
+            controller = json.loads((PERSIST/'metadata'/('c8-'+('native03' if arm == 'native' else 'bidkv03')+'-controller.json')).read_bytes())
+            assert controller['phase'] == 'completed' and controller['client_exit_code'] == 0 and controller['model_final_phase'] == 'preflight-complete'
+            folder = PERSIST/'qualification'/(arm+'-c8-03')
+            verified = inspect_c8(folder, PERSIST/'controlled/initial-inputs-01/continuous-inputs-r1.json')
+            save(out/(arm+'-c8-reuse-admission.json'), verified)
+        assert json.loads((ROOT/'model-hash-status.json').read_bytes())['all_weights_match']
+        admission = json.loads((ROOT/'runtime/official023/source-admission.json').read_bytes())
+        assert admission['scheduler_prepared_sha256'] == 'ae12773bc25b42149d4aa5c84c0797dcf12a0b60c045a7e85ca3c974bc47915c'
+        for entry in admission['source_files']:
+            expected = admission['scheduler_prepared_sha256'] if entry['path'] == 'vllm/v1/core/sched/scheduler.py' else entry['source_sha256']
+            assert sha(ROOT/'runtime/official023'/entry['path']) == expected, 'Prepared source/library changed: '+entry['path']
+        cpu_root=ROOT/'runtime/ascend023-cpubind02'
+        cpu_admission=json.loads((cpu_root/'source-admission.json').read_bytes())
+        assert cpu_admission['cpu_binding_prepared_sha256']=='b7a84571c349c22935414b2c5a4c6cf91223414f80c0954f797340ad0f1f55f2'
+        for entry in cpu_admission['source_files']:
+            expected=cpu_admission['cpu_binding_prepared_sha256']if entry['path']=='vllm_ascend/cpu_binding.py'else entry['source_sha256']
+            assert sha(cpu_root/entry['path'])==expected,entry['path']
+        save(out/'common-ascend-source-admission.json',cpu_admission)
+        save(out/'qualified-runtime-source-admission.json', admission)
+        state['plan_files'] = {path.relative_to(COMMON/'plans').as_posix(): sha(path)
+                               for path in sorted((COMMON/'plans').rglob('*')) if path.is_file()}
+        save(out/'plan-file-manifest.json', state['plan_files'])
+        save(out/'execution-plan.json', plan)
+        save(out/'source-manifest.json', source_manifest)
+        # Time order is fixed before observing any formal score. All Native tasks
+        # precede all Candidate tasks; a fresh Native instance judges both arms.
+        for arm, label in [('native', '81fn03'), ('bidkv', '81fb03')]:
+            state.update(phase=arm+'-solver-cohort')
+            checkpoint()
+            with Service(arm, out/('service-'+arm), label) as service:
+                for stage in stages:
+                    if stage['stage'] == 'solver' and stage['arm'] == arm:
+                        service.check()
+                        invoke(stage)
+                        service.check()
+        state.update(phase='fixed-native-shared-judge')
+        checkpoint()
+        with Service('native', out/'service-judge', '81fj03') as service:
+            for stage in stages:
+                if stage['stage'] == 'judge':
+                    service.check()
+                    invoke(stage)
+                    service.check()
+        state.update(phase='original-grader-summaries')
+        checkpoint()
+        for name in ['hle', 'frontier']:
+            for arm in ['native', 'bidkv']:
+                command = [str(ROOT/'.venv/bin/python'), '-B', str(driver/'finite.py'), '--dataset', name, '--stage', 'quality',
+                           '--tools', str(COMMON/'reference-tools'), '--plan', str(COMMON/'plans'/name),
+                           '--out', str(out/('quality-'+arm+'-'+name)), '--responses', str(out/(arm+'-'+name)/'evaluation'),
+                           '--grades', str(out/('judge-'+arm+'-'+name)/'evaluation')]
+                subprocess.run(command, cwd=ROOT, check=True)
+        summaries = {stage['name']: json.loads((out/stage['name']/'summary.json').read_bytes()) for stage in stages}
+        save(out/'summary.json', {'stages': summaries, 'solver_requests_per_arm': 672,
+                                 'quality_source': 'Original unchanged MMLU extractor and HLE/Frontier graders; all planned denominators retained',
+                                 'scope': 'Full five frozen task coverage; not an automatic four-target pass',
+                                 'order_limit': 'All Native solver datasets precede all Candidate solver datasets; no random interleaving or independent repetitions; time drift remains a limitation'})
+        state.update(phase='completed', formal_complete=True, completed_unix=time.time())
+        checkpoint()
+        return 0
+    except BaseException as error:
+        state.update(phase='failed', error=type(error).__name__+': '+str(error), failed_unix=time.time(), exit_code=2)
+        checkpoint()
+        traceback.print_exc()
+        return 2
+    finally:
+        files = [{'path': path.relative_to(out).as_posix(), 'bytes': path.stat().st_size, 'sha256': sha(path)}
+                 for path in sorted(out.rglob('*')) if path.is_file() and path != out/'manifest.json']
+        save(out/'manifest.json', {'files': files, 'sealed_unix': time.time(), 'controlled_only': True,
+                                   'classification': 'Contains original questions/answers/dialogues/private source bindings; publish numeric derivatives and hashes only'})
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--out', type=Path, required=True)
+    raise SystemExit(run(parser.parse_args()))

@@ -1,0 +1,2508 @@
+{
+  "schema": "pegaflow-full-mod-final-comparison/v1",
+  "mod_prompt_sha256": "43bc925a6ad749971a64e5244b86451f5d4cf3361e87423b1eda8ea0b0d04461",
+  "experiment_host": "ascend-91 historical authorized November14 two-card run; November16 audit only through currently authorized yanbo-81 CPU",
+  "full_experiment_completed": true,
+  "rerun_needed_for_missing_required_coverage": false,
+  "benefit_demonstrated": false,
+  "four_targets_passed": false,
+  "planned_and_verified_solver_records": 1344,
+  "planned_and_verified_judge_records": 720,
+  "verified_c8_records": 684,
+  "datasets": {
+    "mmlu": {
+      "baseline": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 19,
+        "solver_batch_wall_seconds": 1079.4951817840047,
+        "accepted_output_tokens": 681897,
+        "output_tokens_per_second": 631.6813743189455,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 524.4526394169047,
+          "p50": 555.8363038569951,
+          "p95": 949.1151401329028,
+          "p99": 976.9435928238962
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.02399382161616509,
+          "p50": 0.022402634452486365,
+          "p95": 0.03721269428718427,
+          "p99": 0.050642198094334234
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "planned": 200,
+          "correct": 145,
+          "accuracy": 0.725,
+          "unparsed": 0,
+          "categories": {
+            "biology": {
+              "planned": 12,
+              "correct": 11
+            },
+            "business": {
+              "planned": 14,
+              "correct": 12
+            },
+            "chemistry": {
+              "planned": 18,
+              "correct": 15
+            },
+            "computer science": {
+              "planned": 7,
+              "correct": 4
+            },
+            "economics": {
+              "planned": 14,
+              "correct": 11
+            },
+            "engineering": {
+              "planned": 16,
+              "correct": 8
+            },
+            "health": {
+              "planned": 14,
+              "correct": 7
+            },
+            "history": {
+              "planned": 6,
+              "correct": 4
+            },
+            "law": {
+              "planned": 19,
+              "correct": 6
+            },
+            "math": {
+              "planned": 22,
+              "correct": 20
+            },
+            "other": {
+              "planned": 15,
+              "correct": 11
+            },
+            "philosophy": {
+              "planned": 9,
+              "correct": 6
+            },
+            "physics": {
+              "planned": 21,
+              "correct": 18
+            },
+            "psychology": {
+              "planned": 13,
+              "correct": 12
+            }
+          },
+          "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801"
+        }
+      },
+      "candidate": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 19,
+        "solver_batch_wall_seconds": 1095.2469831580092,
+        "accepted_output_tokens": 679048,
+        "output_tokens_per_second": 619.9953165285597,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 470.0614617684207,
+          "p50": 461.33686971399584,
+          "p95": 925.1585185615025,
+          "p99": 963.7618621933372
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.02410680280868653,
+          "p50": 0.022537036838052513,
+          "p95": 0.03747832662443222,
+          "p99": 0.04322675841859695
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "planned": 200,
+          "correct": 151,
+          "accuracy": 0.755,
+          "unparsed": 0,
+          "categories": {
+            "biology": {
+              "planned": 12,
+              "correct": 11
+            },
+            "business": {
+              "planned": 14,
+              "correct": 11
+            },
+            "chemistry": {
+              "planned": 18,
+              "correct": 12
+            },
+            "computer science": {
+              "planned": 7,
+              "correct": 4
+            },
+            "economics": {
+              "planned": 14,
+              "correct": 12
+            },
+            "engineering": {
+              "planned": 16,
+              "correct": 9
+            },
+            "health": {
+              "planned": 14,
+              "correct": 11
+            },
+            "history": {
+              "planned": 6,
+              "correct": 4
+            },
+            "law": {
+              "planned": 19,
+              "correct": 8
+            },
+            "math": {
+              "planned": 22,
+              "correct": 20
+            },
+            "other": {
+              "planned": 15,
+              "correct": 10
+            },
+            "philosophy": {
+              "planned": 9,
+              "correct": 7
+            },
+            "physics": {
+              "planned": 21,
+              "correct": 20
+            },
+            "psychology": {
+              "planned": 13,
+              "correct": 12
+            }
+          },
+          "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801"
+        }
+      },
+      "throughput_change_percent": -1.8499924590914651,
+      "ttft_mean_change_percent": -10.371037069993017,
+      "ttft_p50_change_percent": -17.00130658743585,
+      "ttft_p95_change_percent": -2.524100665810225,
+      "tpot_mean_change_percent": 0.47087618774879214,
+      "same_rate_solver_device_seconds_per_token_change_percent": 1.8848622689309424,
+      "baseline_requests": "native-mmlu-requests.json",
+      "candidate_requests": "pegaflow-mmlu-requests.json"
+    },
+    "hle": {
+      "baseline": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 122,
+        "solver_batch_wall_seconds": 2794.9172076569957,
+        "accepted_output_tokens": 2185583,
+        "output_tokens_per_second": 781.9848809876532,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 1.3811515061702084,
+          "p50": 0.7027797314949566,
+          "p95": 6.006697508845536,
+          "p99": 6.0193889946801935
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.020439909283541537,
+          "p50": 0.01952320766815127,
+          "p95": 0.026148574124910708,
+          "p99": 0.03225643836540715
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "candidate": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 122,
+        "solver_batch_wall_seconds": 2872.220972166004,
+        "accepted_output_tokens": 2197823,
+        "output_tokens_per_second": 765.1998301309576,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 1.4090201354341116,
+          "p50": 0.7207683684973745,
+          "p95": 5.98193618059886,
+          "p99": 5.991718237557507
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.02110793128274912,
+          "p50": 0.01998693759921799,
+          "p95": 0.027981309580607,
+          "p99": 0.037726787843885605
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "throughput_change_percent": -2.146467440073263,
+      "ttft_mean_change_percent": 2.0177822012575675,
+      "ttft_p50_change_percent": 2.5596408371300505,
+      "ttft_p95_change_percent": -0.412228653269342,
+      "tpot_mean_change_percent": 3.268223894444988,
+      "same_rate_solver_device_seconds_per_token_change_percent": 2.193551304607988,
+      "baseline_requests": "native-hle-requests.json",
+      "candidate_requests": "pegaflow-hle-requests.json"
+    },
+    "frontier": {
+      "baseline": {
+        "planned": 160,
+        "executed": 160,
+        "successful": 160,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 160,
+        "length_stops": 35,
+        "solver_batch_wall_seconds": 1570.2406394269929,
+        "accepted_output_tokens": 1218583,
+        "output_tokens_per_second": 776.0485682275306,
+        "ttft_seconds": {
+          "samples": 160,
+          "mean": 1.1844811224000296,
+          "p50": 0.7014518020005198,
+          "p95": 5.593099042349786,
+          "p99": 6.203783419029933
+        },
+        "tpot_seconds": {
+          "samples": 160,
+          "mean": 0.019946687309462016,
+          "p50": 0.019709836413202265,
+          "p95": 0.022273919587477216,
+          "p99": 0.023216430057606152
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 160,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "candidate": {
+        "planned": 160,
+        "executed": 160,
+        "successful": 160,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 160,
+        "length_stops": 40,
+        "solver_batch_wall_seconds": 1659.0029887529963,
+        "accepted_output_tokens": 1255439,
+        "output_tokens_per_second": 756.7430610499752,
+        "ttft_seconds": {
+          "samples": 160,
+          "mean": 1.2154455498751304,
+          "p50": 0.7091274324993719,
+          "p95": 5.784998710201762,
+          "p99": 6.38634044891558
+        },
+        "tpot_seconds": {
+          "samples": 160,
+          "mean": 0.01971884300345263,
+          "p50": 0.019322792352527637,
+          "p95": 0.022299100262294938,
+          "p99": 0.02375675060906517
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 160,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "throughput_change_percent": -2.4876673919582926,
+      "ttft_mean_change_percent": 2.6141765275549345,
+      "ttft_p50_change_percent": 1.0942491667939924,
+      "ttft_p95_change_percent": 3.431007861633617,
+      "tpot_mean_change_percent": -1.1422663947877942,
+      "same_rate_solver_device_seconds_per_token_change_percent": 2.5511310471442172,
+      "baseline_requests": "native-frontier-requests.json",
+      "candidate_requests": "pegaflow-frontier-requests.json"
+    },
+    "swe": {
+      "baseline": {
+        "planned": 64,
+        "executed": 64,
+        "successful": 64,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 64,
+        "length_stops": 2,
+        "solver_batch_wall_seconds": 234.00983007100876,
+        "accepted_output_tokens": 8182,
+        "output_tokens_per_second": 34.96434315394881,
+        "ttft_seconds": {
+          "samples": 64,
+          "mean": 7.818177786717797,
+          "p50": 5.396347409499867,
+          "p95": 25.96716515705261,
+          "p99": 43.13018941804153
+        },
+        "tpot_seconds": {
+          "samples": 64,
+          "mean": 0.23763128796262104,
+          "p50": 0.19430198507171553,
+          "p95": 0.5590597183496901,
+          "p99": 0.5962478493199125
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 64,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "candidate": {
+        "planned": 64,
+        "executed": 64,
+        "successful": 64,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 64,
+        "length_stops": 1,
+        "solver_batch_wall_seconds": 218.77694711899676,
+        "accepted_output_tokens": 6256,
+        "output_tokens_per_second": 28.595334574246746,
+        "ttft_seconds": {
+          "samples": 64,
+          "mean": 7.795531130031122,
+          "p50": 5.829556787000911,
+          "p95": 24.471422196759516,
+          "p99": 39.545931353334
+        },
+        "tpot_seconds": {
+          "samples": 64,
+          "mean": 0.25009495766799744,
+          "p50": 0.2322178715466483,
+          "p95": 0.43966495828444596,
+          "p99": 0.5576186382094648
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 64,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "throughput_change_percent": -18.215724950585155,
+      "ttft_mean_change_percent": -0.289666688382928,
+      "ttft_p50_change_percent": 8.027825946461697,
+      "ttft_p95_change_percent": -5.760131886737174,
+      "tpot_mean_change_percent": 5.244961558823391,
+      "same_rate_solver_device_seconds_per_token_change_percent": 22.272894073560035,
+      "baseline_requests": "native-swe-requests.json",
+      "candidate_requests": "pegaflow-swe-requests.json"
+    },
+    "terminal": {
+      "baseline": {
+        "planned": 48,
+        "executed": 48,
+        "successful": 48,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 48,
+        "length_stops": 2,
+        "solver_batch_wall_seconds": 172.36834494399955,
+        "accepted_output_tokens": 12765,
+        "output_tokens_per_second": 74.05652124899846,
+        "ttft_seconds": {
+          "samples": 48,
+          "mean": 7.216352371874564,
+          "p50": 5.064949658997648,
+          "p95": 23.44519217224733,
+          "p99": 32.63817679363914
+        },
+        "tpot_seconds": {
+          "samples": 48,
+          "mean": 0.1155166590924951,
+          "p50": 0.09773358457255221,
+          "p95": 0.3112651528659928,
+          "p99": 0.38223946712639656
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 48,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "candidate": {
+        "planned": 48,
+        "executed": 48,
+        "successful": 48,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 48,
+        "length_stops": 2,
+        "solver_batch_wall_seconds": 180.42940222199832,
+        "accepted_output_tokens": 13188,
+        "output_tokens_per_second": 73.0923000219977,
+        "ttft_seconds": {
+          "samples": 48,
+          "mean": 7.603368909980721,
+          "p50": 5.0179794340074295,
+          "p95": 23.422624840608474,
+          "p99": 32.526214581161184
+        },
+        "tpot_seconds": {
+          "samples": 48,
+          "mean": 0.1203146352199891,
+          "p50": 0.09458707260860486,
+          "p95": 0.32193416894887145,
+          "p99": 0.3744716348378319
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 48,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "throughput_change_percent": -1.3020071841597702,
+      "ttft_mean_change_percent": 5.363049337980463,
+      "ttft_p50_change_percent": -0.9273581802886843,
+      "ttft_p95_change_percent": -0.09625569060410788,
+      "tpot_mean_change_percent": 4.15349280803925,
+      "same_rate_solver_device_seconds_per_token_change_percent": 1.319183042140648,
+      "baseline_requests": "native-terminal-requests.json",
+      "candidate_requests": "pegaflow-terminal-requests.json"
+    }
+  },
+  "original_quality": {
+    "hle": {
+      "native": {
+        "protocol": "HLE original evaluation prompts/schema on HLE-Verified; Qwen substitute; single trial; not official leaderboard replication",
+        "scoring_policy": "strict_json",
+        "selection": {
+          "subsets": [
+            "gold",
+            "revision"
+          ],
+          "modality": "all",
+          "excluded": 1611,
+          "profile": "fixed200-v1",
+          "selected": 200
+        },
+        "scope": "complete_selected_plan",
+        "judge_model": "qwen3.5-35b",
+        "solver_model": "qwen3.5-35b",
+        "contract_sha256": "e60b057d8b4a006a2913c195e63dbadc5270f8c3b69da5e18be18c81627d2466",
+        "solver_index_sha256": "8c87cf78124663cf004e5ecf5a317fd8d933d4e6e65354f6f8aa981b33a656d8",
+        "judge_index_sha256": "2aa6b72a3c3d859433bbc8115283254832ba9d4420d65fd10469b37ed8618703",
+        "tracks": {
+          "gold": {
+            "total": 74,
+            "graded": 37,
+            "successes": 5,
+            "accuracy": 0.06756756756756757,
+            "unresolved": 37,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.057189729091998445,
+            "solver_failures": 0,
+            "judge_invalid": 37,
+            "judge_transport_failures": 0,
+            "solver_truncated": 41,
+            "judge_truncated": 37
+          },
+          "revision": {
+            "total": 126,
+            "graded": 52,
+            "successes": 22,
+            "accuracy": 0.1746031746031746,
+            "unresolved": 74,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0662869846553988,
+            "solver_failures": 0,
+            "judge_invalid": 74,
+            "judge_transport_failures": 0,
+            "solver_truncated": 81,
+            "judge_truncated": 74
+          }
+        },
+        "groups": {
+          "gold/text": {
+            "total": 64,
+            "graded": 30,
+            "successes": 5,
+            "accuracy": 0.078125,
+            "unresolved": 34,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.06575020608035669,
+            "solver_failures": 0,
+            "judge_invalid": 34,
+            "judge_transport_failures": 0,
+            "solver_truncated": 40,
+            "judge_truncated": 34
+          },
+          "gold/image": {
+            "total": 10,
+            "graded": 7,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 3,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "solver_truncated": 1,
+            "judge_truncated": 3
+          },
+          "revision/text": {
+            "total": 113,
+            "graded": 48,
+            "successes": 21,
+            "accuracy": 0.18584070796460178,
+            "unresolved": 65,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.07172027847534045,
+            "solver_failures": 0,
+            "judge_invalid": 65,
+            "judge_transport_failures": 0,
+            "solver_truncated": 78,
+            "judge_truncated": 65
+          },
+          "revision/image": {
+            "total": 13,
+            "graded": 4,
+            "successes": 1,
+            "accuracy": 0.07692307692307693,
+            "unresolved": 9,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.14485439144214035,
+            "solver_failures": 0,
+            "judge_invalid": 9,
+            "judge_transport_failures": 0,
+            "solver_truncated": 3,
+            "judge_truncated": 9
+          }
+        },
+        "subjects": {
+          "gold/Biology/Medicine": {
+            "total": 14,
+            "graded": 10,
+            "successes": 1,
+            "accuracy": 0.07142857142857142,
+            "unresolved": 4,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.13490737563232041,
+            "solver_failures": 0,
+            "judge_invalid": 4,
+            "judge_transport_failures": 0,
+            "solver_truncated": 1,
+            "judge_truncated": 4
+          },
+          "gold/Chemistry": {
+            "total": 2,
+            "graded": 2,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 0,
+            "complete_grading": true,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 0,
+            "judge_truncated": 0
+          },
+          "gold/Computer Science/AI": {
+            "total": 7,
+            "graded": 4,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 3,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "solver_truncated": 4,
+            "judge_truncated": 3
+          },
+          "gold/Engineering": {
+            "total": 5,
+            "graded": 1,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 4,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 4,
+            "judge_transport_failures": 0,
+            "solver_truncated": 4,
+            "judge_truncated": 4
+          },
+          "gold/Humanities/Social Science": {
+            "total": 12,
+            "graded": 8,
+            "successes": 2,
+            "accuracy": 0.16666666666666666,
+            "unresolved": 4,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.21086242662684826,
+            "solver_failures": 0,
+            "judge_invalid": 4,
+            "judge_transport_failures": 0,
+            "solver_truncated": 8,
+            "judge_truncated": 4
+          },
+          "gold/Math": {
+            "total": 24,
+            "graded": 8,
+            "successes": 2,
+            "accuracy": 0.08333333333333333,
+            "unresolved": 16,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.11057718939643389,
+            "solver_failures": 0,
+            "judge_invalid": 16,
+            "judge_transport_failures": 0,
+            "solver_truncated": 19,
+            "judge_truncated": 16
+          },
+          "gold/Other": {
+            "total": 7,
+            "graded": 4,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 3,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "solver_truncated": 2,
+            "judge_truncated": 3
+          },
+          "gold/Physics": {
+            "total": 3,
+            "graded": 0,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 3,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "solver_truncated": 3,
+            "judge_truncated": 3
+          },
+          "revision/Biology/Medicine": {
+            "total": 16,
+            "graded": 11,
+            "successes": 7,
+            "accuracy": 0.4375,
+            "unresolved": 5,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.24307840170405925,
+            "solver_failures": 0,
+            "judge_invalid": 5,
+            "judge_transport_failures": 0,
+            "solver_truncated": 1,
+            "judge_truncated": 5
+          },
+          "revision/Chemistry": {
+            "total": 13,
+            "graded": 4,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 9,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 9,
+            "judge_transport_failures": 0,
+            "solver_truncated": 8,
+            "judge_truncated": 9
+          },
+          "revision/Computer Science/AI": {
+            "total": 14,
+            "graded": 8,
+            "successes": 3,
+            "accuracy": 0.21428571428571427,
+            "unresolved": 6,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.21494185260204676,
+            "solver_failures": 0,
+            "judge_invalid": 6,
+            "judge_transport_failures": 0,
+            "solver_truncated": 9,
+            "judge_truncated": 6
+          },
+          "revision/Math": {
+            "total": 81,
+            "graded": 28,
+            "successes": 11,
+            "accuracy": 0.13580246913580246,
+            "unresolved": 53,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.07460602571742866,
+            "solver_failures": 0,
+            "judge_invalid": 53,
+            "judge_transport_failures": 0,
+            "solver_truncated": 63,
+            "judge_truncated": 53
+          },
+          "revision/Physics": {
+            "total": 2,
+            "graded": 1,
+            "successes": 1,
+            "accuracy": 0.5,
+            "unresolved": 1,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.6929646455628166,
+            "solver_failures": 0,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "solver_truncated": 0,
+            "judge_truncated": 1
+          }
+        },
+        "calibration_error": null,
+        "calibration_note": "not implemented: pinned upstream binning omits final bin and crashes below 100 grades; raw confidence preserved; no silent replacement metric"
+      },
+      "pegaflow": {
+        "protocol": "HLE original evaluation prompts/schema on HLE-Verified; Qwen substitute; single trial; not official leaderboard replication",
+        "scoring_policy": "strict_json",
+        "selection": {
+          "subsets": [
+            "gold",
+            "revision"
+          ],
+          "modality": "all",
+          "excluded": 1611,
+          "profile": "fixed200-v1",
+          "selected": 200
+        },
+        "scope": "complete_selected_plan",
+        "judge_model": "qwen3.5-35b",
+        "solver_model": "qwen3.5-35b",
+        "contract_sha256": "e60b057d8b4a006a2913c195e63dbadc5270f8c3b69da5e18be18c81627d2466",
+        "solver_index_sha256": "c4721c3b59eb2afb1fea7666ad906111be83a2c672dfa387985f54b5e464a9e2",
+        "judge_index_sha256": "6d84ea3f473e1ced1dd4a602709074588c561f2fb5ae2b99e7542b1aae0a96af",
+        "tracks": {
+          "gold": {
+            "total": 74,
+            "graded": 34,
+            "successes": 7,
+            "accuracy": 0.0945945945945946,
+            "unresolved": 40,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0666798958965217,
+            "solver_failures": 0,
+            "judge_invalid": 40,
+            "judge_transport_failures": 0,
+            "solver_truncated": 40,
+            "judge_truncated": 40
+          },
+          "revision": {
+            "total": 126,
+            "graded": 64,
+            "successes": 21,
+            "accuracy": 0.16666666666666666,
+            "unresolved": 62,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.06507355761931699,
+            "solver_failures": 0,
+            "judge_invalid": 62,
+            "judge_transport_failures": 0,
+            "solver_truncated": 82,
+            "judge_truncated": 62
+          }
+        },
+        "groups": {
+          "gold/text": {
+            "total": 64,
+            "graded": 27,
+            "successes": 6,
+            "accuracy": 0.09375,
+            "unresolved": 37,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.07141274587521125,
+            "solver_failures": 0,
+            "judge_invalid": 37,
+            "judge_transport_failures": 0,
+            "solver_truncated": 39,
+            "judge_truncated": 37
+          },
+          "gold/image": {
+            "total": 10,
+            "graded": 7,
+            "successes": 1,
+            "accuracy": 0.1,
+            "unresolved": 3,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.18594192641790072,
+            "solver_failures": 0,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "solver_truncated": 1,
+            "judge_truncated": 3
+          },
+          "revision/text": {
+            "total": 113,
+            "graded": 57,
+            "successes": 20,
+            "accuracy": 0.17699115044247787,
+            "unresolved": 56,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.07037118725966722,
+            "solver_failures": 0,
+            "judge_invalid": 56,
+            "judge_transport_failures": 0,
+            "solver_truncated": 80,
+            "judge_truncated": 56
+          },
+          "revision/image": {
+            "total": 13,
+            "graded": 7,
+            "successes": 1,
+            "accuracy": 0.07692307692307693,
+            "unresolved": 6,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.14485439144214035,
+            "solver_failures": 0,
+            "judge_invalid": 6,
+            "judge_transport_failures": 0,
+            "solver_truncated": 2,
+            "judge_truncated": 6
+          }
+        },
+        "subjects": {
+          "gold/Biology/Medicine": {
+            "total": 14,
+            "graded": 9,
+            "successes": 4,
+            "accuracy": 0.2857142857142857,
+            "unresolved": 5,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.23664319132398465,
+            "solver_failures": 0,
+            "judge_invalid": 5,
+            "judge_transport_failures": 0,
+            "solver_truncated": 4,
+            "judge_truncated": 5
+          },
+          "gold/Chemistry": {
+            "total": 2,
+            "graded": 1,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 1,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "solver_truncated": 0,
+            "judge_truncated": 1
+          },
+          "gold/Computer Science/AI": {
+            "total": 7,
+            "graded": 4,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 3,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "solver_truncated": 4,
+            "judge_truncated": 3
+          },
+          "gold/Engineering": {
+            "total": 5,
+            "graded": 3,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 2,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "solver_truncated": 2,
+            "judge_truncated": 2
+          },
+          "gold/Humanities/Social Science": {
+            "total": 12,
+            "graded": 4,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 8,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 8,
+            "judge_transport_failures": 0,
+            "solver_truncated": 6,
+            "judge_truncated": 8
+          },
+          "gold/Math": {
+            "total": 24,
+            "graded": 9,
+            "successes": 3,
+            "accuracy": 0.125,
+            "unresolved": 15,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.1323151225924938,
+            "solver_failures": 0,
+            "judge_invalid": 15,
+            "judge_transport_failures": 0,
+            "solver_truncated": 19,
+            "judge_truncated": 15
+          },
+          "gold/Other": {
+            "total": 7,
+            "graded": 3,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 4,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 4,
+            "judge_transport_failures": 0,
+            "solver_truncated": 3,
+            "judge_truncated": 4
+          },
+          "gold/Physics": {
+            "total": 3,
+            "graded": 1,
+            "successes": 0,
+            "accuracy": 0.0,
+            "unresolved": 2,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.0,
+            "solver_failures": 0,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "solver_truncated": 2,
+            "judge_truncated": 2
+          },
+          "revision/Biology/Medicine": {
+            "total": 16,
+            "graded": 11,
+            "successes": 7,
+            "accuracy": 0.4375,
+            "unresolved": 5,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.24307840170405925,
+            "solver_failures": 0,
+            "judge_invalid": 5,
+            "judge_transport_failures": 0,
+            "solver_truncated": 3,
+            "judge_truncated": 5
+          },
+          "revision/Chemistry": {
+            "total": 13,
+            "graded": 6,
+            "successes": 1,
+            "accuracy": 0.07692307692307693,
+            "unresolved": 7,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.14485439144214035,
+            "solver_failures": 0,
+            "judge_invalid": 7,
+            "judge_transport_failures": 0,
+            "solver_truncated": 6,
+            "judge_truncated": 7
+          },
+          "revision/Computer Science/AI": {
+            "total": 14,
+            "graded": 9,
+            "successes": 3,
+            "accuracy": 0.21428571428571427,
+            "unresolved": 5,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.21494185260204676,
+            "solver_failures": 0,
+            "judge_invalid": 5,
+            "judge_transport_failures": 0,
+            "solver_truncated": 8,
+            "judge_truncated": 5
+          },
+          "revision/Math": {
+            "total": 81,
+            "graded": 36,
+            "successes": 9,
+            "accuracy": 0.1111111111111111,
+            "unresolved": 45,
+            "complete_grading": false,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.06844095264817941,
+            "solver_failures": 0,
+            "judge_invalid": 45,
+            "judge_transport_failures": 0,
+            "solver_truncated": 64,
+            "judge_truncated": 45
+          },
+          "revision/Physics": {
+            "total": 2,
+            "graded": 2,
+            "successes": 1,
+            "accuracy": 0.5,
+            "unresolved": 0,
+            "complete_grading": true,
+            "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+            "wald_95_half_width": 0.6929646455628166,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 1,
+            "judge_truncated": 0
+          }
+        },
+        "calibration_error": null,
+        "calibration_note": "not implemented: pinned upstream binning omits final bin and crashes below 100 grades; raw confidence preserved; no silent replacement metric"
+      }
+    },
+    "frontier": {
+      "native": {
+        "protocol": "hust-qwen-judge-v3; Appendix B prompts; Qwen substitute; single trial; scoring_policy=mmlu_extract_first; not official replication",
+        "scoring_policy": "mmlu_extract_first",
+        "denominator_policy": "all_cases_invalid_as_nonsuccess",
+        "judge_model": "qwen3.5-35b",
+        "solver_model": "qwen3.5-35b",
+        "same_model_name": true,
+        "scope": "full_gold",
+        "contract_sha256": "196e7ab5cea4835a42310bc22c5a0c682633c0eb2d6dd6b254dd6739a27e5f55",
+        "solver_index_sha256": "6dd29ce9769bd976cfd3653f739c19b82ee1c902f9f064a562847cbb4ee6aa81",
+        "judge_index_sha256": "01b937fc77159e46787d895c445d925e9f73c0ec8726876feab8b10a9f449a10",
+        "tracks": {
+          "olympiad": {
+            "total": 100,
+            "graded": 98,
+            "successes": 64,
+            "solver_failures": 0,
+            "judge_unresolved": 2,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 4,
+            "judge_audit_flagged": 4,
+            "solver_truncated": 29,
+            "judge_truncated": 6,
+            "success_rate": 0.64,
+            "observed_success_lower_bound": 0.64,
+            "mean_research_score_valid_only": null
+          },
+          "research": {
+            "total": 60,
+            "graded": 55,
+            "successes": 2,
+            "solver_failures": 0,
+            "judge_unresolved": 5,
+            "judge_invalid": 5,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 3,
+            "judge_audit_flagged": 4,
+            "solver_truncated": 6,
+            "judge_truncated": 8,
+            "success_rate": 0.03333333333333333,
+            "observed_success_lower_bound": 0.03333333333333333,
+            "mean_research_score_valid_only": 2.5392727272727273
+          }
+        },
+        "subjects": {
+          "olympiad/biology": {
+            "total": 10,
+            "graded": 10,
+            "successes": 1,
+            "solver_failures": 0,
+            "judge_unresolved": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 0,
+            "judge_audit_flagged": 0,
+            "solver_truncated": 2,
+            "judge_truncated": 0,
+            "success_rate": 0.1,
+            "observed_success_lower_bound": 0.1,
+            "mean_research_score_valid_only": null
+          },
+          "olympiad/chemistry": {
+            "total": 40,
+            "graded": 39,
+            "successes": 30,
+            "solver_failures": 0,
+            "judge_unresolved": 1,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 3,
+            "judge_audit_flagged": 3,
+            "solver_truncated": 12,
+            "judge_truncated": 4,
+            "success_rate": 0.75,
+            "observed_success_lower_bound": 0.75,
+            "mean_research_score_valid_only": null
+          },
+          "olympiad/physics": {
+            "total": 50,
+            "graded": 49,
+            "successes": 33,
+            "solver_failures": 0,
+            "judge_unresolved": 1,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 1,
+            "judge_audit_flagged": 1,
+            "solver_truncated": 15,
+            "judge_truncated": 2,
+            "success_rate": 0.66,
+            "observed_success_lower_bound": 0.66,
+            "mean_research_score_valid_only": null
+          },
+          "research/biology": {
+            "total": 20,
+            "graded": 19,
+            "successes": 1,
+            "solver_failures": 0,
+            "judge_unresolved": 1,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 2,
+            "judge_audit_flagged": 3,
+            "solver_truncated": 0,
+            "judge_truncated": 3,
+            "success_rate": 0.05,
+            "observed_success_lower_bound": 0.05,
+            "mean_research_score_valid_only": 2.4689473684210523
+          },
+          "research/chemistry": {
+            "total": 20,
+            "graded": 20,
+            "successes": 1,
+            "solver_failures": 0,
+            "judge_unresolved": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 0,
+            "judge_audit_flagged": 0,
+            "solver_truncated": 4,
+            "judge_truncated": 0,
+            "success_rate": 0.05,
+            "observed_success_lower_bound": 0.05,
+            "mean_research_score_valid_only": 3.3
+          },
+          "research/physics": {
+            "total": 20,
+            "graded": 16,
+            "successes": 0,
+            "solver_failures": 0,
+            "judge_unresolved": 4,
+            "judge_invalid": 4,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 1,
+            "judge_audit_flagged": 1,
+            "solver_truncated": 2,
+            "judge_truncated": 5,
+            "success_rate": 0.0,
+            "observed_success_lower_bound": 0.0,
+            "mean_research_score_valid_only": 1.671875
+          }
+        }
+      },
+      "pegaflow": {
+        "protocol": "hust-qwen-judge-v3; Appendix B prompts; Qwen substitute; single trial; scoring_policy=mmlu_extract_first; not official replication",
+        "scoring_policy": "mmlu_extract_first",
+        "denominator_policy": "all_cases_invalid_as_nonsuccess",
+        "judge_model": "qwen3.5-35b",
+        "solver_model": "qwen3.5-35b",
+        "same_model_name": true,
+        "scope": "full_gold",
+        "contract_sha256": "196e7ab5cea4835a42310bc22c5a0c682633c0eb2d6dd6b254dd6739a27e5f55",
+        "solver_index_sha256": "8f74943e7fd3f7ba70edeaac97d8d1fd60696ea29d3ed4b17bd30767fc6c4761",
+        "judge_index_sha256": "f02982dcd72eb8a6f4cd59882c4612de2775802255631d764505519203c4c8c5",
+        "tracks": {
+          "olympiad": {
+            "total": 100,
+            "graded": 97,
+            "successes": 65,
+            "solver_failures": 0,
+            "judge_unresolved": 3,
+            "judge_invalid": 3,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 3,
+            "judge_audit_flagged": 3,
+            "solver_truncated": 32,
+            "judge_truncated": 6,
+            "success_rate": 0.65,
+            "observed_success_lower_bound": 0.65,
+            "mean_research_score_valid_only": null
+          },
+          "research": {
+            "total": 60,
+            "graded": 58,
+            "successes": 4,
+            "solver_failures": 0,
+            "judge_unresolved": 2,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 11,
+            "judge_audit_flagged": 12,
+            "solver_truncated": 8,
+            "judge_truncated": 12,
+            "success_rate": 0.06666666666666667,
+            "observed_success_lower_bound": 0.06666666666666667,
+            "mean_research_score_valid_only": 2.618103448275862
+          }
+        },
+        "subjects": {
+          "olympiad/biology": {
+            "total": 10,
+            "graded": 10,
+            "successes": 2,
+            "solver_failures": 0,
+            "judge_unresolved": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 0,
+            "judge_audit_flagged": 0,
+            "solver_truncated": 4,
+            "judge_truncated": 0,
+            "success_rate": 0.2,
+            "observed_success_lower_bound": 0.2,
+            "mean_research_score_valid_only": null
+          },
+          "olympiad/chemistry": {
+            "total": 40,
+            "graded": 38,
+            "successes": 26,
+            "solver_failures": 0,
+            "judge_unresolved": 2,
+            "judge_invalid": 2,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 0,
+            "judge_audit_flagged": 0,
+            "solver_truncated": 14,
+            "judge_truncated": 2,
+            "success_rate": 0.65,
+            "observed_success_lower_bound": 0.65,
+            "mean_research_score_valid_only": null
+          },
+          "olympiad/physics": {
+            "total": 50,
+            "graded": 49,
+            "successes": 37,
+            "solver_failures": 0,
+            "judge_unresolved": 1,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 3,
+            "judge_audit_flagged": 3,
+            "solver_truncated": 14,
+            "judge_truncated": 4,
+            "success_rate": 0.74,
+            "observed_success_lower_bound": 0.74,
+            "mean_research_score_valid_only": null
+          },
+          "research/biology": {
+            "total": 20,
+            "graded": 19,
+            "successes": 2,
+            "solver_failures": 0,
+            "judge_unresolved": 1,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 4,
+            "judge_audit_flagged": 5,
+            "solver_truncated": 3,
+            "judge_truncated": 5,
+            "success_rate": 0.1,
+            "observed_success_lower_bound": 0.1,
+            "mean_research_score_valid_only": 2.857894736842105
+          },
+          "research/chemistry": {
+            "total": 20,
+            "graded": 20,
+            "successes": 1,
+            "solver_failures": 0,
+            "judge_unresolved": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 4,
+            "judge_audit_flagged": 4,
+            "solver_truncated": 3,
+            "judge_truncated": 4,
+            "success_rate": 0.05,
+            "observed_success_lower_bound": 0.05,
+            "mean_research_score_valid_only": 2.92
+          },
+          "research/physics": {
+            "total": 20,
+            "graded": 19,
+            "successes": 1,
+            "solver_failures": 0,
+            "judge_unresolved": 1,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "judge_truncated_with_grade": 3,
+            "judge_audit_flagged": 3,
+            "solver_truncated": 2,
+            "judge_truncated": 3,
+            "success_rate": 0.05,
+            "observed_success_lower_bound": 0.05,
+            "mean_research_score_valid_only": 2.0605263157894735
+          }
+        }
+      }
+    }
+  },
+  "judge_costs": [
+    {
+      "name": "judge-native-hle",
+      "planned": 200,
+      "attempted": 200,
+      "status_counts": {
+        "ok": 89,
+        "invalid_judge": 111
+      },
+      "batch_wall_seconds": 4197.038617472004,
+      "two_device_seconds": 8394.077234944009,
+      "completion_tokens_all_observed_HTTP_records": 920644,
+      "length_stops": 111,
+      "scope": "Judge traffic excluded from solver throughput; all transport-success/invalid-grade attempts retained"
+    },
+    {
+      "name": "judge-pegaflow-hle",
+      "planned": 200,
+      "attempted": 200,
+      "status_counts": {
+        "invalid_judge": 102,
+        "ok": 98
+      },
+      "batch_wall_seconds": 3883.388251021999,
+      "two_device_seconds": 7766.776502043998,
+      "completion_tokens_all_observed_HTTP_records": 848534,
+      "length_stops": 102,
+      "scope": "Judge traffic excluded from solver throughput; all transport-success/invalid-grade attempts retained"
+    },
+    {
+      "name": "judge-native-frontier",
+      "planned": 160,
+      "attempted": 160,
+      "status_counts": {
+        "ok": 153,
+        "invalid_judge": 7
+      },
+      "batch_wall_seconds": 771.5463033989945,
+      "two_device_seconds": 1543.092606797989,
+      "completion_tokens_all_observed_HTTP_records": 346388,
+      "length_stops": 14,
+      "scope": "Judge traffic excluded from solver throughput; all transport-success/invalid-grade attempts retained"
+    },
+    {
+      "name": "judge-pegaflow-frontier",
+      "planned": 160,
+      "attempted": 160,
+      "status_counts": {
+        "ok": 155,
+        "invalid_judge": 5
+      },
+      "batch_wall_seconds": 762.6624628989957,
+      "two_device_seconds": 1525.3249257979915,
+      "completion_tokens_all_observed_HTTP_records": 371437,
+      "length_stops": 18,
+      "scope": "Judge traffic excluded from solver throughput; all transport-success/invalid-grade attempts retained"
+    }
+  ],
+  "lifecycle_cost_observations": [
+    {
+      "service": "service-native",
+      "preparation_seconds": 475.6853868570033,
+      "preparation_device_seconds": 951.3707737140066,
+      "sidecar_ready_to_stop_seconds": null,
+      "formal_telemetry_samples": 557,
+      "formal_total_container_memory_max_observed_bytes": 18075115520,
+      "formal_hbm_max_observed_mb_by_physical_npu": {
+        "2": 56584,
+        "5": 56583
+      },
+      "scope": "Observed total sampling maxima, not isolated MOD memory increments, exact allocation peaks or money; qualification startup streams retained separately in runtime-overheads.json"
+    },
+    {
+      "service": "service-pegaflow",
+      "preparation_seconds": 504.74230926499877,
+      "preparation_device_seconds": 1009.4846185299975,
+      "sidecar_ready_to_stop_seconds": 6499.852251291275,
+      "formal_telemetry_samples": 572,
+      "formal_total_container_memory_max_observed_bytes": 49357201408,
+      "formal_hbm_max_observed_mb_by_physical_npu": {
+        "2": 56669,
+        "5": 56668
+      },
+      "scope": "Observed total sampling maxima, not isolated MOD memory increments, exact allocation peaks or money; qualification startup streams retained separately in runtime-overheads.json"
+    },
+    {
+      "service": "service-judge",
+      "preparation_seconds": 460.09952155599603,
+      "preparation_device_seconds": 920.1990431119921,
+      "sidecar_ready_to_stop_seconds": null,
+      "formal_telemetry_samples": 913,
+      "formal_total_container_memory_max_observed_bytes": 15418048512,
+      "formal_hbm_max_observed_mb_by_physical_npu": {
+        "2": 56436,
+        "5": 56430
+      },
+      "scope": "Observed total sampling maxima, not isolated MOD memory increments, exact allocation peaks or money; qualification startup streams retained separately in runtime-overheads.json"
+    },
+    {
+      "service": "qualification-service-native",
+      "preparation_seconds": 467.6744533750025,
+      "preparation_device_seconds": 935.348906750005,
+      "sidecar_ready_to_stop_seconds": null,
+      "formal_telemetry_samples": 0,
+      "formal_total_container_memory_max_observed_bytes": null,
+      "formal_hbm_max_observed_mb_by_physical_npu": null,
+      "scope": "Observed total sampling maxima, not isolated MOD memory increments, exact allocation peaks or money; qualification startup streams retained separately in runtime-overheads.json"
+    },
+    {
+      "service": "qualification-service-pegaflow",
+      "preparation_seconds": 486.61589911700867,
+      "preparation_device_seconds": 973.2317982340173,
+      "sidecar_ready_to_stop_seconds": 1181.3420205116272,
+      "formal_telemetry_samples": 0,
+      "formal_total_container_memory_max_observed_bytes": null,
+      "formal_hbm_max_observed_mb_by_physical_npu": null,
+      "scope": "Observed total sampling maxima, not isolated MOD memory increments, exact allocation peaks or money; qualification startup streams retained separately in runtime-overheads.json"
+    }
+  ],
+  "mechanism": {
+    "schema": "pegaflow-external-kv-mechanism/v1",
+    "source_manifest_sha256": "6d563ea9af874dae6e6248cc51155809878e352d029c069c446d6857ec133541",
+    "stages": [
+      {
+        "name": "native-mmlu",
+        "arm": "native",
+        "cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        }
+      },
+      {
+        "name": "native-hle",
+        "arm": "native",
+        "cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        }
+      },
+      {
+        "name": "native-frontier",
+        "arm": "native",
+        "cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        }
+      },
+      {
+        "name": "native-swe",
+        "arm": "native",
+        "cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        }
+      },
+      {
+        "name": "native-terminal",
+        "arm": "native",
+        "cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        }
+      },
+      {
+        "name": "pegaflow-mmlu",
+        "arm": "pegaflow",
+        "cache_admission": {
+          "arm": "pegaflow",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": true,
+          "engine_connector": {
+            "deltas": {
+              "vllm:pega_load_success_total": 0.0,
+              "vllm:pega_save_success_total": 12.0,
+              "vllm:pega_load_failure_total": 0.0,
+              "vllm:pega_save_failure_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "external_snapshots_present": true,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "sidecar_metric_snapshots": {
+          "before": {
+            "pegaflow_hll_cardinality": 0.0,
+            "pegaflow_hll_total_requests": 0.0,
+            "pegaflow_pool_capacity_bytes": 32212254720.0,
+            "pegaflow_rpc_duration_seconds_bucket": 9.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.358101149,
+            "pegaflow_rpc_duration_seconds_count": 2.0,
+            "pegaflow_rpc_requests_total": 2.0,
+            "target_info": 1.0
+          },
+          "after": {
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 6.0,
+            "pegaflow_cache_block_misses_total": 6.0,
+            "pegaflow_cache_resident_bytes": 276824064.0,
+            "pegaflow_cache_tier_block_requests_total": 6.0,
+            "pegaflow_hll_cardinality": 18.003296703320952,
+            "pegaflow_hll_total_requests": 18.0,
+            "pegaflow_inflight_bytes": 0.0,
+            "pegaflow_object_lifecycle_total": 24.0,
+            "pegaflow_object_resident_bytes": 276824064.0,
+            "pegaflow_pool_capacity_bytes": 32212254720.0,
+            "pegaflow_pool_used_bytes": 276824064.0,
+            "pegaflow_rpc_duration_seconds_bucket": 243.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.360929433,
+            "pegaflow_rpc_duration_seconds_count": 20.0,
+            "pegaflow_rpc_requests_total": 20.0,
+            "pegaflow_save_bytes_total": 276824064.0,
+            "pegaflow_save_duration_seconds_bucket": 198.0,
+            "pegaflow_save_duration_seconds_sum": 0.11346844300000002,
+            "pegaflow_save_duration_seconds_count": 12.0,
+            "target_info": 1.0
+          },
+          "explicit_counter_deltas": {
+            "deltas": {
+              "pegaflow_cache_block_hits_total": null,
+              "pegaflow_cache_block_insertions_total": null,
+              "pegaflow_cache_block_misses_total": null,
+              "pegaflow_cache_tier_block_requests_total": null,
+              "pegaflow_object_lifecycle_total": null,
+              "pegaflow_rpc_duration_seconds_bucket": 234.0,
+              "pegaflow_rpc_duration_seconds_count": 18.0,
+              "pegaflow_rpc_duration_seconds_sum": 0.0028282840000000142,
+              "pegaflow_rpc_requests_total": 18.0,
+              "pegaflow_save_bytes_total": null,
+              "pegaflow_save_duration_seconds_bucket": null,
+              "pegaflow_save_duration_seconds_count": null,
+              "pegaflow_save_duration_seconds_sum": null
+            },
+            "missing": [
+              "pegaflow_cache_block_hits_total",
+              "pegaflow_cache_block_insertions_total",
+              "pegaflow_cache_block_misses_total",
+              "pegaflow_cache_tier_block_requests_total",
+              "pegaflow_object_lifecycle_total",
+              "pegaflow_save_bytes_total",
+              "pegaflow_save_duration_seconds_bucket",
+              "pegaflow_save_duration_seconds_count",
+              "pegaflow_save_duration_seconds_sum"
+            ],
+            "counter_reset_seen": false
+          },
+          "gauge_names": [
+            "pegaflow_cache_resident_bytes",
+            "pegaflow_hll_cardinality",
+            "pegaflow_hll_total_requests",
+            "pegaflow_inflight_bytes",
+            "pegaflow_object_resident_bytes",
+            "pegaflow_pool_capacity_bytes",
+            "pegaflow_pool_used_bytes",
+            "target_info"
+          ],
+          "lazy_counters_absent_before": [
+            "pegaflow_cache_block_hits_total",
+            "pegaflow_cache_block_insertions_total",
+            "pegaflow_cache_block_misses_total",
+            "pegaflow_cache_resident_bytes",
+            "pegaflow_cache_tier_block_requests_total",
+            "pegaflow_inflight_bytes",
+            "pegaflow_object_lifecycle_total",
+            "pegaflow_object_resident_bytes",
+            "pegaflow_pool_used_bytes",
+            "pegaflow_save_bytes_total",
+            "pegaflow_save_duration_seconds_bucket",
+            "pegaflow_save_duration_seconds_sum",
+            "pegaflow_save_duration_seconds_count"
+          ],
+          "scope": "Counter deltas and gauge snapshots are distinct; gauge decreases are not counter resets. Missing metrics are unknown. Lazy sidecar positive activation is distinct from strict engine zero-restore proof; do not infer absent counters to zero."
+        }
+      },
+      {
+        "name": "pegaflow-hle",
+        "arm": "pegaflow",
+        "cache_admission": {
+          "arm": "pegaflow",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": true,
+          "engine_connector": {
+            "deltas": {
+              "vllm:pega_load_success_total": 0.0,
+              "vllm:pega_save_success_total": 8.0,
+              "vllm:pega_load_failure_total": 0.0,
+              "vllm:pega_save_failure_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "external_snapshots_present": true,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "sidecar_metric_snapshots": {
+          "before": {
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 6.0,
+            "pegaflow_cache_block_misses_total": 6.0,
+            "pegaflow_cache_resident_bytes": 276824064.0,
+            "pegaflow_cache_tier_block_requests_total": 6.0,
+            "pegaflow_hll_cardinality": 18.003296703320952,
+            "pegaflow_hll_total_requests": 18.0,
+            "pegaflow_inflight_bytes": 0.0,
+            "pegaflow_object_lifecycle_total": 24.0,
+            "pegaflow_object_resident_bytes": 276824064.0,
+            "pegaflow_pool_capacity_bytes": 32212254720.0,
+            "pegaflow_pool_used_bytes": 276824064.0,
+            "pegaflow_rpc_duration_seconds_bucket": 243.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.360929433,
+            "pegaflow_rpc_duration_seconds_count": 20.0,
+            "pegaflow_rpc_requests_total": 20.0,
+            "pegaflow_save_bytes_total": 276824064.0,
+            "pegaflow_save_duration_seconds_bucket": 198.0,
+            "pegaflow_save_duration_seconds_sum": 0.11346844300000002,
+            "pegaflow_save_duration_seconds_count": 12.0,
+            "target_info": 1.0
+          },
+          "after": {
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 10.0,
+            "pegaflow_cache_block_misses_total": 10.0,
+            "pegaflow_cache_resident_bytes": 461373440.0,
+            "pegaflow_cache_tier_block_requests_total": 10.0,
+            "pegaflow_hll_cardinality": 21.006136519106235,
+            "pegaflow_hll_total_requests": 21.0,
+            "pegaflow_inflight_bytes": 0.0,
+            "pegaflow_object_lifecycle_total": 40.0,
+            "pegaflow_object_resident_bytes": 461373440.0,
+            "pegaflow_pool_capacity_bytes": 32212254720.0,
+            "pegaflow_pool_used_bytes": 461373440.0,
+            "pegaflow_rpc_duration_seconds_bucket": 399.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.362324982,
+            "pegaflow_rpc_duration_seconds_count": 32.0,
+            "pegaflow_rpc_requests_total": 32.0,
+            "pegaflow_save_bytes_total": 461373440.0,
+            "pegaflow_save_duration_seconds_bucket": 334.0,
+            "pegaflow_save_duration_seconds_sum": 0.16688474200000003,
+            "pegaflow_save_duration_seconds_count": 20.0,
+            "target_info": 1.0
+          },
+          "explicit_counter_deltas": {
+            "deltas": {
+              "pegaflow_cache_block_hits_total": 0.0,
+              "pegaflow_cache_block_insertions_total": 4.0,
+              "pegaflow_cache_block_misses_total": 4.0,
+              "pegaflow_cache_tier_block_requests_total": 4.0,
+              "pegaflow_object_lifecycle_total": 16.0,
+              "pegaflow_rpc_duration_seconds_bucket": 156.0,
+              "pegaflow_rpc_duration_seconds_count": 12.0,
+              "pegaflow_rpc_duration_seconds_sum": 0.001395548999999996,
+              "pegaflow_rpc_requests_total": 12.0,
+              "pegaflow_save_bytes_total": 184549376.0,
+              "pegaflow_save_duration_seconds_bucket": 136.0,
+              "pegaflow_save_duration_seconds_count": 8.0,
+              "pegaflow_save_duration_seconds_sum": 0.053416299000000014
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "gauge_names": [
+            "pegaflow_cache_resident_bytes",
+            "pegaflow_hll_cardinality",
+            "pegaflow_hll_total_requests",
+            "pegaflow_inflight_bytes",
+            "pegaflow_object_resident_bytes",
+            "pegaflow_pool_capacity_bytes",
+            "pegaflow_pool_used_bytes",
+            "target_info"
+          ],
+          "lazy_counters_absent_before": [],
+          "scope": "Counter deltas and gauge snapshots are distinct; gauge decreases are not counter resets. Missing metrics are unknown. Lazy sidecar positive activation is distinct from strict engine zero-restore proof; do not infer absent counters to zero."
+        }
+      },
+      {
+        "name": "pegaflow-frontier",
+        "arm": "pegaflow",
+        "cache_admission": {
+          "arm": "pegaflow",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": true,
+          "engine_connector": {
+            "deltas": {
+              "vllm:pega_load_success_total": 0.0,
+              "vllm:pega_save_success_total": 0.0,
+              "vllm:pega_load_failure_total": 0.0,
+              "vllm:pega_save_failure_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "external_snapshots_present": true,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "sidecar_metric_snapshots": {
+          "before": {
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 10.0,
+            "pegaflow_cache_block_misses_total": 10.0,
+            "pegaflow_cache_resident_bytes": 461373440.0,
+            "pegaflow_cache_tier_block_requests_total": 10.0,
+            "pegaflow_hll_cardinality": 21.006136519106235,
+            "pegaflow_hll_total_requests": 21.0,
+            "pegaflow_inflight_bytes": 0.0,
+            "pegaflow_object_lifecycle_total": 40.0,
+            "pegaflow_object_resident_bytes": 461373440.0,
+            "pegaflow_pool_capacity_bytes": 32212254720.0,
+            "pegaflow_pool_used_bytes": 461373440.0,
+            "pegaflow_rpc_duration_seconds_bucket": 399.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.362324982,
+            "pegaflow_rpc_duration_seconds_count": 32.0,
+            "pegaflow_rpc_requests_total": 32.0,
+            "pegaflow_save_bytes_total": 461373440.0,
+            "pegaflow_save_duration_seconds_bucket": 334.0,
+            "pegaflow_save_duration_seconds_sum": 0.16688474200000003,
+            "pegaflow_save_duration_seconds_count": 20.0,
+            "target_info": 1.0
+          },
+          "after": {
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 10.0,
+            "pegaflow_cache_block_misses_total": 10.0,
+            "pegaflow_cache_resident_bytes": 461373440.0,
+            "pegaflow_cache_tier_block_requests_total": 10.0,
+            "pegaflow_hll_cardinality": 11.003083518962976,
+            "pegaflow_hll_total_requests": 11.0,
+            "pegaflow_inflight_bytes": 0.0,
+            "pegaflow_object_lifecycle_total": 40.0,
+            "pegaflow_object_resident_bytes": 461373440.0,
+            "pegaflow_pool_capacity_bytes": 32212254720.0,
+            "pegaflow_pool_used_bytes": 461373440.0,
+            "pegaflow_rpc_duration_seconds_bucket": 399.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.362324982,
+            "pegaflow_rpc_duration_seconds_count": 32.0,
+            "pegaflow_rpc_requests_total": 32.0,
+            "pegaflow_save_bytes_total": 461373440.0,
+            "pegaflow_save_duration_seconds_bucket": 334.0,
+            "pegaflow_save_duration_seconds_sum": 0.16688474200000003,
+            "pegaflow_save_duration_seconds_count": 20.0,
+            "target_info": 1.0
+          },
+          "explicit_counter_deltas": {
+            "deltas": {
+              "pegaflow_cache_block_hits_total": 0.0,
+              "pegaflow_cache_block_insertions_total": 0.0,
+              "pegaflow_cache_block_misses_total": 0.0,
+              "pegaflow_cache_tier_block_requests_total": 0.0,
+              "pegaflow_object_lifecycle_total": 0.0,
+              "pegaflow_rpc_duration_seconds_bucket": 0.0,
+              "pegaflow_rpc_duration_seconds_count": 0.0,
+              "pegaflow_rpc_duration_seconds_sum": 0.0,
+              "pegaflow_rpc_requests_total": 0.0,
+              "pegaflow_save_bytes_total": 0.0,
+              "pegaflow_save_duration_seconds_bucket": 0.0,
+              "pegaflow_save_duration_seconds_count": 0.0,
+              "pegaflow_save_duration_seconds_sum": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "gauge_names": [
+            "pegaflow_cache_resident_bytes",
+            "pegaflow_hll_cardinality",
+            "pegaflow_hll_total_requests",
+            "pegaflow_inflight_bytes",
+            "pegaflow_object_resident_bytes",
+            "pegaflow_pool_capacity_bytes",
+            "pegaflow_pool_used_bytes",
+            "target_info"
+          ],
+          "lazy_counters_absent_before": [],
+          "scope": "Counter deltas and gauge snapshots are distinct; gauge decreases are not counter resets. Missing metrics are unknown. Lazy sidecar positive activation is distinct from strict engine zero-restore proof; do not infer absent counters to zero."
+        }
+      },
+      {
+        "name": "pegaflow-swe",
+        "arm": "pegaflow",
+        "cache_admission": {
+          "arm": "pegaflow",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": true,
+          "engine_connector": {
+            "deltas": {
+              "vllm:pega_load_success_total": 0.0,
+              "vllm:pega_save_success_total": 402.0,
+              "vllm:pega_load_failure_total": 0.0,
+              "vllm:pega_save_failure_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "external_snapshots_present": true,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "sidecar_metric_snapshots": {
+          "before": {
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 10.0,
+            "pegaflow_cache_block_misses_total": 10.0,
+            "pegaflow_cache_resident_bytes": 461373440.0,
+            "pegaflow_cache_tier_block_requests_total": 10.0,
+            "pegaflow_hll_cardinality": 11.003083518962976,
+            "pegaflow_hll_total_requests": 11.0,
+            "pegaflow_inflight_bytes": 0.0,
+            "pegaflow_object_lifecycle_total": 40.0,
+            "pegaflow_object_resident_bytes": 461373440.0,
+            "pegaflow_pool_capacity_bytes": 32212254720.0,
+            "pegaflow_pool_used_bytes": 461373440.0,
+            "pegaflow_rpc_duration_seconds_bucket": 399.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.362324982,
+            "pegaflow_rpc_duration_seconds_count": 32.0,
+            "pegaflow_rpc_requests_total": 32.0,
+            "pegaflow_save_bytes_total": 461373440.0,
+            "pegaflow_save_duration_seconds_bucket": 334.0,
+            "pegaflow_save_duration_seconds_sum": 0.16688474200000003,
+            "pegaflow_save_duration_seconds_count": 20.0,
+            "target_info": 1.0
+          },
+          "after": {
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 737.0,
+            "pegaflow_cache_block_misses_total": 215.0,
+            "pegaflow_cache_resident_bytes": 21294284800.0,
+            "pegaflow_cache_tier_block_requests_total": 215.0,
+            "pegaflow_hll_cardinality": 626.9838348899307,
+            "pegaflow_hll_total_requests": 626.0,
+            "pegaflow_inflight_bytes": 0.0,
+            "pegaflow_object_lifecycle_total": 2256.0,
+            "pegaflow_object_resident_bytes": 21294284800.0,
+            "pegaflow_pool_capacity_bytes": 32212254720.0,
+            "pegaflow_pool_used_bytes": 21294284800.0,
+            "pegaflow_rpc_duration_seconds_bucket": 6080.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.371080564,
+            "pegaflow_rpc_duration_seconds_count": 469.0,
+            "pegaflow_rpc_requests_total": 469.0,
+            "pegaflow_save_bytes_total": 21294284800.0,
+            "pegaflow_save_duration_seconds_bucket": 6832.0,
+            "pegaflow_save_duration_seconds_sum": 5.464422228000004,
+            "pegaflow_save_duration_seconds_count": 422.0,
+            "target_info": 1.0
+          },
+          "explicit_counter_deltas": {
+            "deltas": {
+              "pegaflow_cache_block_hits_total": 0.0,
+              "pegaflow_cache_block_insertions_total": 727.0,
+              "pegaflow_cache_block_misses_total": 205.0,
+              "pegaflow_cache_tier_block_requests_total": 205.0,
+              "pegaflow_object_lifecycle_total": 2216.0,
+              "pegaflow_rpc_duration_seconds_bucket": 5681.0,
+              "pegaflow_rpc_duration_seconds_count": 437.0,
+              "pegaflow_rpc_duration_seconds_sum": 0.008755581999999984,
+              "pegaflow_rpc_requests_total": 437.0,
+              "pegaflow_save_bytes_total": 20832911360.0,
+              "pegaflow_save_duration_seconds_bucket": 6498.0,
+              "pegaflow_save_duration_seconds_count": 402.0,
+              "pegaflow_save_duration_seconds_sum": 5.297537486000004
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "gauge_names": [
+            "pegaflow_cache_resident_bytes",
+            "pegaflow_hll_cardinality",
+            "pegaflow_hll_total_requests",
+            "pegaflow_inflight_bytes",
+            "pegaflow_object_resident_bytes",
+            "pegaflow_pool_capacity_bytes",
+            "pegaflow_pool_used_bytes",
+            "target_info"
+          ],
+          "lazy_counters_absent_before": [],
+          "scope": "Counter deltas and gauge snapshots are distinct; gauge decreases are not counter resets. Missing metrics are unknown. Lazy sidecar positive activation is distinct from strict engine zero-restore proof; do not infer absent counters to zero."
+        }
+      },
+      {
+        "name": "pegaflow-terminal",
+        "arm": "pegaflow",
+        "cache_admission": {
+          "arm": "pegaflow",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": true,
+          "engine_connector": {
+            "deltas": {
+              "vllm:pega_load_success_total": 0.0,
+              "vllm:pega_save_success_total": 390.0,
+              "vllm:pega_load_failure_total": 0.0,
+              "vllm:pega_save_failure_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "external_snapshots_present": true,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "sidecar_metric_snapshots": {
+          "before": {
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 737.0,
+            "pegaflow_cache_block_misses_total": 215.0,
+            "pegaflow_cache_resident_bytes": 21294284800.0,
+            "pegaflow_cache_tier_block_requests_total": 215.0,
+            "pegaflow_hll_cardinality": 626.9838348899307,
+            "pegaflow_hll_total_requests": 626.0,
+            "pegaflow_inflight_bytes": 0.0,
+            "pegaflow_object_lifecycle_total": 2256.0,
+            "pegaflow_object_resident_bytes": 21294284800.0,
+            "pegaflow_pool_capacity_bytes": 32212254720.0,
+            "pegaflow_pool_used_bytes": 21294284800.0,
+            "pegaflow_rpc_duration_seconds_bucket": 6080.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.371080564,
+            "pegaflow_rpc_duration_seconds_count": 469.0,
+            "pegaflow_rpc_requests_total": 469.0,
+            "pegaflow_save_bytes_total": 21294284800.0,
+            "pegaflow_save_duration_seconds_bucket": 6832.0,
+            "pegaflow_save_duration_seconds_sum": 5.464422228000004,
+            "pegaflow_save_duration_seconds_count": 422.0,
+            "target_info": 1.0
+          },
+          "after": {
+            "pegaflow_cache_block_evictions_total": 512.0,
+            "pegaflow_cache_block_hits_total": 0.0,
+            "pegaflow_cache_block_insertions_total": 1377.0,
+            "pegaflow_cache_block_misses_total": 411.0,
+            "pegaflow_cache_eviction_reclaimed_bytes_total": 14830067712.0,
+            "pegaflow_cache_resident_bytes": 25154748416.0,
+            "pegaflow_cache_tier_block_requests_total": 411.0,
+            "pegaflow_hll_cardinality": 1220.0186469113135,
+            "pegaflow_hll_total_requests": 1214.0,
+            "pegaflow_inflight_bytes": 0.0,
+            "pegaflow_object_age_seconds_bucket": 512.0,
+            "pegaflow_object_age_seconds_sum": 172061.80536012613,
+            "pegaflow_object_age_seconds_count": 512.0,
+            "pegaflow_object_lifecycle_total": 4736.0,
+            "pegaflow_object_resident_bytes": 25154748416.0,
+            "pegaflow_pool_capacity_bytes": 32212254720.0,
+            "pegaflow_pool_used_bytes": 25154748416.0,
+            "pegaflow_rpc_duration_seconds_bucket": 11774.0,
+            "pegaflow_rpc_duration_seconds_sum": 0.380296656,
+            "pegaflow_rpc_duration_seconds_count": 907.0,
+            "pegaflow_rpc_requests_total": 907.0,
+            "pegaflow_save_bytes_total": 40012283904.0,
+            "pegaflow_save_duration_seconds_bucket": 13271.0,
+            "pegaflow_save_duration_seconds_sum": 9.137493632000012,
+            "pegaflow_save_duration_seconds_count": 812.0,
+            "target_info": 1.0
+          },
+          "explicit_counter_deltas": {
+            "deltas": {
+              "pegaflow_cache_block_evictions_total": null,
+              "pegaflow_cache_block_hits_total": 0.0,
+              "pegaflow_cache_block_insertions_total": 640.0,
+              "pegaflow_cache_block_misses_total": 196.0,
+              "pegaflow_cache_eviction_reclaimed_bytes_total": null,
+              "pegaflow_cache_tier_block_requests_total": 196.0,
+              "pegaflow_object_age_seconds_bucket": null,
+              "pegaflow_object_age_seconds_count": null,
+              "pegaflow_object_age_seconds_sum": null,
+              "pegaflow_object_lifecycle_total": 2480.0,
+              "pegaflow_rpc_duration_seconds_bucket": 5694.0,
+              "pegaflow_rpc_duration_seconds_count": 438.0,
+              "pegaflow_rpc_duration_seconds_sum": 0.009216092000000009,
+              "pegaflow_rpc_requests_total": 438.0,
+              "pegaflow_save_bytes_total": 18717999104.0,
+              "pegaflow_save_duration_seconds_bucket": 6439.0,
+              "pegaflow_save_duration_seconds_count": 390.0,
+              "pegaflow_save_duration_seconds_sum": 3.6730714040000088
+            },
+            "missing": [
+              "pegaflow_cache_block_evictions_total",
+              "pegaflow_cache_eviction_reclaimed_bytes_total",
+              "pegaflow_object_age_seconds_bucket",
+              "pegaflow_object_age_seconds_count",
+              "pegaflow_object_age_seconds_sum"
+            ],
+            "counter_reset_seen": false
+          },
+          "gauge_names": [
+            "pegaflow_cache_resident_bytes",
+            "pegaflow_hll_cardinality",
+            "pegaflow_hll_total_requests",
+            "pegaflow_inflight_bytes",
+            "pegaflow_object_resident_bytes",
+            "pegaflow_pool_capacity_bytes",
+            "pegaflow_pool_used_bytes",
+            "target_info"
+          ],
+          "lazy_counters_absent_before": [
+            "pegaflow_cache_block_evictions_total",
+            "pegaflow_cache_eviction_reclaimed_bytes_total",
+            "pegaflow_object_age_seconds_bucket",
+            "pegaflow_object_age_seconds_sum",
+            "pegaflow_object_age_seconds_count"
+          ],
+          "scope": "Counter deltas and gauge snapshots are distinct; gauge decreases are not counter resets. Missing metrics are unknown. Lazy sidecar positive activation is distinct from strict engine zero-restore proof; do not infer absent counters to zero."
+        }
+      }
+    ],
+    "qualification_actual_activation": {
+      "engine_counter_deltas": {
+        "vllm:pega_load_success_total": 0.0,
+        "vllm:pega_load_failure_total": 0.0,
+        "vllm:pega_save_success_total": 2476.0,
+        "vllm:pega_save_failure_total": 0.0
+      },
+      "sidecar_save_bytes": 116256702464.0,
+      "sidecar_lazy_save_counters_absent_before": [
+        "pegaflow_save_bytes_total"
+      ],
+      "actual_storage_save_activated": true,
+      "restore_successes": 0.0,
+      "failures": 0.0,
+      "scope": "Actual cold storage-save path activation only. Fresh salts require zero restores; no cache-restore performance benefit established."
+    },
+    "qualification_activation_sha256": "92b4cab8ee11e135eec1249808d3c5b66d17d949a83cb5fc3019a2f5c2bb8f38",
+    "benefit_scope": "Actual save/restore/failure/byte observations only. Zero successful restores do not establish an offload-cache benefit, regardless of numeric throughput sign. Native retains its own prefix-cache proof; no fabricated Bid0policy or internal-only assumption.",
+    "declared_host_pool": {
+      "argument": "30gb",
+      "declared_plan_gib": 30,
+      "verified_capacity_bytes": 32212254720.0,
+      "actual_capacity_gauge_observations": [
+        32212254720.0,
+        32212254720.0,
+        32212254720.0,
+        32212254720.0,
+        32212254720.0,
+        32212254720.0,
+        32212254720.0,
+        32212254720.0,
+        32212254720.0,
+        32212254720.0
+      ],
+      "residency_metrics": [
+        "pegaflow_pool_used_bytes",
+        "pegaflow_cache_resident_bytes",
+        "pegaflow_inflight_bytes"
+      ],
+      "scope": "Actual capacity gauge verifies reservation separately from cache residency and total host memory/RSS. Missing is unknown. Do not infer exclusive MOD incremental memory from total container samples."
+    }
+  },
+  "separate_c8": {
+    "schema": "pegaflow-default-true-c8-paired-summary/v1",
+    "source_manifest_sha256": "8e4ef4748eafd8ad0cdc6fd0c1d82df471576357cca2333ce1abc4abe168c34e",
+    "native_requests": 343,
+    "pegaflow_requests": 341,
+    "failed": 0,
+    "all_records_independently_replayed": true,
+    "phases": [
+      {
+        "phase": "4096-warmup",
+        "native_requests": 16,
+        "native_failures": 0,
+        "native_window_tokens_per_second": 65.00399805455747,
+        "native_phase_elapsed_seconds_including_drain": 63.01150886999676,
+        "native_drain_seconds": 3.01150886999676,
+        "native_ttft_mean_seconds": 22.93846791418855,
+        "native_tpot_mean_seconds": 0.03287186487769384,
+        "pegaflow_requests": 16,
+        "pegaflow_failures": 0,
+        "pegaflow_window_tokens_per_second": 65.64205906268819,
+        "pegaflow_phase_elapsed_seconds_including_drain": 62.39901761899819,
+        "pegaflow_drain_seconds": 2.3990176189981867,
+        "pegaflow_ttft_mean_seconds": 22.670774087187965,
+        "pegaflow_tpot_mean_seconds": 0.03283417246714759,
+        "throughput_change_percent": 0.9815719451520488
+      },
+      {
+        "phase": "4096-formal",
+        "native_requests": 231,
+        "native_failures": 0,
+        "native_window_tokens_per_second": 194.7915418774593,
+        "native_phase_elapsed_seconds_including_drain": 303.5860768390121,
+        "native_drain_seconds": 3.586076839012094,
+        "native_ttft_mean_seconds": 1.5604510074282303,
+        "native_tpot_mean_seconds": 0.03493318805147139,
+        "pegaflow_requests": 231,
+        "pegaflow_failures": 0,
+        "pegaflow_window_tokens_per_second": 195.06065030537712,
+        "pegaflow_phase_elapsed_seconds_including_drain": 303.16724519999116,
+        "pegaflow_drain_seconds": 3.1672451999911573,
+        "pegaflow_ttft_mean_seconds": 1.538737439004668,
+        "pegaflow_tpot_mean_seconds": 0.03499837160421072,
+        "throughput_change_percent": 0.13815200871869493
+      },
+      {
+        "phase": "16384-warmup",
+        "native_requests": 16,
+        "native_failures": 0,
+        "native_window_tokens_per_second": 61.53234759067382,
+        "native_phase_elapsed_seconds_including_drain": 66.56661350298964,
+        "native_drain_seconds": 6.5666135029896395,
+        "native_ttft_mean_seconds": 12.228858137499628,
+        "native_tpot_mean_seconds": 0.08074541745514652,
+        "pegaflow_requests": 16,
+        "pegaflow_failures": 0,
+        "pegaflow_window_tokens_per_second": 62.908959223686374,
+        "pegaflow_phase_elapsed_seconds_including_drain": 65.1099628820084,
+        "pegaflow_drain_seconds": 5.1099628820084035,
+        "pegaflow_ttft_mean_seconds": 12.701073338249444,
+        "pegaflow_tpot_mean_seconds": 0.07584509074681324,
+        "throughput_change_percent": 2.2372161747672425
+      },
+      {
+        "phase": "16384-formal",
+        "native_requests": 80,
+        "native_failures": 0,
+        "native_window_tokens_per_second": 66.41050991777034,
+        "native_phase_elapsed_seconds_including_drain": 308.3849231899949,
+        "native_drain_seconds": 8.384923189994879,
+        "native_ttft_mean_seconds": 6.131142510610516,
+        "native_tpot_mean_seconds": 0.09607981915784358,
+        "pegaflow_requests": 78,
+        "pegaflow_failures": 0,
+        "pegaflow_window_tokens_per_second": 65.28350593829644,
+        "pegaflow_phase_elapsed_seconds_including_drain": 305.8659260560089,
+        "pegaflow_drain_seconds": 5.865926056008902,
+        "pegaflow_ttft_mean_seconds": 6.411773700821915,
+        "pegaflow_tpot_mean_seconds": 0.09714970042025547,
+        "throughput_change_percent": -1.6970265412347474
+      }
+    ],
+    "pega_actual_storage_activation": {
+      "engine_counter_deltas": {
+        "vllm:pega_load_success_total": 0.0,
+        "vllm:pega_load_failure_total": 0.0,
+        "vllm:pega_save_success_total": 2476.0,
+        "vllm:pega_save_failure_total": 0.0
+      },
+      "sidecar_save_bytes": 116256702464.0,
+      "sidecar_lazy_save_counters_absent_before": [
+        "pegaflow_save_bytes_total"
+      ],
+      "actual_storage_save_activated": true,
+      "restore_successes": 0.0,
+      "failures": 0.0,
+      "scope": "Actual cold storage-save path activation only. Fresh salts require zero restores; no cache-restore performance benefit established."
+    },
+    "comparison_scope": "Original60/300s submission windows with all requests drained; numerator includes drain tokens and denominator is actual phase end-start. Fixed256/ignoreEOS separate from five EOS metrics. Zero restores establishes no offload benefit; no Bid policy fields."
+  },
+  "controlled_audit": {
+    "all2064_formal_records_raw_sse_verified": true,
+    "original_formal_manifest_files_verified": 4585,
+    "original_inventory_files": 6419,
+    "original_inventory_unchanged": true,
+    "all_four_original_quality_summaries_byte_identical": true,
+    "raw_main_source_manifest_sha256": "8e4ef4748eafd8ad0cdc6fd0c1d82df471576357cca2333ce1abc4abe168c34e",
+    "formal_reencoded_source_manifest_sha256": "6d563ea9af874dae6e6248cc51155809878e352d029c069c446d6857ec133541",
+    "main_manifest_json_values_equal": true,
+    "analysis_source_manifest_sha256": "782cecbbaac0757f388ece22f335dcceefb19bfb83345f79a1fa27ffbaa8b408",
+    "extra_image_diagnostic_raw_sse_verified": 4
+  },
+  "unmeasured_costs": {
+    "currency": null,
+    "effective_FLOPs": null,
+    "isolated_MOD_peak_host_memory_increment": null,
+    "isolated_MOD_peak_HBM_increment": null
+  },
+  "limits": [
+    "One ordered cohort, Native all five before Candidate all five; no randomized interleaving or independent repeats.",
+    "Native shared judge uses the same model and original frozen grader contracts; unresolved and truncated grades remain denominators.",
+    "Zero KV restores is required by fresh salts and proves no cache-reuse benefit on this standard workload.",
+    "Observed performance changes cannot identify the fraction caused by save overhead, scheduling, output-length variation or time drift.",
+    "No tuning, forced prefix reuse, cross-node tests or rerun was performed during closeout."
+  ]
+}

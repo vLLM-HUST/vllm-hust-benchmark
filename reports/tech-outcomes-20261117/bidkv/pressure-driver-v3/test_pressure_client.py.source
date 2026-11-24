@@ -1,0 +1,149 @@
+"""CPU HTTP/identity/cache-scope checks; these are never NPU results."""
+
+import json
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+import sys
+import threading
+from types import SimpleNamespace
+
+import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pressure_client
+from pressure_transport import call
+
+
+class Handler(BaseHTTPRequestHandler):
+    mismatch = False
+
+    def do_POST(self):
+        self.rfile.read(int(self.headers["Content-Length"]))
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.end_headers()
+        events = [
+            {
+                "id": "chatcmpl-fixed-id",
+                "choices": [{"delta": {"content": "A"}, "finish_reason": None}],
+            },
+            {
+                "id": "chatcmpl-other" if self.mismatch else "chatcmpl-fixed-id",
+                "choices": [{"delta": {}, "finish_reason": "length"}],
+                "usage": {
+                    "prompt_tokens": 16407,
+                    "completion_tokens": 4096,
+                    "prompt_tokens_details": {"cached_tokens": 16384},
+                },
+            },
+        ]
+        for event in events:
+            self.wfile.write(("data: " + json.dumps(event) + "\n\n").encode())
+        self.wfile.write(b"data: [DONE]\n\n")
+        self.wfile.flush()
+
+    def log_message(self, *_args):
+        pass
+
+
+@pytest.fixture
+def server():
+    Handler.mismatch = False
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    yield {"base_url": f"http://127.0.0.1:{server.server_address[1]}", "timeout": 5}
+    server.shutdown()
+    thread.join()
+    server.server_close()
+
+
+def body():
+    return {
+        "model": "fixture",
+        "messages": [],
+        "stream": True,
+        "stream_options": {"include_usage": True},
+        "max_tokens": 4096,
+        "ignore_eos": True,
+        "cache_salt": "fixture-fresh",
+        "request_id": "fixed-id",
+    }
+
+
+def test_supplemental_retains_consistent_wire_id_and_positive_local_resume_usage(
+    server, tmp_path
+):
+    value = call(server, body(), tmp_path, fixed_length=True, require_zero_reuse=False)
+    assert value["status"] == "ok" and value["server_request_id"] == "chatcmpl-fixed-id"
+    assert value["cached_tokens_reported"] == 16384
+
+
+def test_default_strict_mode_remains_strict_and_mixed_wire_ids_fail(server, tmp_path):
+    assert (
+        call(server, body(), tmp_path / "strict", fixed_length=True)["status"] != "ok"
+    )
+    Handler.mismatch = True
+    value = call(
+        server,
+        body(),
+        tmp_path / "mismatch",
+        fixed_length=True,
+        require_zero_reuse=False,
+    )
+    assert value["status"] != "ok" and "identity" in value["error"]
+    assert Path(value["stream_capture"]).exists()
+
+
+def test_all16_fixed_ids_unique_and_missing_release_cannot_generate(
+    tmp_path, monkeypatch
+):
+    ids = [
+        pressure_client.salt_identity(arm, repeat, lane)
+        for arm in ["native", "bidkv"]
+        for repeat in [1]
+        for lane in range(8)
+    ]
+    assert len(set(ids)) == 16 and {len(value) for value in ids} == {32}
+    monkeypatch.setattr(pressure_client, "PROBE", tmp_path)
+    monkeypatch.setattr(
+        pressure_client,
+        "call",
+        lambda *_a, **_k: pytest.fail("No HTTP before publicrelease"),
+    )
+    with pytest.raises(FileNotFoundError):
+        pressure_client.run(SimpleNamespace(arm="bidkv", repeat=1))
+    assert not (tmp_path / "batches").exists()
+
+
+def test_local_prefix_counter_may_increase_but_external_restore_must_stay_zero():
+    before = "vllm:prefix_cache_hits_total 0\nvllm:external_prefix_cache_hits_total 0\nvllm:num_preemptions_total 0\n"
+    after = "vllm:prefix_cache_hits_total 16384\nvllm:external_prefix_cache_hits_total 0\nvllm:num_preemptions_total 1\n"
+    value = pressure_client.metrics_delta(before, after)
+    assert value["counter_deltas"]["vllm:prefix_cache_hits_total"] == 16384
+    assert value["external_restore_zero"] is True
+    with pytest.raises(AssertionError, match="External"):
+        pressure_client.metrics_delta(
+            before,
+            after.replace(
+                "external_prefix_cache_hits_total 0",
+                "external_prefix_cache_hits_total 1",
+            ),
+        )
+
+
+def test_exact_internal_id_mapping_rejects_foreign_malformed_or_duplicate_bases():
+    wire = "chatcmpl-" + pressure_client.salt_identity("bidkv", 1, 0)
+    assert pressure_client.bind_internal_ids({wire + "-a0b1c2d3"}, "bidkv") == {
+        wire: wire + "-a0b1c2d3"
+    }
+    for ids in [
+        {wire},
+        {wire + "-ABCDEF12"},
+        {wire + "-1234567"},
+        {wire + "-123456789"},
+        {"foreign-12345678"},
+        {wire + "-12345678", wire + "-12345679"},
+    ]:
+        with pytest.raises(AssertionError):
+            pressure_client.bind_internal_ids(ids, "bidkv")

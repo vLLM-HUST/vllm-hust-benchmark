@@ -1,0 +1,156 @@
+{
+  "observed_at": "2026-11-14T17:04:15.243942+00:00",
+  "completed_at_china": "2026-11-14T22:16:12.647159+08:00",
+  "run_id": "five-datasets-r6-matched-20261114-r3",
+  "execution_complete": true,
+  "new_inference_stages": 5,
+  "reused_stages": 10,
+  "checked_files": 12392,
+  "sealed_roots_verified": [
+    "five-datasets-r6-matched-20261114-r3",
+    "five-datasets-r5-matched-20261113-r5",
+    "five-datasets-r6-matched-20261113-r1",
+    "five-datasets-r6-matched-20261114-r2"
+  ],
+  "publication_source_files_verified": 8,
+  "all_checks_passed": true,
+  "performance": [
+    {
+      "dataset": "mmlu",
+      "requests_per_arm": 200,
+      "throughput_ratio": 1.9982992921356268,
+      "ttft_reduction_percent": 50.94241736350036,
+      "tpot_reduction_percent": 49.17591987313084
+    },
+    {
+      "dataset": "hle",
+      "requests_per_arm": 200,
+      "throughput_ratio": 1.577120782355068,
+      "ttft_reduction_percent": 46.101450810400436,
+      "tpot_reduction_percent": 34.51412126863638
+    },
+    {
+      "dataset": "frontier",
+      "requests_per_arm": 160,
+      "throughput_ratio": 2.309131475430005,
+      "ttft_reduction_percent": 62.12116919227243,
+      "tpot_reduction_percent": 54.7097628721982
+    },
+    {
+      "dataset": "swe",
+      "requests_per_arm": 64,
+      "throughput_ratio": 2.1093810956330343,
+      "ttft_reduction_percent": 39.308825864443605,
+      "tpot_reduction_percent": 58.13238645561374
+    },
+    {
+      "dataset": "terminal",
+      "requests_per_arm": 48,
+      "throughput_ratio": 2.3749917471221442,
+      "ttft_reduction_percent": 50.72986539706239,
+      "tpot_reduction_percent": 56.67145196087584
+    }
+  ],
+  "quality": {
+    "mmlu": {
+      "B0": {
+        "planned_denominator": 200,
+        "correct": 143,
+        "truncated_recorded": 20
+      },
+      "B1": {
+        "planned_denominator": 200,
+        "correct": 147,
+        "truncated_recorded": 15
+      }
+    },
+    "hle": {
+      "B0": {
+        "total": 200,
+        "successes": 54,
+        "graded": 197,
+        "solver_truncated": 131,
+        "unresolved": 3
+      },
+      "B1": {
+        "total": 200,
+        "successes": 49,
+        "graded": 198,
+        "solver_truncated": 126,
+        "unresolved": 2
+      }
+    },
+    "frontier": {
+      "B0": {
+        "total": 160,
+        "successes": 70,
+        "graded": 156,
+        "solver_truncated": 39,
+        "unresolved": 4
+      },
+      "B1": {
+        "total": 160,
+        "successes": 63,
+        "graded": 152,
+        "solver_truncated": 35,
+        "unresolved": 8
+      }
+    }
+  },
+  "serving_error_lines_before_shutdown": 0,
+  "post_shutdown_error_stages": [
+    "frontier-solver-B1",
+    "frontier-judge-B1",
+    "hle-solver-B1",
+    "hle-judge-B0",
+    "terminal-trace-B1",
+    "mmlu-B1"
+  ],
+  "milestone_targets": {
+    "3.4.1": {
+      "accepted": false,
+      "status": "current_workload_reference_not_measured",
+      "display_value": "本轮未验证；归档工况另列"
+    },
+    "3.4.2": {
+      "accepted": true,
+      "status": "单一固定数据集达标",
+      "display_value": "达标：mmlu, hle, frontier, swe, terminal"
+    },
+    "3.4.3": {
+      "accepted": false,
+      "status": "固定五项执行完成；16K稳定性结论待复核",
+      "display_value": "Executed; 16K assessment open"
+    },
+    "3.4.4": {
+      "accepted": true,
+      "status": "单一固定数据集达标",
+      "display_value": "达标：mmlu, hle, frontier, swe, terminal"
+    }
+  },
+  "final_targets": {
+    "3.4.1": {
+      "attainment": "not_demonstrated",
+      "requirement": "同工况参考效率 ≥90%",
+      "evidence_summary": "历史out256保守下界 ≥59.76%"
+    },
+    "3.4.2": {
+      "attainment": "demonstrated",
+      "requirement": "单一固定数据集：吞吐 ≥2×；平均TTFT/TPOT分别降低 ≥20%",
+      "evidence_summary": "符合全部数值门槛的固定数据集：frontier, swe, terminal"
+    },
+    "3.4.3": {
+      "attainment": "not_demonstrated",
+      "requirement": "≥32K：吞吐平稳，TTFT/TPOT P95/P99稳定、无明显退化",
+      "evidence_summary": "本轮独立C8仅4K/16K；无可验收32K连续窗口"
+    },
+    "3.4.4": {
+      "attainment": "not_demonstrated",
+      "requirement": "单位token成本降低 ≥30%；多租户场景维持较高利用率",
+      "evidence_summary": "各项同费率估算降幅单列；多租户证据未完成"
+    }
+  },
+  "formal_acceptance_complete": false,
+  "source_report_sha256": "8173587f10ff88b77839e6ae6648c16ef4a9abecbe3204639755759d50e921d2",
+  "no_inference_rerun": true
+}

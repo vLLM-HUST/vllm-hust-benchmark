@@ -1,0 +1,99 @@
+{
+  "schema": "v15-stability-outline-excerpt/v1",
+  "source_document_version": "V1.5",
+  "source_document_sha256": "08196093d69c655bbae39f902a77ed89b2aaba71237adabe13f9122e8769a1ca",
+  "received_excerpt_sha256": "a7739eda0ef110afde2ea3c63b1b068d50bbb3876b36748f154e0752619299cc",
+  "scope": "Selected unchanged paragraphs from the previously received V1.5 extraction, not a new independent verification of the DOCX binary. Paragraph indices are zero-based.",
+  "paragraphs": [
+    {
+      "kind": "paragraph",
+      "body_index": 347,
+      "paragraph_index": 331,
+      "text": "3.4.3 数据集运行稳定性"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 348,
+      "paragraph_index": 332,
+      "text": "指标内容"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 349,
+      "paragraph_index": 333,
+      "text": "上下文在国产芯片上实现16K上下文下的稳定推理：整体吞吐与4K场景处于同一量级，P95/P99 TTFT/TPOT无异常陡升(具体场景与主责单位沟通确定）"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 350,
+      "paragraph_index": 334,
+      "text": "测试准备"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 351,
+      "paragraph_index": 335,
+      "text": "在五项指定数据集的既定版本、任务清单及部署配置下开展稳定性核查，使用正常评测产生的请求、输出及服务记录。"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 352,
+      "paragraph_index": 336,
+      "text": "执行步骤"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 353,
+      "paragraph_index": 337,
+      "text": "（1）复核各数据集已有运行记录的配置、任务完成情况及日志完整性。需补充的测量随对应任务执行，记录运行起止时间、输入及输出token数和总上下文长度。"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 354,
+      "paragraph_index": 338,
+      "text": "（2）核对逐请求结束原因、输出预算、输出记录及服务日志，检查OOM、死锁、非预期服务退出或静默截断，记录发生时点、受影响任务及复核结果。"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 355,
+      "paragraph_index": 339,
+      "text": "（3）按单请求实际上下文长度识别达到16K及以上的运行区间，按既定窗口统计吞吐、TTFT和TPOT的P95/P99及样本数，结合负载与服务日志复核波动。符合相同口径的32K记录可复用。"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 356,
+      "paragraph_index": 340,
+      "text": "方法与度量"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 357,
+      "paragraph_index": 341,
+      "text": "按数据集汇总任务完成及异常情况。上下文长度按实际分词器逐请求统计；窗口吞吐为成功输出token数除以窗口秒数。P95/P99按3.4.2节定义的逐请求TTFT、TPOT计算，采用相同分位数算法，保留窗口、负载配置及样本数，分别报告连续运行区间。"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 358,
+      "paragraph_index": 342,
+      "text": "判定条件"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 359,
+      "paragraph_index": 343,
+      "text": "五项数据集既定任务范围内，无OOM、死锁、非预期服务退出或静默截断。长上下文结论以实际覆盖16K及以上的连续记录为依据，结合可比负载及正常推理波次，核验吞吐与TTFT/TPOT的P95/P99无持续性退化或异常抬升。"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 360,
+      "paragraph_index": 344,
+      "text": "测试记录"
+    },
+    {
+      "kind": "paragraph",
+      "body_index": 361,
+      "paragraph_index": 345,
+      "text": "各数据集任务完成与异常汇总、请求结束状态及输出、上下文长度统计、服务日志和监控、实际覆盖16K及以上上下文区间的连续记录、分窗口统计及曲线。"
+    }
+  ]
+}

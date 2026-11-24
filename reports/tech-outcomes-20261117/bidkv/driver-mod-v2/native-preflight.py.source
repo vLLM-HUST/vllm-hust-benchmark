@@ -1,0 +1,151 @@
+"""Load the isolated native arm and admit frozen tokens before any generation."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import time
+import traceback
+import urllib.request
+from observation import Sampler
+
+ROOT=Path('/workspace/bidkv-five-datasets-20261113-01')
+FOLDER=ROOT/'durable/preflight/native-03'
+FOLDER.mkdir(parents=True,exist_ok=False,mode=0o700)
+INPUT=ROOT/'durable/controlled/initial-inputs-01'
+MODEL=Path('/data/shared_models/Qwen3.5-35B-A3B')
+PYTHON=str(ROOT/'.venv/bin/python')
+SOURCE=ROOT/'sources/bidkv-compat-02'
+STATE={'phase':'preflight-started','pid':os.getpid(),'started_unix':time.time(),'generation_requests':0,'physical_npus':[6,7],'logical_npus':[0,1]}
+SERVICE=None
+SAMPLER=None
+
+def save():
+    temporary=FOLDER/'status.tmp'
+    temporary.write_text(json.dumps(STATE,indent=2)+'\n');temporary.replace(FOLDER/'status.json')
+
+def get(path):
+    with urllib.request.urlopen('http://127.0.0.1:18390'+path,timeout=5)as response:return response.read()
+
+def npu():
+    return subprocess.check_output(['npu-smi','info'],text=True,timeout=20)
+
+def stop():
+    if SERVICE is None:return
+    if SERVICE.poll()is None:
+        os.killpg(SERVICE.pid,signal.SIGTERM)
+        try:SERVICE.wait(timeout=120)
+        except subprocess.TimeoutExpired:os.killpg(SERVICE.pid,signal.SIGKILL);SERVICE.wait(timeout=30)
+    (FOLDER/'npu-release.txt').write_text(npu())
+    (FOLDER/'stop.json').write_text(json.dumps({'exit_code':SERVICE.returncode,'stopped_unix':time.time()},indent=2))
+
+def post(body):
+    request=urllib.request.Request('http://127.0.0.1:18390/tokenize',json.dumps(body).encode(),{'Content-Type':'application/json'})
+    with urllib.request.urlopen(request,timeout=60)as response:return json.load(response)
+
+def binding_evidence():
+    sample=npu()
+    records=[]
+    for line in sample.splitlines():
+        cells=[value.strip()for value in line.split('|')[1:-1]]
+        if len(cells)!=5 or not cells[-1].isdigit():continue
+        device=cells[0].split()
+        if len(device)!=2 or not all(value.isdigit()for value in device):continue
+        pid=int(cells[-1]);process=Path(f'/proc/{pid}')
+        if not process.exists():continue
+        tasks=[]
+        for task in sorted((process/'task').iterdir(),key=lambda item:int(item.name)):
+            try:
+                status=task.joinpath('status').read_text()
+                selected={row.split(':',1)[0]:row.split(':',1)[1].strip()for row in status.splitlines()if row.startswith(('Name:','Cpus_allowed_list:','Mems_allowed_list:'))}
+                tasks.append({'tid':int(task.name),'status':selected})
+            except FileNotFoundError:pass
+        records.append({'physical_npu':int(device[0]),'container_pid':pid,'process_name':cells[2],'affinity':sorted(os.sched_getaffinity(pid)),'threads':tasks})
+    text=(FOLDER/'service.log').read_text(errors='replace')
+    lines=[line for line in text.splitlines()if any(key in line.lower()for key in['cpu_bind','bind cpu','migratepages','[irq]','acl=','release='])]
+    report={'requested_default_enable_cpu_binding':True,'captured_unix':time.time(),'model_generation_requests':0,
+            'worker_and_thread_affinity':records,'preflight_affinity':sorted(os.sched_getaffinity(0)),
+            'cpuset_effective':Path('/sys/fs/cgroup/cpuset.cpus.effective').read_text().strip(),
+            'cpu_max':Path('/sys/fs/cgroup/cpu.max').read_text().strip(),'npu_smi':sample,
+            'binding_log_lines':lines,'warning_or_skip_seen':any(('bind cpus failed'in line.lower()or'cpu binding skipped'in line.lower()or'insufficient cpus'in line.lower())for line in lines),
+            'scope':'Read-only observation of the default runtime attempt. No host IRQ/systemctl/migration command was issued manually.'}
+    (FOLDER/'binding-evidence.json').write_text(json.dumps(report,indent=2)+'\n')
+    return report
+
+
+def cancel_preflight(signum,frame):
+    raise KeyboardInterrupt('Owned zero-generation preflight cancelled by signal '+str(signum))
+signal.signal(signal.SIGTERM,cancel_preflight)
+
+try:
+    os.umask(0o077);save()
+    admission=json.loads((ROOT/'runtime/official023/source-admission.json').read_bytes())
+    assert admission['scheduler_prepared_sha256']=='ae12773bc25b42149d4aa5c84c0797dcf12a0b60c045a7e85ca3c974bc47915c'
+    assert json.loads((ROOT/'model-hash-status.json').read_bytes())['all_weights_match']
+    assert json.loads((ROOT/'durable/metadata/cpu-check-status.json').read_bytes())['phase']=='sdk-cpu-qualified-only'
+    assert npu().count('No running processes found in NPU')==2
+    (FOLDER/'npu-admission.txt').write_text(npu())
+    environment=dict(os.environ)
+    environment.update({'PYTHONPATH':str(ROOT/'runtime/official023')+':'+str(SOURCE/'src')+':'+os.environ.get('PYTHONPATH',''),'PYTHONDONTWRITEBYTECODE':'1','PYTHONUNBUFFERED':'1','HF_HUB_OFFLINE':'1','VLLM_WORKER_MULTIPROC_METHOD':'spawn','OMP_NUM_THREADS':'2','MKL_NUM_THREADS':'2','TOKENIZERS_PARALLELISM':'false','TMPDIR':'/workspace/bf81n03-t','VLLM_RPC_BASE_PATH':'/workspace/bf81n03-r','VLLM_CACHE_ROOT':str(ROOT/'cache/native03/vllm'),'TRITON_CACHE_DIR':str(ROOT/'cache/native03/triton'),'TORCHINDUCTOR_CACHE_DIR':str(ROOT/'cache/native03/inductor'),'ASCEND_CACHE_PATH':str(ROOT/'cache/native03/ascend')})
+    for name in['TMPDIR','VLLM_RPC_BASE_PATH']:Path(environment[name]).mkdir(exist_ok=False,mode=0o700)
+    additional={'enable_cpu_binding':True,'bidkv_official023':{'policy':None,'evidence_dir':str(FOLDER/'policy')}}
+    argv=[PYTHON,'-m','vllm.entrypoints.cli.main','serve',str(MODEL),'--host','127.0.0.1','--port','18390','--served-model-name','qwen3.5-35b','--tensor-parallel-size','2','--pipeline-parallel-size','1','--distributed-executor-backend','mp','--dtype','bfloat16','--max-model-len','65536','--max-num-seqs','16','--max-num-batched-tokens','4096','--kv-cache-memory-bytes',str(16*1024**3),'--gpu-memory-utilization','0.95','--seed','17','--enable-prefix-caching','--mamba-cache-mode','align','--async-scheduling','--enable-prompt-tokens-details','--speculative-config',json.dumps({'method':'mtp','num_speculative_tokens':2}),'--compilation-config',json.dumps({'cudagraph_mode':'FULL_AND_PIECEWISE','cudagraph_capture_sizes':[3,6,12,24,48],'max_cudagraph_capture_size':48}),'--generation-config','vllm','--override-generation-config',json.dumps({'temperature':0.0,'top_p':1.0,'top_k':-1}),'--default-chat-template-kwargs',json.dumps({'enable_thinking':True}),'--limit-mm-per-prompt',json.dumps({'image':1,'video':0}),'--additional-config',json.dumps(additional),'--shutdown-timeout','60']
+    (FOLDER/'command.json').write_text(json.dumps({'argv':argv,'environment':{key:environment.get(key)for key in['PYTHONPATH','HF_HUB_OFFLINE','VLLM_WORKER_MULTIPROC_METHOD','OMP_NUM_THREADS','MKL_NUM_THREADS','TMPDIR','VLLM_RPC_BASE_PATH','VLLM_CACHE_ROOT','TRITON_CACHE_DIR','ASCEND_CACHE_PATH','ASCEND_RT_VISIBLE_DEVICES','LD_PRELOAD','LCCL_DETERMINISTIC']},'scope':'Model startup and input tokenization only; no generation until separate execution sources are sealed.'},indent=2))
+    assert hashlib.sha256((FOLDER/'command.json').read_bytes()).hexdigest()=='9bf189661c9fb5aa51faff2e365169daf5f050b8bce4ca43420fd1ca44bb41c3'
+    SAMPLER=Sampler(FOLDER);SAMPLER.__enter__()
+    log=(FOLDER/'service.log').open('ab',buffering=0)
+    SERVICE=subprocess.Popen(argv,cwd=ROOT,env=environment,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+    STATE.update(phase='starting-model',server_pid=SERVICE.pid,server_start_ticks=Path(f'/proc/{SERVICE.pid}/stat').read_text().split()[21]);save()
+    begin=time.monotonic();reclaims=[]
+    while True:
+        assert SERVICE.poll()is None,'Model process exited before health'
+        assert time.monotonic()-begin<1200,'Model health deadline exceeded'
+        stat={k:int(v)for k,v in(line.split()for line in Path('/sys/fs/cgroup/memory.stat').read_text().splitlines())}
+        if stat['file']>16*1024**3:
+            for item in json.loads((ROOT/'model-expected-weights.json').read_bytes()):
+                descriptor=os.open(MODEL/item['path'],os.O_RDONLY)
+                try:os.posix_fadvise(descriptor,0,0,os.POSIX_FADV_DONTNEED)
+                finally:os.close(descriptor)
+            reclaims.append({'elapsed':time.monotonic()-begin,'file_cache_before':stat['file'],'memory_current_after':Path('/sys/fs/cgroup/memory.current').read_text()})
+            (FOLDER/'startup-cache-advice.json').write_text(json.dumps(reclaims,indent=2))
+        try:get('/health');break
+        except Exception:pass
+        STATE.update(startup_seconds=round(time.monotonic()-begin,1));save();time.sleep(2)
+    ready=time.time()
+    SAMPLER.__exit__(None,None,None);SAMPLER=None
+    (FOLDER/'telemetry.jsonl').replace(FOLDER/'startup-telemetry.jsonl')
+    (FOLDER/'startup-cost.json').write_text(json.dumps({'process_started_unix':STATE['started_unix'],'healthy_unix':ready,'startup_seconds':time.monotonic()-begin,'sampling_interval_seconds':10,'model_generation_requests':0,'scope':'Model loading/graph compilation and default native CPU-binding initialization; solver windows are separate.'},indent=2)+'\n')
+    binding=binding_evidence()
+    STATE.update(phase='actual-token-id-admission',healthy_unix=ready,binding_warning_or_skip_seen=binding['warning_or_skip_seen']);save()
+    (FOLDER/'tokenize').mkdir()
+    checked=[]
+    def admit(identity,body,count,expected,compact):
+        value=post(body)
+        raw=json.dumps({'request':body,'response':value},ensure_ascii=False).encode()
+        (FOLDER/'tokenize'/(identity+'.json')).write_bytes(raw)
+        tokens=value['tokens'];assert value['count']==len(tokens)==count,identity
+        encoded=json.dumps(tokens,separators=(',',':'))if compact else json.dumps(tokens)
+        digest=hashlib.sha256(encoded.encode()).hexdigest();assert digest==expected,(identity,digest,expected)
+        checked.append({'case_id':identity,'tokens':count,'sha256':digest})
+        (FOLDER/'token-id-admission.json').write_text(json.dumps({'complete':False,'checked':checked,'generation_requests':0},indent=2))
+    for length,cases in json.loads((INPUT/'continuous-inputs-r1.json').read_bytes()).items():
+        for index,case in enumerate(cases):admit('c8-'+length+'-'+str(index),{'model':'qwen3.5-35b','messages':case['request']['messages'],'add_generation_prompt':True},case['input_tokens'],case['token_ids_sha256'],False)
+    for name in['swe','terminal']:
+        tasks=[json.loads(line)for line in(INPUT/name/'tasks.jsonl').read_text().splitlines()if line.strip()]
+        expected={item['case_id']:item for item in json.loads((INPUT/name/'offline-token-id-freeze.json').read_bytes())}
+        for task in tasks:
+            body={'model':'qwen3.5-35b','messages':task['source_body']['messages'],'tools':task['source_body'].get('tools'),'add_generation_prompt':True,'continue_final_message':False,'add_special_tokens':False,'chat_template_kwargs':{'enable_thinking':False}}
+            admit(task['case_id'],body,task['prompt_tokens'],expected[task['case_id']]['token_ids_sha256'],True)
+    (FOLDER/'token-id-admission.json').write_text(json.dumps({'complete':True,'checked':checked,'generation_requests':0},indent=2))
+    STATE.update(phase='tokens-admitted-awaiting-execution-sources',tokenizations_passed=len(checked),generation_requests=0);save()
+    deadline=time.monotonic()+3600
+    while not(FOLDER/'stop-requested').exists():
+        assert SERVICE.poll()is None,'Model process exited while awaiting execution sources'
+        assert time.monotonic()<deadline,'Preflight parking deadline exceeded'
+        time.sleep(2)
+    STATE.update(phase='stopping-owned-model');save();stop();STATE.update(phase='preflight-complete',completed_unix=time.time());save()
+except BaseException as error:
+    STATE.update(phase='failed',error=type(error).__name__+': '+str(error),failed_unix=time.time());save();traceback.print_exc();stop();
+    if SAMPLER is not None:SAMPLER.__exit__(None,None,None)
+    raise

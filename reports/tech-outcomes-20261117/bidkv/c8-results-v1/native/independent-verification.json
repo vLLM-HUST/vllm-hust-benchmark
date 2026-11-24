@@ -1,0 +1,67 @@
+{
+  "passed": true,
+  "phases": [
+    {
+      "name": "4096-warmup",
+      "requests": 16,
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 16,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 16
+      },
+      "all_sse_records_verified": true
+    },
+    {
+      "name": "4096-formal",
+      "requests": 230,
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 230,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 230
+      },
+      "all_sse_records_verified": true
+    },
+    {
+      "name": "16384-warmup",
+      "requests": 16,
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 16,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 16
+      },
+      "all_sse_records_verified": true
+    },
+    {
+      "name": "16384-formal",
+      "requests": 80,
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 80,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 80
+      },
+      "all_sse_records_verified": true
+    }
+  ],
+  "total_requests": 342,
+  "scope": "Original synthetic C8 protocol; no invented numeric latency/SLO threshold or five-dataset quality claim"
+}

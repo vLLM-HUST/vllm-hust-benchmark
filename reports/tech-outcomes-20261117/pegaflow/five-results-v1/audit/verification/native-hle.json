@@ -1,0 +1,44 @@
+{
+  "dataset": "hle",
+  "stage": "solver",
+  "planned": 200,
+  "recorded": 200,
+  "raw_sse_verified": 200,
+  "zero_reuse": {
+    "passed": true,
+    "prefix_hit_counter_deltas": {
+      "vllm:prefix_cache_hits_total": 0.0,
+      "vllm:external_prefix_cache_hits_total": 0.0
+    },
+    "unique_salts": 200,
+    "external_loads": "no external connector in this arm",
+    "null_cache_details": 200
+  },
+  "pega_cache_admission": {
+    "arm": "native",
+    "prefix": {
+      "deltas": {
+        "vllm:external_prefix_cache_hits_total": 0.0,
+        "vllm:prefix_cache_hits_total": 0.0
+      },
+      "missing": [],
+      "counter_reset_seen": false,
+      "required": [
+        "vllm:external_prefix_cache_hits_total",
+        "vllm:prefix_cache_hits_total"
+      ],
+      "passed": true
+    },
+    "prefix_counters_present": true,
+    "required_prefix_counter_names": [
+      "vllm:external_prefix_cache_hits_total",
+      "vllm:prefix_cache_hits_total"
+    ],
+    "external_connector_expected": false,
+    "engine_connector": null,
+    "passed": true,
+    "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+  },
+  "failed_records_retained": 0,
+  "metrics_recomputed": true
+}

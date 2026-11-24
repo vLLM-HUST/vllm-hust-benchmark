@@ -2,6 +2,54 @@
   "schema_version": "plugin-performance/v8",
   "entries": [
     {
+      "id": "muxpd",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/ca7ded1a8ff5f604daa49d52316f67784316fb0b/reports/tech-outcomes-20261117/muxpd/README.md",
+      "ecpa": {
+        "launch_acceptance": "not-reproduced-this-round",
+        "configuration_path": "not-evaluated",
+        "analysis_integration": "external-harness",
+        "note_en": "Archived wl38 source-entry measurements; not Manager or 0.2.0a1 wheel performance qualification.",
+        "note_zh": "归档 wl38 普通源码入口实测；不授予 Manager 或 0.2.0a1 安装包性能资格。"
+      },
+      "default_observation_id": "muxpd:wl38-2wiki-tp2",
+      "observations": [
+        {
+          "id": "muxpd:wl38-2wiki-tp2",
+          "kind": "published-comparisons",
+          "setting_label_en": "BF16 TP2+EP · wl38/2wiki-r1.6 · single-pass",
+          "setting_label_zh": "BF16 TP2+EP · wl38/2wiki-r1.6 · 单轮",
+          "aggregation_note_en": "161.68 → 199.37 token/s; one single-pass pair, including drain time; quality not evaluated. Separate TP results, not a five-concurrency aggregate.",
+          "aggregation_note_zh": "161.68 → 199.37 token/s；单轮配对，计时含排空；未评估答案质量。TP 分别报告，不是五并发点汇总。",
+          "comparisons": [
+            {
+              "metric": "output_tps",
+              "baseline": 161.67757962829,
+              "candidate": 199.3681436361015,
+              "model_label": "Qwen3.5-35B-A3B",
+              "scope": "TP2+EP BF16; wl38/wl-2wiki-r1.6 seed38; 229 requests/arm, 120 s Poisson arrivals at 1.6 req/s; output tokens / elapsed including drain; async FULL_DECODE_ONLY, APC off, max_num_seqs=16, max_num_batched_tokens=16384; MuxPD 43fcaf4, core d0f22d2, Ascend c182a9e; MuxPD-first single-pass, ignore_eos=true; quality not evaluated; full recipes differ; no general speedup or current-wheel qualification."
+            }
+          ]
+        },
+        {
+          "id": "muxpd:wl38-2wiki-tp4",
+          "kind": "published-comparisons",
+          "setting_label_en": "BF16 TP4+EP · wl38/2wiki-r1.6 · single-pass",
+          "setting_label_zh": "BF16 TP4+EP · wl38/2wiki-r1.6 · 单轮",
+          "aggregation_note_en": "174.51 → 187.42 token/s; one single-pass pair, including drain time; quality not evaluated. Separate TP results, not a five-concurrency aggregate.",
+          "aggregation_note_zh": "174.51 → 187.42 token/s；单轮配对，计时含排空；未评估答案质量。TP 分别报告，不是五并发点汇总。",
+          "comparisons": [
+            {
+              "metric": "output_tps",
+              "baseline": 174.51200120141849,
+              "candidate": 187.4227684996013,
+              "model_label": "Qwen3.5-35B-A3B",
+              "scope": "TP4+EP BF16; wl38/wl-2wiki-r1.6 seed38; 229 requests/arm, 120 s Poisson arrivals at 1.6 req/s; output tokens / elapsed including drain; async FULL_DECODE_ONLY, APC off, max_num_seqs=16, max_num_batched_tokens=16384; MuxPD 43fcaf4, core d0f22d2, Ascend c182a9e; MuxPD-first single-pass, ignore_eos=true; quality not evaluated; full recipes differ; no general speedup or current-wheel qualification."
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "adm",
       "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-ascend-distributed-metadata/snapshot/qualifications/qwen3moe-dp4-int64-word-20260928.json",
       "ecpa": {

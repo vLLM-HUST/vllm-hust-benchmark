@@ -1,0 +1,106 @@
+"""Read-only final judge/SSE and original quality audit; no HTTP or generation."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import time
+import traceback
+
+ROOT = Path('/workspace/bidkv-five-datasets-20261113-01')
+PERSIST = ROOT/'durable'
+RESULT = PERSIST/'results/five-datasets-mod-04'
+COMMON = Path('/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled')
+FOLDER = PERSIST/'analysis/full-mod04-final-audit01'
+PUBLIC = PERSIST/'analysis/bidkv81-five-results-v1'
+DRIVER = PERSIST/'sources/bidkv81-mod-v4'
+
+
+def main():
+    FOLDER.mkdir(parents=True, exist_ok=False, mode=0o700)
+    (FOLDER/'verification').mkdir()
+    state = {'phase': 'starting', 'pid': os.getpid(), 'started_unix': time.time(),
+             'source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+             'scope': 'Read-only CPU; original frozen SSE and grader, no model HTTP', 'children': []}
+
+    def save():
+        temporary = FOLDER/'status.tmp'
+        temporary.write_text(json.dumps(state, indent=2)+'\n')
+        temporary.replace(FOLDER/'status.json')
+
+    def invoke(name, command):
+        record = {'name': name, 'command': command, 'started_unix': time.time(), 'status': 'running'}
+        state['children'].append(record)
+        state['phase'] = name
+        save()
+        with (FOLDER/(name+'.log')).open('ab', buffering=0) as log:
+            child = subprocess.Popen(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
+                                     env={**os.environ, 'PYTHONDONTWRITEBYTECODE': '1'})
+            record['pid'] = child.pid
+            save()
+            code = child.wait()
+        record.update(actual_returncode=code, ended_unix=time.time(),
+                      status='completed' if code == 0 else 'failed')
+        save()
+        assert code == 0, 'Read-only audit failed, log retained: '+name
+
+    save()
+    try:
+        master = json.loads((PERSIST/'metadata/mod-v4-lifecycle.json').read_bytes())
+        assert master['phase'] == 'completed' and all(c['actual_returncode'] == 0 for c in master['children'])
+        checklist = json.loads((RESULT/'execution-checklist.json').read_bytes())
+        assert checklist['formal_complete'] and checklist['phase'] == 'completed'
+        solver_audit = PERSIST/'analysis/full-mod04-audit01'
+        old = json.loads((solver_audit/'status.json').read_bytes())
+        assert old['phase'] == 'completed' and old['audited_solver_requests'] == 1344
+        for path in (solver_audit/'verification').glob('*.json'):
+            shutil.copyfile(path, FOLDER/'verification'/path.name)
+        assert len(list((FOLDER/'verification').glob('*.json'))) == 10
+        python = str(ROOT/'.venv/bin/python')
+        for stage in checklist['stages']:
+            if stage['stage'] != 'judge':
+                continue
+            name, dataset, arm = stage['name'], stage['dataset'], stage['solver_arm']
+            invoke('audit-'+name, [python, '-B', str(Path(__file__).with_name('verify_finite_records.py')),
+                   '--driver', str(DRIVER), '--tools', str(COMMON/'reference-tools'),
+                   '--plan', str(COMMON/'plans'/dataset), '--root', str(RESULT/name),
+                   '--dataset', dataset, '--stage', 'judge', '--responses', str(RESULT/(arm+'-'+dataset)/'evaluation'),
+                   '--out', str(FOLDER/'verification'/(name+'.json'))])
+        state['quality_recomputation'] = []
+        for dataset in ['hle', 'frontier']:
+            for arm in ['native', 'bidkv']:
+                name = 'quality-'+arm+'-'+dataset
+                target = FOLDER/name
+                invoke('recompute-'+name, [python, '-B', str(DRIVER/'finite.py'), '--dataset', dataset,
+                       '--stage', 'quality', '--tools', str(COMMON/'reference-tools'),
+                       '--plan', str(COMMON/'plans'/dataset), '--out', str(target),
+                       '--responses', str(RESULT/(arm+'-'+dataset)/'evaluation'),
+                       '--grades', str(RESULT/('judge-'+arm+'-'+dataset)/'evaluation')])
+                actual = RESULT/name/'quality/summary.json'
+                recomputed = target/'quality/summary.json'
+                equal = actual.read_bytes() == recomputed.read_bytes()
+                state['quality_recomputation'].append({'name': name, 'original': str(actual),
+                    'original_sha256': hashlib.sha256(actual.read_bytes()).hexdigest(),
+                    'recomputed': str(recomputed), 'recomputed_sha256': hashlib.sha256(recomputed.read_bytes()).hexdigest(),
+                    'byte_identical': equal})
+                save()
+                assert equal, 'Original quality report differs from original-tool recomputation: '+name
+        invoke('numeric-export', [python, '-B', str(Path(__file__).with_name('export_bidkv_numeric.py')),
+               '--root', str(RESULT), '--out', str(PUBLIC), '--common', str(COMMON),
+               '--verification', str(FOLDER/'verification')])
+        state.update(phase='completed', completed_unix=time.time(), audited_solver_requests=1344,
+                     audited_judge_requests=720, public_output=str(PUBLIC))
+        save()
+        return 0
+    except BaseException as error:
+        state.update(phase='failed', failed_unix=time.time(), error=type(error).__name__+': '+str(error))
+        save()
+        traceback.print_exc()
+        return 2
+
+
+if __name__ == '__main__':
+    os.umask(0o077)
+    os.nice(10)
+    raise SystemExit(main())

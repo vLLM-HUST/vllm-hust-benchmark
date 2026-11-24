@@ -1,27 +1,32 @@
 # Agent Operating Constraints
 
+[AGENTS.md](AGENTS.md) is the repository entry point. This file specifies benchmark data custody and
+leaderboard admission. See the [shared workflow](AGENT_WORKFLOW.md) for project evaluation and
+cross-repository publication.
+
 ## Data navigation
 
-Before reading, adding, or editing data, use [DATA_INDEX.md](DATA_INDEX.md) and the generated
-[collection index](docs/data-index.json). Distinguish immutable originals, versioned analysis,
-contracts, publication sources, and synthetic fixtures. After adding/removing tracked data paths,
-regenerate the index with `python scripts/data_index.py --write` and validate with `--check`. An
-index entry is not experimental acceptance or permission to overwrite evidence or run devices. For
-website references and Release assets, use [linked entry points](docs/data-entrypoints.json) and
-`python scripts/data_entrypoints.py --query <term>`. Regenerate with `--write` after publication
-data changes; refresh remote snapshots explicitly as documented in DATA_INDEX.md. Offline CI does
-not prove that remote inventory or deployment is still current.
+Before accessing data, use [DATA_INDEX.md](DATA_INDEX.md) and the generated
+[collection index](docs/data-index.json). Classify immutable originals, versioned analysis,
+contracts, publication sources and synthetic fixtures. For website and Release references, use
+[linked entry points](docs/data-entrypoints.json) or
+`python scripts/data_entrypoints.py --query <term>`. Follow the refresh commands in
+[DATA_INDEX.md](DATA_INDEX.md) when changing indexed inputs.
+`python scripts/refresh_data_navigation.py --check` verifies the local generated navigation. Read
+the remote inventory and deployed site separately when the task requires current status.
 
 This repository is the source of truth for vllm-hust benchmark specs, raw submissions, leaderboard
 snapshots, and CI performance-gate inputs. Agents must preserve the distinction between public
-benchmark data and private/CI smoke tests. When in doubt, stop and ask for clarification instead of
-making a compatibility shortcut.
+benchmark data and private/CI smoke tests. Resolve routine choices from the current frozen contracts
+and the user's confirmed instructions. Ask a specific question only when missing information blocks
+the next necessary action, and continue independent authorized work. Never invent evidence or use a
+compatibility shortcut to hide a failed contract.
 
 ## Hardware Truth
 
-- The current active Ascend benchmark machines are **910B2**. Do not introduce new active/default
-  `910B3` specs, workflow defaults, submissions, or leaderboard records unless a real run artifact
-  explicitly proves the hardware was 910B3.
+- The active Ascend leaderboard target is **910B2**. Read the device mapping, accelerator and lease
+  from the actual run environment before launch. Introduce another hardware series only with
+  verified run evidence and the applicable spec.
 - Never infer `910B2` or `910B3` from a filename, directory name, branch name, PR title, old archive
   path, or screenshot. Hardware labels must come from actual run artifacts or a verified machine
   inventory.
@@ -45,8 +50,11 @@ making a compatibility shortcut.
 
 ## Benchmark Data Integrity
 
-- Do not fabricate, replay, simulate, or manually edit benchmark metrics to make leaderboard lines
-  look better. Submissions must come from real runs.
+- Do not fabricate metrics, publish simulated/reused timings as a new hardware run, or manually
+  improve leaderboard values. Submissions must come from real runs. CPU reconstruction from sealed
+  original streams is an audit, not a new measurement. Frozen public SWE/Terminal trace requests may
+  be submitted to a real engine under the trace inference contract; this does not measure full agent
+  task success. Preserve the original streams, planned denominator and each run identity.
 - Do not use `--enforce-eager` for formal leaderboard data, official baselines, historical PR
   backfills, or website-facing snapshots. Do not enable eager mode through wrapper flags,
   environment variables, empty same-spec fields, retry fallbacks, or generated argument lists. If
@@ -82,3 +90,39 @@ making a compatibility shortcut.
   intended path.
 - If you change a hardware label or precision, update documentation explaining why the new value is
   verified and where the evidence came from.
+
+## Release evaluation and publication
+
+Use the [shared workflow](AGENT_WORKFLOW.md) for the fixed five-profile full test, MMLU200 quick
+test, sealed-stage reuse, qualified 4.1 reference denominator, Release/MOD identity and website
+acceptance. Use the [evidence map](docs/topic4-evidence-map.md) to locate current project evidence.
+A project result enters the official leaderboard only if it independently satisfies that
+leaderboard's current spec and submission rules.
+
+## Archive ownership for new work
+
+Each agent that generates or collects new research data is responsible for archiving that data as
+part of its own task. The central historical-container recovery task does not continuously back up
+newly created files. Complete archiving at a stable stage boundary or task handoff; do not interrupt
+another chat to delegate this responsibility.
+
+- Archive actual file bytes, including raw records, failures and negative results, together with the
+  source scripts, configurations and inputs needed to reconstruct them. A reference, path list, URL
+  or index alone is not a data archive. Preserve original versions; corrections are new versions.
+- Route vLLM, ANISE, LUMI, LLMWorkloadSuite and PrefixCache Routing materials to
+  `vLLM-HUST/vllm-hust-benchmark`; route GenNova materials to `GenNova-HUST/gennova-benchmark`.
+  Follow the destination's existing privacy and publication rules; this reminder does not authorize
+  a new public release. Keep private keys and live credentials out of uploads, and retain the
+  existing protected-original handling where applicable.
+- Include source/version identities, original-to-restored path mappings, file counts, byte counts,
+  SHA256 manifests and a runnable recovery command. Check script and data dependencies, permissions,
+  links and required directories. List intentionally excluded runtimes or model weights and how to
+  provision them separately; do not describe unverified dependencies as recovered.
+- Download the uploaded artifacts again, verify archive and original-file hashes, and test recovery
+  into a fresh directory. Report the repository, immutable commit or Release asset, checksums,
+  recovery entry point, actual verification result and any remaining gaps in the task handoff.
+  Successful upload, an index entry or a passing CI job alone does not prove recoverability.
+- Only clean redundant local copies within the user's authorized scope after the remote bytes and
+  fresh recovery have been verified. Preserve unique originals, frozen historical evidence and
+  required local decryption identities. Archiving does not require rerunning experiments or taking
+  additional devices.

@@ -1,5 +1,17 @@
 # The publication index hashes bytes; keep text checkout bytes consistent.
+leaderboard-data/** -text
+docs/data-index.json text eol=lf
+docs/data-entrypoints.json text eol=lf
 website-publication/data/** text=auto eol=lf
 # Pinned upstream report snapshots are also verified by raw-byte SHA256.
 reports/gennova-mod-evidence-20261105/** text=auto eol=lf
 reports/ride-control-plane-20261106/** text=auto eol=lf
+
+# Frozen offline Tradeoff projection: preserve archive byte hashes, including CSV CRLF.
+website-publication/data/optimization-exploration-20261115-v1/** -text
+
+# Ascend-quant evidence: keep archived bytes verbatim (gzip/CSV/JSONL hashes).
+reports/tech-outcomes-20261117/ascend-quant/** -text
+
+# Preserve the byte-pinned legacy website archive and source inventory.
+archive/website-legacy-20261118/** -text

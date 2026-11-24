@@ -1,0 +1,232 @@
+"""MMLU8-specific numeric, policy and raw-wire evidence, with no inference calls."""
+
+import json
+import re
+from pathlib import Path
+
+from audit_common import replay, sha
+from measurement import distribution
+from mmlu_contract import wire_id
+
+
+def policies(folder, stage):
+    result = {
+        "calls": 0,
+        "decisions": 0,
+        "selections": 0,
+        "abstentions": 0,
+        "failures": 0,
+        "invalid_selections": 0,
+        "changed_from_builtin": 0,
+        "legal": True,
+        "journals": [],
+    }
+    files = sorted(Path(folder).glob("*.jsonl"))
+    assert files, "Missing policy journal"
+    expected = {"chatcmpl-" + wire_id(stage, lane) for lane in range(8)}
+    mapping = {}
+    for path in files:
+        events = [
+            json.loads(line) for line in path.read_text().splitlines() if line.strip()
+        ]
+        assert events and events[0]["event"] == "initialized"
+        assert events[0]["stats"]["enabled"] is stage.startswith("bidkv-")
+        last = events[-1]["stats"]
+        observed = 0
+        for event in events:
+            if event["event"] != "preemption-decision":
+                continue
+            observed += 1
+            context = event["context"]
+            ids = [row["request_id"] for row in context["candidates"]]
+            legal = (
+                len(ids) == len(set(ids))
+                and event["selected_id"] in ids
+                and context["builtin_victim_id"] in ids
+                and context["requesting_request_id"] in ids
+            )
+            for identifier in ids:
+                base, _, suffix = identifier.rpartition("-")
+                legal &= (
+                    base in expected
+                    and re.fullmatch(r"[0-9a-f]{8}", suffix) is not None
+                    and mapping.get(base, identifier) == identifier
+                )
+                mapping[base] = identifier
+            result["legal"] &= bool(legal)
+            result["changed_from_builtin"] += bool(
+                legal and event["selected_id"] != context["builtin_victim_id"]
+            )
+        assert observed == last["decisions"], "Journal event/counter mismatch"
+        for key in (
+            "calls",
+            "decisions",
+            "selections",
+            "abstentions",
+            "failures",
+            "invalid_selections",
+        ):
+            assert type(last[key]) is int and last[key] >= 0
+            result[key] += last[key]
+        result["journals"].append(
+            {
+                "bytes": path.stat().st_size,
+                "sha256": sha(path),
+                "decision_events": observed,
+            }
+        )
+    return result
+
+
+def wire_check(row, selected, identifier):
+    try:
+        body = dict(row["request"])
+        assert body.pop("request_id") == identifier
+        salt = body.pop("cache_salt")
+        assert re.fullmatch(r"[0-9a-f]{32}", salt)
+        assert body == selected["body"]
+        assert row.get("cached_tokens_reported") in (None, 0)
+        raw = replay(Path(row["stream_capture"]))
+        assert not raw["issues"] and raw["done"]
+        assert (
+            row["http_status"] == 200
+            and raw["server_request_id"] == "chatcmpl-" + identifier
+        )
+        assert sha(Path(row["stream_capture"])) == row["stream_sha256"]
+        assert (
+            raw["first_generated_event"] is not None
+            and raw["content"].strip()
+            and raw["first_token"] is not None
+        )
+        assert (
+            isinstance(raw["usage"], dict)
+            and type(raw["usage"]["completion_tokens"]) is int
+        )
+        count = raw["usage"]["completion_tokens"]
+        assert (
+            0 < count <= 8192
+            and raw["usage"]["prompt_tokens"] == selected["frozen"]["input_tokens"]
+        )
+        assert raw["finish_reason"] in ("stop", "length")
+        assert raw["finish_reason"] != "length" or count == 8192
+        for name in (
+            "content",
+            "reasoning",
+            "usage",
+            "finish_reason",
+            "first_token",
+            "last_token",
+            "first_generated_event",
+            "last_generated_event",
+        ):
+            assert row[name] == raw[name]
+        assert row["no_final_content"] is (
+            not raw["content"].strip() or raw["first_token"] is None
+        )
+        return True
+    except (OSError, ValueError, KeyError, TypeError, AssertionError):
+        return False
+
+
+def summarize(records):
+    good = [
+        row
+        for row in records
+        if row["status"] == "ok" and row.get("wire_audit_passed") is True
+    ]
+    wall = (
+        max(row["end"]["monotonic"] for row in records)
+        - min(row["start"]["monotonic"] for row in records)
+        if records
+        else None
+    )
+    assert wall is None or wall > 0
+    tokens = sum(row["usage"]["completion_tokens"] for row in good)
+    ttft, tpot = [], []
+    for row in good:
+        if row.get("first_token") is None:
+            continue
+        first = row["first_token"]["monotonic"]
+        assert row["start"]["monotonic"] <= first <= row["end"]["monotonic"]
+        ttft.append(first - row["start"]["monotonic"])
+        if row["usage"]["completion_tokens"] > 1:
+            tpot.append(
+                (row["end"]["monotonic"] - first)
+                / (row["usage"]["completion_tokens"] - 1)
+            )
+    observed = [row.get("observed_usage") or row.get("usage") for row in records]
+    return {
+        "planned": 8,
+        "recorded": len(records),
+        "successful": len(good),
+        "failed": 8 - len(good),
+        "whole_batch_wall_seconds": wall,
+        "accepted_output_tokens": tokens,
+        "output_tokens_per_second": tokens / wall
+        if len(good) == len(records) == 8
+        else None,
+        "finish_stop": sum(
+            row.get("finish_reason", row.get("observed_finish_reason")) == "stop"
+            for row in records
+        ),
+        "finish_length": sum(
+            row.get("finish_reason", row.get("observed_finish_reason")) == "length"
+            for row in records
+        ),
+        "unknown_final_usage": sum(item is None for item in observed),
+        "no_final_content": sum(row.get("no_final_content") is True for row in records),
+        "unresolved_no_final_content": sum(
+            row.get("no_final_content") is True for row in good
+        ),
+        "ttft_first_content_seconds": distribution(ttft),
+        "tpot_first_content_seconds": distribution(tpot),
+        "ttft_excluded_successful_records": len(good) - len(ttft),
+        "tpot_excluded_successful_records": len(good) - len(tpot),
+        "wire_audit_passed": len(good) == 8,
+        "quality": {
+            "denominator": 8,
+            "correct": sum(row.get("correct") is True for row in records),
+            "unparsed": sum(row.get("unparsed") is not False for row in records)
+            + (8 - len(records)),
+            "accuracy": sum(row.get("correct") is True for row in records) / 8,
+            "scope": "Original unchanged answer extractor, planned8denominator including failures/unreturned/out-of-range. Biology-prefix diagnostic, not formal200 or quality equivalence.",
+        },
+    }
+
+
+def numeric_row(row):
+    result = {
+        key: row.get(key)
+        for key in (
+            "case_id",
+            "wire_id",
+            "stage",
+            "lane",
+            "status",
+            "attempted",
+            "http_status",
+            "start",
+            "end",
+            "first_token",
+            "last_token",
+            "first_generated_event",
+            "last_generated_event",
+            "usage",
+            "observed_usage",
+            "finish_reason",
+            "observed_finish_reason",
+            "no_final_content",
+            "correct",
+            "unparsed",
+            "wire_audit_passed",
+            "cached_tokens_reported",
+        )
+    }
+    for key in ("usage", "observed_usage"):
+        if isinstance(result[key], dict):
+            result[key] = {
+                name: result[key].get(name)
+                for name in ("prompt_tokens", "completion_tokens", "total_tokens")
+            }
+    result["controlled_sse_sha256"] = row.get("stream_sha256")
+    return result
