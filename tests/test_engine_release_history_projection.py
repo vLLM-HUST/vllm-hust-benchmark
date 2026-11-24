@@ -343,15 +343,14 @@ def test_independent_fixed_b0_survives_projection_and_rejects_resigned_changes(
         projection.build(source, tmp_path / "resigned-baseline", "test-policy")
 
 
-def test_r10_default_uses_the_sealed_contiguous_restore_pairs():
+def test_r10_archive_preserves_the_sealed_contiguous_restore_pairs():
     catalog = json.loads(
         (ROOT / "website-publication/data/engine-release-history-v1.json").read_bytes()
     )
     source = (ROOT / "reports/r10-fixed-five-20261120/summary.json").read_bytes()
-    entry = next(row for row in catalog["entries"] if row["id"] == "r10")
+    entry = catalog["archived_r10"]
     installed = entry["stable_evidence"]
     assert entry["publication_status"] == "stable"
-    assert catalog["default_release"] == entry["id"]
     assert entry["original_candidate_release"] == json.loads(source)["engine_release"]
     measured_path = "reports/r10-contiguous-restore-fixed-five-20261121/summary.json"
     measured_raw = (ROOT / measured_path).read_bytes()
@@ -401,3 +400,23 @@ def test_r10_default_uses_the_sealed_contiguous_restore_pairs():
         for row in entry["measurements"]
         for arm in row["arms"]
     )
+
+
+def test_r10_default_is_bound_to_the_revised_35b_context_pair():
+    raw = (ROOT / "reports/r10-3072-context-20261124/summary.json").read_bytes()
+    measured = json.loads(raw)["isolated_r10_candidate"]
+    catalog = json.loads(
+        (ROOT / "website-publication/data/engine-release-history-v1.json").read_bytes()
+    )
+    entry = next(row for row in catalog["entries"] if row["id"] == catalog["default_release"])
+    assert entry["release"] == "full-answer-b1-20261124-r10"
+    assert entry["measurements"] == []
+    assert entry["r10_revision"]["assessment_4_3"] == measured["decision_4_3"]
+    supplement = entry["context_tenant_supplement"]
+    assert supplement["arm_seals"] == measured["arm_seals"]
+    assert supplement["quality_measured"] is False
+    assert supplement["effective_flops_certified"] is False
+    for case in supplement["comparisons"]:
+        for role in ("B0", "B1"):
+            for metric, value in measured["phases"][case["phase"]][role].items():
+                assert case[role]["metrics"][metric] == value
