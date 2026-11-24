@@ -744,8 +744,8 @@
       ],
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-vSpec",
       "upstream_repository": null,
-      "summary_en": "vSpec is an in-process speculative-decoding MOD for vLLM-HUST and vLLM-Ascend-HUST. It exposes Draft and EAGLE launchers, dynamic gamma, and online/profile adaptive control while keeping the host model registry unchanged through delayed plugin registration.",
-      "summary_zh": "vSpec 是面向 vLLM-HUST 与 vLLM-Ascend-HUST 的进程内投机解码 MOD，提供 Draft / EAGLE 启动器、动态 gamma 与 online/profile 自适应控制，并通过延迟插件注册保持宿主模型注册表不变。",
+      "summary_en": "vSpec is an in-process speculative-decoding MOD for vLLM-HUST and vLLM-Ascend-HUST. It exposes Draft and EAGLE launchers, dynamic gamma, and online/profile adaptive control while keeping the host model registry unchanged through delayed plugin registration. R10 3072 revision, the newer even-width speculation controller passed a standalone CPU switch and rollback check. The released stack uses fixed MTP2. Wider candidates were not activated or timed on this host.",
+      "summary_zh": "vSpec 是面向 vLLM-HUST 与 vLLM-Ascend-HUST 的进程内投机解码 MOD，提供 Draft / EAGLE 启动器、动态 gamma 与 online/profile 自适应控制，并通过延迟插件注册保持宿主模型注册表不变。 R10 3072 修订版 · 新版偶数投机宽度控制器完成独立 CPU 验证，覆盖切换和回退。当前发行仍固定 MTP2，新增宽度未在该宿主激活或测量。",
       "public_effect_en": "The repository reports a same-card GSM8K B128 recovery result of 1.518x. That result is specific to the published Qwen2.5 configuration; adaptive control does not guarantee a gain for other models, batch sizes, or request distributions. R10 native MTP2 · 190 MMLU-Pro cases at concurrency 10: the first and second positions were accepted in 90.07% and 77.32% of 254,360 rounds. A trailing 32-round second-position acceptance gate below 40% flagged only 0.25% of rounds offline; about 60% of flagged rounds still accepted the second token. No matched vSpec run on R10.",
       "public_effect_zh": "仓库公开了同卡 GSM8K B128 的 1.518x 恢复验证；该结果仅适用于已发布的 Qwen2.5 配置，自适应控制不保证其他模型、batch 或请求分布同样获益。 R10 原生 MTP2 · MMLU-Pro 190 题、并发 10：254,360 轮中，两个位置各有 90.07% 和 77.32% 的轮次接受。用过去 32 轮第二位置接受率低于 40% 作减步条件，离线只触发 0.25% 的轮次，其中约 60% 仍接受第二个 token。暂无 R10 vSpec 对照成绩。",
       "public_effect_status": "measured",
@@ -785,7 +785,8 @@
           "login": "Renty-0",
           "name": "任天宇"
         }
-      ]
+      ],
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L355"
     },
     {
       "id": "latchmoe",
@@ -915,8 +916,8 @@
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-opfuse",
       "repository_visibility": "private",
       "upstream_repository": null,
-      "summary_en": "Default-off, single-mechanism operator-fusion runtime-patch plugin for vLLM-HUST on Ascend NPU, currently a scaffold from patch-plugin-template with the fusion mechanism target under design.",
-      "summary_zh": "面向 vLLM-HUST 昇腾 NPU 的默认关闭、单一机制算子融合运行时补丁插件，当前为 patch-plugin-template 脚手架，融合机制目标设计中。",
+      "summary_en": "Default-off, single-mechanism operator-fusion runtime-patch plugin for vLLM-HUST on Ascend NPU, currently a scaffold from patch-plugin-template with the fusion mechanism target under design. R10 3072 revision, MoE shared-expert gate on one Ascend 910B2. The lookup fusion preserved native BF16 sigmoid bits on changing-input graph replay. Three and six rows were slightly faster. The tested 12 to 108 row cases regressed, so the experiment stopped at component level.",
+      "summary_zh": "面向 vLLM-HUST 昇腾 NPU 的默认关闭、单一机制算子融合运行时补丁插件，当前为 patch-plugin-template 脚手架，融合机制目标设计中。 R10 3072 修订版 · MoE 共享专家门控的独立 910B2 组件试验。原生 BF16 sigmoid 查表融合在重放中保持逐位一致。3、6 行略快，12 至 108 行均变慢；本轮停在组件级。",
       "public_effect_en": "No performance effect is claimed yet. The repository is a scaffold with differential tests passing; the operator-fusion mechanism has not been implemented or measured online.",
       "public_effect_zh": "暂不主张任何性能效果。仓库当前为脚手架（差分测试通过）；算子融合机制尚未实现，也未做在线实测。",
       "public_effect_status": "preview",
@@ -956,7 +957,8 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
-      ]
+      ],
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L9"
     },
     {
       "id": "ascend-adaptive-quantized-kv",
@@ -1217,8 +1219,8 @@
       "maturity": "experimental",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-prefix-router",
       "upstream_repository": null,
-      "summary_en": "Installable external prefix/lifecycle-aware router with bounded backend pools, request-load accounting, authoritative KV-event recovery, OpenAI-compatible forwarding, and health/readiness/metrics endpoints.",
-      "summary_zh": "可独立安装的外部前缀与生命周期感知 Router，提供有界 backend 连接池、请求负载核算、权威 KV 事件恢复、OpenAI 兼容转发以及健康、就绪和指标接口。",
+      "summary_en": "Installable external prefix/lifecycle-aware router with bounded backend pools, request-load accounting, authoritative KV-event recovery, OpenAI-compatible forwarding, and health/readiness/metrics endpoints. R10 3072 revision, a CPU loopback routed requests using synthetic KV events. Default and trusted modes rejected the legacy event protocol. The frozen resident cache does not emit the needed events, so no two-replica performance test was run.",
+      "summary_zh": "可独立安装的外部前缀与生命周期感知 Router，提供有界 backend 连接池、请求负载核算、权威 KV 事件恢复、OpenAI 兼容转发以及健康、就绪和指标接口。 R10 3072 修订版 · CPU 回环验证通过合成 KV 事件驱动选路。默认和可信模式拒绝旧事件协议；冻结驻留缓存缺少对应的实际事件，未进行双副本性能测试。",
       "public_effect_en": "Three matched 900-second rounds at C1/C2/C4/C8/C16 reported 0.96%–17.52% higher throughput than the same two-replica random-routing deployment. Source-integrity gaps in several Prometheus files prevent per-request causal attribution.",
       "public_effect_zh": "C1/C2/C4/C8/C16 各三轮匹配的 900 秒实验，相对相同双副本随机路由部署记录到 0.96%–17.52% 的吞吐提升。部分 Prometheus 源文件存在完整性缺口，不能作逐请求因果归因。",
       "public_effect_status": "beneficial",
@@ -1241,7 +1243,8 @@
       },
       "evidence_level": "performance_verified",
       "name_en": "Prefix-Aware Request Router",
-      "name_zh": "Prefix Router 前缀感知路由"
+      "name_zh": "Prefix Router 前缀感知路由",
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L296"
     },
     {
       "id": "kv-tiering-migration",
@@ -1654,8 +1657,8 @@
       "maturity": "incubating",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-quantized-kv-cache-hust",
       "upstream_repository": null,
-      "summary_en": "Ascend runtime plugin for dynamic per-channel INT8 KV cache; legacy KIVI and packed-format work remains separate migration history.",
-      "summary_zh": "面向昇腾的动态 per-channel INT8 KV Cache 运行时插件；KIVI 与其他 packed 格式仍属于后续迁移范围。",
+      "summary_en": "Ascend runtime plugin for dynamic per-channel INT8 KV cache; legacy KIVI and packed-format work remains separate migration history. R10 3072 revision, Ascend 910B2 component probe at Qwen per-rank geometry. Dynamic INT8 halved per-layer KV tensor storage across six 4K to 32K cells, while paged decoding took about 21% to 23% longer. The released command line lacks the plugin's INT8 route, so model serving remained disabled.",
+      "summary_zh": "面向昇腾的动态 per-channel INT8 KV Cache 运行时插件；KIVI 与其他 packed 格式仍属于后续迁移范围。 R10 3072 修订版 · 910B2 组件试验。按 Qwen3.5 每 rank 的注意力几何，4K、16K、32K 共六格的动态 INT8 单层 KV 张量约减半，分页解码算子慢约 21% 至 23%。冻结 CLI 缺少插件的 int8 入口，整模未启用。",
       "public_effect_en": "Real Qwen2.5-14B single-card serving, prefill/decode, ACL Graph replay, and three OpenAI API requests are verified. No matched performance comparison has been published.",
       "public_effect_zh": "已验证 Qwen2.5-14B 单卡真实服务、prefill/decode、ACL Graph 回放及三次 OpenAI API 请求；尚无已发布的配对性能对比。",
       "public_effect_status": "validated",
@@ -1700,7 +1703,8 @@
           "login": "SuccinctPaul",
           "name": "程月甲"
         }
-      ]
+      ],
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L121"
     },
     {
       "id": "simllm-migration",
@@ -1893,8 +1897,8 @@
       "maturity": "incubating",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-split-batch-hust",
       "upstream_repository": null,
-      "summary_en": "Owner-led carrier for split-batch planning, dual-stream replay, and full-graph parallel execution; core retains graph-lifecycle ownership.",
-      "summary_zh": "split-batch 规划、双流 replay 与 full-graph 并行执行的原负责人迁移载体；graph 生命周期仍由 core 拥有。",
+      "summary_en": "Owner-led carrier for split-batch planning, dual-stream replay, and full-graph parallel execution; core retains graph-lifecycle ownership. R10 3072 revision, three upstream CPU prechecks passed. MTP2 and MRoPE each independently blocked activation. Split-Batch remained disabled on this host, with no device performance measurement.",
+      "summary_zh": "split-batch 规划、双流 replay 与 full-graph 并行执行的原负责人迁移载体；graph 生命周期仍由 core 拥有。 R10 3072 修订版 · 三项上游 CPU 预检通过。MTP2 和 MRoPE 各自触发拒绝；此组合未启用 Split-Batch，也未开展 NPU 性能评测。",
       "public_effect_en": "Capability preview: split-batch planning, dual-stream replay, and full-graph parallel execution. Public matched performance results are not available yet.",
       "public_effect_zh": "能力预览：split-batch 规划、双流 replay 与 full-graph 并行执行；尚无公开配对性能结果。",
       "public_effect_status": "preview",
@@ -1916,7 +1920,8 @@
         "requirements_zh": "默认关闭的 dual-pad planner 与前置检查可安装、可检查；激活前仍需 graph/worker 执行合同与昇腾验证。",
         "followup_url": "https://github.com/vLLM-HUST/vllm-ascend-split-batch-hust/issues/2"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L267"
     },
     {
       "id": "kv-transfer-observability-migration",
