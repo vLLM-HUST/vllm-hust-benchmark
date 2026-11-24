@@ -70,6 +70,16 @@ P95。
 
 [冻结 r8 / original018 配对补测](reports/r8-context-tenant-20261119/README.md)：真实公开历史的4K、16K、32K及四租户正式阶段全部完成，保留五窗口、租户分布、原始流与完整封存摘要；原五项不重跑。有效算力参考单独认证，不把本专项采样利用率当作效率。
 
+## Control Plane 评测入口
+
+- [请求限流控制器固定五项](reports/controller-r8-full-coverage-20261122/README.md)对比同一 B1 引擎直连与经控制器，覆盖轨迹重负载和闭环
+  C8。服务侧矩阵速率、同费率加速卡成本和 V2 4.1 的原生参考效率分别解读。
+- [三档上下文及四租户](reports/controller-r8-context-tenant-20261122/README.md)记录冻结公开历史、五个时间窗口、逐租户结果和逐卡采样。
+- [35B 真实 Agent 单题执行、评分和复算](reports/request-throttling-real-agent-single-task-20261124/README.md)保留同题六次执行、两组评分器对照、三次
+  program 释放及独立 MMLU-Pro B0 启动来源。六份补丁均未通过该题官方评分，三臂同题性能待测。
+- [实例控制器扩缩容](reports/instance-controller-scaling-20261120/README.md)分别报告峰段接单、全窗口和资源预约。[KV Controller 路由](reports/kv-controller-routing-20261119/README.md)报告同后端配对的
+  24 与 48 program 请求。
+
 ## 第八版请求限流控制器全指标复测（2026-11-22）
 
 [固定五项、SWE Trace Heavy Load 和闭环并发 8](reports/controller-r8-full-coverage-20261122/README.md)保留配对性能、尾部时延、评分、服务侧算力下界、单位成本、双卡利用率和原始归档摘要。
