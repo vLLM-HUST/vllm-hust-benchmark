@@ -10,7 +10,7 @@
 - [双卡 B1 结果与方法](../controller-b1-discovery-20261104/README.md) ·
   [机器可读结果](../controller-b1-discovery-20261104/summary.json)。B 和 C 使用相同缓存配置，各完成 336 次调用。缓存输入占比从
   34.73% 升至 57.02%，实际计算的输入词元由 3,911,106 降至 2,575,715。单次回放，任务质量和独立重复仍待验证。
-- [四卡比较表](request-throttling/four-card-comparison.csv) ·
+- [四卡比较表](request-throttling/four-card-comparison.csv.gz) ·
   [直连逐轮数据](request-throttling/vllm-direct-service-rounds.jsonl.gz) ·
   [限流逐轮数据](request-throttling/thunderagent-program-throttling-rounds.jsonl.gz)。2026-10-07，Qwen2.5-14B，每秒到达一个任务。两组各完成
   200 个任务、6,294 次调用和 639,700 个输出词元，逐轮输入摘要一致。整批耗时为 5,199.2993 与 2,717.078 秒，缩短
@@ -35,8 +35,8 @@
 达标指首词元时延 ≤ 2 秒且每输出词元时延 ≤ 100 毫秒。目标峰段按到达时间 930–960 秒统计。动态组于第 800.78 秒提交三个作业，第 894.48 秒首次观测到四副本就绪。第
 3、4 副本在该峰段实际处理 89、78 条请求。全窗口为 1,320 秒。该轮使用已知到达时刻，历史对照未控制运行顺序和物理卡位。全窗口未通过收益门槛。
 
-- [原始分析回执](instance-scaling/scheduled-gates-result.json) ·
-  [逐段统计](instance-scaling/interval-attribution.json)。源归档为 Instance Controller 的
+- [原始分析回执](instance-scaling/scheduled-gates-result.json.gz) ·
+  [逐段统计](instance-scaling/interval-attribution.json.gz)。源归档为 Instance Controller 的
   `myc-instance-schedule-r2`，历史固定组为 `myc-instance-capacity-two-r2`。JSON 保留源文件摘要及峰段路由回执。
-- [仓库归档文件校验和](SHA256SUMS)。两份逐轮原始数据以 gzip 保存。可用 `gzip -dc` 解压到独立目录，再用
+- [仓库归档文件校验和](SHA256SUMS)。原始数据、比较表及分析回执以 gzip 保存。可用 `gzip -dc` 解压到独立目录，再用
   [压缩前原始校验和](SHA256SUMS.raw)复核字节一致性。
