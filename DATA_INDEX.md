@@ -84,6 +84,9 @@ P95。
 
 [固定五项、SWE Trace Heavy Load 和闭环并发 8](reports/controller-r8-full-coverage-20261122/README.md)保留配对性能、尾部时延、评分、服务侧算力下界、单位成本、双卡利用率和原始归档摘要。
 
+[R8 双卡原生参考效率](reports/controller-r8-native-efficiency-20261123/README.md)记录直连及经请求限流控制器两臂的 §4.1
+原生时钟、必要算量、独立参考和封存复算。
+
 ## 第八版请求限流控制器上下文与四租户实测（2026-11-22）
 
 [三档上下文及四租户同引擎配对](reports/controller-r8-context-tenant-20261122/README.md)保留整阶段、五个提交窗口、逐租户请求和双卡使用率。[网站数据投影](website-publication/data/controller-r8-context-tenant-v1.json)
