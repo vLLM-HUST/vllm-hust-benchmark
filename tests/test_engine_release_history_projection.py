@@ -408,7 +408,9 @@ def test_r10_default_is_bound_to_the_revised_35b_context_pair():
     catalog = json.loads(
         (ROOT / "website-publication/data/engine-release-history-v1.json").read_bytes()
     )
-    entry = next(row for row in catalog["entries"] if row["id"] == catalog["default_release"])
+    entry = next(
+        row for row in catalog["entries"] if row["id"] == catalog["default_release"]
+    )
     assert entry["release"] == "full-answer-b1-20261124-r10"
     assert entry["measurements"] == []
     assert entry["r10_revision"]["assessment_4_3"] == measured["decision_4_3"]
