@@ -1,0 +1,164 @@
+{
+  "date": "2026-11-24",
+  "release": "full-answer-b1-20261121-r10",
+  "model": "Qwen3.5-35B-A3B BF16",
+  "platform": "Ascend 910B2 TP2",
+  "runtime": "E36/R54 · FULL · MTP2",
+  "workload": "MMLU-Pro, 10 fixed questions, one concurrent wave of 10 per arm",
+  "controls": "Same physical pair within each plugin. Formal timing excludes startup and HTTP warmup.",
+  "interpretation": "One matched ten-item pair per plugin. No R11 qualification or estimate for other workloads.",
+  "plugins": {
+    "core-attention-boundary": {
+      "plugin": "core-attention-boundary",
+      "mod_revision": "b5bc92a513a4ad043e39c7e2e3d6c4f4351114ff",
+      "scope": "R10 port of the first-prefill search in the frozen runtime utility",
+      "physical_devices": [
+        4,
+        5
+      ],
+      "same_host_and_cards": true,
+      "order": [
+        "r10",
+        "candidate"
+      ],
+      "control_reused_after_port_conflict": true,
+      "request_plan_sha256": "0b8f6a85272a1882644dd35b6716e688e4829df8842b3ebdea6d8b585c6dbc66",
+      "candidate_sha256": "d060f312fc0771c988607623b02d94d5c68f20dff05cb29a929fbeaecf546bb6",
+      "frozen_source_sha256": "63f58dd2b29543045109f40897ddc5f57e299bb4259f0e37a64b024cb1f20ddb",
+      "archive_sha256": "407c573013facdc87817b7857418837d74c36fb1d6249e7971162bc480ac40a7",
+      "cpu_parity_cases": 2412,
+      "raw_streams_recomputed": 20,
+      "activation_tp_ranks": [],
+      "activation_first_observed_before_formal": 0,
+      "mechanism_verified_on_both_ranks": false,
+      "metrics": {
+        "r10": {
+          "wall_s": 67.98240218200954,
+          "output_tok_s": 363.27048187972684,
+          "mean_ttft_ms": 757.6259306166321,
+          "p95_ttft_ms": 1088.2890140928794,
+          "mean_tpot_ms": 12.317677143806879,
+          "p95_tpot_ms": 13.572663180462381,
+          "cases": 10,
+          "completed": 10,
+          "failed": 0,
+          "correct": 10,
+          "unparsed": 0,
+          "truncated": 0,
+          "completion_tokens": 24696
+        },
+        "candidate": {
+          "wall_s": 70.52381073200377,
+          "output_tok_s": 394.39162052225834,
+          "mean_ttft_ms": 758.0419947043993,
+          "p95_ttft_ms": 1088.1601020257222,
+          "mean_tpot_ms": 12.160570709991834,
+          "p95_tpot_ms": 13.578037882193831,
+          "cases": 10,
+          "completed": 10,
+          "failed": 0,
+          "correct": 8,
+          "unparsed": 0,
+          "truncated": 1,
+          "completion_tokens": 27814
+        }
+      },
+      "delta_percent": {
+        "wall_s": 3.7383,
+        "output_tok_s": 8.5669,
+        "mean_ttft_ms": 0.0549,
+        "p95_ttft_ms": -0.0118,
+        "mean_tpot_ms": -1.2755,
+        "p95_tpot_ms": 0.0396
+      },
+      "paired_correct_to_wrong": 2,
+      "paired_wrong_to_correct": 0,
+      "exact_text_pairs": 0,
+      "screen_passes_all_observed_dimensions": false,
+      "r11_confirmed": false,
+      "isolated_contract_hashes": {
+        "runtime_contract": "724af19c1d5afee72f2b2bb22f4f73159b8167ef425cba4fbe13d87a93a3cdfa",
+        "microflow_contract": "8282fbff246a9a82f0155c6516a7f34f16f2fce8774dddf6c2007acd163db4b8"
+      },
+      "donor_validation": "Read-only experiment manifests each change one pinned hash while keeping other host checks active.",
+      "prior_public_evidence_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-website-extra/snapshot/docs/FRONTIER-QWEN35-OP02-CORE-ATTENTION-BOUNDARY.md",
+      "followup_zh": "冻结 R10 的边界搜索移植，MMLU-Pro 十题、并发 10、同卡对照。候选未取得双 rank 的搜索分支生效证据，以下只保留为运行诊断。输出吞吐 +8.57%，P95 首 token 时延 −0.01%，P95 每 token 耗时 +0.04%，整批耗时 +3.74%，答对 10→8，其中 2 题由对变错、0 题由错变对。未达到 R11 整体验收条件。",
+      "followup_en": "R10 port of boundary search, same-card comparison on 10 concurrent MMLU-Pro items. Both TP ranks were not confirmed on the new search branch, so the observations are diagnostic. Output throughput +8.57%, P95 TTFT −0.01%, P95 TPOT +0.04%, batch wall time +3.74%, correct answers 10 to 8 (2 correct to wrong, 0 wrong to correct). The screen does not qualify this port for R11."
+    },
+    "ascend-attention-boundary": {
+      "plugin": "ascend-attention-boundary",
+      "mod_revision": "3572713e7944ea877b22f2a8a6bb053f348bfd25",
+      "scope": "R10 port of the first-prefill search in the frozen runtime utility",
+      "physical_devices": [
+        6,
+        7
+      ],
+      "same_host_and_cards": true,
+      "order": [
+        "r10",
+        "candidate"
+      ],
+      "control_reused_after_port_conflict": true,
+      "request_plan_sha256": "0b8f6a85272a1882644dd35b6716e688e4829df8842b3ebdea6d8b585c6dbc66",
+      "candidate_sha256": "5295741857ecb7bc16deb5ea9c816afe972994cf44e3d05e2a4fbb93a4c88117",
+      "frozen_source_sha256": "f4b966f75045e7b3c2d6f00004c8069c3e4fca7b5c783eee61328dfe733018aa",
+      "archive_sha256": "2c37f7132c8ba750ee9031c6993d0d5bd4ec0585fdbef4934ca9b57420ccc789",
+      "cpu_parity_cases": 2412,
+      "raw_streams_recomputed": 20,
+      "activation_tp_ranks": [
+        "0",
+        "1"
+      ],
+      "activation_first_observed_before_formal": 2,
+      "mechanism_verified_on_both_ranks": true,
+      "metrics": {
+        "r10": {
+          "wall_s": 70.79628602898447,
+          "output_tok_s": 409.8943832748434,
+          "mean_ttft_ms": 764.3667611875571,
+          "p95_ttft_ms": 1095.4675682703964,
+          "mean_tpot_ms": 12.032998178629207,
+          "p95_tpot_ms": 13.582884083788844,
+          "cases": 10,
+          "completed": 10,
+          "failed": 0,
+          "correct": 8,
+          "unparsed": 0,
+          "truncated": 1,
+          "completion_tokens": 29019
+        },
+        "candidate": {
+          "wall_s": 62.07703816000139,
+          "output_tok_s": 450.4886320111019,
+          "mean_ttft_ms": 756.9708855997305,
+          "p95_ttft_ms": 1086.2237634486519,
+          "mean_tpot_ms": 11.90573167646636,
+          "p95_tpot_ms": 13.359309599645808,
+          "cases": 10,
+          "completed": 10,
+          "failed": 0,
+          "correct": 9,
+          "unparsed": 0,
+          "truncated": 0,
+          "completion_tokens": 27965
+        }
+      },
+      "delta_percent": {
+        "wall_s": -12.316,
+        "output_tok_s": 9.9036,
+        "mean_ttft_ms": -0.9676,
+        "p95_ttft_ms": -0.8438,
+        "mean_tpot_ms": -1.0576,
+        "p95_tpot_ms": -1.646
+      },
+      "paired_correct_to_wrong": 1,
+      "paired_wrong_to_correct": 2,
+      "exact_text_pairs": 0,
+      "screen_passes_all_observed_dimensions": false,
+      "r11_confirmed": false,
+      "prior_public_evidence_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-website-extra/snapshot/docs/FRONTIER-QWEN35-OP01-ATTENTION-BOUNDARY.md",
+      "followup_zh": "冻结 R10 的边界搜索移植，MMLU-Pro 十题、并发 10、同卡对照。两 rank 在预热阶段均进入新搜索分支，生效证据来自预热。输出吞吐 +9.90%，P95 首 token 时延 −0.84%，P95 每 token 耗时 −1.65%，整批耗时 −12.32%，答对 8→9，其中 1 题由对变错、2 题由错变对。未达到 R11 整体验收条件。",
+      "followup_en": "R10 port of boundary search, same-card comparison on 10 concurrent MMLU-Pro items. Warmup logs show both ranks entering the modified search branch. Output throughput +9.90%, P95 TTFT −0.84%, P95 TPOT −1.65%, batch wall time −12.32%, correct answers 8 to 9 (1 correct to wrong, 2 wrong to correct). The screen does not qualify this port for R11."
+    }
+  }
+}
