@@ -4724,10 +4724,10 @@
         "requirements_en": "Tested with BF16, MTP2 and FULL graphs. The guarded path is limited to eligible all-greedy requests without extra sampling constraints or logprobs.",
         "requirements_zh": "已测 BF16、MTP2、FULL 图。只对符合条件、无额外采样约束且无需 logprobs 的纯贪心请求启用。"
       },
-      "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L260",
-      "public_effect_en": "MMLU-Pro · concurrency 10. 10-case screen: output throughput +6.08%, P95 TPOT −4.23%, 8→9 correct. 190 new cases: throughput −0.45%, P95 TPOT −2.08%, 141→139 correct. Experimental overlay; outside the frozen engine stack. v2 used the same cards in a separate 10-case session at concurrency 10: observed throughput +19.67%, P95 TTFT +2.77%, P95 TPOT −3.28%, and 8→9 correct. The longest output changed from 8,192 capped tokens to 6,687 tokens with EOS; the throughput difference cannot be attributed to the MOD alone.",
-      "public_effect_zh": "MMLU-Pro · 并发 10。10 题筛选吞吐 +6.08%、P95 每 token 耗时 −4.23%、答对 8→9。新增 190 题吞吐 −0.45%、P95 每 token 耗时 −2.08%、答对 141→139。当前为实验补丁，尚未晋级冻结组合。 v2 另测同卡、不同场次的 10 题（并发 10）：观察到吞吐 +19.67%、P95 首字 +2.77%、P95 每 token 耗时 −3.28%、答对 8→9。最长输出从 8,192 token 截断变为 6,687 token 正常结束，吞吐增幅无法单独归因于 MOD。",
+      "public_effect_status": "inconclusive",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/main/reports/greedy-bf16-v2-20261124",
+      "public_effect_en": "v2 shows mixed results on the same devices against frozen R10. R11 integration deferred. MMLU-Pro 200: throughput +1.88%, mean TTFT +5.83%, correct 149→147. Closed-loop concurrency 8: 4K/16K throughput +0.54%/+0.01%. The report includes the fixed five profiles, request measurements and evidence gaps.",
+      "public_effect_zh": "v2 同卡冻结 R10 对照有取舍，暂缓集成 R11。MMLU-Pro 200 题吞吐 +1.88%、平均首字时延 +5.83%、答对 149→147。闭环连续压测 · 并发 8，4K／16K 吞吐分别 +0.54%／+0.01%。报告保留固定五项、逐请求记录和待补证据。",
       "repository_visibility": "public",
       "upstream_creators": [
         {

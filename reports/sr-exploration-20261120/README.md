@@ -126,3 +126,11 @@ MOD不重复计增量，不补造SR编号，也不把跨模型差异当成独立
 上文的 BetterScale 状态写回融合现以独立实验 MOD 登记。该试验依赖冻结 R10
 的宿主状态路径。代码包默认关闭，沿用已入库的组件结果和整模未通过结论。[独立仓库](https://github.com/vLLM-HUST/vllm-hust-accepted-state-fusion)
 · [公开证据](../../website-publication/data/accepted-state-fusion-20261124/summary.json)
+
+## BF16 直接贪心采样 v2
+
+2026-11-24 · [同卡冻结 R10 对照与逐请求数据](../greedy-bf16-v2-20261124/README.md)。
+MMLU-Pro 200 题吞吐 +1.88%、平均首字时延
++5.83%、答对 149→147。4K／16K
+闭环并发 8 吞吐 +0.54%／
++0.01%。保持实验身份，暂缓集成 R11。
