@@ -32,6 +32,10 @@
 [单峰和双峰真机配对](reports/instance-controller-scaling-20261120/README.md)记录完成请求、延迟、峰内接单和预约资源，覆盖默认 CUDA
 Graph 模式。
 
+## r10 3072 长上下文修订（2026-11-24）
+
+[V5 4.3 配对与四租户回归](reports/r10-3072-context-20261124/README.md)保存独立修订版工况、原门槛及封存摘要。
+
 ## r10 固定五项与 C8（2026-11-20）
 
 [R10 稳定包与补丁 B0 原生 F/T 对照](reports/r10-stable-patched-b0-ft-20261123-v1/README.md)

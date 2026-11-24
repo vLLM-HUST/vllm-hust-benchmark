@@ -21,6 +21,10 @@ Qwen3.5-35B-A3B、BF16、双 Ascend 910B2、TP2。判据、样本及计时以
 - [B0 0.28 RC 源码候选观测](../website-publication/data/official-b0-028-source-full-report-20261123-v1/observations.json)
   保存五项、三个上下文长度和四租户的逐阶段结果。原整轮状态为 failed，F 与效率留空，算力资格为 ineligible。
 
+## r10 3072 修订版的 V5 4.3 证据
+
+[闭环连续压测配对与 4K 四租户回归](../reports/r10-3072-context-20261124/README.md)记录 Qwen3.5-35B-A3B BF16 TP2 的 16K 和 32K 两阶段判定、原定门槛及双 rank 3072 图回放。
+
 ## r10 两个修复候选的 V2 证据
 
 两版均使用 Qwen3.5-35B-A3B、BF16、双 Ascend 910B2、TP2，分别与固定 vLLM 0.18.0 / vLLM-Ascend 0.18.0 B0 比较。
