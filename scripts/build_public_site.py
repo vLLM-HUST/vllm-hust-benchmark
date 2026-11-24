@@ -90,8 +90,9 @@ BETTERSCALE_CARD = {
     "summary_en": "Multi-device inference execution optimization for Ascend. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36. Frozen R10 uses its resident-state path. The R10 fusion experiment is recorded under Accepted Token State Fusion.",
     "summary_zh": "面向昇腾的多卡推理执行优化。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。 冻结 R10 使用其状态管理路径。 已接受 Token 状态写回融合的 R10 试验记录见同名独立 MOD 条目。",
     "public_effect_status": "measured",
-    "public_effect_en": "Historical DeepSeek-V4-Flash HTTP test: output throughput rose 39.63% at DP8/C16 and 35.17% at TP8/C4 against their respective baselines.",
-    "public_effect_zh": "DeepSeek-V4-Flash 历史 HTTP 实测中，DP8／并发 16 和 TP8／并发 4 的输出吞吐分别较各自基线提高 39.63% 和 35.17%。",
+    "public_effect_en": "Historical DeepSeek-V4-Flash HTTP test: output throughput rose 39.63% at DP8/C16 and 35.17% at TP8/C4 against their respective baselines. R10 single-card component test of 16-row resident-slot tiling. All six decode and mixed shapes passed bitwise checks on graph replay with changed inputs. At 54 live rows, decode fell from 21.45 to 8.74 μs and mixed from 33.90 to 15.16 μs. The 1/2/4/8-warp settings generated identical device binaries within each branch. Model-level validation is pending.",
+    "public_effect_zh": "DeepSeek-V4-Flash 历史 HTTP 实测中，DP8／并发 16 和 TP8／并发 4 的输出吞吐分别较各自基线提高 39.63% 和 35.17%。 冻结 R10 单卡组件对照中，驻留状态槽改为 16 行分块。六种解码和混合形状均通过动态输入图回放逐位核对。54 活跃行时，解码 21.45→8.74 μs，混合 33.90→15.16 μs。1／2／4／8 warp 在同一分支生成相同设备二进制。分块仅取得组件证据，整模待验证。",
+    "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L5",
     "public_effect_detail_en": [
         "2026-09-14 · DeepSeek-V4-Flash-0731 W8A8 on 8 × Ascend 910B2 (HCCS), vLLM 0.25.1 / vLLM-Ascend 0.25.1rc1, K5.",
         "DP8, concurrency 16, 8 GiB KV/rank: 268.89 → 375.45 output tok/s (+39.63%), runs 158 → 155. The candidate included the DP startup preparation carried into 0.3.1.",
