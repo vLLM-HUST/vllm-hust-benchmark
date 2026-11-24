@@ -18,12 +18,24 @@
     "frozen_sampler_sha256": "d62875a1c942255586b9bdd85abb820153be4731fa99406ebb0ab25b0d5c816b",
     "fixed_five_plan_sha256": "bd7d90855af8c9eb0b631531065975844e1ccdef852d49a0ebdbb10056d0fb65"
   },
+  "original018_provenance": {
+    "source_map_sha256": "a357ad8cf1ff6f8797fb2d6476e71a0deef5ee0899a55ea32ed65f07fe7773bc",
+    "historical_sdk_byte_equivalence": false,
+    "text_backend": "vLLM/vLLM-Ascend 0.18 with the recorded text profile compatibility adaptations",
+    "hle_backend": "Original multimodal profile"
+  },
   "candidate_execution": "fixed-five-completed",
   "r10_control": {
-    "state": "running",
+    "state": "completed",
     "finished_phases": [
       "continuous-B1",
-      "mmlu-B1"
+      "mmlu-B1",
+      "frontier-solver-B1",
+      "hle-solver-B1",
+      "swe-trace-B1",
+      "terminal-trace-B1",
+      "frontier-judge-B1",
+      "hle-judge-B1"
     ],
     "total_phases": 8
   },
@@ -216,8 +228,34 @@
           "projected_records": 200
         },
         "frozen_r10": {
-          "state": "planned"
+          "seal_sha256": "38f343f1f162e707b367a14c02ff28ee3277eb868a67241f2bd5fc77e97f4c67",
+          "sealed_files": 853,
+          "started_utc": "2026-11-24T04:50:52.233090+00:00",
+          "ended_utc": "2026-11-24T05:45:33.614864+00:00",
+          "state": "sealed",
+          "metrics": {
+            "planned": 200,
+            "recorded": 200,
+            "successful": 200,
+            "transport_completed": 200,
+            "failed": 0,
+            "unreturned": 0,
+            "length_stops": 125,
+            "successful_output_tokens": 2237520,
+            "duration_seconds": 2160.8784634800395,
+            "output_tokens_per_second": 1035.4677682318752,
+            "mean_ttft_ms": 255.50294018961722,
+            "mean_tpot_ms": 15.470831579599125,
+            "actual_context_16k_cases": 125,
+            "unresolved_grades": 0
+          },
+          "projected_records": 200
         }
+      },
+      "bf16_v2_vs_frozen_r10_pct": {
+        "output_tokens_per_second": 1.1347763059956995,
+        "mean_ttft_ms": -2.7455006587960407,
+        "mean_tpot_ms": -0.2242993064724308
       }
     },
     "hle-judge": {
@@ -276,7 +314,28 @@
           "projected_records": 200
         },
         "frozen_r10": {
-          "state": "planned"
+          "seal_sha256": "fb16f8cfc59440b5029eb195e99ca8a72d33e905fbc0b0ccc8dabfa09970bb44",
+          "sealed_files": 845,
+          "started_utc": "2026-11-24T06:53:41.394854+00:00",
+          "ended_utc": "2026-11-24T07:15:09.960938+00:00",
+          "state": "sealed",
+          "metrics": {
+            "planned": 200,
+            "recorded": 200,
+            "successful": 200,
+            "transport_completed": 200,
+            "failed": 0,
+            "unreturned": 0,
+            "length_stops": 0,
+            "successful_output_tokens": 23409,
+            "duration_seconds": 217.42383083503228,
+            "output_tokens_per_second": 107.66529092094463,
+            "mean_ttft_ms": 3963.15415637102,
+            "mean_tpot_ms": 115.2266912022109,
+            "actual_context_16k_cases": 125,
+            "unresolved_grades": 0
+          },
+          "projected_records": 200
         }
       }
     },
@@ -336,8 +395,34 @@
           "projected_records": 160
         },
         "frozen_r10": {
-          "state": "running"
+          "seal_sha256": "886b9fd2e59175fc508264547204db966cce90292891ec9dddc6ce92bf77d3ee",
+          "sealed_files": 763,
+          "started_utc": "2026-11-24T04:12:56.862598+00:00",
+          "ended_utc": "2026-11-24T04:49:17.913407+00:00",
+          "state": "sealed",
+          "metrics": {
+            "planned": 160,
+            "recorded": 160,
+            "successful": 160,
+            "transport_completed": 160,
+            "failed": 0,
+            "unreturned": 0,
+            "length_stops": 34,
+            "successful_output_tokens": 1160852,
+            "duration_seconds": 1116.7163687039865,
+            "output_tokens_per_second": 1039.5226868101122,
+            "mean_ttft_ms": 222.72375969550922,
+            "mean_tpot_ms": 15.13717947334622,
+            "actual_context_16k_cases": 34,
+            "unresolved_grades": 0
+          },
+          "projected_records": 160
         }
+      },
+      "bf16_v2_vs_frozen_r10_pct": {
+        "output_tokens_per_second": 0.8487873266575852,
+        "mean_ttft_ms": 6.348579516449315,
+        "mean_tpot_ms": -1.44999607966535
       }
     },
     "frontier-judge": {
@@ -396,7 +481,28 @@
           "projected_records": 160
         },
         "frozen_r10": {
-          "state": "planned"
+          "seal_sha256": "a9299f8a7fcfabcdc4b93d92cc0257f0fb12cdccb3582a495a13b18107051230",
+          "sealed_files": 763,
+          "started_utc": "2026-11-24T06:27:38.054947+00:00",
+          "ended_utc": "2026-11-24T06:52:07.790967+00:00",
+          "state": "sealed",
+          "metrics": {
+            "planned": 160,
+            "recorded": 160,
+            "successful": 154,
+            "transport_completed": 160,
+            "failed": 0,
+            "unreturned": 0,
+            "length_stops": 13,
+            "successful_output_tokens": 306133,
+            "duration_seconds": 406.2071947379736,
+            "output_tokens_per_second": 753.6375622235665,
+            "mean_ttft_ms": 1300.8984262603917,
+            "mean_tpot_ms": 22.172999063281637,
+            "actual_context_16k_cases": 38,
+            "unresolved_grades": 6
+          },
+          "projected_records": 160
         }
       }
     },
@@ -461,8 +567,40 @@
           "projected_records": 64
         },
         "frozen_r10": {
-          "state": "planned"
+          "seal_sha256": "f54eaf4e3f2748d9da02cdda90d2cd1d8469dc3c9d6492cd28590117d16c554e",
+          "sealed_files": 634,
+          "started_utc": "2026-11-24T05:47:15.237326+00:00",
+          "ended_utc": "2026-11-24T06:05:55.635263+00:00",
+          "state": "sealed",
+          "metrics": {
+            "planned": 64,
+            "recorded": 64,
+            "successful": 64,
+            "failed": 0,
+            "unreturned": 0,
+            "length_stops": 1,
+            "successful_output_tokens": 6282,
+            "duration_seconds": 51.27068600803614,
+            "output_tokens_per_second": 122.52615459475933,
+            "mean_ttft_ms": 1645.6481564027854,
+            "mean_tpot_ms": 45.95530778208787,
+            "ttft_p95_ms": 3567.359763738929,
+            "ttft_p99_ms": 4721.023428704939,
+            "tpot_p95_ms": 67.45060034729966,
+            "tpot_p99_ms": 86.4828068018923,
+            "actual_context_16k_cases": 2
+          },
+          "projected_records": 64
         }
+      },
+      "bf16_v2_vs_frozen_r10_pct": {
+        "output_tokens_per_second": 0.2516516866259533,
+        "mean_ttft_ms": 0.7618338280919401,
+        "mean_tpot_ms": -0.4604178316925056,
+        "ttft_p95_ms": 0.14628094961048888,
+        "ttft_p99_ms": -4.102510509565138,
+        "tpot_p95_ms": -2.8646004833562833,
+        "tpot_p99_ms": -6.6149496352057024
       }
     },
     "terminal-trace": {
@@ -526,8 +664,40 @@
           "projected_records": 48
         },
         "frozen_r10": {
-          "state": "planned"
+          "seal_sha256": "9fe8f74e85a378fdccb8abf532653533472931bcdacb1d9b8b050fd646afd96d",
+          "sealed_files": 586,
+          "started_utc": "2026-11-24T06:07:24.533819+00:00",
+          "ended_utc": "2026-11-24T06:26:09.904891+00:00",
+          "state": "sealed",
+          "metrics": {
+            "planned": 48,
+            "recorded": 48,
+            "successful": 48,
+            "failed": 0,
+            "unreturned": 0,
+            "length_stops": 3,
+            "successful_output_tokens": 13864,
+            "duration_seconds": 56.84668211103417,
+            "output_tokens_per_second": 243.8840664952184,
+            "mean_ttft_ms": 1628.2628451869339,
+            "mean_tpot_ms": 30.230171124792236,
+            "ttft_p95_ms": 4268.474069260991,
+            "ttft_p99_ms": 5766.823600425851,
+            "tpot_p95_ms": 55.23944292073271,
+            "tpot_p99_ms": 88.28308759351884,
+            "actual_context_16k_cases": 4
+          },
+          "projected_records": 48
         }
+      },
+      "bf16_v2_vs_frozen_r10_pct": {
+        "output_tokens_per_second": 1.5750720978118693,
+        "mean_ttft_ms": 3.9081523498714743,
+        "mean_tpot_ms": 2.533792993506845,
+        "ttft_p95_ms": -4.298226849101794,
+        "ttft_p99_ms": -0.12610916700912522,
+        "tpot_p95_ms": 21.416294679119474,
+        "tpot_p99_ms": -4.518204477639487
       }
     },
     "continuous": {
@@ -774,15 +944,82 @@
         "observed_success_lower_bound": 0.06666666666666667,
         "mean_research_score_valid_only": 2.757033898305085
       }
+    },
+    "hle-frozen-r10": {
+      "gold": {
+        "total": 74,
+        "graded": 74,
+        "successes": 15,
+        "accuracy": 0.20270270270270271,
+        "unresolved": 0,
+        "complete_grading": true,
+        "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+        "wald_95_half_width": 0.09159676321017363,
+        "solver_failures": 0,
+        "judge_invalid": 0,
+        "judge_transport_failures": 0,
+        "solver_truncated": 42,
+        "judge_truncated": 0
+      },
+      "revision": {
+        "total": 126,
+        "graded": 126,
+        "successes": 39,
+        "accuracy": 0.30952380952380953,
+        "unresolved": 0,
+        "complete_grading": true,
+        "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+        "wald_95_half_width": 0.08072205016422743,
+        "solver_failures": 0,
+        "judge_invalid": 0,
+        "judge_transport_failures": 0,
+        "solver_truncated": 83,
+        "judge_truncated": 0
+      }
+    },
+    "frontier-frozen-r10": {
+      "olympiad": {
+        "total": 100,
+        "graded": 97,
+        "successes": 65,
+        "solver_failures": 0,
+        "judge_unresolved": 3,
+        "judge_invalid": 3,
+        "judge_transport_failures": 0,
+        "judge_truncated_with_grade": 3,
+        "judge_audit_flagged": 3,
+        "solver_truncated": 27,
+        "judge_truncated": 5,
+        "success_rate": 0.65,
+        "observed_success_lower_bound": 0.65,
+        "mean_research_score_valid_only": null
+      },
+      "research": {
+        "total": 60,
+        "graded": 57,
+        "successes": 2,
+        "solver_failures": 0,
+        "judge_unresolved": 3,
+        "judge_invalid": 3,
+        "judge_transport_failures": 0,
+        "judge_truncated_with_grade": 5,
+        "judge_audit_flagged": 6,
+        "solver_truncated": 7,
+        "judge_truncated": 8,
+        "success_rate": 0.03333333333333333,
+        "observed_success_lower_bound": 0.03333333333333333,
+        "mean_research_score_valid_only": 2.5178070175438596
+      }
     }
   },
   "decision": "defer-r11-integration",
+  "snapshot_utc": "2026-11-24T07:16:41.013081+00:00",
   "request_projection": {
-    "records": 4235,
-    "sha256": "af7deca233c184ed63f88fcd0c3aeb2dfe1dce718dd32d2d5f14a07c2c0be066",
+    "records": 5067,
+    "sha256": "1c2c077ccfed656d039dba9f38f91685207318f46403c0832ee46866fda239b6",
     "scope": "timings, token counts, outcomes and seal hashes; source requests, response text and operational logs remain in the sealed internal evidence",
     "file": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/greedy-bf16-v2-20261124/requests.json",
-    "file_sha256": "685c62258303d8bbaf646f8271d8b05e9c9fa2680bf7ef41231fc70ca87a1583"
+    "file_sha256": "6842d5896694ce543ed3ec24f505091d2b7ebc643010ec3b126255672e8d3dfa"
   },
   "mmlu_paired_quality": {
     "same_ordered_case_count": 200,
