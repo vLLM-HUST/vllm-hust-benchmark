@@ -2753,10 +2753,10 @@
       "documentation_url": "./betterscale.html",
       "summary_en": "Less host waiting. More device execution. BetterScale publishes separate bounded observations for DeepSeek V4 Flash and a Qwen3.5 TP2 small-fish prototype; their models, runtimes and protocols are not pooled. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36. The R10 fusion experiment is recorded under Accepted Token State Fusion.",
       "summary_zh": "让设备少等调度，多做推理。BetterScale 分别公开 DeepSeek V4 Flash 与 Qwen3.5 TP2 small-fish 原型的有限观察；两者的模型、运行时与协议不会合并。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。 已接受 Token 状态写回融合的 R10 试验记录见同名独立 MOD 条目。",
-      "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim. An R10 single-card component test of 16-row resident-slot tiling. All six decode and mixed shapes passed bitwise checks on graph replay with changed inputs. At 54 live rows, decode fell from 21.45 to 8.74 μs and mixed from 33.90 to 15.16 μs. The 1/2/4/8-warp settings generated identical device binaries within each branch. Model-level validation is pending.",
-      "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。 冻结 R10 单卡组件对照中，驻留状态槽改为 16 行分块。六种解码和混合形状均通过动态输入图回放逐位核对。54 活跃行时，解码 21.45→8.74 μs，混合 33.90→15.16 μs。1／2／4／8 warp 在同一分支生成相同设备二进制。分块仅取得组件证据，整模待验证。",
+      "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim. An R10 single-card component test of 16-row resident-slot tiling. All six decode and mixed shapes passed bitwise checks on graph replay with changed inputs. At 54 live rows, decode fell from 21.45 to 8.74 μs and mixed from 33.90 to 15.16 μs. The 1/2/4/8-warp settings generated identical device binaries within each branch. Model-level validation is pending. The same-host, same-card MMLU-Pro ten-item screen used a historical R10 control. Output throughput +1.96%, P95 TTFT +2.29%, P95 TPOT −1.07%, batch wall time +2.16%, correct answers 10 to 9. Larger model-level validation is pending for R11.",
+      "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。 冻结 R10 单卡组件对照中，驻留状态槽改为 16 行分块。六种解码和混合形状均通过动态输入图回放逐位核对。54 活跃行时，解码 21.45→8.74 μs，混合 33.90→15.16 μs。1／2／4／8 warp 在同一分支生成相同设备二进制。分块仅取得组件证据，整模待验证。 同机同卡分时 MMLU-Pro 十题初筛中，输出吞吐 +1.96%，P95 首字 +2.29%，P95 每 token 耗时 −1.07%，整批耗时 +2.16%，答对 10→9。这组数据用于整模初筛，R11 仍待扩大复核。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L5",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e2481edfeb341e856ac11705336f8e872f423a23/website-publication/data/r10-parallel-components-20261124/summary.json#L5",
       "functional_compatibility": {
         "status": "passed",
         "scope": "DeepSeek-V4-Flash-0731-w8a8 · Ascend 910B2 TP8 / TP1-DP8-EP8, bounded K5 configurations"
@@ -3992,8 +3992,8 @@
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-prefill-microflow",
       "repository_visibility": "public",
       "upstream_repository": null,
-      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification. The frozen B1 r6 profile enables the school028 GDN and FlashAttention path from 0.1.0.dev0.",
-      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。B1 r6 冻结组合启用了 0.1.0.dev0 的 school028 GDN 与 FlashAttention 路径。",
+      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification. The frozen B1 r6 profile enables the school028 GDN and FlashAttention path from 0.1.0.dev0. The R10 FA output-gate fusion passed non-NaN BF16 bitwise checks. Grouped graph replay was roughly flat at 8 rows, around 4% slower at 54 rows and around 9% slower at 4096 rows. The component screen did not qualify the change for integration.",
+      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。B1 r6 冻结组合启用了 0.1.0.dev0 的 school028 GDN 与 FlashAttention 路径。 冻结 R10 的 FA 输出门控融合通过非 NaN BF16 逐位校验。分组图回放中，8 行接近持平，54 行慢约 4%，4096 行慢约 9%。组件筛选未达到集成条件。",
       "compatibility": {
         "status": "experimental",
         "host": "Pinned BetterScale shared host on vLLM-HUST + vllm-ascend-hust",
@@ -4023,10 +4023,7 @@
           "name": "田景远"
         }
       ],
-      "public_effect_zh": "冻结 R10 的 FA 输出门控融合通过非 NaN BF16 逐位校验。分组图回放中，8 行略快 0.33%，54 行耗时增加 4.47%，4096 行增加 8.61%。组件筛选未达到集成条件。",
-      "public_effect_en": "The R10 FA output-gate fusion passed non-NaN BF16 bitwise checks. Grouped graph replay was 0.33% faster at 8 rows, 4.47% slower at 54 rows and 8.61% slower at 4096 rows. The component screen did not qualify the change for integration.",
-      "public_effect_status": "not-beneficial-in-tested-cell",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L146"
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L146"
     },
     {
       "id": "graph-coverage",

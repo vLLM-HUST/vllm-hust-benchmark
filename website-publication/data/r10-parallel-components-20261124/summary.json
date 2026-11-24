@@ -141,7 +141,68 @@
       "warp_binary_identity_within_branch": true,
       "note_zh": "冻结 R10 单卡组件对照中，驻留状态槽改为 16 行分块。六种解码和混合形状均通过动态输入图回放逐位核对。54 活跃行时，解码 21.45→8.74 μs，混合 33.90→15.16 μs。1／2／4／8 warp 在同一分支生成相同设备二进制。分块仅取得组件证据，整模待验证。",
       "note_en": "R10 single-card component test of 16-row resident-slot tiling. All six decode and mixed shapes passed bitwise checks on graph replay with changed inputs. At 54 live rows, decode fell from 21.45 to 8.74 μs and mixed from 33.90 to 15.16 μs. The 1/2/4/8-warp settings generated identical device binaries within each branch. Model-level validation is pending.",
-      "previous_effect_link": "./betterscale.html#service-throughput"
+      "previous_effect_link": "./betterscale.html#service-throughput",
+      "model_pilot": {
+        "scope": "Same-device historical frozen R10 control, Qwen3.5-35B-A3B BF16 TP2, FULL and MTP2",
+        "concurrency": 10,
+        "cases_per_arm": 10,
+        "request_plan_sha256": "0b8f6a85272a1882644dd35b6716e688e4829df8842b3ebdea6d8b585c6dbc66",
+        "raw_streams_recomputed": 20,
+        "historical_control": true,
+        "archive_sha256": {
+          "candidate": "a0f6d0f1fa32c49d88d3031db8a2b816537d0b63d91f7ee0197835efba70dca5",
+          "native": "3c018e6a237ec17bbe16af4193bee4e0519fabd16c3080cc86ddccbfbe1df163"
+        },
+        "worker_rank_count": 2,
+        "metrics": {
+          "native": {
+            "wall_s": 67.98240218200954,
+            "output_tok_s": 363.27048187972684,
+            "mean_ttft_ms": 757.6259306166321,
+            "p95_ttft_ms": 1088.2890140928794,
+            "mean_tpot_ms": 12.317677143806879,
+            "p95_tpot_ms": 13.572663180462381,
+            "cases": 10,
+            "completed": 10,
+            "failed": 0,
+            "correct": 10,
+            "unparsed": 0,
+            "truncated": 0,
+            "completion_tokens": 24696
+          },
+          "candidate": {
+            "wall_s": 69.45321083400631,
+            "output_tok_s": 370.4076412174137,
+            "mean_ttft_ms": 782.7011441870127,
+            "p95_ttft_ms": 1113.2583908707602,
+            "mean_tpot_ms": 12.158618930396505,
+            "p95_tpot_ms": 13.42750692628206,
+            "cases": 10,
+            "completed": 10,
+            "failed": 0,
+            "correct": 9,
+            "unparsed": 0,
+            "truncated": 0,
+            "completion_tokens": 25726
+          }
+        },
+        "delta_percent": {
+          "wall_s": 2.1635137988489594,
+          "output_tok_s": 1.9646956451721431,
+          "mean_ttft_ms": 3.3097089945128833,
+          "p95_ttft_ms": 2.2943700115077847,
+          "mean_tpot_ms": -1.291300393356598,
+          "p95_tpot_ms": -1.0694751077980902
+        },
+        "correct_to_wrong": 1,
+        "wrong_to_correct": 0,
+        "exact_generated_text_pairs": 0,
+        "all_observed_screen_dimensions_positive": false,
+        "notes": {
+          "zh": "同机同卡分时 MMLU-Pro 十题初筛中，输出吞吐 +1.96%，P95 首字 +2.29%，P95 每 token 耗时 −1.07%，整批耗时 +2.16%，答对 10→9。这组数据用于整模初筛，R11 仍待扩大复核。",
+          "en": "The same-host, same-card MMLU-Pro ten-item screen used a historical R10 control. Output throughput +1.96%, P95 TTFT +2.29%, P95 TPOT −1.07%, batch wall time +2.16%, correct answers 10 to 9. Larger model-level validation is pending for R11."
+        }
+      }
     },
     "prefill-microflow": {
       "protocol": "Ascend 910B2, BF16, per-rank width 2048, multi-operation graph replay",
