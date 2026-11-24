@@ -46,6 +46,13 @@ SWE trace64、SWE Trace Heavy Load 和 Terminal trace48 是推理服务轨迹回
 流式 SWE Trace Heavy Load 各完成 336 次请求，整批 309.47 → 225.38 秒，输入 token 缓存命中率 38.22 → 60.88%。
 此前[非流式复测](../controller-r8-20261122-repeat/README.md)各自产生完整配对；[三档上下文与四租户](../controller-r8-context-tenant-20261122/README.md)保留逐窗口和逐租户。
 
+表中的两档独立闭环 C8 使用确定性生成的合成工程日志。4K、16K 档各 8 个模板，每条实际为 4,115、16,407 个输入 token；直连与经限流层采用同一份清单。 使用归档的
+Qwen3.5-35B-A3B tokenizer 在 CPU 重新生成后，全部 839,836 字节与正式清单相同。输入 SHA-256 为
+`17faf7a6e4ba31f55fb64dca577d41d85ebc8ca4381ccf68d8184cc1e5937802`。推理采样使用 `seed=17`。
+[官方生成器和输入摘要](https://github.com/DeepLinkNext/DeepLinkEngine/blob/035131bac73eba206be9290d181c2092f89a98b4/data/official-protocol-inputs.json#L2-L11)
+·
+[归档路径与复算命令](https://github.com/vLLM-HUST/request-throttling-controller/issues/6#issuecomment-7119651458)
+
 ## 6. 成本、利用率和算力
 
 加速卡成本按[送测方案](../../docs/topic4-submission-v2-20261119.md)的每卡每月 1,875 元、每月 30 天、每组占两卡折算。
