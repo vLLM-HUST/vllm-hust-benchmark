@@ -1,0 +1,313 @@
+"""Recompute the formal R10 arm using the native run's own output geometry."""
+import argparse
+from decimal import Decimal, localcontext
+import hashlib
+from importlib.metadata import distribution
+import json
+from pathlib import Path, PurePosixPath
+import sys
+from types import SimpleNamespace
+
+
+HISTORICAL_CLOSURE = 'aebd5c5ea84ed0435ba7f348a868b33eb09f34216f99b0a4deb813cba1a071bd'  # pragma: allowlist secret
+R10_RUNTIME = '993b9a6fc29ae24dbfe707d570060de42ef861884a0d7e12ffa68e1e7252668c'  # pragma: allowlist secret
+PATCHED_B0 = 'd9a53879647e68302736b77d765aae23e0c4ebbf19ee7ee0f9d463a67f327591'  # pragma: allowlist secret
+RELEASE = 'full-answer-b1-20261121-r10'
+PROMPTS = 'c36b966384a220b9060c452e632ac636da59a92dce5a6ded9fe931794c187851'  # pragma: allowlist secret
+WARMUP = 'b4527c75c156653b856a097375c4db99634b8373b974e4986de0323b33b7934b'  # pragma: allowlist secret
+QUALITY_PLAN = 'f4ed4ce5956c9ed08f360400b5a996ef92a217ce295d50648d4dc06443db768e'  # pragma: allowlist secret
+GDN = 'runtime/ascend/vllm_ascend/ops/gdn.py'
+QWEN = 'mods/betterscale/betterscale/models/qwen35/'
+R10_LAYOUT_SOURCES = {
+    GDN: ('765eb27018f762e970301978af80a91d86ce4d7110ed7f2c48a3986b2eb78e85',  # pragma: allowlist secret
+          'eaba7292690dd75dfbdb58616aedbe73a004dbad8a98021ef77f23e41bc04a73'),  # pragma: allowlist secret
+    QWEN + 'service_metadata.py': ('c5a84859236fa7623e888ce5aa214f82e36ce478143e671d4f93e298d911d34d',  # pragma: allowlist secret
+                                    '42de8c1014fcdefa0ce61c1965db1c1956f552766c4c2be23949b9af4ff3ec92'),  # pragma: allowlist secret
+    QWEN + 'mixed_core.py': ('9755886fada242e6fc77bdd2ffc363f5d5a74cf08e5302a1d9943ef25c0dd657',  # pragma: allowlist secret
+                             'a9981e438e52702be1f3ad6b03a8e0f4c1d2e8b38161140c11a5b7896c10829b'),  # pragma: allowlist secret
+}
+R10_DISPATCH_SOURCES = {
+    QWEN + 'integration.py': '52f3c5406493e7996f4cb6aaba85ee4d74e8e924d9690645114ab7fe6b6169d9',  # pragma: allowlist secret
+    QWEN + 'mixed_layout.py': '33b707fd0b5103c4ffdb7f81e2a3c4c2df5a7c41c84802322948423fb91d445a',  # pragma: allowlist secret
+    'runtime/ascend/vllm_ascend/compilation/hust_restore_norm_trace.py':
+        'f92f8634d49eae5b3afd2be62d0c0b930037b2663dd0735be6f6ceb274a8f1f6',  # pragma: allowlist secret
+}
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def sha(path):
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def read(path):
+    return json.loads(path.read_bytes())
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def checked(path, expected):
+    require(path.is_file() and not path.is_symlink() and sha(path) == expected,
+            'Sealed evidence changed: ' + str(path))
+    return read(path)
+
+
+def companion(root, deployment, kit, text):
+    from audit_loaded_work_inventory import validate
+
+    closure = checked(root / 'old-closure-checksums.json', HISTORICAL_CLOSURE)
+    prefix = 'compute-reference/http-independent-audit/'
+    audit_pin = closure[prefix + 'checksums.json']
+    audit = checked(root / 'old-http-audit-checksums.json', audit_pin)
+    provenance = checked(root / 'old-http-source-inputs.json', audit['source-inputs.json'])
+    receipt = checked(root / 'old-http-audit-receipt.json', audit['receipt.json'])
+    correspondence = checked(root / 'old-http-producer-correspondence.json', audit['public-producer-correspondence.json'])
+    inventory_audit = checked(root / 'old-http-loaded-inventory-audit.json', audit['loaded-inventory-audit.json'])
+    require(receipt['schema'] == 'sealed-http-reference-independent-recomputation/v1'
+            and receipt['completed'] is True and receipt['original_completed'] is True
+            and receipt['model_inference_executed'] is False and receipt['requests'] == 200
+            and correspondence['all_request_closures_contained'] is True
+            and len(correspondence['requests']) == 200 and set(inventory_audit) == {'0', '1'},
+            'The original independent R10 HTTP source proof did not close')
+    require(receipt['source'] == provenance['source'] and provenance['model_config_sha256']
+            == sha(deployment / 'inputs/model-metadata/config.json'), 'Companion model identity differs')
+    for name, pin in provenance['audit_source_sha256'].items():
+        require(sha(kit / name) == pin, 'Original HTTP source proof used a different auditor: ' + name)
+    origin_pin = provenance['source_checksums_sha256']
+    origin = checked(root / 'old-http-origin-checksums.json', origin_pin)
+    require(provenance['original_receipt_sha256'] == origin['receipt.json'], 'Companion receipt binding differs')
+    observed = checked(root / 'old-http-installed-files.json', origin['installed-files.json'])
+    current = read(deployment / 'provenance/installed-files.json')
+    require(observed == current and len(current) == 9256
+            and digest(json.dumps(current, sort_keys=True, separators=(',', ':')).encode()) == R10_RUNTIME,
+            'Official R10 runtime inventory differs from the measured companion')
+    old_deployment = PurePosixPath(checked(root / 'old-http-deployment.json', origin['deployment.json'])['root'])
+    loaded_sources = {}
+    for rank in (0, 1):
+        inventory = checked(root / f'old-http-model-inventory-rank-{rank}.json',
+                            origin[f'service/raw-work/rank-{rank}-model-inventory.json'])
+        require(validate(inventory, text) == inventory_audit[str(rank)], 'Companion semantic inventory changed')
+        for role in ('target', 'draft'):
+            for name, pin in inventory[role]['source_sha256'].items():
+                path = PurePosixPath(name)
+                if path.is_relative_to(old_deployment):
+                    key = path.relative_to(old_deployment).as_posix()
+                    require(current.get(key) == pin, 'Unregistered observed runtime source: ' + key)
+                    actual = deployment / key
+                elif path.name == 'm01_route_capture.py':
+                    key = 'third-party-test-kit/proc_capture/m01_route_capture.py'
+                    actual = kit / key
+                else:
+                    require(path.name in ('module.py', 'container.py')
+                            and path.parent.parts[-3:] == ('torch', 'nn', 'modules'),
+                            'Unreviewed external observed source: ' + name)
+                    key = '/'.join(path.parts[-4:])
+                    actual = Path(distribution('torch').locate_file(key))
+                require(sha(actual) == pin, 'Observed loaded source differs: ' + key)
+                loaded_sources[key] = pin
+    return dict(companion_checksums_sha256=audit_pin, original_checksums_sha256=origin_pin,
+                release_runtime_sha256=R10_RUNTIME, loaded_source_sha256=loaded_sources,
+                companion_counts_or_times_used_for_native_work=False)
+
+
+def input_digest(data):
+    return digest((json.dumps(data, separators=(',', ':')) + '\n').encode())
+
+
+def verify_r10_sources(deployment, inventory, canonical_sources, variant_sources):
+    for name, expected in canonical_sources.items():
+        if name in variant_sources:
+            original, current = R10_LAYOUT_SOURCES[name]
+            require(expected == original, 'Original source domain pin differs: ' + name)
+            expected = current
+        require(inventory.get(name) == expected and sha(deployment / name) == expected,
+                'Reviewed R10 source differs: ' + name)
+
+
+def qualify_contiguous_restore(native, deployment, plan, sealed_read):
+    adapter = plan['model_adapter']
+    environment = sealed_read(native, 'service/launch-command.json')['environment']
+    require(plan['engine_release'] == RELEASE and adapter['restore_gated_rms'] is False
+            and adapter['diagnostic_ablation'] is False and adapter['gated_rms_mode'] == 'native'
+            and environment.get('HUST_RESTORE_GATED_RMS') in (None, '0')
+            and environment.get('MTP_GDN_LAYOUT_FUSION') == '1',
+            'This arithmetic bridge requires stable contiguous restore and native gated RMS')
+    inventory = read(deployment / 'provenance/installed-files.json')
+    verify_r10_sources(deployment, inventory, R10_DISPATCH_SOURCES, ())
+    return inventory, dict(
+        scope='stable native gated RMS; token/head restore layout only',
+        native_gated_rms=True, layout_fusion=True, fused_gated_rms=False,
+        changed_source_pins={name: dict(original=old, stable=current)
+                            for name, (old, current) in R10_LAYOUT_SOURCES.items()},
+        dispatch_source_pins=R10_DISPATCH_SOURCES,
+        source_review=('Original GDN attention, native gated RMS and projection remain on the active path. '
+                       'Both mixed-core prefill and verify computations retain the same inputs and calls. '
+                       'The contiguous restore uses the same token/head/source addresses and changes only the launch layout.'))
+
+
+def current_source_domains(native, deployment, plan, sealed_read):
+    from public_output_binding import bind
+    from qualify_dense_source import PROTOCOL as dense, PROTOCOL_SHA256 as dense_pin
+    from qualify_native_capacity import PROTOCOL as capacity, PROTOCOL_SHA256 as capacity_pin, RESET_SOURCE_SHA256
+
+    work_path = native / 'service/token-workload.json'
+    work = sealed_read(native, 'service/token-workload.json')
+    quality = deployment / 'inputs/mmlu-quality018-r2/quality-request-plan.json'
+    require(Path(plan['workload']).resolve() == work_path and plan['files'].get(str(work_path)) == sha(work_path)
+            and input_digest(work['request_token_ids']) == PROMPTS and input_digest(work['warmup_cohorts']) == WARMUP
+            and work['source_files'].get(str(quality)) == QUALITY_PLAN and sha(quality) == QUALITY_PLAN
+            and work['formal_questions_used_for_warmup'] is False,
+            'Current R10 fixed input, warmup or packaged quality plan differs')
+    arguments = sealed_read(native, 'service/client/effective-engine-args.json')
+    capacity_domain, dense_domain = checked(capacity, capacity_pin), checked(dense, dense_pin)
+    inventory = read(deployment / 'provenance/installed-files.json')
+    verify_r10_sources(deployment, inventory, capacity_domain['source_sha256'], ())
+    verify_r10_sources(deployment, inventory, dense_domain['sources']['B1'], (GDN,))
+    reset_sources = [Path(name) for name, pin in plan['files'].items()
+                     if Path(name).name == 'native_state_cache.py' and pin == RESET_SOURCE_SHA256]
+    require(len(reset_sources) == 1 and sha(reset_sources[0]) == RESET_SOURCE_SHA256,
+            'Current reset source differs from the capacity proof')
+    bind(deployment, native / 'service/native-plan.json', native / 'service/client/effective-engine-args.json')
+    log = native / 'service.log'
+    manifest = read(native / 'checksums.json')
+    require(log.is_file() and not log.is_symlink() and sha(log) == manifest.get('service.log'),
+            'Current capacity service log differs from the native seal')
+    return work, arguments, log.read_text(), capacity_domain, dense_domain
+
+
+def qualify(options):
+    sys.path[:0] = [str(options.kit / name) for name in ('scripts', 'third-party-test-kit')]
+    from full_reference_reuse import arm_statistics, qualify_native, read_statistics
+    from native_public_client import validate_frames
+    from public_work_ledger import ledger
+    from native_output_geometry import geometry as rebuild_geometry
+    from qualify_dense_source import validate_domain as validate_dense
+    from qualify_native_capacity import validate_artifacts as validate_capacity
+    from qualify_necessary_work import PROTOCOL, PROTOCOL_SHA256, sealed_read
+    from reference_capture_profile import profile
+    from reference_final_stages import validate_native_timing
+
+    native, deployment = options.native.resolve(), options.deployment.resolve()
+    native_pin = sha(native / 'checksums.json')
+    require(native_pin == options.native_seal, 'Current native evidence seal differs')
+    receipt = sealed_read(native, 'receipt.json')
+    native_plan = sealed_read(native, 'service/native-plan.json')
+    require(receipt['completed'] is True and receipt['quiescent'] is True and not receipt.get('failure')
+            and receipt['preflight_only'] is False
+            and receipt['role'] == 'B1' and receipt['formal_repetitions'] == 3
+            and native_plan['engine_release'] == RELEASE and Path(native_plan['deployment']).resolve() == deployment,
+            'A completed formal stable R10 native group is required')
+    domain = checked(PROTOCOL, PROTOCOL_SHA256)
+    for name, pin in domain['formula_sha256'].items():
+        require(sha(options.kit / 'third-party-test-kit' / name) == pin, 'Work formula source differs: ' + name)
+    inventory, restored_layout = qualify_contiguous_restore(native, deployment, native_plan, sealed_read)
+    verify_r10_sources(deployment, inventory, domain['sources']['B1'], R10_LAYOUT_SOURCES)
+    config = deployment / 'inputs/model-metadata/config.json'
+    text = checked(config, domain['model_config_sha256'])['text_config']
+    binding = companion(options.companion, deployment, options.kit, text)
+    applicability = qualify_native(native, 'B1', profile('submission-v2'))
+    reference = read_statistics(options.reference)
+    require(reference['original_method_frozen_unix'] < receipt['started'],
+            'Original reference method must predate current native measurement')
+    workload, arguments, log, capacity_domain, dense_domain = current_source_domains(
+        native, deployment, native_plan, sealed_read)
+    warmup = sealed_read(native, 'service/client/warmup.json')
+    cohorts = workload['warmup_cohorts']
+    require(warmup['formal_questions_used'] is False and warmup['cohorts'] == [
+                  dict(cohort=i, requests=len(tokens), output_tokens=32 * len(tokens)) for i, tokens in enumerate(cohorts)]
+            and {row['rank'] for row in warmup['boundary']} == {0, 1}
+            and all(row['sealed'] is True and row['failure'] is None for row in warmup['boundary'])
+            and sealed_read(native, 'service/client/after-warmup-reset.json')['reset'] is True,
+            'R10 warmup cohort count, compile boundary or final reset differs')
+    for index, tokens in enumerate(cohorts):
+        prefix = f'service/client/warmup-{index:02d}'
+        raw = sealed_read(native, prefix + '.json')
+        frames = validate_frames(raw, list(map(len, tokens)), 32)
+        require(all(len(row['output_ids']) == 32 and row['finish_reason'] == 'length' for row in frames)
+                and sealed_read(native, prefix + '-reset.json')['reset'] is True,
+                'R10 warmup did not reach the shared fixed budget')
+    timing_path = 'service/client/timings.json'
+    timings = sealed_read(native, timing_path)['repetitions']
+    require(len(timings) == 3 and receipt['result'] == timing_path
+            and receipt['result_sha256'] == sha(native / timing_path),
+            'Three unique native R10 timing records bound to the outer receipt are required')
+    rows, all_ids, end_ns = [], set(), -1
+    for repetition in range(1, 4):
+        base = 'service/client/formal-' + str(repetition)
+        timing = sealed_read(native, base + '-timing.json')
+        raw = sealed_read(native, base + '/raw-public-output-frames.json')
+        worker_audits = sealed_read(native, base + '-pre-audit.json')
+        geometry = sealed_read(native, base + '/public-output-geometry.json')
+        reset = sealed_read(native, base + '-reset.json')
+        require(geometry == rebuild_geometry(raw, workload['request_token_ids'], maximum=256)
+                and len(geometry['requests']) == 200 and all(row['output_tokens'] == 256
+                    and row['finish_reason'] == 'length' for row in geometry['requests']),
+                'New native raw outputs do not reproduce the formal geometry')
+        capacity = validate_capacity(arguments, reset, workload, log, capacity_domain)
+        capacity.update(source_ownership_qualified=True, no_preemption_certified=True,
+                        no_external_prefix_reuse_certified=True)
+        validate_dense(text, arguments, geometry, capacity, dense_domain)
+        work = ledger(SimpleNamespace(**text), geometry)
+        work.update(necessary_work_certified=True, source_runtime_applicability_certified=True)
+        seconds = validate_native_timing(raw, timing, worker_audits, work, repetition=repetition)
+        require(timing == timings[repetition - 1] and raw['start_ns'] >= end_ns
+                and len(set(raw['request_ids'])) == 200 and not all_ids.intersection(raw['request_ids']),
+                'Overlapping or mismatched native repetitions')
+        all_ids.update(raw['request_ids'])
+        end_ns = raw['end_ns']
+        rows.append(dict(repetition=repetition, requests=200, F_interval=work['F_interval'],
+                         T_seconds=str(Decimal(raw['end_ns'] - raw['start_ns']) / 10**9),
+                         geometry_sha256=work['geometry_sha256'], timing_sha256=sha(native / (base + '-timing.json')),
+                         native_source_seal_sha256=native_pin, public_clock_seconds=seconds,
+                         capacity_source_validated=True))
+    arm = arm_statistics(rows, reference['arms']['B1'])
+    b0 = checked(options.b0, PATCHED_B0)
+    baseline_denominator = reference['arms']['B0']['reference_tflops_per_card_upper']
+    require(b0['original_reference']['C_upper_tflops_per_card'] == baseline_denominator,
+            'Patched B0 uses a different independently verified B0 reference denominator')
+    pairs = {}
+    with localcontext() as context:
+        context.prec = 40
+        for version, baseline in b0['versions'].items():
+            base = list(map(Decimal, baseline['tflops_per_card_interval']))
+            current = list(map(Decimal, arm['achieved_tflops_per_card_interval']))
+            require(Decimal(baseline['reference_normalized_lower_percent']) == 100 * base[0] / Decimal(
+                baseline_denominator), 'Patched B0 reference-normalized result does not reproduce')
+            pairs[version] = dict(B0=baseline, B1_native_source_seal_sha256=native_pin,
+                                  B1_over_B0_effective_compute_interval=[str(current[0] / base[1]), str(current[1] / base[0])])
+    common = dict(profile='submission-v2', requests_per_repetition=200, repetitions=3,
+        ordered_prompt_token_ids_sha256=PROMPTS, warmup_cohorts_sha256=WARMUP,
+        warmup_cohort_sizes=[len(row) for row in workload['warmup_cohorts']], formal_sampling=native_plan['sampling'],
+        warmup_receipt_sha256=sha(native / 'service/client/warmup.json'),
+        native_workload_sha256=sha(native / 'service/token-workload.json'), native_checksums_sha256=native_pin)
+    mapping = sealed_read(native, 'device-mapping.json')
+    return dict(schema='deeplinkengine-stable-r10-patched-b0-ft-comparison/v1', B1_release=RELEASE,
+                B1=arm, pairs=pairs, independent_r10_companion=binding, native_applicability=applicability,
+                r10_contiguous_restore_source_review=restored_layout,
+                common_workload=common, B1_devices={k:mapping[k] for k in ('physical_cards', 'logical_cards')},
+                per_role_reference_tflops_per_card_upper=dict(B0=baseline_denominator,
+                    B1=arm['reference_tflops_per_card_upper']),
+                B1_native_seal_sha256=native_pin, existing_b0_report_sha256=PATCHED_B0,
+                existing_b0_repeated=False, five_datasets_repeated=False)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    for name in ('kit', 'native', 'deployment', 'companion', 'reference', 'b0', 'out'):
+        parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--native-seal', required=True)
+    args = parser.parse_args()
+    result = qualify(args)
+    with args.out.open('x', encoding='utf-8') as stream:
+        json.dump(result, stream, indent=2)
+        stream.write('\n')
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,872 @@
+{
+  "schema": "deeplinkengine-full-acceptance-report/v1",
+  "engine_release": "full-answer-b1-20261119-r9",
+  "execution_complete": true,
+  "targets": {
+    "4.1": {
+      "evidence_reason": "原完整参考的算量、参考时间与每卡分母已独立复算，并通过同工况输入、权重、精度、双卡及预算核验；本轮必要F和原生同步T重新计算分子，再除以原参考每卡上界。两份F不相消，未沿用旧效率。",
+      "milestone": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "本轮必要算量、同步计时和已核验同工况参考分母，效率下界≥50%。"
+      },
+      "final": {
+        "met": false,
+        "status": "未达成目标",
+        "reason": "同一效率下界≥90%。"
+      },
+      "efficiency_lower_percent": "89.53208007570844306128260183644895633833",
+      "certificate_kind": "qualified_full_reference_denominator_reuse/v1"
+    },
+    "4.2": {
+      "milestone": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "同一数据集同时满足吞吐及两项平均时延：MMLU-Pro, HLE-Verified, FrontierScience, SWE-bench-Pro trace, TerminalBench 2.1 trace"
+      },
+      "final": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "同一数据集同时满足吞吐及两项平均时延：MMLU-Pro, FrontierScience, SWE-bench-Pro trace, TerminalBench 2.1 trace"
+      },
+      "datasets": {
+        "mmlu": {
+          "met": true,
+          "execution_complete": true,
+          "throughput_ratio": "2.952586516884603795145965809",
+          "ttft_ratio": "0.3169659022133338069489542733",
+          "tpot_ratio": "0.5296077838532617009140817839",
+          "quality": {
+            "met": true
+          }
+        },
+        "hle": {
+          "met": true,
+          "execution_complete": true,
+          "throughput_ratio": "1.840615194074885663165121269",
+          "ttft_ratio": "0.5405260369839617291430992044",
+          "tpot_ratio": "0.5664327875017998191868805805",
+          "quality": {
+            "met": true
+          }
+        },
+        "frontier": {
+          "met": true,
+          "execution_complete": true,
+          "throughput_ratio": "2.542840738801331745935506948",
+          "ttft_ratio": "0.3713303440045255546330573762",
+          "tpot_ratio": "0.3902125156652974347880634546",
+          "quality": {
+            "met": true
+          }
+        },
+        "swe": {
+          "met": true,
+          "execution_complete": true,
+          "throughput_ratio": "2.149634042431336031980450833",
+          "ttft_ratio": "0.6149658522685542841154321127",
+          "tpot_ratio": "0.4082487049352479711428819456",
+          "quality": {
+            "met": true
+          }
+        },
+        "terminal": {
+          "met": true,
+          "execution_complete": true,
+          "throughput_ratio": "2.941280840650527343000962037",
+          "ttft_ratio": "0.5103223967390132858667040531",
+          "tpot_ratio": "0.3956324357250456983622390400",
+          "quality": {
+            "met": true
+          }
+        }
+      },
+      "final_datasets": {
+        "mmlu": {
+          "met": true,
+          "execution_complete": true,
+          "throughput_ratio": "2.952586516884603795145965809",
+          "ttft_ratio": "0.3169659022133338069489542733",
+          "tpot_ratio": "0.5296077838532617009140817839",
+          "quality": {
+            "met": true
+          }
+        },
+        "hle": {
+          "met": false,
+          "execution_complete": true,
+          "throughput_ratio": "1.840615194074885663165121269",
+          "ttft_ratio": "0.5405260369839617291430992044",
+          "tpot_ratio": "0.5664327875017998191868805805",
+          "quality": {
+            "met": true
+          }
+        },
+        "frontier": {
+          "met": true,
+          "execution_complete": true,
+          "throughput_ratio": "2.542840738801331745935506948",
+          "ttft_ratio": "0.3713303440045255546330573762",
+          "tpot_ratio": "0.3902125156652974347880634546",
+          "quality": {
+            "met": true
+          }
+        },
+        "swe": {
+          "met": true,
+          "execution_complete": true,
+          "throughput_ratio": "2.149634042431336031980450833",
+          "ttft_ratio": "0.6149658522685542841154321127",
+          "tpot_ratio": "0.4082487049352479711428819456",
+          "quality": {
+            "met": true
+          }
+        },
+        "terminal": {
+          "met": true,
+          "execution_complete": true,
+          "throughput_ratio": "2.941280840650527343000962037",
+          "ttft_ratio": "0.5103223967390132858667040531",
+          "tpot_ratio": "0.3956324357250456983622390400",
+          "quality": {
+            "met": true
+          }
+        }
+      }
+    },
+    "4.3": {
+      "milestone": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "16K/4K吞吐≥50%，TTFT P95/P99比值≤3，TPOT P95/P99比值≤2；两臂完整且无失败。"
+      },
+      "final": {
+        "met": false,
+        "status": "未达成目标",
+        "reason": "32K全部五个60秒窗口：吞吐max/min≤1.50，TTFT P95/P99≤2，TPOT P95/P99≤1.25；两臂完整且无失败。"
+      },
+      "percentile_method": "nearest_rank",
+      "blocking_errors": {
+        "B0": [],
+        "B1": []
+      },
+      "measured_ratios": {
+        "throughput": "0.6299741074655761560381378639",
+        "ttft_p95": "2.057888391522584127239785194",
+        "ttft_p99": "2.610980336833835856430419744",
+        "tpot_p95": "1.431602938082765222590676707",
+        "tpot_p99": "1.426952662000593640836837288"
+      },
+      "measured_window_ratios": {
+        "throughput": "1.454361515339579155186304124",
+        "ttft_p95": "2.080988637409040907508178529",
+        "ttft_p99": "2.081962708084552087697903475",
+        "tpot_p95": "1.501788860162271399606004216",
+        "tpot_p99": "1.067635389027310135442137928"
+      }
+    },
+    "4.4": {
+      "utilization_gain_pp": "45.38294548310371",
+      "four_tenant_ai_core_mean_percent": "84.7367181794055",
+      "rental_quote": {
+        "provider": "上海有色网 (SMM)",
+        "url": "https://news.smm.cn/news/TCNOQJBAJVZYJ73BMVU7G5GJZXQ462A4U6NN4CY",
+        "checked_date": "2026-11-21",
+        "published_date": "2026-11-17",
+        "cny_per_server_month": 15000,
+        "cards_per_server": 8,
+        "cny_per_card_month": 1875,
+        "days_per_month": 30
+      },
+      "cost_basis": "published_rental",
+      "formula": "10^6 × 1875 CNY per card-month × occupied cards × formal window seconds / (30 × 86400 × successful output tokens)",
+      "formal_cost": {
+        "mmlu": {
+          "arms": {
+            "B0": {
+              "window_seconds": "1426.005969121994",
+              "successful_output_tokens": 721900,
+              "occupied_cards": 2,
+              "measurement_seal_sha256": "b879abd7204d5f719132000a54c87a066c11abf148fc0c056f7e33a7546d6659",
+              "monthly_cost_per_card_cny": "1875",
+              "cost_per_million_output_tokens_cny": "2.857857514318074762842909401",
+              "unit_cny_per_million_output_tokens": "2.857857514318074762842909401"
+            },
+            "B1": {
+              "window_seconds": "473.23409574094694",
+              "successful_output_tokens": 707350,
+              "occupied_cards": 2,
+              "measurement_seal_sha256": "8711e21835bb648c5b3c23903ff79c947c3d558910d23acc70c4d2b207161d6b",
+              "monthly_cost_per_card_cny": "1875",
+              "cost_per_million_output_tokens_cny": "0.9679166039589987587343475518",
+              "unit_cny_per_million_output_tokens": "0.9679166039589987587343475518"
+            }
+          },
+          "utilization": {
+            "B0": {
+              "per_card_percent": {
+                "1": 33.00333538557099,
+                "6": 33.451083567727835
+              },
+              "mean_percent": 33.22720947664941,
+              "covered_seconds": 1426.005969121994,
+              "missing_seconds": 0.0,
+              "max_hold_age_seconds": 6.809675950964447,
+              "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+            },
+            "B1": {
+              "per_card_percent": {
+                "1": 79.01917311530337,
+                "6": 78.20113680420285
+              },
+              "mean_percent": 78.61015495975312,
+              "covered_seconds": 473.23409574094694,
+              "missing_seconds": 0.0,
+              "max_hold_age_seconds": 7.317248108563945,
+              "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+            }
+          },
+          "reduction_percent": "66.13139041713360734311772317"
+        },
+        "four_tenant": {
+          "arms": {
+            "B0": {
+              "window_seconds": "311.53741639497457",
+              "successful_output_tokens": 40192,
+              "occupied_cards": 2,
+              "measurement_seal_sha256": "ea79bc36280efbe3e7272bf2453c5589b186583e18f49f4f8857f24993439ba2",
+              "monthly_cost_per_card_cny": "1875",
+              "cost_per_million_output_tokens_cny": "11.21416306168234524341033410",
+              "unit_cny_per_million_output_tokens": "11.21416306168234524341033410"
+            },
+            "B1": {
+              "window_seconds": "307.7012882716954",
+              "successful_output_tokens": 108032,
+              "occupied_cards": 2,
+              "measurement_seal_sha256": "1a9a03cd80a5b46679bcb077cbcdd0d4da9e059b59e9f693496e0aee6ddc2e5c",
+              "monthly_cost_per_card_cny": "1875",
+              "cost_per_million_output_tokens_cny": "4.120720600313590747631703089",
+              "unit_cny_per_million_output_tokens": "4.120720600313590747631703089"
+            }
+          },
+          "utilization": {
+            "B0": {
+              "per_card_percent": {
+                "1": 30.927905763274776,
+                "6": 30.384589131887108
+              },
+              "mean_percent": 30.65624744758094,
+              "covered_seconds": 311.53741639497457,
+              "missing_seconds": 0.0,
+              "max_hold_age_seconds": 6.8488598674885,
+              "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+            },
+            "B1": {
+              "per_card_percent": {
+                "0": 84.59503272576033,
+                "3": 84.87840363305068
+              },
+              "mean_percent": 84.7367181794055,
+              "covered_seconds": 307.7012882716954,
+              "missing_seconds": 0.0,
+              "max_hold_age_seconds": 6.775067146867514,
+              "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+            }
+          },
+          "reduction_percent": "63.25431886759633465734551720"
+        }
+      },
+      "milestone": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "MMLU200 完整回答满足质量和服务要求，按公开月租折算的单位成本下降≥10%，双卡 AI Core 提高≥10个百分点。",
+        "reduction_percent": "66.13139041713360734311772317"
+      },
+      "final": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "4K 四租户按公开月租折算的单位成本下降≥30%，B1 双卡 AI Core 均值≥80%，两臂各租户完整结束。",
+        "reduction_percent": "63.25431886759633465734551720"
+      },
+      "unit_cost_reduction_percent": "66.13139041713360734311772317",
+      "four_tenant_cost_reduction_percent": "63.25431886759633465734551720"
+    }
+  },
+  "execution_devices": {
+    "fixed_five": {
+      "current": [
+        0,
+        3
+      ],
+      "stages": {
+        "continuous-B0": [
+          1,
+          6
+        ],
+        "continuous-B1": [
+          1,
+          6
+        ],
+        "mmlu-pair": [
+          1,
+          6
+        ],
+        "frontier-solver-B0": [
+          1,
+          6
+        ],
+        "frontier-solver-B1": [
+          1,
+          6
+        ],
+        "frontier-judge-B0": [
+          1,
+          6
+        ],
+        "frontier-judge-B1": [
+          1,
+          6
+        ],
+        "hle-solver-B0": [
+          1,
+          6
+        ],
+        "hle-solver-B1": [
+          0,
+          3
+        ],
+        "hle-judge-B0": [
+          0,
+          3
+        ],
+        "hle-judge-B1": [
+          0,
+          3
+        ],
+        "swe-trace-B0": [
+          1,
+          6
+        ],
+        "swe-trace-B1": [
+          0,
+          3
+        ],
+        "terminal-trace-B0": [
+          1,
+          6
+        ],
+        "terminal-trace-B1": [
+          0,
+          3
+        ]
+      }
+    }
+  },
+  "measurements": [
+    {
+      "id": "mmlu",
+      "label": "MMLU200",
+      "control": "B0",
+      "candidate": "r9",
+      "baseline_id": "original018-cann8.5.1",
+      "arms": [
+        {
+          "role": "B0",
+          "requests": 200,
+          "failed": 0,
+          "output_tokens": 721900,
+          "duration_seconds": 1426.005969121994,
+          "output_tokens_per_second": 506.23911514513577,
+          "mean_ttft_ms": 516926.28600326163,
+          "mean_tpot_ms": 40.32025335120394,
+          "truncated": 23,
+          "source_seal_sha256": "b879abd7204d5f719132000a54c87a066c11abf148fc0c056f7e33a7546d6659",
+          "correct": 139,
+          "unresolved": 0,
+          "source_completed_utc": "2026-11-17T14:14:10.882176+00:00",
+          "physical_cards": [
+            1,
+            6
+          ]
+        },
+        {
+          "role": "r9",
+          "requests": 200,
+          "failed": 0,
+          "output_tokens": 707350,
+          "duration_seconds": 473.23409574094694,
+          "output_tokens_per_second": 1494.7147856971203,
+          "mean_ttft_ms": 163848.00662081165,
+          "mean_tpot_ms": 21.353920021733167,
+          "truncated": 24,
+          "source_seal_sha256": "8711e21835bb648c5b3c23903ff79c947c3d558910d23acc70c4d2b207161d6b",
+          "correct": 143,
+          "unresolved": 0,
+          "source_completed_utc": "2026-11-20T10:34:24.797754+00:00",
+          "physical_cards": [
+            1,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hle",
+      "label": "HLE200",
+      "control": "B0",
+      "candidate": "r9",
+      "baseline_id": "original018-cann8.5.1",
+      "arms": [
+        {
+          "failed": 0,
+          "duration_seconds": 3885.0061199310003,
+          "output_tokens_per_second": 559.9211256940399,
+          "mean_ttft_ms": 572.1570441743825,
+          "mean_tpot_ms": 27.48568454179799,
+          "source_seal_sha256": "252b06216894a9631a59649e781ca20862788ae07b583245944fdc4e75368079",
+          "role": "B0",
+          "physical_cards": [
+            1,
+            6
+          ],
+          "requests": 200,
+          "successful": 200,
+          "unreturned": 0,
+          "output_tokens": 2175297,
+          "truncated": 122,
+          "source_completed_utc": "2026-11-17T21:58:58.191717+00:00",
+          "correct": 57,
+          "unresolved": 1,
+          "quality_tracks": {
+            "gold": {
+              "total": 74,
+              "graded": 74,
+              "successes": 18,
+              "accuracy": 0.24324324324324326,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.097754949976972,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 39,
+              "judge_truncated": 0
+            },
+            "revision": {
+              "total": 126,
+              "graded": 125,
+              "successes": 39,
+              "accuracy": 0.30952380952380953,
+              "unresolved": 1,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.08072205016422743,
+              "solver_failures": 0,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "solver_truncated": 83,
+              "judge_truncated": 1
+            }
+          },
+          "judge_physical_cards": [
+            0,
+            3
+          ]
+        },
+        {
+          "failed": 0,
+          "duration_seconds": 2115.2022260315716,
+          "output_tokens_per_second": 1030.5993314359637,
+          "mean_ttft_ms": 309.2657796200365,
+          "mean_tpot_ms": 15.568792911405765,
+          "source_seal_sha256": "e641a4852b05eb11ff3b30168d1f3c2c564fbf9975afc32332d20e52e6c10b8e",
+          "role": "r9",
+          "physical_cards": [
+            0,
+            3
+          ],
+          "requests": 200,
+          "successful": 200,
+          "unreturned": 0,
+          "output_tokens": 2179926,
+          "truncated": 118,
+          "source_completed_utc": "2026-11-21T09:29:35.874676+00:00",
+          "correct": 54,
+          "unresolved": 3,
+          "quality_tracks": {
+            "gold": {
+              "total": 74,
+              "graded": 74,
+              "successes": 18,
+              "accuracy": 0.24324324324324326,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.097754949976972,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 40,
+              "judge_truncated": 0
+            },
+            "revision": {
+              "total": 126,
+              "graded": 123,
+              "successes": 36,
+              "accuracy": 0.2857142857142857,
+              "unresolved": 3,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.07888106377466154,
+              "solver_failures": 0,
+              "judge_invalid": 3,
+              "judge_transport_failures": 0,
+              "solver_truncated": 78,
+              "judge_truncated": 3
+            }
+          },
+          "judge_physical_cards": [
+            0,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "frontier",
+      "label": "Frontier160",
+      "control": "B0",
+      "candidate": "r9",
+      "baseline_id": "original018-cann8.5.1",
+      "arms": [
+        {
+          "role": "B0",
+          "requests": 160,
+          "failed": 0,
+          "output_tokens": 1178893,
+          "duration_seconds": 3033.7339827370015,
+          "output_tokens_per_second": 388.5947175026914,
+          "mean_ttft_ms": 819.7433263350831,
+          "mean_tpot_ms": 38.92342869990322,
+          "truncated": 39,
+          "source_seal_sha256": "c5907da1ff3d4bd769acc6f432d99f0e43fe9bbdf8e71693320dedc410c4aaec",
+          "correct": 69,
+          "unresolved": 9,
+          "quality_tracks": {
+            "olympiad": {
+              "total": 100,
+              "graded": 94,
+              "successes": 65,
+              "solver_failures": 0,
+              "judge_unresolved": 6,
+              "judge_invalid": 6,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 2,
+              "judge_audit_flagged": 2,
+              "solver_truncated": 33,
+              "judge_truncated": 8,
+              "success_rate": 0.65,
+              "observed_success_lower_bound": 0.65,
+              "mean_research_score_valid_only": null
+            },
+            "research": {
+              "total": 60,
+              "graded": 57,
+              "successes": 4,
+              "solver_failures": 0,
+              "judge_unresolved": 3,
+              "judge_invalid": 3,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 2,
+              "judge_audit_flagged": 6,
+              "solver_truncated": 6,
+              "judge_truncated": 5,
+              "success_rate": 0.06666666666666667,
+              "observed_success_lower_bound": 0.06666666666666667,
+              "mean_research_score_valid_only": 2.341666666666667
+            }
+          },
+          "source_completed_utc": "2026-11-17T18:01:36.345321+00:00",
+          "physical_cards": [
+            1,
+            6
+          ]
+        },
+        {
+          "role": "r9",
+          "requests": 160,
+          "failed": 0,
+          "output_tokens": 1254371,
+          "duration_seconds": 1269.433490310097,
+          "output_tokens_per_second": 988.1344785488386,
+          "mean_ttft_ms": 304.39557136342046,
+          "mean_tpot_ms": 15.188409031308073,
+          "truncated": 42,
+          "source_seal_sha256": "3e901b4ce5a5142d6df4bb8d824ae6e5c3de71109f679f6e9acbb5e3fb0cad0e",
+          "correct": 65,
+          "unresolved": 8,
+          "quality_tracks": {
+            "olympiad": {
+              "total": 100,
+              "graded": 96,
+              "successes": 62,
+              "solver_failures": 0,
+              "judge_unresolved": 4,
+              "judge_invalid": 4,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 1,
+              "judge_audit_flagged": 1,
+              "solver_truncated": 32,
+              "judge_truncated": 5,
+              "success_rate": 0.62,
+              "observed_success_lower_bound": 0.62,
+              "mean_research_score_valid_only": null
+            },
+            "research": {
+              "total": 60,
+              "graded": 56,
+              "successes": 3,
+              "solver_failures": 0,
+              "judge_unresolved": 4,
+              "judge_invalid": 4,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 5,
+              "judge_audit_flagged": 5,
+              "solver_truncated": 10,
+              "judge_truncated": 9,
+              "success_rate": 0.05,
+              "observed_success_lower_bound": 0.05,
+              "mean_research_score_valid_only": 2.253214285714286
+            }
+          },
+          "source_completed_utc": "2026-11-20T14:36:51.282899+00:00",
+          "physical_cards": [
+            1,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "swe",
+      "label": "SWE-bench Pro trace",
+      "control": "B0",
+      "candidate": "r9",
+      "baseline_id": "original018-cann8.5.1",
+      "arms": [
+        {
+          "failed": 0,
+          "duration_seconds": 160.57507177302614,
+          "output_tokens_per_second": 50.879628511381554,
+          "mean_ttft_ms": 3122.073883968369,
+          "mean_tpot_ms": 121.89023352741987,
+          "source_seal_sha256": "8fc75c65e91244737b10514552cac0d3c971c9ca7f6b1dc8ed82ede548c8d9a7",
+          "role": "B0",
+          "physical_cards": [
+            1,
+            6
+          ],
+          "requests": 64,
+          "successful": 64,
+          "unreturned": 0,
+          "output_tokens": 8170,
+          "truncated": 2,
+          "source_completed_utc": "2026-11-18T01:16:29.873642+00:00"
+        },
+        {
+          "failed": 0,
+          "duration_seconds": 57.546415315940976,
+          "output_tokens_per_second": 109.37258151432579,
+          "mean_ttft_ms": 1919.9688269000035,
+          "mean_tpot_ms": 49.761529981824104,
+          "source_seal_sha256": "be551a413e8402194d4817812ed686249f99f5f5598ac1dd422538ad00d75e4c",
+          "role": "r9",
+          "physical_cards": [
+            0,
+            3
+          ],
+          "requests": 64,
+          "successful": 64,
+          "unreturned": 0,
+          "output_tokens": 6294,
+          "truncated": 1,
+          "source_completed_utc": "2026-11-21T11:03:38.006376+00:00"
+        }
+      ],
+      "source_tasks": 32,
+      "mode": "public_request_replay"
+    },
+    {
+      "id": "terminal",
+      "label": "Terminal-Bench 2.1 trace",
+      "control": "B0",
+      "candidate": "r9",
+      "baseline_id": "original018-cann8.5.1",
+      "arms": [
+        {
+          "failed": 0,
+          "duration_seconds": 175.097352857003,
+          "output_tokens_per_second": 77.27129953272089,
+          "mean_ttft_ms": 3965.2407299230013,
+          "mean_tpot_ms": 81.76412729078463,
+          "source_seal_sha256": "f01b880eebe70b83dfe69daa739c85be3ebd855b3bd784731556268bec41bc47",
+          "role": "B0",
+          "physical_cards": [
+            1,
+            6
+          ],
+          "requests": 48,
+          "successful": 48,
+          "unreturned": 0,
+          "output_tokens": 13530,
+          "truncated": 3,
+          "source_completed_utc": "2026-11-18T02:33:36.811578+00:00"
+        },
+        {
+          "failed": 0,
+          "duration_seconds": 63.85611390136182,
+          "output_tokens_per_second": 227.27659284776,
+          "mean_ttft_ms": 2023.5511529414605,
+          "mean_tpot_ms": 32.348540834985805,
+          "source_seal_sha256": "6ff11c5314e49fab787cfe508d1a6709eb530c4447dca1e69461f21c21e9d3f5",
+          "role": "r9",
+          "physical_cards": [
+            0,
+            3
+          ],
+          "requests": 48,
+          "successful": 48,
+          "unreturned": 0,
+          "output_tokens": 14513,
+          "truncated": 3,
+          "source_completed_utc": "2026-11-21T11:32:45.354920+00:00"
+        }
+      ],
+      "source_tasks": 32,
+      "mode": "public_request_replay"
+    },
+    {
+      "id": "4096-formal",
+      "label": "4K / C8",
+      "control": "B0",
+      "candidate": "r9",
+      "baseline_id": "original018-cann8.5.1",
+      "arms": [
+        {
+          "role": "B0",
+          "requests": 152,
+          "failed": 0,
+          "output_tokens": 38912,
+          "duration_seconds": 308.22856341302395,
+          "output_tokens_per_second": 126.2439780698008,
+          "mean_ttft_ms": 1655.1112870166482,
+          "mean_tpot_ms": 56.39988700156132,
+          "truncated": 152,
+          "source_seal_sha256": "55e3d0aded9cf14baefde733042c1a82265142e0e316b31809e72691941249b0",
+          "source_completed_utc": "2026-11-19T23:32:51.209786+00:00",
+          "physical_cards": [
+            1,
+            6
+          ]
+        },
+        {
+          "role": "r9",
+          "requests": 455,
+          "failed": 0,
+          "output_tokens": 116480,
+          "duration_seconds": 303.10824608197436,
+          "output_tokens_per_second": 384.28515721904336,
+          "mean_ttft_ms": 839.3761466495222,
+          "mean_tpot_ms": 17.526029208241575,
+          "truncated": 455,
+          "source_seal_sha256": "fdfff7b163f478a5580d6261f028b9409a4201a7e6fa99c8bfa243cb8140bce0",
+          "source_completed_utc": "2026-11-20T08:32:51.855781+00:00",
+          "physical_cards": [
+            1,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "16384-formal",
+      "label": "16K / C8",
+      "control": "B0",
+      "candidate": "r9",
+      "baseline_id": "original018-cann8.5.1",
+      "arms": [
+        {
+          "role": "B0",
+          "requests": 73,
+          "failed": 0,
+          "output_tokens": 18688,
+          "duration_seconds": 313.719726889045,
+          "output_tokens_per_second": 59.56909431649955,
+          "mean_ttft_ms": 5786.16316898643,
+          "mean_tpot_ms": 110.6630329851608,
+          "truncated": 73,
+          "source_seal_sha256": "55e3d0aded9cf14baefde733042c1a82265142e0e316b31809e72691941249b0",
+          "source_completed_utc": "2026-11-19T23:32:51.209786+00:00",
+          "physical_cards": [
+            1,
+            6
+          ]
+        },
+        {
+          "role": "r9",
+          "requests": 189,
+          "failed": 0,
+          "output_tokens": 48384,
+          "duration_seconds": 303.26738864800427,
+          "output_tokens_per_second": 159.54237683023095,
+          "mean_ttft_ms": 3070.9273480759716,
+          "mean_tpot_ms": 38.17255685770861,
+          "truncated": 189,
+          "source_seal_sha256": "fdfff7b163f478a5580d6261f028b9409a4201a7e6fa99c8bfa243cb8140bce0",
+          "source_completed_utc": "2026-11-20T08:32:51.855781+00:00",
+          "physical_cards": [
+            1,
+            6
+          ]
+        }
+      ]
+    }
+  ],
+  "raw_asset": {
+    "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/full-answer-b1-20261119-r9/r9-qwen-completed-evidence-projection-20261121-v1.tar.gz",
+    "sha256": "0b7d4f8ab2ace2ce325c681476c77de1c8b38d0eee369ce3b607cddf47e11d2a",
+    "bytes": 254206,
+    "asset_id": 776039136,
+    "redownload_verified": true,
+    "public_download": {
+      "path": "data/r9-qwen-run29-20261121/r9-qwen-completed-evidence-projection-20261121-v1.tar.gz",
+      "sha256": "0b7d4f8ab2ace2ce325c681476c77de1c8b38d0eee369ce3b607cddf47e11d2a",
+      "bytes": 254206
+    }
+  },
+  "prior_public_evidence": {
+    "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/full-answer-b1-20261119-r9/r9-qwen-partial-originals-20261121-v1.tar.gz",
+    "bytes": 131040800,
+    "sha256": "a73f661e451f5fe606094978416330a42bca1c45777d01487cf6532e7cd9226c",
+    "redownload_verified": true
+  },
+  "evidence_sha256": {
+    "fixed_five_campaign": "97d53cf88a069e0ea55a76aa13fd13b38c9a0ffcecb913e2285af49e5ffad4fa",
+    "context_summary": "126dbe9487430a66a65dcdd5bbdf14c76df52ea40af92a76da418cb9f5785ce5",
+    "compute_reference": "78e4c48974f261d1f5558832e763f38e05b3d7f1fb3a93eef08d90d64d5224da",
+    "cost_report": "3f269fdf5eb18fda35a50f0e51b4be031afc14b16330a191636f214d0d504a90"
+  },
+  "baseline_id": "original018-cann8.5.1",
+  "b0_inference_reruns": 0,
+  "compute_reference": {
+    "path": "data/r9-qwen-run29-20261121/compute-reference.json",
+    "sha256": "e745b3ec08ba08da840deb0ef404c3ac87054487ed65faff672bf1171425c5c4",
+    "bytes": 12010
+  },
+  "context_tenant_supplement": {
+    "path": "data/r9-qwen-run29-20261121/context-supplement.json",
+    "sha256": "b91fa2ce25276952a9c3994fa9197a8f4c3d30327e63f520d0d1f122b0835213",
+    "bytes": 58727
+  }
+}

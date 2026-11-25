@@ -1,0 +1,98 @@
+"""CPU arithmetic fixtures only, never actual1GiB admission or performance."""
+
+import importlib.util
+import json
+from pathlib import Path
+
+import pytest
+
+SPEC = importlib.util.spec_from_file_location(
+    "capacity", Path(__file__).with_name("capacity_rules.py")
+)
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+
+
+def fixture(blocks):
+    groups = [
+        {
+            "index": 0,
+            "layer_names": ["a" + str(i) for i in range(11)],
+            "layer_count": 11,
+            "is_eagle_group": False,
+            "spec": {
+                "type": "FullAttentionSpec",
+                "block_size_tokens": 2048,
+                "page_size_bytes": 2138112,
+                "sliding_window": None,
+                "attention_chunk_size": None,
+            },
+        }
+    ]
+    for index, size in [(1, 11), (2, 11), (3, 8)]:
+        groups.append(
+            {
+                "index": index,
+                "layer_names": ["m" + str(index) + "-" + str(i) for i in range(size)],
+                "layer_count": size,
+                "is_eagle_group": False,
+                "spec": {
+                    "type": "MambaSpec",
+                    "block_size_tokens": 2048,
+                    "page_size_bytes": 2138112,
+                    "mamba_cache_mode": "align",
+                    "num_speculative_blocks": 2,
+                },
+            }
+        )
+    base = {
+        "num_blocks": blocks,
+        "groups": groups,
+        "tensor_descriptors": [
+            {"size_bytes": blocks * 2138112, "shared_by": ["descriptor" + str(i)]}
+            for i in range(11)
+        ],
+        "actual_profile": {
+            "kv_cache_memory_bytes": 1073741824,
+            "max_model_len": 65536,
+            "speculative_num_tokens": 2,
+            "max_num_seqs": 16,
+        },
+        "observer_source_sha256": "fixture-only",
+        "loaded_vllm_file": "fixture-only",
+        "loaded_ascend_file": "fixture-only",
+    }
+    return {"results": [{**base, "rank": rank, "local_rank": rank} for rank in [0, 1]]}
+
+
+def test_hybrid_admission_states_are_not_linear_context_token_blocks():
+    data = fixture(45)
+    before = json.dumps(data, sort_keys=True)
+    result = MODULE.evaluate(data)
+    assert result["usable_pool_blocks"] == 44
+    assert result["sum_first_prefill_blocks_per_request"] == 18
+    assert result["sum_input_resident_upper_blocks_per_request"] == 21
+    assert result["sum_end_resident_upper_blocks_per_request"] == 23
+    assert result["max_context_upper_blocks"] == 44
+    assert result["admission_active_upper_bound"] == 2
+    assert result["go_for_fixed_workload"] is True
+    assert json.dumps(data, sort_keys=True) == before
+
+
+def test_large_capacity_that_can_hold_the_fixed_peak_is_no_go():
+    assert MODULE.evaluate(fixture(730))["go_for_fixed_workload"] is False
+
+
+def test_max_context_not_fitting_or_unsupported_groups_are_no_go():
+    assert MODULE.evaluate(fixture(40))["go_for_fixed_workload"] is False
+    data = fixture(45)
+    data["results"][0]["groups"][0]["is_eagle_group"] = True
+    with pytest.raises(AssertionError, match="draft-group"):
+        MODULE.evaluate(data)
+
+
+def test_rank_layout_disagreement_rejects_instead_of_guessing_one_rank():
+    data = fixture(45)
+    data["results"][1]["num_blocks"] = 46
+    with pytest.raises(AssertionError, match="different actual layouts"):
+        MODULE.evaluate(data)

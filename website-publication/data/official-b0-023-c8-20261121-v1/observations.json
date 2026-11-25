@@ -1,0 +1,101 @@
+{
+  "schema": "vllm-hust-official-baseline-observations/v1",
+  "baseline_id": "official-0.23.0",
+  "model": "Qwen3.5-35B-A3B",
+  "precision": "BF16",
+  "tensor_parallel_size": 2,
+  "runtime": {
+    "kind": "official-image",
+    "image_digest": "sha256:4ee78def8f33d59d48f116d1dfa793332c23c99ecab4f0d7dd5cd62d0fb4e6c1",
+    "baseline_id": "official-vllm-0.23.0",
+    "versions": {
+      "vllm": "0.23.0+empty",
+      "vllm-ascend": "0.23.0",
+      "torch": "2.10.0+cpu",
+      "torch-npu": "2.10.0.post4"
+    },
+    "requested_graph_mode": "FULL",
+    "effective_graph_mode": "FULL_DECODE_ONLY"
+  },
+  "hardware": {
+    "chip_model": "Ascend 910B2",
+    "driver_version": null,
+    "driver_version_status": "not-recorded",
+    "npu_smi_version": "26.0.rc1",
+    "npu_smi_version_evidence": "original npu-smi header; tool version only",
+    "physical_devices": [
+      0,
+      7
+    ],
+    "host_identity": null,
+    "host_identity_status": "Not recorded in original sealed arm",
+    "cohort_id": "c9afa42af8b015c1213a82b36e7c50db51175746501e684f0268cddc409a5200"
+  },
+  "profiles": [
+    {
+      "id": "4096-formal",
+      "label": "4K / C8 路 continuous synthetic",
+      "workload_kind": "continuous-synthetic",
+      "raw_phase_id": "4096-formal",
+      "arm": {
+        "role": "B0",
+        "source_seal_sha256": "c9afa42af8b015c1213a82b36e7c50db51175746501e684f0268cddc409a5200",
+        "requests": 267,
+        "failed": 0,
+        "successful": 267,
+        "output_tokens": 68352,
+        "duration_seconds": 303.10687444894575,
+        "output_tokens_per_second": 225.50461821186101,
+        "mean_ttft_ms": 1198.3761377850624,
+        "mean_tpot_ms": 30.780032969486445,
+        "original_submission_seconds": 300,
+        "original_phase_start": {
+          "monotonic": 672517.377646552,
+          "wall": 1795240113.8640823,
+          "monotonic_after": 672517.377647462
+        },
+        "original_phase_end": {
+          "monotonic": 672820.484521001,
+          "wall": 1795240416.9709568,
+          "monotonic_after": 672820.484521541
+        }
+      }
+    },
+    {
+      "id": "16384-formal",
+      "label": "16K / C8 路 continuous synthetic",
+      "workload_kind": "continuous-synthetic",
+      "raw_phase_id": "16384-formal",
+      "arm": {
+        "role": "B0",
+        "source_seal_sha256": "c9afa42af8b015c1213a82b36e7c50db51175746501e684f0268cddc409a5200",
+        "requests": 137,
+        "failed": 0,
+        "successful": 137,
+        "output_tokens": 35072,
+        "duration_seconds": 302.61343022005167,
+        "output_tokens_per_second": 115.89703726796482,
+        "mean_ttft_ms": 3303.7196868235233,
+        "mean_tpot_ms": 56.18541535869877,
+        "original_submission_seconds": 300,
+        "original_phase_start": {
+          "monotonic": 672887.645380251,
+          "wall": 1795240484.131816,
+          "monotonic_after": 672887.645380951
+        },
+        "original_phase_end": {
+          "monotonic": 673190.258810471,
+          "wall": 1795240786.7452462,
+          "monotonic_after": 673190.258810931
+        }
+      }
+    }
+  ],
+  "pairs": null,
+  "F": null,
+  "efficiency_percent": null,
+  "necessary_work_certified": false,
+  "source_execution_status": "failed",
+  "original_campaign_seal_sha256": "721d6dff52613510a3e9ff33b2d0d794c7ff5c286551572decc014261d26cc44",
+  "independent_third_party": false
+}

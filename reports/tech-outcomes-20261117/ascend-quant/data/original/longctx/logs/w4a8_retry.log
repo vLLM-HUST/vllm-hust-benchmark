@@ -1,0 +1,56 @@
+=== W4A8 retry on card 7 port 8230 ===
+run_dir=/data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z
+[w4a8] launcher=6873
+[w4a8] ready after 520s
+[p23] w4a8: 245 cases (0 done)
+  20/245  single-L8192-d000-s19 hit=True n=1/1  (35.7s)
+  40/245  single-L8192-d025-s19 hit=True n=1/1  (57.2s)
+  60/245  single-L8192-d050-s19 hit=True n=1/1  (79.2s)
+  80/245  single-L8192-d075-s19 hit=True n=1/1  (101.5s)
+  100/245  single-L8192-d100-s19 hit=True n=1/1  (140.4s)
+  120/245  single-L32768-d000-s19 hit=True n=1/1  (210.6s)
+  140/245  single-L32768-d025-s19 hit=True n=1/1  (311.1s)
+  160/245  single-L32768-d050-s19 hit=True n=1/1  (391.6s)
+  180/245  single-L32768-d075-s19 hit=True n=1/1  (465.9s)
+  200/245  single-L32768-d100-s19 hit=True n=1/1  (551.0s)
+  220/245  single-L131072-d075-s04 hit=True n=1/1  (1099.0s)
+  240/245  multi-L131072-s04 hit=True n=3/3  (1410.4s)
+[p23] w4a8 done in 1533.4s -> /data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z/out/niah_w4a8.jsonl
+  longgen-L32768-s00 exact=True rouge=0.647 d4=0.5209 rep10=0.4689 chars=1933 (10.6s)
+  longgen-L32768-s01 exact=True rouge=0.972 d4=1.0 rep10=0.0 chars=966 (6.8s)
+  longgen-L32768-s02 exact=True rouge=0.287 d4=0.1725 rep10=0.8097 chars=4923 (21.0s)
+  longgen-L32768-s03 exact=True rouge=0.988 d4=0.9787 rep10=0.0 chars=822 (6.5s)
+  longgen-L32768-s04 exact=True rouge=0.661 d4=0.5106 rep10=0.4784 chars=1869 (10.2s)
+  longgen-L32768-s05 exact=True rouge=0.971 d4=1.0 rep10=0.0 chars=953 (6.8s)
+  longgen-L32768-s06 exact=True rouge=0.661 d4=0.5097 rep10=0.4803 chars=1950 (10.2s)
+  longgen-L32768-s07 exact=True rouge=0.991 d4=0.9928 rep10=0.0 chars=990 (6.7s)
+  longgen-L32768-s08 exact=True rouge=0.968 d4=1.0 rep10=0.0 chars=849 (6.7s)
+  longgen-L32768-s09 exact=True rouge=0.664 d4=0.5076 rep10=0.4829 chars=1988 (10.3s)
+  longgen-L131072-s00 exact=True rouge=0.660 d4=0.5014 rep10=0.484 chars=2005 (26.1s)
+  longgen-L131072-s01 exact=True rouge=0.662 d4=0.493 rep10=0.4737 chars=1437 (25.4s)
+  longgen-L131072-s02 exact=False rouge=0.275 d4=0.977 rep10=0.0 chars=4481 (37.6s)
+  longgen-L131072-s03 exact=True rouge=0.629 d4=0.506 rep10=0.4816 chars=1450 (26.0s)
+  longgen-L131072-s04 exact=False rouge=0.296 d4=0.9374 rep10=0.0 chars=3740 (36.9s)
+[p23] w4a8 longgen done in 247.9s
+
+=== NIAH (hit / n, Wilson 95% CI) ===
+single  L=8192   w8a8 100/100=100.0% [96.3,100.0] | w4a8 100/100=100.0% [96.3,100.0]
+single  L=32768  w8a8 100/100=100.0% [96.3,100.0] | w4a8 100/100=100.0% [96.3,100.0]
+single  L=131072 w8a8 25/25=100.0% [86.7,100.0] | w4a8 25/25=100.0% [86.7,100.0]
+multi   L=32768  w8a8 9/10=90.0% [59.6,98.2] | w4a8 10/10=100.0% [72.2,100.0]
+multi   L=131072 w8a8 9/10=90.0% [59.6,98.2] | w4a8 9/10=90.0% [59.6,98.2]
+
+=== long generation ===
+L=32768  w8a8  exact=80.0% rouge=0.559 distinct4=0.650 repeat10=0.326 chars_med=1945 invalid=0 trunc=2
+L=32768  w4a8  exact=100.0% rouge=0.781 distinct4=0.719 repeat10=0.272 chars_med=1869 invalid=0 trunc=1
+L=131072 w8a8  exact=60.0% rouge=0.584 distinct4=0.603 repeat10=0.381 chars_med=1433 invalid=0 trunc=1
+L=131072 w4a8  exact=60.0% rouge=0.504 distinct4=0.683 repeat10=0.288 chars_med=2005 invalid=0 trunc=2
+
+=== pre-registered criteria ===
+C1 triggered=False
+C2 triggered=False
+C3 triggered=True
+
+wrote /data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z/out/stability.json
+=== W4A8 retry done niah_rc=0 longgen_rc=0 ===
+summary=/data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z/out/stability.json

@@ -1,0 +1,334 @@
+{
+  "schema": "vllm-hust-b1-sr1-evidence/v1",
+  "as_of_utc": "2026-11-18",
+  "status": "experimental_regressed",
+  "control": "frozen B1-r8",
+  "physical_cards": [
+    0,
+    1
+  ],
+  "hardware": "Ascend 910B2 TP2",
+  "checkpoint": "Qwen3.5-35B-A3B BF16",
+  "operating_geometry": "E36/R54",
+  "effective_target_kv_tokens": {
+    "r8": 1447936,
+    "sr1": 847872
+  },
+  "continuous_pair": {
+    "sr1": {
+      "release": "B1-sr1",
+      "seal_sha256": "d3e54d61f6c31e2cbc252a20f3ae4aca06c52e95219c83176cf19a0f67e525c9",
+      "physical_cards": [
+        0,
+        1
+      ],
+      "draft_traffic_client_including_protocol_warmups": [
+        {
+          "rank": 0,
+          "committed_tokens": 2353388,
+          "rebuilt_history_tokens": 56774454,
+          "graph_replays": 3771,
+          "restored_tokens": 0
+        },
+        {
+          "rank": 1,
+          "committed_tokens": 2353388,
+          "rebuilt_history_tokens": 56774454,
+          "graph_replays": 3771,
+          "restored_tokens": 0
+        }
+      ],
+      "sampled_hbm": {
+        "timed_samples": 122,
+        "per_card_mib": {
+          "0": 64121,
+          "1": 64064
+        },
+        "simultaneous_total_mib": 128185
+      },
+      "formal_c8": {
+        "4096-formal": {
+          "recorded": 118,
+          "successful": 118,
+          "failed": 0,
+          "successful_output_tokens": 30208,
+          "mean_ttft_ms": 1319.871941407732,
+          "mean_tpot_ms": 77.63451568301967,
+          "cohort_wall_seconds": 315.72975762188435,
+          "output_tokens_per_second": 95.67675922450388,
+          "ttft_p95_ms": 2416.4560199715197,
+          "ttft_p99_ms": 3218.4548888076088,
+          "tpot_p95_ms": 85.58213465080104,
+          "tpot_p99_ms": 86.90181843815918,
+          "end_to_end_p95_ms": 23065.184967359528,
+          "end_to_end_p99_ms": 23415.869729509577
+        },
+        "16384-formal": {
+          "recorded": 86,
+          "successful": 86,
+          "failed": 0,
+          "successful_output_tokens": 22016,
+          "mean_ttft_ms": 4067.3902408696363,
+          "mean_tpot_ms": 97.95129473473601,
+          "cohort_wall_seconds": 317.3970078211278,
+          "output_tokens_per_second": 69.36423298737377,
+          "ttft_p95_ms": 9968.947968212888,
+          "ttft_p99_ms": 11489.732742263006,
+          "tpot_p95_ms": 108.27808702254997,
+          "tpot_p99_ms": 110.26089672820972,
+          "end_to_end_p95_ms": 32899.88850499503,
+          "end_to_end_p99_ms": 35022.89524758235
+        }
+      }
+    },
+    "r8": {
+      "release": "full-answer-b1-20261117-r8",
+      "seal_sha256": "c7548286e1a3b9bccc181d31d55d03bca456d95b4ef8da435bc5ac5d660b6b60",
+      "physical_cards": [
+        0,
+        1
+      ],
+      "draft_traffic_client_including_protocol_warmups": null,
+      "sampled_hbm": {
+        "timed_samples": 117,
+        "per_card_mib": {
+          "0": 60836,
+          "1": 60779
+        },
+        "simultaneous_total_mib": 121614
+      },
+      "formal_c8": {
+        "4096-formal": {
+          "recorded": 457,
+          "successful": 457,
+          "failed": 0,
+          "successful_output_tokens": 116992,
+          "mean_ttft_ms": 647.776673774131,
+          "mean_tpot_ms": 18.184461834159855,
+          "cohort_wall_seconds": 302.54540711455047,
+          "output_tokens_per_second": 386.6923683151607,
+          "ttft_p95_ms": 1267.8865130990744,
+          "ttft_p99_ms": 1826.5495656058192,
+          "tpot_p95_ms": 19.63510937842668,
+          "tpot_p99_ms": 21.23353817518435,
+          "end_to_end_p95_ms": 5825.115139223635,
+          "end_to_end_p99_ms": 6313.572297133505
+        },
+        "16384-formal": {
+          "recorded": 190,
+          "successful": 190,
+          "failed": 0,
+          "successful_output_tokens": 48640,
+          "mean_ttft_ms": 2604.4946337461865,
+          "mean_tpot_ms": 39.8525192964749,
+          "cohort_wall_seconds": 304.58908344991505,
+          "output_tokens_per_second": 159.69055571224402,
+          "ttft_p95_ms": 6415.707832062613,
+          "ttft_p99_ms": 9740.6148160994,
+          "tpot_p95_ms": 45.23076185573111,
+          "tpot_p99_ms": 46.412699187101396,
+          "end_to_end_p95_ms": 14194.802119256929,
+          "end_to_end_p99_ms": 15382.993947388599
+        }
+      }
+    },
+    "sr1_minus_r8": {
+      "4096-formal": {
+        "output_tokens_per_second": -291.0156090906568,
+        "ttft_p95_ms": 1148.5695068724453,
+        "ttft_p99_ms": 1391.9053232017895,
+        "tpot_p95_ms": 65.94702527237436,
+        "tpot_p99_ms": 65.66828026297483,
+        "end_to_end_p95_ms": 17240.069828135893,
+        "end_to_end_p99_ms": 17102.29743237607
+      },
+      "16384-formal": {
+        "output_tokens_per_second": -90.32632272487025,
+        "ttft_p95_ms": 3553.2401361502743,
+        "ttft_p99_ms": 1749.1179261636062,
+        "tpot_p95_ms": 63.04732516681886,
+        "tpot_p99_ms": 63.84819754110832,
+        "end_to_end_p95_ms": 18705.086385738105,
+        "end_to_end_p99_ms": 19639.901300193756
+      }
+    }
+  },
+  "mmlu_pro_pair": {
+    "scope": "One matched B1-r8 versus B1-sr1 MMLU200 pair",
+    "independent_pairs": 1,
+    "physical_cards": [
+      0,
+      1
+    ],
+    "logical_cards": [
+      0,
+      1
+    ],
+    "r8": {
+      "release": "full-answer-b1-20261117-r8",
+      "seal_sha256": "502de25ea05cb7a7f2f6bbf7ffb7679a6f717549dd3908550183a649dde7ffba",
+      "requests": 200,
+      "throughput_tok_s": 1499.314552020488,
+      "output_tokens": 704934,
+      "wall_s": 470.1708517735824,
+      "accuracy_pct": 75.0,
+      "correct": 150,
+      "unparsed": 0,
+      "truncated": 21,
+      "draft_traffic": null,
+      "ttft_p95_ms": 378380.2347794641,
+      "ttft_p99_ms": 388613.7295244634,
+      "tpot_p95_ms": 23.649505992140597,
+      "tpot_p99_ms": 23.998817045055585,
+      "end_to_end_p95_ms": 438109.5424194354,
+      "end_to_end_p99_ms": 465066.5528848115
+    },
+    "sr1": {
+      "release": "B1-sr1",
+      "seal_sha256": "44c7b09a8634302c2235e5c1f4a9b5af399c864e2c0ff30e5e6abc55c3a82921",
+      "requests": 200,
+      "throughput_tok_s": 131.85995213528875,
+      "output_tokens": 713590,
+      "wall_s": 5411.726520785131,
+      "accuracy_pct": 75.5,
+      "correct": 151,
+      "unparsed": 0,
+      "truncated": 26,
+      "draft_traffic": [
+        {
+          "rank": 0,
+          "committed_tokens": 996061,
+          "rebuilt_history_tokens": 596763933,
+          "graph_replays": 11075,
+          "restored_tokens": 0
+        },
+        {
+          "rank": 1,
+          "committed_tokens": 996061,
+          "rebuilt_history_tokens": 596763933,
+          "graph_replays": 11075,
+          "restored_tokens": 0
+        }
+      ],
+      "ttft_p95_ms": 4513819.661141187,
+      "ttft_p99_ms": 4611397.202852508,
+      "tpot_p95_ms": 288.3995225802933,
+      "tpot_p99_ms": 294.2043740671575,
+      "end_to_end_p95_ms": 5128761.298557278,
+      "end_to_end_p99_ms": 5365803.115764316
+    },
+    "sr1_minus_r8": {
+      "throughput_tok_s": -1367.4545998851993,
+      "accuracy_pct": 0.5,
+      "ttft_p95_ms": 4135439.426361723,
+      "ttft_p99_ms": 4222783.473328045,
+      "tpot_p95_ms": 264.75001658815273,
+      "tpot_p99_ms": 270.2055570221019,
+      "end_to_end_p95_ms": 4690651.756137842,
+      "end_to_end_p99_ms": 4900736.562879505
+    }
+  },
+  "preflight": {
+    "cross_page_c1": {
+      "status": "passed",
+      "ranks": [
+        {
+          "verified_rows": 10,
+          "committed_tokens": 2104,
+          "rebuilt_history_tokens": 20460,
+          "graph_replays": 10,
+          "rank": 0,
+          "peak_allocated_bytes": 58449586176,
+          "peak_reserved_bytes": 62379786240
+        },
+        {
+          "verified_rows": 10,
+          "committed_tokens": 2104,
+          "rebuilt_history_tokens": 20460,
+          "graph_replays": 10,
+          "rank": 1,
+          "peak_allocated_bytes": 58449586176,
+          "peak_reserved_bytes": 62379786240
+        }
+      ]
+    },
+    "mixed_c8": {
+      "status": "passed",
+      "ranks": [
+        {
+          "verified_rows": 81,
+          "committed_tokens": 8366,
+          "rebuilt_history_tokens": 82602,
+          "graph_replays": 13,
+          "rank": 0,
+          "peak_allocated_bytes": 58449586176,
+          "peak_reserved_bytes": 62505615360
+        },
+        {
+          "verified_rows": 81,
+          "committed_tokens": 8366,
+          "rebuilt_history_tokens": 82602,
+          "graph_replays": 13,
+          "rank": 1,
+          "peak_allocated_bytes": 58449586176,
+          "peak_reserved_bytes": 62505615360
+        }
+      ]
+    },
+    "hle_image": {
+      "status": "passed",
+      "ranks": [
+        {
+          "rank": 0,
+          "committed_tokens": 106,
+          "rebuilt_history_tokens": 845,
+          "graph_replays": 9,
+          "peak_allocated_bytes": 58902656000,
+          "peak_reserved_bytes": 62805508096
+        },
+        {
+          "rank": 1,
+          "committed_tokens": 106,
+          "rebuilt_history_tokens": 845,
+          "graph_replays": 9,
+          "peak_allocated_bytes": 58902656000,
+          "peak_reserved_bytes": 62805508096
+        }
+      ]
+    },
+    "host_state_dma": {
+      "status": "passed",
+      "ranks": [
+        {
+          "rank": 0,
+          "restored_tokens": 2103,
+          "committed_tokens": 27,
+          "rebuilt_history_tokens": 18414,
+          "graph_replays": 9,
+          "peak_allocated_bytes": 58449586176,
+          "peak_reserved_bytes": 62381883392
+        },
+        {
+          "rank": 1,
+          "restored_tokens": 2103,
+          "committed_tokens": 27,
+          "rebuilt_history_tokens": 18414,
+          "graph_replays": 9,
+          "peak_allocated_bytes": 58449586176,
+          "peak_reserved_bytes": 62381883392
+        }
+      ],
+      "bytes_per_direction_per_rank": 171102260,
+      "pages_per_direction": 2,
+      "greedy_output_tokens_equal": 24
+    }
+  },
+  "coverage": {
+    "MMLU-Pro": "complete",
+    "HLE": "no completed pair; sr1 image preflight passed",
+    "FrontierScience": "no completed pair",
+    "SWE-bench-Pro": "no completed pair",
+    "Terminal-Bench 2.1": "no completed pair; full Agent run requires AMD64 Docker"
+  },
+  "raw_evidence_private": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/b1-sr1-evidence-20261118"
+}

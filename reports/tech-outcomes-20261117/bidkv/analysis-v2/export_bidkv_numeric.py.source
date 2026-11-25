@@ -1,0 +1,363 @@
+"""Export an explicit numeric allowlist; never copy prompts, answers or SSE."""
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import re
+
+
+def read(path):
+    return json.loads(path.read_bytes())
+
+
+def sha(path):
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def numeric_record(path):
+    record = read(path)
+    result = {
+        key: record.get(key)
+        for key in [
+            "case_id",
+            "submission_index",
+            "status",
+            "attempted",
+            "http_status",
+            "start",
+            "first_token",
+            "last_token",
+            "first_generated_event",
+            "last_generated_event",
+            "end",
+            "elapsed_s",
+            "cached_tokens_reported",
+            "finish_reason",
+            "observed_finish_reason",
+            "correct",
+            "category",
+            "track",
+            "subject",
+        ]
+    }
+    for name in ["usage", "observed_usage"]:
+        value = record.get(name)
+        result[name] = (
+            {
+                key: value.get(key)
+                for key in ["prompt_tokens", "completion_tokens", "total_tokens"]
+            }
+            if isinstance(value, dict)
+            else None
+        )
+    grade = record.get("grade")
+    if isinstance(grade, dict):
+        result["grade_numeric"] = {
+            key: grade.get(key) for key in ["correct", "score", "confidence"]
+        }
+    result["controlled_record_sha256"] = sha(path)
+    result["controlled_sse_sha256"] = record.get("stream_sha256")
+    result["failure_detail"] = (
+        "retained in controlled record; no original text distributed"
+        if record.get("error")
+        else None
+    )
+    return result
+
+
+def telemetry(path):
+    result = []
+    if not path.exists():
+        return result
+    for line in path.read_text().splitlines():
+        raw = json.loads(line)
+        row = {key: raw.get(key) for key in ["wall", "monotonic"]}
+        row["memory_current_bytes"] = (
+            int(raw["memory.current"]) if "memory.current" in raw else None
+        )
+        for name in ["memory.events", "memory.stat", "cpu.stat"]:
+            row[name] = {
+                key: int(value)
+                for key, value in (
+                    part.split() for part in raw.get(name, "").splitlines()
+                )
+            }
+        devices, current = [], None
+        for part in raw.get("npu_smi", "").splitlines():
+            cells = [value.strip() for value in part.split("|")[1:-1]]
+            if len(cells) == 3 and re.fullmatch(r"\d+\s+910B2", cells[0]):
+                current = int(cells[0].split()[0])
+                values = re.findall(r"\d+(?:\.\d+)?", cells[2])
+                devices.append(
+                    {
+                        "physical_npu": current,
+                        "power_watts": float(values[0]),
+                        "temperature_celsius": float(values[1]),
+                    }
+                )
+            elif (
+                len(cells) == 3
+                and current is not None
+                and cells[0].isdigit()
+                and ":" in cells[1]
+            ):
+                values = [int(value) for value in re.findall(r"\d+", cells[2])]
+                if len(values) == 5:
+                    devices[-1].update(
+                        aicore_utilization_percent=values[0],
+                        memory_used_mb=values[1],
+                        memory_total_mb=values[2],
+                        hbm_used_mb=values[3],
+                        hbm_total_mb=values[4],
+                    )
+        row["devices"] = devices
+        row["sampling_error_present"] = "sampling_error" in raw
+        result.append(row)
+    return result
+
+
+def runtime_overheads(root):
+    periods = []
+    for name in ["service-native", "service-bidkv", "service-judge"]:
+        folder = root / name
+        entry = {"name": name, "status": "not_executed", "physical_device_count": 2}
+        if folder.exists():
+            process = (
+                read(folder / "process.json")
+                if (folder / "process.json").exists()
+                else None
+            )
+            ready = (
+                read(folder / "ready.json")
+                if (folder / "ready.json").exists()
+                else None
+            )
+            stop = (
+                read(folder / "stop.json") if (folder / "stop.json").exists() else None
+            )
+            entry.update(
+                status="ready" if ready else "initialization_failed_or_incomplete",
+                process=process,
+                ready=ready,
+                stop=stop,
+                initialization_device_seconds=2 * ready["startup_seconds"]
+                if ready
+                else None,
+                telemetry_numeric=telemetry(folder / "telemetry.jsonl"),
+            )
+        periods.append(entry)
+    return {
+        "schema": "bidkv-runtime-overheads/v1",
+        "periods": periods,
+        "scope": "Three fresh model/compile initializations; solver and shared judge windows are separate. Total container/device memory is observed, not an isolated MOD incremental cost. No hardware price supplied; device seconds are a resource proxy, not monetary cost. AICore sampling is not effective FLOP evidence.",
+    }
+
+
+def diagnostic_overheads(root):
+    arms = []
+    for arm in ["native", "bidkv"]:
+        folder = root / (arm + "-hle") / "image-qualification"
+        rows = []
+        for color in ["red", "blue"]:
+            path = folder / (color + ".json")
+            if path.exists():
+                record = numeric_record(path)
+                record.update(diagnostic_id=color, passed=read(path).get("passed"))
+                rows.append(record)
+        complete = [row for row in rows if row.get("start") and row.get("end")]
+        span = (
+            max(row["end"]["monotonic"] for row in complete)
+            - min(row["start"]["monotonic"] for row in complete)
+            if complete
+            else None
+        )
+        arms.append(
+            {
+                "arm": arm,
+                "planned": 2,
+                "recorded": len(rows),
+                "attempted": sum(row.get("attempted") is True for row in rows),
+                "successful": sum(row.get("status") == "ok" for row in rows),
+                "passed": sum(row.get("passed") is True for row in rows),
+                "failed_final_records": sum(row.get("status") != "ok" for row in rows),
+                "no_final_record": 2 - len(rows),
+                "length_stops": sum(
+                    row.get("finish_reason") == "length" for row in rows
+                ),
+                "wall_seconds_from_completed_records": span,
+                "device_seconds_from_completed_records": 2 * span
+                if span is not None
+                else None,
+                "cost_is_lower_bound_if_incomplete": len(complete) != 2,
+                "records": rows,
+                "controlled_root": str(folder),
+                "capture_files": len(
+                    list((folder / "transport").glob("*.sse.jsonl.gz"))
+                ),
+            }
+        )
+    return {
+        "schema": "hle-synthetic-diagnostic-overheads/v1",
+        "planned": 4,
+        "requests_per_arm": 2,
+        "max_tokens": 32,
+        "temperature": 0,
+        "seed": 17,
+        "thinking": False,
+        "eos_enabled": True,
+        "arms": arms,
+        "scope": "Fixed original red/blue image-interface diagnostics before formal HLE200 batch/snapshot/Sampler. Separate from672 solver and720 planned judge, not free. All usage, failures and incomplete/unbound captures retained in controlled custody; no inferred missing usage. Diagnostic cache reuse is not independently proved by formal batch counters.",
+    }
+
+
+def export(root, out, common=None, verification=None):
+    state = read(root / "execution-checklist.json")
+    assert state["phase"] in ["completed", "failed"], (
+        "Do not publish an inconsistent live snapshot"
+    )
+    out.mkdir(parents=True, exist_ok=False)
+    summary = {
+        "schema": "bidkv-five-numeric-export/v2",
+        "status": state["phase"],
+        "formal_complete": state["formal_complete"],
+        "planned_solver_requests_per_arm": state["planned_solver_requests_per_arm"],
+        "planned_judge_inputs": state["planned_judge_inputs"],
+        "stages": [],
+        "classification": "Explicit numeric derivatives only; original questions, answers, dialogues, private Engine and raw SSE remain controlled",
+    }
+    for stage in state["stages"]:
+        entry = {
+            key: stage.get(key)
+            for key in [
+                "name",
+                "arm",
+                "solver_arm",
+                "dataset",
+                "stage",
+                "planned",
+                "status",
+                "started_unix",
+                "completed_unix",
+                "exit_code",
+                "actual_client_returncode",
+            ]
+        }
+        stage_root = root / stage["name"]
+        metric = stage_root / "summary.json"
+        if metric.exists():
+            entry["summary"] = read(metric)
+        entry["zero_reuse"] = (
+            read(stage_root / "zero-reuse.json")
+            if (stage_root / "zero-reuse.json").exists()
+            else None
+        )
+        check = verification / (stage["name"] + ".json") if verification else None
+        entry["independent_verification"] = (
+            read(check) if check and check.exists() else None
+        )
+        paths = sorted((stage_root / "evaluation/requests").glob("*.json"))
+        records = [numeric_record(path) for path in paths]
+        filename = stage["name"] + "-requests.json"
+        (out / filename).write_text(
+            json.dumps(records, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        entry["numeric_records_file"] = filename
+        entry["recorded"] = len(records)
+        captures = set((stage_root / "transport").glob("*.sse.jsonl.gz"))
+        mapped = {
+            Path(read(path)["stream_capture"])
+            for path in paths
+            if read(path).get("stream_capture")
+        }
+        entry["sse_capture_files"] = len(captures)
+        entry["unbound_sse_capture_files"] = len(
+            {p.resolve() for p in captures} - {p.resolve() for p in mapped}
+        )
+        entry["unbound_capture_scope"] = (
+            "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage"
+        )
+        summary["stages"].append(entry)
+    summary["quality_summary_files"] = {}
+    for path in sorted(root.glob("quality-*/*/summary.json")):
+        name = path.parent.parent.name + "-summary.json"
+        (out / name).write_bytes(path.read_bytes())
+        summary["quality_summary_files"][path.parent.parent.name] = {
+            "file": name,
+            "sha256": sha(path),
+            "controlled_path": str(path),
+        }
+    (out / "runtime-overheads.json").write_text(
+        json.dumps(runtime_overheads(root), indent=2) + "\n", encoding="utf-8"
+    )
+    (out / "diagnostic-overheads.json").write_text(
+        json.dumps(diagnostic_overheads(root), indent=2) + "\n", encoding="utf-8"
+    )
+    if common is not None:
+        source = common / "reference-tools/DEPLOYMENT-TOOLS.json"
+        inventory = {
+            "schema": "original-grader-source-custody/v1",
+            "controlled_tools_root": str(source.parent),
+            "tool_inventory_sha256": sha(source),
+            "tool_file_hashes": read(source)["files"],
+            "frozen_plan_file_hashes": read(root / "plan-file-manifest.json")
+            if (root / "plan-file-manifest.json").exists()
+            else None,
+            "scope": "Private original grader and dependency code is not redistributed. Hashes bind original selected tools and unchanged scoring/denominator contracts.",
+        }
+        (out / "original-grader-sources.json").write_text(
+            json.dumps(inventory, indent=2) + "\n", encoding="utf-8"
+        )
+    for name in [
+        "execution-plan.json",
+        "source-manifest.json",
+        "plan-file-manifest.json",
+    ]:
+        path = root / name
+        if path.exists():
+            (out / name).write_bytes(path.read_bytes())
+    controlled = {
+        "controlled_root": str(root),
+        "access": "existing authorized Coder/NAS access, no public download link",
+        "raw_manifest_sha256": sha(root / "manifest.json")
+        if (root / "manifest.json").exists()
+        else None,
+        "originals_not_redistributed": True,
+        "files": [
+            {
+                "path": path.relative_to(root).as_posix(),
+                "bytes": path.stat().st_size,
+                "sha256": sha(path),
+            }
+            for path in sorted(root.rglob("*"))
+            if path.is_file()
+        ],
+    }
+    (out / "controlled-originals-index.json").write_text(
+        json.dumps(controlled, indent=2) + "\n", encoding="utf-8"
+    )
+    (out / "summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    files = [
+        {"path": path.name, "bytes": path.stat().st_size, "sha256": sha(path)}
+        for path in sorted(out.iterdir())
+        if path.is_file()
+    ]
+    (out / "manifest.json").write_text(
+        json.dumps({"schema": "public-safe-bidkv-numeric/v1", "files": files}, indent=2)
+        + "\n",
+        encoding="utf-8",
+    )
+    return {"phase": state["phase"], "public_files": len(files), "output": str(out)}
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, required=True)
+    parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--common", type=Path)
+    parser.add_argument("--verification", type=Path)
+    args = parser.parse_args()
+    print(json.dumps(export(args.root, args.out, args.common, args.verification)))

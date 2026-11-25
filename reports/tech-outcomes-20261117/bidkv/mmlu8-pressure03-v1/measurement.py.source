@@ -1,0 +1,83 @@
+"""Frozen finite-batch metric definitions; quality is supplied by original graders."""
+
+import math
+import statistics
+
+
+def percentile(values, q):
+    if not 0 <= q <= 1:
+        raise ValueError("Invalid quantile")
+    if not values:
+        return None
+    ordered = sorted(values)
+    position = (len(ordered) - 1) * q
+    low, high = math.floor(position), math.ceil(position)
+    return ordered[low] + (ordered[high] - ordered[low]) * (position - low)
+
+
+def distribution(values):
+    return {
+        "samples": len(values),
+        "mean": statistics.mean(values) if values else None,
+        "p50": percentile(values, 0.5),
+        "p95": percentile(values, 0.95),
+        "p99": percentile(values, 0.99),
+    }
+
+
+def summarize(planned_ids, records):
+    if len(planned_ids) != len(set(planned_ids)):
+        raise ValueError("Duplicate planned case")
+    identities = [row["case_id"] for row in records]
+    if len(identities) != len(set(identities)) or set(identities) - set(planned_ids):
+        raise ValueError("Unknown or duplicate actual case")
+    attempted = [row for row in records if row.get("attempted", True)]
+    good = [row for row in attempted if row["status"] == "ok"]
+    span = None
+    if attempted:
+        span = max(row["end"]["monotonic"] for row in attempted) - min(
+            row["start"]["monotonic"] for row in attempted
+        )
+        if not math.isfinite(span) or span <= 0:
+            raise ValueError("Invalid solver batch wall-clock interval")
+    tokens = sum(row["usage"]["completion_tokens"] for row in good)
+    ttft, tpot = [], []
+    for row in good:
+        begin = row["start"]["monotonic"]
+        first = row["first_token"]["monotonic"]
+        end = row["end"]["monotonic"]
+        if (
+            not all(math.isfinite(value) for value in [begin, first, end])
+            or not begin <= first <= end
+        ):
+            raise ValueError("Invalid content-token timestamps")
+        ttft.append(first - begin)
+        if row["usage"]["completion_tokens"] > 1:
+            tpot.append((end - first) / (row["usage"]["completion_tokens"] - 1))
+    return {
+        "planned": len(planned_ids),
+        "executed": len(attempted),
+        "successful": len(good),
+        "failed": len(attempted) - len(good),
+        "not_executed": len(planned_ids) - len(attempted),
+        "recorded": len(records),
+        "length_stops": sum(
+            row.get("finish_reason", row.get("observed_finish_reason")) == "length"
+            for row in attempted
+        ),
+        "solver_batch_wall_seconds": span,
+        "accepted_output_tokens": tokens,
+        "output_tokens_per_second": tokens / span if span is not None else None,
+        "ttft_seconds": distribution(ttft),
+        "tpot_seconds": distribution(tpot),
+        "tpot_excluded_output_tokens_le_one": len(good) - len(tpot),
+        "null_cache_detail_count": sum(
+            row.get("cached_tokens_reported") is None for row in good
+        ),
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": len(attempted)
+        == len(records)
+        == len(planned_ids),
+        "valid_transport": len(good) == len(planned_ids),
+    }

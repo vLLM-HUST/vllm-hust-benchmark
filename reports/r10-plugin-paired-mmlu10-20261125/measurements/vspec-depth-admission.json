@@ -1,0 +1,343 @@
+{
+  "schema": "vllm-hust-mod-admission-audit/v1",
+  "date": "2026-11-25",
+  "mod_id": "vspec",
+  "scope": "Static admission of effective MTP4/6 depth expansion against sealed R10; the previously studied depth-reduction mechanism is excluded.",
+  "baseline": {
+    "release": "full-answer-b1-20261124-r10",
+    "version": "2026.11.24.10",
+    "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+    "native_reference_archive_sha256": "a712c0cbfb48d696feaf53b579360f023e50a773a1997cdf1c69b394863b39c5",
+    "profile": {
+      "model_adapter": {
+        "id": "qwen35",
+        "vocab_size": 248320,
+        "architecture": "Qwen3_5MoeForConditionalGeneration",
+        "worker": "betterscale.qwen35_worker.Worker",
+        "config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+        "model_type": "qwen3_5_moe",
+        "state_page_copy": true,
+        "qwen_worker_unchanged": true,
+        "tokenizer_native": false,
+        "restore_gated_rms": false,
+        "diagnostic_ablation": false,
+        "gated_rms_mode": "native"
+      },
+      "geometry": {
+        "schema": "vllm-hust-runtime-geometry/v1",
+        "id": "r10-3072-E36-R54",
+        "execution_seats": 36,
+        "resident_seats": 54,
+        "speculative_tokens": 2,
+        "prefill_tokens": 4096,
+        "host_bytes_per_rank": 4294967296,
+        "mixed_capture_tokens": 3072
+      },
+      "geometry_sha256": "64fae8080ef5f2cb6f89d5fe524c7505a1ab7c13a6f56172fd7bee1faac9d472",
+      "kv_cache_memory_bytes": 21474836480,
+      "max_model_len": 65536,
+      "speculative_config": {
+        "method": "mtp",
+        "num_speculative_tokens": 2
+      },
+      "compilation_config": {
+        "cudagraph_mode": "FULL",
+        "cudagraph_capture_sizes": [
+          3,
+          6,
+          12,
+          16,
+          24,
+          32,
+          40,
+          48,
+          64,
+          80,
+          96,
+          108,
+          128,
+          256,
+          512,
+          1024,
+          1536,
+          2048,
+          3072,
+          4096
+        ],
+        "max_cudagraph_capture_size": 4096
+      }
+    }
+  },
+  "vspec_revision": "448fdf875f58a7fbb43b461465cfb87000b6bdf6",
+  "native_support": "Core can cycle the single Qwen predictor for extra draft positions and Ascend has a width-parameterized proposal loop. Core dynamic per-batch selection is inside a configured maximum and does not extend width-2 worker allocations.",
+  "cpu_probes": {
+    "mtp2_measured_profile_static": {
+      "returned": "qwen35-live-state"
+    },
+    "mtp4_preserving_3072": {
+      "exception": "ValueError",
+      "message": "Outside experimental R10 3072 capture contract"
+    },
+    "mtp6_preserving_3072": {
+      "exception": "StopIteration",
+      "message": ""
+    },
+    "mtp6_resident_capacity": {
+      "exception": "ValueError",
+      "message": "resident candidate capacity supports MTP1 through MTP4"
+    },
+    "mtp8_resident_capacity": {
+      "exception": "ValueError",
+      "message": "resident candidate capacity supports MTP1 through MTP4"
+    },
+    "mtp4_removing_3072_static_check_only": {
+      "returned": "qwen35-live-state",
+      "captures": [
+        3,
+        6,
+        12,
+        16,
+        24,
+        32,
+        40,
+        48,
+        64,
+        80,
+        96,
+        108,
+        128,
+        144,
+        180,
+        256,
+        512,
+        1024,
+        1536,
+        2048,
+        4096
+      ]
+    }
+  },
+  "distinct_abi_constraints": [
+    "BetterScale school/live FULL plus mixed capture 3072 requires runtime MTP2 exactly. Static MTP4 passes source-level admission only with a different graph contract without 3072.",
+    "At E36, native MTP6 needs a 252-query verify capacity and the existing BetterScale graph bins stop at 180; the resident State and draft-related modules admit MTP1–4. MTP8 is also outside the resident State limit.",
+    "State binding allocates K+1 recurrent candidates and K+3 convolution rows using the startup K. State address and commit use that same capacity, so a policy decision cannot extend those physical rows. The sealed launch uses native gated RMS (restore_gated_rms=false). Optional fused Restore/RMS handles mixed/prefill captures and falls back for decode; it provides no wider decoder ABI proof.",
+    "The current vSpec even-round carrier requires native8 at startup, authentic two-rank queue-drain/device fence receipts, and four native attention groups with a per-width metadata witness and max8 physical convolution layout. The R10 publisher starts with one scheduler FA group and adds only one worker-only GDN group.",
+    "The older vSpec live 4→6 branch requires native6 at startup, async queue2 and its own two-stage worker RPC; it cannot be activated with the R10 MTP2 storage contract.",
+    "The documented vSpec reference is Python 3.11, Core 762f85b3, Ascend 4e57439e before a packaged backend patch, matching CANN 9.1 and rebuilt native operators, with a Qwen KV/Mamba startup bridge. R10 is Python 3.12, Core f18cf803c and Ascend 74f0c0a27."
+  ],
+  "sources": [
+    {
+      "path": "runtime/engine-core/vllm/model_executor/models/qwen3_5_mtp.py",
+      "sha256": "89b0bde1d11fe5768a634e4365c78274e20694b26f4c6bb68e934328d8d0b190",
+      "line_matches": {
+        "self.num_mtp_layers =": [
+          82
+        ],
+        "spec_step_idx % self.num_mtp_layers": [
+          169
+        ]
+      }
+    },
+    {
+      "path": "runtime/engine-core/vllm/config/speculative.py",
+      "sha256": "819972563967f5321367cd692d8785e5bd1b2408305ada4c2c9700c376d24090",
+      "line_matches": {
+        "self.num_speculative_tokens > n_predict": [
+          1437
+        ],
+        "self.num_speculative_tokens % n_predict": [
+          1438
+        ]
+      }
+    },
+    {
+      "path": "runtime/engine-core/vllm/v1/core/sched/scheduler.py",
+      "sha256": "50e7cea25eea05fa192bdd99f30e990f45c499eb327c42b247bf61220d7b64b7",
+      "line_matches": {
+        "self.dynamic_sd_lookup[": [
+          1412
+        ],
+        "num_spec_tokens_to_schedule = self.num_spec_tokens": [
+          1410
+        ]
+      }
+    },
+    {
+      "path": "runtime/ascend/vllm_ascend/spec_decode/llm_base_proposer.py",
+      "sha256": "d106cb3cc2e048734fa2986394c43c2177d04190715dc390d8a62d50830cb6e2",
+      "line_matches": {
+        "for draft_index in range(self.num_speculative_tokens - 1)": [
+          1484
+        ],
+        "max(self.num_speculative_tokens - 1, 0)": [
+          258
+        ]
+      }
+    },
+    {
+      "path": "mods/betterscale/betterscale/models/qwen35/__init__.py",
+      "sha256": "3b5c5ef1fc58f436f820285b4b1683d27ddbd86b964ef3a77f5da5fe795f0c16",
+      "line_matches": {
+        "mixed_graph = os.environ": [
+          88
+        ],
+        "or spec.num_speculative_tokens != 2": [
+          96
+        ],
+        "Outside experimental R10 3072 capture contract": [
+          98
+        ],
+        "spec.num_speculative_tokens in (1, 2, 3, 4)": [
+          149
+        ],
+        "MTP3/4 requires balanced attention disabled": [
+          205
+        ]
+      }
+    },
+    {
+      "path": "mods/betterscale/betterscale/models/qwen35/count_policy.py",
+      "sha256": "195ba3d23ad16a01db08f0bbd312e54851f378a07d55864ef67b86c0194592f8",
+      "line_matches": {
+        "assert 0 <= MTP_TOKENS <= 4": [
+          6
+        ],
+        "BINS = ": [
+          9
+        ],
+        "next(n for n in BINS if n >= requests * width)": [
+          16
+        ],
+        "assert 2 <= width <= 5": [
+          25
+        ]
+      }
+    },
+    {
+      "path": "mods/betterscale/betterscale/models/qwen35/state_backend.py",
+      "sha256": "b8918ed6955de98c034444ef8e2bb14e2244eb75f1612b9980fe91a2cd00d564",
+      "line_matches": {
+        "if len(config.kv_cache_groups) != 1": [
+          104
+        ],
+        "config.kv_cache_groups.append": [
+          115
+        ],
+        "speculative_tokens=runner.vllm_config.speculative_config.num_speculative_tokens": [
+          132
+        ]
+      }
+    },
+    {
+      "path": "mods/betterscale/betterscale/live/llm/qwen35/state.py",
+      "sha256": "a7dd15ef7001c719630ae0a073d599717312f8ec349e5f68ffcdc8d339d2c71d",
+      "line_matches": {
+        "if self.speculative_tokens not in": [
+          125
+        ],
+        "self.candidates = capacity.speculative_tokens + 1": [
+          241
+        ],
+        "geometry.conv_kernel - 1 + capacity.speculative_tokens": [
+          248
+        ],
+        "physical_blocks_per_logical_block=self.candidates": [
+          267
+        ]
+      }
+    },
+    {
+      "path": "mods/betterscale/betterscale/models/qwen35/state_address.py",
+      "sha256": "fd8e334e31fa385e55049c3234b5c17ee3949782cff1709a880f2da8522f707a",
+      "line_matches": {
+        "WIDTH=root.capacity.speculative_tokens + 1": [
+          157
+        ]
+      }
+    },
+    {
+      "path": "mods/betterscale/betterscale/models/qwen35/state_commit.py",
+      "sha256": "4d832c59889d253d8677c43144d210133835d9afdd717d75e2c4d5f4400a958d",
+      "line_matches": {
+        "root.capacity.speculative_tokens + 1": [
+          37
+        ]
+      }
+    },
+    {
+      "path": "mods/betterscale/betterscale/models/qwen35/restore_norm_runtime.py",
+      "sha256": "524a0227437614e67c28372226c5164c1d3519809a935b8082ead07e93cdf813",
+      "line_matches": {
+        "PREFILLS = prefill_capture_sizes()": [
+          13
+        ],
+        "if meta is None or meta.decode or meta.tokens not in PREFILLS": [
+          64
+        ]
+      }
+    },
+    {
+      "path": "src/vllm_hust_vspec/adaptive/even_runtime.py",
+      "sha256": "fe59ba6c837058754f2d79943be866e4c98cd236eef42b55e9e95fe48bf8cab0",
+      "line_matches": {
+        "collective_rpc('fence_private_even_mtp_transition'": [
+          62
+        ],
+        "num_speculative_tokens!=8": [
+          154
+        ]
+      }
+    },
+    {
+      "path": "src/vllm_hust_vspec/adaptive/quiescent.py",
+      "sha256": "6e09780a883c77e4582c70f081d6f747f4a62d6c68f48780aa84a7e466145594",
+      "line_matches": {
+        "collective_rpc('fence_private_q35_phase_growth'": [
+          119
+        ],
+        "num_speculative_tokens != 6": [
+          215
+        ]
+      }
+    },
+    {
+      "path": "src/vllm_hust_vspec/backends/q35_even_fence.py",
+      "sha256": "943c69b9550c4c0e32bc23f48d94cfe523659a398faafca20e31c89054d86079",
+      "line_matches": {
+        "_q35_fused_gdn_refresh": [
+          44
+        ],
+        "len(runner.attn_groups)!=4": [
+          48
+        ],
+        "(11,4096)": [
+          80
+        ]
+      }
+    },
+    {
+      "path": "docs/v0.15.1-reproduction.md",
+      "sha256": "56a2bf6f41debb0e3500e5d69a2d5ff5c70817b651ac282e7d494d6a5b77c29a",
+      "line_matches": {
+        "Python 3.11, CANN 9.1": [
+          23
+        ],
+        "762f85b311fbab0bcf8921dd216f5093cd58b9b8": [
+          31
+        ],
+        "4e57439e58ed3d78e675f9fd7b4614fb183c5394": [
+          32
+        ],
+        "must use the same opt-in KV/Mamba compatibility bridge": [
+          120
+        ]
+      }
+    }
+  ],
+  "website_meta_note_zh": "新版 R10 的 vSpec 仅完成 MTP4／6 加深路线源码和 CPU 准入核对。保持 FULL 3072 时，MTP4 被发行配置拒绝。MTP6 超出当前图规格和常驻 GDN 候选容量。vSpec 的动态扩大还依赖另一套固定后端和状态转换协议。本轮未启动整模、未运行十题，暂无性能或准确率结果。",
+  "timing_result": null,
+  "measured_candidate_item_count": 0,
+  "candidate_service_started": false,
+  "npu_leased": false,
+  "decision": "No qualified drop-in depth increase on the exact R10 profile. Reopen only with a width-aware 3072 graph, State and lifecycle ABI and device correctness validation."
+}

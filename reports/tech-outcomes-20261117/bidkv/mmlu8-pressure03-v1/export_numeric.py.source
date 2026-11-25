@@ -1,0 +1,289 @@
+"""Independent read-only MMLU03 replay/grading, all32 planned, numeric-only output."""
+
+import argparse
+import copy
+import json
+from pathlib import Path
+
+from audit_common import elapsed, optional, telemetry
+from mmlu_contract import (
+    DRIVER,
+    INPUT,
+    PROBE,
+    STAGES,
+    geometry,
+    load_grader,
+    load_inputs,
+    pilot_decision,
+    read,
+    sha,
+    wire_id,
+)
+from study_tools import numeric_row, policies, summarize, wire_check
+
+
+def audit(root, driver=DRIVER, inputs=INPUT):
+    root, driver = Path(root), Path(driver)
+    selected, grader = load_inputs(inputs, driver), load_grader(inputs, driver)
+    lifecycle = optional(root / "metadata/lifecycle.json") or {}
+    supervisor = optional(root / "metadata/controller-owned-supervisor.json") or {}
+    manifest = read(driver / "source-manifest.json")
+    unchanged = all(
+        sha(driver / name) == value for name, value in manifest["files"].items()
+    )
+    results, fingerprints, all_salts = [], {}, set()
+    for stage in STAGES:
+        batch, folder = root / "batches" / stage, root / stage
+        stage_state = next(
+            (row for row in lifecycle.get("stages", []) if row["name"] == stage), {}
+        )
+        issues, rows, controlled = [], [], []
+        raw_geometry = optional(folder / "cache-groups-rpc.json")
+        actual_geometry = None
+        if raw_geometry:
+            try:
+                actual_geometry = geometry(
+                    raw_geometry, [item["frozen"] for item in selected]
+                )
+                fingerprints[stage] = actual_geometry["fingerprint_sha256"]
+                if not actual_geometry["go"]:
+                    issues.append("geometry_not_admitted")
+            except (AssertionError, ValueError, KeyError, TypeError):
+                issues.append("invalid_geometry")
+        for lane, item in enumerate(selected):
+            identifier = wire_id(stage, lane)
+            path = batch / "records" / (identifier + ".json")
+            raw = optional(path)
+            if raw is None:
+                rows.append(
+                    {
+                        "case_id": item["case"]["case_id"],
+                        "wire_id": identifier,
+                        "lane": lane,
+                        "stage": stage,
+                        "status": "not_executed" if not batch.exists() else "missing",
+                        "correct": False,
+                        "unparsed": True,
+                    }
+                )
+                continue
+            controlled.append(
+                {
+                    "kind": "record",
+                    "wire_id": identifier,
+                    "bytes": path.stat().st_size,
+                    "sha256": sha(path),
+                }
+            )
+            row = copy.deepcopy(raw)
+            capture = Path(row.get("stream_capture", ""))
+            if not capture.is_file():
+                try:
+                    capture = root / capture.relative_to(PROBE)
+                except ValueError:
+                    capture = batch / "unavailable-capture"
+            row["stream_capture"] = str(capture)
+            row["wire_audit_passed"] = (
+                row.get("status") == "ok"
+                and row.get("case_id") == item["case"]["case_id"]
+                and wire_check(row, item, identifier)
+            )
+            if row.get("status") == "ok" and not row["wire_audit_passed"]:
+                row["status"] = "independent_audit_error"
+                issues.append("independent_wire_body_audit_failed")
+            salt = row.get("request", {}).get("cache_salt")
+            if salt in all_salts or not salt:
+                issues.append("missing_or_duplicate_cache_salt")
+            all_salts.add(salt)
+            answer = (
+                grader.extract_answer(row.get("content", ""))
+                if row.get("status") == "ok"
+                else None
+            )
+            valid = isinstance(answer, str) and answer in [
+                chr(65 + index) for index in range(item["case"]["option_count"])
+            ]
+            row.update(
+                correct=bool(
+                    row.get("status") == "ok"
+                    and valid
+                    and answer == item["case"]["answer"]
+                ),
+                unparsed=not valid,
+            )
+            rows.append(row)
+            if capture.is_file():
+                controlled.append(
+                    {
+                        "kind": "SSE",
+                        "wire_id": identifier,
+                        "bytes": capture.stat().st_size,
+                        "sha256": sha(capture),
+                    }
+                )
+        recorded = [row for row in rows if "start" in row and "end" in row]
+        summary = summarize(recorded)
+        policy, counters = None, None
+        if (folder / "policy").is_dir():
+            try:
+                policy = policies(folder / "policy", stage)
+                from mmlu_contract import metric_delta
+                from observation import totals
+
+                # observation.snapshot retains exact text; parse the same public Prometheus format.
+                counters = metric_delta(
+                    totals((batch / "before-metrics.txt").read_text()),
+                    totals((batch / "after-metrics.txt").read_text()),
+                )
+                assert policy["decisions"] == counters["vllm:num_preemptions_total"]
+                assert (
+                    policy["legal"]
+                    and policy["failures"] == policy["invalid_selections"] == 0
+                )
+            except (AssertionError, OSError, KeyError, TypeError, ValueError):
+                issues.append("policy_or_metrics_audit_failed")
+        token = optional(folder / "token-id-admission.json") or {}
+        binding = optional(folder / "binding-evidence.json")
+        owner = optional(folder / "status.json") or {}
+        api_wait = optional(folder / "api-owned-wait.json") or {}
+        waits = [
+            row
+            for row in lifecycle.get("owned_waits", [])
+            if row.get("kind") in (stage + "-owner", stage + "-API")
+        ]
+        waits_ok = (
+            len(waits) == 2
+            and all(
+                type(row.get("actual_returncode")) is int
+                and row["actual_returncode"] == 0
+                for row in waits
+            )
+            and api_wait.get("actual_returncode") == 0
+            and stage_state.get("actual_client_returncode") == 0
+        )
+        summary.update(
+            counter_deltas=counters,
+            policy=policy,
+            input_admission_passed=token.get("passed") is True,
+        )
+        executed = batch.exists()
+        passed = (
+            executed
+            and summary["successful"] == 8
+            and summary["failed"] == 0
+            and not issues
+            and unchanged
+            and actual_geometry is not None
+            and actual_geometry["go"]
+            and token.get("passed") is True
+            and binding is not None
+            and waits_ok
+        )
+        results.append(
+            {
+                "stage": stage,
+                "planned": 8,
+                "execution_status": stage_state.get("status", "not_executed"),
+                "stage_audit_passed": bool(passed),
+                "issues": sorted(set(issues)),
+                "summary": summary,
+                "records": [numeric_row(row) for row in rows],
+                "controlled_index": controlled,
+                "actual_geometry": actual_geometry,
+                "actual_waits_ok": waits_ok,
+                "owned_waits": waits,
+                "costs": {
+                    "cold_model_initialization_seconds": owner.get(
+                        "initialization_seconds"
+                    ),
+                    "owner_total_seconds": elapsed(
+                        owner.get("released_unix"), owner.get("started_unix")
+                    ),
+                    "client_total_seconds": elapsed(
+                        stage_state.get("client_ended_unix"),
+                        stage_state.get("client_started_unix"),
+                    ),
+                    "api_owned_wait": api_wait,
+                    "scope": "Actual observed separate cold/admission/generation/cleanup times; unknown remains null",
+                },
+                "startup_telemetry": telemetry(folder / "startup-telemetry.jsonl"),
+                "generation_telemetry": telemetry(batch / "telemetry.jsonl"),
+            }
+        )
+    observed_equal = len(set(fingerprints.values())) == 1 if fingerprints else None
+    global_equal = observed_equal if len(fingerprints) == 4 else None
+    pairs = []
+    for label, a, b in (("AB", results[0], results[1]), ("BA", results[3], results[2])):
+        na, nb = (
+            a["summary"]["output_tokens_per_second"],
+            b["summary"]["output_tokens_per_second"],
+        )
+        numeric = na is not None and nb is not None and na > 0
+        pairs.append(
+            {
+                "order": label,
+                "native_stage": a["stage"],
+                "bidkv_stage": b["stage"],
+                "numeric_throughput_change_pct": 100 * (nb / na - 1)
+                if numeric
+                else None,
+                "validated_pair": a["stage_audit_passed"]
+                and b["stage_audit_passed"]
+                and observed_equal is True,
+                "scope": "All predeclared pairs retained, never select a best pair",
+            }
+        )
+    master_ok = (
+        type(supervisor.get("actual_child_returncode")) is int
+        and supervisor["actual_child_returncode"] == 0
+    )
+    phase = lifecycle.get("phase")
+    closed_pilot = phase == "pilot_complete_confirmation_not_qualified" and all(
+        row["stage_audit_passed"] for row in results[:2]
+    )
+    closed_abba = (
+        phase == "completed"
+        and all(row["stage_audit_passed"] for row in results)
+        and global_equal is True
+    )
+    decision = None
+    if all(row["stage_audit_passed"] for row in results[:2]):
+        decision = pilot_decision(
+            results[0]["summary"],
+            results[1]["summary"],
+            clean_runtime=not (root / "metadata/runtime-interference.json").exists(),
+            same_geometry=observed_equal is True,
+            actual_waits_ok=all(row["actual_waits_ok"] for row in results[:2]),
+        )
+    return {
+        "scope": "Original-first8 MMLU biology diagnostic only; planned32. No formal200/five-task/quality-equivalence claim",
+        "source_manifest_sha256": sha(driver / "source-manifest.json"),
+        "source_bytes_unchanged": unchanged,
+        "planned": 32,
+        "phase": phase,
+        "actual_controller_returncode": supervisor.get("actual_child_returncode"),
+        "master_completed_successfully": master_ok,
+        "observed_geometry_match": observed_equal,
+        "all_four_geometry_verified_equal": global_equal,
+        "all_four_stage_audits_passed": bool(closed_abba and master_ok and unchanged),
+        "closed_pilot_audit_passed": bool(closed_pilot and master_ok and unchanged),
+        "pilot_decision_recomputed": decision,
+        "stored_pilot_decision": optional(root / "metadata/pilot-decision.json"),
+        "stages": results,
+        "pairs": pairs,
+        "policy_activation_and_performance_separate": True,
+    }
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=PROBE)
+    parser.add_argument("--driver", type=Path, default=DRIVER)
+    parser.add_argument("--input", type=Path, default=INPUT)
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    assert not args.out.exists()
+    args.out.write_text(
+        json.dumps(audit(args.root, args.driver, args.input), indent=2, allow_nan=False)
+        + "\n"
+    )

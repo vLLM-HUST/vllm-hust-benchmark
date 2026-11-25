@@ -1,0 +1,141 @@
+"""Prospective small matched capacity probe; preserve all outcomes and cleanup."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import time
+import traceback
+import urllib.request
+
+import runtime as c
+
+ROOT=c.ROOT
+PLAN_PATH=ROOT/'plan.json'
+PLAN_SHA=hashlib.sha256(PLAN_PATH.read_bytes()).hexdigest()
+PLAN=json.loads(PLAN_PATH.read_bytes())
+c.STATE.update(plan_sha256=PLAN_SHA,scope='Separate capacity diagnostic, not frozen five-dataset evidence')
+
+
+def post(path,body=None):
+    request=urllib.request.Request(f'http://127.0.0.1:{c.PORT}'+path,
+        data=b''if body is None else json.dumps(body).encode(),headers={'Content-Type':'application/json'})
+    with urllib.request.urlopen(request,timeout=300)as response:
+        raw=response.read();return json.loads(raw)if raw else None
+
+
+def probe(prompt,salt):
+    time.sleep(1)
+    body={'model':'pegaflow-techoutcomes-qwen35','prompt':prompt,'max_tokens':32,
+          'temperature':0,'seed':17,'ignore_eos':True,'return_token_ids':True,
+          'cache_salt':salt,'stream':False}
+    response=post('/v1/completions',body)
+    assert len(response['choices'][0]['token_ids'])==response['usage']['completion_tokens']==32
+    assert response['usage']['prompt_tokens']==len(prompt)
+    return {'request':body,'response':response}
+
+
+def ids(record):
+    return record['response']['choices'][0]['token_ids']
+
+
+def qualify(arm):
+    candidate=arm.startswith('pegaflow')
+    folder=c.EVIDENCE/arm
+    original=json.loads((ROOT/'diagnostic-long-prompts.json').read_bytes())
+    golden=None if arm=='native'else json.loads((c.EVIDENCE/'native/qualification-oracle.json').read_bytes())
+    record={'arm':arm,'started_unix':time.time(),'long':[],
+            'quality_scope':'Two long-prefix 32-token samples only; old short-repeatability limitations retained; no SWE solving quality claim'}
+    try:
+        for index,case in enumerate(original):
+            salt=f'capacity01-long-{index}'
+            cold=probe(case['input_ids'],salt)
+            warm=probe(case['input_ids'],salt)
+            c.metrics(folder,f'long{index}-before-reset',candidate)
+            post('/reset_prefix_cache?reset_external=false')
+            restored=probe(case['input_ids'],salt)
+            c.metrics(folder,f'long{index}-after-reset',candidate)
+            before=(folder/f'vllm-metrics-long{index}-before-reset.txt').read_text()
+            after=(folder/f'vllm-metrics-long{index}-after-reset.txt').read_text()
+            delta={name:c.counter(after,name)-c.counter(before,name)for name in ['pega_load_success_total','pega_save_success_total','pega_load_failure_total','pega_save_failure_total']}
+            row={'index':index,'prompt_sha256':case['prompt_sha256'],'cold':cold,'warm':warm,'restored':restored,
+                 'equal':ids(cold)==ids(warm)==ids(restored),
+                 'equal_native':golden is None or ids(cold)==ids(golden['long'][index]['cold'])==ids(restored),
+                 'mechanism_delta':delta}
+            record['long'].append(row);c.write(folder/'qualification-oracle.json',record)
+            assert row['equal']and row['equal_native'],'Long-prefix numeric qualification failed'
+            if candidate:assert delta['pega_load_success_total']>0 and delta['pega_load_failure_total']==delta['pega_save_failure_total']==0
+        record.update(valid=True,completed_unix=time.time());c.write(folder/'qualification-oracle.json',record)
+        post('/reset_prefix_cache?reset_external=false')
+    except BaseException as error:
+        record.update(valid=False,error=type(error).__name__+': '+str(error),completed_unix=time.time());c.write(folder/'qualification-oracle.json',record);raise
+
+
+def run_arm(arm,duration):
+    candidate=arm.startswith('pegaflow')
+    folder=c.EVIDENCE/arm;folder.mkdir(parents=True,exist_ok=False)
+    assert c.npu(folder/'npu-admission.txt').count('No running processes found in NPU')==2
+    try:
+        if candidate:
+            c.update('starting-pegaflow',arm=arm)
+            c.SIDECAR=c.start(arm+'-sidecar',[str(ROOT/'.venv/bin/pegaflow-server'),'--addr','127.0.0.1:33892','--http-addr','127.0.0.1:33893','--pool-size','30gb','--devices','0,1','--log-level','info'],folder/'sidecar')
+            c.health(c.SIDECAR,'http://127.0.0.1:33893/health',maximum=300)
+        c.update('starting-vllm',arm=arm)
+        c.SERVER=c.start(arm+'-vllm',c.server_command(candidate),folder/'server')
+        c.health(c.SERVER,f'http://127.0.0.1:{c.PORT}/health')
+        qualify(arm)
+        result=c.point(arm,16,duration,qualification=(duration==180))
+        return result
+    finally:
+        c.update('stopping-owned-services',arm=arm)
+        c.stop(c.SERVER);c.stop(c.SIDECAR);c.SERVER=c.SIDECAR=None
+        deadline=time.monotonic()+90
+        while True:
+            snapshot=c.npu(folder/'npu-release.txt')
+            if snapshot.count('No running processes found in NPU')==2:break
+            assert time.monotonic()<deadline,'Owned devices did not release after service exit'
+            time.sleep(2)
+
+
+def cancel(signum,frame):
+    raise KeyboardInterrupt('Capacity probe interrupted by signal '+str(signum))
+
+
+try:
+    signal.signal(signal.SIGTERM,cancel)
+    c.update('waiting-public-plan')
+    deadline=time.monotonic()+1800
+    while not(ROOT/'publication.json').exists():
+        assert time.monotonic()<deadline,'Prospective public source release not received'
+        time.sleep(5)
+    release=json.loads((ROOT/'publication.json').read_bytes())
+    assert release['plan_sha256']==PLAN_SHA and release['commit']
+    assert hashlib.sha256((ROOT/'prepared-qwen35.json').read_bytes()).hexdigest()==PLAN['workload_sha256']
+    for name,digest in PLAN['execution_sources_sha256'].items():
+        assert hashlib.sha256((ROOT/name).read_bytes()).hexdigest()==digest
+    c.BASE_IDENTITY=c.snapshot_runtime();c.write(c.EVIDENCE/'runtime-identity.json',c.BASE_IDENTITY)
+    assert c.BASE_IDENTITY['vllm']['commit']==PLAN['vllm_commit']and not c.BASE_IDENTITY['vllm']['modified']
+    assert c.BASE_IDENTITY['vllm_ascend']['commit']==PLAN['ascend_commit']and not c.BASE_IDENTITY['vllm_ascend']['modified']
+    baseline=run_arm('native',180)
+    candidate=run_arm('pegaflow',180)
+    gain=100*(candidate['output_tokens_per_second']/baseline['output_tokens_per_second']-1)
+    native_folder=Path(baseline['folder'])
+    native_preemptions=c.counter((native_folder/'vllm-metrics-after.txt').read_text(),'num_preemptions_total')-c.counter((native_folder/'vllm-metrics-before.txt').read_text(),'num_preemptions_total')
+    result={'scope':'Independent small capacity diagnostic; no five-dataset or acceptance claim','initial_gain_percent':gain,
+            'initial':{'native':baseline,'pegaflow':candidate},'confirmation':None,
+            'native_preemptions_observed':native_preemptions,
+            'failure_policy':'Every failure, zero and negative retained; no parameter grid or task substitution'}
+    c.write(ROOT/'result.json',result)
+    if gain>0 and native_preemptions>0:
+        p=run_arm('pegaflow-confirm',900)
+        n=run_arm('native-confirm',900)
+        result['confirmation']={'pegaflow':p,'native':n,'gain_percent':100*(p['output_tokens_per_second']/n['output_tokens_per_second']-1)}
+        c.write(ROOT/'result.json',result)
+    c.update('complete',gain_percent=gain,confirmation=result['confirmation'],completed_unix=time.time())
+except BaseException as error:
+    traceback.print_exc();c.update('failed',error=type(error).__name__+': '+str(error),completed_unix=time.time())
+    for owned in reversed(c.OWNED):
+        try:c.stop(owned)
+        except BaseException:traceback.print_exc()
+    c.npu(ROOT/'evidence/failure-npu-release.txt')
+    raise

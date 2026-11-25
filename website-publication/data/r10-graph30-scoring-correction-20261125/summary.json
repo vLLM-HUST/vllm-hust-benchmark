@@ -1,0 +1,81 @@
+{
+  "scope": "Rescoring only, preserving the frozen first-match result and the original timings.",
+  "engine_release": "full-answer-b1-20261124-r10",
+  "engine_version": "2026.11.24.10",
+  "benchmark_proof": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/main/reports/r10-graph30-scoring-correction-20261125",
+  "frozen_first_match": {
+    "r10": 10,
+    "graph30": 8
+  },
+  "last_explicit_answer": {
+    "r10": 10,
+    "graph30": 10
+  },
+  "score_correction_cases": {
+    "mmlu-pro-02986": {
+      "expected": "A",
+      "frozen_score_answer": "B",
+      "corrected_score_answer": "A",
+      "corrected_score_pass": true,
+      "explicit_choices_in_emission_order": [
+        "B",
+        "D",
+        "D",
+        "A",
+        "H",
+        "A"
+      ],
+      "frozen_first_phrase_character": 2176,
+      "has_terminal_explicit_statement": true,
+      "terminal_explicit_answer": "A",
+      "finish_reason": "stop",
+      "completion_tokens": 1121,
+      "request_sha256": "1d38cab4ca99f4dd88606984a048eb0e6ce7e125280142d17e8859ca4137ee12",
+      "raw_stream_sha256": "b2664c77c727784a3cb6acd8807f91122ad9b0b3fffb10e7851ec6d4f8e9ed96"
+    },
+    "mmlu-pro-03290": {
+      "expected": "G",
+      "frozen_score_answer": "B",
+      "corrected_score_answer": "G",
+      "corrected_score_pass": true,
+      "explicit_choices_in_emission_order": [
+        "B",
+        "D",
+        "D",
+        "A",
+        "H",
+        "G",
+        "G"
+      ],
+      "frozen_first_phrase_character": 19741,
+      "has_terminal_explicit_statement": true,
+      "terminal_explicit_answer": "G",
+      "finish_reason": "stop",
+      "completion_tokens": 7205,
+      "request_sha256": "9dc9865ebc84da469e1019e08aff779d79e0e3f01b262ff40393a0612ecbb3a7",
+      "raw_stream_sha256": "21a6a7a27cb0978728cfda04cda0d31422facf7ccc4ef9dbffcfd8fe52f34a28"
+    }
+  },
+  "exact_emitted_text_pairs": 0,
+  "request_level_graph_call_relation_observed": false,
+  "historical_metadata_reuse_graph40_score": {
+    "frozen": 9,
+    "corrected": 10
+  },
+  "ten_requests_per_arm": 10,
+  "confirmation_run_included": true,
+  "source_scoring_correction_sha256": "4e08c8b6795b34ead226dfc768add1446a6ebe8a2cf93038f0def4161b4b50d1",
+  "previous_evidence_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/pull/782",
+  "same_host_confirmation": {
+    "correct": 9,
+    "completed": 10,
+    "legacy_correct": 6,
+    "truncated": 1,
+    "graph30_hits_per_rank": 480,
+    "output_throughput": 403.6998398930557,
+    "missed_case": "mmlu-pro-03290",
+    "failed_quality_gate": true,
+    "formal_4_1_to_4_4_started": false,
+    "miss_reason": "8192-token truncation without a terminal answer. Reasoning identified G more than once, then resumed analysis."
+  }
+}

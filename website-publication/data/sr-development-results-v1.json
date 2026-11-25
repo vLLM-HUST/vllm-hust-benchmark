@@ -1,0 +1,846 @@
+{
+  "schema": "vllm-hust-sr-development/v1",
+  "control": "B1-r8",
+  "entries": [
+    {
+      "id": "sr1",
+      "name": "DiffSpec",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/b1-sr1-evidence-20261118",
+      "rows": [
+        {
+          "id": "mmlu",
+          "label": "MMLU200",
+          "variant": "",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 1499.314552020488,
+              "mean_ttft_ms": 169552.6407927135,
+              "mean_tpot_ms": 21.547721954577767,
+              "ttft_p95_ms": 378380.2347794641,
+              "ttft_p99_ms": 388613.7295244634,
+              "end_to_end_p95_ms": 438109.5424194354,
+              "end_to_end_p99_ms": 465066.5528848115,
+              "correct": 150,
+              "requests": 200,
+              "truncated": 21,
+              "unresolved": 0
+            },
+            {
+              "output_tokens_per_second": 131.85995213528875,
+              "mean_ttft_ms": 1865749.918355248,
+              "mean_tpot_ms": 256.1486219929231,
+              "ttft_p95_ms": 4513819.661141187,
+              "ttft_p99_ms": 4611397.202852508,
+              "end_to_end_p95_ms": 5128761.298557278,
+              "end_to_end_p99_ms": 5365803.115764316,
+              "correct": 151,
+              "requests": 200,
+              "truncated": 26,
+              "unresolved": 0
+            }
+          ]
+        },
+        {
+          "id": "4096-formal",
+          "label": "4K / C8",
+          "variant": "",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 386.6923683151607,
+              "mean_ttft_ms": 647.776673774131,
+              "mean_tpot_ms": 18.184461834159855,
+              "ttft_p95_ms": 1267.8865130990744,
+              "ttft_p99_ms": 1826.5495656058192,
+              "end_to_end_p95_ms": 5825.115139223635,
+              "end_to_end_p99_ms": 6313.572297133505
+            },
+            {
+              "output_tokens_per_second": 95.67675922450388,
+              "mean_ttft_ms": 1319.871941407732,
+              "mean_tpot_ms": 77.63451568301967,
+              "ttft_p95_ms": 2416.4560199715197,
+              "ttft_p99_ms": 3218.4548888076088,
+              "end_to_end_p95_ms": 23065.184967359528,
+              "end_to_end_p99_ms": 23415.869729509577
+            }
+          ]
+        },
+        {
+          "id": "16384-formal",
+          "label": "16K / C8",
+          "variant": "",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 159.69055571224402,
+              "mean_ttft_ms": 2604.4946337461865,
+              "mean_tpot_ms": 39.8525192964749,
+              "ttft_p95_ms": 6415.707832062613,
+              "ttft_p99_ms": 9740.6148160994,
+              "end_to_end_p95_ms": 14194.802119256929,
+              "end_to_end_p99_ms": 15382.993947388599
+            },
+            {
+              "output_tokens_per_second": 69.36423298737377,
+              "mean_ttft_ms": 4067.3902408696363,
+              "mean_tpot_ms": 97.95129473473601,
+              "ttft_p95_ms": 9968.947968212888,
+              "ttft_p99_ms": 11489.732742263006,
+              "end_to_end_p95_ms": 32899.88850499503,
+              "end_to_end_p99_ms": 35022.89524758235
+            }
+          ]
+        }
+      ],
+      "scope_zh": "实验冻结。C8 和 MMLU-Pro 各一次双卡同卡配对。HLE、Frontier、SWE 和 Terminal 缺少完整配对。",
+      "scope_en": "Experimental freeze. One matched-card pair each for C8 and MMLU-Pro. No complete pairs for HLE, Frontier, SWE or Terminal."
+    },
+    {
+      "id": "sr2",
+      "name": "PyramidKV",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/b1-sr2-20261119",
+      "rows": [
+        {
+          "id": "mmlu",
+          "label": "MMLU200",
+          "variant": "v2",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 1499.314552020488,
+              "mean_ttft_ms": 169552.6407927135,
+              "mean_tpot_ms": 21.547721954577767,
+              "ttft_p95_ms": 378380.2347794641,
+              "ttft_p99_ms": 388613.7295244634,
+              "end_to_end_p95_ms": 438109.5424194354,
+              "end_to_end_p99_ms": 465066.5528848115,
+              "correct": 150,
+              "requests": 200,
+              "truncated": 21,
+              "unresolved": 0
+            },
+            {
+              "output_tokens_per_second": 1474.2404562382517,
+              "mean_ttft_ms": 161491.71070090495,
+              "mean_tpot_ms": 21.540682301089646,
+              "ttft_p95_ms": 345671.0959703661,
+              "ttft_p99_ms": 366881.59805229865,
+              "end_to_end_p95_ms": 436727.3954274597,
+              "end_to_end_p99_ms": 466715.1271465793,
+              "correct": 144,
+              "requests": 200,
+              "truncated": 22,
+              "unresolved": 0
+            }
+          ]
+        },
+        {
+          "id": "hle",
+          "label": "HLE200",
+          "variant": "v2",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 1029.135823051449,
+              "mean_ttft_ms": 305.12776681163814,
+              "mean_tpot_ms": 15.465988965588618,
+              "ttft_p95_ms": 734.9885666459799,
+              "ttft_p99_ms": 1034.8984616124626,
+              "end_to_end_p95_ms": 249473.74466930926,
+              "end_to_end_p99_ms": 252728.90044616399,
+              "correct": 52,
+              "requests": 200,
+              "truncated": 125,
+              "unresolved": 1
+            },
+            {
+              "output_tokens_per_second": 1026.1320375384862,
+              "mean_ttft_ms": 288.47588874865323,
+              "mean_tpot_ms": 15.56051474615822,
+              "ttft_p95_ms": 664.7522332191459,
+              "ttft_p99_ms": 1035.0067263603205,
+              "end_to_end_p95_ms": 251785.41211943625,
+              "end_to_end_p99_ms": 254794.27185713768,
+              "correct": 52,
+              "requests": 200,
+              "truncated": 122,
+              "unresolved": 0
+            }
+          ]
+        },
+        {
+          "id": "frontier",
+          "label": "Frontier160",
+          "variant": "v2",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 988.8199591668886,
+              "mean_ttft_ms": 293.9845828292164,
+              "mean_tpot_ms": 15.087085354904016,
+              "ttft_p95_ms": 701.4726813465356,
+              "ttft_p99_ms": 1125.7295014679432,
+              "end_to_end_p95_ms": 242238.9738967538,
+              "end_to_end_p99_ms": 246864.46166443228,
+              "correct": 66,
+              "requests": 160,
+              "truncated": 36,
+              "unresolved": 8
+            },
+            {
+              "output_tokens_per_second": 1008.2715695083256,
+              "mean_ttft_ms": 270.3930048213806,
+              "mean_tpot_ms": 15.055712053322624,
+              "ttft_p95_ms": 955.5198389053345,
+              "ttft_p99_ms": 966.7813144016266,
+              "end_to_end_p95_ms": 242520.3936330795,
+              "end_to_end_p99_ms": 248009.43153636932,
+              "correct": 67,
+              "requests": 160,
+              "truncated": 41,
+              "unresolved": 3
+            }
+          ]
+        },
+        {
+          "id": "swe",
+          "label": "SWE trace64",
+          "variant": "v2",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 136.7040067203789,
+              "mean_ttft_ms": 1704.197388270586,
+              "mean_tpot_ms": 47.552687655058094,
+              "ttft_p95_ms": 4113.19782539606,
+              "ttft_p99_ms": 5389.563230104446,
+              "end_to_end_p95_ms": 7342.817525586485,
+              "end_to_end_p99_ms": 39366.09169642204
+            },
+            {
+              "output_tokens_per_second": 125.50670411367416,
+              "mean_ttft_ms": 1969.2733456176938,
+              "mean_tpot_ms": 47.634403773007364,
+              "ttft_p95_ms": 4334.697718048094,
+              "ttft_p99_ms": 5174.3961102676385,
+              "end_to_end_p95_ms": 7641.123990154263,
+              "end_to_end_p99_ms": 43210.00688947671
+            }
+          ]
+        },
+        {
+          "id": "terminal",
+          "label": "Terminal trace48",
+          "variant": "v2",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 217.1330147920728,
+              "mean_ttft_ms": 1937.2756961711275,
+              "mean_tpot_ms": 34.61003701327142,
+              "ttft_p95_ms": 5134.8297769248475,
+              "ttft_p99_ms": 6339.0947930717475,
+              "end_to_end_p95_ms": 30006.51727864742,
+              "end_to_end_p99_ms": 52908.36558488072
+            },
+            {
+              "output_tokens_per_second": 201.7767886163862,
+              "mean_ttft_ms": 1869.3385993052896,
+              "mean_tpot_ms": 37.501320011812844,
+              "ttft_p95_ms": 4838.183346033095,
+              "ttft_p99_ms": 6557.41465136528,
+              "end_to_end_p95_ms": 32452.21756472587,
+              "end_to_end_p99_ms": 57997.63047887803
+            }
+          ]
+        },
+        {
+          "id": "4096-formal",
+          "label": "4K / C8",
+          "variant": "v3",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 386.6923683151607,
+              "mean_ttft_ms": 647.776673774131,
+              "mean_tpot_ms": 18.184461834159855,
+              "ttft_p95_ms": 1267.8865130990744,
+              "ttft_p99_ms": 1826.5495656058192,
+              "end_to_end_p95_ms": 5825.115139223635,
+              "end_to_end_p99_ms": 6313.572297133505
+            },
+            {
+              "output_tokens_per_second": 386.44046748208905,
+              "mean_ttft_ms": 729.327569085966,
+              "mean_tpot_ms": 17.878897310603705,
+              "ttft_p95_ms": 1515.7380502671003,
+              "ttft_p99_ms": 2213.8459707051516,
+              "end_to_end_p95_ms": 6007.318510487675,
+              "end_to_end_p99_ms": 6371.065657325089
+            }
+          ]
+        },
+        {
+          "id": "16384-formal",
+          "label": "16K / C8",
+          "variant": "v3",
+          "cards": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 159.69055571224402,
+              "mean_ttft_ms": 2604.4946337461865,
+              "mean_tpot_ms": 39.8525192964749,
+              "ttft_p95_ms": 6415.707832062613,
+              "ttft_p99_ms": 9740.6148160994,
+              "end_to_end_p95_ms": 14194.802119256929,
+              "end_to_end_p99_ms": 15382.993947388599
+            },
+            {
+              "output_tokens_per_second": 160.80393664185158,
+              "mean_ttft_ms": 2884.401930808163,
+              "mean_tpot_ms": 38.467690198768395,
+              "ttft_p95_ms": 5466.752028092742,
+              "ttft_p99_ms": 9848.777563218026,
+              "end_to_end_p95_ms": 14440.412980038673,
+              "end_to_end_p99_ms": 16444.985118228935
+            }
+          ]
+        }
+      ],
+      "scope_zh": "实验冻结。v3 为双卡同卡 C8；v2 五项中 MMLU-Pro 为同卡，其余沿用不同卡位的同口径对照。v4 因宿主内存余量中止。SWE 与 Terminal 仅计请求回放性能。",
+      "scope_en": "Experimental freeze. v3 C8 uses matched cards. In the five-profile v2 snapshot, MMLU-Pro uses matched cards and the other four use protocol-matched controls on different cards. v4 stopped at the host memory reserve guard. SWE and Terminal measure request replay performance only."
+    },
+    {
+      "id": "sr4",
+      "name": "Shared-expert MatMul–SwiGLU",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/b1-sr4-20261120",
+      "rows": [
+        {
+          "id": "mmlu",
+          "label": "MMLU200",
+          "variant": "",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ],
+          "arms": [
+            {
+              "ttft_p95_ms": 344010.0142691983,
+              "ttft_p99_ms": 360962.95208626776,
+              "tpot_p95_ms": 23.500597935295826,
+              "tpot_p99_ms": 23.929099784708175,
+              "end_to_end_p95_ms": 425005.0328448502,
+              "end_to_end_p99_ms": 462672.7794578391,
+              "output_tokens": 690468,
+              "truncated": 26,
+              "mean_ttft_ms": 153215.83218120824,
+              "mean_tpot_ms": 21.437139275963567,
+              "output_tokens_per_second": 1445.905611681983,
+              "duration_seconds": 477.5332458920311,
+              "requests": 200,
+              "correct": 147,
+              "unresolved": 0,
+              "failed": 0
+            },
+            {
+              "ttft_p95_ms": 345495.77644065226,
+              "ttft_p99_ms": 359602.9359942675,
+              "tpot_p95_ms": 23.458293955264505,
+              "tpot_p99_ms": 24.060324278006274,
+              "end_to_end_p95_ms": 447921.0004404496,
+              "end_to_end_p99_ms": 471041.5189679284,
+              "output_tokens": 712322,
+              "truncated": 25,
+              "mean_ttft_ms": 157644.8339548848,
+              "mean_tpot_ms": 21.465040721953006,
+              "output_tokens_per_second": 1499.115037858796,
+              "duration_seconds": 475.1616667240014,
+              "requests": 200,
+              "correct": 143,
+              "unresolved": 0,
+              "failed": 0
+            }
+          ]
+        },
+        {
+          "id": "hle",
+          "label": "HLE200",
+          "variant": "",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 1029.135823051449,
+              "mean_ttft_ms": 305.12776681163814,
+              "mean_tpot_ms": 15.465988965588618,
+              "ttft_p95_ms": 734.9885666459799,
+              "ttft_p99_ms": 1034.8984616124626,
+              "tpot_p95_ms": 17.957674786501936,
+              "tpot_p99_ms": 18.924058640289356,
+              "end_to_end_p95_ms": 249473.74466930926,
+              "end_to_end_p99_ms": 252728.90044616399,
+              "output_tokens": 2214211,
+              "duration_seconds": 2151.5245610970305,
+              "failed": 0,
+              "truncated": 125,
+              "requests": 200,
+              "correct": 52,
+              "unresolved": 1
+            },
+            {
+              "output_tokens_per_second": 1039.6698396371228,
+              "mean_ttft_ms": 298.1610109050416,
+              "mean_tpot_ms": 15.646554928741823,
+              "ttft_p95_ms": 791.2365327008067,
+              "ttft_p99_ms": 912.6987054092801,
+              "tpot_p95_ms": 18.35007798783947,
+              "tpot_p99_ms": 18.96727233012697,
+              "end_to_end_p95_ms": 250392.1552212458,
+              "end_to_end_p99_ms": 259047.50744106818,
+              "failed": 0,
+              "duration_seconds": 2058.4332818069997,
+              "requests": 200,
+              "correct": 60,
+              "unresolved": 1,
+              "truncated": 121
+            }
+          ]
+        },
+        {
+          "id": "frontier",
+          "label": "Frontier160",
+          "variant": "",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 988.8199591668886,
+              "mean_ttft_ms": 293.9845828292164,
+              "mean_tpot_ms": 15.087085354904016,
+              "ttft_p95_ms": 701.4726813465356,
+              "ttft_p99_ms": 1125.7295014679432,
+              "tpot_p95_ms": 16.87796499412236,
+              "tpot_p99_ms": 17.131018957229134,
+              "end_to_end_p95_ms": 242238.9738967538,
+              "end_to_end_p99_ms": 246864.46166443228,
+              "output_tokens": 1138891,
+              "duration_seconds": 1151.7678111590212,
+              "failed": 0,
+              "truncated": 36,
+              "requests": 160,
+              "correct": 66,
+              "unresolved": 8
+            },
+            {
+              "output_tokens_per_second": 1004.3404787078913,
+              "mean_ttft_ms": 288.39005053753226,
+              "mean_tpot_ms": 15.1271389302011,
+              "ttft_p95_ms": 912.3765575505793,
+              "ttft_p99_ms": 1050.0924224620312,
+              "tpot_p95_ms": 16.84569707483276,
+              "tpot_p99_ms": 17.045412960979075,
+              "end_to_end_p95_ms": 243187.69128620083,
+              "end_to_end_p99_ms": 249023.90515312902,
+              "failed": 0,
+              "duration_seconds": 1269.8462593490003,
+              "requests": 160,
+              "correct": 62,
+              "unresolved": 9,
+              "truncated": 43
+            }
+          ]
+        },
+        {
+          "id": "swe",
+          "label": "SWE-bench Pro",
+          "variant": "",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 136.7040067203789,
+              "mean_ttft_ms": 1704.197388270586,
+              "mean_tpot_ms": 47.552687655058094,
+              "ttft_p95_ms": 4113.19782539606,
+              "ttft_p99_ms": 5389.563230104446,
+              "tpot_p95_ms": 69.36026787422817,
+              "tpot_p99_ms": 83.800830029337,
+              "end_to_end_p95_ms": 7342.817525586485,
+              "end_to_end_p99_ms": 39366.09169642204,
+              "output_tokens": 8181,
+              "duration_seconds": 59.8446248670225,
+              "failed": 0,
+              "truncated": 2,
+              "requests": 64
+            },
+            {
+              "output_tokens_per_second": 110.73829719775543,
+              "mean_ttft_ms": 2084.8972640156944,
+              "mean_tpot_ms": 47.08824847279417,
+              "ttft_p95_ms": 4583.598905747381,
+              "ttft_p99_ms": 5101.615967689677,
+              "tpot_p95_ms": 71.22951135288822,
+              "tpot_p99_ms": 83.8912568808,
+              "end_to_end_p95_ms": 8369.189116449646,
+              "end_to_end_p99_ms": 17623.25675103969,
+              "failed": 0,
+              "duration_seconds": 56.65609964000032,
+              "requests": 64
+            }
+          ]
+        },
+        {
+          "id": "terminal",
+          "label": "Terminal-Bench",
+          "variant": "",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 217.1330147920728,
+              "mean_ttft_ms": 1937.2756961711275,
+              "mean_tpot_ms": 34.61003701327142,
+              "ttft_p95_ms": 5134.8297769248475,
+              "ttft_p99_ms": 6339.0947930717475,
+              "tpot_p95_ms": 67.14074778902034,
+              "tpot_p99_ms": 90.20930624306641,
+              "end_to_end_p95_ms": 30006.51727864742,
+              "end_to_end_p99_ms": 52908.36558488072,
+              "output_tokens": 13813,
+              "duration_seconds": 63.61538347002352,
+              "failed": 0,
+              "truncated": 3,
+              "requests": 48
+            },
+            {
+              "output_tokens_per_second": 243.28631838877342,
+              "mean_ttft_ms": 2147.994331166425,
+              "mean_tpot_ms": 31.624780656340878,
+              "ttft_p95_ms": 4810.656514049507,
+              "ttft_p99_ms": 6486.755287549273,
+              "tpot_p95_ms": 67.14132696807597,
+              "tpot_p99_ms": 94.21195810960907,
+              "end_to_end_p95_ms": 32859.57613280154,
+              "end_to_end_p99_ms": 53963.61652013929,
+              "failed": 0,
+              "duration_seconds": 64.11786779999966,
+              "requests": 48
+            }
+          ]
+        },
+        {
+          "id": "4096-formal",
+          "label": "4K / C8",
+          "variant": "Run 1",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 386.95420551192586,
+              "ttft_p95_ms": 1297.6814753841609,
+              "ttft_p99_ms": 1702.7836183458562,
+              "tpot_p95_ms": 19.59794121639182,
+              "tpot_p99_ms": 20.39117785710294,
+              "end_to_end_p95_ms": 5860.319119004998,
+              "end_to_end_p99_ms": 6360.377540674526,
+              "requests": 457,
+              "mean_ttft_ms": 749.2615800323903,
+              "mean_tpot_ms": 17.77387827599208,
+              "output_tokens": 116992,
+              "failed": 0
+            },
+            {
+              "output_tokens_per_second": 387.0815334622148,
+              "ttft_p95_ms": 1054.0443147002404,
+              "ttft_p99_ms": 1599.339665170901,
+              "tpot_p95_ms": 19.448745259604966,
+              "tpot_p99_ms": 19.74932422862641,
+              "end_to_end_p95_ms": 5674.35603719905,
+              "end_to_end_p99_ms": 5949.097467339234,
+              "requests": 458,
+              "mean_ttft_ms": 632.723272903886,
+              "mean_tpot_ms": 18.200820852881353,
+              "output_tokens": 117248,
+              "failed": 0
+            }
+          ]
+        },
+        {
+          "id": "16384-formal",
+          "label": "16K / C8",
+          "variant": "Run 1",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 159.63468158937903,
+              "ttft_p95_ms": 7180.332662200089,
+              "ttft_p99_ms": 9711.99296463514,
+              "tpot_p95_ms": 44.40155025028313,
+              "tpot_p99_ms": 45.119957222904574,
+              "end_to_end_p95_ms": 14621.441574010532,
+              "end_to_end_p99_ms": 15353.277265336366,
+              "requests": 189,
+              "mean_ttft_ms": 3100.850396096354,
+              "mean_tpot_ms": 37.9504461057581,
+              "output_tokens": 48384,
+              "failed": 0
+            },
+            {
+              "output_tokens_per_second": 161.48079629182854,
+              "ttft_p95_ms": 7293.345164501261,
+              "ttft_p99_ms": 9664.502344099126,
+              "tpot_p95_ms": 43.800900435292306,
+              "tpot_p99_ms": 44.42113536353324,
+              "end_to_end_p95_ms": 14720.721290498659,
+              "end_to_end_p99_ms": 15613.882069700048,
+              "requests": 191,
+              "mean_ttft_ms": 2933.622124596891,
+              "mean_tpot_ms": 38.089324467939306,
+              "output_tokens": 48896,
+              "failed": 0
+            }
+          ]
+        },
+        {
+          "id": "4096-repeat",
+          "label": "4K / C8",
+          "variant": "Run 2",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 386.95420551192586,
+              "ttft_p95_ms": 1297.6814753841609,
+              "ttft_p99_ms": 1702.7836183458562,
+              "tpot_p95_ms": 19.59794121639182,
+              "tpot_p99_ms": 20.39117785710294,
+              "end_to_end_p95_ms": 5860.319119004998,
+              "end_to_end_p99_ms": 6360.377540674526,
+              "requests": 457,
+              "mean_ttft_ms": 749.2615800323903,
+              "mean_tpot_ms": 17.77387827599208,
+              "output_tokens": 116992,
+              "failed": 0
+            },
+            {
+              "output_tokens_per_second": 387.7880055123768,
+              "ttft_p95_ms": 1270.2978246012203,
+              "ttft_p99_ms": 1703.2128439610128,
+              "tpot_p95_ms": 19.471247565092842,
+              "tpot_p99_ms": 19.83438788493182,
+              "end_to_end_p95_ms": 5711.870928500139,
+              "end_to_end_p99_ms": 6058.210765979312,
+              "requests": 459,
+              "mean_ttft_ms": 690.6689558322945,
+              "mean_tpot_ms": 17.962210895792264,
+              "output_tokens": 117504,
+              "failed": 0
+            }
+          ]
+        },
+        {
+          "id": "16384-repeat",
+          "label": "16K / C8",
+          "variant": "Run 2",
+          "cards": [
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ],
+          "arms": [
+            {
+              "output_tokens_per_second": 159.63468158937903,
+              "ttft_p95_ms": 7180.332662200089,
+              "ttft_p99_ms": 9711.99296463514,
+              "tpot_p95_ms": 44.40155025028313,
+              "tpot_p99_ms": 45.119957222904574,
+              "end_to_end_p95_ms": 14621.441574010532,
+              "end_to_end_p99_ms": 15353.277265336366,
+              "requests": 189,
+              "mean_ttft_ms": 3100.850396096354,
+              "mean_tpot_ms": 37.9504461057581,
+              "output_tokens": 48384,
+              "failed": 0
+            },
+            {
+              "output_tokens_per_second": 160.8898505044639,
+              "ttft_p95_ms": 7705.306067599486,
+              "ttft_p99_ms": 9702.26555076038,
+              "tpot_p95_ms": 44.09125585882458,
+              "tpot_p99_ms": 44.78036068861676,
+              "end_to_end_p95_ms": 14508.131805602716,
+              "end_to_end_p99_ms": 14994.273839540363,
+              "requests": 190,
+              "mean_ttft_ms": 2903.8610750578778,
+              "mean_tpot_ms": 38.35002314778214,
+              "output_tokens": 48640,
+              "failed": 0
+            }
+          ]
+        }
+      ],
+      "scope_zh": "场景型实验冻结。两轮同卡 C8 的 4K 端到端尾延迟下降，16K 吞吐提升，16K 首字 P95 两轮均回退。MMLU-Pro 与 FrontierScience 答对数下降。保留为 SR 实验记录，常规 r 准入未通过。",
+      "scope_en": "Scenario-specific experimental freeze. Two matched-card C8 runs improved 4K end-to-end tails and 16K throughput, with worse 16K TTFT P95 in both runs. MMLU-Pro and FrontierScience correct counts fell. The regular-release no-regression gate failed."
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "schema": "vllm-hust-frozen-combination/v1",
+  "run_id": "five-datasets-r6-matched-20261114-r3",
+  "engine_release": "full-answer-b1-20261113-r6",
+  "tools_commit": "29ed9a834eef377d52ec710fbedbcafb7e19c3c6",
+  "model": "Qwen3.5-35B-A3B",
+  "hardware": {
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "BF16",
+    "accelerator": "Ascend910B2",
+    "cards": 2,
+    "parallelism": "TP2"
+  },
+  "B0": {
+    "vllm": "0.18.0+empty",
+    "vllm-ascend": "0.18.0",
+    "torch": "2.9.0+cpu",
+    "torch-npu": "2.9.0.post1+gitee7ba04",
+    "transformers": "4.57.6",
+    "triton-ascend": "3.2.0.dev20260322",
+    "source_map_sha256": "a357ad8cf1ff6f8797fb2d6476e71a0deef5ee0899a55ea32ed65f07fe7773bc",
+    "cann": "8.5.1"
+  },
+  "B1": {
+    "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+    "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+    "torch": "2.13.0+cpu",
+    "torch-npu": "2.13.0rc1",
+    "transformers": "5.14.1",
+    "cann": "9.1.0"
+  },
+  "worker": "corrected_serving_runtime.CorrectedWorker",
+  "settings": {
+    "max_num_seqs": 24,
+    "resident_seats": 36,
+    "mtp_tokens": 2,
+    "graph": "FULL",
+    "host_bytes_per_rank": 4294967296,
+    "device_kv_bytes_per_rank": 21474836480,
+    "tensor_parallel_size": 2,
+    "prefill_tokens": 4096,
+    "max_model_len": 65536
+  },
+  "components": [
+    {
+      "id": "async-execution-state",
+      "name_zh": "异步执行与状态管理",
+      "name_en": "Asynchronous execution and state management",
+      "configuration": "E24 / R36"
+    },
+    {
+      "id": "mtp",
+      "name_zh": "MTP2",
+      "name_en": "MTP2",
+      "configuration": "2 tokens"
+    },
+    {
+      "id": "graph",
+      "name_zh": "FULL 执行图",
+      "name_en": "FULL execution graph",
+      "configuration": "FULL"
+    },
+    {
+      "id": "kv_materialization",
+      "name_zh": "逐请求 KV 重算",
+      "name_en": "Per-request KV recomputation",
+      "configuration": "per-request"
+    },
+    {
+      "id": "microflow",
+      "name_zh": "Microflow",
+      "name_en": "Microflow",
+      "configuration": "enabled"
+    },
+    {
+      "id": "hust_m01_correction",
+      "name_zh": "M01 状态校正",
+      "name_en": "M01 state correction",
+      "configuration": "enabled"
+    },
+    {
+      "id": "hust_joint_packed",
+      "name_zh": "锁页状态合并分配",
+      "name_en": "Packed pinned-host state",
+      "configuration": "per-object / per-dtype"
+    },
+    {
+      "id": "compile-boundary",
+      "name_zh": "完整预热与编译封边",
+      "name_en": "Complete warmup and compilation boundary",
+      "configuration": "both TP ranks"
+    }
+  ],
+  "source_files": [
+    {
+      "repository": "vLLM-HUST/vllm-hust-engine",
+      "commit": "29ed9a834eef377d52ec710fbedbcafb7e19c3c6",
+      "path": "engines/b1-r4.json",
+      "sha256": "4da45c08368e58a74e5ac795d0440d16831db8190a3970fb35547cef22b5b984"
+    },
+    {
+      "repository": "vLLM-HUST/vllm-hust-engine",
+      "commit": "29ed9a834eef377d52ec710fbedbcafb7e19c3c6",
+      "path": "engines/b1-r6.json",
+      "sha256": "d7b455a67b965e1c08cc6c7ecc31fa95076e118165699bdcd0e2a7871dc21503"
+    },
+    {
+      "repository": "vLLM-HUST/vllm-hust-engine",
+      "commit": "29ed9a834eef377d52ec710fbedbcafb7e19c3c6",
+      "path": "engines/b1-r6-overlay.json",
+      "sha256": "e46705b8884b16850ffd5711c4adc56acc524333f22aed64ef38f606331fd349"
+    },
+    {
+      "repository": "vLLM-HUST/vllm-hust-engine",
+      "commit": "29ed9a834eef377d52ec710fbedbcafb7e19c3c6",
+      "path": "protocols/task-warmup-v3-c8-compatibility.json",
+      "sha256": "afde52db11530d3a7c1bb0b209a0cbd24cb1e978cbe939878acb1eb5cf8f38ad"
+    }
+  ]
+}
