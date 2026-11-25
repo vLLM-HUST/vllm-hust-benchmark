@@ -1,5 +1,9 @@
 # vllm-hust-benchmark
 
+[轻量检出、索引维护和附件管理](docs/REPOSITORY_MAINTENANCE.md)提供日常代码维护入口。 数据导航统一检查使用
+`python scripts/refresh_data_navigation.py --check`。 网站当前发布源为
+[website-publication](website-publication/README.md)，由固定提交装配后发布。
+
 只安装独立数据组件、避免检出整个历史归档：见 [固定提交 wheel 安装](docs/workload-data/INSTALLATION.zh-CN.md)。
 
 可选的原始数据目录、读取适配与准备入口见 [Workload Data 使用说明](workload-preparation/README.md)；逐来源实际验证进度见
@@ -16,16 +20,16 @@ V1：[从全新 CPU 工作区部署并运行一个真实 Agent](docs/SWE_BENCH_P
 > removed. The execution scripts and historical design notes below are retained for reference only;
 > new PR validation is performed by the external fixed-machine dataset service.
 
-Wrapper benchmark repository for vllm-hust.
+Benchmark orchestration, workload data, immutable evidence and website publication sources.
 
 GenNova 与 GenNova Autotune 的产品级独立测试结果统一维护在
 [GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)（私有仓库，需授权）。 历史
 MOD 证据入口见 [迁移记录](reports/gennova-mod-evidence-20261105/README.md)。
 
-The goal is to keep `vllm-hust-benchmark` as the stable entrypoint for running experiments, while
-the real benchmark implementations stay in `vllm-hust`. This repo resolves the sibling `vllm-hust`
-and `vllm-hust-website` repositories, invokes the benchmark entrypoints from there, and keeps result
-export and website publication flows in one place.
+Current data installation, task execution and publication entrypoints are linked above. The
+historical wrapper CLI delegates performance workloads to sibling `vllm-hust` checkouts and can
+export standard leaderboard snapshots. Its manual examples below describe that compatibility
+interface. Current website publication uses the committed `website-publication` source.
 
 ## Current Delivery Contract
 
@@ -59,8 +63,8 @@ For runtime comparisons, the wrapper now understands two execution targets:
 - `vllm`: the baseline checkout at `../reference-repos/vllm` (override with
   `VLLM_BASELINE_VLLM_REPO`)
 
-Use the already configured conda environment for this workspace. Do not rely on the system Python
-installation for benchmark execution or validation.
+Use the dependency environment specified by the selected task or tool. CPU repository validation
+uses the Python version and test extra declared in CI; model execution follows its pinned runtime.
 
 ## Local Validation Dependencies
 
@@ -132,7 +136,11 @@ Within that boundary, the important design point is:
   receipts and card-rental costs. Solver-enabled measurements, not predictions, native-OFF
   comparisons, task accuracy or official fixed-target leaderboard submissions.
 
-## Quick Start
+## Historical Wrapper CLI Examples
+
+These manual commands describe the retained wrapper interface. For current data installation and
+task execution, use the guides at the top of this README. Website production publication follows
+`website-publication/README.md`; the retired HF/dispatch workflows do not run these examples.
 
 ```bash
 # show the active public target matrix; 3B perfgate profiles are excluded

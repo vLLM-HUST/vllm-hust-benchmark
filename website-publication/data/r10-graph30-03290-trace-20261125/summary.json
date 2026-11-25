@@ -1,0 +1,107 @@
+{
+  "scope": "Request-level diagnosis of MMLU-Pro 03290 only. The other nine frozen requests provided concurrent background load.",
+  "engine_release": "full-answer-b1-20261124-r10",
+  "engine_version": "2026.11.24.10",
+  "graph_capture": "FULL 3072 · MTP2 · BF16 TP2",
+  "same_host_and_two_cards": true,
+  "tracked_case_id": "mmlu-pro-03290",
+  "scored_background_cases": 0,
+  "max_completion_tokens": 8192,
+  "request_body_sha256": "5f17aebbad3175c602a294545cc1e7249f7bf5fa6ea8153abfad26c7599e05f5",
+  "prompt_token_ids_sha256": "377e9fcb3bcfdd79968e7148faa3cfdb601737b7e364118e69e76e4432cf61b7",
+  "first_differing_output_token": 17,
+  "geometry_at_first_difference": {
+    "native": {
+      "computed_before": 1588,
+      "scheduled_output_before": 15,
+      "request_input_rows": 3,
+      "token_begin": 16,
+      "token_end": 18,
+      "finish_reason": null,
+      "graph_mode": "FULL",
+      "descriptor_rows": 40,
+      "replayed_rows": 40,
+      "batch_input_rows": 30,
+      "batch_requests": 10
+    },
+    "graph30": {
+      "computed_before": 1589,
+      "scheduled_output_before": 16,
+      "request_input_rows": 3,
+      "token_begin": 16,
+      "token_end": 17,
+      "finish_reason": null,
+      "graph_mode": "FULL",
+      "descriptor_rows": 30,
+      "replayed_rows": 30,
+      "batch_input_rows": 30,
+      "batch_requests": 10
+    }
+  },
+  "paired_arms": {
+    "native": {
+      "finish_reason": "length",
+      "completion_tokens": 8192,
+      "terminal_explicit_choice": null,
+      "emitted_tokens_match_http": true,
+      "target_total_verification_waves": 3018,
+      "replayed_rows_histogram": {
+        "12": 219,
+        "1536": 1,
+        "24": 482,
+        "3": 1750,
+        "40": 475,
+        "4096": 1,
+        "6": 90
+      },
+      "target_routed_25_to_30_row_batch_replays": 475,
+      "first_compared_bucket_emit_range": [
+        2,
+        4
+      ],
+      "last_compared_bucket_emit_range": [
+        1244,
+        1246
+      ],
+      "first_recheck_token": 769,
+      "first_recheck_replayed_rows": 40,
+      "private_trace_sha256": "7452884180b373cb2bdf3ab1c73e58ddad2db4b2390901ca2adf28d0fab23071",
+      "private_aligned_trace_sha256": "10e764ff2703d01fcd7ca50d0df370348fbf0849487c55a260e9099e3fb277f3"
+    },
+    "graph30": {
+      "finish_reason": "length",
+      "completion_tokens": 8192,
+      "terminal_explicit_choice": null,
+      "emitted_tokens_match_http": true,
+      "target_total_verification_waves": 3000,
+      "replayed_rows_histogram": {
+        "12": 594,
+        "1536": 1,
+        "24": 426,
+        "3": 590,
+        "30": 380,
+        "4096": 1,
+        "6": 1008
+      },
+      "target_routed_25_to_30_row_batch_replays": 380,
+      "first_compared_bucket_emit_range": [
+        2,
+        4
+      ],
+      "last_compared_bucket_emit_range": [
+        998,
+        1000
+      ],
+      "first_recheck_token": 1234,
+      "first_recheck_replayed_rows": 24,
+      "private_trace_sha256": "c40ac502a5a09dcf15c0a57eaf648b3a5361b5c9f378c68eab04ad635f566636",
+      "private_aligned_trace_sha256": "4ae2d281aea09cf94ae7299a00f86562c554317328195cd1dac1ca2fc9233fe4"
+    }
+  },
+  "known_clear_repair": false,
+  "new_ten_case_quality_gate_run": false,
+  "formal_4_1_to_4_4_started": false,
+  "previous_quality_evidence": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/main/reports/r10-graph30-scoring-correction-20261125",
+  "findings_zh": "两臂前 16 个输出 token 一致，第 17 个 token 在各自的 40／30 行图上首次分叉，此时批次均有 10 个请求和 30 个实际输入行。两路当步接纳的推测 token 边界不同，因此首处分叉不足以把后续截断归因到 30 行图。题干要四处的染色体数，选项采用染色体数与染色单体数交替的格式，两路都在这两种解读之间反复核对。30 行最后覆盖到 token 1,000。第 1,070 个 token 在 24 行图上重现从第 966 个 token 开始的 42-token 片段，第 1,234 个 token 显式再次核对选项。40 行在第 769 个 token 已显式回查，换到更小的图档后仍继续。30 行结果一度倾向 G，随后重开分析，两路均无最终选项。",
+  "findings_en": "The first 16 output tokens matched. The first divergence was at token 17, with the native and candidate respectively replaying the 40- and 30-row graph for ten requests and 30 live rows. The speculative commit boundaries differed, so the divergence alone does not attribute truncation to the 30-row graph. Both responses repeatedly switched between the question's four chromosome counts and the answer choices' alternating chromosome and chromatid counts. The final 30-row replay committed through token 1,000. At token 1,070 the candidate repeated 42 tokens from token 966 while on the 24-row graph, and explicitly checked the choices again at token 1,234. The native arm explicitly rechecked at token 769 and continued after moving to smaller graphs. Neither response delivered a terminal choice."
+}
