@@ -1,0 +1,52 @@
+{
+  "schema": "instance-controller-scaling/v1",
+  "ride_version": "0.3.6",
+  "instance_controller_version": "0.1.12.dev3",
+  "hardware": "4 × NVIDIA RTX A6000",
+  "model": "Qwen2.5-7B-Instruct",
+  "execution_mode": "default CUDA Graph",
+  "report_path": "reports/instance-controller-scaling-20261120/README.md",
+  "model_manifest_sha256": "f45b108d1585aaae3a9c2dd5b6ee0f138565b37b7871119e8a961ab66480b9ac",
+  "source_summary_sha256": {
+    "single": "938ec4dd9a9090b47ebcb6df0e4a254025b7443788e27ea198a79b6a396fc732",
+    "double": "4e37e314593bd5e23939ab5e90cf78bc563a4f99b970e8e17607c6b20c252241",
+    "single_audit": "7107f57360e139bbde9cccba4b51e5ba28b774b41a7bf84a7feac3d0a688302e",
+    "dual_audit": "51a682578e0cb4abc8720c24ed56574e7b4b66c553f19323964c2315cfd25af7"
+  },
+  "scenarios": [
+    {
+      "peaks": 1,
+      "completed_per_arm": 6870,
+      "window_seconds": 1180,
+      "trace_sha256": "42d4c21c2ebe44ae3da06d581f45b963bd1b764b456167192e4634da0f5446f5",
+      "fixed": {
+        "replicas": 2,
+        "p95_latency_seconds": 449.8886191787198,
+        "mean_reserved_replicas": 2.0
+      },
+      "dynamic": {
+        "min_replicas": 1,
+        "max_replicas": 3,
+        "p95_latency_seconds": 344.5594149244949,
+        "mean_reserved_replicas": 2.0851175071829458
+      }
+    },
+    {
+      "peaks": 2,
+      "completed_per_arm": 10050,
+      "window_seconds": 2000,
+      "trace_sha256": "b3cd3cd8b1523122fd84646e92f47da021a8905d3d5d54dc2c106d66bcf1cdde",
+      "fixed": {
+        "replicas": 2,
+        "p95_latency_seconds": 398.5548016372137,
+        "mean_reserved_replicas": 2.0
+      },
+      "dynamic": {
+        "min_replicas": 1,
+        "max_replicas": 4,
+        "p95_latency_seconds": 399.7835352674127,
+        "mean_reserved_replicas": 2.0597329998016356
+      }
+    }
+  ]
+}

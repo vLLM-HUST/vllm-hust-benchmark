@@ -1,0 +1,192 @@
+{
+  "schema": "dataset-run-guide/v1",
+  "guide_id": "five-datasets-run-guide-20261115-v2",
+  "standard_id": "five-datasets-20261113-v1",
+  "standard_sha256": "66c050b7c6d705853f10bc437e6ace1707a9b46d43b6bdb7159724045045b756",
+  "modes": [
+    {
+      "id": "quick",
+      "title_zh": "快速测试",
+      "title_en": "Quick test",
+      "datasets": [
+        "mmlu"
+      ],
+      "scope_zh": "仅 MMLU-Pro 固定 200 题；B0/B1 各跑同一组 200 题。",
+      "scope_en": "MMLU-Pro fixed200 only; the same 200 questions in each of B0 and B1.",
+      "hours": [
+        2,
+        3
+      ],
+      "qualified_hours": [
+        1,
+        2
+      ],
+      "datasets_flag": "mmlu"
+    },
+    {
+      "id": "full",
+      "title_zh": "全量测试",
+      "title_en": "Full test",
+      "datasets": [
+        "mmlu",
+        "hle",
+        "frontier",
+        "swe",
+        "terminal"
+      ],
+      "scope_zh": "跑完冻结标准的全部五项：MMLU200、HLE 分层 200、Frontier160、SWE trace 32 任务（64 请求/臂）、Terminal trace 32 任务（48 请求/臂）。",
+      "scope_en": "All five frozen profiles: MMLU200, HLE stratified200, Frontier160, SWE trace32 tasks (64 requests/arm), Terminal trace32 tasks (48 requests/arm).",
+      "hours": [
+        12,
+        16
+      ],
+      "qualified_hours": [
+        10,
+        14
+      ],
+      "datasets_flag": "mmlu,hle,frontier,swe,terminal"
+    }
+  ],
+  "scope_zh": "“全量”指本项目冻结的五项测试范围，不是五个上游数据集的原始全集。快速测试是单数据集检查，不能替代五项验收。SWE/Terminal 仅回放公开 trace 测推理性能，不执行历史工具命令，不报告任务解决率。",
+  "scope_en": "Full means all five project-frozen profiles, not every item in the five upstream datasets. Quick is a single-dataset check and cannot replace five-profile acceptance. SWE/Terminal replay public traces for inference only; no historical tool commands are executed and no task success rate is reported.",
+  "timing": {
+    "kind": "planning_estimate_not_end_to_end_measurement",
+    "reference_zh": "参考配置：双卡 Ascend 910B2、Qwen3.5-35B-A3B BF16，原版 B0 0.18 / 冻结 B1 r6，串行配对。",
+    "reference_en": "Reference: dual Ascend 910B2, Qwen3.5-35B-A3B BF16, original B0 0.18 / frozen B1 r6, serial pairing.",
+    "includes_zh": "五数据集主流程估时包含本机 C8、两臂加载与预热、推理、评分和报告。",
+    "includes_en": "Five-profile estimates include local C8, both-arm loading/warmup, inference, scoring and reporting.",
+    "excludes_zh": "首次下载、环境安装和资源排队另计；32K、多租户和有效算力分子采集专项单列。已有参考分母自动核验缓存。",
+    "excludes_en": "Downloads, installation and queues are additional;32K, multi-tenant and compute numerator captures are separate. Existing reference denominators are automatically verified and cached.",
+    "basis_zh": "基于当前 r6 报告中15个封存阶段的耗时合计：全量约11.13小时，快速约2.44小时；展示排期范围为加上余量后的估算。",
+    "basis_en": "Based on all15 sealed stages in the current r6 report: about11.13 hours full and2.44 hours quick, with planning allowance added.",
+    "qualified_zh": "仅在同机同配置已有有效、封存的 C8 资格证据并通过脚本校验时，才可显式传 --continuous-evidence 复用；新第三方机器应重跑。复用后快速约 1–2 小时，全量约 10–14 小时。",
+    "qualified_en": "Reuse C8 only with valid sealed evidence for the same host/configuration, explicitly supplied through --continuous-evidence and verified by the runner. New third-party hosts must rerun it. With valid reuse: quick about 1–2 h; full about 10–14 h.",
+    "observed_components": [
+      {
+        "id": "qualification",
+        "completed_stage_minutes": 62.91,
+        "campaign_sha256": "4072da95880f9087da0e71e19b7b7eb95a1aaf7aaf4cf44794b455e2064c067e",
+        "campaign_status": "failed",
+        "basis": "Completed selected stages only; failed/unselected stages are not counted. Source campaigns are retained unchanged."
+      },
+      {
+        "id": "mmlu",
+        "completed_stage_minutes": 75.59,
+        "campaign_sha256": "478a6430a345fb04e02afa2d4a8e161c06ffe74f1a8b3146e50f02ae3579f7e9",
+        "campaign_status": "failed",
+        "basis": "Completed selected stages only; failed/unselected stages are not counted. Source campaigns are retained unchanged."
+      },
+      {
+        "id": "frontier",
+        "completed_stage_minutes": 174.9,
+        "campaign_sha256": "478a6430a345fb04e02afa2d4a8e161c06ffe74f1a8b3146e50f02ae3579f7e9",
+        "campaign_status": "failed",
+        "basis": "Completed selected stages only; failed/unselected stages are not counted. Source campaigns are retained unchanged."
+      },
+      {
+        "id": "hle",
+        "completed_stage_minutes": 301.29,
+        "campaign_sha256": "0f50fa5ab688cc68da9e363ad99a4fd27ae9aa0bad7a4c193e35c634c7aaec03",
+        "campaign_status": "completed",
+        "basis": "Completed selected stages only; failed/unselected stages are not counted. Source campaigns are retained unchanged."
+      },
+      {
+        "id": "traces",
+        "completed_stage_minutes": 78.29,
+        "campaign_sha256": "a4f89e532e467a4f439e24a228cb1bbd8f6918397f58785ef000134f8cdae2c5",
+        "campaign_status": "completed",
+        "basis": "Completed selected stages only; failed/unselected stages are not counted. Source campaigns are retained unchanged."
+      }
+    ],
+    "basis_summary_path": "website-publication/data/five-datasets-r6-20261114/summary-public-v1.json",
+    "basis_summary_sha256": "8173587f10ff88b77839e6ae6648c16ef4a9abecbe3204639755759d50e921d2",
+    "observed_r6_stage_minutes": [
+      {
+        "name": "continuous-B0",
+        "minutes": 33.89342388709386
+      },
+      {
+        "name": "continuous-B1",
+        "minutes": 34.11003663937251
+      },
+      {
+        "name": "mmlu-pair",
+        "minutes": 78.26848763227463
+      },
+      {
+        "name": "frontier-solver-B0",
+        "minutes": 75.54447170098622
+      },
+      {
+        "name": "frontier-solver-B1",
+        "minutes": 47.80691045125325
+      },
+      {
+        "name": "frontier-judge-B0",
+        "minutes": 34.00364529689153
+      },
+      {
+        "name": "frontier-judge-B1",
+        "minutes": 38.545429321130115
+      },
+      {
+        "name": "hle-solver-B0",
+        "minutes": 91.26452089945475
+      },
+      {
+        "name": "hle-solver-B1",
+        "minutes": 66.57026943365733
+      },
+      {
+        "name": "hle-judge-B0",
+        "minutes": 34.065729018052416
+      },
+      {
+        "name": "hle-judge-B1",
+        "minutes": 33.745945072174074
+      },
+      {
+        "name": "swe-trace-B0",
+        "minutes": 21.408100140094756
+      },
+      {
+        "name": "swe-trace-B1",
+        "minutes": 24.71530825694402
+      },
+      {
+        "name": "terminal-trace-B0",
+        "minutes": 24.081520942846932
+      },
+      {
+        "name": "terminal-trace-B1",
+        "minutes": 29.541776756445568
+      }
+    ]
+  },
+  "execution": {
+    "engine_repository": "vLLM-HUST/vllm-hust-engine",
+    "verified_runner_commit": "3c08084c64f44d96a8b17a376889fd2e3308bac2",
+    "command_template": "python one_click.py --model /path/to/model --out /path/to/new-results --datasets {datasets}",
+    "note_zh": "当前固定r6执行器；按部署清单设置模型、SDK、卡号与新结果目录，默认跟随日志。有效算力自动核验并缓存原同工况参考分母，本轮效率另按匹配分子重算。",
+    "note_en": "Current pinned r6 runner with local model/SDK/device paths and live logs. Compute-reference denominator statistics are automatically verified and cached; current efficiency requires matched numerator measurements.",
+    "acceptance_zh": "报告逐项展示执行计数、质量、性能、参考算力、上下文与成本结论。",
+    "acceptance_en": "The report lists execution counts, quality, performance, compute reference, context and cost results.",
+    "bootstrap_commit": "1be195b12798e7a0959044e929e19fa358429cc4",
+    "public_bootstrap_repository": "vLLM-HUST/vllm-hust-engine",
+    "public_bootstrap_path": "download_and_run.py",
+    "bootstrap_sha256": "126abc8396bc597ea86f26087aa66d4dcd59d2199b5399d3203f06768eca5bf9",
+    "bootstrap_bytes": 9577,
+    "tools_release": "acceptance-tools-20261115-r4",
+    "engine_release": "full-answer-b1-20261113-r6",
+    "compute_reference": {
+      "mode": "qualified_reference_denominator_reuse",
+      "profile": "MMLU200/out256 native inproc",
+      "denominator_unit": "TFLOP/s/card",
+      "B0_reference_upper": "26.81825767648090573566921216250915821371",
+      "B1_reference_upper": "19.34038334687175052309470403284461724716",
+      "current_efficiency_requires_new_matched_numerator": true,
+      "historical_efficiency_reused": false,
+      "source_summary_sha256": "95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0"
+    }
+  }
+}

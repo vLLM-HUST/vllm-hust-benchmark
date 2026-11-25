@@ -1,0 +1,283 @@
+{
+  "schema": "pegaflow-own-mod-frozen-five-execution-plan/v4",
+  "project": "PegaFlow",
+  "standard_id": "five-datasets-20261113-v1",
+  "standard_sha256": "66c050b7c6d705853f10bc437e6ace1707a9b46d43b6bdb7159724045045b756",
+  "run_guide_sha256": "5db88d61ceaa2e831ab808f77f58f8241aa279e68c66ac4bd1de94c9f3d22c08",
+  "private_reference_tools_commit": "448362c7565597c8963c970dcfea0b235fd5fcf7",
+  "runtime_binding": "Project Native/PegaFlow on its official0.23 runtime; this workload standard does not replace the project runtime contract. Not the private Engine B0/B1 runtime pair.",
+  "baseline": "Stock official vLLM0fc with no Bid measurement scheduler/adapter, same common Ascend fe00/b7 carrier and SDK; PegaFlow OFF",
+  "candidate": "That same stock foundation and resource profile with e2 PegaFlow read_write connector and30GiB host sidecar ON",
+  "pegaflow_commit": "e2cdc2f7b32d8294b54a74545c05d103e5a5ecaf",
+  "vllm_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+  "ascend_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+  "physical_npus": [
+    6,
+    7
+  ],
+  "logical_npus": [
+    0,
+    1
+  ],
+  "chip": "Ascend910B2,64GiB/card",
+  "parallelism": {
+    "tensor": 2,
+    "pipeline": 1,
+    "data": 1,
+    "expert": false
+  },
+  "model": "Qwen3.5-35B-A3B BF16",
+  "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+  "kv_bytes_per_rank": 17179869184,
+  "max_model_len": 65536,
+  "max_num_seqs": 16,
+  "max_num_batched_tokens": 4096,
+  "image_limit": 1,
+  "video_limit": 0,
+  "mtp_tokens": 2,
+  "graph_mode": "FULL_AND_PIECEWISE",
+  "graph_capture_sizes": [
+    3,
+    6,
+    12,
+    24,
+    48
+  ],
+  "service_seed": 17,
+  "stage_order": [
+    "native-all-five",
+    "pegaflow-all-five",
+    "native-shared-judge"
+  ],
+  "dataset_order": [
+    "mmlu",
+    "hle",
+    "frontier",
+    "swe",
+    "terminal"
+  ],
+  "planned_solver_requests_per_arm": 672,
+  "planned_judge_inputs": 720,
+  "judge": "One fresh Native instance, same pinned Qwen model/framework/profile and unchanged per-dataset judge configs for both solver arms; judge traffic excluded from solver metrics/cost",
+  "generation_limits": {
+    "mmlu": {
+      "tasks": 200,
+      "max_completion_tokens": 8192,
+      "concurrency": 200,
+      "temperature": 0,
+      "seed": 0,
+      "thinking": "Unchanged original server default/frozen request"
+    },
+    "hle": {
+      "tasks": 200,
+      "max_tokens": 16384,
+      "concurrency": 16,
+      "temperature": 0,
+      "seed": 17,
+      "thinking": false,
+      "judge_max_tokens": 8192,
+      "image_tasks": 23,
+      "strata": [
+        64,
+        10,
+        113,
+        13
+      ]
+    },
+    "frontier": {
+      "tasks": 160,
+      "max_tokens": 16384,
+      "concurrency": 16,
+      "temperature": 0,
+      "seed": 17,
+      "thinking": false,
+      "judge_max_tokens": 8192,
+      "tracks": [
+        100,
+        60
+      ]
+    },
+    "swe": {
+      "requests": 64,
+      "tasks": 32,
+      "max_tokens": 2048,
+      "concurrency": 8,
+      "temperature": 0,
+      "seed": 17,
+      "tool_choice": "none"
+    },
+    "terminal": {
+      "requests": 48,
+      "tasks": 32,
+      "max_tokens": 2048,
+      "concurrency": 8,
+      "temperature": 0,
+      "seed": 17,
+      "tool_choice": "none"
+    }
+  },
+  "formal_dataset_eos": "Preserved for all five; no force-length, retries, replacement, outcome filtering or historical tool execution",
+  "c8": {
+    "arm_order": [
+      "native",
+      "pegaflow"
+    ],
+    "nominal_input_lengths": [
+      4096,
+      16384
+    ],
+    "actual_input_tokens": [
+      4115,
+      16407
+    ],
+    "input_sha256": "a73c9e1b2afa476dea80f91832e963867f6f4130e4988d97210dddfea5aeb392",
+    "lanes": 8,
+    "warmup_seconds": 60,
+    "formal_seconds": 300,
+    "request_timeout_seconds": 180,
+    "fixed_output_tokens": 256,
+    "ignore_eos": true,
+    "scope": "Original separate synthetic continuous qualification; not an EOS dataset result or a32K/full four-target stability proof",
+    "mechanism_evidence": "B1 must show actual engine save-success delta>0 and positive fresh-sidecar saved-byte delta, with failures0 and successful restores0. This demonstrates cold storage-save activation, not restored-cache benefit; lazy sidecar counters absent before first save are explicitly reported. The independent strict zero-reuse check uses explicit initialized vLLM counters. No extra synthetic model requests are introduced."
+  },
+  "actual_token_admission": "Both fresh arms16C8+112trace inputs must match offline frozen token ID hashes before any generation; each formal trace phase checks every input again",
+  "cache_reuse": "All formal tasks use unique salts. Actual internal/external prefix hits0, Pega successful external restore delta0; null usage cache details remain unknown until engine counter proof. Zero restore cells cannot establish cache-offload benefit.",
+  "external_metrics_url_candidate": "http://127.0.0.1:18390 (vLLM API metrics exposes actual vllm:pega_load_success_total); Native omits external URL. Independent raw sidecar snapshots retained too.",
+  "quality": "Unchanged original MMLU extractor/HLE/Frontier graders and all planned denominators; errors,length stops,missing/unresolved remain. SWE/Terminal performance replay only, no solve rate.",
+  "metrics": "Accepted tokens / first submission to last response wall; TTFT first content; TPOT(end-first content)/(tokens-1), equal request weight; finite quantile linear(n-1)q; one-token exclusion count retained",
+  "source_and_input_policy": "Project own execution sources public. Private Engine source and original questions/answers/dialogues/SSE controlled only; public numeric observations,SHA and controlled-location index.",
+  "startup_policy": "Same startup-only model-file fadvise when cgroup filecache>16GiB; no global cleaning and no cleaning within timed measurement",
+  "old_protocol_separation": "Old20GiB/context262144 SWE900s cohort and separate3GiB capacity diagnostic remain untouched; neither qualifies this new16GiB/image-enabled profile",
+  "order_limit": "All Native solver scopes precede Candidate scopes, then a shared Native judge. No random interleaving/repeated formal five cohorts; time drift remains a limitation.",
+  "completion_vs_targets": "Full execution is separate from four-target acceptance; no inherited Engine historical target or cost claims",
+  "status": "Local preparation only; no81 SSH/SDK/model/tokenization/generation executed for this Pega namespace.",
+  "profile": "pegaflow81-stock023-default-true-common-topology-20261114-04",
+  "test_target": "own_mod",
+  "selected_scope": "full",
+  "mod_prompt_sha256": "43bc925a6ad749971a64e5244b86451f5d4cf3361e87423b1eda8ea0b0d04461",
+  "enable_cpu_binding": true,
+  "previous_prepared_profile": {
+    "profile": "pegaflow91-mod-v3",
+    "source_manifest_sha256": "dd0520688c73226599ee258bfbfd4542c76f75131b53edef7d1b484a7c6c1da6",
+    "disposition": "Retained frozen and not executed. Ascend91 remained admin-stopped. New81 scope requires its own Linux/stock-module/ABI/CPU/binding/token/C8 admission; choose one host if91 is restored to avoid duplicate NPU work."
+  },
+  "base_definition": "B0 is the same official0.23 foundation with targetPegaFlow OFF; B1 is that same configuration with targetPegaFlow ON. The optional Engine reference runner does not defineB1.",
+  "mod_repository": "https://github.com/vLLM-HUST/pegaflow-hust",
+  "pre_generation_admission": "Local/NAS source/argv/hash sealed first; Native defaultTrue model loading, thread-affinity and128actual token checks may run with0generation, then park until public source/plan readback. C8 and all solver/judgegeneration remain gated by released source-manifest SHA.",
+  "startup_cost_evidence": "Lifecycle/source admission/sidecar and model start-ready times;10-second cgroup hostmemory/stat/events+NPU memory/utilization samples only during startup; compilation/load log observations and actual worker/thread affinity/warnings; formal solver phases use their existingSampler.",
+  "controller_fix": "Recognize already observed fatal EngineCore/worker/capacity initialization messages even if API parent survives; abort owned startup immediately and retain error. No budget,task,EOS orgrader change.",
+  "quality_gate": "Original independent task graders; no cross-configuration exact-token equality requirement for full-five MOD quality. Trace tokenizer IDs remain exact. The prior separate3GiBprobe retains its own predeclared sampled gate without replacing this campaign.",
+  "core_packages": {
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0",
+    "transformers": "5.5.4",
+    "tokenizers": "0.22.2",
+    "CANN": "9.1 installedimage/path"
+  },
+  "common_base_compatibility": {
+    "profile": "official-ascend0.23-single-chip-topology-compat/v2",
+    "base_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+    "original_cpu_binding_sha256": "71719e397ab003b31ba5e46e1a6da4da658ae7221eeead04311b65ad4d12d533",
+    "prepared_cpu_binding_sha256": "b7a84571c349c22935414b2c5a4c6cf91223414f80c0954f797340ad0f1f55f2",
+    "prepare_script_sha256": "fe00e47faa81a0a3713a368e79a53504290687f2f249e4bf693457c2f7341253",
+    "actual_import_tree": "/workspace/bidkv-five-datasets-20261113-01/runtime/ascend023-cpubind03",
+    "arms": [
+      "B0",
+      "B1",
+      "shared-native-judge"
+    ],
+    "change": "Only parse_topo_affinity maps allocated physical rows through existing info-m logical mapping. Unknown/unallocated rows are skipped; invalid, conflicting and multichip mappings reject.",
+    "unchanged": "Original official tree, all other copied source bytes and prebuilt ABI libraries; CPU assignment, migration and IRQ algorithms are unchanged.",
+    "installed_runtime_resource_policy": "Copy every installed package file except Python caches, including _build_info.py, all original _cann_ops_custom metadata/kernel binaries and internal relative runtime links; verify original/copied inventory, target identity and bytes. No rebuild or CANN/SDK replacement.",
+    "previous_prepare_draft": "Helper469 was rejected before any91 execution after81 zero-generation initialization found omitted CANN runtime assets. Final helperfe00 preserves the installed assets; CPU patchedb7 bytes are unchanged. No91 model used the incomplete copy.",
+    "attribution": "A common foundation compatibility fix, not a PegaFlow MOD gain.",
+    "pre_generation_requirements": [
+      "Independently run the guarded prepare script on restored91 and verify every copied source/library byte; no upstream mutation.",
+      "Fresh actual SDK import must resolve cpu_binding.py to the isolated copied tree with the declared patched SHA.",
+      "Actual per-worker/per-thread affinities and warnings must be inspected; a True flag alone does not demonstrate effective binding."
+    ],
+    "reuse_policy": "Read-only reuse fe00/b7 complete Ascend carrier with full origin/copy inventory/byte/link/ABI checks. Stock vLLM path is separate and must resolve original schedulerSHA9ae149, never Bid ae127.",
+    "host_actual_prepare_status": "Prior81 common carrier byte identity known; newPega81 SDK/source/ABI/CPU/effectivebinding/token/C8 admission not yet executed."
+  },
+  "resource_admission": "Sequential allocation after Bid full and its one bounded mechanism probe release both physical6/7. Parent-owned source-bound resource-handoff.json is mandatory; idle npu-smi alone cannot claim another task's between-stage devices.",
+  "receipt_contract": "Use independently admitted actual81 phase=verified/all_weights_match=true receipt with14 actual_bytes/actual_sha256 matches to frozen revision's expected weights; current sizes/stats and tokenizer metadata rechecked. No re-reading70GB weights and no91 weight/runtime/C8 receipt substitution.",
+  "previous_qualified_receipts": "Read durable oldNAS/provenance/{model-hash-status.json,model-expected-weights.json,run-env.json} and evidence/formal-runtime-identity.json. Runtime metadata and installed Pega bytes are checked in the new actualROOT SDK; no old /workspace/.venv dependency.",
+  "owned_wait_receipts": "StockPython owned wait wrapper -> restore_sdk81.py with actual child returncode; initial launch81 directly waits CPU/C8 children; formal campaign81 thin wrapper waits payload with actualRC. No SDK shim or existing Bid environment mutation.",
+  "machine": "ascend-81/user/yanbo-81",
+  "root": "/workspace/pegaflow81-five-datasets-20261114-04",
+  "durable_root": "/data/shared_upload/cybber695/pegaflow81-five-datasets-20261114-04",
+  "handoff_gate": {
+    "path": "/data/shared_upload/cybber695/pegaflow81-five-datasets-20261114-04/resource-handoff.json",
+    "required": {
+      "state": "released-for-pegaflow",
+      "machine": "ascend-81",
+      "physical_npus": [
+        6,
+        7
+      ],
+      "logical_npus": [
+        0,
+        1
+      ],
+      "bid_full_released": true,
+      "bid_probe_released": true,
+      "run_this_host_only": true,
+      "source_manifest_sha256": "exact current manifest SHA"
+    },
+    "writer": "Parent after checking actual owned Bid controllers/services exited and hardware idle; no automatic steal/restart."
+  },
+  "stock_vllm_admission": {
+    "source": "/vllm-workspace/vllm",
+    "commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+    "scheduler_sha256": "9ae1491f57a6294e32416b93ef2ea68107fa0d65c3a4d7f745f1261012f735e9",
+    "forbidden_bid_scheduler_sha256": "ae12773bc25b42149d4aa5c84c0797dcf12a0b60c045a7e85ca3c974bc47915c",
+    "fresh_import_proof": "actual vllm/Scheduler module paths and source bytes, no _select_bidkv023_victim method, no Bid package source or carrier on PYTHONPATH"
+  },
+  "preliminary_cost_estimate": {
+    "wall_hours_range": [
+      6,
+      10
+    ],
+    "npu_cards": 2,
+    "npu_card_hours_range": [
+      12,
+      20
+    ],
+    "basis": "Actual81 Native672 solver batch sum5927.06s=98.8min, approx10min cold init per arm. Add5loads, at least24min C8 submission windows/drains, newPega save-path overhead and720planned judge inputs. Estimate6-10h, not an inference timeout or fixed promise; update after new independentC8.",
+    "qualification_minimum": "Both original60+300second4K/16K C8 arms require1440submission-window seconds in total, plus drains and model loading.",
+    "model_loads_planned": 5,
+    "solver_requests_per_arm": 672,
+    "planned_judge_inputs": 720,
+    "scope": "Preparation/initialization/compilation costs recorded separately; not a performance guarantee, timeout change or billed cloud price.",
+    "actual_prior81_native_solver_batch_seconds": 5927.063046930358,
+    "prior81_native_stage_batch_seconds": {
+      "native-mmlu": 1104.09108046256,
+      "native-hle": 2815.7438803557307,
+      "native-frontier": 1604.4667282290757,
+      "native-swe": 226.35277020558715,
+      "native-terminal": 176.40858767740428
+    },
+    "actual_prior81_solver_timing_sha256": "35203d15d8d65a6c4d4cb9026b19aff0eb8b943c9bc72a69830c83a235e2391c",
+    "actual_prior81_cold_load_minutes_per_arm_approx": 10
+  },
+  "actual81_reference_files": {
+    "e2-artifact": {
+      "path": "\\data\\shared_upload\\cybber695\\pegaflow-techoutcomes-20261113-02\\evidence\\formal-runtime-identity.json",
+      "bytes": 7816,
+      "sha256": "6580cb0025e8559cb6294593df203fc70e410953f6c9d9ae7679a76f57b4f923"
+    },
+    "81-weights": {
+      "path": "\\data\\shared_upload\\cybber695\\bidkv-five-datasets-20261113-01\\provenance\\model-hash-status.json",
+      "bytes": 5084,
+      "sha256": "e95e919abc6d13f160ca7530211ec167945a2d3981aa36c48003bbd9ade5b6c8"
+    },
+    "81-expected": {
+      "path": "\\data\\shared_upload\\cybber695\\bidkv-five-datasets-20261113-01\\provenance\\model-expected-weights.json",
+      "bytes": 2453,
+      "sha256": "1fec52d80a8898b730f32bd498a7ce9f90a31d6b6cc15d833611cd271fdce0d3"
+    }
+  },
+  "quality_delivery": "Original HLE/Frontier quality files preserved and their original numeric summaries+SHA additionally referenced in top-level summary; no grader changes.720 denotes planned judge inputs, not guaranteed HTTP calls/successes."
+}

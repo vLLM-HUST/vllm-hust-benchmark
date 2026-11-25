@@ -1,0 +1,239 @@
+"""Run the frozen five scopes with original graders and a project SSE adapter.
+
+This file is project code, not a redistribution of private Engine sources.
+The caller must provide the already-authorized, hash-checked private tools and
+controlled plans. No model weights are imported into the client process.
+"""
+
+import argparse
+from concurrent.futures import ThreadPoolExecutor
+import copy
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import sys
+import time
+import traceback
+import urllib.request
+import uuid
+
+from measurement import summarize
+from observation import Sampler, snapshot, zero_reuse
+from transport import call
+
+SCOPE = {'mmlu': (200, 200, 8192), 'hle': (200, 16, 16384),
+         'frontier': (160, 16, 16384), 'swe': (64, 8, 2048), 'terminal': (48, 8, 2048)}
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def save(path, value):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_suffix(path.suffix+'.tmp')
+    temp.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False)+'\n', encoding='utf-8', newline='\n')
+    temp.replace(path)
+
+
+def load_tools(root):
+    manifest = json.loads((root/'DEPLOYMENT-TOOLS.json').read_bytes())
+    for name, digest in manifest['files'].items():
+        if sha(root/name) != digest:
+            raise ValueError('Original private tool source differs: '+name)
+    sys.path.insert(0, str(root/'scripts'))
+
+
+def admit_trace(contract, tasks, expected_path, out):
+    expected = {row['case_id']: row for row in json.loads(expected_path.read_bytes())}
+    if set(expected) != {task['case_id'] for task in tasks}:
+        raise ValueError('Offline trace token manifest omitted cases')
+    import agent_trace
+    checked = []
+    for task in tasks:
+        body = agent_trace.tokenization_body(contract, task)
+        request = urllib.request.Request(contract['base_url']+'/tokenize', json.dumps(body).encode(), {'Content-Type': 'application/json'})
+        with urllib.request.urlopen(request, timeout=60) as response:
+            value = json.load(response)
+        save(out/'tokenize'/(task['case_id']+'.json'), {'request': body, 'response': value})
+        digest = hashlib.sha256(json.dumps(value['tokens'], separators=(',', ':')).encode()).hexdigest()
+        if (value['count'], digest) != (task['prompt_tokens'], expected[task['case_id']]['token_ids_sha256']):
+            raise ValueError('Actual input IDs changed: '+task['case_id'])
+        checked.append({'case_id': task['case_id'], 'prompt_tokens': value['count'], 'token_ids_sha256': digest})
+    save(out/'trace-tokenizer-admission.json', {'complete': True, 'checked': checked})
+
+
+def run_simple(args):
+    count, concurrency, maximum = SCOPE[args.dataset]
+    requests = args.out/'evaluation/requests'
+    requests.mkdir(parents=True, exist_ok=False)
+    scorer = gold = None
+    if args.dataset == 'mmlu':
+        from mmlu_scope import verify
+        verify(args.plan)
+        plan = json.loads((args.plan/'inputs/mmlu-quality018-r2/quality-request-plan.json').read_bytes())
+        verified = json.loads((args.plan/'inputs/verified-mmlu-quality-inputs.json').read_bytes())
+        recovered = json.loads((args.plan/'inputs/recovered-mmlu-cases.json').read_bytes())
+        tasks = verified['cases']
+        gold = tasks
+        assert len(plan['requests']) == len(tasks) == len(recovered) == count
+        assert [row['case_id'] for row in tasks] == [row['case_id'] for row in recovered]
+        spec = importlib.util.spec_from_file_location('pinned_mmlu_scorer', args.plan/'scorers/mmlu_pro_pyramidkv.py')
+        scorer = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(scorer)
+        config = {'base_url': args.base_url, 'timeout': 14400}
+        bodies = []
+        for original in plan['requests']:
+            body = copy.deepcopy(original)
+            assert body['max_completion_tokens'] == maximum and body['temperature'] == 0 and body['seed'] == 0
+            assert 'ignore_eos' not in body and 'chat_template_kwargs' not in body
+            body['cache_salt'] = uuid.uuid4().hex
+            bodies.append(body)
+    else:
+        import agent_trace
+        contract, tasks = agent_trace.load_plan(args.plan)
+        assert len(tasks) == count and contract['concurrency'] == concurrency
+        config = contract
+        admit_trace(contract, tasks, args.plan/'offline-token-id-freeze.json', args.out)
+        bodies = [agent_trace.request_body(contract, task) for task in tasks]
+        assert all(body['max_tokens'] == maximum and body['tool_choice'] == 'none' and 'ignore_eos' not in body for body in bodies)
+    save(args.out/'request-identity.json', {'case_ids': [task['case_id'] for task in tasks],
+                                           'concurrency': concurrency, 'max_output_tokens': maximum,
+                                           'inference_retries': 0, 'scope': args.dataset,
+                                           'timeout_seconds': config['timeout']})
+    before = snapshot(args.base_url, args.out, 'before')
+    external_before = snapshot(args.external_metrics_url, args.out, 'external-before') if args.external_metrics_url else None
+
+    def send(index):
+        task, body = tasks[index], bodies[index]
+        record = call(config, body, args.out/'transport')
+        if args.dataset != 'mmlu' and record['status'] == 'ok' and record['usage']['prompt_tokens'] != task['prompt_tokens']:
+            record.update(status='tokenization_error', error='Actual prompt token count changed')
+        record.update(case_id=task['case_id'], submission_index=index)
+        if scorer is not None:
+            assert gold[index]['case_id'] == task['case_id']
+            answer = scorer.extract_answer(record.get('content', '')) if record['status'] == 'ok' else None
+            record.update(answer=answer, gold=gold[index]['answer'], correct=record['status'] == 'ok' and answer == gold[index]['answer'], category=task['category'])
+        save(requests/(task['case_id']+'.json'), record)
+        print(json.dumps({'case_id': task['case_id'], 'status': record['status']}), flush=True)
+        return record
+
+    with Sampler(args.out), ThreadPoolExecutor(max_workers=concurrency) as pool:
+        rows = list(pool.map(send, range(len(tasks))))
+    after = snapshot(args.base_url, args.out, 'after')
+    external_after = snapshot(args.external_metrics_url, args.out, 'external-after') if args.external_metrics_url else None
+    report = summarize([task['case_id'] for task in tasks], rows)
+    if scorer is not None:
+        report['quality'] = {'planned': count, 'correct': sum(row['correct'] for row in rows),
+                             'accuracy': sum(row['correct'] for row in rows)/count,
+                             'unparsed': sum(row['answer'] is None for row in rows),
+                             'categories': {category: {'planned': sum(row['category'] == category for row in rows),
+                                                       'correct': sum(row['category'] == category and row['correct'] for row in rows)}
+                                            for category in sorted({row['category'] for row in rows})},
+                             'scorer_sha256': sha(args.plan/'scorers/mmlu_pro_pyramidkv.py')}
+    else:
+        report['quality'] = {'measured': False, 'reason': 'Trace replay only; no historical tools or task execution'}
+    save(args.out/'summary.json', report)
+    proof = zero_reuse(before, after, rows, external_metrics=(external_before, external_after) if external_before is not None else None)
+    save(args.out/'zero-reuse.json', proof)
+    return 0 if report['valid_transport'] else 2
+
+
+def run_client(args):
+    from dataset_contract import client
+    module = client(args.dataset)
+    contract, tasks = module.load_plan(args.plan)
+    count, concurrency, maximum = SCOPE[args.dataset]
+    assert len(tasks) == count
+    assert contract['engine_transport']['adapter_sha256'] == sha(Path(__file__).with_name('transport.py'))
+    assert contract['solver']['concurrency'] == contract['judge']['concurrency'] == concurrency
+    assert contract['solver']['request']['max_tokens'] == maximum
+    assert contract['judge']['request']['max_tokens'] == 8192
+    for role, budget in [('solver', maximum), ('judge', 8192)]:
+        assert contract[role]['request'] == {'temperature': 0, 'seed': 17, 'max_tokens': budget,
+                                            'chat_template_kwargs': {'enable_thinking': False}}, 'Frozen request parameters changed'
+    if args.dataset == 'hle':
+        from hle_scope import verify_selected
+        verify_selected(args.plan, contract, tasks)
+    if args.stage == 'quality':
+        return module.summary(argparse.Namespace(plan=str(args.plan), responses=str(args.responses),
+                                                 grades=str(args.grades), output=str(args.out/'quality')))
+    original_body = module.request_body
+
+    def streamed_body(config, messages):
+        body = original_body(config, messages)
+        body.update(stream=True, stream_options={'include_usage': True}, cache_salt=uuid.uuid4().hex)
+        assert 'ignore_eos' not in body and config['request']['chat_template_kwargs']['enable_thinking'] is False
+        return body
+
+    module.request_body = streamed_body
+    module.call = lambda config, body: call(config, body, args.out/'transport')
+    if args.dataset == 'hle' and args.stage == 'solver':
+        import image_qualification
+        image_qualification.call = lambda config, body, out: call(config, body, out)
+        save(args.out/'image-interface-qualification.json', image_qualification.qualify(contract['solver'], args.out/'image-qualification'))
+    before = snapshot(args.base_url, args.out, 'before')
+    external_before = snapshot(args.external_metrics_url, args.out, 'external-before') if args.external_metrics_url else None
+    execution = argparse.Namespace(plan=str(args.plan), output=str(args.out/'evaluation'),
+                                   responses=str(args.responses) if args.responses else None,
+                                   resume=False, limit=None, track=None, case_ids=[task['case_id'] for task in tasks])
+    with Sampler(args.out):
+        module.execute(execution, args.stage)
+    meta, records = module.verify_run(args.out/'evaluation', sha(args.plan/'contract.json'), args.stage)
+    assert meta['case_ids'] == [task['case_id'] for task in tasks] and set(records) == set(meta['case_ids'])
+    after = snapshot(args.base_url, args.out, 'after')
+    external_after = snapshot(args.external_metrics_url, args.out, 'external-after') if args.external_metrics_url else None
+    rows = list(records.values())
+    if args.stage == 'solver':
+        report = summarize(meta['case_ids'], rows)
+    else:
+        report = {'planned': count, 'executed': sum(row.get('request') is not None for row in rows),
+                  'successful': sum(row['status'] == 'ok' for row in rows),
+                  'invalid_judge': sum(row['status'] == 'invalid_judge' for row in rows),
+                  'solver_failed': sum(row['status'] == 'solver_failed' for row in rows),
+                  'transport_failures': sum(row['status'] not in ['ok', 'invalid_judge', 'solver_failed'] for row in rows),
+                  'length_stops': sum(row.get('finish_reason') == 'length' for row in rows),
+                  'scope': 'Judge traffic excluded from all solver throughput and cost; invalid/unresolved answers remain in planned denominator'}
+    save(args.out/'summary.json', report)
+    submitted = [row for row in rows if row.get('request') is not None]
+    proof = zero_reuse(before, after, submitted, external_metrics=(external_before, external_after) if external_before is not None else None)
+    save(args.out/'zero-reuse.json', proof)
+    bad = any(row['status'] not in ['ok', 'invalid_judge', 'solver_failed'] for row in rows)
+    return 2 if bad else 0
+
+
+def main(args):
+    args.out.mkdir(parents=True, exist_ok=False, mode=0o700)
+    state = {'dataset': args.dataset, 'stage': args.stage, 'phase': 'checking-original-sources', 'started_unix': time.time()}
+    save(args.out/'status.json', state)
+    try:
+        load_tools(args.tools)
+        state['phase'] = 'running'
+        save(args.out/'status.json', state)
+        code = run_simple(args) if args.dataset in ['mmlu', 'swe', 'terminal'] else run_client(args)
+        if not isinstance(code, int):
+            code = 0
+        state.update(phase='completed' if code == 0 else 'failed', exit_code=code, completed_unix=time.time())
+        save(args.out/'status.json', state)
+        return code
+    except BaseException as error:
+        state.update(phase='failed', exit_code=2, error=type(error).__name__+': '+str(error), failed_unix=time.time())
+        save(args.out/'status.json', state)
+        traceback.print_exc()
+        return 2
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--dataset', choices=SCOPE, required=True)
+    parser.add_argument('--stage', choices=['solver', 'judge', 'quality'], default='solver')
+    parser.add_argument('--tools', type=Path, required=True)
+    parser.add_argument('--plan', type=Path, required=True)
+    parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--responses', type=Path)
+    parser.add_argument('--grades', type=Path)
+    parser.add_argument('--base-url', default='http://127.0.0.1:18390')
+    parser.add_argument('--external-metrics-url')
+    raise SystemExit(main(parser.parse_args()))

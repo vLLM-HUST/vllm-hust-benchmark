@@ -1,0 +1,88 @@
+[W1113 11:10:47.354489422 FunctionLoader.cpp:44] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+[env] 已挂 custom_transformer 算子包: /data/jxd/src/vllm-ascend-hust-v1/vllm_ascend/_cann_ops_custom/vendors/custom_transformer
+[env] python : /data/jxd/envs/vllm-hust-v1-cann91/bin/python3
+[env] vllm   : /data/jxd/envs/vllm-hust-v1-cann91/bin/vllm
+[env] CANN   : /data/jxd/Ascend-9.1.0/cann-9.1.0
+[env] caches : /data/jxd/cache/p23-w8a8/vllm / /data/jxd/cache/p23-w8a8/triton
+[env] 提示   : 起服务用 ./run_swe_server.sh (已含同一套前置); 退出用 deactivate
+===================== run_swe_server_ab.sh =====================
+utc             : 2026-11-13T11:11:10Z
+label           : w8a8
+model_path      : /data/jxd/Qwen3.5-35B-A3B-W8A8
+served_name     : qwen35-a3b-w8a8
+cards           : 7 (tp=1)
+port            : 8230
+max_model_len   : 133120
+gpu_mem_util    : 0.9
+cann            : /data/jxd/Ascend-9.1.0/ascend-toolkit/set_env.sh
+atb             : /data/jxd/Ascend-9.1.0/nnal/atb/set_env.sh
+cache_root      : /data/jxd/cache/p23-w8a8
+vendor_opp      : 1
+fix_kernels_so  : 0
+extra_args      : --no-enable-prefix-caching --max-num-seqs 2 --max-num-batched-tokens 4096 --kv-cache-memory-bytes 8589934592
+command         : /data/jxd/envs/vllm-hust-v1-cann91/bin/vllm serve /data/jxd/Qwen3.5-35B-A3B-W8A8 --served-model-name qwen35-a3b-w8a8 --tensor-parallel-size 1 --max-model-len 133120 --gpu-memory-utilization 0.9 --trust-remote-code --host 127.0.0.1 --port 8230 --quantization ascend --no-enable-prefix-caching --max-num-seqs 2 --max-num-batched-tokens 4096 --kv-cache-memory-bytes 8589934592
+===============================================================
+[swe] server pid : 4504 (pid file /data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z/logs/swe_server_ab_w8a8.pid)
+[swe] server log : /data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z/logs/swe_server_ab_w8a8_20261113T111110Z.log
+[swe] stop       : kill -- -4504
+[swe] 服务进程提前退出, 见 /data/user8/tech-outcomes-20261117/ascend-quant/long-context/run_20261113T111012Z/logs/swe_server_ab_w8a8_20261113T111110Z.log
+(APIServer pid=4504)     sys.exit(main())
+(APIServer pid=4504)              ^^^^^^
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/entrypoints/cli/main.py", line 97, in main
+(APIServer pid=4504)     args.dispatch_function(args)
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/entrypoints/cli/serve.py", line 153, in cmd
+(APIServer pid=4504)     uvloop.run(run_server(args))
+(APIServer pid=4504)   File "/data/jxd/envs/vllm-hust-v1-cann91/lib/python3.11/site-packages/uvloop/__init__.py", line 92, in run
+(APIServer pid=4504)     return runner.run(wrapper())
+(APIServer pid=4504)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=4504)   File "/data/jxd/envs/vllm-hust-v1-cann91/lib/python3.11/asyncio/runners.py", line 118, in run
+(APIServer pid=4504)     return self._loop.run_until_complete(task)
+(APIServer pid=4504)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=4504)   File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+(APIServer pid=4504)   File "/data/jxd/envs/vllm-hust-v1-cann91/lib/python3.11/site-packages/uvloop/__init__.py", line 48, in wrapper
+(APIServer pid=4504)     return await main
+(APIServer pid=4504)            ^^^^^^^^^^
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/entrypoints/launchers/api_server/entry.py", line 176, in run_server
+(APIServer pid=4504)     await run_server_worker(listen_address, sock, args, **uvicorn_kwargs)
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/entrypoints/launchers/api_server/entry.py", line 190, in run_server_worker
+(APIServer pid=4504)     async with build_async_engine_client(
+(APIServer pid=4504)   File "/data/jxd/envs/vllm-hust-v1-cann91/lib/python3.11/contextlib.py", line 210, in __aenter__
+(APIServer pid=4504)     return await anext(self.gen)
+(APIServer pid=4504)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/entrypoints/launchers/api_server/entry.py", line 58, in build_async_engine_client
+(APIServer pid=4504)     async with build_async_engine_client_from_engine_args(
+(APIServer pid=4504)   File "/data/jxd/envs/vllm-hust-v1-cann91/lib/python3.11/contextlib.py", line 210, in __aenter__
+(APIServer pid=4504)     return await anext(self.gen)
+(APIServer pid=4504)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/entrypoints/launchers/api_server/entry.py", line 94, in build_async_engine_client_from_engine_args
+(APIServer pid=4504)     async_llm = AsyncLLM.from_vllm_config(
+(APIServer pid=4504)                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/v1/engine/async_llm.py", line 226, in from_vllm_config
+(APIServer pid=4504)     return cls(
+(APIServer pid=4504)            ^^^^
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/v1/engine/async_llm.py", line 160, in __init__
+(APIServer pid=4504)     self.engine_core = EngineCoreClient.make_async_mp_client(
+(APIServer pid=4504)                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=4504)     return func(*args, **kwargs)
+(APIServer pid=4504)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/v1/engine/core_client.py", line 163, in make_async_mp_client
+(APIServer pid=4504)     return AsyncMPClient(
+(APIServer pid=4504)            ^^^^^^^^^^^^^^
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=4504)     return func(*args, **kwargs)
+(APIServer pid=4504)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/v1/engine/core_client.py", line 1060, in __init__
+(APIServer pid=4504)     super().__init__(
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/v1/engine/core_client.py", line 656, in __init__
+(APIServer pid=4504)     with launch_core_engines(
+(APIServer pid=4504)   File "/data/jxd/envs/vllm-hust-v1-cann91/lib/python3.11/contextlib.py", line 144, in __exit__
+(APIServer pid=4504)     next(self.gen)
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/v1/engine/utils.py", line 1240, in launch_core_engines
+(APIServer pid=4504)     wait_for_engine_startup(
+(APIServer pid=4504)   File "/data/jxd/src/vllm-hust-v1/vllm/v1/engine/utils.py", line 1320, in wait_for_engine_startup
+(APIServer pid=4504)     raise RuntimeError(
+(APIServer pid=4504) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {'EngineCore': 1}
+(APIServer pid=4504) INFO 11-13 11:13:40 [base.py:261] Multi-modal warmup completed in 35.846s
+(APIServer pid=4504) INFO 11-13 11:13:44 [base.py:261] Readonly multi-modal warmup completed in 3.895s
+(APIServer pid=4504) [ERROR] 2026-11-13-11:13:44 (PID:4504, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception

@@ -1,0 +1,159 @@
+{
+  "schema": "plugin-five-full-cohort-plan/v1",
+  "project": "BidKV",
+  "standard_id": "five-datasets-20261113-v1",
+  "standard_sha256": "66c050b7c6d705853f10bc437e6ace1707a9b46d43b6bdb7159724045045b756",
+  "stage_order": [
+    "native-all-five",
+    "bidkv-all-five",
+    "native-shared-judge"
+  ],
+  "datasets": [
+    {
+      "id": "mmlu",
+      "requests_per_arm": 200,
+      "concurrency": 200,
+      "max_completion_tokens": 8192,
+      "temperature": 0,
+      "seed": 0,
+      "thinking": "unchanged qualified server default",
+      "timeout_seconds": 14400
+    },
+    {
+      "id": "hle",
+      "requests_per_arm": 200,
+      "strata": {
+        "gold/text": 64,
+        "gold/image": 10,
+        "revision/text": 113,
+        "revision/image": 13
+      },
+      "concurrency": 16,
+      "max_tokens": 16384,
+      "temperature": 0,
+      "seed": 17,
+      "thinking": false,
+      "timeout_seconds": 1800
+    },
+    {
+      "id": "frontier",
+      "requests_per_arm": 160,
+      "tracks": {
+        "olympiad": 100,
+        "research": 60
+      },
+      "concurrency": 16,
+      "max_tokens": 16384,
+      "temperature": 0,
+      "seed": 17,
+      "thinking": false,
+      "timeout_seconds": 1800
+    },
+    {
+      "id": "swe",
+      "requests_per_arm": 64,
+      "tasks": 32,
+      "concurrency": 8,
+      "max_tokens": 2048,
+      "temperature": 0,
+      "seed": 17,
+      "timeout_seconds": 600,
+      "tools": "original histories/tools; tool_choice=none; execute no commands"
+    },
+    {
+      "id": "terminal",
+      "requests_per_arm": 48,
+      "tasks": 32,
+      "concurrency": 8,
+      "max_tokens": 2048,
+      "temperature": 0,
+      "seed": 17,
+      "timeout_seconds": 600,
+      "tools": "original histories/tools; tool_choice=none; execute no commands"
+    }
+  ],
+  "solver_requests_per_arm": 672,
+  "planned_judge_inputs": 720,
+  "judge": {
+    "arm": "fresh Native official0.23 prepared host, policy disabled",
+    "same_fixed_model_runtime_for_both_solver_arms": true,
+    "max_tokens": 8192,
+    "concurrency": 16,
+    "temperature": 0,
+    "seed": 17,
+    "thinking": false,
+    "traffic_excluded_from_solver_metrics_and_cost": true,
+    "original_graders_unchanged": true
+  },
+  "model": "Qwen3.5-35B-A3B BF16",
+  "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+  "parallelism": {
+    "tensor": 2,
+    "pipeline": 1,
+    "data": 1,
+    "expert": false
+  },
+  "physical_npus": [
+    6,
+    7
+  ],
+  "logical_npus": [
+    0,
+    1
+  ],
+  "server_profile": {
+    "kv_bytes_per_rank": 17179869184,
+    "max_model_len": 65536,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 4096,
+    "image_limit": 1,
+    "mtp_tokens": 2,
+    "graph": "FULL_AND_PIECEWISE",
+    "capture_sizes": [
+      3,
+      6,
+      12,
+      24,
+      48
+    ],
+    "service_seed": 17,
+    "default_thinking": true,
+    "enable_cpu_binding": false
+  },
+  "runtime_profile": "official-vllm-0.23-source-bridge/v1",
+  "runtime": {
+    "torch": "2.10.0+cpu",
+    "torch_npu": "2.10.0.post4",
+    "vllm": "0.23.0+empty",
+    "vllm_ascend": "0.23.0",
+    "transformers": "5.5.4",
+    "tokenizers": "0.22.2",
+    "CANN": "9.1"
+  },
+  "bidkv_commit": "53eed4dd65bc4ba12efa37f9f1e334fa1ae51076",
+  "qualified_command_sha256": {
+    "native": "e778954cd9cfe1dd7c56182f099be0f05d85b991e863eb9fde1f04ade07e976e",
+    "bidkv": "9a6b06608d41b2ecf0cabff43eea5cc3ddeebdd14cd6a8efb1a93cfb6def7247"
+  },
+  "pre_generation_gates": [
+    "both original C8 arms completed and devices released",
+    "independent all-record C8 SSE/phase/counter revalidation",
+    "all controlled input member hashes and original HLE assets verified",
+    "prepared source and shared libraries hashes revalidated",
+    "unchanged original graders and task membership/order admitted"
+  ],
+  "request_rules": {
+    "eos_enabled": true,
+    "inference_retries": 0,
+    "outcome_filtering": false,
+    "replacement_or_padding": false,
+    "fresh_cache_salts": true,
+    "zero_reuse_proved_by_usage_and_engine_counters": true,
+    "trace_actual_token_ids_match_all_frozen_offline_hashes": true
+  },
+  "failure_policy": "Retain every failure and planned unexecuted stage; no automatic retry or budget change. Subsequent diagnosis/new attempt must be explicitly separate and preserve this cohort.",
+  "order_limitation": "All Native solver datasets precede all Candidate solver datasets. No random interleaving or repeated cohort; time drift remains a limitation.",
+  "zero_decision_limitation": "If no native preemptions/policy calls occur, no BidKV mechanism benefit is established.",
+  "coverage_is_not_four_target_pass": true,
+  "privacy": "Original questions, answers, dialogues, private Engine and full SSE stay controlled. Public report contains numeric derivatives, configurations, identities and audit hashes."
+}

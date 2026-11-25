@@ -1,0 +1,529 @@
+{
+  "schema": "swe-c4-router-study-summary/v1",
+  "router_commit": "51fe92786beafb4b69b97acffe3bcd4d2ae6cc13",
+  "swe_client_commit": "ef43ced21e870e2faa1122f89f831ddf39443bf6",
+  "data_source": "nvidia/Open-SWE-Traces fb0c0dccc7a5cce79b3f6de891848acdede36685; bundled 8 trajectories, 4 started per window",
+  "conditions": "2 repetitions per arm, 600 s, C4, 4 Ascend NPUs (exact chip model not captured), 2 TP2, Qwen3.5-35B-A3B BF16, eager, per-backend pool limit 2, client cache_salt omitted; cross-session reuse possible",
+  "arms": {
+    "A": [
+      0,
+      0,
+      0
+    ],
+    "B": [
+      4,
+      0,
+      0
+    ],
+    "C": [
+      4,
+      1,
+      0
+    ],
+    "D": [
+      4,
+      0,
+      1
+    ]
+  },
+  "arm_weight_order": [
+    "active_request",
+    "active_decode_sequence",
+    "router_queue"
+  ],
+  "runs": [
+    {
+      "arm": "A",
+      "rep": 0,
+      "requests": 32,
+      "window_completed": 28,
+      "drained": 4,
+      "ttft_mean_all_s": 1.0045647465158254,
+      "ttft_p95_window_completed_s": 1.3946506699547168,
+      "tpot_mean_all_s": 0.22539495378221233,
+      "tpot_defined": 32,
+      "e2e_mean_all_s": 96.80873719736701,
+      "window_output_tokens": 10589,
+      "window_seconds": 600,
+      "cache_hit_tokens": 141312,
+      "cache_query_tokens": 210970,
+      "router_predicted_hit_decisions": 23,
+      "decode_nonzero_decisions": 28,
+      "queue_nonzero_decisions": 0,
+      "active_count_differ_decisions": 30,
+      "lower_hit_selected": 0,
+      "remove_term_selected_strictly_above_min": 0,
+      "remove_term_min_ties": 1,
+      "fallbacks": 0
+    },
+    {
+      "arm": "B",
+      "rep": 0,
+      "requests": 32,
+      "window_completed": 28,
+      "drained": 4,
+      "ttft_mean_all_s": 1.0194146448629908,
+      "ttft_p95_window_completed_s": 1.4085078910924491,
+      "tpot_mean_all_s": 0.23205317954496174,
+      "tpot_defined": 32,
+      "e2e_mean_all_s": 99.23721430660225,
+      "window_output_tokens": 10315,
+      "window_seconds": 600,
+      "cache_hit_tokens": 141312,
+      "cache_query_tokens": 210970,
+      "router_predicted_hit_decisions": 23,
+      "decode_nonzero_decisions": 28,
+      "queue_nonzero_decisions": 0,
+      "active_count_differ_decisions": 30,
+      "lower_hit_selected": 0,
+      "remove_term_selected_strictly_above_min": 0,
+      "remove_term_min_ties": 1,
+      "fallbacks": 0
+    },
+    {
+      "arm": "C",
+      "rep": 0,
+      "requests": 32,
+      "window_completed": 28,
+      "drained": 4,
+      "ttft_mean_all_s": 1.00088958296692,
+      "ttft_p95_window_completed_s": 1.3837812553159887,
+      "tpot_mean_all_s": 0.22719376559780916,
+      "tpot_defined": 32,
+      "e2e_mean_all_s": 98.00681718881242,
+      "window_output_tokens": 10469,
+      "window_seconds": 600,
+      "cache_hit_tokens": 141312,
+      "cache_query_tokens": 210970,
+      "router_predicted_hit_decisions": 23,
+      "decode_nonzero_decisions": 28,
+      "queue_nonzero_decisions": 0,
+      "active_count_differ_decisions": 30,
+      "lower_hit_selected": 0,
+      "remove_term_selected_strictly_above_min": 0,
+      "remove_term_min_ties": 1,
+      "fallbacks": 0
+    },
+    {
+      "arm": "D",
+      "rep": 0,
+      "requests": 32,
+      "window_completed": 28,
+      "drained": 4,
+      "ttft_mean_all_s": 0.9979471325059421,
+      "ttft_p95_window_completed_s": 1.3682242057286198,
+      "tpot_mean_all_s": 0.2252491433310321,
+      "tpot_defined": 32,
+      "e2e_mean_all_s": 97.13849788607331,
+      "window_output_tokens": 10578,
+      "window_seconds": 600,
+      "cache_hit_tokens": 141312,
+      "cache_query_tokens": 210970,
+      "router_predicted_hit_decisions": 23,
+      "decode_nonzero_decisions": 28,
+      "queue_nonzero_decisions": 0,
+      "active_count_differ_decisions": 30,
+      "lower_hit_selected": 0,
+      "remove_term_selected_strictly_above_min": 0,
+      "remove_term_min_ties": 1,
+      "fallbacks": 0
+    },
+    {
+      "arm": "B",
+      "rep": 1,
+      "requests": 32,
+      "window_completed": 28,
+      "drained": 4,
+      "ttft_mean_all_s": 0.9908920143498108,
+      "ttft_p95_window_completed_s": 1.3783820096403356,
+      "tpot_mean_all_s": 0.22442398982514328,
+      "tpot_defined": 32,
+      "e2e_mean_all_s": 96.69532517256448,
+      "window_output_tokens": 10609,
+      "window_seconds": 600,
+      "cache_hit_tokens": 141312,
+      "cache_query_tokens": 210970,
+      "router_predicted_hit_decisions": 23,
+      "decode_nonzero_decisions": 28,
+      "queue_nonzero_decisions": 0,
+      "active_count_differ_decisions": 30,
+      "lower_hit_selected": 0,
+      "remove_term_selected_strictly_above_min": 0,
+      "remove_term_min_ties": 1,
+      "fallbacks": 0
+    },
+    {
+      "arm": "D",
+      "rep": 1,
+      "requests": 32,
+      "window_completed": 28,
+      "drained": 4,
+      "ttft_mean_all_s": 0.9928672258392908,
+      "ttft_p95_window_completed_s": 1.374326075520366,
+      "tpot_mean_all_s": 0.22521203015519264,
+      "tpot_defined": 32,
+      "e2e_mean_all_s": 97.12698919355171,
+      "window_output_tokens": 10557,
+      "window_seconds": 600,
+      "cache_hit_tokens": 141312,
+      "cache_query_tokens": 210970,
+      "router_predicted_hit_decisions": 23,
+      "decode_nonzero_decisions": 28,
+      "queue_nonzero_decisions": 0,
+      "active_count_differ_decisions": 30,
+      "lower_hit_selected": 0,
+      "remove_term_selected_strictly_above_min": 0,
+      "remove_term_min_ties": 1,
+      "fallbacks": 0
+    },
+    {
+      "arm": "A",
+      "rep": 1,
+      "requests": 32,
+      "window_completed": 28,
+      "drained": 4,
+      "ttft_mean_all_s": 0.9877831733901985,
+      "ttft_p95_window_completed_s": 1.376010219380259,
+      "tpot_mean_all_s": 0.22456975150278924,
+      "tpot_defined": 32,
+      "e2e_mean_all_s": 96.57141317875357,
+      "window_output_tokens": 10615,
+      "window_seconds": 600,
+      "cache_hit_tokens": 141312,
+      "cache_query_tokens": 210970,
+      "router_predicted_hit_decisions": 23,
+      "decode_nonzero_decisions": 28,
+      "queue_nonzero_decisions": 0,
+      "active_count_differ_decisions": 30,
+      "lower_hit_selected": 0,
+      "remove_term_selected_strictly_above_min": 0,
+      "remove_term_min_ties": 1,
+      "fallbacks": 0
+    },
+    {
+      "arm": "C",
+      "rep": 1,
+      "requests": 32,
+      "window_completed": 28,
+      "drained": 4,
+      "ttft_mean_all_s": 0.9949927956913598,
+      "ttft_p95_window_completed_s": 1.3843712267465884,
+      "tpot_mean_all_s": 0.22626175435171883,
+      "tpot_defined": 32,
+      "e2e_mean_all_s": 98.05919822305441,
+      "window_output_tokens": 10459,
+      "window_seconds": 600,
+      "cache_hit_tokens": 141312,
+      "cache_query_tokens": 210970,
+      "router_predicted_hit_decisions": 23,
+      "decode_nonzero_decisions": 28,
+      "queue_nonzero_decisions": 0,
+      "active_count_differ_decisions": 30,
+      "lower_hit_selected": 0,
+      "remove_term_selected_strictly_above_min": 0,
+      "remove_term_min_ties": 1,
+      "fallbacks": 0
+    }
+  ],
+  "private_source_hashes": {
+    "rep0-A/client/summary.json": {
+      "sha256": "8257d9a42f9266c1c37a5355216e5038fd6e7a52f4f7837021e396468ee41502",
+      "bytes": 994
+    },
+    "rep0-A/client/requests.jsonl": {
+      "sha256": "e4e50e45feeb1501564b376786c1d9be5486bdfa3cb143cb090e2e1f650bcbe4",
+      "bytes": 389788
+    },
+    "rep0-A/routing.jsonl": {
+      "sha256": "f3133d3ba266ca585e216be924e0095efd78e7e0d8f263bff1c74c40fc0e8fa9",
+      "bytes": 18604
+    },
+    "rep0-A/router-metrics.json": {
+      "sha256": "c9c822e5709df308a8014cfc4d306195082ef0cbf4f089dc3b353ad31ec698ac",
+      "bytes": 46039
+    },
+    "rep0-A/backend-cache-before.json": {
+      "sha256": "87e98cfebb8bb2b1ace2593e5567eda5bd5b2b4298c507505dd973bb7ceda34a",
+      "bytes": 347
+    },
+    "rep0-A/backend-cache-after.json": {
+      "sha256": "34cdc8c5d2e3a80c653e53cc59093956ba5d92abf64505b53c7ac3340e27e8a1",
+      "bytes": 364
+    },
+    "rep0-A/analysis.json": {
+      "sha256": "8da3dcf8142122eab8966686ca928bd427ad8800ef48b334c30dea2154da1317",
+      "bytes": 1335
+    },
+    "rep0-A/router.json": {
+      "sha256": "ced020373b942e4cd1ead81724026e37ef12b79369ed1c9ff6125d57c6422245",
+      "bytes": 1468
+    },
+    "rep0-B/client/summary.json": {
+      "sha256": "098f37ac70ba359630154cfb8649b2e1b6e5a8ce446082c5eec04f0f9a3b6d66",
+      "bytes": 994
+    },
+    "rep0-B/client/requests.jsonl": {
+      "sha256": "e8011cb0fd381e43cd89b90879cf2eae8bcf1edb66dd0a52f0c9cda32f09f3d2",
+      "bytes": 389757
+    },
+    "rep0-B/routing.jsonl": {
+      "sha256": "9e9c6a81d76e92a8cd6556876df8956d7eb8fbe24dfb365e1039fe39fb20d02a",
+      "bytes": 18661
+    },
+    "rep0-B/router-metrics.json": {
+      "sha256": "7cda58c07f3b8d0f03a46e4671cdd519804ad357f4e8cd20051235713a2c81ad",
+      "bytes": 46037
+    },
+    "rep0-B/backend-cache-before.json": {
+      "sha256": "87e98cfebb8bb2b1ace2593e5567eda5bd5b2b4298c507505dd973bb7ceda34a",
+      "bytes": 347
+    },
+    "rep0-B/backend-cache-after.json": {
+      "sha256": "34cdc8c5d2e3a80c653e53cc59093956ba5d92abf64505b53c7ac3340e27e8a1",
+      "bytes": 364
+    },
+    "rep0-B/analysis.json": {
+      "sha256": "f5df034f8111108489ce01187ef92dcbce68af12c919b51ac541805ddadf0320",
+      "bytes": 1335
+    },
+    "rep0-B/router.json": {
+      "sha256": "48e0dce855499807081f6865791970dc5d7370016553b74d3b5a1ee70b47fea1",
+      "bytes": 1468
+    },
+    "rep0-C/client/summary.json": {
+      "sha256": "6f2290cb46389e8dc8ec8b91bfd2c46c02992475253d2536d678b31da689021f",
+      "bytes": 996
+    },
+    "rep0-C/client/requests.jsonl": {
+      "sha256": "f5f379d49ed83b09ef335a9de522022563230870d06cf9b1ae1c9e632b32bada",
+      "bytes": 389696
+    },
+    "rep0-C/routing.jsonl": {
+      "sha256": "62f28cb1d04b06cfbe7669d23c3831658eab0fcd733dc7f67c0e00f673df4c72",
+      "bytes": 18661
+    },
+    "rep0-C/router-metrics.json": {
+      "sha256": "335968e137c9623c439d0a63fd68b897485c7d7aaac31e53bab435c7649c6128",
+      "bytes": 46044
+    },
+    "rep0-C/backend-cache-before.json": {
+      "sha256": "87e98cfebb8bb2b1ace2593e5567eda5bd5b2b4298c507505dd973bb7ceda34a",
+      "bytes": 347
+    },
+    "rep0-C/backend-cache-after.json": {
+      "sha256": "34cdc8c5d2e3a80c653e53cc59093956ba5d92abf64505b53c7ac3340e27e8a1",
+      "bytes": 364
+    },
+    "rep0-C/analysis.json": {
+      "sha256": "365680d05d118f9167829a3f3135ec270a9132d10c4e705cf77e4e536b6b88ff",
+      "bytes": 1337
+    },
+    "rep0-C/router.json": {
+      "sha256": "52591622d669df013a3aec60475d070aa3a435b5458dcecb899dc6a6f56a2535",
+      "bytes": 1468
+    },
+    "rep0-D/client/summary.json": {
+      "sha256": "819fc674e6de10e901580369cfcf227d113dadf6dd45e918cec97c2cf56d0f67",
+      "bytes": 971
+    },
+    "rep0-D/client/requests.jsonl": {
+      "sha256": "9f97b2579c05df9ef2019b537fffbc3d9f85b820779b7ac61afb4714d64f1fe1",
+      "bytes": 389840
+    },
+    "rep0-D/routing.jsonl": {
+      "sha256": "8153facae3a302675551b15422146373fd2c0e2ed702f336f6c4a0f8212b5a40",
+      "bytes": 18662
+    },
+    "rep0-D/router-metrics.json": {
+      "sha256": "077e5d93751a676a623619318d4918c55424f60f326fefe0d40c0213e2f09229",
+      "bytes": 46038
+    },
+    "rep0-D/backend-cache-before.json": {
+      "sha256": "87e98cfebb8bb2b1ace2593e5567eda5bd5b2b4298c507505dd973bb7ceda34a",
+      "bytes": 347
+    },
+    "rep0-D/backend-cache-after.json": {
+      "sha256": "34cdc8c5d2e3a80c653e53cc59093956ba5d92abf64505b53c7ac3340e27e8a1",
+      "bytes": 364
+    },
+    "rep0-D/analysis.json": {
+      "sha256": "7cf1605da2eac4a4f33bc4213f746890e062857649be7819850af338bc9ec55e",
+      "bytes": 1312
+    },
+    "rep0-D/router.json": {
+      "sha256": "077df0f9ef4f81d9406b694749cd5316098ad1ac6bbcf954aae1eba70c47bd8b",
+      "bytes": 1468
+    },
+    "rep1-B/client/summary.json": {
+      "sha256": "b102a0918c741bd53431b290c1076322ef2bed4028451b59de0b5c474a7b1409",
+      "bytes": 995
+    },
+    "rep1-B/client/requests.jsonl": {
+      "sha256": "727462b3161668c20b690caf4e7843c5e82434a83024369c4b4f3a70167b4a63",
+      "bytes": 389750
+    },
+    "rep1-B/routing.jsonl": {
+      "sha256": "e91d75b3a2fdfa2ae67337f09ac31729141e779c7ee926effe503adca64b0310",
+      "bytes": 18662
+    },
+    "rep1-B/router-metrics.json": {
+      "sha256": "190d5e53d7b90be0b74a130e9f6d691653e560a901f6c3a9e1e7ada55ea1727c",
+      "bytes": 46047
+    },
+    "rep1-B/backend-cache-before.json": {
+      "sha256": "87e98cfebb8bb2b1ace2593e5567eda5bd5b2b4298c507505dd973bb7ceda34a",
+      "bytes": 347
+    },
+    "rep1-B/backend-cache-after.json": {
+      "sha256": "34cdc8c5d2e3a80c653e53cc59093956ba5d92abf64505b53c7ac3340e27e8a1",
+      "bytes": 364
+    },
+    "rep1-B/analysis.json": {
+      "sha256": "bd362ef6bbd558955461989eec8bf419bcd70d0e5af56472b89643da9224066f",
+      "bytes": 1336
+    },
+    "rep1-B/router.json": {
+      "sha256": "48e0dce855499807081f6865791970dc5d7370016553b74d3b5a1ee70b47fea1",
+      "bytes": 1468
+    },
+    "rep1-D/client/summary.json": {
+      "sha256": "f37d601200d9c97116d017ef05e97eb4cadf60db724eabbfb518a5b019b08c47",
+      "bytes": 971
+    },
+    "rep1-D/client/requests.jsonl": {
+      "sha256": "6c8d43a6cde08e02e4ae27fed31c1e0c71912d7416e9ad3e4ad66c7416089d48",
+      "bytes": 389629
+    },
+    "rep1-D/routing.jsonl": {
+      "sha256": "f45646fcf3cb4edf9f6c1d4631a810d61e265d8906225311ae7e0db1ea8043c2",
+      "bytes": 18661
+    },
+    "rep1-D/router-metrics.json": {
+      "sha256": "28153134cdb856abba8078a41ceec8f2496ce3fda8dc94b76f23aebaf83f4c14",
+      "bytes": 46037
+    },
+    "rep1-D/backend-cache-before.json": {
+      "sha256": "87e98cfebb8bb2b1ace2593e5567eda5bd5b2b4298c507505dd973bb7ceda34a",
+      "bytes": 347
+    },
+    "rep1-D/backend-cache-after.json": {
+      "sha256": "34cdc8c5d2e3a80c653e53cc59093956ba5d92abf64505b53c7ac3340e27e8a1",
+      "bytes": 364
+    },
+    "rep1-D/analysis.json": {
+      "sha256": "32a8c8c69b8aa5e19ec6f7a3ab6042a163ffd86f50a4c1d6d9fcb0c37d9f8b9d",
+      "bytes": 1312
+    },
+    "rep1-D/router.json": {
+      "sha256": "077df0f9ef4f81d9406b694749cd5316098ad1ac6bbcf954aae1eba70c47bd8b",
+      "bytes": 1468
+    },
+    "rep1-A/client/summary.json": {
+      "sha256": "b95ddf24a49ffbd0348b487b88cf2a84b971c76b4a883864ae8c50a9d4380b7d",
+      "bytes": 993
+    },
+    "rep1-A/client/requests.jsonl": {
+      "sha256": "5f0aa3d0cd95ab078e0128ae6b63685804735ac937143767d4049c7387d80ef0",
+      "bytes": 389744
+    },
+    "rep1-A/routing.jsonl": {
+      "sha256": "e27b189f2c2238a0a10b3e3567de14e0834aac2d4ed40ca27bf635e5bbea9869",
+      "bytes": 18604
+    },
+    "rep1-A/router-metrics.json": {
+      "sha256": "9c8d38b5766c417fa0ce84dd579a1cd0a345fc51fbae40dfa0374041d7563199",
+      "bytes": 46032
+    },
+    "rep1-A/backend-cache-before.json": {
+      "sha256": "87e98cfebb8bb2b1ace2593e5567eda5bd5b2b4298c507505dd973bb7ceda34a",
+      "bytes": 347
+    },
+    "rep1-A/backend-cache-after.json": {
+      "sha256": "34cdc8c5d2e3a80c653e53cc59093956ba5d92abf64505b53c7ac3340e27e8a1",
+      "bytes": 364
+    },
+    "rep1-A/analysis.json": {
+      "sha256": "81b00f6d57bd74b3efee9d0127f9f7e7dd6d336c3034b3ec1c9d06cc9bcf89b6",
+      "bytes": 1334
+    },
+    "rep1-A/router.json": {
+      "sha256": "ced020373b942e4cd1ead81724026e37ef12b79369ed1c9ff6125d57c6422245",
+      "bytes": 1468
+    },
+    "rep1-C/client/summary.json": {
+      "sha256": "d1b365f0247877a7767dc7a9f54c54cd6e3078764c9f06cde322ea092331dc5b",
+      "bytes": 993
+    },
+    "rep1-C/client/requests.jsonl": {
+      "sha256": "7f0901422b6ffe7cdfab959f8ee01bf6223f8e2ae3d6257dc11321f03d598bd8",
+      "bytes": 389708
+    },
+    "rep1-C/routing.jsonl": {
+      "sha256": "5b1428a4d48bbabffc51c883a55ff989dd5d4efef83e30670664dd99da1b1704",
+      "bytes": 18661
+    },
+    "rep1-C/router-metrics.json": {
+      "sha256": "a33198a5abc2de2f27547226a749c5310a5b655cef922bb55f04e8732ebdef56",
+      "bytes": 46041
+    },
+    "rep1-C/backend-cache-before.json": {
+      "sha256": "87e98cfebb8bb2b1ace2593e5567eda5bd5b2b4298c507505dd973bb7ceda34a",
+      "bytes": 347
+    },
+    "rep1-C/backend-cache-after.json": {
+      "sha256": "cbd28ed167a54f013cd6ce34b3173cb354436370558e1b4b11a9978405e47ac5",
+      "bytes": 364
+    },
+    "rep1-C/analysis.json": {
+      "sha256": "68fc3cf986a005694c073de0b2bbe12cc1846ef50fc2abad528cc6720a2ef480",
+      "bytes": 1334
+    },
+    "rep1-C/router.json": {
+      "sha256": "52591622d669df013a3aec60475d070aa3a435b5458dcecb899dc6a6f56a2535",
+      "bytes": 1468
+    },
+    "prepared.json": {
+      "sha256": "fead141dedf4b3ca3135c504da39465cdeeb9f196a04d3b56bb06f7bb54494ef",
+      "bytes": 1081040
+    },
+    "run-metadata.json": {
+      "sha256": "900ba08641ba9d95d0347d465dc8057d648fde3386101d5a6824068b3eb6960d",
+      "bytes": 770
+    },
+    "swe_quick_driver.py": {
+      "sha256": "1d3900e1e82391daa2f7b3003292b088d9c37c50fbca6457fa806a332b051e28",
+      "bytes": 8169
+    },
+    "swe_traced_router.py": {
+      "sha256": "b50711e42aa62b0436e965ba827815bc3a0b852d110b9203d8bad09e6a90b940",
+      "bytes": 1639
+    },
+    "client/src/swe_prefix_reuse/client.py": {
+      "sha256": "040ca92b5051ceb649243279db38a32237abb91f1aafaf15dbe6d03c2e8f511f",
+      "bytes": 7095
+    },
+    "worker0.sh": {
+      "sha256": "1b85eeb5c5475956a285a6be147c53e178bf7c9273e6e8f40a4eb1b98cdafe68",
+      "bytes": 776
+    },
+    "worker1.sh": {
+      "sha256": "f3cbbc8606cbe073d575222df49cba7df060769adf58402063663945352ec264",
+      "bytes": 776
+    },
+    "experiment.log": {
+      "sha256": "95f83638247e93de9986e3bd39521fbc35543a38b59d59a1bed18b91b5753067",
+      "bytes": 2798
+    },
+    "combined-analysis.json": {
+      "sha256": "64cac868ced617cf0fb48ee6b3c50e8fe70bd06e90d9d4b8f2c2bac567cd7997",
+      "bytes": 11334
+    }
+  },
+  "limitations": [
+    "Only 28 requests completed inside each timed window; 4 additional requests drained.",
+    "Independent replays, not same-state counterfactuals.",
+    "Removing a cost term from recorded candidate scores only tests that snapshot; ties and later state changes remain unresolved.",
+    "Client removes cache_salt for Router compatibility; cross-session reuse is possible.",
+    "Source requests, token IDs and traces remain private; hashes do not enable independent recomputation."
+  ]
+}

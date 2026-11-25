@@ -71,7 +71,9 @@ def test_source_cleanup_has_complete_archive_and_green_merge_receipts():
         verified = row["download_back"]
         assert verified["all_lengths_and_sha256_match"] is True
         assert verified["verified_files"] == len(records)
-        assert verified["verified_bytes"] == sum(record["bytes"] for record in records)
+        assert verified["verified_bytes"] == manifest.get(
+            "pre_redaction_snapshot_bytes", sum(record["bytes"] for record in records)
+        )
         assert row["pr_checks"]
         assert all(check["conclusion"] == "SUCCESS" for check in row["pr_checks"])
         assert row["trusted_default_branch_gate"]["conclusion"] == "success"
@@ -98,7 +100,7 @@ def test_published_stateaxis_links_resolve_to_frozen_benchmark_originals():
     found = set()
     prefix = (
         "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/"
-        "ddc4f6a3290e447260fc8f6c03ea36d3ca514e23/"
+        "b523bc34f0cd5c00653efddb821c2161c072cea2/"
     )
     for component in registry["components"]:
         if component["id"] not in expected:

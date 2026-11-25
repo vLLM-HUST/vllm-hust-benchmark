@@ -1,0 +1,155 @@
+"""CPU negative cases for pressure bounds, identities, counters and source gates."""
+
+import copy
+import json
+from pathlib import Path
+import tempfile
+import unittest
+
+import controller
+from cpu_rules import (
+    STAGES,
+    bind_internal_ids,
+    case_id,
+    geometry,
+    metric_delta,
+    KV_BYTES,
+)
+
+
+def payload():
+    groups = [
+        {
+            "is_eagle_group": False,
+            "spec": {
+                "type": "FullAttentionSpec",
+                "block_size_tokens": 2048,
+                "sliding_window": None,
+                "attention_chunk_size": None,
+            },
+        },
+        *[
+            {
+                "is_eagle_group": False,
+                "spec": {
+                    "type": "MambaSpec",
+                    "block_size_tokens": 2048,
+                    "mamba_cache_mode": "align",
+                    "num_speculative_blocks": 2,
+                },
+            }
+            for _ in range(3)
+        ],
+    ]
+    value = {
+        "rank": 0,
+        "num_blocks": 71,
+        "groups": groups,
+        "tensor_descriptors": [{"size_bytes": 1669865472}],
+        "actual_profile": {
+            "max_model_len": 4096,
+            "kv_cache_memory_bytes": KV_BYTES,
+            "max_num_seqs": 12,
+            "speculative_num_tokens": 2,
+        },
+        "observer_source_sha256": "synthetic",
+        "loaded_vllm_file": "synthetic-vllm",
+        "loaded_ascend_file": "synthetic-ascend",
+    }
+    return {"results": [value, {**copy.deepcopy(value), "rank": 1}]}
+
+
+class Rules(unittest.TestCase):
+    def test_actual_geometry_formula_and_no_pressure(self):
+        inputs = [{"tokens": 555, "max_tokens": 2218}] * 12
+        result = geometry(payload(), inputs)
+        self.assertTrue(result["go"])
+        self.assertEqual(result["usable_pool_blocks"], 70)
+        self.assertEqual(result["first_admission_upper_count_in_original_order"], 7)
+        self.assertEqual(result["maximum_context_upper_blocks"], 14)
+        self.assertEqual(result["nominal_max_context_token_capacity"], 20480)
+        self.assertEqual(result["end_upper_blocks_per_case"][0], 14)
+        larger = payload()
+        for rank in larger["results"]:
+            rank["num_blocks"] = 1000
+        self.assertFalse(geometry(larger, inputs)["go"])
+
+    def test_rank_mismatch_and_oversize_rejected(self):
+        value = payload()
+        value["results"][1]["num_blocks"] = 72
+        with self.assertRaises(AssertionError):
+            geometry(value, [{"tokens": 555, "max_tokens": 2218}] * 12)
+        with self.assertRaises(AssertionError):
+            geometry(payload(), [{"tokens": 1000, "max_tokens": 3100}] * 12)
+
+    def test_exact_stage_binding_rejects_foreign_or_ambiguous(self):
+        identity = "chatcmpl-" + case_id("native-r01", 0)
+        self.assertEqual(
+            bind_internal_ids([identity + "-1234abcd"], "native-r01"),
+            {identity: identity + "-1234abcd"},
+        )
+        for values in (
+            [identity],
+            [identity + "-1234ABCd"],
+            [identity + "-1234abc"],
+            [identity + "-1234abcd", identity + "-2222aaaa"],
+        ):
+            with self.assertRaises(AssertionError):
+                bind_internal_ids(values, "native-r01")
+        with self.assertRaises(AssertionError):
+            bind_internal_ids([identity + "-1234abcd"], "bidkv-r01")
+        self.assertEqual(
+            len({case_id(stage, lane) for stage in STAGES for lane in range(12)}), 48
+        )
+
+    def test_missing_reset_external_reuse_not_zero(self):
+        base = {
+            name: 0
+            for name in (
+                "vllm:num_preemptions_total",
+                "vllm:prefix_cache_hits_total",
+                "vllm:external_prefix_cache_hits_total",
+            )
+        }
+        self.assertEqual(
+            metric_delta(base, {**base, "vllm:num_preemptions_total": 7})[
+                "vllm:num_preemptions_total"
+            ],
+            7,
+        )
+        for removed in base:
+            missing = {key: value for key, value in base.items() if key != removed}
+            with self.assertRaises(AssertionError):
+                metric_delta(missing, missing)
+        with self.assertRaises(AssertionError):
+            metric_delta({**base, "vllm:num_preemptions_total": 1}, base)
+        with self.assertRaises(AssertionError):
+            metric_delta(base, {**base, "vllm:external_prefix_cache_hits_total": 1})
+        self.assertEqual(
+            metric_delta(base, {**base, "vllm:prefix_cache_hits_total": 20})[
+                "vllm:prefix_cache_hits_total"
+            ],
+            20,
+        )
+
+    def test_unpublished_source_cannot_start(self):
+        previous_driver, previous_probe = controller.DRIVER, controller.PROBE
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                controller.DRIVER = root / "source"
+                controller.PROBE = root / "probe"
+                controller.DRIVER.mkdir()
+                controller.PROBE.mkdir()
+                (controller.DRIVER / "source-manifest.json").write_text('{"files":{}}')
+                (controller.PROBE / "publication.json").write_text(
+                    json.dumps({"readback_verified": False})
+                )
+                with self.assertRaises(AssertionError):
+                    controller.publication_admission()
+        finally:
+            controller.DRIVER, controller.PROBE = previous_driver, previous_probe
+
+
+if __name__ == "__main__":
+    unittest.main()

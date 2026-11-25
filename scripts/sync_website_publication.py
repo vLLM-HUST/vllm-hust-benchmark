@@ -21,6 +21,31 @@ def digest(raw):
     return hashlib.sha256(raw).hexdigest()
 
 
+def verify_source_paths(paths, commit):
+    revision_paths = subprocess.check_output(
+        [
+            "git",
+            "ls-tree",
+            "-r",
+            "--name-only",
+            "-z",
+            commit,
+            "--",
+            SOURCE.relative_to(ROOT).as_posix(),
+        ],
+        cwd=ROOT,
+    )
+    expected = set(revision_paths.decode("utf-8").split("\0")[:-1])
+    actual = {path.relative_to(ROOT).as_posix() for path in paths}
+    missing = expected - actual
+    extra = actual - expected
+    if missing or extra:
+        raise ValueError(
+            f"Source paths differ from benchmark revision {commit}: "
+            f"missing={sorted(missing)}, extra={sorted(extra)}"
+        )
+
+
 def run(website, mode, revision=None):
     destination = website / "data"
     if mode == "bootstrap":
@@ -61,11 +86,13 @@ def run(website, mode, revision=None):
         raise ValueError(
             "publish requires --revision; uncommitted sources cannot be published"
         )
+    paths = sorted(path for path in SOURCE.rglob("*") if path.is_file())
+    if commit:
+        verify_source_paths(paths, commit)
     entries = []
     copies = []
-    for path in sorted(SOURCE.rglob("*")):
-        if not path.is_file():
-            continue
+    public_paths = set()
+    for path in paths:
         if ".publication.part-" in path.name:
             continue
         source_raw = path.read_bytes()
@@ -111,6 +138,10 @@ def run(website, mode, revision=None):
             )
             if committed != source_raw:
                 raise ValueError(f"Uncommitted source change: {repository_path}")
+        website_path = "data/" + relative.as_posix()
+        if website_path in public_paths:
+            raise ValueError(f"Duplicate website data path: {website_path}")
+        public_paths.add(website_path)
         target = destination / relative
         if mode == "publish":
             copies.append((target, raw))
@@ -118,19 +149,18 @@ def run(website, mode, revision=None):
             raise ValueError(f"Website differs from benchmark: {relative}")
         entries.append(
             {
-                "website_path": "data/" + relative.as_posix(),
+                "website_path": website_path,
                 "benchmark_path": repository_path,
                 "sha256": digest(raw),
                 "source_sha256": digest(source_raw),
                 "bytes": len(raw),
             }
         )
-    expected = {entry["website_path"] for entry in entries}
     extra = {
         path.relative_to(website).as_posix()
         for path in destination.rglob("*")
         if path.is_file() and path.name != MANIFEST
-    } - expected
+    } - public_paths
     if extra:
         raise ValueError(f"Unregistered website data: {sorted(extra)}")
     for target, raw in copies:
@@ -148,11 +178,13 @@ def run(website, mode, revision=None):
         manifest_path = destination / MANIFEST
         if not manifest_path.is_file():
             raise ValueError("Website source manifest is missing")
-        if json.loads(manifest_path.read_text()) != manifest:
+        if json.loads(manifest_path.read_text(encoding="utf-8")) != manifest:
             raise ValueError("Website source manifest differs from benchmark")
     else:
         (destination / MANIFEST).write_text(
-            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n"
+            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+            newline="\n",
         )
     print(
         f"{mode}: {len(entries)} files, {sum(e['bytes'] for e in entries)} bytes; {manifest['status']}"

@@ -15,6 +15,23 @@ def receipt():
 
 def test_source_receipts_are_pinned_and_complete():
     data = receipt()
+    correction = json.loads(
+        (
+            REPORT / "b1-mod-source-audit-20261020-redaction-correction-20261115.json"
+        ).read_text()
+    )
+    assert correction["schema"] == "source-excerpt-redaction-correction/v1"
+    assert (
+        correction["receipt_sha256"]
+        == hashlib.sha256(
+            (REPORT / "b1-mod-source-audit-20261020.json").read_bytes()
+        ).hexdigest()
+    )
+    corrections = {
+        (row["repository"], row["path"]): row for row in correction["corrections"]
+    }
+    assert len(corrections) == len(correction["corrections"]) == 1
+    used = set()
     assert len(data["repositories"]) == 22
     assert len({row["repository"] for row in data["repositories"]}) == 22
     for row in data["repositories"]:
@@ -22,12 +39,23 @@ def test_source_receipts_are_pinned_and_complete():
         assert row["default_branch"]
         assert any(source["path"] == "README.md" for source in row["sources"])
         for source in row["sources"]:
-            assert (
-                hashlib.sha256(source["text"].encode()).hexdigest() == source["sha256"]
-            )
+            actual = hashlib.sha256(source["text"].encode()).hexdigest()
+            key = (row["repository"], source["path"])
+            if key in corrections:
+                sanitized = corrections[key]
+                # Preserve the recorded original digest; independently bind the
+                # exact sanitized excerpt, without calling it the original bytes.
+                assert sanitized["original_digest"] == source["sha256"]
+                assert sanitized["sanitized_excerpt_digest"] == actual
+                assert sanitized["url"] == source["url"]
+                assert actual != source["sha256"]
+                used.add(key)
+            else:
+                assert actual == source["sha256"]
             assert f"/blob/{row['commit']}/" in source["url"]
     for source in data["measured_host_sources"]:
         assert hashlib.sha256(source["text"].encode()).hexdigest() == source["sha256"]
+    assert used == corrections.keys()
 
 
 def test_hybrid_fastpath_rejects_current_mtp2_before_device_access():
