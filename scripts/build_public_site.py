@@ -17,7 +17,7 @@ from pathlib import Path
 PUBLIC_ENGINE_HISTORY_PATH = "data/engine-release-history-v1.json"
 PUBLIC_FIXED_B0_PATH = "data/fixed-b0-original018-v1.json"
 PUBLIC_FIXED_B0_SHA256 = "8b5bbddb6ae681513f8476e02f27ec5333a486a51a45848ac01092b310f27d4d"  # pragma: allowlist secret -- fixed public B0 observations
-PUBLIC_ENGINE_HISTORY_SHA256 = "0260529ee42bdb94a40b1eb24ba7fd5b492ac62157eae7e13a085be7c9e7c02c"  # pragma: allowlist secret -- fixed public release catalog
+PUBLIC_ENGINE_HISTORY_SHA256 = "646ced40e206edc3f7566a1249cf8ba0bd5640bd013e4868dbde849e80f4633b"  # pragma: allowlist secret -- fixed public release catalog
 
 
 PROJECT = re.compile(
@@ -90,9 +90,9 @@ BETTERSCALE_CARD = {
     "summary_en": "Multi-device inference execution optimization for Ascend. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36. Frozen R10 uses its resident-state path. The R10 fusion experiment is recorded under Accepted Token State Fusion.",
     "summary_zh": "面向昇腾的多卡推理执行优化。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。 冻结 R10 使用其状态管理路径。 已接受 Token 状态写回融合的 R10 试验记录见同名独立 MOD 条目。",
     "public_effect_status": "measured",
-    "public_effect_en": "Historical DeepSeek-V4-Flash HTTP test: output throughput rose 39.63% at DP8/C16 and 35.17% at TP8/C4 against their respective baselines. R10 single-card component test of 16-row resident-slot tiling. All six decode and mixed shapes passed bitwise checks on graph replay with changed inputs. At 54 live rows, decode fell from 21.45 to 8.74 μs and mixed from 33.90 to 15.16 μs. The 1/2/4/8-warp settings generated identical device binaries within each branch. Model-level validation is pending.",
-    "public_effect_zh": "DeepSeek-V4-Flash 历史 HTTP 实测中，DP8／并发 16 和 TP8／并发 4 的输出吞吐分别较各自基线提高 39.63% 和 35.17%。 冻结 R10 单卡组件对照中，驻留状态槽改为 16 行分块。六种解码和混合形状均通过动态输入图回放逐位核对。54 活跃行时，解码 21.45→8.74 μs，混合 33.90→15.16 μs。1／2／4／8 warp 在同一分支生成相同设备二进制。分块仅取得组件证据，整模待验证。",
-    "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L5",
+    "public_effect_en": "Historical DeepSeek-V4-Flash HTTP test: output throughput rose 39.63% at DP8/C16 and 35.17% at TP8/C4 against their respective baselines. R10 single-card component test of 16-row resident-slot tiling. All six decode and mixed shapes passed bitwise checks on graph replay with changed inputs. At 54 live rows, decode fell from 21.45 to 8.74 μs and mixed from 33.90 to 15.16 μs. The 1/2/4/8-warp settings generated identical device binaries within each branch. Model-level validation is pending. The same-host, same-card MMLU-Pro ten-item screen used a historical R10 control. Output throughput +1.96%, P95 TTFT +2.29%, P95 TPOT −1.07%, batch wall time +2.16%, correct answers 10 to 9. Larger model-level validation is pending for R11.",
+    "public_effect_zh": "DeepSeek-V4-Flash 历史 HTTP 实测中，DP8／并发 16 和 TP8／并发 4 的输出吞吐分别较各自基线提高 39.63% 和 35.17%。 冻结 R10 单卡组件对照中，驻留状态槽改为 16 行分块。六种解码和混合形状均通过动态输入图回放逐位核对。54 活跃行时，解码 21.45→8.74 μs，混合 33.90→15.16 μs。1／2／4／8 warp 在同一分支生成相同设备二进制。分块仅取得组件证据，整模待验证。 同机同卡分时 MMLU-Pro 十题初筛中，输出吞吐 +1.96%，P95 首字 +2.29%，P95 每 token 耗时 −1.07%，整批耗时 +2.16%，答对 10→9。这组数据用于整模初筛，R11 仍待扩大复核。",
+    "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e2481edfeb341e856ac11705336f8e872f423a23/website-publication/data/r10-parallel-components-20261124/summary.json#L5",
     "public_effect_detail_en": [
         "2026-09-14 · DeepSeek-V4-Flash-0731 W8A8 on 8 × Ascend 910B2 (HCCS), vLLM 0.25.1 / vLLM-Ascend 0.25.1rc1, K5.",
         "DP8, concurrency 16, 8 GiB KV/rank: 268.89 → 375.45 output tok/s (+39.63%), runs 158 → 155. The candidate included the DP startup preparation carried into 0.3.1.",

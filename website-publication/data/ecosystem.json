@@ -552,10 +552,10 @@
       "upstream_repository": null,
       "summary_en": "BidKV uses the merged vLLM-HUST preemption-policy API v1 with bounded safe abstention. The latest Qwen3.5-35B-A3B TP4 KV-pressure campaign preserves two positive C12 pairs, active policy selections, negative tuning trials and shutdown diagnostics; it remains separate from the older TP2/SWE and Qwen3.8 observations.",
       "summary_zh": "BidKV 使用已合并的 vLLM-HUST preemption-policy API v1 与有界安全弃权。最新 Qwen3.5-35B-A3B TP4 KV-pressure 实验保留两轮 C12 正向配对、真实策略选择、负向调参试验与退出诊断，并与旧 TP2/SWE 和 Qwen3.8 观察严格分开。",
-      "public_effect_en": "In the Qwen3.5 TP4 C12 cell with 512 MiB KV per NPU, two alternating-order pairs improved output throughput by 17.11% and 10.65% (13.83% geometric mean; 13.88% arithmetic mean). BidKV made 10 and 7 active selections with zero policy failures. Other retained cells are negative or not exercised, so this is a tested-cell result, not a general speedup claim. BidKV passed 1,006 CPU checks against the frozen R10 preemption interface, covering the native selector and fail-closed behavior. In 1,000 synthetic pressure cases, 412 selected a different victim. The paired model pressure run is pending.",
-      "public_effect_zh": "在 Qwen3.5 TP4 C12、每 NPU 512 MiB KV 的测试单元中，两轮交替顺序配对的输出吞吐分别提升 17.11% 与 10.65%（几何平均 13.83%，算术平均 13.88%）。BidKV 分别执行 10 与 7 次有效选择，策略失败为 0。其余保留单元为负向或未触发，因此这只是已测单元结果，不代表普遍加速。 BidKV 与冻结 R10 抢占接口完成 1,006 组 CPU 核对，覆盖真实宿主选择器和异常回退。1,000 组模拟压力中，412 组选择与原生不同。该结果限于接口机制，整模压力配对待测。",
+      "public_effect_en": "In the Qwen3.5 TP4 C12 cell with 512 MiB KV per NPU, two alternating-order pairs improved output throughput by 17.11% and 10.65% (13.83% geometric mean; 13.88% arithmetic mean). BidKV made 10 and 7 active selections with zero policy failures. Other retained cells are negative or not exercised, so this is a tested-cell result, not a general speedup claim. BidKV passed 1,006 CPU checks against the frozen R10 preemption interface, covering the native selector and fail-closed behavior. In 1,000 synthetic pressure cases, 412 selected a different victim. The paired model pressure run is pending. The frozen R10 native pressure control completed 24 requests at concurrency 8 with 89 KV blocks. KV utilization hit 100% twice. The scheduler recorded zero native preemptions, so the BidKV arm was not started and paired performance remains unmeasured.",
+      "public_effect_zh": "在 Qwen3.5 TP4 C12、每 NPU 512 MiB KV 的测试单元中，两轮交替顺序配对的输出吞吐分别提升 17.11% 与 10.65%（几何平均 13.83%，算术平均 13.88%）。BidKV 分别执行 10 与 7 次有效选择，策略失败为 0。其余保留单元为负向或未触发，因此这只是已测单元结果，不代表普遍加速。 BidKV 与冻结 R10 抢占接口完成 1,006 组 CPU 核对，覆盖真实宿主选择器和异常回退。1,000 组模拟压力中，412 组选择与原生不同。该结果限于接口机制，整模压力配对待测。 冻结 R10 原生压力对照使用 89 个 KV 块、并发 8，完成 24 个请求。KV 使用率两次达到 100%，原生抢占为 0，BidKV 候选未启动，暂无配对性能结论。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L206",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/550852d9c1e585dbc68321c5a4e712cc4d6b3f85/website-publication/data/r10-parallel-components-20261124/summary.json#L267",
       "functional_compatibility": {
         "status": "passed",
         "scope": "Qwen3.5-35B-A3B · Ascend TP4 · FULL_AND_PIECEWISE graph; Qwen3.8-27B · Ascend TP4 · FULL_DECODE_ONLY graph"
@@ -744,12 +744,12 @@
       ],
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-vSpec",
       "upstream_repository": null,
-      "summary_en": "vSpec is an in-process speculative-decoding MOD for vLLM-HUST and vLLM-Ascend-HUST. It exposes Draft and EAGLE launchers, dynamic gamma, and online/profile adaptive control while keeping the host model registry unchanged through delayed plugin registration.",
-      "summary_zh": "vSpec 是面向 vLLM-HUST 与 vLLM-Ascend-HUST 的进程内投机解码 MOD，提供 Draft / EAGLE 启动器、动态 gamma 与 online/profile 自适应控制，并通过延迟插件注册保持宿主模型注册表不变。",
-      "public_effect_en": "The repository reports a same-card GSM8K B128 recovery result of 1.518x. That result is specific to the published Qwen2.5 configuration; adaptive control does not guarantee a gain for other models, batch sizes, or request distributions. R10 native MTP2 · 190 MMLU-Pro cases at concurrency 10: the first and second positions were accepted in 90.07% and 77.32% of 254,360 rounds. A trailing 32-round second-position acceptance gate below 40% flagged only 0.25% of rounds offline; about 60% of flagged rounds still accepted the second token. No matched vSpec run on R10.",
-      "public_effect_zh": "仓库公开了同卡 GSM8K B128 的 1.518x 恢复验证；该结果仅适用于已发布的 Qwen2.5 配置，自适应控制不保证其他模型、batch 或请求分布同样获益。 R10 原生 MTP2 · MMLU-Pro 190 题、并发 10：254,360 轮中，两个位置各有 90.07% 和 77.32% 的轮次接受。用过去 32 轮第二位置接受率低于 40% 作减步条件，离线只触发 0.25% 的轮次，其中约 60% 仍接受第二个 token。暂无 R10 vSpec 对照成绩。",
+      "summary_en": "vSpec is an in-process speculative-decoding MOD for vLLM-HUST and vLLM-Ascend-HUST. It exposes Draft and EAGLE launchers, dynamic gamma, and online/profile adaptive control while keeping the host model registry unchanged through delayed plugin registration. R10 3072 revision, the newer even-width speculation controller passed a standalone CPU switch and rollback check. The released stack uses fixed MTP2. Wider candidates were not activated or timed on this host.",
+      "summary_zh": "vSpec 是面向 vLLM-HUST 与 vLLM-Ascend-HUST 的进程内投机解码 MOD，提供 Draft / EAGLE 启动器、动态 gamma 与 online/profile 自适应控制，并通过延迟插件注册保持宿主模型注册表不变。 R10 3072 修订版 · 新版偶数投机宽度控制器完成独立 CPU 验证，覆盖切换和回退。当前发行仍固定 MTP2，新增宽度未在该宿主激活或测量。",
+      "public_effect_en": "The repository reports a same-card GSM8K B128 recovery result of 1.518x. That result is specific to the published Qwen2.5 configuration; adaptive control does not guarantee a gain for other models, batch sizes, or request distributions. R10 native MTP2 · 190 MMLU-Pro cases at concurrency 10: the first and second positions were accepted in 90.07% and 77.32% of 254,360 rounds. A trailing 32-round second-position acceptance gate below 40% flagged only 0.25% of rounds offline; about 60% of flagged rounds still accepted the second token. No matched vSpec run on R10. Revised R10 source and CPU admission checks covered only the vSpec MTP4/6 depth-increase route. The released FULL 3072 profile rejects MTP4. MTP6 exceeds the current graph buckets and resident GDN candidate capacity. Dynamic depth growth also requires a different pinned backend and state-transition protocol. No model-level timing or quality was measured.",
+      "public_effect_zh": "仓库公开了同卡 GSM8K B128 的 1.518x 恢复验证；该结果仅适用于已发布的 Qwen2.5 配置，自适应控制不保证其他模型、batch 或请求分布同样获益。 R10 原生 MTP2 · MMLU-Pro 190 题、并发 10：254,360 轮中，两个位置各有 90.07% 和 77.32% 的轮次接受。用过去 32 轮第二位置接受率低于 40% 作减步条件，离线只触发 0.25% 的轮次，其中约 60% 仍接受第二个 token。暂无 R10 vSpec 对照成绩。 新版 R10 的 vSpec 仅完成 MTP4／6 加深路线源码和 CPU 准入核对。保持 FULL 3072 时，MTP4 被发行配置拒绝。MTP6 超出当前图规格和常驻 GDN 候选容量。vSpec 的动态扩大还依赖另一套固定后端和状态转换协议。本轮未启动整模、未运行十题，暂无性能或准确率结果。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L369",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aee47f13128015b60eedff6781de9785b611359c/website-publication/data/r10-plugin-paired-mmlu10-20261125/summary.json#L60",
       "runtime_state_dimensions": [
         "installed",
         "configured",
@@ -785,7 +785,8 @@
           "login": "Renty-0",
           "name": "任天宇"
         }
-      ]
+      ],
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L355"
     },
     {
       "id": "latchmoe",
@@ -915,12 +916,12 @@
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-opfuse",
       "repository_visibility": "private",
       "upstream_repository": null,
-      "summary_en": "Default-off, single-mechanism operator-fusion runtime-patch plugin for vLLM-HUST on Ascend NPU, currently a scaffold from patch-plugin-template with the fusion mechanism target under design.",
-      "summary_zh": "面向 vLLM-HUST 昇腾 NPU 的默认关闭、单一机制算子融合运行时补丁插件，当前为 patch-plugin-template 脚手架，融合机制目标设计中。",
-      "public_effect_en": "No performance effect is claimed yet. The repository is a scaffold with differential tests passing; the operator-fusion mechanism has not been implemented or measured online.",
-      "public_effect_zh": "暂不主张任何性能效果。仓库当前为脚手架（差分测试通过）；算子融合机制尚未实现，也未做在线实测。",
+      "summary_en": "Default-off, single-mechanism operator-fusion runtime-patch plugin for vLLM-HUST on Ascend NPU, currently a scaffold from patch-plugin-template with the fusion mechanism target under design. R10 3072 revision, MoE shared-expert gate on one Ascend 910B2. The lookup fusion preserved native BF16 sigmoid bits on changing-input graph replay. Three and six rows were slightly faster. The tested 12 to 108 row cases regressed, so the experiment stopped at component level.",
+      "summary_zh": "面向 vLLM-HUST 昇腾 NPU 的默认关闭、单一机制算子融合运行时补丁插件，当前为 patch-plugin-template 脚手架，融合机制目标设计中。 R10 3072 修订版 · MoE 共享专家门控的独立 910B2 组件试验。原生 BF16 sigmoid 查表融合在重放中保持逐位一致。3、6 行略快，12 至 108 行均变慢；本轮停在组件级。",
+      "public_effect_en": "No performance effect is claimed yet. The repository is a scaffold with differential tests passing; the operator-fusion mechanism has not been implemented or measured online. A separate routed-expert output combine prototype for revised R10 was bitwise exact in 15 dynamic graph cells. Of 210 pairs, 200 were slower and the median in every cell rose by 0.035–1.713 μs. The prototype stopped at component screening.",
+      "public_effect_zh": "暂不主张任何性能效果。仓库当前为脚手架（差分测试通过）；算子融合机制尚未实现，也未做在线实测。 新版 R10 的独立路由专家输出归并原型，15 个动态图工况逐位一致。210 组配对中 200 组变慢，各档中位耗时增加 0.035–1.713 μs，停在组件验证。",
       "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-opfuse",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aee47f13128015b60eedff6781de9785b611359c/website-publication/data/r10-plugin-paired-mmlu10-20261125/summary.json#L11",
       "functional_compatibility": {
         "status": "preview",
         "scope": "scaffold only; not yet qualified on Ascend 910B2"
@@ -956,7 +957,8 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
-      ]
+      ],
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L9"
     },
     {
       "id": "ascend-adaptive-quantized-kv",
@@ -1217,8 +1219,8 @@
       "maturity": "experimental",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-prefix-router",
       "upstream_repository": null,
-      "summary_en": "Installable external prefix/lifecycle-aware router with bounded backend pools, request-load accounting, authoritative KV-event recovery, OpenAI-compatible forwarding, and health/readiness/metrics endpoints.",
-      "summary_zh": "可独立安装的外部前缀与生命周期感知 Router，提供有界 backend 连接池、请求负载核算、权威 KV 事件恢复、OpenAI 兼容转发以及健康、就绪和指标接口。",
+      "summary_en": "Installable external prefix/lifecycle-aware router with bounded backend pools, request-load accounting, authoritative KV-event recovery, OpenAI-compatible forwarding, and health/readiness/metrics endpoints. R10 3072 revision, a CPU loopback routed requests using synthetic KV events. Default and trusted modes rejected the legacy event protocol. The frozen resident cache does not emit the needed events, so no two-replica performance test was run.",
+      "summary_zh": "可独立安装的外部前缀与生命周期感知 Router，提供有界 backend 连接池、请求负载核算、权威 KV 事件恢复、OpenAI 兼容转发以及健康、就绪和指标接口。 R10 3072 修订版 · CPU 回环验证通过合成 KV 事件驱动选路。默认和可信模式拒绝旧事件协议；冻结驻留缓存缺少对应的实际事件，未进行双副本性能测试。",
       "public_effect_en": "Three matched 900-second rounds at C1/C2/C4/C8/C16 reported 0.96%–17.52% higher throughput than the same two-replica random-routing deployment. Source-integrity gaps in several Prometheus files prevent per-request causal attribution.",
       "public_effect_zh": "C1/C2/C4/C8/C16 各三轮匹配的 900 秒实验，相对相同双副本随机路由部署记录到 0.96%–17.52% 的吞吐提升。部分 Prometheus 源文件存在完整性缺口，不能作逐请求因果归因。",
       "public_effect_status": "beneficial",
@@ -1241,7 +1243,8 @@
       },
       "evidence_level": "performance_verified",
       "name_en": "Prefix-Aware Request Router",
-      "name_zh": "Prefix Router 前缀感知路由"
+      "name_zh": "Prefix Router 前缀感知路由",
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L296"
     },
     {
       "id": "kv-tiering-migration",
@@ -1654,8 +1657,8 @@
       "maturity": "incubating",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-quantized-kv-cache-hust",
       "upstream_repository": null,
-      "summary_en": "Ascend runtime plugin for dynamic per-channel INT8 KV cache; legacy KIVI and packed-format work remains separate migration history.",
-      "summary_zh": "面向昇腾的动态 per-channel INT8 KV Cache 运行时插件；KIVI 与其他 packed 格式仍属于后续迁移范围。",
+      "summary_en": "Ascend runtime plugin for dynamic per-channel INT8 KV cache; legacy KIVI and packed-format work remains separate migration history. R10 3072 revision, Ascend 910B2 component probe at Qwen per-rank geometry. Dynamic INT8 halved per-layer KV tensor storage across six 4K to 32K cells, while paged decoding took about 21% to 23% longer. The released command line lacks the plugin's INT8 route, so model serving remained disabled.",
+      "summary_zh": "面向昇腾的动态 per-channel INT8 KV Cache 运行时插件；KIVI 与其他 packed 格式仍属于后续迁移范围。 R10 3072 修订版 · 910B2 组件试验。按 Qwen3.5 每 rank 的注意力几何，4K、16K、32K 共六格的动态 INT8 单层 KV 张量约减半，分页解码算子慢约 21% 至 23%。冻结 CLI 缺少插件的 int8 入口，整模未启用。",
       "public_effect_en": "Real Qwen2.5-14B single-card serving, prefill/decode, ACL Graph replay, and three OpenAI API requests are verified. No matched performance comparison has been published.",
       "public_effect_zh": "已验证 Qwen2.5-14B 单卡真实服务、prefill/decode、ACL Graph 回放及三次 OpenAI API 请求；尚无已发布的配对性能对比。",
       "public_effect_status": "validated",
@@ -1700,7 +1703,8 @@
           "login": "SuccinctPaul",
           "name": "程月甲"
         }
-      ]
+      ],
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L121"
     },
     {
       "id": "simllm-migration",
@@ -1893,8 +1897,8 @@
       "maturity": "incubating",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-split-batch-hust",
       "upstream_repository": null,
-      "summary_en": "Owner-led carrier for split-batch planning, dual-stream replay, and full-graph parallel execution; core retains graph-lifecycle ownership.",
-      "summary_zh": "split-batch 规划、双流 replay 与 full-graph 并行执行的原负责人迁移载体；graph 生命周期仍由 core 拥有。",
+      "summary_en": "Owner-led carrier for split-batch planning, dual-stream replay, and full-graph parallel execution; core retains graph-lifecycle ownership. R10 3072 revision, three upstream CPU prechecks passed. MTP2 and MRoPE each independently blocked activation. Split-Batch remained disabled on this host, with no device performance measurement.",
+      "summary_zh": "split-batch 规划、双流 replay 与 full-graph 并行执行的原负责人迁移载体；graph 生命周期仍由 core 拥有。 R10 3072 修订版 · 三项上游 CPU 预检通过。MTP2 和 MRoPE 各自触发拒绝；此组合未启用 Split-Batch，也未开展 NPU 性能评测。",
       "public_effect_en": "Capability preview: split-batch planning, dual-stream replay, and full-graph parallel execution. Public matched performance results are not available yet.",
       "public_effect_zh": "能力预览：split-batch 规划、双流 replay 与 full-graph 并行执行；尚无公开配对性能结果。",
       "public_effect_status": "preview",
@@ -1916,7 +1920,8 @@
         "requirements_zh": "默认关闭的 dual-pad planner 与前置检查可安装、可检查；激活前仍需 graph/worker 执行合同与昇腾验证。",
         "followup_url": "https://github.com/vLLM-HUST/vllm-ascend-split-batch-hust/issues/2"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L267"
     },
     {
       "id": "kv-transfer-observability-migration",
@@ -2753,10 +2758,10 @@
       "documentation_url": "./betterscale.html",
       "summary_en": "Less host waiting. More device execution. BetterScale publishes separate bounded observations for DeepSeek V4 Flash and a Qwen3.5 TP2 small-fish prototype; their models, runtimes and protocols are not pooled. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36. The R10 fusion experiment is recorded under Accepted Token State Fusion.",
       "summary_zh": "让设备少等调度，多做推理。BetterScale 分别公开 DeepSeek V4 Flash 与 Qwen3.5 TP2 small-fish 原型的有限观察；两者的模型、运行时与协议不会合并。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。 已接受 Token 状态写回融合的 R10 试验记录见同名独立 MOD 条目。",
-      "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim. An R10 single-card component test of 16-row resident-slot tiling. All six decode and mixed shapes passed bitwise checks on graph replay with changed inputs. At 54 live rows, decode fell from 21.45 to 8.74 μs and mixed from 33.90 to 15.16 μs. The 1/2/4/8-warp settings generated identical device binaries within each branch. Model-level validation is pending.",
-      "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。 冻结 R10 单卡组件对照中，驻留状态槽改为 16 行分块。六种解码和混合形状均通过动态输入图回放逐位核对。54 活跃行时，解码 21.45→8.74 μs，混合 33.90→15.16 μs。1／2／4／8 warp 在同一分支生成相同设备二进制。分块仅取得组件证据，整模待验证。",
+      "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim. An R10 single-card component test of 16-row resident-slot tiling. All six decode and mixed shapes passed bitwise checks on graph replay with changed inputs. At 54 live rows, decode fell from 21.45 to 8.74 μs and mixed from 33.90 to 15.16 μs. The 1/2/4/8-warp settings generated identical device binaries within each branch. Model-level validation is pending. The same-host, same-card MMLU-Pro ten-item screen used a historical R10 control. Output throughput +1.96%, P95 TTFT +2.29%, P95 TPOT −1.07%, batch wall time +2.16%, correct answers 10 to 9. Larger model-level validation is pending for R11.",
+      "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。 冻结 R10 单卡组件对照中，驻留状态槽改为 16 行分块。六种解码和混合形状均通过动态输入图回放逐位核对。54 活跃行时，解码 21.45→8.74 μs，混合 33.90→15.16 μs。1／2／4／8 warp 在同一分支生成相同设备二进制。分块仅取得组件证据，整模待验证。 同机同卡分时 MMLU-Pro 十题初筛中，输出吞吐 +1.96%，P95 首字 +2.29%，P95 每 token 耗时 −1.07%，整批耗时 +2.16%，答对 10→9。这组数据用于整模初筛，R11 仍待扩大复核。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L5",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e2481edfeb341e856ac11705336f8e872f423a23/website-publication/data/r10-parallel-components-20261124/summary.json#L5",
       "functional_compatibility": {
         "status": "passed",
         "scope": "DeepSeek-V4-Flash-0731-w8a8 · Ascend 910B2 TP8 / TP1-DP8-EP8, bounded K5 configurations"
@@ -3992,8 +3997,8 @@
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-prefill-microflow",
       "repository_visibility": "public",
       "upstream_repository": null,
-      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification. The frozen B1 r6 profile enables the school028 GDN and FlashAttention path from 0.1.0.dev0.",
-      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。B1 r6 冻结组合启用了 0.1.0.dev0 的 school028 GDN 与 FlashAttention 路径。",
+      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification. The frozen B1 r6 profile enables the school028 GDN and FlashAttention path from 0.1.0.dev0. The R10 FA output-gate fusion matched the reference bit for bit for numeric BF16 outputs and classified the same non-numeric encodings. Grouped graph replay was roughly flat at 8 rows, around 4% slower at 54 rows and around 9% slower at 4096 rows. The component screen did not qualify the change for integration.",
+      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。B1 r6 冻结组合启用了 0.1.0.dev0 的 school028 GDN 与 FlashAttention 路径。 冻结 R10 的 FA 输出门控融合的 BF16 数值输出逐位一致，非数值编码的分类也一致。分组图回放中，8 行接近持平，54 行慢约 4%，4096 行慢约 9%。组件筛选未达到集成条件。",
       "compatibility": {
         "status": "experimental",
         "host": "Pinned BetterScale shared host on vLLM-HUST + vllm-ascend-hust",
@@ -4023,10 +4028,7 @@
           "name": "田景远"
         }
       ],
-      "public_effect_zh": "冻结 R10 的 FA 输出门控融合通过非 NaN BF16 逐位校验。分组图回放中，8 行略快 0.33%，54 行耗时增加 4.47%，4096 行增加 8.61%。组件筛选未达到集成条件。",
-      "public_effect_en": "The R10 FA output-gate fusion passed non-NaN BF16 bitwise checks. Grouped graph replay was 0.33% faster at 8 rows, 4.47% slower at 54 rows and 8.61% slower at 4096 rows. The component screen did not qualify the change for integration.",
-      "public_effect_status": "not-beneficial-in-tested-cell",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/411b2fa1b9d18918af38166fc6b4fd0f94910bb9/website-publication/data/r10-parallel-components-20261124/summary.json#L146"
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/550852d9c1e585dbc68321c5a4e712cc4d6b3f85/website-publication/data/r10-parallel-components-20261124/summary.json#L207"
     },
     {
       "id": "graph-coverage",
@@ -4064,10 +4066,10 @@
         }
       ],
       "advisors": [],
-      "public_effect_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: at fixed budget 32, capture sizes [1,2,4] → [1,2,4,8,16,32] reduced median batch completion by 57.0% across five process pairs. Package CPU checks pass; capture memory/startup costs also increase. R10 diagnostic: 24 fixed-output requests at concurrency 6/8/10 produced 78 FULL dispatches, all with zero dispatcher padding. CPU replay identified no missing capture size in this window. Other layers and workloads were outside scope.",
-      "public_effect_zh": "历史 Qwen3-0.6B FP16 / Ascend 910B2 TP1：保持总预算 32，捕获尺寸从 [1,2,4] 扩至 [1,2,4,8,16,32]，五组独立进程配对的批次完成时间中位数下降 57.0%。封装 CPU 检查通过；图内存与启动开销会增加。 R10 诊断：并发 6／8／10，24 个固定输出请求，78 次 FULL 图分发，观测到的分发 padding 全为 0。CPU 按冻结分发器重放未发现需要增补的规格；结论仅限这个窗口和分发层。",
+      "public_effect_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: at fixed budget 32, capture sizes [1,2,4] → [1,2,4,8,16,32] reduced median batch completion by 57.0% across five process pairs. Package CPU checks pass; capture memory/startup costs also increase. R10 diagnostic: 24 fixed-output requests at concurrency 6/8/10 produced 78 FULL dispatches, all with zero dispatcher padding. CPU replay identified no missing capture size in this window. Other layers and workloads were outside scope. Revised R10 same-host same-card MMLU-Pro ten-request screen added only a 30-row bucket and retained FULL 3072 and MTP2. Both TP ranks recorded 410 replays. Output throughput +15.42%, P95 TTFT -10.24%, P95 TPOT -9.31%, truncations 1 to 0. The frozen first-match scorer gave 10/10 and 8/10. Both candidate responses explicitly ended with the correct A and G. Using the last explicit answer for both arms gives 10/10 each. A separate confirmation on the same host scored 9/10 under the same rule. Item 03290 hit the output limit without a final choice. The quality gate failed before 4.1–4.4. In a request-level trace of 03290, the 40-row arm started rechecking at token 769 and the 30-row arm at token 1,234. Both runs reached the 8,192-token limit without a terminal choice. Repeated reasoning also occurred at 40 rows. No specific engine correction was established, so the quality gate remains closed.",
+      "public_effect_zh": "历史 Qwen3-0.6B FP16 / Ascend 910B2 TP1：保持总预算 32，捕获尺寸从 [1,2,4] 扩至 [1,2,4,8,16,32]，五组独立进程配对的批次完成时间中位数下降 57.0%。封装 CPU 检查通过；图内存与启动开销会增加。 R10 诊断：并发 6／8／10，24 个固定输出请求，78 次 FULL 图分发，观测到的分发 padding 全为 0。CPU 按冻结分发器重放未发现需要增补的规格；结论仅限这个窗口和分发层。 新版 R10 同机同卡 MMLU-Pro 十题，仅新增 30 行图档并保留 FULL 3072 和 MTP2。两侧 TP 各命中 410 次，吞吐 +15.42%，P95 首字 -10.24%，P95 每 token -9.31%，截断 1→0。冻结评分原生 10/10、候选 8/10。逐题复算发现旧评分取了较早的声明，两道候选答复最终明确给出 A 和 G。统一按最后明确选项复算，两臂均为 10/10。 同机确认跑按同一规则为 9/10。03290 到达输出上限，未给出最终选项。质量门未通过，未启动 4.1–4.4。 03290 专项逐 token 追踪：原 40 行第 769 个 token 开始回查，30 行第 1,234 个 token 开始回查。两臂均到达 8,192 token 上限，缺少最终选项。40 行也复现反复推理，暂无明确引擎修法，质量门保持关闭。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L117",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/32abb95833c6ca0f9231b6c1303081ec43bfcea3/website-publication/data/r10-graph30-03290-trace-20261125/summary.json",
       "evidence_level": "hardware_verified",
       "compatibility": {
         "status": "experimental",
@@ -4187,10 +4189,10 @@
         }
       ],
       "advisors": [],
-      "public_effect_en": "Historical measured core: median throughput +9.35% over the accepted batch-copy baseline, four independent pairs, exact token/top1-ID/logprob agreement. The packaged adapter passes CPU tests; its separate device requalification is pending.",
-      "public_effect_zh": "历史核心实现相对已接受的 batch-copy 基线，四组独立配对的吞吐提升中位数为 9.35%，token、top1 ID 与 logprob 一致。当前封装适配层已通过 CPU 测试，独立设备复验正在推进。",
+      "public_effect_en": "Historical measured core: median throughput +9.35% over the accepted batch-copy baseline, four independent pairs, exact token/top1-ID/logprob agreement. The packaged adapter passes CPU tests; its separate device requalification is pending. Revised R10 source review found that the target and MTP draft FULL paths bypass the host graph-update entry that this MOD optimizes. This was an integration review, without an R10 performance pair.",
+      "public_effect_zh": "历史核心实现相对已接受的 batch-copy 基线，四组独立配对的吞吐提升中位数为 9.35%，token、top1 ID 与 logprob 一致。当前封装适配层已通过 CPU 测试，独立设备复验正在推进。 新版 R10 源码复核：目标模型与 MTP draft 的 FULL 路径均绕过插件拟优化的宿主图更新入口。本次为接入核验，未进行 R10 性能对照。",
       "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/802cc5ca4a9da1e1e95f333d5dd2a3a4a53cbb63/reports/independent-inference-optimizations-20261113/sglang-prepared-dispatch/README.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aee47f13128015b60eedff6781de9785b611359c/website-publication/data/r10-plugin-paired-mmlu10-20261125/summary.json#L48",
       "evidence_level": "code_available",
       "compatibility": {
         "status": "experimental",

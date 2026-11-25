@@ -1,0 +1,420 @@
+{
+  "release": "full-answer-b1-20261124-r10",
+  "version": "2026.11.24.10",
+  "engine_commit": "bfd23cf66378c80972806b1aae9d1db4afe11b90",
+  "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+  "date": "2026-11-24",
+  "qualification": "Independent NPU component probes and CPU activation checks. No candidate was admitted to paired model-level measurements.",
+  "plugins": {
+    "opfuse": {
+      "recipe": "OpFuse shared expert native-BF16 sigmoid table, fused lookup and multiply",
+      "service_activated": false,
+      "r10_source": {
+        "release": "full-answer-b1-20261124-r10",
+        "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+        "source": "runtime/ascend/vllm_ascend/ops/fused_moe/shared_experts.py",
+        "host_source_sha256": "78d6ad231159b907571b609538e38fa682a7d5e994d7c24749c1ece075fcc881",
+        "native_expression": "F.sigmoid(gate_out) * shared_out",
+        "part2_line": 161,
+        "geometry": {
+          "schema": "vllm-hust-runtime-geometry/v1",
+          "id": "r10-3072-E36-R54",
+          "execution_seats": 36,
+          "resident_seats": 54,
+          "speculative_tokens": 2,
+          "prefill_tokens": 4096,
+          "host_bytes_per_rank": 4294967296,
+          "mixed_capture_tokens": 3072
+        },
+        "hidden_size": 2048,
+        "graph_decode_rows": [
+          3,
+          6,
+          12,
+          24,
+          36,
+          54,
+          108
+        ],
+        "cpu": {
+          "bf16_gate_patterns": 65536,
+          "finite_patterns": 65280,
+          "nan_patterns": 254,
+          "raw_bf16_index_encoding_verified": true,
+          "one_rounding_control_differences": 1113,
+          "scope": "CPU scalar model; NPU table generated from stock torch.nn.functional.sigmoid"
+        }
+      },
+      "finite_eager": {
+        "gate_patterns": 65280,
+        "elements": 33423360,
+        "largest_finite_abs_diff": 0,
+        "unequal": 0,
+        "by_gate_offset": {}
+      },
+      "edge_eager": {
+        "elements": 221184,
+        "unequal": 0,
+        "largest_finite_abs_diff": 0.0
+      },
+      "graph_cases": 28,
+      "graph_bits_verified": 1990656,
+      "timing_pairs": [
+        {
+          "rows": 3,
+          "native_p50_us": 9.101494650046032,
+          "candidate_p50_us": 8.905588587125143,
+          "paired_delta_p50_us": -0.18595308065414518,
+          "candidate_faster_pairs": 14
+        },
+        {
+          "rows": 6,
+          "native_p50_us": 9.079343577226002,
+          "candidate_p50_us": 8.971572915712992,
+          "paired_delta_p50_us": -0.11348426342010498,
+          "candidate_faster_pairs": 14
+        },
+        {
+          "rows": 12,
+          "native_p50_us": 9.13015107313792,
+          "candidate_p50_us": 9.242354333400726,
+          "paired_delta_p50_us": 0.1024166742960615,
+          "candidate_faster_pairs": 1
+        },
+        {
+          "rows": 24,
+          "native_p50_us": 9.16697382926941,
+          "candidate_p50_us": 9.253656367460888,
+          "paired_delta_p50_us": 0.09069790442784598,
+          "candidate_faster_pairs": 0
+        },
+        {
+          "rows": 36,
+          "native_p50_us": 9.03286983569463,
+          "candidate_p50_us": 9.38336451848348,
+          "paired_delta_p50_us": 0.34039119879404733,
+          "candidate_faster_pairs": 0
+        },
+        {
+          "rows": 54,
+          "native_p50_us": 9.071656068166096,
+          "candidate_p50_us": 9.213624894618988,
+          "paired_delta_p50_us": 0.14279186725616455,
+          "candidate_faster_pairs": 1
+        },
+        {
+          "rows": 108,
+          "native_p50_us": 9.073989590009052,
+          "candidate_p50_us": 9.455848733584086,
+          "paired_delta_p50_us": 0.3859529892603559,
+          "candidate_faster_pairs": 0
+        }
+      ],
+      "archive_sha256": "4250a42b9e3522d88ee7719a81f9e4ceaa89be7073d82834c9638cc38bbeb534",
+      "decision": "Stop at component result; only 3- and 6-row cases improve.",
+      "notes": {
+        "zh": "R10 3072 修订版 · MoE 共享专家门控的独立 910B2 组件试验。原生 BF16 sigmoid 查表融合在重放中保持逐位一致。3、6 行略快，12 至 108 行均变慢；本轮停在组件级。",
+        "en": "R10 3072 revision, MoE shared-expert gate on one Ascend 910B2. The lookup fusion preserved native BF16 sigmoid bits on changing-input graph replay. Three and six rows were slightly faster. The tested 12 to 108 row cases regressed, so the experiment stopped at component level."
+      },
+      "existing_evidence_url": "https://github.com/vLLM-HUST/vllm-hust-opfuse"
+    },
+    "quantized-kv-cache-migration": {
+      "evidence_sha256": "ea5f4fdb77773d2bb5d69135d213bf0b3c673cb48f8bec3b2c3ce35189173f4b",
+      "physical_card_released": true,
+      "quality_scope": "seeded synthetic activations with released per-rank geometry and CANN 9.1",
+      "host_status": "Published R10 CLI has no int8 activation route",
+      "cases": [
+        {
+          "batch": 1,
+          "context": 4096,
+          "bf16_us": 220.46,
+          "int8_us": 271.05,
+          "device_time_change_percent": 22.95,
+          "host_time_change_percent": 22.79,
+          "relative_l2_vs_bf16_pct": 1.344,
+          "cosine_vs_bf16": 0.99991,
+          "relative_l2_bf16_vs_fp32_pct": 0.234,
+          "storage": {
+            "bf16_kv": 4194304,
+            "int8_kv": 2097152,
+            "int8_scale_and_offset": 3072
+          },
+          "storage_ratio": 1.9971
+        },
+        {
+          "batch": 1,
+          "context": 16384,
+          "bf16_us": 218.72,
+          "int8_us": 266.19,
+          "device_time_change_percent": 21.7,
+          "host_time_change_percent": 21.28,
+          "relative_l2_vs_bf16_pct": 1.425,
+          "cosine_vs_bf16": 0.9999,
+          "relative_l2_bf16_vs_fp32_pct": 0.226,
+          "storage": {
+            "bf16_kv": 16777216,
+            "int8_kv": 8388608,
+            "int8_scale_and_offset": 3072
+          },
+          "storage_ratio": 1.9993
+        },
+        {
+          "batch": 1,
+          "context": 32768,
+          "bf16_us": 214.95,
+          "int8_us": 260.32,
+          "device_time_change_percent": 21.11,
+          "host_time_change_percent": 20.62,
+          "relative_l2_vs_bf16_pct": 1.587,
+          "cosine_vs_bf16": 0.999876,
+          "relative_l2_bf16_vs_fp32_pct": 0.234,
+          "storage": {
+            "bf16_kv": 33554432,
+            "int8_kv": 16777216,
+            "int8_scale_and_offset": 3072
+          },
+          "storage_ratio": 1.9996
+        },
+        {
+          "batch": 4,
+          "context": 4096,
+          "bf16_us": 220.52,
+          "int8_us": 266.63,
+          "device_time_change_percent": 20.91,
+          "host_time_change_percent": 20.28,
+          "relative_l2_vs_bf16_pct": 1.499,
+          "cosine_vs_bf16": 0.999892,
+          "relative_l2_bf16_vs_fp32_pct": 0.232,
+          "storage": {
+            "bf16_kv": 16777216,
+            "int8_kv": 8388608,
+            "int8_scale_and_offset": 3072
+          },
+          "storage_ratio": 1.9993
+        },
+        {
+          "batch": 4,
+          "context": 16384,
+          "bf16_us": 219.33,
+          "int8_us": 265.8,
+          "device_time_change_percent": 21.19,
+          "host_time_change_percent": 20.65,
+          "relative_l2_vs_bf16_pct": 1.545,
+          "cosine_vs_bf16": 0.999885,
+          "relative_l2_bf16_vs_fp32_pct": 0.234,
+          "storage": {
+            "bf16_kv": 67108864,
+            "int8_kv": 33554432,
+            "int8_scale_and_offset": 3072
+          },
+          "storage_ratio": 1.9998
+        },
+        {
+          "batch": 4,
+          "context": 32768,
+          "bf16_us": 215.52,
+          "int8_us": 263.33,
+          "device_time_change_percent": 22.19,
+          "host_time_change_percent": 21.86,
+          "relative_l2_vs_bf16_pct": 1.573,
+          "cosine_vs_bf16": 0.99988,
+          "relative_l2_bf16_vs_fp32_pct": 0.233,
+          "storage": {
+            "bf16_kv": 134217728,
+            "int8_kv": 67108864,
+            "int8_scale_and_offset": 3072
+          },
+          "storage_ratio": 1.9999
+        }
+      ],
+      "host_admission": {
+        "status": "static_check_unsupported_dtype_at_cli",
+        "candidate_commit": "a04488dd1304117e40a188b3a3354ee28ec8c51b",
+        "extension_id": "org.vllm-hust.ascend-quantized-kv-cache",
+        "candidate_source_sha256": "8c50e7ace306405790901083a4e696ba2b5ba36b414f3cb84cda98319c8bc85a",
+        "requested_dtypes": [
+          "int8",
+          "kivi_int4"
+        ],
+        "frozen_host_cli_dtypes": [
+          "auto",
+          "bfloat16",
+          "float16",
+          "fp8",
+          "fp8_ds_mla",
+          "fp8_e4m3",
+          "fp8_e5m2",
+          "fp8_inc",
+          "fp8_per_token_head",
+          "int4_per_token_head",
+          "int8_per_token_head",
+          "nvfp4",
+          "nvfp4_4over6",
+          "nvfp4_ds_mla",
+          "turboquant_3bit_nc",
+          "turboquant_4bit_nc",
+          "turboquant_k3v4_nc",
+          "turboquant_k8v4"
+        ]
+      },
+      "model_serving_activated": false,
+      "notes": {
+        "zh": "R10 3072 修订版 · 910B2 组件试验。按 Qwen3.5 每 rank 的注意力几何，4K、16K、32K 共六格的动态 INT8 单层 KV 张量约减半，分页解码算子慢约 21% 至 23%。冻结 CLI 缺少插件的 int8 入口，整模未启用。",
+        "en": "R10 3072 revision, Ascend 910B2 component probe at Qwen per-rank geometry. Dynamic INT8 halved per-layer KV tensor storage across six 4K to 32K cells, while paged decoding took about 21% to 23% longer. The released command line lacks the plugin's INT8 route, so model serving remained disabled."
+      },
+      "existing_evidence_url": "https://github.com/vLLM-HUST/vllm-ascend-quantized-kv-cache-hust/tree/ae7b44bfee695d0ba580040dffd10eb802104485#%E5%B7%B2%E9%AA%8C%E8%AF%81%E7%8E%AF%E5%A2%83"
+    },
+    "split-batch-full-graph-migration": {
+      "repository_commit": "7e165fc94783975d729d10017a228ed2692fc51f",
+      "planner_sha256": "caeb204015fedc43261507c14520b0a4ee1d0491575a9f3d2e40a2c72de0f66b",
+      "upstream_cpu_checks": [
+        "test_dual_pad_plan_saves_padding",
+        "test_exact_graph_hit_does_not_split_by_default",
+        "test_precheck_fails_closed_for_conflicts"
+      ],
+      "host_release": "full-answer-b1-20261124-r10",
+      "mtp_speculative_tokens": 2,
+      "mrope_section": [
+        11,
+        11,
+        10
+      ],
+      "activation_mode": "import_only",
+      "prechecks": {
+        "both": "speculative_decode_conflict",
+        "mtp_only": "speculative_decode_conflict",
+        "mrope_only": "mrope_conflict",
+        "eligible_control": null
+      },
+      "width_rejection": "plan_dual_pad supports single-token decode only: every request must contribute exactly one token (num_requests=10, total_tokens=30)",
+      "notes": {
+        "zh": "R10 3072 修订版 · 三项上游 CPU 预检通过。MTP2 和 MRoPE 各自触发拒绝；此组合未启用 Split-Batch，也未开展 NPU 性能评测。",
+        "en": "R10 3072 revision, three upstream CPU prechecks passed. MTP2 and MRoPE each independently blocked activation. Split-Batch remained disabled on this host, with no device performance measurement."
+      },
+      "existing_evidence_url": "https://github.com/vLLM-HUST/vllm-ascend-split-batch-hust"
+    },
+    "prefix-router-migration": {
+      "release": "full-answer-b1-20261124-r10",
+      "engine_version": "2026.11.24.10",
+      "engine_source": "bfd23cf66378c80972806b1aae9d1db4afe11b90",
+      "sdk_archive_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+      "router_source": "bcc96912c254b4e0e8ba478a41216e40a96a0eb2",
+      "scope": "Loopback only. Exact frozen publisher/packet and SHA-256 hash. Synthetic KV events, 16-token fixture and stub HTTP backends. No serving scheduler, model or NPU.",
+      "checks": {
+        "default_activation": "rejected_no_snapshot_epoch_replay",
+        "trusted_activation": "rejected_best_effort",
+        "legacy_wire": {
+          "block_hash_representation": "frozen default uint64",
+          "score_after_exact_store": {
+            "a": 0,
+            "b": 32
+          },
+          "selected_backend": "b"
+        },
+        "score_after_remove": {
+          "a": 0,
+          "b": 0
+        },
+        "unsalted_score_after_matching_tokens_with_distinct_salt": {
+          "a": 0,
+          "b": 0
+        },
+        "explicitly_salted_request_routes_via_fallback": "a",
+        "subscriber_evidence": [
+          {
+            "node_id": "a",
+            "ready": true,
+            "last_error": null,
+            "publisher_epoch": "unversioned",
+            "next_seq": 0,
+            "recovery_basis": "unversioned_best_effort"
+          },
+          {
+            "node_id": "b",
+            "ready": true,
+            "last_error": null,
+            "publisher_epoch": "unversioned",
+            "next_seq": 3,
+            "recovery_basis": "unversioned_best_effort"
+          }
+        ]
+      },
+      "host": {
+        "chat": "The enabled School request hook scopes rendering to recompute with a fresh request salt. Router cannot fingerprint that state.",
+        "completions": "With cache_salt omitted the standard renderer does not synthesize one. The same resident scheduler owns lookup and retention, so a stock event switch does not export retained resident hits.",
+        "activation": "Default and trusted-cache admission reject the unversioned publisher. Explicit public best-effort accepted synthetic loopback store and removal wire, with no generation or restart recovery proof.",
+        "decision": "Do not allocate a model pair for the exact frozen composition. A future resident-event provider would need versioned replay, removal and epoch semantics tied to complete FA/GDN/MTP checkpoint state.",
+        "scope": "Pinned source control flow plus separate CPU transport proof. No model execution or NPU timing."
+      },
+      "notes": {
+        "zh": "R10 3072 修订版 · CPU 回环验证通过合成 KV 事件驱动选路。默认和可信模式拒绝旧事件协议；冻结驻留缓存缺少对应的实际事件，未进行双副本性能测试。",
+        "en": "R10 3072 revision, a CPU loopback routed requests using synthetic KV events. Default and trusted modes rejected the legacy event protocol. The frozen resident cache does not emit the needed events, so no two-replica performance test was run."
+      },
+      "existing_evidence_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/fd2ab4d3a28dac6dd49697081611389d069f9d57/website-publication/data/leaderboard_prefix_routing_mean_evidence.json"
+    },
+    "vspec": {
+      "release": "full-answer-b1-20261124-r10",
+      "vspec_source_commit": "448fdf875f58a7fbb43b461465cfb87000b6bdf6",
+      "component_source_sha256": "6793018827319ddc96e55112bc834d3b9a368926730c9ebfc85dce9eff6d06fe",
+      "scope": "Actual vSpec selector, synthetic observations with explicit external transition acknowledgments",
+      "default_gamma_when_even_round_mode_selected": 8,
+      "gamma_inputs": [
+        2,
+        4,
+        6,
+        8
+      ],
+      "odd_gamma_rejected": true,
+      "synthetic_switch_path": [
+        8,
+        6,
+        8
+      ],
+      "policy_kept_width_until_ack": true,
+      "frozen_launch": {
+        "release": "full-answer-b1-20261124-r10",
+        "source_commit": "bfd23cf66378c80972806b1aae9d1db4afe11b90",
+        "python": "3.12.16",
+        "core": "0.28.1.post1.dev143+gf18cf803c.empty",
+        "ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+        "method": "mtp",
+        "candidate_width": 2,
+        "mode": "FULL",
+        "capture_sizes": [
+          3,
+          6,
+          12,
+          16,
+          24,
+          32,
+          40,
+          48,
+          64,
+          80,
+          96,
+          108,
+          128,
+          256,
+          512,
+          1024,
+          1536,
+          2048,
+          3072,
+          4096
+        ]
+      },
+      "different_documented_base": {
+        "core": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+        "ascend": "4e57439e58ed3d78e675f9fd7b4614fb183c5394",
+        "python": "3.11"
+      },
+      "serving_activated": false,
+      "performance_measured": false,
+      "notes": {
+        "zh": "R10 3072 修订版 · 新版偶数投机宽度控制器完成独立 CPU 验证，覆盖切换和回退。当前发行仍固定 MTP2，新增宽度未在该宿主激活或测量。",
+        "en": "R10 3072 revision, the newer even-width speculation controller passed a standalone CPU switch and rollback check. The released stack uses fixed MTP2. Wider candidates were not activated or timed on this host."
+      },
+      "existing_evidence_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L369"
+    }
+  }
+}

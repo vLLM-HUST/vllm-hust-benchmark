@@ -27,10 +27,17 @@ def test_source_candidate_keeps_originals_and_preflight_scope():
     )
     assert baseline["status"] == "partial"
     assert baseline["source_identity"]["kind"] == "source-build-candidate"
-    descriptor = baseline["observations"]
-    raw = (ROOT / "website-publication" / descriptor["path"]).read_bytes()
-    assert len(raw) == descriptor["bytes"]
-    assert hashlib.sha256(raw).hexdigest() == descriptor["sha256"]
+    raw = (
+        ROOT
+        / "website-publication/data/official-b0-028-source-full-report-20261123-v1/observations.json"
+    ).read_bytes()
+    assert len(raw) == 78444
+    assert (
+        hashlib.sha256(raw).hexdigest()
+        == (
+            "017240d6be1cf654e349cef6b20a4b1f572179f77f84234f99c6d0ee7b5c896b"  # pragma: allowlist secret -- immutable v1 observations SHA256
+        )
+    )
     observation = json.loads(raw)
     original_raw = (REPORT / "original-report.json").read_bytes()
     original = json.loads(original_raw)

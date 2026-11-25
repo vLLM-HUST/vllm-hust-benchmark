@@ -1,0 +1,138 @@
+{
+  "schema": "r10-plugin-paired-mmlu10-website/v1",
+  "date": "2026-11-25",
+  "engine": {
+    "release": "full-answer-b1-20261124-r10",
+    "version": "2026.11.24.10",
+    "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+    "source_commit": "bfd23cf66378c80972806b1aae9d1db4afe11b90"
+  },
+  "plugins": {
+    "opfuse": {
+      "qualification": "component only",
+      "component": "opfuse-routed-combine-gather",
+      "comparison": {
+        "cpu_inverse_route_patterns": 450,
+        "all_bitwise_output_elements": 3667968,
+        "finite_edge": {
+          "elements": 6144,
+          "different_bits": 0
+        },
+        "nonfinite_edge": {
+          "elements": 6144,
+          "different_bits": 0
+        },
+        "cases": 15,
+        "actual_model_route_frequencies_observed": false
+      },
+      "summary": {
+        "cumulative_pairs": 210,
+        "faster_pairs": 10,
+        "ties": 0,
+        "positive_median_cases": 0,
+        "max_median_added_us": 1.712743192911148,
+        "min_median_added_us": 0.03464437193340686,
+        "eligible_for_model_screen": false
+      },
+      "source_sha256": {
+        "runtime/ascend/vllm_ascend/ops/fused_moe/token_dispatcher.py": "cf4e44a06db2dd7d1a0abce35381ed270aef6b75e4d3bf6557a50b0bb7ffebb5",
+        "runtime/ascend/vllm_ascend/ops/fused_moe/moe_comm_method.py": "697c7ef6220387f7a43ea682d6421182ff8674ff148e8c4b292fdbfe852d8046",
+        "runtime/ascend/vllm_ascend/device/device_op.py": "151f03a3344f2651317db0c9d5503a272dcdd61ff8b5712cbef4e112f6e4a013",
+        "mods/betterscale/betterscale/patches/qwen_fia/wave.py": "cddaeb1abbf9db5644171551e910f3946f47207b34d691d97456d800fa502bee",
+        "mods/betterscale/betterscale/models/qwen35/draft_fia.py": "8ca998cf2a2749862bd3c104d9f28a1427ed1cac65bf8007100ddd86bb1388bb"
+      },
+      "benchmark_measurement": "opfuse-routed-combine-gather.json",
+      "whole_model_started": false,
+      "prior_public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-opfuse"
+    },
+    "sglang-prepared-dispatch": {
+      "qualification": "source admission only",
+      "revision": "27e296ffbb9515b9015609caf8fb7eafac7f4a23",
+      "reasons": [
+        "Frozen BetterScale target wave bypasses host graph_task_update.",
+        "Frozen MTP draft FULL path bypasses host graph_task_update.",
+        "Released carrier is pinned to SGLang 0.5.23 and TorchNPU 2.10.0.post6."
+      ],
+      "whole_model_started": false,
+      "benchmark_measurement": "opfuse-routed-combine-gather.json",
+      "prior_public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/802cc5ca4a9da1e1e95f333d5dd2a3a4a53cbb63/reports/independent-inference-optimizations-20261113/sglang-prepared-dispatch/README.md"
+    },
+    "vspec": {
+      "qualification": "source and CPU admission only",
+      "decision": "No qualified drop-in depth increase on the exact R10 profile. Reopen only with a width-aware 3072 graph, State and lifecycle ABI and device correctness validation.",
+      "whole_model_started": false,
+      "benchmark_measurement": "vspec-depth-admission.json",
+      "prior_public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L369"
+    },
+    "graph-coverage": {
+      "qualification": "same physical host and cards, one native/candidate ten-request screen",
+      "native": {
+        "arm": "r10",
+        "cases": 10,
+        "completed": 10,
+        "failed": 0,
+        "correct": 10,
+        "unparsed": 0,
+        "truncated": 1,
+        "request_plan_sha256": "0b8f6a85272a1882644dd35b6716e688e4829df8842b3ebdea6d8b585c6dbc66",
+        "wall_s": 68.22866634797538,
+        "output_tok_s": 354.5870276375101,
+        "mean_ttft_ms": 786.9546800851822,
+        "p95_ttft_ms": 1208.0491752596572,
+        "mean_tpot_ms": 12.130340800168975,
+        "p95_tpot_ms": 13.532807628862685
+      },
+      "candidate": {
+        "arm": "candidate",
+        "cases": 10,
+        "completed": 10,
+        "failed": 0,
+        "correct": 8,
+        "unparsed": 0,
+        "truncated": 0,
+        "request_plan_sha256": "0b8f6a85272a1882644dd35b6716e688e4829df8842b3ebdea6d8b585c6dbc66",
+        "wall_s": 62.89658534800401,
+        "output_tok_s": 409.2591013896254,
+        "mean_ttft_ms": 753.2126822916325,
+        "p95_ttft_ms": 1084.3218453694135,
+        "mean_tpot_ms": 11.508336876072052,
+        "p95_tpot_ms": 12.27327738341135
+      },
+      "deltas_percent": {
+        "wall_s": -7.815015719019092,
+        "output_tok_s": 15.418520557950544,
+        "mean_ttft_ms": -4.287667212284363,
+        "p95_ttft_ms": -10.24191170559343,
+        "mean_tpot_ms": -5.127670642924221,
+        "p95_tpot_ms": -9.30723527588625
+      },
+      "both_ranks_graph30_replays": 410,
+      "native_graph40_replays_per_rank": 477,
+      "graph_capture_native": {
+        "elapsed_seconds": 299,
+        "device_memory_gib": 1.47
+      },
+      "graph_capture_candidate": {
+        "elapsed_seconds": 306,
+        "device_memory_gib": 1.48
+      },
+      "quality_changed_items": [
+        "mmlu-pro-02986",
+        "mmlu-pro-03290"
+      ],
+      "finish_changed_items": [
+        "mmlu-pro-03290"
+      ],
+      "screen_gates": {
+        "output_throughput_increased": true,
+        "window_completed_faster": true,
+        "p95_ttft_decreased": true,
+        "p95_tpot_decreased": true,
+        "no_previously_correct_item_regressed": false,
+        "no_additional_truncations": true
+      },
+      "benchmark_measurement": "graph-coverage-mmlu10-pair.json",
+      "prior_public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L117"
+    }
+  }
+}
