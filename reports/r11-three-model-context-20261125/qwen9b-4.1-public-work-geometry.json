@@ -1,0 +1,384 @@
+{
+  "schema": "qwen35-9b-dense-native-public-work-geometry/v1",
+  "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+  "config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+  "source_domain": "dense target and one full-attention MTP layer, BF16 TP2",
+  "reference_time_used": false,
+  "formal_4_1_eligible": false,
+  "necessary_work_certified": false,
+  "efficiency_percent": null,
+  "open_completeness": [
+    "source-qualified actual draft/cache producer closure",
+    "GDN recurrence and prefill chain, vector operations and independent full-model time"
+  ],
+  "mtp_source_sha256": {
+    "B0": "cf97664e82371425df14e412c9d351405d05ae8db3622fc817813ddda6858622",
+    "B1": "89b0bde1d11fe5768a634e4365c78274e20694b26f4c6bb68e934328d8d0b190"
+  },
+  "arms": {
+    "B0": [
+      {
+        "geometry_sha256": "9a1e30d837dc913280fd2c3fa79a91263e0c49b2396db4706323a27990a1f22a",
+        "requests": 200,
+        "input_only_tokens": 282265,
+        "outputs": 51200,
+        "branches": {
+          "lower": {
+            "matrix_and_causal_basic_operations": 4860930763669504,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23309055950848,
+              "draft_prefix_key_value_projection": 5827263987712,
+              "draft_full_query_gate_projection": 2141578067968,
+              "draft_full_attention_output": 1070789033984,
+              "draft_dense_swiglu_matrices": 9637101305856,
+              "draft_full_causal_qk_av": 804629135360,
+              "draft_retained_or_dependency_vocabulary": 64916585185280
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347332,
+              "necessary_full_rows": 31912,
+              "necessary_vocabulary_rows": 31912,
+              "necessary_full_causal_pairs": 49110665
+            }
+          },
+          "upper": {
+            "matrix_and_causal_basic_operations": 4861317511774208,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23328718848000,
+              "draft_prefix_key_value_projection": 5832179712000,
+              "draft_full_query_gate_projection": 2151443070976,
+              "draft_full_attention_output": 1075721535488,
+              "draft_dense_swiglu_matrices": 9681493819392,
+              "draft_full_causal_qk_av": 808575696896,
+              "draft_retained_or_dependency_vocabulary": 65215618088960
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347625,
+              "necessary_full_rows": 32059,
+              "necessary_vocabulary_rows": 32059,
+              "necessary_full_causal_pairs": 49351544
+            }
+          }
+        }
+      },
+      {
+        "geometry_sha256": "420c8fcbc09f808f82cff1128f9d0f943e1d75ceffb9a321ca5deb65b680beef",
+        "requests": 200,
+        "input_only_tokens": 282265,
+        "outputs": 51200,
+        "branches": {
+          "lower": {
+            "matrix_and_causal_basic_operations": 4860930847539200,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23309123059712,
+              "draft_prefix_key_value_projection": 5827280764928,
+              "draft_full_query_gate_projection": 2141578067968,
+              "draft_full_attention_output": 1070789033984,
+              "draft_dense_swiglu_matrices": 9637101305856,
+              "draft_full_causal_qk_av": 804629118976,
+              "draft_retained_or_dependency_vocabulary": 64916585185280
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347333,
+              "necessary_full_rows": 31912,
+              "necessary_vocabulary_rows": 31912,
+              "necessary_full_causal_pairs": 49110664
+            }
+          },
+          "upper": {
+            "matrix_and_causal_basic_operations": 4861317595643904,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23328785956864,
+              "draft_prefix_key_value_projection": 5832196489216,
+              "draft_full_query_gate_projection": 2151443070976,
+              "draft_full_attention_output": 1075721535488,
+              "draft_dense_swiglu_matrices": 9681493819392,
+              "draft_full_causal_qk_av": 808575680512,
+              "draft_retained_or_dependency_vocabulary": 65215618088960
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347626,
+              "necessary_full_rows": 32059,
+              "necessary_vocabulary_rows": 32059,
+              "necessary_full_causal_pairs": 49351543
+            }
+          }
+        }
+      },
+      {
+        "geometry_sha256": "082a15906f383ffee7b163240cc516b36bbe13622d74b211a76088a64e7be6cc",
+        "requests": 200,
+        "input_only_tokens": 282265,
+        "outputs": 51200,
+        "branches": {
+          "lower": {
+            "matrix_and_causal_basic_operations": 4860889296437248,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23307646664704,
+              "draft_prefix_key_value_projection": 5826911666176,
+              "draft_full_query_gate_projection": 2140504326144,
+              "draft_full_attention_output": 1070252163072,
+              "draft_dense_swiglu_matrices": 9632269467648,
+              "draft_full_causal_qk_av": 803913760768,
+              "draft_retained_or_dependency_vocabulary": 64884037386240
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347311,
+              "necessary_full_rows": 31896,
+              "necessary_vocabulary_rows": 31896,
+              "necessary_full_causal_pairs": 49067002
+            }
+          },
+          "upper": {
+            "matrix_and_causal_basic_operations": 4861255606714368,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23326705582080,
+              "draft_prefix_key_value_projection": 5831676395520,
+              "draft_full_query_gate_projection": 2149832458240,
+              "draft_full_attention_output": 1074916229120,
+              "draft_dense_swiglu_matrices": 9674246062080,
+              "draft_full_causal_qk_av": 807672594432,
+              "draft_retained_or_dependency_vocabulary": 65166796390400
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347595,
+              "necessary_full_rows": 32035,
+              "necessary_vocabulary_rows": 32035,
+              "necessary_full_causal_pairs": 49296423
+            }
+          }
+        }
+      }
+    ],
+    "B1": [
+      {
+        "geometry_sha256": "74dc2b78e3d41e5079f92ad5e410610e9a27e765f811351ba1b873dd7d869892",
+        "requests": 200,
+        "input_only_tokens": 282265,
+        "outputs": 51200,
+        "branches": {
+          "lower": {
+            "matrix_and_causal_basic_operations": 4860898350923776,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23308787515392,
+              "draft_prefix_key_value_projection": 5827196878848,
+              "draft_full_query_gate_projection": 2140705652736,
+              "draft_full_attention_output": 1070352826368,
+              "draft_dense_swiglu_matrices": 9633175437312,
+              "draft_full_causal_qk_av": 804231512064,
+              "draft_retained_or_dependency_vocabulary": 64890140098560
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347328,
+              "necessary_full_rows": 31899,
+              "necessary_vocabulary_rows": 31899,
+              "necessary_full_causal_pairs": 49086396
+            }
+          },
+          "upper": {
+            "matrix_and_causal_basic_operations": 4861275012415488,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23328249085952,
+              "draft_prefix_key_value_projection": 5832062271488,
+              "draft_full_query_gate_projection": 2150302220288,
+              "draft_full_attention_output": 1075151110144,
+              "draft_dense_swiglu_matrices": 9676359991296,
+              "draft_full_causal_qk_av": 808090681344,
+              "draft_retained_or_dependency_vocabulary": 65181036052480
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347618,
+              "necessary_full_rows": 32042,
+              "necessary_vocabulary_rows": 32042,
+              "necessary_full_causal_pairs": 49321941
+            }
+          }
+        }
+      },
+      {
+        "geometry_sha256": "7e9c933d9092f8f67b76ce9f78e77e7ae235ea75d37df3b2cab92bafd0616b2c",
+        "requests": 200,
+        "input_only_tokens": 282265,
+        "outputs": 51200,
+        "branches": {
+          "lower": {
+            "matrix_and_causal_basic_operations": 4860843290230784,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23308049317888,
+              "draft_prefix_key_value_projection": 5827012329472,
+              "draft_full_query_gate_projection": 2139229257728,
+              "draft_full_attention_output": 1069614628864,
+              "draft_dense_swiglu_matrices": 9626531659776,
+              "draft_full_causal_qk_av": 803705159680,
+              "draft_retained_or_dependency_vocabulary": 64845386874880
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347317,
+              "necessary_full_rows": 31877,
+              "necessary_vocabulary_rows": 31877,
+              "necessary_full_causal_pairs": 49054270
+            }
+          },
+          "upper": {
+            "matrix_and_causal_basic_operations": 4861231366520832,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23326772690944,
+              "draft_prefix_key_value_projection": 5831693172736,
+              "draft_full_query_gate_projection": 2149161369600,
+              "draft_full_attention_output": 1074580684800,
+              "draft_dense_swiglu_matrices": 9671226163200,
+              "draft_full_causal_qk_av": 807717421056,
+              "draft_retained_or_dependency_vocabulary": 65146454016000
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347596,
+              "necessary_full_rows": 32025,
+              "necessary_vocabulary_rows": 32025,
+              "necessary_full_causal_pairs": 49299159
+            }
+          }
+        }
+      },
+      {
+        "geometry_sha256": "951b2d5d2da85fb1942abc93833aa41131d48d4b8b0193923a7091197261b043",
+        "requests": 200,
+        "input_only_tokens": 282265,
+        "outputs": 51200,
+        "branches": {
+          "lower": {
+            "matrix_and_causal_basic_operations": 4860895565103104,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23308653297664,
+              "draft_prefix_key_value_projection": 5827163324416,
+              "draft_full_query_gate_projection": 2140638543872,
+              "draft_full_attention_output": 1070319271936,
+              "draft_dense_swiglu_matrices": 9632873447424,
+              "draft_full_causal_qk_av": 804050354176,
+              "draft_retained_or_dependency_vocabulary": 64888105861120
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347326,
+              "necessary_full_rows": 31898,
+              "necessary_vocabulary_rows": 31898,
+              "necessary_full_causal_pairs": 49075339
+            }
+          },
+          "upper": {
+            "matrix_and_causal_basic_operations": 4861303431626752,
+            "components": {
+              "target_qkv_projection": 223650355609600,
+              "target_attention_output": 89460142243840,
+              "target_causal_qk_av": 37680034349056,
+              "target_gdn_projection": 1077715151093760,
+              "target_dense_swiglu_matrices": 3220565120778240,
+              "target_vocabulary": 104152956928000,
+              "draft_prefix_concat_fc": 23329389936640,
+              "draft_prefix_key_value_projection": 5832347484160,
+              "draft_full_query_gate_projection": 2151040417792,
+              "draft_full_attention_output": 1075520208896,
+              "draft_dense_swiglu_matrices": 9679681880064,
+              "draft_full_causal_qk_av": 808278032384,
+              "draft_retained_or_dependency_vocabulary": 65203412664320
+            },
+            "target_prefix_rows": 333265,
+            "target_final_full_rows": 333265,
+            "draft_dependency_population": {
+              "necessary_kv_prefix_rows": 347635,
+              "necessary_full_rows": 32053,
+              "necessary_vocabulary_rows": 32053,
+              "necessary_full_causal_pairs": 49333376
+            }
+          }
+        }
+      }
+    ]
+  }
+}

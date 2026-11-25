@@ -697,6 +697,159 @@
             }
           }
         },
+        "qwen9b-small-mixed": {
+          "milestone": true,
+          "final": false,
+          "ratios_16k_over_4k": {
+            "throughput": 0.6273072314247544,
+            "ttft_p95": 2.1034186487973727,
+            "ttft_p99": 2.467666413250232,
+            "tpot_p95": 1.4113447099665506,
+            "tpot_p99": 1.3145806547717764
+          },
+          "ratios_32k_max_over_min": {
+            "throughput": 1.4751258329527321,
+            "ttft_p95": 1.4219206954235732,
+            "ttft_p99": 1.4219206954235732,
+            "tpot_p95": 2.2278795329939425,
+            "tpot_p99": 2.143932782544617
+          },
+          "matched_pair_success_counts": {
+            "4096": {
+              "B0": 159,
+              "B1": 260
+            },
+            "16384": {
+              "B0": 101,
+              "B1": 163
+            },
+            "32768": {
+              "B0": 60,
+              "B1": 90
+            }
+          },
+          "metrics_by_lower_bound": {
+            "4096": {
+              "requests": 260,
+              "failed": 0,
+              "outputs_per_second": 217.364571806649,
+              "ttft_ms": {
+                "p95": 2429.5587209635414,
+                "p99": 4542.555132997222
+              },
+              "tpot_ms": {
+                "p95": 39.3599731254154,
+                "p99": 47.63365945477477
+              }
+            },
+            "16384": {
+              "requests": 163,
+              "failed": 0,
+              "outputs_per_second": 136.3543677498562,
+              "ttft_ms": {
+                "p95": 5110.379122023005,
+                "p99": 11209.510732034687
+              },
+              "tpot_ms": {
+                "p95": 55.550489854980626,
+                "p99": 62.61828723523364
+              }
+            },
+            "32768": {
+              "requests": 90,
+              "failed": 0,
+              "outputs_per_second": 75.73480505926732,
+              "ttft_ms": {
+                "p95": 22042.8958729608,
+                "p99": 25025.875043997075
+              },
+              "tpot_ms": {
+                "p95": 69.85559856847806,
+                "p99": 85.91570556848583
+              }
+            }
+          },
+          "metrics_32k_five_windows": [
+            {
+              "requests": 22,
+              "failed": 0,
+              "outputs_per_second": 68.08155186833915,
+              "ttft_ms": {
+                "p95": 22042.8958729608,
+                "p99": 24543.629943043925
+              },
+              "tpot_ms": {
+                "p95": 38.563891941243234,
+                "p99": 40.07388023915244
+              }
+            },
+            {
+              "requests": 18,
+              "failed": 0,
+              "outputs_per_second": 54.254892138580885,
+              "ttft_ms": {
+                "p95": 25025.875043997075,
+                "p99": 25025.875043997075
+              },
+              "tpot_ms": {
+                "p95": 85.91570556848583,
+                "p99": 85.91570556848583
+              }
+            },
+            {
+              "requests": 18,
+              "failed": 0,
+              "outputs_per_second": 51.53896210219752,
+              "ttft_ms": {
+                "p95": 21802.844505989924,
+                "p99": 21802.844505989924
+              },
+              "tpot_ms": {
+                "p95": 62.20767953337225,
+                "p99": 62.20767953337225
+              }
+            },
+            {
+              "requests": 16,
+              "failed": 0,
+              "outputs_per_second": 46.15304697909165,
+              "ttft_ms": {
+                "p95": 18531.68320999248,
+                "p99": 18531.68320999248
+              },
+              "tpot_ms": {
+                "p95": 71.00928847463436,
+                "p99": 71.00928847463436
+              }
+            },
+            {
+              "requests": 16,
+              "failed": 0,
+              "outputs_per_second": 63.78609439985671,
+              "ttft_ms": {
+                "p95": 17600.049795000814,
+                "p99": 17600.049795000814
+              },
+              "tpot_ms": {
+                "p95": 74.64121067051903,
+                "p99": 74.64121067051903
+              }
+            }
+          ],
+          "b0_evidence_sha256": "d208e7f3a47666446d7e0a4b39f108011943354fe7d44fe8a5b0853d5c21b01a",
+          "b1_evidence_sha256": "69ac728c006a69e0450a4da9700b3e400b49d2be8758cbccf4afd953f1f1ddba",
+          "policy": "cold pure prefill progress and 2048 graph for 32K with at least two decodes",
+          "candidate_sources": {
+            "mods/betterscale/betterscale/models/qwen35/prefill_round_robin.py": {
+              "donor_sha256": "ba0c8c90cc5cf1b43e0d6dfa0a17f768f007300f4f9b86016f4eac477ff4b7a9",
+              "candidate_sha256": "af93a2fe78d0d29fb549c2e523bdf6f7607634e637674217802a9960f40d27ae"
+            },
+            "mods/microflow/hust_prefill_microflow/school028/host-contract.json": {
+              "donor_sha256": "b14fed9456ed99d72eb45f3ff3d6690574d64dc3ed36fac8925001f6628e7b4d",
+              "candidate_sha256": "8c699e37f91e54888d420e811ef2998ab4ce2812cb13e4366b55ad0964c66b41"
+            }
+          }
+        },
         "qwen9b": {
           "milestone": false,
           "final": false,
