@@ -1,0 +1,482 @@
+{
+  "schema": "r10-revised-mod-component-exploration/v1",
+  "date": "2026-11-25",
+  "engine": {
+    "release": "full-answer-b1-20261124-r10",
+    "version": "2026.11.24.10",
+    "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+    "source_commit": "bfd23cf66378c80972806b1aae9d1db4afe11b90"
+  },
+  "model": "Qwen3.5-35B-A3B",
+  "accelerator": "Ascend 910B2",
+  "dtype": "BF16",
+  "candidates": {
+    "fia-v2-same-mask-tnd": {
+      "schema": "r10-fia-v2-component-screen/v1",
+      "status": "no_consistent_performance_improvement",
+      "pruned": true,
+      "scope": "BF16 causal TND paged FIA Q=3 on one Ascend 910B2; component calls only",
+      "base_release": "full-answer-b1-20261124-r10",
+      "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+      "reference_attention_sha256": "ab53725b841070e62fdae81e9651a8a0d926651ed0cb640606829975b87feda2",
+      "source_candidate": "Vendor torch_npu FIA V2 without learnable_sink, same mask/scale/TND/KV",
+      "gpu": {
+        "architecture": "Ascend910B2",
+        "torch": "2.13.0+cpu",
+        "torch_npu": "2.13.0.rc1",
+        "cann": "9.1.0",
+        "physical_card": 7
+      },
+      "storage_layout": {
+        "query_rows": 3,
+        "query_heads_per_rank": 8,
+        "kv_heads_per_rank": 1,
+        "head_dim": 256,
+        "kernel_block_tokens": 128,
+        "mask": "2048x2048 right-down causal, sparse_mode=3"
+      },
+      "sample_design": {
+        "rounds": 7,
+        "calls_a_round": 24,
+        "alternating_order": "AB/BA",
+        "baseline": "FIA V1",
+        "candidate": "FIA V2",
+        "dynamic": "complete graph-task update before replay; changed lengths and disjoint page tables",
+        "synthesis": "deterministic synthetic tensors; no dataset or model quality claims"
+      },
+      "cases": [
+        {
+          "context": 4057,
+          "batch": 4,
+          "query_rows": 3,
+          "length_cases": [
+            [
+              4057,
+              4044,
+              4031,
+              4018
+            ],
+            [
+              4016,
+              4005,
+              3994,
+              3983
+            ]
+          ],
+          "eager": {
+            "median_event_us": {
+              "V1": 145.55333058039346,
+              "V2": 150.54000417391458
+            },
+            "median_wall_us": {
+              "V1": 152.77720861680186,
+              "V2": 158.31062531409165
+            },
+            "v2_event_change_percent": 3.4260113276946447,
+            "v2_bitwise_to_v1": true,
+            "max_l2_v2_vs_v1": 0.0,
+            "max_l2_v1_vs_fp32": 0.0022470438852906227,
+            "max_l2_v2_vs_fp32": 0.0022470438852906227
+          },
+          "dynamic-graph": {
+            "median_event_us": {
+              "V1": 661.822517712911,
+              "V2": 664.5566622416178
+            },
+            "median_wall_us": {
+              "V1": 669.402041239664,
+              "V2": 671.1899598788781
+            },
+            "v2_event_change_percent": 0.4131235271588096,
+            "v2_bitwise_to_v1": true,
+            "max_l2_v2_vs_v1": 0.0,
+            "max_l2_v1_vs_fp32": 0.0022470438852906227,
+            "max_l2_v2_vs_fp32": 0.0022470438852906227
+          }
+        },
+        {
+          "context": 16357,
+          "batch": 4,
+          "query_rows": 3,
+          "length_cases": [
+            [
+              16357,
+              16344,
+              16331,
+              16318
+            ],
+            [
+              16316,
+              16305,
+              16294,
+              16283
+            ]
+          ],
+          "eager": {
+            "median_event_us": {
+              "V1": 145.24499575297037,
+              "V2": 148.2133368651072
+            },
+            "median_wall_us": {
+              "V1": 152.7851248586861,
+              "V2": 155.93516582157463
+            },
+            "v2_event_change_percent": 2.0436787489638064,
+            "v2_bitwise_to_v1": true,
+            "max_l2_v2_vs_v1": 0.0,
+            "max_l2_v1_vs_fp32": 0.0022772548254579306,
+            "max_l2_v2_vs_fp32": 0.0022772548254579306
+          },
+          "dynamic-graph": {
+            "median_event_us": {
+              "V1": 688.4283224741617,
+              "V2": 660.1566473642985
+            },
+            "median_wall_us": {
+              "V1": 694.5194157500131,
+              "V2": 666.0844592261128
+            },
+            "v2_event_change_percent": -4.1066984298752995,
+            "v2_bitwise_to_v1": true,
+            "max_l2_v2_vs_v1": 0.0,
+            "max_l2_v1_vs_fp32": 0.0022772548254579306,
+            "max_l2_v2_vs_fp32": 0.0022772548254579306
+          }
+        },
+        {
+          "context": 32721,
+          "batch": 4,
+          "query_rows": 3,
+          "length_cases": [
+            [
+              32721,
+              32708,
+              32695,
+              32682
+            ],
+            [
+              32680,
+              32669,
+              32658,
+              32647
+            ]
+          ],
+          "eager": {
+            "median_event_us": {
+              "V1": 154.98416622479758,
+              "V2": 155.1466683546702
+            },
+            "median_wall_us": {
+              "V1": 160.7860419123123,
+              "V2": 160.85854197929925
+            },
+            "v2_event_change_percent": 0.10485079465274438,
+            "v2_bitwise_to_v1": true,
+            "max_l2_v2_vs_v1": 0.0,
+            "max_l2_v1_vs_fp32": 0.0023081642575562,
+            "max_l2_v2_vs_fp32": 0.0023081642575562
+          },
+          "dynamic-graph": {
+            "median_event_us": {
+              "V1": 645.8766857782999,
+              "V2": 646.9033161799113
+            },
+            "median_wall_us": {
+              "V1": 651.5855420730077,
+              "V2": 652.7976656798273
+            },
+            "v2_event_change_percent": 0.15895145686737333,
+            "v2_bitwise_to_v1": true,
+            "max_l2_v2_vs_v1": 0.0,
+            "max_l2_v1_vs_fp32": 0.0023081642575562,
+            "max_l2_v2_vs_fp32": 0.0023081642575562
+          }
+        },
+        {
+          "context": 32721,
+          "batch": 8,
+          "query_rows": 3,
+          "length_cases": [
+            [
+              32721,
+              32708,
+              32695,
+              32682,
+              32669,
+              32656,
+              32643,
+              32630
+            ],
+            [
+              32680,
+              32669,
+              32658,
+              32647,
+              32636,
+              32625,
+              32614,
+              32603
+            ]
+          ],
+          "eager": {
+            "median_event_us": {
+              "V1": 258.70166222254437,
+              "V2": 258.3933273951213
+            },
+            "median_wall_us": {
+              "V1": 264.21020690274116,
+              "V2": 264.09520796732977
+            },
+            "v2_event_change_percent": -0.11918548368577975,
+            "v2_bitwise_to_v1": true,
+            "max_l2_v2_vs_v1": 0.0,
+            "max_l2_v1_vs_fp32": 0.0022948961704969406,
+            "max_l2_v2_vs_fp32": 0.0022948961704969406
+          },
+          "dynamic-graph": {
+            "median_event_us": {
+              "V1": 666.338324546814,
+              "V2": 670.8283424377441
+            },
+            "median_wall_us": {
+              "V1": 671.6366260661744,
+              "V2": 675.928332687666
+            },
+            "v2_event_change_percent": 0.6738345560393766,
+            "v2_bitwise_to_v1": true,
+            "max_l2_v2_vs_v1": 0.0,
+            "max_l2_v1_vs_fp32": 0.0022948961704969406,
+            "max_l2_v2_vs_fp32": 0.0022948961704969406
+          }
+        }
+      ],
+      "lease_released": true,
+      "whole_model_started": false,
+      "official_41_to_44_started": false,
+      "evidence_sha256": "cb31b0e28d4aecf9bd20dd1672ceffc2f17a4c0fbb8f675fc7184e1f6836bce3"
+    },
+    "gmm1-dense-endpoints": {
+      "study": "R10 routed GMM1 with cumulative dense endpoints",
+      "release": "full-answer-b1-20261124-r10",
+      "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+      "source_sha256": {
+        "runtime/ascend/vllm_ascend/ops/fused_moe/routed_experts.py": "b17e5a105d59fc280f244bdc4036b4cb41efd1d5a2ff1accca4b56620cc91ab7",
+        "runtime/ascend/vllm_ascend/ops/fused_moe/token_dispatcher.py": "cf4e44a06db2dd7d1a0abce35381ed270aef6b75e4d3bf6557a50b0bb7ffebb5",
+        "runtime/ascend/vllm_ascend/ops/fused_moe/moe_mlp.py": "2bf107e3287e3a4c69512e60e65495448f34a4451eab32ae3b23b5c2a46d2558",
+        "runtime/ascend/vllm_ascend/ops/fused_moe/moe_comm_method.py": "697c7ef6220387f7a43ea682d6421182ff8674ff148e8c4b292fdbfe852d8046"
+      },
+      "geometry": "Qwen3.5-35B-A3B BF16 TP2, DP1, one rank's ND routed MLP, 256 experts, top 8",
+      "device": "one Ascend 910B2",
+      "runtime": {
+        "torch": "2.13.0+cpu",
+        "torch_npu": "2.13.0.rc1"
+      },
+      "status": "completed",
+      "method": {
+        "baseline": "First GMM uses 256 dense INT64 counts (type 1). GMM2 unchanged in both arms.",
+        "candidate": "First GMM consumes 256 dense INT64 endpoints (type 0) with unchanged expert order.",
+        "distributions": "Fixed synthetic spread, eight-expert hotspot, and expert zero absent.",
+        "expert_histograms_from_model": false,
+        "frozen_service_target_replays_per_rank": {
+          "3": 920,
+          "6": 438,
+          "12": 475,
+          "24": 653,
+          "40": 382
+        },
+        "timing": "NPUGraph warmed; 12 alternating AB/BA pairs per cell; per-invocation NPU event interval.",
+        "route_update": "Route IDs and activations changed in persistent inputs after capture; graph compared to both stock replay and eager.",
+        "prebuilt_only": "Upper bound; excludes generating cumulative endpoints.",
+        "full_chain": "Native routing, live INT64 cumsum before GMM1, stock SwiGLU, count-mode GMM2, native unpermute."
+      },
+      "checks": {
+        "resource_release": true,
+        "leased_lock_count": 8,
+        "process_exit_status": 0,
+        "complete_peer_snapshots": 9,
+        "peer_busy_or_model_lease_samples": 0
+      },
+      "raw_result_sha256": "e7ca3b2eae8c8b1bd54aacb0ac10aa85db1740a09ee81559874d03e295f26964",
+      "result_summary": {
+        "component_bitwise_elements": 34485480,
+        "prebuilt_positive_cells": 11,
+        "full_chain_positive_cells": 0,
+        "full_chain_max_paired_savings_us": -28.661390145619727,
+        "full_chain_min_paired_savings_us": -34.30557250976565,
+        "optimistic_sum_of_best_synthetic_cells_s": 0.0,
+        "timing_supports_entire_model_claim": false
+      }
+    },
+    "runner-wave-shape-metadata-reuse": {
+      "schema": "vllm-hust-component-exploration/v1",
+      "measurement_date": "2026-11-25",
+      "candidate": "stable-runner-input-shape-metadata-reuse",
+      "scope": "component measurement and trace opportunity",
+      "selection": "revised native R10",
+      "baseline_release": "full-answer-b1-20261124-r10",
+      "baseline_version": "2026.11.24.10",
+      "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+      "device": "Ascend 910B2",
+      "native_source_sha256": {
+        "runtime/engine-core/vllm/v1/utils.py": "4093f1c040a5f3def599bb044b72109301b970f70a5e5b622fd03a450a11e36a",
+        "runtime/engine-core/vllm/v1/worker/gpu_model_runner.py": "5c246e2c6c2178d98df69bc3b6a63b44cd815eb129547051816782bcd3cd00b4",
+        "runtime/ascend/vllm_ascend/worker/model_runner_v1.py": "83da7d9c6c53f718322328bb43d80651a7cd62992a8d0e8d723d62769bd0b346"
+      },
+      "mechanism": "Cache ordered scheduled-token vectors and retained req_indices, query_pos and num_scheduled_tokens metadata across repeated shapes. Other position, sequence and request state retain their original calculation.",
+      "correctness": {
+        "cpu": {
+          "cases": 6526,
+          "base_copy_triplets": 6526,
+          "reuse_copy_triplets": 4414,
+          "exact_cpu_and_device_results": true
+        },
+        "device": {
+          "cases": 120,
+          "base_copy_triplets": 120,
+          "reuse_copy_triplets": 80,
+          "exact_cpu_and_device_results": true
+        }
+      },
+      "trace_opportunity": {
+        "revised_r10_native_mmlu_pro_ten_after_warmup": {
+          "target_replays": 2873,
+          "target_buckets": {
+            "1536": 2,
+            "3": 920,
+            "4096": 3,
+            "40": 382,
+            "24": 653,
+            "12": 475,
+            "6": 438
+          },
+          "same_bucket_successors": {
+            "40": 381,
+            "24": 652,
+            "12": 474,
+            "6": 437,
+            "3": 918
+          },
+          "eligible_equal_bucket_successors": 2862,
+          "schedule_vector_observed": false,
+          "denominator_seconds": 68.91053621901665,
+          "idealized_device_component_projection": {
+            "median_saving_elapsed_us": {
+              "estimated_seconds": 0.47469802435239156,
+              "estimated_share_percent": 0.6888613126498836
+            },
+            "max_saving_elapsed_us": {
+              "estimated_seconds": 0.5163287157058716,
+              "estimated_share_percent": 0.7492739775886184
+            }
+          }
+        },
+        "historical_3072_context_experiment_same_runner_sha": {
+          "target_replays": 13143,
+          "target_buckets": {
+            "4096": 2825,
+            "3072": 1397,
+            "24": 6992,
+            "1536": 44,
+            "2048": 28,
+            "12": 73,
+            "6": 38,
+            "3": 73,
+            "1024": 22,
+            "256": 22,
+            "128": 8,
+            "512": 6,
+            "64": 1,
+            "80": 1514,
+            "48": 76,
+            "40": 24
+          },
+          "same_bucket_successors": {
+            "24": 6674,
+            "12": 60,
+            "6": 30,
+            "3": 67,
+            "40": 20
+          },
+          "eligible_equal_bucket_successors": 6851,
+          "schedule_vector_observed": false,
+          "denominator_seconds": 1516.8669459819794,
+          "idealized_device_component_projection": {
+            "median_saving_elapsed_us": {
+              "estimated_seconds": 1.140981467072169,
+              "estimated_share_percent": 0.07521961435671788
+            },
+            "max_saving_elapsed_us": {
+              "estimated_seconds": 1.1494063334941862,
+              "estimated_share_percent": 0.0757750267113963
+            }
+          }
+        }
+      },
+      "qualification": {
+        "component_repeated_vectors_bit_equal": true,
+        "candidate_model_started": false,
+        "official_4_1_to_4_4_completed": false,
+        "actual_hit_ratio_observed": false
+      },
+      "limits": [
+        "A matching graph bucket is a necessary condition in this narrow trace screen. The real ordered partitions are unavailable in these logs.",
+        "Perfect hit rate and full conversion of measured component savings are assumed for the opportunity estimates, which are not observed full-model or official results. The two parallel TP ranks are not added.",
+        "The historical context trace has the same pinned Ascend worker source. Its elapsed denominator spans context warmup and 4K, 16K, 32K and four-tenant windows.",
+        "The online candidate still needs an admission guard for CPU-side dummy and asynchronous device-side writes."
+      ]
+    }
+  },
+  "candidate_full_acceptance_started": false,
+  "files": {
+    "gmm1-cumulative-endpoints.json": {
+      "path": "measurements/gmm1-cumulative-endpoints.json",
+      "original_payload_sha256": "96feea74a6f6b53407b673b3395297288e136d07b76eea27a2384ecf1249fafa",
+      "archived_json_sha256": "5b47b25c2c4e8ec24ef6fa209b63bfdfc557fa3027690878bea21bdce77e58f3"
+    },
+    "fia-v2-4057-4-eager.json": {
+      "path": "measurements/fia-v2-4057-4-eager.json",
+      "original_payload_sha256": "4b87a9a01fe72665d427ffbfc0aeeb60aede7fe6d49fa4283227e6553ac7f65e",
+      "archived_json_sha256": "4b87a9a01fe72665d427ffbfc0aeeb60aede7fe6d49fa4283227e6553ac7f65e"
+    },
+    "fia-v2-4057-4-dynamic-graph.json": {
+      "path": "measurements/fia-v2-4057-4-dynamic-graph.json",
+      "original_payload_sha256": "176ba19bdb765ce610a2a5660d9c5a4c9777f8dc485264ab7ea2ffe87ab706f3",
+      "archived_json_sha256": "176ba19bdb765ce610a2a5660d9c5a4c9777f8dc485264ab7ea2ffe87ab706f3"
+    },
+    "fia-v2-16357-4-eager.json": {
+      "path": "measurements/fia-v2-16357-4-eager.json",
+      "original_payload_sha256": "c1466596dc1507c428546ab75073e9d6b06d4239c678712333d5a9b08c1a1245",
+      "archived_json_sha256": "c1466596dc1507c428546ab75073e9d6b06d4239c678712333d5a9b08c1a1245"
+    },
+    "fia-v2-16357-4-dynamic-graph.json": {
+      "path": "measurements/fia-v2-16357-4-dynamic-graph.json",
+      "original_payload_sha256": "ece1ce7ae30f975b226bbdd3d1ba89ab714a642062ca94183889b3576ebcc46e",
+      "archived_json_sha256": "ece1ce7ae30f975b226bbdd3d1ba89ab714a642062ca94183889b3576ebcc46e"
+    },
+    "fia-v2-32721-4-eager.json": {
+      "path": "measurements/fia-v2-32721-4-eager.json",
+      "original_payload_sha256": "b9f67bcf3d97c44193f445997a0fd3da2e232a9aad7f9a4f2205f6051dd4bdf9",
+      "archived_json_sha256": "b9f67bcf3d97c44193f445997a0fd3da2e232a9aad7f9a4f2205f6051dd4bdf9"
+    },
+    "fia-v2-32721-4-dynamic-graph.json": {
+      "path": "measurements/fia-v2-32721-4-dynamic-graph.json",
+      "original_payload_sha256": "67152a065a3a61de431816838221c6c19aa44db34d2703e907fda959973d8c48",
+      "archived_json_sha256": "67152a065a3a61de431816838221c6c19aa44db34d2703e907fda959973d8c48"
+    },
+    "fia-v2-32721-8-eager.json": {
+      "path": "measurements/fia-v2-32721-8-eager.json",
+      "original_payload_sha256": "e9df46d1609a6918ed2f5f6e6816aaf8b3657beda5af8f347bcea8f86a1b9376",
+      "archived_json_sha256": "e9df46d1609a6918ed2f5f6e6816aaf8b3657beda5af8f347bcea8f86a1b9376"
+    },
+    "fia-v2-32721-8-dynamic-graph.json": {
+      "path": "measurements/fia-v2-32721-8-dynamic-graph.json",
+      "original_payload_sha256": "0d134038faef834b69fb5932f064ac8e8360d4216ba7d97ed02ed8b38424fa62",
+      "archived_json_sha256": "0d134038faef834b69fb5932f064ac8e8360d4216ba7d97ed02ed8b38424fa62"
+    },
+    "runner-metadata-wave-reuse.json": {
+      "path": "measurements/runner-metadata-wave-reuse.json",
+      "original_payload_sha256": "16b666992a3b203e8976eb76c7465608b28c96c6504aa5d319f529dd5e6e2cfe",
+      "archived_json_sha256": "16b666992a3b203e8976eb76c7465608b28c96c6504aa5d319f529dd5e6e2cfe"
+    }
+  }
+}
