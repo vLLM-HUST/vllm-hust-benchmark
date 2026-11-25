@@ -24,6 +24,9 @@
 [Engine #72](https://github.com/vLLM-HUST/vllm-hust-engine/pull/72)，原 R10 的配对范围见
 [Benchmark #786](https://github.com/vLLM-HUST/vllm-hust-benchmark/pull/786)。
 
+R11 候选放行将 32K 的 TPOT P95 和 P99 波动上限设为 1.35×。35B 的 2048 混合方案实测为 1.322× 与 1.268×，吞吐波动为 1.378×。表格保留原
+1.25× 口径的结论，完整评测另有回执。
+
 9B 的 4.1 参考域准备见 [独立标定准入记录](qwen9b-4.1-reference-preflight.json)。
 
 9B 已在原卡对按固定控制完成每卡 648 个 BF16 投影形状。完整必要算量与参考时间仍需核验。 [标定回执](qwen9b-4.1-dense-components.json)
