@@ -306,6 +306,124 @@
         "optimistic_sum_of_best_synthetic_cells_s": 0.0,
         "timing_supports_entire_model_claim": false
       }
+    },
+    "runner-wave-shape-metadata-reuse": {
+      "schema": "vllm-hust-component-exploration/v1",
+      "measurement_date": "2026-11-25",
+      "candidate": "stable-runner-input-shape-metadata-reuse",
+      "scope": "component measurement and trace opportunity",
+      "selection": "revised native R10",
+      "baseline_release": "full-answer-b1-20261124-r10",
+      "baseline_version": "2026.11.24.10",
+      "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+      "device": "Ascend 910B2",
+      "native_source_sha256": {
+        "runtime/engine-core/vllm/v1/utils.py": "4093f1c040a5f3def599bb044b72109301b970f70a5e5b622fd03a450a11e36a",
+        "runtime/engine-core/vllm/v1/worker/gpu_model_runner.py": "5c246e2c6c2178d98df69bc3b6a63b44cd815eb129547051816782bcd3cd00b4",
+        "runtime/ascend/vllm_ascend/worker/model_runner_v1.py": "83da7d9c6c53f718322328bb43d80651a7cd62992a8d0e8d723d62769bd0b346"
+      },
+      "mechanism": "Cache ordered scheduled-token vectors and retained req_indices, query_pos and num_scheduled_tokens metadata across repeated shapes. Other position, sequence and request state retain their original calculation.",
+      "correctness": {
+        "cpu": {
+          "cases": 6526,
+          "base_copy_triplets": 6526,
+          "reuse_copy_triplets": 4414,
+          "exact_cpu_and_device_results": true
+        },
+        "device": {
+          "cases": 120,
+          "base_copy_triplets": 120,
+          "reuse_copy_triplets": 80,
+          "exact_cpu_and_device_results": true
+        }
+      },
+      "trace_opportunity": {
+        "revised_r10_native_mmlu_pro_ten_after_warmup": {
+          "target_replays": 2873,
+          "target_buckets": {
+            "1536": 2,
+            "3": 920,
+            "4096": 3,
+            "40": 382,
+            "24": 653,
+            "12": 475,
+            "6": 438
+          },
+          "same_bucket_successors": {
+            "40": 381,
+            "24": 652,
+            "12": 474,
+            "6": 437,
+            "3": 918
+          },
+          "eligible_equal_bucket_successors": 2862,
+          "schedule_vector_observed": false,
+          "denominator_seconds": 68.91053621901665,
+          "idealized_device_component_projection": {
+            "median_saving_elapsed_us": {
+              "estimated_seconds": 0.47469802435239156,
+              "estimated_share_percent": 0.6888613126498836
+            },
+            "max_saving_elapsed_us": {
+              "estimated_seconds": 0.5163287157058716,
+              "estimated_share_percent": 0.7492739775886184
+            }
+          }
+        },
+        "historical_3072_context_experiment_same_runner_sha": {
+          "target_replays": 13143,
+          "target_buckets": {
+            "4096": 2825,
+            "3072": 1397,
+            "24": 6992,
+            "1536": 44,
+            "2048": 28,
+            "12": 73,
+            "6": 38,
+            "3": 73,
+            "1024": 22,
+            "256": 22,
+            "128": 8,
+            "512": 6,
+            "64": 1,
+            "80": 1514,
+            "48": 76,
+            "40": 24
+          },
+          "same_bucket_successors": {
+            "24": 6674,
+            "12": 60,
+            "6": 30,
+            "3": 67,
+            "40": 20
+          },
+          "eligible_equal_bucket_successors": 6851,
+          "schedule_vector_observed": false,
+          "denominator_seconds": 1516.8669459819794,
+          "idealized_device_component_projection": {
+            "median_saving_elapsed_us": {
+              "estimated_seconds": 1.140981467072169,
+              "estimated_share_percent": 0.07521961435671788
+            },
+            "max_saving_elapsed_us": {
+              "estimated_seconds": 1.1494063334941862,
+              "estimated_share_percent": 0.0757750267113963
+            }
+          }
+        }
+      },
+      "qualification": {
+        "component_repeated_vectors_bit_equal": true,
+        "candidate_model_started": false,
+        "official_4_1_to_4_4_completed": false,
+        "actual_hit_ratio_observed": false
+      },
+      "limits": [
+        "A matching graph bucket is a necessary condition in this narrow trace screen. The real ordered partitions are unavailable in these logs.",
+        "Perfect hit rate and full conversion of measured component savings are assumed for the opportunity estimates, which are not observed full-model or official results. The two parallel TP ranks are not added.",
+        "The historical context trace has the same pinned Ascend worker source. Its elapsed denominator spans context warmup and 4K, 16K, 32K and four-tenant windows.",
+        "The online candidate still needs an admission guard for CPU-side dummy and asynchronous device-side writes."
+      ]
     }
   },
   "candidate_full_acceptance_started": false,
@@ -354,6 +472,11 @@
       "path": "measurements/fia-v2-32721-8-dynamic-graph.json",
       "original_payload_sha256": "0d134038faef834b69fb5932f064ac8e8360d4216ba7d97ed02ed8b38424fa62",
       "archived_json_sha256": "0d134038faef834b69fb5932f064ac8e8360d4216ba7d97ed02ed8b38424fa62"
+    },
+    "runner-metadata-wave-reuse.json": {
+      "path": "measurements/runner-metadata-wave-reuse.json",
+      "original_payload_sha256": "16b666992a3b203e8976eb76c7465608b28c96c6504aa5d319f529dd5e6e2cfe",
+      "archived_json_sha256": "16b666992a3b203e8976eb76c7465608b28c96c6504aa5d319f529dd5e6e2cfe"
     }
   }
 }
