@@ -1,0 +1,141 @@
+{
+  "schema": "qualified-reference-denominator/v1",
+  "benchmark_commit": "53541118b3461705f1e61532710ff0a759d59af0",
+  "manifest_sha256": "5c7194b483d96e7a682183fa62c569737312d8139fc0b20b51e91a5479772ad6",
+  "unit": "TFLOP/s/card",
+  "interpretation": "Workload-specific independent reference; upper denominator from a certified reference-time lower bound",
+  "scope": {
+    "profile": "mmlu-fixed200-v1",
+    "requests": 200,
+    "input_tokens": 282265,
+    "output_tokens": 51200,
+    "max_completion_tokens": 256,
+    "dtype": "BF16",
+    "tp": 2,
+    "accelerator": "Ascend 910B2",
+    "frontend": "native_inproc",
+    "timing": "dual_rank_synchronized_after_warmup"
+  },
+  "calculation": {
+    "reference_upper_formula": "C_ref_upper = sum(F_upper) / (k * sum(T_ref_lower) * 1e12)",
+    "current_lower_formula": "C_current_lower = sum(F_current_lower) / (k * sum(T_current) * 1e12)",
+    "efficiency_lower_formula": "eta_lower = 100 * C_current_lower / C_ref_upper",
+    "shared_exact_work_formula": "Only when work is identical and cancellation is justified: eta_lower = 100 * sum(T_ref_lower) / sum(T_current)",
+    "reference_time_construction": "finish(v) = duration(v) + max(finish(parent)); T_ref_lower = max(finish(v)) over the certified retained dependency/resource graph",
+    "aggregation": "sum work and time across all repetitions before division; never average per-repeat rates or select the fastest repetition",
+    "chips": 2,
+    "flops_counting": "Necessary-work dependency closure; matrix multiply-add=2 operations; scalar catalog fixed; padding, redundant work and unused drafts excluded",
+    "reference_bound": "Certified retained graph and nonnegative omitted work give a time lower bound; combining F_upper and T_ref_lower gives a reference-compute upper bound",
+    "independence": "Target endpoint elapsed times and target efficiency are not inputs to reference calibration or DAG durations",
+    "applicability": "Workload, arithmetic/reference domains, dtype, card count and timing boundary must match; out256/native and out8192/HTTP are separate"
+  },
+  "arms": {
+    "B0": {
+      "sum_reference_seconds_lower": "102.3231709195348958960064",
+      "effective_flops_interval": [
+        5487388087149780,
+        5488258327989369
+      ],
+      "reference_tflops_per_card_upper": "26.81825767648090573566921216250915821371",
+      "reference_repetitions": [
+        {
+          "name": "uninstrumented-1",
+          "F_interval": [
+            1829129362383260,
+            1829419442663123
+          ],
+          "Tref_lower_seconds": "34.1077236398449652986688",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "0c51f8f42043eff8f82ec23888702cdd1583a9d68835135e32190c7514c8feff"
+        },
+        {
+          "name": "uninstrumented-2",
+          "F_interval": [
+            1829129362383260,
+            1829419442663123
+          ],
+          "Tref_lower_seconds": "34.1077236398449652986688",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "6db7784be4bb652d1d0179e6673f7405314a2cb5077adf0321c765cb152ab30d"
+        },
+        {
+          "name": "uninstrumented-3",
+          "F_interval": [
+            1829129362383260,
+            1829419442663123
+          ],
+          "Tref_lower_seconds": "34.1077236398449652986688",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "b91eb934d213473b74f2cc499f94b2c72d167682082a4e520254c9a6cb35eb82"
+        }
+      ]
+    },
+    "B1": {
+      "sum_reference_seconds_lower": "140.60316791316519",
+      "effective_flops_interval": [
+        5438115361780845,
+        5438638334450385
+      ],
+      "reference_tflops_per_card_upper": "19.34038334687175052309470403284461724716",
+      "reference_repetitions": [
+        {
+          "name": "uninstrumented-1",
+          "F_interval": [
+            1812705120593615,
+            1812879444816795
+          ],
+          "Tref_lower_seconds": "46.86772263772173",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "0407c570c288265d9b5038a7e2a87eb1e8ea87553551785c7f6695a073ab2a86"
+        },
+        {
+          "name": "uninstrumented-2",
+          "F_interval": [
+            1812705120593615,
+            1812879444816795
+          ],
+          "Tref_lower_seconds": "46.86772263772173",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "c5bea9d69988f75e68fe6c141965a13e23d8a34533a11fb84a00bff465c12a10"
+        },
+        {
+          "name": "uninstrumented-3",
+          "F_interval": [
+            1812705120593615,
+            1812879444816795
+          ],
+          "Tref_lower_seconds": "46.86772263772173",
+          "requests": 200,
+          "input_tokens": 282265,
+          "output_tokens": 51200,
+          "source_sha256": "9a198f5dcb9e6a062b9caac2a69040508e82d4210c852fd8b007f1f671113746"
+        }
+      ]
+    }
+  },
+  "domain_sha256": "7913a10bc39d5ca6e187b156d8c741a7f06023952d8dd376517b970b06077019",
+  "reference_kind": "certified_lower_bound_of_fixed_full_reference",
+  "applicability_protocol_sha256": "b7a5fbf468e0b93add821f545efc015a35860de616c904e02a0139ec3599ae9d",
+  "source_root": "Independently bound original reference repository; see benchmark_commit and source_sha256.",
+  "original_method_frozen_unix": 1793638631.8479264,
+  "original_efficiency_used": false,
+  "target_times_used": false,
+  "source_sha256": {
+    "source-readback.json": "5c7194b483d96e7a682183fa62c569737312d8139fc0b20b51e91a5479772ad6",
+    "scripts/recompute_m01_qualified_pair.py": "97c5ab301a12ac10cc5d3b97a1c38d155e9a0862cbcc52650f0084ff3884220c",
+    "reports/m01-qualified-pair-20261103/summary.json": "95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0",
+    "reports/m01-qualified-pair-20261103/evidence/evidence-manifest.json": "5d1f4e6c50aa144bdc37ed293db9dd73fec5ab1c28788f91785a758146654cee",
+    "reports/m01-qualified-pair-20261103/evidence/qualification-protocol.json": "f137434c1d2e5a132a23fd42f6273d032a60372573c04914995f7ce1a8258b13"
+  },
+  "sealed_original_sha256": "195abafc693571721c937fc4466c058f510949b5d82e0b7fb85e1398f161f501"
+}

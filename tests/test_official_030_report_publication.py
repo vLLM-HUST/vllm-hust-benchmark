@@ -15,10 +15,17 @@ def test_official030_observations_preserve_originals_and_automatic_refusal():
     baseline = next(
         row for row in catalog["comparison_baselines"] if row["id"] == "official-0.30.0"
     )
-    descriptor = baseline["observations"]
-    raw = (ROOT / "website-publication" / descriptor["path"]).read_bytes()
-    assert len(raw) == descriptor["bytes"]
-    assert hashlib.sha256(raw).hexdigest() == descriptor["sha256"]
+    raw = (
+        ROOT
+        / "website-publication/data/official-b0-030-full-report-20261122-v1/observations.json"
+    ).read_bytes()
+    assert len(raw) == 78937
+    assert (
+        hashlib.sha256(raw).hexdigest()
+        == (
+            "93c0d1916825005c694415b29295a1aa028ef5488ae6311884c1af52dc3114f1"  # pragma: allowlist secret -- immutable v1 observations SHA256
+        )
+    )
     observation = json.loads(raw)
     original_raw = (REPORT / "original-report.json").read_bytes()
     original = json.loads(original_raw)

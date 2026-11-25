@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-25",
+  "scope": "catalog screening against revised R10; official selector denial verified on CPU",
+  "baseline_release": "full-answer-b1-20261124-r10",
+  "baseline_version": "2026.11.24.10",
+  "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+  "loaded_source_sha256": {
+    "vllm_ascend/worker/model_runner_v1.py": "83da7d9c6c53f718322328bb43d80651a7cd62992a8d0e8d723d62769bd0b346",
+    "vllm_ascend/attention/attention_v1.py": "ab53725b841070e62fdae81e9651a8a0d926651ed0cb640606829975b87feda2"
+  },
+  "ascend_attention_optimizations": {
+    "revision": "bc6bb4abeb05a7bf3d26d44400526d74f1a5f01a",
+    "default_installed": false,
+    "rejections": {
+      "core-boundary": "core-boundary is not admitted: retired_absorbed: Current Core and Ascend maintain evolved, backend-specific decode/prefill boundary implementations.",
+      "persistent-matmul-empty": "persistent-matmul-empty is not admitted: retired_not_consumed: The qualified environment did not enable Batch Invariant and never consumed this branch.",
+      "linear-swiglu-graph": "linear-swiglu-graph is not admitted: relocated_operator_family: Graph fusion belongs to the operator optimization family and must have exactly one owner.",
+      "pyramidkv": "pyramidkv is not admitted: port_required: The recovered adapter targets the removed native_model_runner_v1.py and an obsolete provider build."
+    }
+  },
+  "gdn_optimizations": {
+    "revision": "807d1b0d2295a438ec696fdfdc8c2ebd97b6b448",
+    "default_installed": false,
+    "rejections": {
+      "native-delayed": "native-delayed is blocked until its current-runner lifecycle rewrite is qualified"
+    }
+  },
+  "native_mmlu_pro_ten": {
+    "archive_sha256": "a712c0cbfb48d696feaf53b579360f023e50a773a1997cdf1c69b394863b39c5",
+    "request_plan_sha256": "0b8f6a85272a1882644dd35b6716e688e4829df8842b3ebdea6d8b585c6dbc66",
+    "existing_prefix_policy": {
+      "block_size": "2048",
+      "prefix_match_unit": "None",
+      "enable_mamba_fine_grained_prefix_cache": "False",
+      "mamba_block_size": "2048",
+      "enable_prefix_caching": "True",
+      "mamba_cache_mode": "align"
+    },
+    "raw_prometheus_counter_deltas": {
+      "prefix_cache_queries_total": 15037,
+      "prefix_cache_hits_total": 0,
+      "external_prefix_cache_hits_total": 0
+    }
+  },
+  "other_dispositions": {
+    "runtime-micro-optimizations": "Existing three formal pair outcomes +0.841%, -0.494%, -0.213%; geometric +0.043%, exact 210 pairs. No duplicate empty-padding or QSL trial.",
+    "gdn-static-decay": "Prior three-pair formal geometric output throughput difference -0.004%, exact 210 pairs.",
+    "kv-materialization-arrival-control": "Included in the exact released manifest and earlier active stack; recorded installed 0.1.0 distribution. No fresh runtime action count attributed.",
+    "stateaxis-pipelined-weight-loading": "Startup evidence only; released bundle is limited to StateAxis and Qwen2, while R10 uses Qwen3.5 MoE.",
+    "stateaxis-automatic-prefix-cache": "Exact ten retained zero baseline prefix/cache hits; no direct R10 activation proof.",
+    "stateaxis-async-kv-transfer": "Historical component H2D overlap requires host-tier restoration; no eligible path verified in the frozen native ten.",
+    "sglang-prepared-dispatch": "Handled by a separate exploration lane to avoid duplicate work."
+  },
+  "qualification": "No recommended whole-model candidate from this branch; no NPU lease or job started."
+}
