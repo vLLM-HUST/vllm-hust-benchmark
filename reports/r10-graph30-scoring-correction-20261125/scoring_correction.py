@@ -26,4 +26,3 @@ def extract_answer(text: str) -> str | None:
         return choices[-1]
     match = _LAST_STANDALONE_CHOICE.search(text)
     return match.group(0) if match else None
-
