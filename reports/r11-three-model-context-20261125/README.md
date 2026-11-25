@@ -16,3 +16,5 @@
 完整指标、各窗口计数、源码与 B0/B1 证据摘要见 [机器记录](context-evidence.json)。
 
 固定五项质量和 4.1–4.4 总体验收另立证据。模型入口与调度实现见 [Engine #72](https://github.com/vLLM-HUST/vllm-hust-engine/pull/72)，原 R10 的配对范围见 [Benchmark #786](https://github.com/vLLM-HUST/vllm-hust-benchmark/pull/786)。
+
+9B 的 4.1 参考域准备见 [独立标定准入记录](qwen9b-4.1-reference-preflight.json)。
