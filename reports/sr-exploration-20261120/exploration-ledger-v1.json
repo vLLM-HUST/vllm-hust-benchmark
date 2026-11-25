@@ -1,0 +1,2247 @@
+{
+  "schema": "vllm-hust-sr-exploration-ledger/v1",
+  "assessment_date": "2026-11-20",
+  "record_type": "evidence_review_and_candidate_disposition_not_new_measurement",
+  "baseline": {
+    "release": "full-answer-b1-20261117-r8",
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "BF16",
+    "hardware": "Ascend 910B2 x2",
+    "parallelism": "TP2/PP1",
+    "recipe": "E36/R54, MTP2, FULL, host State4GiB/rank, KV20GiB/rank",
+    "default_entrypoint_profile": "r6",
+    "website_selected_release": "r8",
+    "evidence": [
+      {
+        "repository": "vLLM-HUST/vllm-hust-engine",
+        "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+        "path": "mods/active-stack-r8.json",
+        "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/mods/active-stack-r8.json"
+      }
+    ]
+  },
+  "scope_zh": "统一登记已发布SR1/SR2、早期组合筛选、Engine C/E/K系列可核验的机制探索，以及本次固定canonical目录全部分类条目的处置。源码/组件/模型/诊断阶段分别保留；不声称收齐未提交或未归档的运行，不给历史实验补造SR编号。",
+  "policies": {
+    "unchanged_negative_retests_recommended": false,
+    "existing_components_counted_as_new": false,
+    "historical_native_gain_treated_as_r8_increment": false,
+    "component_gain_treated_as_model_gain": false,
+    "read_existing_ledger_before_recommending": true,
+    "reopen_requires_zh": [
+      "指出不同于已测失败版本的实质源码/算法/工作负载机制变化，或新增的真实瓶颈证据。",
+      "用当前固定基线说明接入冲突、资源和质量边界；所有失败与代价保留。",
+      "前瞻性定义同口径对照和停止条件；不缩预算、挑最好轮次或覆盖旧原件。"
+    ]
+  },
+  "included_r8_ids": [
+    "betterscale",
+    "capacity-tuning",
+    "guarded-progress-async",
+    "hust-joint-packed",
+    "hust-m01-correction",
+    "kv-materialization-arrival-control",
+    "prefill-microflow",
+    "sealed-serving-warmup",
+    "short-prefill-tail",
+    "vllm-hust-extension-manager"
+  ],
+  "explorations": [
+    {
+      "id": "sr1-diffspec",
+      "name_zh": "DiffSpec 与 r8 组合",
+      "aliases": [
+        "sr1",
+        "DiffSpec"
+      ],
+      "stage": "full_model",
+      "verdict": "regressed",
+      "baseline": "frozen B1-r8; 910B2x2 TP2 BF16 E36/R54",
+      "result_zh": "同卡各一次配对，MMLU200 吞吐1499.31→131.86 token/s，4K/16K吞吐和尾时延均退化；未替换r8。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "reports/b1-sr1-20261118/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/reports/b1-sr1-20261118/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "reports/b1-sr1-20261118/summary.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/reports/b1-sr1-20261118/summary.json"
+        }
+      ]
+    },
+    {
+      "id": "sr2-pyramidkv",
+      "name_zh": "PyramidKV 与 r8 组合",
+      "aliases": [
+        "sr2",
+        "PyramidKV"
+      ],
+      "stage": "full_model",
+      "verdict": "no_qualified_gain",
+      "baseline": "frozen B1-r8; 910B2x2 TP2 BF16 E36/R54",
+      "result_zh": "v3单次同卡16K为159.69→160.80 token/s，P99变长；v2 MMLU150→144/200；v4因主机4GiB余量保护中止。不能作为稳定提速候选。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "reports/b1-sr2-20261119/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/reports/b1-sr2-20261119/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/sr-development-results-v1.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/sr-development-results-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "sr4-shared-expert-swiglu",
+      "name_zh": "共享专家 MatMul–SwiGLU 与 r8 组合",
+      "aliases": [
+        "sr4",
+        "shared-expert MatMul–SwiGLU"
+      ],
+      "stage": "full_model",
+      "verdict": "regressed",
+      "baseline": "frozen B1-r8; 910B2x2 TP2 BF16 E36/R54",
+      "result_zh": "场景型实验冻结。4K C8 端到端尾延迟两轮改善，16K 吞吐两轮提升，16K TTFT P95 与 MMLU/FrontierScience 答对数回退。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "针对回退机制有实质变更或新增瓶颈证据后，建立新的同口径对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "c6059a6d3d1cf7ea16340d79cccf7bb1a13fa661",
+          "path": "b1-sr4-20261120",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/b1-sr4-20261120"
+        }
+      ]
+    },
+    {
+      "id": "vspec-local-argmax",
+      "name_zh": "vSpec 局部 argmax",
+      "aliases": [
+        "vSpec",
+        "vspec",
+        "local argmax",
+        "MTP局部选择"
+      ],
+      "stage": "full_model",
+      "verdict": "no_gain",
+      "baseline": "Qwen3.5 BF16 TP2 E24/R36 + BetterScale + Microflow + KV逐请求重算; MTP2 FULL; MMLU200/out256",
+      "result_zh": "三对独立服务ON/OFF吞吐几何平均变化−0.009906%；没有超过当时B1；未重新评分。该记录仅覆盖局部argmax，不冒充整个vSpec动态控制。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "reports/vllm-hust-midterm-20261019/vspec-school028/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/reports/vllm-hust-midterm-20261019/vspec-school028/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "reports/vllm-hust-midterm-20261019/vspec-school028/summary.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/reports/vllm-hust-midterm-20261019/vspec-school028/summary.json"
+        }
+      ]
+    },
+    {
+      "id": "vspec-adaptive-topic",
+      "name_zh": "vSpec 动态投机专题",
+      "aliases": [
+        "vSpec Adaptive",
+        "dynamic gamma",
+        "vSpec 0.15.2"
+      ],
+      "stage": "full_model_other_recipe",
+      "verdict": "quality_unqualified",
+      "baseline": "Qwen3.5 BF16 TP2 EP; native fixed MTP2/4/6/8 controls; not B1-r8",
+      "result_zh": "Frontier/HLE两轮输出token/s高于各固定深度，存在逐臂后端差异、自然输出量差异；Frontier Olympiad低于同轮MTP4，不能称质量无损或r8叠加收益。",
+      "action": "hold_quality_and_integration",
+      "reopen_condition_zh": "先明确质量和后端归因问题的实质修正，以及与已测局部argmax、SR1不同的新增机制；不再笼统推荐“试vSpec”。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "reports/tech-outcomes-20261117/vspec/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/reports/tech-outcomes-20261117/vspec/README.md"
+        }
+      ]
+    },
+    {
+      "id": "E02-capacity32",
+      "name_zh": "执行容量24→32",
+      "aliases": [
+        "E02",
+        "E32"
+      ],
+      "stage": "full_model",
+      "verdict": "tradeoff_not_promoted",
+      "baseline": "B1 r6; fixed MMLU200/max8192",
+      "result_zh": "两对吞吐+20.98%/+18.67%，平均TPOT+9.22%/+8.07%；未过原筛选。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E02-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E02-RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "E03-mtp-depth",
+      "name_zh": "上下文并行开关与MTP3",
+      "aliases": [
+        "E03",
+        "MTP3",
+        "CP0"
+      ],
+      "stage": "startup_and_host_admission",
+      "verdict": "unsupported_current_contract",
+      "baseline": "B1 r6 E24/R36; correction metadata and FULL graph",
+      "result_zh": "前两臂MTP2/CP1和CP0完成，CP关闭吞吐仅+0.675%未过筛选；MTP3在正式请求前被两步元数据契约拒绝，旧自动重复被中止，剩余两臂撤销。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E03-mtp-v3/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E03-mtp-v3/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E03-mtp-v3/COURSE-CORRECTION-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E03-mtp-v3/COURSE-CORRECTION-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "E04-capacity26",
+      "name_zh": "执行容量24→26",
+      "aliases": [
+        "E04",
+        "E26"
+      ],
+      "stage": "full_model",
+      "verdict": "tradeoff_not_promoted",
+      "baseline": "B1 r6; MMLU200/max8192",
+      "result_zh": "两对吞吐+9.83%/+7.73%，正确148→138、149→144；性能与质量分开判定，未晋级。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E04-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E04-RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "E05-state-policy",
+      "name_zh": "关闭State维护及partial reclaim",
+      "aliases": [
+        "E05",
+        "state policy off"
+      ],
+      "stage": "full_model",
+      "verdict": "regressed",
+      "baseline": "B1 r6 E24/R36 cold unique-salt MMLU200",
+      "result_zh": "单次开关配对吞吐−2.80%，并非已证明减少维护I/O就可加速。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E05-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E05-RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "E06-native-multistream",
+      "name_zh": "原生共享专家多流",
+      "aliases": [
+        "E06",
+        "native shared multistream"
+      ],
+      "stage": "full_model",
+      "verdict": "screen_not_met",
+      "baseline": "B1 r6 E24/R36 MMLU200",
+      "result_zh": "吞吐+1.70%，P95 TTFT+5.18%；未过原5%筛选，不能列作现成稳定增益。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E06-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E06-RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "E08-graph-padding",
+      "name_zh": "缩小decode图桶80→72",
+      "aliases": [
+        "E08",
+        "decode padding"
+      ],
+      "stage": "full_model",
+      "verdict": "screen_not_met",
+      "baseline": "B1 r6 E24/R36 MTP2 FULL",
+      "result_zh": "吞吐+2.09%，未过原5%门槛；输出量和评分变化保留，不把TTFT变化归为单算子贡献。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E08-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E08-RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "E09-E11-layout-failures",
+      "name_zh": "全局NZ及标量兼容启动失败",
+      "aliases": [
+        "E09",
+        "E10",
+        "E11",
+        "NZ mode2",
+        "nz-scalar-compat"
+      ],
+      "stage": "startup_and_component",
+      "verdict": "startup_failed",
+      "baseline": "B1 r6 ND reference and NZ candidate",
+      "result_zh": "保留原NZ启动/图内Cast不接纳及后续诊断；E11正式请求为0，不能写成性能为0或已完成模型对照。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E11-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E11-RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "E13-nz-cache",
+      "name_zh": "专家NZ＋路由缓存",
+      "aliases": [
+        "E13",
+        "nz-linear-compat"
+      ],
+      "stage": "full_model",
+      "verdict": "screen_not_met",
+      "baseline": "B1 r6; one new arm versus sealed E09 control",
+      "result_zh": "吞吐+0.463%，未过原筛选；不是新鲜重复配对，质量/稳定性未合格。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E13-RESULTS-v2.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E13-RESULTS-v2.md"
+        }
+      ]
+    },
+    {
+      "id": "E14-router-cache",
+      "name_zh": "ND路由预转换缓存",
+      "aliases": [
+        "E14",
+        "router-precast"
+      ],
+      "stage": "full_model",
+      "verdict": "screen_not_met",
+      "baseline": "B1 r6; sealed E09 control",
+      "result_zh": "吞吐+0.146%，未过原筛选。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E14-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E14-RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "E15-layout-no-cache",
+      "name_zh": "专家NZ／门控ND／关闭显式缓存",
+      "aliases": [
+        "E15",
+        "nz-gates-nd"
+      ],
+      "stage": "full_model",
+      "verdict": "regressed",
+      "baseline": "B1 r6; sealed E09 control",
+      "result_zh": "吞吐−0.683%；四格布局/缓存结果全部保留，不选其中正例拼接收益。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E15-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E15-RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "E16-gmm-layout",
+      "name_zh": "GMM布局组件诊断",
+      "aliases": [
+        "E16",
+        "GMM NZ"
+      ],
+      "stage": "component",
+      "verdict": "mixed_component_results",
+      "baseline": "native GMM shapes on two ranks",
+      "result_zh": "7个case组件比值1.0238–1.0961，rank0一case0.9070；不是全部通过或模型加速。",
+      "action": "hold_component_only",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/README.md"
+        }
+      ]
+    },
+    {
+      "id": "E17-selective-layout",
+      "name_zh": "专家NZ／普通Linear保留ND",
+      "aliases": [
+        "E17",
+        "expert-nz-linear-nd"
+      ],
+      "stage": "full_model",
+      "verdict": "screen_not_met",
+      "baseline": "B1 r6; sealed original ND reference",
+      "result_zh": "相对原ND吞吐+0.895%，未过原筛选；保留与E15的次要比较，不换较弱主参考。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E17-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E17-RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "E18-E20-joint-layout",
+      "name_zh": "容量、布局和多流联合探索",
+      "aliases": [
+        "E18",
+        "E19",
+        "E20",
+        "E26 joint",
+        "E28"
+      ],
+      "stage": "full_model",
+      "verdict": "unqualified_joint_tradeoff",
+      "baseline": "B1 r6; reused original ND and neighboring recipe controls",
+      "result_zh": "存在约5%量级局部配方正收益，同时保留低收益、质量/截断与代价；不是独立组件因果或r8新增收益。原配方不作为新MOD再测。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E18-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E18-RESULTS-v1.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E19-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E19-RESULTS-v1.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/E20-RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/E20-RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "C02-journal-spool",
+      "name_zh": "日志落盘方式",
+      "aliases": [
+        "C02",
+        "journal spool"
+      ],
+      "stage": "full_model",
+      "verdict": "no_gain",
+      "baseline": "B1 r6 matched complete-answer observations",
+      "result_zh": "吞吐变化−0.070686%；不推荐原日志落盘改法作为加速项。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/C02-journal-spool-20261115-r3/analysis-v1.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/C02-journal-spool-20261115-r3/analysis-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "C03-C04-capacity36",
+      "name_zh": "E36/R54容量组合",
+      "aliases": [
+        "C03",
+        "C04",
+        "capacity-tuning"
+      ],
+      "stage": "full_model",
+      "verdict": "absorbed_into_r8",
+      "baseline": "B1 r6 E24/R36 versus E36/R54",
+      "result_zh": "完整回答两对吞吐+25.07%/+29.10%，TPOT+14.17%/+12.87%；已进入r8组合，原收益/取舍不重复计为新增模块。",
+      "action": "already_included",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "mods/active-stack-r8.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/mods/active-stack-r8.json"
+        }
+      ]
+    },
+    {
+      "id": "C05-resident36",
+      "name_zh": "固定E36、驻留54→36提案",
+      "aliases": [
+        "C05",
+        "resident budget"
+      ],
+      "stage": "source_preparation",
+      "verdict": "not_measured",
+      "baseline": "B1 r6-derived E36 control proposal",
+      "result_zh": "已冻结原四臂方案和静态检查；查到的记录未启动模型，不把它写成实测失败或新收益。",
+      "action": "defer_unmeasured_proposal",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/C05-resident-budget-20261116-r1/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/C05-resident-budget-20261116-r1/README.md"
+        }
+      ]
+    },
+    {
+      "id": "C06-execution48",
+      "name_zh": "48执行席位源码准入",
+      "aliases": [
+        "C06",
+        "E48"
+      ],
+      "stage": "source_preparation",
+      "verdict": "not_measured",
+      "baseline": "frozen native contract",
+      "result_zh": "只有主机/源码检查，未启动NPU；不是已验证可用容量或性能。",
+      "action": "defer_unmeasured_proposal",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/C06-execution48-audit-20261116-r1/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/C06-execution48-audit-20261116-r1/README.md"
+        }
+      ]
+    },
+    {
+      "id": "C07-mc2",
+      "name_zh": "prefill矩阵乘＋AllReduce融合",
+      "aliases": [
+        "C07",
+        "MC2",
+        "communication fusion"
+      ],
+      "stage": "component",
+      "verdict": "screen_not_met",
+      "baseline": "fixed native component, two ranks",
+      "result_zh": "r1原生控制图失败保留；r2数值通过，但8个正反计时对中只有3对同时过wall/device门槛，整体未通过。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/C07-prefill-MC2-component-20261116-r2/analysis-v1.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/C07-prefill-MC2-component-20261116-r2/analysis-v1.json"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/C07-prefill-MC2-component-20261116-r2/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/C07-prefill-MC2-component-20261116-r2/README.md"
+        }
+      ]
+    },
+    {
+      "id": "K01-K02-restore-tile",
+      "name_zh": "状态恢复行块R16→R32",
+      "aliases": [
+        "K01",
+        "K02",
+        "restore32"
+      ],
+      "stage": "full_model",
+      "verdict": "no_stable_gain",
+      "baseline": "B1 r6 complete-answer ABBA",
+      "result_zh": "K01组件正例后，K02两对整模型吞吐+1.999%/−2.314%，未过双向筛选；保留R16。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/K01-restore-row-tile-20261116-r2/RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/K01-restore-row-tile-20261116-r2/RESULTS-v1.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/K02-restore32-full-answer-20261116-r3/RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/K02-restore32-full-answer-20261116-r3/RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "K03-K04-async",
+      "name_zh": "受保护进度复制异步化及生命周期修复",
+      "aliases": [
+        "K03",
+        "K04",
+        "guarded-progress-async"
+      ],
+      "stage": "full_model",
+      "verdict": "absorbed_into_r8",
+      "baseline": "B1 r6 full-answer ABBA; native source-ownership qualification",
+      "result_zh": "两对完整模型吞吐+14.16%/+12.04%，质量取舍保留；原生异步和初始化修复已纳入r8，不再重复作为新增叠加。",
+      "action": "already_included",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "mods/active-stack-r8.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/mods/active-stack-r8.json"
+        }
+      ]
+    },
+    {
+      "id": "K05-cache-relocation",
+      "name_zh": "Triton编译缓存索引迁移",
+      "aliases": [
+        "K05",
+        "cache relocation"
+      ],
+      "stage": "host_tooling",
+      "verdict": "not_steady_state_optimization",
+      "baseline": "verified frozen SDK and caches",
+      "result_zh": "修复部署索引、原payload保持SHA；这是恢复工具工作，不列稳态吞吐加速MOD。",
+      "action": "not_performance_mod",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/K05-triton-cache-relocation-20261116-r1/RESULTS-v1.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/K05-triton-cache-relocation-20261116-r1/RESULTS-v1.md"
+        }
+      ]
+    },
+    {
+      "id": "K06-gdn-tile",
+      "name_zh": "GDN value tile 16／64／128",
+      "aliases": [
+        "K06",
+        "GDN tile",
+        "BV16",
+        "BV64",
+        "BV128"
+      ],
+      "stage": "component",
+      "verdict": "screen_not_met",
+      "baseline": "native BV32 comparison; 910B2 two ranks",
+      "result_zh": "BV16/64未通过双卡整体性能筛选；BV128因UB超限编译失败，余项按协议未执行。",
+      "action": "exclude_unchanged",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/K06-GDN-value-tile-20261116-r2/analysis-v1.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/K06-GDN-value-tile-20261116-r2/analysis-v1.json"
+        }
+      ]
+    },
+    {
+      "id": "C10-C15-r8-combination",
+      "name_zh": "容量＋异步＋短prefill尾段联合组合",
+      "aliases": [
+        "C08",
+        "C09",
+        "C10",
+        "C13",
+        "C15",
+        "short-prefill-tail",
+        "r8"
+      ],
+      "stage": "full_model",
+      "verdict": "absorbed_into_r8_with_tradeoffs",
+      "baseline": "r6 controls versus frozen r8/C15 candidate",
+      "result_zh": "C10/C15完整结果和失败都保留；r8有真实吞吐收益，同时原反向4K TTFT及反向MMLU TPOT筛选未全通过。已包含项不重计新增收益。",
+      "action": "already_included",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "mods/active-stack-r8.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/mods/active-stack-r8.json"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "mods/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/mods/README.md"
+        }
+      ]
+    },
+    {
+      "id": "restore-rms-v010",
+      "name_zh": "旧版状态恢复＋门控归一化融合",
+      "aliases": [
+        "C11",
+        "restore-gated-rms-fusion 0.1.0"
+      ],
+      "stage": "component",
+      "verdict": "screen_not_met",
+      "baseline": "original two-candidate component pool",
+      "result_zh": "小mixed形状正收益，大prefill负例；原完整48对门槛失败。旧版本保持排除。",
+      "action": "exclude_superseded_version",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "mods/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/mods/README.md"
+        }
+      ]
+    },
+    {
+      "id": "restore-rms-v021",
+      "name_zh": "状态恢复＋门控归一化融合0.2.1",
+      "aliases": [
+        "C12",
+        "C14",
+        "C16",
+        "C17",
+        "M15",
+        "restore-gated-rms-fusion"
+      ],
+      "stage": "component_pass_source_integration",
+      "verdict": "component_pass_model_pending",
+      "baseline": "same frozen native component; actual r8 serving shapes remain separate",
+      "result_zh": "packed32/64各32数值配置/48性能对通过；C16/C17与M15完成源码/CPU准备。尚无该实际服务适配器的整模型收益。",
+      "action": "continue_existing_validation",
+      "reopen_condition_zh": "沿用既有候选，先补真实prefill形状、非连续Z、角色切换/私有流和一次归一化的NPU资格，再测相对同一r8的完整模型；不重跑已合格组件池，不宣称纯decode收益。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "mods/restore-gated-rms-fusion/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/mods/restore-gated-rms-fusion/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/C16-restore-RMS-serving-integration-20261117-r1/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/C16-restore-RMS-serving-integration-20261117-r1/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/C17-fusion-SDK-source-20261117-r1/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/C17-fusion-SDK-source-20261117-r1/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/M15-serving-restore-domain-20261117-r1/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/M15-serving-restore-domain-20261117-r1/README.md"
+        }
+      ]
+    },
+    {
+      "id": "M16-M17-tail-diagnostics",
+      "name_zh": "短尾预算及HTTP时间线诊断",
+      "aliases": [
+        "M16",
+        "M17",
+        "tail256"
+      ],
+      "stage": "diagnostic",
+      "verdict": "not_qualification_timing",
+      "baseline": "old E24 replay and E36/r8 instrumented HTTP studies kept separate",
+      "result_zh": "固定状态预算复算不能证明闭环收益；M17插桩和原缺失臂接续用于定位4K退化，不是新干净性能验收。",
+      "action": "continue_diagnostic_without_speedup_claim",
+      "reopen_condition_zh": "原实现和原配置不重复排入加速候选；只有明确的新机制或新瓶颈证据，才建立新的前瞻性对照。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/M16-fixed-state-tail-budget-replay-20261117-r1/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/M16-fixed-state-tail-budget-replay-20261117-r1/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/M17-KV-namespace-recovery-20261117-r2/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/M17-KV-namespace-recovery-20261117-r2/README.md"
+        },
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "44fefd07b014c85a14bf425092c5fe103ba471a5",
+          "path": "experiments/optimization-20261115/r8-release-blocker-source-analysis-20261117-r1/README.md",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/44fefd07b014c85a14bf425092c5fe103ba471a5/experiments/optimization-20261115/r8-release-blocker-source-analysis-20261117-r1/README.md"
+        }
+      ]
+    },
+    {
+      "id": "layered-prefill-unmerged-prototype",
+      "name_zh": "Layered Prefill未合并原型",
+      "aliases": [
+        "research/b1-sr2-layered-prefill",
+        "Layered Prefill PR37"
+      ],
+      "stage": "source_preparation",
+      "verdict": "unmerged_prototype_not_measured",
+      "baseline": "frozen r8 donor; CPU worker layer-range reference",
+      "result_zh": "分支标题曾使用B1-sr2，但已发布SR2实际是PyramidKV。此原型只有CPU parity，Ascend调度器接入和设备资格待完成，没有完整模型性能记录。",
+      "action": "defer_unmerged_prototype",
+      "reopen_condition_zh": "保持与已发布SR2编号分离，先完成实现/资格后才建立新的实验身份。",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-engine",
+          "revision": "104e36c4a6544243ecfc8d814e35b74be14c1b7e",
+          "path": null,
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/pull/37",
+          "kind": "unmerged_pull_request",
+          "state": "open"
+        }
+      ]
+    }
+  ],
+  "catalog_dispositions": [
+    {
+      "id": "activation-sparsity-migration",
+      "name_zh": "激活稀疏推理",
+      "kind": "retired",
+      "action": "retired_not_candidate",
+      "related_exploration": null,
+      "reason_zh": "退役/归档项，不构造新加速候选。",
+      "published_result_en": "Research preview: package TEAL and LaRoSA activation-sparsity work behind an extension boundary. No kernel, quality, model, hardware, or speedup claim is public yet.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "adm",
+      "name_zh": "昇腾分布式元数据",
+      "kind": "runtime_mod",
+      "action": "different_topology",
+      "related_exploration": null,
+      "reason_zh": "已有模型/精度或多芯片拓扑不同，不能直接叠加当前双卡BF16引擎。",
+      "published_result_en": "On Qwen3-30B-A3B-W8A8 TP1/DP4, three matched session means favored the new word path by 0.38%, 0.71%, and 1.32% against the previous published MOD; aggregate output throughput was 467.099 vs 463.376 tok/s (+0.80%). Individual rounds varied. This does not establish general speedup or research recovery acceptance.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "ascend-adaptive-quantized-kv",
+      "name_zh": "昇腾自适应 KV 量化",
+      "kind": "runtime_mod",
+      "action": "defer_hybrid_cache_qualification",
+      "related_exploration": null,
+      "reason_zh": "当前TP2、Qwen3.5混合cache、MTP2/APC/FULL尚未验收。",
+      "published_result_en": "Packaging, inert discovery, and compatibility receipts pass on Python 3.10, 3.12, and 3.14. No runtime or performance result is claimed yet.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "ascend-attention-boundary",
+      "name_zh": "昇腾注意力计算边界调优",
+      "kind": "runtime_mod",
+      "action": "hold_causal_and_identity_gaps",
+      "related_exploration": null,
+      "reason_zh": "既有观测未形成可归因、稳定的组件性能增益。",
+      "published_result_en": "The repeat-backed ON/OFF observations are published as protocol evidence. Tokenizer identity is not independently proven and the non-selected raw repeats remain local, so no causal speedup or general performance result is claimed.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "ascend-attention-optimizations",
+      "name_zh": "Ascend 注意力优化集",
+      "kind": "runtime_mod",
+      "action": "no_admitted_executable_candidate",
+      "related_exploration": null,
+      "reason_zh": "没有当前可接纳的可执行候选，不能沿用旧指标。",
+      "published_result_en": "Legacy candidate disposition is complete, but there is currently no admitted executable attention candidate. PyramidKV requires a current-runner rewrite before source and NPU qualification; no legacy metric is current.",
+      "published_evidence_level": "retest_pending",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "ascend-mapped-kv-offload",
+      "name_zh": "昇腾映射主机内存 KV 卸载",
+      "kind": "runtime_mod",
+      "action": "defer_hybrid_cache_qualification",
+      "related_exploration": null,
+      "reason_zh": "当前TP2、Qwen3.5混合cache、MTP2/APC/FULL尚未验收。",
+      "published_result_en": "Installation and inspection are available; host integration and device validation remain pending. No performance benefit is claimed.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "ascend-quant-toolkit",
+      "name_zh": "昇腾模型量化工具",
+      "kind": "tool_mod",
+      "action": "changes_model_or_offline_only",
+      "related_exploration": null,
+      "reason_zh": "离线转换或模型/精度改变需独立验收，不是保持当前BF16身份的直接执行增量。",
+      "published_result_en": "Offline artifact preparation and contract validation only. The accepted package passed its three-version CPU CI, build and wheel/sdist checks; mixed-scheme metadata, shard inventory and fail-closed rejection are covered, but no online latency, throughput, quality, or NPU runtime benefit is claimed.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "betterscale",
+      "name_zh": "BetterScale 执行与状态调度",
+      "kind": "runtime_mod",
+      "action": "already_included",
+      "related_exploration": null,
+      "reason_zh": "已在冻结r8包含，不重计为新增叠加。",
+      "published_result_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "bidkv",
+      "name_zh": "BidKV 缓存抢占策略",
+      "kind": "runtime_mod",
+      "action": "conditional_bottleneck_check",
+      "related_exploration": null,
+      "reason_zh": "仅当当前r8实际存在KV压力及有效抢占机会才继续接入；TP4低KV正例不外推TP2/20GiB。",
+      "published_result_en": "In the Qwen3.5 TP4 C12 cell with 512 MiB KV per NPU, two alternating-order pairs improved output throughput by 17.11% and 10.65% (13.83% geometric mean; 13.88% arithmetic mean). BidKV made 10 and 7 active selections with zero policy failures. Other retained cells are negative or not exercised, so this is a tested-cell result, not a general speedup claim.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "capacity-tuning",
+      "name_zh": "执行与常驻席位调优",
+      "kind": "runtime_mod",
+      "action": "already_included",
+      "related_exploration": null,
+      "reason_zh": "已在冻结r8包含，不重计为新增叠加。",
+      "published_result_en": "Included in the r8 combined-engine validation.",
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "clm-lifecycle",
+      "name_zh": "CLM 请求生命周期观测",
+      "kind": "control_plane",
+      "action": "tool_or_control_not_direct_speedup",
+      "related_exploration": null,
+      "reason_zh": "保留工具、观测和服务控制作用，不把功能交付当作单实例吞吐提升。",
+      "published_result_en": "Tool/control-plane capability: version 0.1.1 provides a bounded asynchronous report queue and observable delivery counters. It does not execute an inference optimization and makes no throughput claim.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "core-attention-boundary",
+      "name_zh": "核心注意力计算边界调优",
+      "kind": "runtime_mod",
+      "action": "hold_causal_and_identity_gaps",
+      "related_exploration": null,
+      "reason_zh": "既有观测未形成可归因、稳定的组件性能增益。",
+      "published_result_en": "The local C1/C2/C4/C8/C16 ON/OFF observations are retained as protocol evidence only. One observation per point does not establish a causal speedup or a general performance result.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "cuda-mtp",
+      "name_zh": "CUDA 多词元预测（MTP）",
+      "kind": "runtime_mod",
+      "action": "different_device",
+      "related_exploration": null,
+      "reason_zh": "CUDA路径与当前Ascend设备不同。",
+      "published_result_en": "Bounded startup and functional checks cover A6000 PP4/TP1. The tested setup reduced available KV capacity and produced one answer mismatch; it does not establish a general speed or quality gain.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "diffspec",
+      "name_zh": "DiffSpec 投机解码",
+      "kind": "runtime_mod",
+      "action": "exclude_unchanged",
+      "related_exploration": "sr1-diffspec",
+      "reason_zh": "已有原实现负收益、接近零收益或未通过稳定性能筛选；不重复推荐原配置。",
+      "published_result_en": "Implementation review is complete, but no benchmark-custodied functional or performance result exists for the current immutable target/draft revisions. Qualification remains pending; no acceleration conclusion is published.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "dla",
+      "name_zh": "DLA 输出长度感知准入",
+      "kind": "runtime_mod",
+      "action": "exclude_unchanged_no_action",
+      "related_exploration": null,
+      "reason_zh": "已测配置未触发实际控制动作，不能把准入检查当作调度收益。",
+      "published_result_en": "The pinned known-output-budget carrier has five Qwen3.5 TP2/PP1 observations with matched Native controls. Admission checks ran, but no deferral or preemption occurred. These are single observations, not validation of learned length prediction or a stable speedup.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "gdn-optimizations",
+      "name_zh": "GDN 执行优化集",
+      "kind": "runtime_mod",
+      "action": "exclude_unchanged",
+      "related_exploration": null,
+      "reason_zh": "已有原实现负收益、接近零收益或未通过稳定性能筛选；不重复推荐原配置。",
+      "published_result_en": "Formal Qwen3.5-35B-A3B BF16 TP2 testing completed three alternating fresh-process pairs. Throughput changes were +0.292%, +0.214%, and -0.516% (geometric aggregate -0.004%); TTFT/TPOT changes were also sub-percent. All 210 paired quality outputs and reasoning hashes were exact. Static decay is qualified as quality-equivalent in this cell, but no stable speedup is demonstrated.",
+      "published_evidence_level": "measured",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "gdn-state-codec",
+      "name_zh": "GDN 状态压缩与恢复",
+      "kind": "runtime_mod",
+      "action": "exclude_unchanged",
+      "related_exploration": null,
+      "reason_zh": "已有原实现负收益、接近零收益或未通过稳定性能筛选；不重复推荐原配置。",
+      "published_result_en": "Current 0.2.0 code is not beneficial in the tested Qwen3.5-35B-A3B TP2 eager AgentX cells. Across four first-turn shapes (three retained repetitions each), total-time medians ranged from 0.60% faster to 0.81% slower, but TTFT regressed in every cell by 2.09% to 4.43%; exact 128-token output hashes matched in 0/4 cells. A real concurrency-2 probe failed closed and terminated the engine. A component-only host submission change was 18.33% faster while synchronized device time stayed near 68 us, so it does not establish end-to-end gain.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "graph-coverage",
+      "name_zh": "计算图捕获范围配置",
+      "kind": "tool_mod",
+      "action": "overlaps_included_mechanism",
+      "related_exploration": null,
+      "reason_zh": "旧小模型正例保留；r8已有FULL图、预热封锁及短尾/预算调度，先证明有未覆盖瓶颈。",
+      "published_result_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: at fixed budget 32, capture sizes [1,2,4] → [1,2,4,8,16,32] reduced median batch completion by 57.0% across five process pairs. Package CPU checks pass; capture memory/startup costs also increase.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "guarded-progress-async",
+      "name_zh": "受保护的异步进度复制",
+      "kind": "runtime_mod",
+      "action": "already_included",
+      "related_exploration": null,
+      "reason_zh": "已在冻结r8包含，不重计为新增叠加。",
+      "published_result_en": "Included in the r8 combined-engine validation.",
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "hust-joint-packed",
+      "name_zh": "锁页主机状态合并",
+      "kind": "runtime_mod",
+      "action": "already_included",
+      "related_exploration": null,
+      "reason_zh": "已在冻结r8包含，不重计为新增叠加。",
+      "published_result_en": null,
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "hust-m01-correction",
+      "name_zh": "请求状态校正",
+      "kind": "runtime_mod",
+      "action": "already_included",
+      "related_exploration": null,
+      "reason_zh": "已在冻结r8包含，不重计为新增叠加。",
+      "published_result_en": null,
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "hybrid-spec",
+      "name_zh": "Hybrid Spec 混合状态投机解码",
+      "kind": "runtime_mod",
+      "action": "archived_or_unqualified",
+      "related_exploration": null,
+      "reason_zh": "保留历史，不作为当前r8合格的投机增量。",
+      "published_result_en": null,
+      "published_evidence_level": "integration_scaffold",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "instance-controller",
+      "name_zh": "实例扩缩容控制器",
+      "kind": "control_plane",
+      "action": "separate_replica_routing_workstream",
+      "related_exploration": null,
+      "reason_zh": "属于多副本服务控制，不能当作双卡TP2单引擎执行增量。",
+      "published_result_en": "Ascend validation covered real inference on four serving replicas and scale-down after draining.",
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "knorm-migration",
+      "name_zh": "KNorm KV 压缩",
+      "kind": "runtime_mod",
+      "action": "scaffold_without_current_model_evidence",
+      "related_exploration": null,
+      "reason_zh": "尚缺当前宿主完整模型性能与质量证据。",
+      "published_result_en": "Capability preview: extract KNorm as a host-governed KV compression method. The public scaffold makes no performance or quality claim yet.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "kv-controller",
+      "name_zh": "下一轮 KV 准备控制器",
+      "kind": "control_plane",
+      "action": "separate_replica_routing_workstream",
+      "related_exploration": null,
+      "reason_zh": "属于多副本服务控制，不能当作双卡TP2单引擎执行增量。",
+      "published_result_en": "Selective prewarming shortened two complete 24-program SWE-smith runs by 1.51% and 2.07%. TokenCake saved prefill work, while both full batches took longer.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "kv-materialization-arrival-control",
+      "name_zh": "KV 物化与重算",
+      "kind": "runtime_mod",
+      "action": "already_included",
+      "related_exploration": null,
+      "reason_zh": "已在冻结r8包含，不重计为新增叠加。",
+      "published_result_en": "The unified Qwen3.5 five-point observation is +7.13% geometric mean versus its exact Native series, with recompute and reuse actions exercised. The separate Qwen2.5 M2 study did not beat the best fixed policy; neither result transfers to the other protocol.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "kv-tiering-migration",
+      "name_zh": "KV 缓存分层管理",
+      "kind": "runtime_mod",
+      "action": "exclude_unchanged",
+      "related_exploration": null,
+      "reason_zh": "已有原实现负收益、接近零收益或未通过稳定性能筛选；不重复推荐原配置。",
+      "published_result_en": "Five Qwen3.5 TP2 concurrency points and matched Native controls are measured through Extension Manager. Throughput is 2.33–5.23% lower in these single observations; all windows show cache stores but zero restores, so no reuse benefit is demonstrated.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "kv-transfer-observability-migration",
+      "name_zh": "KV 传输追踪",
+      "kind": "tool_mod",
+      "action": "tool_or_control_not_direct_speedup",
+      "related_exploration": null,
+      "reason_zh": "保留工具、观测和服务控制作用，不把功能交付当作单实例吞吐提升。",
+      "published_result_en": "Experimental host-contract evidence covers clean-wheel ECPA activation, real v1/v2 callbacks, correlated recovery artifacts, process-owned runtime-effective evidence, stop, and post-exit expiry. A single-card Ascend diagnostic also passed, but it included an unmerged Ascend call-site change, so this is not release-level NPU qualification or a speedup claim.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "kvcompress-ascend",
+      "name_zh": "昇腾 KV 缓存压缩",
+      "kind": "runtime_mod",
+      "action": "exclude_unchanged",
+      "related_exploration": null,
+      "reason_zh": "已有原实现负收益、接近零收益或未通过稳定性能筛选；不重复推荐原配置。",
+      "published_result_en": "On the exact Qwen3.5-35B BF16 setting, the five-point geometric-mean output-throughput change is -3.55% versus the shared Native series.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "latchmoe",
+      "name_zh": "LatchMoE 专家权重卸载",
+      "kind": "runtime_mod",
+      "action": "exclude_unchanged",
+      "related_exploration": null,
+      "reason_zh": "已有原实现负收益、接近零收益或未通过稳定性能筛选；不重复推荐原配置。",
+      "published_result_en": "Historical report: all four ranks exercised expert mapping, host/device movement and graph replay with 48/48 stable-address checks. Four concurrent outputs, cancellation and exception recovery passed; output throughput was about 2.91 tok/s versus 23.57 tok/s without the plugin. Source link: existing benchmark source-audit snapshot, not raw run logs; original report currently not publicly retrievable.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "layered-prefill-migration",
+      "name_zh": "分层预填充",
+      "kind": "retired",
+      "action": "retired_not_candidate",
+      "related_exploration": null,
+      "reason_zh": "退役/归档项，不构造新加速候选。",
+      "published_result_en": "Capability preview: optional layered prefill behind an explicit, default-off integration boundary. Public HUST-specific benchmark results are not available yet.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "llm-serving-cost-pricing-model",
+      "name_zh": "推理服务成本估算",
+      "kind": "tool_mod",
+      "action": "tool_or_control_not_direct_speedup",
+      "related_exploration": null,
+      "reason_zh": "保留工具、观测和服务控制作用，不把功能交付当作单实例吞吐提升。",
+      "published_result_en": "Analysis preview: repository tests, a pinned shared-workload integration, wheel construction, and clean-wheel removal pass. No in-process pricing action or performance claim is made.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "memory-tracker",
+      "name_zh": "昇腾计算图显存跟踪器",
+      "kind": "tool_mod",
+      "action": "tool_or_control_not_direct_speedup",
+      "related_exploration": null,
+      "reason_zh": "保留工具、观测和服务控制作用，不把功能交付当作单实例吞吐提升。",
+      "published_result_en": null,
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "mooncake",
+      "name_zh": "Mooncake HUST",
+      "kind": "external_system",
+      "action": "external_system_not_direct_mod",
+      "related_exploration": null,
+      "reason_zh": "本轮未查到当前r8的质量合格新增收益，暂不列入优先叠加。",
+      "published_result_en": null,
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "mooncake-vllm-connectors",
+      "name_zh": "Mooncake KV 存储与传输",
+      "kind": "connector_mod",
+      "action": "defer_missing_incremental_evidence",
+      "related_exploration": null,
+      "reason_zh": "官方连接器功能证据不等于当前r8的混合状态复用与预算增益。",
+      "published_result_en": "The official MooncakeStoreConnector has functional save/load and outage/recovery evidence. The separate AscendStoreConnector + Mooncake measurements are deliberately not scored on this card because they did not exercise the official connector.",
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "muxpd",
+      "name_zh": "MuxPD 分离预填充与解码",
+      "kind": "runtime_mod",
+      "action": "hold_quality_and_execution_conflict",
+      "related_exploration": null,
+      "reason_zh": "历史配方有性能正例及质量负例；P/D worker与Microflow/CorrectedWorker需重新协调。",
+      "published_result_en": "Archived wl38/wl-2wiki-r1.6 on Qwen3.5-35B-A3B BF16: TP2 output throughput 161.68 → 199.37 token/s (+23.31%); TP4 174.51 → 187.42 (+7.40%). Each arm completed 229/229 requests. TP2 SLO attainment rose 4.37% → 55.90%, while median SSE gap rose 27.11 → 53.12 ms. Async FULL_DECODE_ONLY, APC off, TP+EP, max_num_seqs=16, max_num_batched_tokens=16384; MuxPD 43fcaf4 / core d0f22d2 / Ascend c182a9e. One single-pass pair per TP, MuxPD first; throughput includes drain time, ignore_eos=true, quality not evaluated. All six workloads and TP4 docchat SLO regression (-12.15 pp) remain in the report. Historical quality failures remain; Issue #23 closed only under revised ROW-versus-single-request-native criteria. ROW is default-off and performance unmeasured. This is not five-point leaderboard, general speedup, Manager or 0.2.0a1 wheel qualification; historical hardware/model byte identity is incomplete (see environment report).",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "opfuse",
+      "name_zh": "OpFuse 算子融合",
+      "kind": "runtime_mod",
+      "action": "mechanism_not_implemented",
+      "related_exploration": null,
+      "reason_zh": "脚手架或差分测试不等于已有融合机制实现。",
+      "published_result_en": "No performance effect is claimed yet. The repository is a scaffold with differential tests passing; the operator-fusion mechanism has not been implemented or measured online.",
+      "published_evidence_level": "scaffold_only",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "pegaflow",
+      "name_zh": "PegaFlow",
+      "kind": "external_system",
+      "action": "external_system_not_direct_mod",
+      "related_exploration": null,
+      "reason_zh": "本轮未查到当前r8的质量合格新增收益，暂不列入优先叠加。",
+      "published_result_en": null,
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "pegaflow-vllm-connectors",
+      "name_zh": "PegaFlow KV 传输",
+      "kind": "connector_mod",
+      "action": "defer_external_cache_and_tail_risk",
+      "related_exploration": null,
+      "reason_zh": "保留旧正例及恢复慢尾、额外锁页池和协议差异；不直接叠加当前逐请求重算。",
+      "published_result_en": "On the exact Qwen3.5-35B BF16 setting, the five-point geometric-mean output-throughput change is +6.34% versus the shared Native series; C1 regresses while C2-C16 improve.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "pipeline-microbatch-migration",
+      "name_zh": "流水线微批处理",
+      "kind": "runtime_mod",
+      "action": "different_topology",
+      "related_exploration": null,
+      "reason_zh": "已有模型/精度或多芯片拓扑不同，不能直接叠加当前双卡BF16引擎。",
+      "published_result_en": "Five Qwen3.5 TP2/PP2 concurrency observations and matched Native controls are published, accounting for all four chips. The batch admission policy was exercised; each point is a single observation and does not establish a stable speedup.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "prefill-admission",
+      "name_zh": "短请求预填充准入",
+      "kind": "tool_mod",
+      "action": "overlaps_included_mechanism",
+      "related_exploration": null,
+      "reason_zh": "旧小模型正例保留；r8已有FULL图、预热封锁及短尾/预算调度，先证明有未覆盖瓶颈。",
+      "published_result_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: cap 224 at unchanged global budget 256 reduced short-request first-token latency by 68.17% (126.746 → 40.342 ms); batch completion increased 2.02%. Five process pairs, 60 unprofiled batches; exact token agreement.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "prefill-microflow",
+      "name_zh": "Microflow 预填充流水线",
+      "kind": "runtime_mod",
+      "action": "already_included",
+      "related_exploration": null,
+      "reason_zh": "已在冻结r8包含，不重计为新增叠加。",
+      "published_result_en": null,
+      "published_evidence_level": "performance_measured",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "prefix-router-migration",
+      "name_zh": "Prefix Router 前缀感知路由",
+      "kind": "runtime_mod",
+      "action": "separate_replica_routing_workstream",
+      "related_exploration": null,
+      "reason_zh": "已测两副本路由，有历史吞吐正例和来源归因缺口；不是双卡TP2单引擎直接执行增量。",
+      "published_result_en": "Three matched 900-second rounds at C1/C2/C4/C8/C16 reported 0.96%–17.52% higher throughput than the same two-replica random-routing deployment. Source-integrity gaps in several Prometheus files prevent per-request causal attribution.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "pyramidkv-ascend-migration",
+      "name_zh": "PyramidKV 缓存压缩",
+      "kind": "runtime_mod",
+      "action": "exclude_unchanged",
+      "related_exploration": "sr2-pyramidkv",
+      "reason_zh": "已有原实现负收益、接近零收益或未通过稳定性能筛选；不重复推荐原配置。",
+      "published_result_en": "Paired Qwen3.5-35B-A3B BF16 TP2 evidence: peak KV-pool usage fell 25.47% relatively; held-out LongBench F1 fell 0.26 points. At 8K/24K, throughput fell 2.6–10.3% and device HBM rose about 0.4 GiB. These results apply only to the pinned graph-slot fix and 1368/beta=2 profile; they do not establish a general speedup.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "qos-scheduler-migration",
+      "name_zh": "QoS 服务质量调度",
+      "kind": "retired",
+      "action": "retired_not_candidate",
+      "related_exploration": null,
+      "reason_zh": "退役/归档项，不构造新加速候选。",
+      "published_result_en": "Capability preview: schedule against TTFT, TBT, and TTLT deadlines through a runtime policy extension. Public SLO and throughput results are pending.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "quality-bounded-inference",
+      "name_zh": "质量约束推理策略",
+      "kind": "control_plane",
+      "action": "not_runtime_qualified",
+      "related_exploration": null,
+      "reason_zh": "CPU宿主契约/生命周期已验证；没有当前NPU、模型质量或性能资格。",
+      "published_result_en": "Experimental CPU host-contract evidence: 1,069 tests, current-host callback, clean-wheel activation, process-owned runtime evidence and supervised stop pass. This is not model-quality, NPU, adaptive-policy or performance qualification.",
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "quantized-kv-cache-migration",
+      "name_zh": "KV 缓存量化",
+      "kind": "runtime_mod",
+      "action": "defer_hybrid_cache_qualification",
+      "related_exploration": null,
+      "reason_zh": "当前TP2、Qwen3.5混合cache、MTP2/APC/FULL尚未验收。",
+      "published_result_en": "Real Qwen2.5-14B single-card serving, prefill/decode, ACL Graph replay, and three OpenAI API requests are verified. No matched performance comparison has been published.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "request-lifecycle-profiler",
+      "name_zh": "请求生命周期因果分析器",
+      "kind": "tool_mod",
+      "action": "tool_or_control_not_direct_speedup",
+      "related_exploration": null,
+      "reason_zh": "保留工具、观测和服务控制作用，不把功能交付当作单实例吞吐提升。",
+      "published_result_en": "Experimental CPU host-contract evidence: clean-wheel activation, real EventBus callback evidence, supervised stop, disable and forget pass. Blind attribution, native NPU execution and performance remain unqualified; no speedup is claimed.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "request-throttling-controller",
+      "name_zh": "请求限流控制器",
+      "kind": "control_plane",
+      "action": "reuse_existing_scenario_result",
+      "related_exploration": null,
+      "reason_zh": "已有r8多轮缓存竞争正例与固定MMLU/Frontier负例；复用结论，不重复推荐固定负载原配方。",
+      "published_result_en": "A pinned 192-concurrency, no-keepalive run reported 86.025 steps/min for the thin adapter versus 65.625 for plain vLLM (1.31x) and 91.05 for the official path (94.5%), with zero recorded errors. This is one narrow historical cell, not a general performance guarantee or current-host ECPA NPU qualification. Link: historical public summary only; original report is not publicly retrievable and was not copied this round.",
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "ride-control-plane",
+      "name_zh": "RIDE 跨实例服务控制面",
+      "kind": "control_plane",
+      "action": "tool_or_control_not_direct_speedup",
+      "related_exploration": null,
+      "reason_zh": "保留工具、观测和服务控制作用，不把功能交付当作单实例吞吐提升。",
+      "published_result_en": null,
+      "published_evidence_level": "descriptor_only",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "ride-runtime-bridge",
+      "name_zh": "RIDE 远程运行时边车",
+      "kind": "control_plane",
+      "action": "tool_or_control_not_direct_speedup",
+      "related_exploration": null,
+      "reason_zh": "保留工具、观测和服务控制作用，不把功能交付当作单实例吞吐提升。",
+      "published_result_en": null,
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "runtime-micro-optimizations",
+      "name_zh": "推理运行时开销优化",
+      "kind": "runtime_mod",
+      "action": "exclude_unchanged",
+      "related_exploration": null,
+      "reason_zh": "已有原实现负收益、接近零收益或未通过稳定性能筛选；不重复推荐原配置。",
+      "published_result_en": "Formal Qwen3.5-35B-A3B BF16 TP2 testing completed three alternating fresh-process pairs. Throughput changes were +0.841%, -0.494%, and -0.213% (geometric aggregate +0.043%); TTFT/TPOT changes were also sub-percent. All 210 paired quality outputs and reasoning hashes were exact. The MOD is qualified as quality-equivalent in this cell, but no stable speedup is demonstrated.",
+      "published_evidence_level": "measured",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "scheduler-policy-lab",
+      "name_zh": "调度策略研究与测试",
+      "kind": "tool_mod",
+      "action": "tool_or_control_not_direct_speedup",
+      "related_exploration": null,
+      "reason_zh": "保留工具、观测和服务控制作用，不把功能交付当作单实例吞吐提升。",
+      "published_result_en": null,
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "sealed-serving-warmup",
+      "name_zh": "服务预热与编译封锁",
+      "kind": "runtime_mod",
+      "action": "already_included",
+      "related_exploration": null,
+      "reason_zh": "已在冻结r8包含，不重计为新增叠加。",
+      "published_result_en": "Included in the r8 combined-engine validation.",
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "sglang-prepared-dispatch",
+      "name_zh": "SGLang 注意力调用预封装",
+      "kind": "runtime_mod",
+      "action": "different_host_porting_only",
+      "related_exploration": null,
+      "reason_zh": "现有实现属于SGLang；当前r8 FULL路径是否仍有同类开销尚需证明。",
+      "published_result_en": "Historical measured core: median throughput +9.35% over the accepted batch-copy baseline, four independent pairs, exact token/top1-ID/logprob agreement. The packaged adapter passes CPU tests; its separate device requalification is pending.",
+      "published_evidence_level": "code_available",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "short-prefill-tail",
+      "name_zh": "短预填充尾段优先调度",
+      "kind": "runtime_mod",
+      "action": "already_included",
+      "related_exploration": null,
+      "reason_zh": "已在冻结r8包含，不重计为新增叠加。",
+      "published_result_en": "Included in the r8 combined-engine validation.",
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "simllm-migration",
+      "name_zh": "SimLLM 近似前缀复用",
+      "kind": "runtime_mod",
+      "action": "exclude_quality_risk",
+      "related_exploration": null,
+      "reason_zh": "现有性能观察不能覆盖质量负例；没有实质质量修正不重新推荐。",
+      "published_result_en": "2026-11-02 TTFT admission follow-up on Qwen3.5-35B-A3B W8A8, Ascend 910B3 TP1/eager: the constructed 16K-prompt / 8192-token-floor cell reduced median TTFT by 45.9% and increased throughput by 12.6%, but approximate reuse answered only 5/12 correctly versus 12/12 for the paired disabled baseline. The original similarity replay (100 requests, one output token) changed warm TTFT by -1.5% and post-first-request throughput by +4.0%, with 92/100 outputs equal; it did not reproduce a 10% gain. The 8192-floor replay arm failed during startup and has no result. These diagnostics and earlier 5,000-request replays do not establish quality-qualified speedup.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "slicegpt-migration",
+      "name_zh": "SliceGPT 模型剪枝",
+      "kind": "tool_mod",
+      "action": "changes_model_or_offline_only",
+      "related_exploration": null,
+      "reason_zh": "离线转换或模型/精度改变需独立验收，不是保持当前BF16身份的直接执行增量。",
+      "published_result_en": "Offline conversion and package lifecycle are implemented and covered by 44 tests. Real CUDA/NPU model loading, serving restoration, accuracy, memory, and performance remain unqualified.",
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "split-batch-full-graph-migration",
+      "name_zh": "分批次与全图并行",
+      "kind": "runtime_mod",
+      "action": "not_runtime_qualified",
+      "related_exploration": null,
+      "reason_zh": "已有规划/双流和图执行预览，缺当前r8匹配完整模型性能证据；不能只因名称含全图就推荐。",
+      "published_result_en": "Capability preview: split-batch planning, dual-stream replay, and full-graph parallel execution. Public matched performance results are not available yet.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "stateaxis-async-kv-transfer",
+      "name_zh": "StateAxis 异步 KV 传输",
+      "kind": "runtime_mod",
+      "action": "defer_missing_current_restore_bottleneck",
+      "related_exploration": null,
+      "reason_zh": "旧组件恢复正例保留，当前独立版本及r8真实restore路径未验收。",
+      "published_result_en": "Historical Qwen2.5-14B matched component runs were exact and lifecycle-clean. Host-tier-hit P50 improved from 592.597 ms to 333.716 ms (-43.686%) and pair throughput from 3.291 to 5.626 ops/s, with overlap proven in 3/3 candidate runs. This does not qualify active version 0.2.0 or general serving throughput.",
+      "published_evidence_level": "runtime_activation_verified_historical_performance_only",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "stateaxis-automatic-prefix-cache",
+      "name_zh": "StateAxis 自动前缀缓存",
+      "kind": "runtime_mod",
+      "action": "exclude_unchanged_no_hits",
+      "related_exploration": null,
+      "reason_zh": "历史closure没有缓存命中，只证明无害边界。",
+      "published_result_en": "The frozen historical closure was exact and lifecycle-clean with 0.0256% throughput overhead, but exercised zero cache hits. It establishes a no-harm boundary only; it does not qualify an online gain or the independent MOD.",
+      "published_evidence_level": "runtime_activation_verified_performance_unqualified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "stateaxis-pipelined-weight-loading",
+      "name_zh": "StateAxis 流水化权重加载",
+      "kind": "runtime_mod",
+      "action": "startup_only_not_steady_state",
+      "related_exploration": null,
+      "reason_zh": "启动耗时收益独立保留，不列稳态吞吐加速项。",
+      "published_result_en": "A matched 3+3 real-NPU carrier diagnostic on Qwen3.5-35B-A3B BF16 TP2 reduced median process-to-Ready time from 337.70 s to 301.62 s (10.68%) and median weight iteration from 166.20 s to 107.15 s (35.53%). This is startup evidence, not a steady-state throughput claim or a formal ECPA ON/OFF qualification.",
+      "published_evidence_level": "hardware_startup_diagnostic",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "traceloom",
+      "name_zh": "TraceLoom 推理时间线分析",
+      "kind": "tool_mod",
+      "action": "tool_or_control_not_direct_speedup",
+      "related_exploration": null,
+      "reason_zh": "保留工具、观测和服务控制作用，不把功能交付当作单实例吞吐提升。",
+      "published_result_en": "Bounded Qwen3-0.6B TP1/eager capture associates 14,144 / 14,178 events with supplied steps (32 nonempty-step macro instances). The retained TP2 HOST→AIV→AIV→HOST study adds four processes, eight worker profiles, 496 replays, 14,384 launch coordinates and 273,544 member occurrences; workflow and raw profiles agree. Paired span differences change sign: this validates captured analysis evidence, not a stable backend speedup, universal distributed coverage or instrumentation overhead.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "tricard-clm-lifecycle",
+      "name_zh": "Tricard 生命周期观测",
+      "kind": "control_plane",
+      "action": "tool_or_control_not_direct_speedup",
+      "related_exploration": null,
+      "reason_zh": "保留工具、观测和服务控制作用，不把功能交付当作单实例吞吐提升。",
+      "published_result_en": "Control-plane preview: clean-wheel activation intent and event-sink packaging are verified. No live observer receipt, NPU execution, or throughput benefit is claimed.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "unified-communication-migration",
+      "name_zh": "统一通信",
+      "kind": "runtime_mod",
+      "action": "functional_api_not_speedup",
+      "related_exploration": null,
+      "reason_zh": "统一通信是功能接入，实际MC2融合另有C07未通过记录。",
+      "published_result_en": "The host contract is merged in vllm-hust #74 and covers all-reduce, all-gather, reduce-scatter, broadcast, explicit native fallback, visible failures, and ordered teardown. The HCCL adapter is implemented in vllm-ascend-hust #71. This is functional integration, not a measured speedup claim; multi-device hardware validation remains pending.",
+      "published_evidence_level": "cpu_smoke",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "vllm-hust-extension-manager",
+      "name_zh": "扩展发现与启用管理",
+      "kind": "tool_mod",
+      "action": "already_included",
+      "related_exploration": null,
+      "reason_zh": "已在冻结r8包含，不重计为新增叠加。",
+      "published_result_en": "Extension discovery, validation and activation are included in the frozen engine stack.",
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "vllm-hust-opset",
+      "name_zh": "OPset 算子优化集",
+      "kind": "runtime_mod",
+      "action": "conditional_path_check",
+      "related_exploration": null,
+      "reason_zh": "先核对MoE底座是否实际命中受支持Linear–SwiGLU路径和ABI；没有命中即移除。",
+      "published_result_en": "On Qwen2.5-7B-Instruct, Ascend 910B2/CANN 9.0.0, Graph/batch-invariant, a 64-request ShareGPT workload at concurrency 4 gave 3.82% lower steady-state TPOT and 5.24% higher output-token throughput across three matched rounds for linear-SwiGLU fusion. The published compatibility profile is a separate CANN 9.1 beta.3 line; cold-start performance and other paths are not covered by this result.",
+      "published_evidence_level": "performance_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "vllm-local-control-host",
+      "name_zh": "vLLM 本地控制接口",
+      "kind": "control_plane",
+      "action": "tool_or_control_not_direct_speedup",
+      "related_exploration": null,
+      "reason_zh": "保留工具、观测和服务控制作用，不把功能交付当作单实例吞吐提升。",
+      "published_result_en": null,
+      "published_evidence_level": "integration_tested",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    },
+    {
+      "id": "vspec",
+      "name_zh": "vSpec 投机解码",
+      "kind": "runtime_mod",
+      "action": "hold_quality_and_integration",
+      "related_exploration": "vspec-local-argmax",
+      "reason_zh": "局部argmax已测无收益；动态vSpec专题另有质量和后端归因问题，不能笼统列为首选。",
+      "published_result_en": "The repository reports a same-card GSM8K B128 recovery result of 1.518x. That result is specific to the published Qwen2.5 configuration; adaptive control does not guarantee a gain for other models, batch sizes, or request distributions.",
+      "published_evidence_level": "hardware_verified",
+      "evidence": [
+        {
+          "repository": "vLLM-HUST/vllm-hust-benchmark",
+          "revision": "23d9903d635ec86d980c9d211e9050b2ef724d8e",
+          "path": "website-publication/data/ecosystem.json",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/23d9903d635ec86d980c9d211e9050b2ef724d8e/website-publication/data/ecosystem.json"
+        }
+      ],
+      "unchanged_repeat_recommended": false
+    }
+  ],
+  "recommendations": [
+    {
+      "rank": 1,
+      "id": "restore-rms-v021",
+      "catalog_id": null,
+      "classification": "continue_existing_positive_component_candidate",
+      "action": "continue_existing_validation",
+      "title_zh": "继续恢复＋门控归一化融合既有接入",
+      "new_experiment": false,
+      "reason_zh": "现有组件正例且C16/C17已有接入准备；先闭合实际服务形状/NPU资格，随后才比较r8整模型。",
+      "must_not_claim_zh": "未证明r8吞吐增益、纯decode收益或质量等价。"
+    },
+    {
+      "rank": 2,
+      "id": "bidkv",
+      "catalog_id": "bidkv",
+      "classification": "conditional_bottleneck_check_only",
+      "action": "conditional_bottleneck_check",
+      "title_zh": "BidKV：先查真实KV压力及有效抢占机会",
+      "new_experiment": false,
+      "reason_zh": "已有别的低KV/TP4单元正例，但当前r8和RTC记录不能证明相同瓶颈。",
+      "must_not_claim_zh": "无压力/无有效动作时不安排原配置加速复测；旧13.83%不是当前增量。"
+    },
+    {
+      "rank": 3,
+      "id": "vllm-hust-opset",
+      "catalog_id": "vllm-hust-opset",
+      "classification": "conditional_path_check_only",
+      "action": "conditional_path_check",
+      "title_zh": "OpSet：先核对MoE底座调用命中及兼容性",
+      "new_experiment": false,
+      "reason_zh": "局部融合机制可能与现有调度正交，但旧7B dense Graph正例不说明当前MoE能命中。",
+      "must_not_claim_zh": "未命中支持路径就从候选移除；旧5.24%不是r8叠加收益。"
+    }
+  ],
+  "decision_zh": "本次核验范围内，没有另一个已证明相对r8提升完整模型性能且质量合格的可直接开启MOD。唯一首要推进项是继续既有restore/RMS验证；BidKV与OpSet仅先做瓶颈/路径资格检查。",
+  "new_hardware_experiments_started": 0,
+  "later_integration_families": [
+    {
+      "id": "r9-intern-native-20261120",
+      "record_type": "native-model-integration-not-new-sr-id",
+      "source_commit": "84cc5dcd02a6b0ac7b346ff3cd96fbb2765d301f",
+      "report": "reports/r9-intern-native-20261120/README.md",
+      "inherited_r8_mods_recounted": false,
+      "standalone_mod_speedup_claimed": false,
+      "original018_pair": false,
+      "disposition": "FrozenR9; InternMMLU200/C8qualification complete; all original regressions and failed attempts retained"
+    }
+  ]
+}

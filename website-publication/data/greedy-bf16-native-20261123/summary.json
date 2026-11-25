@@ -1,0 +1,143 @@
+{
+  "schema": "vllm-hust-experimental-mod-evidence/v1",
+  "id": "greedy-bf16-native",
+  "name_en": "Native BF16 Greedy Sampling",
+  "name_zh": "BF16 直接贪心采样",
+  "date": "2026-11-23",
+  "status": "experimental",
+  "series_kind": "same-device-r10-development-comparison",
+  "baseline": {
+    "release": "full-answer-b1-20261121-r10",
+    "package_version": "2026.11.21.10"
+  },
+  "candidate": {
+    "baseline_file_sha256": "d62875a1c942255586b9bdd85abb820153be4731fa99406ebb0ab25b0d5c816b",
+    "replacement_file_sha256": "6f8873c1d804af734934d9786b4d96b2326aa4ace6e644dbb50f2381f7b2cc48",
+    "included_in_frozen_engine": false,
+    "delivery": "single-source experimental overlay",
+    "maintainer_status": "no named maintainer confirmed",
+    "upstream_reference": "https://github.com/vllm-project/vllm-ascend/blob/v0.30.0/vllm_ascend/sample/rejection_sampler.py#L171-L201"
+  },
+  "setup": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "BF16",
+    "device": "Ascend 910B2",
+    "device_count": 2,
+    "tensor_parallel": 2,
+    "runtime": "R10 FULL graph, MTP2, E36/R54",
+    "max_model_length": 32768,
+    "generation": {
+      "temperature": 0,
+      "request_seed": 0,
+      "max_completion_tokens": 8192,
+      "eos": "enabled"
+    },
+    "concurrency": 10,
+    "metric_units": {
+      "output_tok_s": "token/s",
+      "wall_s": "s",
+      "ttft_ms": "ms",
+      "tpot_ms": "ms"
+    }
+  },
+  "mechanism_en": "For eligible all-greedy MTP requests, take the row-wise argmax directly on BF16 full-vocabulary scores, then select the target and bonus token IDs. Rejection sampling remains in use. Requests with sampling constraints or logprobs keep the frozen path.",
+  "mechanism_zh": "符合条件的纯贪心 MTP 请求直接对 BF16 全词表分数按行取最大值，再取目标和补位 token ID。保留拒绝采样。带采样约束或要求输出 logprobs 的请求沿用冻结路径。",
+  "screens": [
+    {
+      "id": "frozen-mmlu-first-10",
+      "cases_per_arm": 10,
+      "scope_en": "First ten frozen MMLU-Pro cases, all biology, replayed as one batch of ten.",
+      "scope_zh": "冻结 MMLU-Pro 的前 10 题，全为生物学，一批并发 10。",
+      "performance": {
+        "output_tok_s": {
+          "r10": 366.04520553808646,
+          "candidate": 388.29570532817473,
+          "change_percent": 6.078620742315155,
+          "improved": true
+        },
+        "mean_ttft_ms": {
+          "r10": 755.6406630930724,
+          "candidate": 752.7156821015524,
+          "change_percent": -0.3870862348179016,
+          "improved": true
+        },
+        "p95_ttft_ms": {
+          "r10": 1087.155949343287,
+          "candidate": 1083.2230414525839,
+          "change_percent": -0.3617611523975772,
+          "improved": true
+        },
+        "mean_tpot_ms": {
+          "r10": 12.198469433711526,
+          "candidate": 12.169601132797599,
+          "change_percent": -0.2366551071903089,
+          "improved": true
+        },
+        "p95_tpot_ms": {
+          "r10": 13.771229609220265,
+          "candidate": 13.189223363671823,
+          "change_percent": -4.226247488886326,
+          "improved": true
+        }
+      },
+      "quality": {
+        "r10_correct": 8,
+        "candidate_correct": 9,
+        "r10_output_tokens": 25408,
+        "candidate_output_tokens": 27211,
+        "newly_wrong": 1
+      },
+      "retained_raw_archive_sha256": "fef850a6b3ba3707f263218eba7aba2fc249f55c431b4706f118a2e9dd519ed7"
+    },
+    {
+      "id": "frozen-mmlu-remaining-190",
+      "cases_per_arm": 190,
+      "scope_en": "Remaining 190 frozen MMLU-Pro cases across 14 fields. Nineteen successive batches of ten with per-request prefix cache isolation. Same cards for both arms.",
+      "scope_zh": "冻结 MMLU-Pro 剩余 190 题，覆盖 14 个学科。每批并发 10，共 19 批，逐题隔离前缀缓存，两组使用同一对卡。",
+      "request_plan_sha256": "38cec05c2744c902974fd952366b3b216ae9bc62292a783769756ce8b294f536",
+      "r10": {
+        "cases": 190,
+        "correct": 141,
+        "truncated": 22,
+        "unparsed": 0,
+        "output_tokens": 680134,
+        "wall_s": 1361.0256252649997,
+        "output_tok_s": 499.72167119746473,
+        "mean_ttft_ms": 752.6463814736895,
+        "p95_ttft_ms": 1305.0970445139683,
+        "mean_tpot_ms": 11.882058894768646,
+        "p95_tpot_ms": 13.998201345949633
+      },
+      "candidate": {
+        "cases": 190,
+        "correct": 139,
+        "truncated": 16,
+        "unparsed": 0,
+        "output_tokens": 661597,
+        "wall_s": 1329.9070718480216,
+        "output_tok_s": 497.4761124329186,
+        "mean_ttft_ms": 760.1306039103197,
+        "p95_ttft_ms": 1302.157946555235,
+        "mean_tpot_ms": 11.7713367751392,
+        "p95_tpot_ms": 13.70736201715649
+      },
+      "change_percent": {
+        "wall_s": -2.286404667136166,
+        "output_tok_s": -0.44936189362473344,
+        "mean_ttft_ms": 0.9943876195851686,
+        "p95_ttft_ms": -0.22520148758959913,
+        "mean_tpot_ms": -0.931842878494682,
+        "p95_tpot_ms": -2.077690709008828
+      },
+      "newly_wrong": 23,
+      "newly_correct": 21,
+      "newly_truncated": 4,
+      "resolved_truncation": 10,
+      "peer_devices_idle_in_all_samples": true,
+      "raw_streams_recomputed": 380,
+      "retained_raw_archive_sha256": "c2100c6b5cb7ad8e31ef32383b208499f1a23f5cf14f13112b27583e6f851d7f"
+    }
+  ],
+  "decision_en": "The 190-case expansion showed a small P95 TPOT reduction with a lower output rate and two fewer correct answers. The two screens have separate denominators. Promotion to a frozen engine remains pending.",
+  "decision_zh": "190 题扩测观察到 P95 每 token 耗时降低，同时输出吞吐下降、少答对两题。两轮分别统计，尚未晋级冻结引擎组合。"
+}

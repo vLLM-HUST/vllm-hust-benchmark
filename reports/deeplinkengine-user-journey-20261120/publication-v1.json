@@ -1,0 +1,164 @@
+{
+  "schema": "deeplinkengine-archived-user-journey-publication/v1",
+  "date": "2026-11-20",
+  "origin_repository": "DeepLinkNext/DeepLinkEngine",
+  "custody_repository": "vLLM-HUST/vllm-hust-benchmark",
+  "release": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/deeplinkengine-user-journey-20261120-v2",
+  "assessment": {
+    "schema": "deeplinkengine-user-journey-assessment/v1",
+    "date": "2026-11-20",
+    "repository": "DeepLinkNext/DeepLinkEngine",
+    "runtime_release": "full-answer-b1-20261117-r8",
+    "runtime_version": "2026.11.17.8.post2",
+    "container": "research-2card",
+    "physical_devices": [
+      0,
+      7
+    ],
+    "new_experiments_started_for_archiving": 0,
+    "standalone": {
+      "status": "passed",
+      "source_commit": "2e90cef5c908478dbba0776a3d7ea8fdab868e11",
+      "model": "/models/Qwen3.5-35B-A3B",
+      "runtime_geometry": {
+        "schema": "vllm-hust-runtime-geometry/v1",
+        "id": "r8-E36-R54",
+        "execution_seats": 36,
+        "resident_seats": 54,
+        "speculative_tokens": 2,
+        "prefill_tokens": 4096,
+        "host_bytes_per_rank": 4294967296
+      },
+      "verified_runtime_files": 9235,
+      "models_endpoint_verified": true,
+      "example_client_returncode": 0,
+      "completion": {
+        "content": "Hello!",
+        "finish_reason": "stop",
+        "usage": {
+          "prompt_tokens": 18,
+          "total_tokens": 21,
+          "completion_tokens": 3,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "created_cache_tokens": 0,
+            "multimodal_tokens": null
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0
+          }
+        }
+      },
+      "cold_start_seconds": 2206.266204595566,
+      "cold_start_scope": "Observed supervised launch to readiness; includes startup preparation; not an inference latency benchmark",
+      "graceful_shutdown_returncode": 130,
+      "cleanup_verified": true
+    },
+    "installation": {
+      "status": "passed",
+      "verified_runtime_files": 9235,
+      "shared_environment_modified": false
+    },
+    "host_pin": {
+      "status": "completed",
+      "elapsed_seconds": 215.09675363299903,
+      "policy": {
+        "schema": "pinned-memory-preflight-policy/v1",
+        "timeout_seconds": 900,
+        "scope": "Imports and the original two32MiB pinned H2D/D2H checks before model loading; native arm clocks remain unchanged"
+      },
+      "result": {
+        "devices": [
+          {
+            "device": 0,
+            "bytes": 33554432,
+            "pinned": true,
+            "h2d_d2h_equal": true
+          },
+          {
+            "device": 1,
+            "bytes": 33554432,
+            "pinned": true,
+            "h2d_d2h_equal": true
+          }
+        ],
+        "memlock": [
+          65536,
+          65536
+        ],
+        "model_loaded": false
+      },
+      "source_file_sha256": "e6e59f2b3f14c7148fc82a247c3bc60a61d777a073b3617dffa441cc66e8c84f",
+      "original_payload_sha256": "8bdaea3ee965efa4795e64ad1fe09c91990594bd88d09b393fecd4dc58f0b9ed"
+    },
+    "paired_campaign": {
+      "attempts": 6,
+      "status": "failed",
+      "source_commit": "b94d2293f9b37bda332126747a7edef3ba9f02c1",
+      "first_preparation_stages_completed": 5,
+      "fixed_five_stages_completed": 0,
+      "fixed_five_stages_planned": 15,
+      "formal_client_started": false,
+      "native_arm_failure": "TimeoutError: Original arm deadline reached",
+      "outer_failure": "Execution cancelled by signal 2",
+      "cleanup_quiescent": true,
+      "new_complete_effective_compute_result": null,
+      "new_acceptance_verdict": null,
+      "followup_device_runs_cancelled_by_user": true
+    },
+    "third_party_verification": "pending; this is operator-collected evidence, not independent certification",
+    "fills_prior_archive_gap": {
+      "record": "audit/2026-11-20-standalone.json",
+      "field": "model_http_smoke",
+      "previous_status": "not_run",
+      "additional_evidence_status": "passed",
+      "historical_record_preserved": true
+    },
+    "limits": [
+      "Standalone HTTP usability is not fixed-five performance, long-context stability, cost reduction or effective-compute acceptance.",
+      "All six incomplete paired attempts and their distinct failures remain archived; no missing result is filled with zero or another version.",
+      "This archive does not supply R9/R10 measurements and starts no replacement tests.",
+      "Runtime wheels, original018 image layers, CANN, models and generated compiler caches are excluded; original installation, dependency, model-weight and source identities are included."
+    ]
+  },
+  "archive": {
+    "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/untagged-f3948f3b3014d932cdd3/deeplinkengine-user-journey-20261120-v2.tar.gz",
+    "sha256": "ccf867075f47e6f87ab8d5eefd548dc8e41d6727aaf5923f479b2934b5e270d4",
+    "bytes": 23127731
+  },
+  "manifest": {
+    "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/untagged-f3948f3b3014d932cdd3/manifest.json",
+    "sha256": "5bb16c674a39511cb23634d72849be369adbf2fd9d7efc9b95edf7bf40443bee",
+    "bytes": 2191103
+  },
+  "recovery": {
+    "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/untagged-f3948f3b3014d932cdd3/recover_archive.py",
+    "sha256": "e4ed32e1954b11621524918e98f8e8170be34b447f85da6aa88fbbbad7aea9c4",
+    "bytes": 5108
+  },
+  "verification": {
+    "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/deeplinkengine-user-journey-20261120-v2/public-recovery-verification-v1.json",
+    "sha256": "5883e60819810511486d5698a1f4a5bb1fe5208f66b135f85332495b3e693fa3",
+    "bytes": 2636
+  },
+  "recovery_command": "python recover_archive.py --archive deeplinkengine-user-journey-20261120-v2.tar.gz --out recovered-user-journey",
+  "coverage": {
+    "original_records": 203,
+    "complete_source_snapshots": 7,
+    "restored_files": 4936,
+    "restored_bytes": 287623706
+  },
+  "validation": {
+    "anonymous_download": true,
+    "all_downloaded_bytes_equal": true,
+    "fresh_recovery": true,
+    "all_restored_hashes_verified": true,
+    "all_source_git_blob_identities_verified": true,
+    "model_started": false,
+    "inference_requests_sent": false
+  },
+  "download_center": {
+    "release": "https://github.com/DeepLinkNext/DeepLinkEngine/releases/tag/r8-runtime-dependencies-20261119-v1",
+    "index": "https://github.com/DeepLinkNext/DeepLinkEngine/releases/download/r8-runtime-dependencies-20261119-v1/deeplinkengine-user-journey-20261120-v2-publication.json"
+  }
+}

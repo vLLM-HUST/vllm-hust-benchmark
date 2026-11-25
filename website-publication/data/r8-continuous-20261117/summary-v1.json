@@ -1,0 +1,128 @@
+{
+  "schema": "r8-first-current-continuous-pair/v1",
+  "scope": "C8 closed-loop stress only; not five-dataset quality, native compute efficiency, 32K or multitenant acceptance",
+  "formal_requests": 871,
+  "total_streams": 1055,
+  "failures": 0,
+  "independent_runs_per_arm": 1,
+  "comparisons": {
+    "4096-formal": {
+      "throughput_ratio": 3.055599971044363,
+      "ttft_reduction_percent": 52.80698249796669,
+      "tpot_reduction_percent": 68.49560429891484,
+      "tail_changes_percent": {
+        "ttft_p95_ms": -52.664373840358344,
+        "ttft_p99_ms": -70.68583117691603,
+        "tpot_p95_ms": -67.5197089726714,
+        "tpot_p99_ms": -67.25654908255373
+      }
+    },
+    "16384-formal": {
+      "throughput_ratio": 2.6809497284543826,
+      "ttft_reduction_percent": 48.43810819958249,
+      "tpot_reduction_percent": 65.35260701668422,
+      "tail_changes_percent": {
+        "ttft_p95_ms": -49.75311957248852,
+        "ttft_p99_ms": -60.5985296325567,
+        "tpot_p95_ms": -62.855052889859266,
+        "tpot_p99_ms": -62.7067423787482
+      }
+    }
+  },
+  "groups": {
+    "B0": {
+      "4096-formal": {
+        "requests": 152,
+        "failed": 0,
+        "output_tokens": 38912,
+        "cohort_wall_seconds": 307.2702257260098,
+        "output_tokens_per_second": 126.63771736444615,
+        "mean_ttft_ms": 1587.6534701348742,
+        "mean_tpot_ms": 56.417137610355304,
+        "ttft_p95_ms": 2741.4477860875195,
+        "ttft_p99_ms": 5808.739209432978,
+        "tpot_p95_ms": 60.3379483265784,
+        "tpot_p99_ms": 62.27559186877939
+      },
+      "16384-formal": {
+        "requests": 73,
+        "failed": 0,
+        "output_tokens": 18688,
+        "cohort_wall_seconds": 313.8515266640461,
+        "output_tokens_per_second": 59.5440786878952,
+        "mean_ttft_ms": 6013.84140073628,
+        "mean_tpot_ms": 109.53333811878106,
+        "ttft_p95_ms": 14290.106372989218,
+        "ttft_p99_ms": 24648.808468477804,
+        "tpot_p95_ms": 119.53590920085415,
+        "tpot_p99_ms": 120.98690246140548
+      }
+    },
+    "B1": {
+      "4096-formal": {
+        "requests": 457,
+        "failed": 0,
+        "output_tokens": 116992,
+        "cohort_wall_seconds": 302.34068614197895,
+        "output_tokens_per_second": 386.95420551192586,
+        "mean_ttft_ms": 749.2615800323903,
+        "mean_tpot_ms": 17.77387827599208,
+        "ttft_p95_ms": 1297.6814753841609,
+        "ttft_p99_ms": 1702.7836183458562,
+        "tpot_p95_ms": 19.59794121639182,
+        "tpot_p99_ms": 20.39117785710294
+      },
+      "16384-formal": {
+        "requests": 189,
+        "failed": 0,
+        "output_tokens": 48384,
+        "cohort_wall_seconds": 303.09203187096864,
+        "output_tokens_per_second": 159.63468158937903,
+        "mean_ttft_ms": 3100.850396096354,
+        "mean_tpot_ms": 37.9504461057581,
+        "ttft_p95_ms": 7180.332662200089,
+        "ttft_p99_ms": 9711.99296463514,
+        "tpot_p95_ms": 44.40155025028313,
+        "tpot_p99_ms": 45.119957222904574
+      }
+    }
+  },
+  "evidence": {
+    "raw": {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/full-answer-b1-20261117-r8/r8-first-current-B0-B1-continuous-pair-raw-and-CPU-replay-v1.zip",
+      "sha256": "d146ed4878b2fd0ac87db86d6280b19e6b683fdae922d13857384e245cb9e88a",
+      "bytes": 26300935,
+      "asset_id": 759286048,
+      "redownload_verified": true
+    },
+    "analysis": {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/full-answer-b1-20261117-r8/continuous-review-v1.json",
+      "sha256": "3f9b94f3b857a881463fa443b2c324a278423581a144529e1ae3f6d1839addf0",
+      "bytes": 10876,
+      "asset_id": 759286900,
+      "redownload_verified": true
+    },
+    "chart": {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/full-answer-b1-20261117-r8/continuous-B0-r8-v1.png",
+      "sha256": "75c745c28506f59e136e56b380928b9da58b01d026bd9012201c5d555027561d",
+      "bytes": 210036,
+      "asset_id": 759286689,
+      "redownload_verified": true
+    },
+    "manifest": {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/download/full-answer-b1-20261117-r8/r8-release-manifest-v2.json",
+      "sha256": "cb827ba7700956f9898891a1ad4961ede4dd236c0e22ec271196ae173ae47d49",
+      "bytes": 11217,
+      "asset_id": 759287099,
+      "redownload_verified": true
+    },
+    "release_body_readback_verified": true,
+    "runtime_changed": false
+  },
+  "baseline": "B0 original018",
+  "candidate": "B1 r8",
+  "model": "Qwen3.5-35B-A3B",
+  "hardware": "TP2 Ascend 910B2",
+  "source_commit": "fd7be18a576bb2430e6cf8eb217db3b7c579059f",
+  "review_sha256": "3f9b94f3b857a881463fa443b2c324a278423581a144529e1ae3f6d1839addf0"
+}

@@ -17,7 +17,9 @@ NAMES = ("summary-adjudicated.json", "summary-raw.json", "timeout-adjudication.j
 
 def extract_browser_copies(archive):
     """Small byte-identical access copies; original Release remains authoritative."""
-    custody = json.loads((ROOT / "archive/dev-hub-20261020/manifest.json").read_text())
+    custody = json.loads(
+        (ROOT / "archive/dev-hub-20261020/manifest.json").read_text(encoding="utf-8")
+    )
     raw = archive.read_bytes()
     assert hashlib.sha256(raw).hexdigest() == custody["asset"]["sha256"]
     assert len(raw) == custody["asset"]["bytes"]
@@ -93,7 +95,9 @@ def build():
     raw_dir = "reports/frontier-raw-recovery-20261020/"
     raw_runs = {
         run["run_id"]: run
-        for run in json.loads((ROOT / raw_dir / "manifest.json").read_text())["runs"]
+        for run in json.loads(
+            (ROOT / raw_dir / "manifest.json").read_text(encoding="utf-8")
+        )["runs"]
     }
     points = {}
     for point in frontier["points"]:
@@ -160,7 +164,9 @@ def build():
         "archive/website-links-20261022",
         "archive/website-links-accounting-20261022",
     ):
-        receipt = json.loads((ROOT / capsule / "manifest.json").read_text())
+        receipt = json.loads(
+            (ROOT / capsule / "manifest.json").read_text(encoding="utf-8")
+        )
         for row in receipt["files"]:
             if row["path"] == "LICENSE":
                 continue
@@ -181,7 +187,9 @@ def build():
         }
     plans = {}
     for plan in json.loads(
-        (ROOT / "website-publication/data/serving-plans.json").read_text()
+        (ROOT / "website-publication/data/serving-plans.json").read_text(
+            encoding="utf-8"
+        )
     )["plans"]:
         plans[plan["id"]] = rewrites[plan["accountingEvidence"]]
     return {
@@ -203,11 +211,11 @@ def main():
         return
     expected = render(build())
     if args.check:
-        assert (ROOT / OUTPUT).read_text() == expected, (
+        assert (ROOT / OUTPUT).read_text(encoding="utf-8") == expected, (
             "Regenerate website evidence links"
         )
     else:
-        (ROOT / OUTPUT).write_text(expected)
+        (ROOT / OUTPUT).write_text(expected, encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":

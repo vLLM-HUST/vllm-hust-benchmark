@@ -1,0 +1,166 @@
+{
+  "schema": "vllm-hust-model-integration/v1",
+  "candidate": {
+    "release": "full-answer-b1-20261119-r9",
+    "model": "Intern-S2",
+    "dtype": "BF16",
+    "hardware": "Ascend910B2",
+    "devices": 2,
+    "sdk_sha256": "b56fc7e63e4db0981e2e43cb251e4fd7272f230dd4486a46f5755c0d528b0dd6",
+    "source_commit": "84cc5dcd02a6b0ac7b346ff3cd96fbb2765d301f"
+  },
+  "reference": {
+    "release": "full-answer-b1-20261117-r8",
+    "model": "Qwen3.5-35B-A3B",
+    "kind": "previously-published-website-reference",
+    "url": "https://vllm-hust.sage.org.ai/b0-b1.html?release=r8",
+    "reference_sha256": "717915ffc5d0617b02346d8f5dab84c1e91363e6d4cf605dba87993c3e1bf9fc"
+  },
+  "scope": {
+    "original018_pair": false,
+    "project_full_five": false,
+    "qwen_performance_repeated": false,
+    "native_intern_run_complete": true
+  },
+  "workloads": [
+    {
+      "id": "mmlu200",
+      "label_zh": "MMLU200",
+      "label_en": "MMLU200",
+      "reference": {
+        "role": "r8",
+        "output_tokens_per_second": 1445.905611681983,
+        "mean_ttft_ms": 153215.83218120824,
+        "mean_tpot_ms": 21.437139275963567,
+        "output_tokens": 690468,
+        "duration_seconds": 477.5332458920311,
+        "requests": 200,
+        "failed": 0,
+        "correct": 147,
+        "truncated": 26,
+        "unparsed": 0,
+        "source_seal_sha256": "d4f70c9e9c116f04c2bc8ac68c7390c2027fc2aa4ec35a6581fe5973b23d115f",
+        "unresolved": 0
+      },
+      "candidate": {
+        "output_tokens_per_second": 1460.4061270678003,
+        "mean_ttft_ms": 146463.01984443853,
+        "mean_tpot_ms": 21.211667281885237,
+        "requests": 200,
+        "correct": 162,
+        "truncated": 17,
+        "failed": 0,
+        "unparsed": 0,
+        "output_tokens": 649740,
+        "duration_seconds": 444.9036387600936,
+        "ttft_p95_ms": 325745.3900180873,
+        "ttft_p99_ms": 342233.5011346685,
+        "tpot_p95_ms": 23.352699217678246,
+        "tpot_p99_ms": 23.899984932452924
+      },
+      "change_percent": {
+        "output_tokens_per_second": 1.0028673565316115,
+        "mean_ttft_ms": -4.4073854774898,
+        "mean_tpot_ms": -1.051782101967036
+      }
+    },
+    {
+      "id": "continuous-4k-c8",
+      "label_zh": "4K / C8",
+      "label_en": "4K / C8",
+      "reference": {
+        "requests": 457,
+        "failed": 0,
+        "output_tokens": 116992,
+        "cohort_wall_seconds": 302.34068614197895,
+        "output_tokens_per_second": 386.95420551192586,
+        "mean_ttft_ms": 749.2615800323903,
+        "mean_tpot_ms": 17.77387827599208,
+        "ttft_p95_ms": 1297.6814753841609,
+        "ttft_p99_ms": 1702.7836183458562,
+        "tpot_p95_ms": 19.59794121639182,
+        "tpot_p99_ms": 20.39117785710294
+      },
+      "candidate": {
+        "requests": 437,
+        "failed": 0,
+        "output_tokens": 111872,
+        "cohort_wall_seconds": 302.6155393839581,
+        "output_tokens_per_second": 369.68359334005316,
+        "mean_ttft_ms": 642.5495126105641,
+        "mean_tpot_ms": 19.112816830492253,
+        "ttft_p95_ms": 1041.6101043578237,
+        "ttft_p99_ms": 2166.1223163129757,
+        "tpot_p95_ms": 20.751751791959737,
+        "tpot_p99_ms": 24.21954703687085
+      },
+      "change_percent": {
+        "output_tokens_per_second": -4.463218625321397,
+        "mean_ttft_ms": -14.242298052599079,
+        "mean_tpot_ms": 7.53318174969575,
+        "ttft_p95_ms": -19.732991175706715,
+        "ttft_p99_ms": 27.210662175457333,
+        "tpot_p95_ms": 5.887407063977035,
+        "tpot_p99_ms": 18.77463482784718
+      }
+    },
+    {
+      "id": "continuous-16k-c8",
+      "label_zh": "16K / C8",
+      "label_en": "16K / C8",
+      "reference": {
+        "requests": 189,
+        "failed": 0,
+        "output_tokens": 48384,
+        "cohort_wall_seconds": 303.09203187096864,
+        "output_tokens_per_second": 159.63468158937903,
+        "mean_ttft_ms": 3100.850396096354,
+        "mean_tpot_ms": 37.9504461057581,
+        "ttft_p95_ms": 7180.332662200089,
+        "ttft_p99_ms": 9711.99296463514,
+        "tpot_p95_ms": 44.40155025028313,
+        "tpot_p99_ms": 45.119957222904574
+      },
+      "candidate": {
+        "requests": 188,
+        "failed": 0,
+        "output_tokens": 48128,
+        "cohort_wall_seconds": 304.5297161929775,
+        "output_tokens_per_second": 158.04040604530613,
+        "mean_ttft_ms": 2876.2266948284146,
+        "mean_tpot_ms": 39.23554899539425,
+        "ttft_p95_ms": 7815.838200272993,
+        "ttft_p99_ms": 9540.873634167945,
+        "tpot_p95_ms": 44.95268259644873,
+        "tpot_p99_ms": 47.2914828759545
+      },
+      "change_percent": {
+        "output_tokens_per_second": -0.9987024925910415,
+        "mean_ttft_ms": -7.243938680521866,
+        "mean_tpot_ms": 3.386265568670521,
+        "ttft_p95_ms": 8.85064199627461,
+        "ttft_p99_ms": -1.7619383692955792,
+        "tpot_p95_ms": 1.241245729167062,
+        "tpot_p99_ms": 4.8127830492436185
+      }
+    }
+  ],
+  "quality": {
+    "requests": 200,
+    "correct": 162,
+    "truncated": 17,
+    "failed": 0,
+    "unparsed": 0
+  },
+  "source": {
+    "benchmark_path": "reports/r9-intern-native-20261120/native-source-summary.json.gz",
+    "sha256": "066ac163f45f36e738f3b9478812966fd326c872201585f0c239fe0d3bd0bef9",
+    "bytes": 4099,
+    "encoding": "gzip",
+    "original_sha256": "0a394374301810d19fad4c9740c55e394baa3712d650963db503eb5824d60774",
+    "original_bytes": 12627,
+    "private_raw_release": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261119-r9"
+  },
+  "tradeoffs_zh": "4K平均TPOT增加7.53%，4K首token延迟P99增加27.21%，16K首token延迟P95增加8.85%；保留全部尾部统计。",
+  "tradeoffs_en": "4K mean TPOT increases7.53%,4K TTFT P99 increases27.21%, and16K TTFT P95 increases8.85%; all tail statistics are retained."
+}
