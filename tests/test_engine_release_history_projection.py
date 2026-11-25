@@ -406,8 +406,14 @@ def test_r10_current_assessment_binds_the_complete_revised_35b_run():
     name = "r10-35b-paired-full-20261125"
     folder = ROOT / "website-publication/data" / name
     raw = (ROOT / "reports" / name / "summary.json").read_bytes()
-    assert (folder / "summary.json").read_bytes() == raw
     source = json.loads(raw)
+    public_source = json.loads((folder / "summary.json").read_bytes())
+    expected_public = dict(source)
+    del expected_public["mods"]
+    expected_public["custody"] = dict(
+        source["custody"], engine_asset_sha256=hashlib.sha256(raw).hexdigest()
+    )
+    assert public_source == expected_public
     catalog = json.loads(
         (ROOT / "website-publication/data/engine-release-history-v1.json").read_bytes()
     )

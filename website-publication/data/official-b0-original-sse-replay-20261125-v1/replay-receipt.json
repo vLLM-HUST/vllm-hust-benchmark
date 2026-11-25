@@ -1,0 +1,473 @@
+{
+  "schema": "vllm-hust-official-b0-original-sse-replay/v1",
+  "replayed_utc_date": "2026-11-25",
+  "inference_reruns": 0,
+  "method": {
+    "input_verification": "Original published stage checksums plus one verified request JSON and compressed SSE file per original request. The SSE terminal usage must match each successful request JSON.",
+    "throughput": "Successful reported completion tokens divided by the original phase monotonic end minus start, including drain.",
+    "ttft": "Request-start to original first nonempty generated delta, with SSE timestamp readback. First-delta fields retained in counts.",
+    "tpot": "Mean of per-request seconds from the first delta to request end divided by reported completion tokens minus one, converted to milliseconds.",
+    "scope": "Original independent B0 observations. Dates, qualifications and previously published scores are not replaced. Raw request payloads are not redistributed here."
+  },
+  "baselines": {
+    "official-0.23.0": {
+      "original_archive": {
+        "url": "https://github.com/DeepLinkNext/DeepLinkEngine/releases/download/official-b0-0.23-full-report-20261122-v1/portable-full-report-metadata.tar.gz",
+        "sha256": "3745da2836117e416d97b4cc3311c49c96c522280b9bec0bdc867e935383fe94",
+        "bytes": 1309217,
+        "manifest_url": "https://github.com/DeepLinkNext/DeepLinkEngine/releases/download/official-b0-0.23-full-report-20261122-v1/release-manifest.json",
+        "scope": "sealed-report-metadata; raw SSE omitted"
+      },
+      "original_observations": {
+        "path": "data/official-b0-023-full-report-20261122-v1/observations.json",
+        "sha256": "ec941421093cc7340de3f84fe88c960ac68c634f943e6def990d1d943c3b7665",
+        "bytes": 77029
+      },
+      "stages": {
+        "mmlu": {
+          "original_manifest": "7f6b10975c1797472e66e30d9a507a9958d137f0d46e44d8c9165f8ecba250de",
+          "physical_cards": [
+            0,
+            7
+          ],
+          "device_samples_sha256": "458b3a57d237305569d39a5d2071887392c804e1fbaaa391a95054d1077f9275",
+          "source_summary": {
+            "path": "mmlu/service/joint.json",
+            "sha256": "c0ad6ebd46dd705a36fe28cd8bb5b93b66dd146c0641d53a09fb8d43c72ab677"
+          },
+          "rows": {
+            "mmlu": {
+              "counts": {
+                "failed": 0,
+                "successful": 200,
+                "correct": 152,
+                "truncated": 19,
+                "successful_output_tokens": 672254,
+                "first_content_delta": 200,
+                "first_reasoning_delta": 0
+              },
+              "ttft_ms": {
+                "count": 200,
+                "mean": 280172.754024351,
+                "p50": 266029.25522095757,
+                "p95_nearest_rank": 591799.7789450455
+              },
+              "tpot_ms": {
+                "count": 200,
+                "mean": 23.079636707554588,
+                "p50": 23.041052188942427,
+                "p95_nearest_rank": 25.93134525803283
+              },
+              "strict_content_ttft_ms": {
+                "count": 200,
+                "mean": 280172.754024351,
+                "p50": 266029.25522095757,
+                "p95_nearest_rank": 591799.7789450455
+              },
+              "seconds_with_drain": 705.8374928979902,
+              "phase_start_monotonic": 675958.144478987,
+              "phase_end_monotonic": 676663.981971885,
+              "successful_output_tokens_per_second": 952.4203612929305,
+              "ai_core_percent": {
+                "sample_count": 106,
+                "cards": {
+                  "0": {
+                    "count": 106,
+                    "mean": 56.58490566037736,
+                    "p50": 64.0,
+                    "p95_nearest_rank": 66
+                  },
+                  "7": {
+                    "count": 106,
+                    "mean": 56.424528301886795,
+                    "p50": 64.0,
+                    "p95_nearest_rank": 67
+                  }
+                },
+                "mean_all_cards": 56.50471698113208,
+                "first_monotonic_start": 675962.089078009,
+                "last_monotonic_end": 676660.991243324
+              },
+              "verified_request_artifacts": 400
+            }
+          }
+        }
+      }
+    },
+    "candidate-0.28.0rc1-source": {
+      "original_archive": {
+        "url": "https://github.com/DeepLinkNext/DeepLinkEngine/releases/download/official-b0-0.28-source-full-report-20261123-v1/portable-official-028-report-metadata.tar.gz",
+        "sha256": "6a3f0532ac9b8281cbfac73cd22d519b6ff3ba80d2d3455770109c2c5002431e",
+        "bytes": 1406780,
+        "manifest_url": "https://github.com/DeepLinkNext/DeepLinkEngine/releases/download/official-b0-0.28-source-full-report-20261123-v1/release-manifest.json",
+        "scope": "sealed report metadata and selected prefix replay; full raw SSE omitted"
+      },
+      "original_observations": {
+        "path": "data/official-b0-028-source-full-report-20261123-v1/observations.json",
+        "sha256": "017240d6be1cf654e349cef6b20a4b1f572179f77f84234f99c6d0ee7b5c896b",
+        "bytes": 78444
+      },
+      "stages": {
+        "mmlu": {
+          "original_manifest": "77511d88367dc170820f20803a229d7618ebc8cda4ad0ff84b8382bd04d7459f",
+          "physical_cards": [
+            0,
+            1
+          ],
+          "device_samples_sha256": "583239bb667bffb0e14d36ae9e64f69c3755e7e098eaf04c9d360ab467cf8c46",
+          "source_summary": {
+            "path": "mmlu/service/joint.json",
+            "sha256": "fff1aa4cdde6bd7399d31b057c504ed6047d1af3f106c479ea87a4a3a80938bb"
+          },
+          "rows": {
+            "mmlu": {
+              "counts": {
+                "successful": 200,
+                "correct": 142,
+                "truncated": 23,
+                "successful_output_tokens": 689823,
+                "first_content_delta": 200,
+                "first_reasoning_delta": 0
+              },
+              "ttft_ms": {
+                "count": 200,
+                "mean": 291775.83262527955,
+                "p50": 286151.3837495004,
+                "p95_nearest_rank": 599225.8982600033
+              },
+              "tpot_ms": {
+                "count": 200,
+                "mean": 22.90179158145342,
+                "p50": 23.044629423392227,
+                "p95_nearest_rank": 25.51401008474376
+              },
+              "strict_content_ttft_ms": {
+                "count": 200,
+                "mean": 291775.83262527955,
+                "p50": 286151.3837495004,
+                "p95_nearest_rank": 599225.8982600033
+              },
+              "seconds_with_drain": 717.3780096700066,
+              "successful_output_tokens_per_second": 961.5892746939903,
+              "ai_core_percent": {
+                "sample_count": 96,
+                "cards": {
+                  "0": {
+                    "count": 96,
+                    "mean": 57.1875,
+                    "p50": 62.0,
+                    "p95_nearest_rank": 67
+                  },
+                  "1": {
+                    "count": 96,
+                    "mean": 57.822916666666664,
+                    "p50": 63.0,
+                    "p95_nearest_rank": 68
+                  }
+                },
+                "mean_all_cards": 57.505208333333336,
+                "first_monotonic_start": 117371.508066367,
+                "last_monotonic_end": 118081.054978115
+              },
+              "verified_request_artifacts": 400
+            }
+          }
+        },
+        "continuous": {
+          "original_manifest": "0072d0a0bb5b1a6102a98f28f85660f8dd29a4fdc08b6280224ad8e875725883",
+          "physical_cards": [
+            0,
+            1
+          ],
+          "device_samples_sha256": "453db8e60fda0ef724943060cfe5ec66895b0c609616a8e97a0978adc5be4ceb",
+          "source_summary": {
+            "path": "continuous/service/continuous.json",
+            "sha256": "e9cf6cfb0861d6351f5acda0dfafcaa856b4a2767d3ae8f8c19adf7fb73d1c05"
+          },
+          "rows": {
+            "4096-formal": {
+              "counts": {
+                "successful": 304,
+                "successful_output_tokens": 77824,
+                "first_content_delta": 0,
+                "first_reasoning_delta": 304
+              },
+              "ttft_ms": {
+                "count": 304,
+                "mean": 986.308087631905,
+                "p50": 783.6664895075955,
+                "p95_nearest_rank": 1613.9167320070555
+              },
+              "tpot_ms": {
+                "count": 304,
+                "mean": 27.342524504360455,
+                "p50": 27.589483278450857,
+                "p95_nearest_rank": 30.873633062754593
+              },
+              "strict_content_ttft_ms": null,
+              "seconds_with_drain": 302.83355700800894,
+              "successful_output_tokens_per_second": 256.9860512451129,
+              "ai_core_percent": {
+                "sample_count": 41,
+                "cards": {
+                  "0": {
+                    "count": 41,
+                    "mean": 43.09756097560975,
+                    "p50": 52,
+                    "p95_nearest_rank": 68
+                  },
+                  "1": {
+                    "count": 41,
+                    "mean": 43.24390243902439,
+                    "p50": 52,
+                    "p95_nearest_rank": 70
+                  }
+                },
+                "mean_all_cards": 43.170731707317074,
+                "first_monotonic_start": 116137.94190348,
+                "last_monotonic_end": 116436.547308288
+              },
+              "verified_request_artifacts": 608
+            },
+            "16384-formal": {
+              "counts": {
+                "successful": 172,
+                "successful_output_tokens": 44032,
+                "first_content_delta": 0,
+                "first_reasoning_delta": 172
+              },
+              "ttft_ms": {
+                "count": 172,
+                "mean": 2918.91848905923,
+                "p50": 2862.463884492172,
+                "p95_nearest_rank": 4544.817091009463
+              },
+              "tpot_ms": {
+                "count": 172,
+                "mean": 43.85542057334342,
+                "p50": 44.42045602353413,
+                "p95_nearest_rank": 50.25558688623064
+              },
+              "strict_content_ttft_ms": null,
+              "seconds_with_drain": 305.34504784499586,
+              "successful_output_tokens_per_second": 144.2040744094603,
+              "ai_core_percent": {
+                "sample_count": 41,
+                "cards": {
+                  "0": {
+                    "count": 41,
+                    "mean": 61.58536585365854,
+                    "p50": 61,
+                    "p95_nearest_rank": 86
+                  },
+                  "1": {
+                    "count": 41,
+                    "mean": 61.75609756097561,
+                    "p50": 61,
+                    "p95_nearest_rank": 84
+                  }
+                },
+                "mean_all_cards": 61.670731707317074,
+                "first_monotonic_start": 116503.074746577,
+                "last_monotonic_end": 116801.869737086
+              },
+              "verified_request_artifacts": 344
+            }
+          }
+        }
+      }
+    },
+    "official-0.30.0": {
+      "original_archive": {
+        "url": "https://github.com/DeepLinkNext/DeepLinkEngine/releases/download/official-b0-0.30-full-report-20261122-v1/portable-full-report-metadata.tar.gz",
+        "sha256": "95e3af0cf0b42e9c271e8c1f9643ee74cd9883b344d36fed1f72c8b795fd39dd",
+        "bytes": 2546344,
+        "manifest_url": "https://github.com/DeepLinkNext/DeepLinkEngine/releases/download/official-b0-0.30-full-report-20261122-v1/release-manifest.json",
+        "scope": "sealed-report-metadata; raw SSE omitted"
+      },
+      "original_observations": {
+        "path": "data/official-b0-030-full-report-20261122-v1/observations.json",
+        "sha256": "93c0d1916825005c694415b29295a1aa028ef5488ae6311884c1af52dc3114f1",
+        "bytes": 78937
+      },
+      "stages": {
+        "mmlu": {
+          "original_manifest": "7cba09ad04803d7b7d0a1af2d0ccba04e06eaf97c88cedaa417f279b92000337",
+          "physical_cards": [
+            0,
+            7
+          ],
+          "device_samples_sha256": "877ee43262703e4360aa5061ba88fce39e1ee88012706bbecdb5898d9d12df61",
+          "source_summary": {
+            "path": "mmlu/service/joint.json",
+            "sha256": "3c9ce35fbda36a5ec1c27c71b75d8699a1b14c736f79c50bdb41cbdd6ab615db"
+          },
+          "rows": {
+            "mmlu": {
+              "counts": {
+                "failed": 0,
+                "successful": 200,
+                "correct": 155,
+                "truncated": 19,
+                "successful_output_tokens": 679774,
+                "first_content_delta": 200,
+                "first_reasoning_delta": 0
+              },
+              "ttft_ms": {
+                "count": 200,
+                "mean": 281936.01960920496,
+                "p50": 276202.02576648444,
+                "p95_nearest_rank": 578711.4892869722
+              },
+              "tpot_ms": {
+                "count": 200,
+                "mean": 22.707744850761333,
+                "p50": 22.754675917798174,
+                "p95_nearest_rank": 25.06154679819509
+              },
+              "strict_content_ttft_ms": {
+                "count": 200,
+                "mean": 281936.01960920496,
+                "p50": 276202.02576648444,
+                "p95_nearest_rank": 578711.4892869722
+              },
+              "seconds_with_drain": 696.1718120160513,
+              "phase_start_monotonic": 709437.038111564,
+              "phase_end_monotonic": 710133.20992358,
+              "successful_output_tokens_per_second": 976.4457397828783,
+              "ai_core_percent": {
+                "sample_count": 104,
+                "cards": {
+                  "0": {
+                    "count": 104,
+                    "mean": 59.24038461538461,
+                    "p50": 63.0,
+                    "p95_nearest_rank": 65
+                  },
+                  "7": {
+                    "count": 104,
+                    "mean": 58.38461538461539,
+                    "p50": 63.0,
+                    "p95_nearest_rank": 66
+                  }
+                },
+                "mean_all_cards": 58.8125,
+                "first_monotonic_start": 709441.68731515,
+                "last_monotonic_end": 710127.303705838
+              },
+              "verified_request_artifacts": 400
+            }
+          }
+        },
+        "continuous": {
+          "original_manifest": "830ccec4375074cf48763f682ad88efb5ebd222ddcc608b674625c00f9b91b31",
+          "physical_cards": [
+            0,
+            7
+          ],
+          "device_samples_sha256": "734cec52db753de4cfb7f305bcc3ad6a685bcd31c728627ee9e6b529bfdc0add",
+          "source_summary": {
+            "path": "continuous/service/continuous.json",
+            "sha256": "d0cf28c224a0f257de8972a6b7c20548cfae5cdc9f4574ac0511e240e0d286bf"
+          },
+          "rows": {
+            "4096-formal": {
+              "counts": {
+                "failed": 0,
+                "successful": 293,
+                "successful_output_tokens": 75008,
+                "first_content_delta": 0,
+                "first_reasoning_delta": 293
+              },
+              "ttft_ms": {
+                "count": 293,
+                "mean": 959.1646526646944,
+                "p50": 790.0791009888053,
+                "p95_nearest_rank": 1441.9607920572162
+              },
+              "tpot_ms": {
+                "count": 293,
+                "mean": 28.605635398036558,
+                "p50": 29.205129921491096,
+                "p95_nearest_rank": 31.79833475253819
+              },
+              "strict_content_ttft_ms": null,
+              "seconds_with_drain": 303.63121936796233,
+              "phase_start_monotonic": 708086.09529867,
+              "phase_end_monotonic": 708389.726518038,
+              "successful_output_tokens_per_second": 247.03652067180835,
+              "ai_core_percent": {
+                "sample_count": 46,
+                "cards": {
+                  "0": {
+                    "count": 46,
+                    "mean": 42.21739130434783,
+                    "p50": 49.5,
+                    "p95_nearest_rank": 63
+                  },
+                  "7": {
+                    "count": 46,
+                    "mean": 41.58695652173913,
+                    "p50": 51.5,
+                    "p95_nearest_rank": 63
+                  }
+                },
+                "mean_all_cards": 41.90217391304348,
+                "first_monotonic_start": 708087.46248922,
+                "last_monotonic_end": 708387.666269834
+              },
+              "verified_request_artifacts": 586
+            },
+            "16384-formal": {
+              "counts": {
+                "failed": 0,
+                "successful": 157,
+                "successful_output_tokens": 40192,
+                "first_content_delta": 0,
+                "first_reasoning_delta": 157
+              },
+              "ttft_ms": {
+                "count": 157,
+                "mean": 2728.855346513402,
+                "p50": 2425.0107218977064,
+                "p95_nearest_rank": 5229.396912036464
+              },
+              "tpot_ms": {
+                "count": 157,
+                "mean": 49.69989084149847,
+                "p50": 50.94187782766919,
+                "p95_nearest_rank": 55.32418769400786
+              },
+              "strict_content_ttft_ms": null,
+              "seconds_with_drain": 304.05150449997745,
+              "phase_start_monotonic": 708452.944244452,
+              "phase_end_monotonic": 708756.995748952,
+              "successful_output_tokens_per_second": 132.1881306461451,
+              "ai_core_percent": {
+                "sample_count": 46,
+                "cards": {
+                  "0": {
+                    "count": 46,
+                    "mean": 53.43478260869565,
+                    "p50": 62.5,
+                    "p95_nearest_rank": 72
+                  },
+                  "7": {
+                    "count": 46,
+                    "mean": 54.76086956521739,
+                    "p50": 63.0,
+                    "p95_nearest_rank": 74
+                  }
+                },
+                "mean_all_cards": 54.09782608695652,
+                "first_monotonic_start": 708453.781872994,
+                "last_monotonic_end": 708753.793828697
+              },
+              "verified_request_artifacts": 314
+            }
+          }
+        }
+      }
+    }
+  }
+}
