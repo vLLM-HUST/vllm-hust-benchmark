@@ -1,0 +1,74 @@
+"""Independently bind continuous request records to their captured SSE bytes."""
+import base64
+import gzip
+import hashlib
+import json
+from pathlib import Path
+
+from observation import zero_reuse
+
+
+def inspect(root, inputs_path):
+    root = Path(root)
+    inputs = json.loads(Path(inputs_path).read_bytes())
+    report = json.loads((root/'continuous.json').read_bytes())
+    assert report['status'] == 'completed'
+    assert [phase['name'] for phase in report['phases']] == ['4096-warmup', '4096-formal', '16384-warmup', '16384-formal']
+    salts, verified = set(), []
+    for phase in report['phases']:
+        name = phase['name']
+        seconds = 60 if name.endswith('warmup') else 300
+        assert phase['seconds'] == seconds and phase['failed'] == 0
+        start, deadline, end = phase['start']['monotonic'], phase['submission_deadline_monotonic'], phase['end']['monotonic']
+        assert abs(deadline-start-seconds) < 1e-6 and end >= deadline
+        rows = [json.loads(path.read_bytes()) for path in sorted(root.glob(name+'-lane*.json'))]
+        assert len(rows) == phase['requests'] and rows
+        lanes = {index: [] for index in range(8)}
+        for row in rows:
+            assert row['status'] == 'ok' and start <= row['start']['monotonic'] < deadline
+            assert row['end']['monotonic'] <= end
+            assert row['end']['monotonic']-row['start']['monotonic'] <= 181
+            expected = inputs[name.split('-')[0]][row['lane']]
+            request = dict(row['request'])
+            salt = request.pop('cache_salt')
+            assert salt and salt not in salts and request == expected['request']
+            salts.add(salt)
+            wire = Path(row['stream_capture'])
+            assert wire.resolve().is_relative_to(root.resolve())
+            assert hashlib.sha256(wire.read_bytes()).hexdigest() == row['stream_sha256']
+            done, usage, finish, content, thought, first = False, None, None, '', '', None
+            with gzip.open(wire, 'rt', encoding='utf-8') as stream:
+                for line in stream:
+                    event = json.loads(line)
+                    raw = base64.b64decode(event['raw_b64'])
+                    if not raw.startswith(b'data:'):
+                        continue
+                    data = raw[5:].strip()
+                    if data == b'[DONE]':
+                        done = True
+                        continue
+                    payload = json.loads(data)
+                    assert not payload.get('error')
+                    if payload.get('usage') is not None:
+                        usage = payload['usage']
+                    for choice in payload.get('choices', []):
+                        delta = choice.get('delta') or {}
+                        text = delta.get('content') or ''
+                        reasoning = delta.get('reasoning_content') or delta.get('reasoning') or ''
+                        content += text
+                        thought += reasoning
+                        if (text or reasoning) and first is None:
+                            first = event['clock']
+                        finish = choice.get('finish_reason') or finish
+            assert done and usage == row['usage'] and finish == row['finish_reason'] == 'length'
+            assert usage['completion_tokens'] == 256 and usage['prompt_tokens'] == expected['input_tokens']
+            assert (content, thought, first) == (row['content'], row['reasoning'], row['first_generated_event'])
+            lanes[row['lane']].append(row)
+        for lane in lanes.values():
+            assert lane
+            lane.sort(key=lambda row: row['start']['monotonic'])
+            assert all(left['end']['monotonic'] <= right['start']['monotonic'] for left, right in zip(lane, lane[1:]))
+        proof = zero_reuse((root/(name+'-before-metrics.txt')).read_text(), (root/(name+'-after-metrics.txt')).read_text(), rows)
+        verified.append({'name': name, 'requests': len(rows), 'zero_reuse': proof, 'all_sse_records_verified': True})
+    return {'passed': True, 'phases': verified, 'total_requests': len(salts),
+            'scope': 'Original synthetic C8 protocol; no invented numeric latency/SLO threshold or five-dataset quality claim'}

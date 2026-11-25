@@ -1,0 +1,368 @@
+{
+  "public_files_verified": 383,
+  "c8_numeric_requests_recomputed": 685,
+  "default_mod_frozen_source_files_verified": {
+    "driver-mod-v2": 20,
+    "driver-mod-v3": 23,
+    "driver-mod-v4": 25
+  },
+  "zero_generation_native04_failure_receipt_verified": true,
+  "actual_native05_zero_generation_admission_verified": true,
+  "analysis_only_frozen_members_verified": 6,
+  "zero_generation_pressure_admission_source_members_verified": 11,
+  "supplemental_fixed_pressure_source_members_verified": 12,
+  "actual_zero_generation_pressure_capacity": {
+    "schema": "actual-hybrid-cache-pressure-bounds/v1",
+    "go_for_fixed_workload": true,
+    "actual_per_rank_total_pool_blocks": 45,
+    "reserved_null_blocks": 1,
+    "usable_pool_blocks": 44,
+    "groups": [
+      {
+        "index": 0,
+        "type": "FullAttentionSpec",
+        "layer_names": [
+          "language_model.model.layers.3.self_attn.attn",
+          "language_model.model.layers.7.self_attn.attn",
+          "language_model.model.layers.11.self_attn.attn",
+          "language_model.model.layers.15.self_attn.attn",
+          "language_model.model.layers.19.self_attn.attn",
+          "language_model.model.layers.23.self_attn.attn",
+          "language_model.model.layers.27.self_attn.attn",
+          "language_model.model.layers.31.self_attn.attn",
+          "language_model.model.layers.35.self_attn.attn",
+          "language_model.model.layers.39.self_attn.attn",
+          "mtp.layers.0.self_attn.attn"
+        ],
+        "layer_count": 11,
+        "block_size_tokens": 2048,
+        "page_size_bytes_per_layer": 2138112,
+        "first_prefill_pool_blocks": 9,
+        "input_resident_upper_pool_blocks": 9,
+        "end_resident_upper_pool_blocks": 11,
+        "max_context_upper_pool_blocks": 32,
+        "native_rule": "Full-input admission; growing full-attention blocks, lookahead included in steady bounds"
+      },
+      {
+        "index": 1,
+        "type": "MambaSpec",
+        "layer_names": [
+          "language_model.model.layers.0.linear_attn",
+          "language_model.model.layers.4.linear_attn",
+          "language_model.model.layers.8.linear_attn",
+          "language_model.model.layers.12.linear_attn",
+          "language_model.model.layers.16.linear_attn",
+          "language_model.model.layers.20.linear_attn",
+          "language_model.model.layers.24.linear_attn",
+          "language_model.model.layers.28.linear_attn",
+          "language_model.model.layers.32.linear_attn",
+          "language_model.model.layers.36.linear_attn"
+        ],
+        "layer_count": 10,
+        "block_size_tokens": 2048,
+        "page_size_bytes_per_layer": 2138112,
+        "first_prefill_pool_blocks": 3,
+        "input_resident_upper_pool_blocks": 4,
+        "end_resident_upper_pool_blocks": 4,
+        "max_context_upper_pool_blocks": 4,
+        "native_rule": "First prefill1+spec states; align-mode resident upper bound2+spec, not ceil(context/block) physical states"
+      },
+      {
+        "index": 2,
+        "type": "MambaSpec",
+        "layer_names": [
+          "language_model.model.layers.1.linear_attn",
+          "language_model.model.layers.5.linear_attn",
+          "language_model.model.layers.9.linear_attn",
+          "language_model.model.layers.13.linear_attn",
+          "language_model.model.layers.17.linear_attn",
+          "language_model.model.layers.21.linear_attn",
+          "language_model.model.layers.25.linear_attn",
+          "language_model.model.layers.29.linear_attn",
+          "language_model.model.layers.33.linear_attn",
+          "language_model.model.layers.37.linear_attn"
+        ],
+        "layer_count": 10,
+        "block_size_tokens": 2048,
+        "page_size_bytes_per_layer": 2138112,
+        "first_prefill_pool_blocks": 3,
+        "input_resident_upper_pool_blocks": 4,
+        "end_resident_upper_pool_blocks": 4,
+        "max_context_upper_pool_blocks": 4,
+        "native_rule": "First prefill1+spec states; align-mode resident upper bound2+spec, not ceil(context/block) physical states"
+      },
+      {
+        "index": 3,
+        "type": "MambaSpec",
+        "layer_names": [
+          "language_model.model.layers.2.linear_attn",
+          "language_model.model.layers.6.linear_attn",
+          "language_model.model.layers.10.linear_attn",
+          "language_model.model.layers.14.linear_attn",
+          "language_model.model.layers.18.linear_attn",
+          "language_model.model.layers.22.linear_attn",
+          "language_model.model.layers.26.linear_attn",
+          "language_model.model.layers.30.linear_attn",
+          "language_model.model.layers.34.linear_attn",
+          "language_model.model.layers.38.linear_attn"
+        ],
+        "layer_count": 10,
+        "block_size_tokens": 2048,
+        "page_size_bytes_per_layer": 2138112,
+        "first_prefill_pool_blocks": 3,
+        "input_resident_upper_pool_blocks": 4,
+        "end_resident_upper_pool_blocks": 4,
+        "max_context_upper_pool_blocks": 4,
+        "native_rule": "First prefill1+spec states; align-mode resident upper bound2+spec, not ceil(context/block) physical states"
+      }
+    ],
+    "input_tokens": 16407,
+    "fixed_output_tokens": 4096,
+    "lookahead_tokens": 2,
+    "sum_first_prefill_blocks_per_request": 18,
+    "sum_input_resident_upper_blocks_per_request": 21,
+    "sum_end_resident_upper_blocks_per_request": 23,
+    "floor_usableK_over_input_admission_blocks": 2,
+    "admission_active_upper_bound": 2,
+    "steady_input_safe_active_count": 2,
+    "fixed_end_upper_blocks_at_admission_count": 46,
+    "max_context_upper_blocks": 44,
+    "max_context_fits_usable_pool": true,
+    "actual_tensor_descriptor_bytes": 1058365440,
+    "bytes_per_pool_block_from_descriptors": 23519232,
+    "metadata_fingerprint_sha256": "b5cddb04919e013aa5bb974d42edc65f863ddedd4653fded2a7febde50431379",
+    "rule_source_sha256": {
+      "vllm/v1/kv_cache_interface.py": "8d6be98bbf75b3d55007b64ccf5afef047ca01790a432522f70a196412c103d9",
+      "vllm/v1/core/single_type_kv_cache_manager.py": "dc425e1e87b6157f3e5c46be2bfee54076ccb020b86c5a8aaa3d9901c75e46ef",
+      "vllm/v1/core/block_pool.py": "84755b84c36ed6460ceefe2690c9484a9c31488c5da6daa6c918f497d8837dee",
+      "vllm/v1/core/kv_cache_coordinator.py": "aeca063d319413d2bd0f094158a16be08c2a4c9b1c96a21617f97936c23bd9ce"
+    },
+    "scope": "Metadata-derived first-admission and steady upper bounds, not an observed policy call or exact scheduling simulation. In-flight timing, MTP acceptance and state recycling may avoid simultaneous peaks. Positive actual calls/selection must still be measured; every0call/negative/partial result retained. No live config or allocator is touched.",
+    "no_go_rule": "No generation if max context is not admitted, layout is unsupported, or the fixed upper bound fits without pressure. Never change1GiB/4096/48 on site."
+  },
+  "actual_zero_generation_pressure_capacity_smaller_v2": {
+    "schema": "actual-hybrid-cache-pressure-bounds/v1",
+    "go_for_fixed_workload": true,
+    "actual_per_rank_total_pool_blocks": 45,
+    "reserved_null_blocks": 1,
+    "usable_pool_blocks": 44,
+    "groups": [
+      {
+        "index": 0,
+        "type": "FullAttentionSpec",
+        "layer_names": [
+          "language_model.model.layers.3.self_attn.attn",
+          "language_model.model.layers.7.self_attn.attn",
+          "language_model.model.layers.11.self_attn.attn",
+          "language_model.model.layers.15.self_attn.attn",
+          "language_model.model.layers.19.self_attn.attn",
+          "language_model.model.layers.23.self_attn.attn",
+          "language_model.model.layers.27.self_attn.attn",
+          "language_model.model.layers.31.self_attn.attn",
+          "language_model.model.layers.35.self_attn.attn",
+          "language_model.model.layers.39.self_attn.attn",
+          "mtp.layers.0.self_attn.attn"
+        ],
+        "layer_count": 11,
+        "block_size_tokens": 2048,
+        "page_size_bytes_per_layer": 2138112,
+        "first_prefill_pool_blocks": 9,
+        "input_resident_upper_pool_blocks": 9,
+        "end_resident_upper_pool_blocks": 11,
+        "max_context_upper_pool_blocks": 32,
+        "native_rule": "Full-input admission; growing full-attention blocks, lookahead included in steady bounds"
+      },
+      {
+        "index": 1,
+        "type": "MambaSpec",
+        "layer_names": [
+          "language_model.model.layers.0.linear_attn",
+          "language_model.model.layers.4.linear_attn",
+          "language_model.model.layers.8.linear_attn",
+          "language_model.model.layers.12.linear_attn",
+          "language_model.model.layers.16.linear_attn",
+          "language_model.model.layers.20.linear_attn",
+          "language_model.model.layers.24.linear_attn",
+          "language_model.model.layers.28.linear_attn",
+          "language_model.model.layers.32.linear_attn",
+          "language_model.model.layers.36.linear_attn"
+        ],
+        "layer_count": 10,
+        "block_size_tokens": 2048,
+        "page_size_bytes_per_layer": 2138112,
+        "first_prefill_pool_blocks": 3,
+        "input_resident_upper_pool_blocks": 4,
+        "end_resident_upper_pool_blocks": 4,
+        "max_context_upper_pool_blocks": 4,
+        "native_rule": "First prefill1+spec states; align-mode resident upper bound2+spec, not ceil(context/block) physical states"
+      },
+      {
+        "index": 2,
+        "type": "MambaSpec",
+        "layer_names": [
+          "language_model.model.layers.1.linear_attn",
+          "language_model.model.layers.5.linear_attn",
+          "language_model.model.layers.9.linear_attn",
+          "language_model.model.layers.13.linear_attn",
+          "language_model.model.layers.17.linear_attn",
+          "language_model.model.layers.21.linear_attn",
+          "language_model.model.layers.25.linear_attn",
+          "language_model.model.layers.29.linear_attn",
+          "language_model.model.layers.33.linear_attn",
+          "language_model.model.layers.37.linear_attn"
+        ],
+        "layer_count": 10,
+        "block_size_tokens": 2048,
+        "page_size_bytes_per_layer": 2138112,
+        "first_prefill_pool_blocks": 3,
+        "input_resident_upper_pool_blocks": 4,
+        "end_resident_upper_pool_blocks": 4,
+        "max_context_upper_pool_blocks": 4,
+        "native_rule": "First prefill1+spec states; align-mode resident upper bound2+spec, not ceil(context/block) physical states"
+      },
+      {
+        "index": 3,
+        "type": "MambaSpec",
+        "layer_names": [
+          "language_model.model.layers.2.linear_attn",
+          "language_model.model.layers.6.linear_attn",
+          "language_model.model.layers.10.linear_attn",
+          "language_model.model.layers.14.linear_attn",
+          "language_model.model.layers.18.linear_attn",
+          "language_model.model.layers.22.linear_attn",
+          "language_model.model.layers.26.linear_attn",
+          "language_model.model.layers.30.linear_attn",
+          "language_model.model.layers.34.linear_attn",
+          "language_model.model.layers.38.linear_attn"
+        ],
+        "layer_count": 10,
+        "block_size_tokens": 2048,
+        "page_size_bytes_per_layer": 2138112,
+        "first_prefill_pool_blocks": 3,
+        "input_resident_upper_pool_blocks": 4,
+        "end_resident_upper_pool_blocks": 4,
+        "max_context_upper_pool_blocks": 4,
+        "native_rule": "First prefill1+spec states; align-mode resident upper bound2+spec, not ceil(context/block) physical states"
+      }
+    ],
+    "input_tokens": 16407,
+    "fixed_output_tokens": 4096,
+    "lookahead_tokens": 2,
+    "sum_first_prefill_blocks_per_request": 18,
+    "sum_input_resident_upper_blocks_per_request": 21,
+    "sum_end_resident_upper_blocks_per_request": 23,
+    "floor_usableK_over_input_admission_blocks": 2,
+    "admission_active_upper_bound": 2,
+    "steady_input_safe_active_count": 2,
+    "fixed_end_upper_blocks_at_admission_count": 46,
+    "max_context_upper_blocks": 44,
+    "max_context_fits_usable_pool": true,
+    "actual_tensor_descriptor_bytes": 1058365440,
+    "bytes_per_pool_block_from_descriptors": 23519232,
+    "metadata_fingerprint_sha256": "b5cddb04919e013aa5bb974d42edc65f863ddedd4653fded2a7febde50431379",
+    "rule_source_sha256": {
+      "vllm/v1/kv_cache_interface.py": "8d6be98bbf75b3d55007b64ccf5afef047ca01790a432522f70a196412c103d9",
+      "vllm/v1/core/single_type_kv_cache_manager.py": "dc425e1e87b6157f3e5c46be2bfee54076ccb020b86c5a8aaa3d9901c75e46ef",
+      "vllm/v1/core/block_pool.py": "84755b84c36ed6460ceefe2690c9484a9c31488c5da6daa6c918f497d8837dee",
+      "vllm/v1/core/kv_cache_coordinator.py": "aeca063d319413d2bd0f094158a16be08c2a4c9b1c96a21617f97936c23bd9ce"
+    },
+    "scope": "Metadata-derived first-admission and steady upper bounds, not an observed policy call or exact scheduling simulation. In-flight timing, MTP acceptance and state recycling may avoid simultaneous peaks. Positive actual calls/selection must still be measured; every0call/negative/partial result retained. No live config or allocator is touched.",
+    "no_go_rule": "No generation if max context is not admitted, layout is unsupported, or the fixed upper bound fits without pressure. Never change1GiB/4096/16 on site."
+  },
+  "smaller_pressure_v2_source_members_verified": 12,
+  "candidate_only_corrective_source_and_native_receipt": {
+    "new_candidate_planned": 8,
+    "native_all8_carry_receipt_verified": true,
+    "old_v2_remains_failed": true,
+    "original_sse_publicly_read_back": false
+  },
+  "closed_failed_or_partial_pressure_results": {
+    "pressure-v2-failed-results-v1": {
+      "original_failed_status_preserved": true,
+      "native8_successful": true,
+      "candidate_throughput": null
+    },
+    "pressure-v3-corrective-results-v1": {
+      "original_failed_status_preserved": true,
+      "native8_successful": true,
+      "candidate_throughput": null
+    }
+  },
+  "historical_pressure_failure_report_and_full_preemption_audit": {
+    "historical_pressure_pair_valid": false,
+    "native_successful_requests": 8,
+    "candidate_tps": null,
+    "full_solver_exact_preemption_audit_stages": 10,
+    "controlled_metric_sha_bindings": 20,
+    "controlled_metrics_publicly_replayed": false
+  },
+  "prospective_eos_historical_workload": {
+    "frozen_members": 22,
+    "actual_linux_cpu_tests": 38,
+    "model_result": false
+  },
+  "prospective_mmlu_first8_diagnostic": {
+    "frozen_members": 25,
+    "actual_linux_cpu_tests": 39,
+    "formal200": false
+  },
+  "default_true_c8": {
+    "native": {
+      "numeric_requests_recomputed": 334,
+      "original_sse_publicly_read_back": false,
+      "all_first_generated_equal_first_content": true,
+      "policy_last_observed_stats": [
+        {
+          "profile": "official-vllm-0.23-source-bridge/v1",
+          "policy": null,
+          "enabled": false,
+          "decisions": 0,
+          "calls": 0,
+          "selections": 0,
+          "abstentions": 0,
+          "failures": 0,
+          "invalid_selections": 0
+        }
+      ],
+      "scope": "Original60/300 synthetic qualification, including response drain; not full-five completion or measured fixed-window token throughput",
+      "actual_owned_wait_receipts_verified": true
+    },
+    "bidkv": {
+      "numeric_requests_recomputed": 349,
+      "original_sse_publicly_read_back": false,
+      "all_first_generated_equal_first_content": true,
+      "policy_last_observed_stats": [
+        {
+          "profile": "official-vllm-0.23-source-bridge/v1",
+          "policy": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy",
+          "enabled": true,
+          "decisions": 0,
+          "calls": 0,
+          "selections": 0,
+          "abstentions": 0,
+          "failures": 0,
+          "invalid_selections": 0
+        }
+      ],
+      "scope": "Original60/300 synthetic qualification, including response drain; not full-five completion or measured fixed-window token throughput",
+      "actual_owned_wait_receipts_verified": true
+    }
+  },
+  "closed_solver_controlled_sse_audits_indexed": 1344,
+  "original_sse_publicly_read_back": false,
+  "controlled_sse_independent_verification_receipts_indexed": true,
+  "aborted_cohort_receipt_counts_verified": true,
+  "aborted_cohort_controlled_answers_publicly_reverified": false,
+  "five_dataset_formal_completion_established_by_this_capsule": true,
+  "full_five_numeric_and_custody_verification": {
+    "formal_complete": true,
+    "public_numeric_record_identity_checks": 2064,
+    "public_solver_metric_records_recomputed": 1344,
+    "public_judge_records_counted": 720,
+    "controlled_sse_replay_receipt_requests": 2064,
+    "public_original_sse_readback": false,
+    "policy_calls": 0,
+    "quality_original_byte_identical_recomputation_receipts": 4
+  },
+  "selector_mechanism_gain_established": false
+}

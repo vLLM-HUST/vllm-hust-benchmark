@@ -1,0 +1,191 @@
+"""Build the self-contained public PegaFlow closeout from audited numeric data."""
+
+from collections import Counter
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+HERE = Path(__file__).resolve().parent
+PROJECT = HERE.parents[2]
+COLLECTED = HERE / 'collected'
+OUT = HERE / 'report-ready'
+SOURCE = PROJECT / 'work/five-datasets-20261113-v1/publication-ready/pegaflow91-mod-v4-final01'
+
+
+def read(path):
+    return json.loads(Path(path).read_bytes())
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def save(path, value):
+    Path(path).write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + '\n', encoding='utf-8', newline='\n')
+
+
+def delta(baseline, candidate):
+    return 100 * (candidate / baseline - 1) if baseline else None
+
+
+def main():
+    OUT.mkdir(exist_ok=False)
+    for path in (COLLECTED / 'numeric').iterdir():
+        shutil.copy2(path, OUT / path.name)
+    shutil.copytree(COLLECTED / 'c8-numeric', OUT / 'c8')
+    shutil.copytree(COLLECTED / 'c8-request-numeric', OUT / 'c8/requests')
+    shutil.copytree(COLLECTED / 'connector-supplement', OUT / 'connector')
+    (OUT / 'audit').mkdir()
+    shutil.copytree(COLLECTED / 'verification', OUT / 'audit/verification')
+    for name in ['closure.json', 'audit-status.json', 'dispatch.json', 'quality-recomputation.json', 'evidence-path-mapping.json', 'historical-receipts-supplement-v2.json', 'original-inventory-before.json', 'original-inventory-after.json']:
+        shutil.copy2(COLLECTED / name, OUT / 'audit' / name)
+    (OUT / 'audit-sources').mkdir()
+    for name in ['audit_worker.py', 'export_c8_requests.py', 'collect_receipt_supplement.py', 'build_final_package.py']:
+        shutil.copy2(HERE / name, OUT / 'audit-sources' / name)
+    shutil.copy2(SOURCE / 'mod-binding.json', OUT / 'mod-binding.json')
+    # Keep the generic builder's computations intact; repair only its two
+    # Bid-specific closure/lifecycle link targets for this Pega package.
+    builder_source = PROJECT / 'work/pegaflow-run-20261113/build_five_mod_report.py'
+    builder = OUT / 'audit-sources/build_five_mod_report_pega.py'
+    original_builder = builder_source.read_text(encoding='utf-8')
+    patched_builder = original_builder.replace('](../closure-and-quality-recompute.json)', '](../audit/closure.json)').replace('](../full-owned-lifecycle-policy.json)', '](../audit/historical-receipts-supplement-v2.json)')
+    assert original_builder != patched_builder
+    builder.write_text(patched_builder, encoding='utf-8', newline='\n')
+    save(OUT / 'audit-sources/builder-provenance.json', {'upstream_local_path': 'work/pegaflow-run-20261113/build_five_mod_report.py', 'upstream_sha256': sha(builder_source), 'patched_sha256': sha(builder), 'changes': 'Two closure/lifecycle Markdown link targets only; metric, scoring, identity and plotting computations unchanged. No C8 injection: formal source manifest is a differently serialized copy, so raw main manifest identity and C8 are separately audited.'})
+    python = PROJECT / 'work/five-datasets-20261113-v1/cpu-venv/Scripts/python.exe'
+    report_environment = {**os.environ, 'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONPATH': 'E:/CodexData/Dependencies/pegaflow-publication;E:/CodexData/Dependencies/pegaflow-report', 'MPLCONFIGDIR': str(HERE / 'mpl-cache')}
+    call = subprocess.run([str(python), '-B', str(builder), '--capsule', str(OUT), '--out', str(OUT / 'report'), '--project', 'PegaFlow', '--candidate-arm', 'pegaflow', '--binding', str(OUT / 'mod-binding.json'), '--binding-link', '../mod-binding.json', '--chip', 'Ascend 910B2 64GiB', '--plots'], capture_output=True, text=True, env=report_environment)
+    save(OUT / 'audit-sources/report-builder-wait.json', {'actual_returncode': call.returncode, 'stdout': call.stdout, 'stderr': call.stderr, 'scope': 'Observed local CPU report-builder process.wait via subprocess.run; not a model SDK or experiment'})
+    assert call.returncode == 0, call.stderr
+    summary = read(OUT / 'summary.json')
+    stages = {row['name']: row for row in summary['stages']}
+    pairs = {}
+    for dataset in ['mmlu', 'hle', 'frontier', 'swe', 'terminal']:
+        baseline, candidate = [stages[arm + '-' + dataset]['summary'] for arm in ['native', 'pegaflow']]
+        pairs[dataset] = {'baseline': baseline, 'candidate': candidate, 'throughput_change_percent': delta(baseline['output_tokens_per_second'], candidate['output_tokens_per_second']), 'ttft_mean_change_percent': delta(baseline['ttft_seconds']['mean'], candidate['ttft_seconds']['mean']), 'ttft_p50_change_percent': delta(baseline['ttft_seconds']['p50'], candidate['ttft_seconds']['p50']), 'ttft_p95_change_percent': delta(baseline['ttft_seconds']['p95'], candidate['ttft_seconds']['p95']), 'tpot_mean_change_percent': delta(baseline['tpot_seconds']['mean'], candidate['tpot_seconds']['mean']), 'same_rate_solver_device_seconds_per_token_change_percent': delta(1 / baseline['output_tokens_per_second'], 1 / candidate['output_tokens_per_second']), 'baseline_requests': 'native-' + dataset + '-requests.json', 'candidate_requests': 'pegaflow-' + dataset + '-requests.json'}
+    quality = {}
+    for dataset in ['hle', 'frontier']:
+        quality[dataset] = {arm: read(OUT / f'quality-{arm}-{dataset}-summary.json') for arm in ['native', 'pegaflow']}
+    runtime = read(OUT / 'runtime-overheads.json')
+    costs = []
+    for period in runtime['periods'] + runtime['qualification_periods']:
+        samples = period['telemetry_numeric']
+        host = [row['memory_current_bytes'] for row in samples if row.get('memory_current_bytes') is not None]
+        devices = {}
+        for row in samples:
+            for device in row['devices']:
+                if device.get('hbm_used_mb') is not None:
+                    key = str(device['physical_npu'])
+                    devices[key] = max(devices.get(key, 0), device['hbm_used_mb'])
+        costs.append({'service': period['name'], 'preparation_seconds': period['ready']['startup_seconds'], 'preparation_device_seconds': period['initialization_device_seconds'], 'sidecar_ready_to_stop_seconds': period['sidecar_ready_to_owned_stop_observation_seconds'], 'formal_telemetry_samples': len(samples), 'formal_total_container_memory_max_observed_bytes': max(host) if host else None, 'formal_hbm_max_observed_mb_by_physical_npu': devices or None, 'scope': 'Observed total sampling maxima, not isolated MOD memory increments, exact allocation peaks or money; qualification startup streams retained separately in runtime-overheads.json'})
+    judge_costs = []
+    for stage in summary['stages']:
+        if stage['stage'] != 'judge':
+            continue
+        rows = read(OUT / stage['numeric_records_file'])
+        attempted = [row for row in rows if row['attempted'] is True]
+        span = max(row['end']['monotonic'] for row in attempted) - min(row['start']['monotonic'] for row in attempted)
+        judge_costs.append({'name': stage['name'], 'planned': stage['planned'], 'attempted': len(attempted), 'status_counts': dict(Counter(row['status'] for row in rows)), 'batch_wall_seconds': span, 'two_device_seconds': 2 * span, 'completion_tokens_all_observed_HTTP_records': sum(row['usage']['completion_tokens'] for row in attempted), 'length_stops': stage['summary']['length_stops'], 'scope': 'Judge traffic excluded from solver throughput; all transport-success/invalid-grade attempts retained'})
+    closure = read(OUT / 'audit/closure.json')
+    c8 = read(OUT / 'c8/paired-summary.json')
+    mechanism = read(OUT / 'connector-mechanism.json')
+    comparison = {'schema': 'pegaflow-full-mod-final-comparison/v1', 'mod_prompt_sha256': '43bc925a6ad749971a64e5244b86451f5d4cf3361e87423b1eda8ea0b0d04461', 'experiment_host': 'ascend-91 historical authorized November14 two-card run; November16 audit only through currently authorized yanbo-81 CPU', 'full_experiment_completed': True, 'rerun_needed_for_missing_required_coverage': False, 'benefit_demonstrated': False, 'four_targets_passed': False, 'planned_and_verified_solver_records': 1344, 'planned_and_verified_judge_records': 720, 'verified_c8_records': 684, 'datasets': pairs, 'original_quality': quality, 'judge_costs': judge_costs, 'lifecycle_cost_observations': costs, 'mechanism': mechanism, 'separate_c8': c8, 'controlled_audit': {'all2064_formal_records_raw_sse_verified': closure['raw_sse_verified'] == 2064, 'original_formal_manifest_files_verified': closure['original_manifest_files_verified'], 'original_inventory_files': closure['original_inventory_files'], 'original_inventory_unchanged': closure['original_inventory_unchanged'], 'all_four_original_quality_summaries_byte_identical': all(row['byte_identical'] for row in closure['quality_recomputation']), 'raw_main_source_manifest_sha256': '8e4ef4748eafd8ad0cdc6fd0c1d82df471576357cca2333ce1abc4abe168c34e', 'formal_reencoded_source_manifest_sha256': sha(OUT / 'source-manifest.json'), 'main_manifest_json_values_equal': read(OUT / 'source-manifest.json') == read(SOURCE / 'source-manifest.json'), 'analysis_source_manifest_sha256': '782cecbbaac0757f388ece22f335dcceefb19bfb83345f79a1fa27ffbaa8b408'}, 'unmeasured_costs': {'currency': None, 'effective_FLOPs': None, 'isolated_MOD_peak_host_memory_increment': None, 'isolated_MOD_peak_HBM_increment': None}, 'limits': ['One ordered cohort, Native all five before Candidate all five; no randomized interleaving or independent repeats.', 'Native shared judge uses the same model and original frozen grader contracts; unresolved and truncated grades remain denominators.', 'Zero KV restores is required by fresh salts and proves no cache-reuse benefit on this standard workload.', 'Observed performance changes cannot identify the fraction caused by save overhead, scheduling, output-length variation or time drift.', 'No tuning, forced prefix reuse, cross-node tests or rerun was performed during closeout.']}
+    save(OUT / 'COMPARISON.json', comparison)
+    rows = []
+    for name, pair in pairs.items():
+        b, c = pair['baseline'], pair['candidate']
+        rows.append(f"| {name} | {b['output_tokens_per_second']:.3f} | {c['output_tokens_per_second']:.3f} | {pair['throughput_change_percent']:+.3f}% | {b['ttft_seconds']['mean']:.6f} / {c['ttft_seconds']['mean']:.6f} | {b['tpot_seconds']['mean']:.6f} / {c['tpot_seconds']['mean']:.6f} | {b['length_stops']} / {c['length_stops']} |")
+    quality_rows = []
+    for dataset in ['hle', 'frontier']:
+        groups = 'groups' if dataset == 'hle' else 'tracks'
+        for group, b in quality[dataset]['native'][groups].items():
+            c = quality[dataset]['pegaflow'][groups][group]
+            unresolved = 'unresolved' if dataset == 'hle' else 'judge_unresolved'
+            quality_rows.append(f"| {dataset}/{group} | {b['total']} | {b['successes']} / {c['successes']} | {b['graded']} / {c['graded']} | {b[unresolved]} / {c[unresolved]} | {b['solver_truncated']} / {c['solver_truncated']} | {b['judge_truncated']} / {c['judge_truncated']} |")
+    cost_rows = [f"| {x['service']} | {x['preparation_seconds']:.3f} | {x['preparation_device_seconds']:.3f} | {x['sidecar_ready_to_stop_seconds'] if x['sidecar_ready_to_stop_seconds'] is not None else '不适用'} | {x['formal_total_container_memory_max_observed_bytes'] if x['formal_total_container_memory_max_observed_bytes'] is not None else '见分开的startup telemetry'} | {json.dumps(x['formal_hbm_max_observed_mb_by_physical_npu'])} |" for x in costs]
+    text = '''# PegaFlow：完整五项 MOD 实验与闭合审计
+
+已经完成要求的双卡 B0/B1 五项测试和共享 Native judge，无需补跑覆盖范围。五项吞吐均低于 B0，本轮没有证明 PegaFlow 加速或缓存恢复收益，也没有通过四目标验收。保存链路已经真实触发，不能描述为“根本未触发”。
+
+实验在此前获授权的 ascend-91 上于 2026-11-14 完成；2026-11-16 仅经当前可用 yanbo-81 读取持久卷并进行 CPU 审核，没有访问或恢复 91，没有启动新模型、调优、构造复用、跨机实验或重新测量。原始实验状态直到本次恢复 NAS 证据后才确认全部闭合。
+
+## 结果与逐请求记录
+
+[机器可读比较](COMPARISON.json)｜[完整通用报告及图表](report/REPORT.md)｜[HTML 报告](report/report.html)｜[原始数字索引](summary.json)｜[独立核验](audit/closure.json)。五项逐请求数值分别是本目录 `native-<dataset>-requests.json` 和 `pegaflow-<dataset>-requests.json`，包含时间、usage、finish、状态和受控记录/SSE 哈希，不含题目、答案或对话。
+
+| 数据集 | B0 tok/s | B1 tok/s | 吞吐变化 | TTFT均值秒 B0/B1 | TPOT均值秒 B0/B1 | solver length B0/B1 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+''' + '\n'.join(rows) + '''
+
+吞吐为所有有效输出词元总数除以该批最早请求提交至最后响应完成的墙钟区间，TTFT 为首个 content 事件；TPOT 使用 `(end-first_content)/(completion_tokens-1)`，单请求等权平均，分位数按 `(n-1)q` 线性插值。所有 mean/P50/P95/P99、逐请求词元数及排除数见 COMPARISON.json 和逐请求文件。五项保留 EOS，输出长度可变，因此短 trace 的 tok/s 变化不能直接当作相同长度服务时间变化。单次有序队列未提供总体效应置信区间或因果归因。
+
+## 冻结负载与公平性
+
+使用正确 MOD 提示词 SHA256 `43bc925a6ad749971a64e5244b86451f5d4cf3361e87423b1eda8ea0b0d04461`，参见[绑定](mod-binding.json)与[执行计划](execution-plan.json)。每臂 MMLU200/C200/max8192，HLE200/C16/max16384，Frontier160/C16/max16384，SWE32任务64请求/C8/max2048，Terminal32任务48请求/C8/max2048；每臂672、两臂1344 solver。MMLU seed0，其他 seed17，temperature0。HLE Gold文64/图10、Revision文113/图13；Frontier Olympiad100/Research60。原始题目、顺序、提示、预算、EOS和 grader 保持冻结；trace 仅推理回放、tool_choice=none，不执行工具、不声称任务解决率。
+
+独立新建 Native 服务对两臂 HLE/Frontier 完成720个 judge 输入，max8192，不计入 solver 吞吐。全14个阶段实际 client wait 均为0，2064/2064个正式记录逐一从原始 SSE 重放并核对冻结请求、时间、usage、判分和缓存计数；4份原 grader 汇总由 CPU 无HTTP重算逐字节一致。所有1344个 solver传输成功；judge 的语义判分未决保留为未决。
+
+两臂同用 Qwen3.5-35B-A3B（revision712cf74392b05026a6db2bf213d343747d1f6d45）、BF16、2×Ascend910B2 64GiB、物理2/5→逻辑0/1、TP2/PP1/DP1，16GiB/rank KV、ctx65536、seq16、batch4096、APC、Mamba align、async、MTP2、FULL_AND_PIECEWISE图[3,6,12,24,48]及默认CPU binding=True。B0关闭连接器和sidecar；B1增加 e2cdc2f7 PegaKVConnector read_write 和本机30gb sidecar，并保留其必要 HMA本地prefix索引安全限制。该差异计入MOD成本，不能关闭B0优化来消除。
+
+## 质量、未决与截断
+
+MMLU原extractor：B0 145/200=72.5%，B1 151/200=75.5%；单次固定子集结果不证明MOD提高质量。分类明细在summary/COMPARISON中。
+
+| 数据集/分层 | 固定分母 | 成功 B0/B1 | 已判 B0/B1 | 未决 B0/B1 | solver length B0/B1 | judge length B0/B1 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+''' + '\n'.join(quality_rows) + '''
+
+HLE 总成功27/200→28/200；judge未决111→102，均由原 strict_json 和固定预算保留，不能删除后重算成“准确率提升”。仅固定已判结果的条件缺失上下界分别13.5%–69.0%和14.0%–65.0%，不是置信区间，也不表示未决已被确认为错误。Frontier分别保留原Olympiad/Research计分；Research有效判分均值2.539273→2.618103只覆盖55→58个有效判分，完整60任务的成功下界为2/60→4/60。所有原汇总含学科分组、truncated-with-grade及审计标志，均在 `quality-*-summary.json`；judge无效111/102和7/5已经纳入分母。SWE和Terminal的任务解决质量未测。
+
+## PegaFlow 实际触发与零复用
+
+正式五项 engine save-success 分别12/8/0/402/390（共812），load-success、load/save failure均为0；各阶段本地和外部prefix hit增量为0。Frontier阶段没有save，不外推为该阶段有保存收益。逐阶段初始化计数、sidecar字节和容量/常驻量见[机制](connector-mechanism.json)及[开销补充](connector/PEGA-CONNECTOR.md)。
+
+本轮fresh cache_salt要求零复用，因而没有从CPU/SSD取回KV的事件，不能把变慢归因于SSD回读。实际配置和容量观测为本机30GiB主机池，容量32212254720B；保存开销和连接器安全限制是可能的代价，但本试验没有分别隔离其因果占比。此标准负载没有创造缓存恢复收益的机会，故不据此否定其他复用场景，也不更换负载追求正数。
+
+## C8 资格与可复算数据
+
+[配对摘要](c8/paired-summary.json)｜[逐请求数值及phase边界](c8/requests/manifest.json)｜[独立SSE检查](c8/independent-verification.json)。Native343、Pega341条均完成，按原4K/16K、C8、60s预热/300s正式提交窗口，固定256输出并排空；该合成资格与五项EOS指标分开。4K正式194.791542→195.060650 tok/s（+0.138%）；16K正式66.410510→65.283506（−1.697%）。这些tok/s分母包括drain，不能改称固定[0,300)产出。
+
+C8实际保存2476次、sidecar累计保存116256702464B、恢复0、失败0。该证据证明保存链路工作，不能用接近零的吞吐差或保存调用证明复用收益。逐请求记录仅含数值和哈希，受控索引绑定原件。
+
+## 准备、内存和成本
+
+| 服务 | 准备秒 | 准备双卡秒 | sidecar就绪至stop秒 | 正式容器memory.current最大观测B | 正式各卡HBM最大观测MB |
+| --- | ---: | ---: | ---: | ---: | --- |
+''' + '\n'.join(cost_rows) + '''
+
+准备包括源码准入、模型装载、图编译和binding；编译日志分项原文由受控索引保留，不能把重叠日志时间简单相加。主机池、sidecar常驻时间、startup-model/startup-sidecar各自采样、judge及额外HLE图像资格成本分别保留于 [runtime-overheads.json](runtime-overheads.json)、[diagnostic-overheads.json](diagnostic-overheads.json)及COMPARISON。HLE额外红/蓝资格每臂2请求、max32，不计入672/720。
+
+上述内存是留存采样区间内整个容器和设备的总观测；不是精确分配峰值，也不能把两臂总字节差称为MOD独占增量。相同费率下 solver 双卡秒/输出词元是吞吐倒数的资源代理；真实账单、有效FLOP、MOD独占主机/HBM增量均未测，保留null。无证据声称更低总体成本。
+
+## 身份证据与边界
+
+实际历史资格/服务前CPU子进程import、source/compiled-extension字节校验和跟踪diff证明 stock vLLM0fc695f、scheduler9ae149（无Bid bridge），Ascend5cb98ca及共同fe00/b7载体1264资源（含804个CANN文件）。三次正式服务各自runtime-identity和command/ready/PID/wait保留；每服务startup/steady两份有效worker/thread affinity观测未见warning/skip，quota800000/100000、cpuset0–191。包为torch2.10.0+cpu、torch-npu2.10.0.post4、vLLM0.23.0+empty、Ascend0.23.0、Transformers5.5.4、tokenizers0.22.2；重复使用已验证e2 wheel（SHA df687c8d…，7481020B），本轮没有重新编译。
+
+这些import是与服务环境相同的准入子进程检查，不是对正在运行Engine进程做loaded-import RPC或独立/proc argv采样；此类直接观测没有补造。Popen前命令、实际PID、健康、worker日志、affinity与运行期保存计数构成各自独立证据层。绑定文件中的 preparation_only、旧81 actual_import_tree 等历史准备描述保留原样，不当作本轮实际路径；本轮实际载体路径见runtime-overheads。
+
+14权重分片沿用此前完整逐字节哈希凭据，并核对当时当前文件size/mtime；不是本次重新读取70GiB权重的证明。原main manifest原字节SHA8e4ef474…，formal内controller重新序列化副本SHA见COMPARISON；JSON值相等但原字节不同，两个哈希都保留。C8绑定原main8e4，不以formal副本替换。
+
+## 原件、失败历史和可追溯性
+
+[正式原件索引](controlled-originals-index.json)｜[全campaign受控索引](controlled-campaign-index.json)｜[实际等待与释放](audit/historical-receipts-supplement-v2.json)｜[原grader与计划哈希](original-grader-sources.json)｜[CPU核验源码](audit-sources/audit_worker.py)。原问题、答案、图像、对话、私有Engine/评测源码和原始SSE留在获授权NAS；公开数值、源码与哈希供复算，不能用缺少公网原件下载链接冒充不存在原件。
+
+2026-11-14首次纯CPU预生成准入失败（RC1、模型启动/生成0）及后续修正RC0均保留，不能删除失败。正式outer/c8/formal真实wait都是0、无signals，5个owned服务均已释放双卡；Pega sidecar退出−15为owned stop的SIGTERM，不能写成其自身exit0。旧通用receipt导出器对outer文件名的查询不匹配，在新的supplement中按实际文件名补足，缺失的SDK外层wait仍为null。
+
+本次CPU审核逐一验证原formal manifest4585成员，并对metadata/qualification/logs/formal全库存前后校验一致；所有原件未变。公开包若因体积使用gzip，原字节哈希仍对应解压内容，见发布侧compressed-members映射；压缩不改原manifest。
+
+可用于最终条目的表述：完成PegaFlow在Qwen3.5-35B-A3B、双910B2上的五项MOD对照及共享judge，保存链路实际触发且全部正式请求完成。五项吞吐相对Native分别下降1.85%、2.15%、2.49%、18.22%和1.30%；fresh-salt标准下零恢复，未证明缓存复用或总体成本收益。质量未决与截断按原规则完整保留，结果作为负面边界公开。[结果报告](README.md)｜[逐请求结果索引](summary.json)。
+'''
+    (OUT / 'README.md').write_text(text, encoding='utf-8', newline='\n')
+    files = [{'path': path.relative_to(OUT).as_posix(), 'bytes': path.stat().st_size, 'sha256': sha(path)} for path in sorted(OUT.rglob('*')) if path.is_file()]
+    save(OUT / 'package-manifest.json', {'schema': 'pegaflow-final-public-package/v1', 'files': files, 'scope': 'Numeric evidence, public code and hashes only; no controlled prompts/output/SSE or private grader code'})
+    print(json.dumps({'output': str(OUT), 'files': len(files), 'datasets': len(pairs), 'raw_sse_verified': closure['raw_sse_verified'], 'builder_actual_returncode': call.returncode}))
+
+
+if __name__ == '__main__':
+    main()

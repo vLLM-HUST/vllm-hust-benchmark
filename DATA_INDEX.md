@@ -3,6 +3,108 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## 课题四正式送测与补测
+
+[V2 证据导航和补测清单](docs/topic4-evidence-map.md)集中列出在途 B1/扩展对照、已有原件、四指标验收缺口和入库方式。先核对是否已有可复算证据，再安排新增测量。
+
+算力方法以[送测 V2](docs/topic4-submission-v2-20261119.md)为准；[早期 M01 方法与配对](docs/B0_REFERENCE_COMPUTE.md)保留原计时协议和结论，供追溯。
+
+## DeepLinkEngine 安装与流程原件（2026-11-20）
+
+[安装、API 实测和未完成流程的可恢复存档](reports/deeplinkengine-user-journey-20261120/README.md)补齐独立 HTTP
+验证，保留失败和停止原因；新增推理实验 0 次，不替代 R9/R10 或完整项目验收。
+
+## R9 Qwen run-29 补测（2026-11-21）
+
+[固定五项、有效算力、上下文四租户与 4.4 公开租金核算](reports/r9-qwen-run29-20261121/README.md)。 按工况保留两臂卡号与封存证据。下面保留此前阶段记录。
+
+## R9 Qwen 已完成阶段（2026-11-21）
+
+[Original018/R9 配对实测与原件复算](reports/r9-qwen-partial-20261121/README.md)补接 MMLU200、Frontier160、C8
+4K/16K，保留 HLE 启动失败及未执行阶段，不新增推理。
+
+## R9 书生模型集成验证（2026-11-20）
+
+[原生单模型实测及可恢复证据](reports/r9-intern-native-20261120/README.md)记录MMLU200、C8连续4K/16K与公开R8参考的全部收益、取舍、SDK字节等价和安装/复算回执；不作为Original018或项目完整验收。
+
+## Instance Controller 扩缩容实测（2026-11-20）
+
+[单峰和双峰真机配对](reports/instance-controller-scaling-20261120/README.md)记录完成请求、延迟、峰内接单和预约资源，覆盖默认 CUDA
+Graph 模式。
+
+## r10 3072 长上下文修订（2026-11-24）
+
+[V5 4.3 配对与四租户回归](reports/r10-3072-context-20261124/README.md)保存独立修订版工况、原门槛及封存摘要。
+
+## r10 固定五项与 C8（2026-11-20）
+
+[R10 稳定包与补丁 B0 原生 F/T 对照](reports/r10-stable-patched-b0-ft-20261123-v1/README.md)
+包含两组配对的有效算力区间、原生三轮回执、源码资格复核及公开算术复算包。
+
+[两版修复候选的 V2 4.1–4.4 证据](docs/topic4-evidence-map.md#r10-%E4%B8%A4%E4%B8%AA%E4%BF%AE%E5%A4%8D%E5%80%99%E9%80%89%E7%9A%84-v2-%E8%AF%81%E6%8D%AE)按候选保存实测、数据集、判定及封存来源。
+
+[B1-r10 一键实测](reports/r10-fixed-five-20261120/README.md)包含固定五项、4K/16K C8、两臂评分和封存来源。
+
+[原生 RMS 修订实测与连续写回复查](reports/r10-native-rms-20261121/README.md)包含 HLE、FrontierScience、4K/16K C8
+与双卡组件数据。
+
+[r10 native-rms 五项配对](reports/r10-native-rms-fixed-five-20261121/README.md)记录其全部五项、C8 和封存证据。
+
+[r10 contiguous-restore 五项配对](reports/r10-contiguous-restore-fixed-five-20261121/README.md)记录其全部五项、C8
+和封存证据。
+
+## SR系列探索与候选处置（2026-11-20）
+
+[B1-sr4 共享专家融合](reports/b1-sr4-20261120/README.md)记录两轮 C8、候选 C1 和固定五项的可公开配对结果。
+
+[统一探索台账](reports/sr-exploration-20261120/README.md)登记已发布SR1/SR2、早期vSpec组合消融、Engine
+C/E/K探索及完整MOD目录处置。已包含、无收益、退化、质量/兼容失败与尚未完成资格分别保留；推荐当前引擎增量前先核对此表。
+
+## KV Controller 路由真机回放（2026-11-19）
+
+[同后端配对及公开数据](reports/kv-controller-routing-20261119/README.md)记录 24 与 48 个 SWE-smith program 的整批和请求
+P95。
+
+## 课题四送测方案 V2（2026-11-19）
+
+[固定 B0 与送测时最新 B1 的四项测试方案](docs/topic4-submission-v2-20261119.md)：明确同轮 F/T、独立参考分母、五项固定范围、16K/32K
+分窗判据、按公开租赁报价估算单位成本与完整区间利用率。历史成绩保留其原版本和协议。
+
+## r8 上下文与四租户补齐（2026-11-18 UTC）
+
+[冻结 r8 / original018 配对补测](reports/r8-context-tenant-20261119/README.md)：真实公开历史的4K、16K、32K及四租户正式阶段全部完成，保留五窗口、租户分布、原始流与完整封存摘要；原五项不重跑。有效算力参考单独认证，不把本专项采样利用率当作效率。
+
+## Control Plane 评测入口
+
+- [请求限流控制器固定五项](reports/controller-r8-full-coverage-20261122/README.md)对比同一 B1 引擎直连与经控制器，覆盖轨迹重负载和闭环
+  C8。服务侧矩阵速率、同费率加速卡成本和 V2 4.1 的原生参考效率分别解读。
+- [三档上下文及四租户](reports/controller-r8-context-tenant-20261122/README.md)记录冻结公开历史、五个时间窗口、逐租户结果和逐卡采样。
+- [35B 真实 Agent 单题执行、评分和复算](reports/request-throttling-real-agent-single-task-20261124/README.md)保留同题六次执行、两组评分器对照、三次
+  program 释放及独立 MMLU-Pro B0 启动来源。六份补丁均未通过该题官方评分，三臂同题性能待测。
+- [实例控制器扩缩容](reports/instance-controller-scaling-20261120/README.md)分别报告峰段接单、全窗口和资源预约。[KV Controller 路由](reports/kv-controller-routing-20261119/README.md)报告同后端配对的
+  24 与 48 program 请求。
+
+## 第八版请求限流控制器全指标复测（2026-11-22）
+
+[固定五项、SWE Trace Heavy Load 和闭环并发 8](reports/controller-r8-full-coverage-20261122/README.md)保留配对性能、尾部时延、评分、服务侧算力下界、单位成本、双卡利用率和原始归档摘要。
+
+[R8 双卡原生参考效率](reports/controller-r8-native-efficiency-20261123/README.md)记录直连及经请求限流控制器两臂的 §4.1
+原生时钟、必要算量、独立参考和封存复算。
+
+## 第八版请求限流控制器上下文与四租户实测（2026-11-22）
+
+[三档上下文及四租户同引擎配对](reports/controller-r8-context-tenant-20261122/README.md)保留整阶段、五个提交窗口、逐租户请求和双卡使用率。[网站数据投影](website-publication/data/controller-r8-context-tenant-v1.json)
+
+## SWE Trace Heavy Load 第八版请求限流控制器复测（2026-11-22）
+
+[完整批次、分层时延和逐程序结果](reports/controller-r8-20261122-repeat/README.md)保留第二组真实双卡配对和设备采样；[网站复测数据](website-publication/data/controller-r8-heavy-load-repeat-v1.json)与首轮结果各自可追溯。
+
+## Request Throttling Controller 第八版对照（2026-11-18）
+
+[多轮缓存竞争与四项固定负载](reports/controller-r8-20261118/README.md)：完整保留正收益、退化、输出量和原评分；多轮新输入为合成token-ID并继承真实输出，不是完整Agent解决率。Humanity’s
+Last Exam按要求暂缓。
+[时延补充数据](website-publication/data/controller-r8-latency-v1.json)从已封存的请求与引擎计数器复算，区分客户端和引擎口径。
+
 ## 真实上下文与四租户补测（2026-11-15）
 
 [双卡B0/B1配对报告](reports/context-tenant-a01-20261115/README.md)：保留全部窗口、原始流和局部负收益，追加长上下文与四租户工况判读；原五项数据不重跑。
@@ -11,6 +113,11 @@
 
 [TP8 历史争用与 wl38 默认模式报告](reports/tech-outcomes-20261117/muxpd/README.md)： 复核 TP8 出词间隔改善及首 token
 代价，首次归档 wl38 六种真实文本派生负载在 TP2/TP4 的全部 24 份结果， 含 SLO 计算、请求身份、正负结果和原件哈希。单轮性能结果不替代质量验收，也不进入官方榜单。
+
+## vSpec 0.15.2 专题证据（2026-11-17）
+
+[FrontierScience 与 HLE-Verified 两轮复测入口](reports/tech-outcomes-20261117/vspec/README.md)：各含 vSpec 与原生
+MTP2/4/6/8 的冻结题单、脱敏吞吐、逐题号评分及独立 gamma 诊断 trace。公开目录不含题目、图像或回答正文；本地兼容补丁和质量限制见各报告。本集合是专题实验，不进入官方榜单。
 
 ## PegaFlow 本地缓存恢复慢尾归因（2026-11-10）
 
@@ -232,3 +339,36 @@ python -m pytest -q tests/test_data_index.py
 ## B1 r6固定五项复测（2026-11-14）
 
 [15阶段封存复核与四目标验收](reports/five-datasets-r6-20261114/README.md)：10阶段复用、5阶段新增，672条solver/trace请求每臂均完成；保留质量下降、裁判未决、当前MMLU参考及16K/32K、多租户证据缺口。
+
+## r8 当前有效算力参考（2026-11-19）
+
+[已封存三轮认证与网站发布订正](reports/r8-compute-reference-20261119-v2/README.md)：固定MMLU200/out256、BF16/TP2，保留六份必要算量、六份同步原生计时和原完整参考分母。B1效率下界89.7838%，50%里程碑达成、90%最终目标未达成；本次补接已有结果，新增推理0轮。
+
+## 官方 B0 0.23 C8 已封存结果（2026-11-21）
+
+[原件与 CPU 复算](reports/official-b0-023-c8-20261121-v1/README.md)：4K/16K 合成 C8 正式阶段与独立预热；原整轮失败、新 F/T
+未认证，驱动未记录。
+
+## 官方 B0 0.23 固定全套报告（2026-11-22）
+
+[报告与匿名复算](reports/official-b0-023-full-report-20261122-v1/README.md)：固定五项、真实上下文、四租户及三次原生
+T；自动算量适用性未通过，F 与效率留空。旧 C8 原件保留，元数据归档不包含完整 SSE。
+
+## B0 0.23 / 0.30 MTP KV 补丁复测
+
+[独立 F/T 复测与 CPU 复算](reports/b0-mtp-kv-prefix-repair-v1/README.md)：Qwen3.5-35B-A3B，TP2。每个补丁版三轮正式计时，附算量和有效算力区间。
+
+## R10 与 B0 0.23 / 0.30 补丁版的原生 F/T 对照（2026-11-23）
+
+[三臂有效算力与复算证据](reports/r10-stable-patched-b0-ft-20261123-v1/README.md)汇总 R10 稳定包的一组新计时和两版 B0
+的封存结果。每臂三轮，每轮 200 条。
+
+## 官方 B0 0.30 固定配置报告（2026-11-22）
+
+[报告、原件与匿名复算](reports/official-b0-030-full-report-20261122-v1/README.md)：固定五项、真实上下文、四租户和原三次 T。200
+请求独立 companion 后自动算量合同拒绝，F/效率为空；原失败保留，C8 仅计数和时钟，元数据包省略完整 SSE。
+
+## B0 0.28 源码候选固定配置报告（2026-11-23）
+
+[报告、原件与匿名复算](reports/official-b0-028-source-full-report-20261123-v1/README.md)：九组原测、完整质量与原三次 T；封存
+JSON 的自动 F/T 预检拒绝，F 为空。候选身份、原失败与完整准入失败均保留；元数据包不含完整 SSE。

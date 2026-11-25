@@ -1,0 +1,34 @@
+{
+  "schema": "own-mod-c8-qualification/v2",
+  "test_target": "own_mod",
+  "project": "BidKV",
+  "profile_id": "bidkv-default-true-common-topology-fix-20261114-v3",
+  "enable_cpu_binding": true,
+  "native_preflight": "native-04",
+  "bidkv_preflight": "bidkv-03",
+  "physical_npus": [
+    6,
+    7
+  ],
+  "logical_npus": [
+    0,
+    1
+  ],
+  "same_frozen_c8_input_sha256": "a73c9e1b2afa476dea80f91832e963867f6f4130e4988d97210dddfea5aeb392",
+  "scope": "Original separate fixed-length 4K/16K C8,60/300s,8lanes,ignore_eosTrue/max_tokens256. All five actual datasets preserve EOS.",
+  "sources_sha256": {
+    "transport.py": "e372ac8bdc271550b380b67a7294350d6ffd266f363cdb23359e07b2c0e869f2",
+    "measurement.py": "d4999f0f43d6f804fb298fa52ce930ca974c06c7e18438a09580a6a14863fe95",
+    "observation.py": "cae477ce93c7821a704fbebc211de1edba10ec16a7db2fe2d463943879ed784e",
+    "continuous.py": "046c427be605a8d97d785201032ffb82f5e9476d55667f355557fdbf363f764e",
+    "test_driver.py": "f371c00a234f9e2d21435e131975113060350598755b3bedae274631936bb9ff"
+  },
+  "common_ascend_compatibility": {
+    "base_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+    "source_original_sha256": "71719e397ab003b31ba5e46e1a6da4da658ae7221eeead04311b65ad4d12d533",
+    "source_prepared_sha256": "b7a84571c349c22935414b2c5a4c6cf91223414f80c0954f797340ad0f1f55f2",
+    "prepare_script_sha256": "469b4cd103c88f7b1ba9f7bad646ea3a553035cb0700a653c756bb2314d2496d",
+    "shared_both_arms": true,
+    "scope": "Only physical\u2192logical topology parsing; original source/453files and8prebuiltlibs preserved except one Python method; no manual IRQ/migration operations."
+  }
+}

@@ -1,0 +1,1956 @@
+{
+  "scope": "Original-first8 MMLU biology diagnostic only; planned32. No formal200/five-task/quality-equivalence claim",
+  "source_manifest_sha256": "aaa8b284e6e924c8519832a722fd037d63f66d694db7eb5f05f72cc058b331bd",
+  "source_bytes_unchanged": true,
+  "planned": 32,
+  "phase": "pilot_complete_confirmation_not_qualified",
+  "actual_controller_returncode": 0,
+  "master_completed_successfully": true,
+  "observed_geometry_match": true,
+  "all_four_geometry_verified_equal": null,
+  "all_four_stage_audits_passed": false,
+  "closed_pilot_audit_passed": true,
+  "pilot_decision_recomputed": {
+    "run_reverse_confirmation": false,
+    "reasons": [
+      "prospective_quality_triage_not_met"
+    ],
+    "first_pair_throughput_change_pct": 7.501798699342155,
+    "scope": "Prospective cost triage only, not quality equivalence/statistical proof/final acceptance. Negative/partial firstAB remains reported with16remaining requests not executed."
+  },
+  "stored_pilot_decision": {
+    "run_reverse_confirmation": false,
+    "reasons": [
+      "prospective_quality_triage_not_met"
+    ],
+    "first_pair_throughput_change_pct": 7.501798699342155,
+    "scope": "Prospective cost triage only, not quality equivalence/statistical proof/final acceptance. Negative/partial firstAB remains reported with16remaining requests not executed."
+  },
+  "stages": [
+    {
+      "stage": "native-r01",
+      "planned": 8,
+      "execution_status": "completed",
+      "stage_audit_passed": true,
+      "issues": [],
+      "summary": {
+        "planned": 8,
+        "recorded": 8,
+        "successful": 8,
+        "failed": 0,
+        "whole_batch_wall_seconds": 141.4458719715476,
+        "accepted_output_tokens": 12743,
+        "output_tokens_per_second": 90.0909996338621,
+        "finish_stop": 8,
+        "finish_length": 0,
+        "unknown_final_usage": 0,
+        "no_final_content": 0,
+        "unresolved_no_final_content": 0,
+        "ttft_first_content_seconds": {
+          "samples": 8,
+          "mean": 49.63068861584179,
+          "p50": 44.25379939377308,
+          "p95": 98.46152873821552,
+          "p99": 120.7471805269271
+        },
+        "tpot_first_content_seconds": {
+          "samples": 8,
+          "mean": 0.054376950685892114,
+          "p50": 0.05280524435027879,
+          "p95": 0.08479415026197519,
+          "p99": 0.08736249007761313
+        },
+        "ttft_excluded_successful_records": 0,
+        "tpot_excluded_successful_records": 0,
+        "wire_audit_passed": true,
+        "quality": {
+          "denominator": 8,
+          "correct": 8,
+          "unparsed": 0,
+          "accuracy": 1.0,
+          "scope": "Original unchanged answer extractor, planned8denominator including failures/unreturned/out-of-range. Biology-prefix diagnostic, not formal200 or quality equivalence."
+        },
+        "counter_deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_queries_total": 0.0,
+          "vllm:num_preemptions_total": 96.0,
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_queries_total": 495174.0
+        },
+        "policy": {
+          "calls": 0,
+          "decisions": 96,
+          "selections": 0,
+          "abstentions": 0,
+          "failures": 0,
+          "invalid_selections": 0,
+          "changed_from_builtin": 0,
+          "legal": true,
+          "journals": [
+            {
+              "bytes": 227829,
+              "sha256": "2cfecea9d6113c0c5037205257817e921d6a379bcc6e8ece4544c430e572dbdf",
+              "decision_events": 96
+            }
+          ]
+        },
+        "input_admission_passed": true
+      },
+      "records": [
+        {
+          "case_id": "mmlu-pro-02804",
+          "wire_id": "hust-mm03-n-r01-l000000000000000",
+          "stage": "native-r01",
+          "lane": 0,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9837634.302586416,
+            "wall": 1794636710.1389146
+          },
+          "end": {
+            "monotonic": 9837770.757021409,
+            "wall": 1794636846.5933497
+          },
+          "first_token": {
+            "monotonic": 9837676.084212435,
+            "wall": 1794636751.92054
+          },
+          "last_token": {
+            "monotonic": 9837770.754560504,
+            "wall": 1794636846.5908885
+          },
+          "first_generated_event": {
+            "monotonic": 9837676.084212435,
+            "wall": 1794636751.92054
+          },
+          "last_generated_event": {
+            "monotonic": 9837770.754560504,
+            "wall": 1794636846.5908885
+          },
+          "usage": {
+            "prompt_tokens": 1369,
+            "completion_tokens": 2082,
+            "total_tokens": 3451
+          },
+          "observed_usage": {
+            "prompt_tokens": 1369,
+            "completion_tokens": 2082,
+            "total_tokens": 3451
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "365d88ae1a8453e488296203e9baa003129ebb0edb2bbd13c198f9c0fd3290e2"
+        },
+        {
+          "case_id": "mmlu-pro-02866",
+          "wire_id": "hust-mm03-n-r01-l010000000000000",
+          "stage": "native-r01",
+          "lane": 1,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9837634.301636,
+            "wall": 1794636710.137964
+          },
+          "end": {
+            "monotonic": 9837773.202765223,
+            "wall": 1794636849.0390933
+          },
+          "first_token": {
+            "monotonic": 9837667.187038708,
+            "wall": 1794636743.0233665
+          },
+          "last_token": {
+            "monotonic": 9837773.200529821,
+            "wall": 1794636849.0368578
+          },
+          "first_generated_event": {
+            "monotonic": 9837667.187038708,
+            "wall": 1794636743.0233665
+          },
+          "last_generated_event": {
+            "monotonic": 9837773.200529821,
+            "wall": 1794636849.0368578
+          },
+          "usage": {
+            "prompt_tokens": 1562,
+            "completion_tokens": 2373,
+            "total_tokens": 3935
+          },
+          "observed_usage": {
+            "prompt_tokens": 1562,
+            "completion_tokens": 2373,
+            "total_tokens": 3935
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "8e1def4f6d32aee43946ce6bf5b12c490bd73ebc86b01bb9b5c826be9acb1457"
+        },
+        {
+          "case_id": "mmlu-pro-02926",
+          "wire_id": "hust-mm03-n-r01-l020000000000000",
+          "stage": "native-r01",
+          "lane": 2,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9837634.301288543,
+            "wall": 1794636710.1376166
+          },
+          "end": {
+            "monotonic": 9837769.466395328,
+            "wall": 1794636845.3027234
+          },
+          "first_token": {
+            "monotonic": 9837648.402588636,
+            "wall": 1794636724.2389164
+          },
+          "last_token": {
+            "monotonic": 9837769.43165204,
+            "wall": 1794636845.26798
+          },
+          "first_generated_event": {
+            "monotonic": 9837648.402588636,
+            "wall": 1794636724.2389164
+          },
+          "last_generated_event": {
+            "monotonic": 9837769.43165204,
+            "wall": 1794636845.26798
+          },
+          "usage": {
+            "prompt_tokens": 1485,
+            "completion_tokens": 2038,
+            "total_tokens": 3523
+          },
+          "observed_usage": {
+            "prompt_tokens": 1485,
+            "completion_tokens": 2038,
+            "total_tokens": 3523
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "f8b24ffba0aa15e9516661d5c16a4d7dd9062ede26979d41c6e8f8c4d21170d9"
+        },
+        {
+          "case_id": "mmlu-pro-02986",
+          "wire_id": "hust-mm03-n-r01-l030000000000000",
+          "stage": "native-r01",
+          "lane": 3,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9837634.304647323,
+            "wall": 1794636710.140975
+          },
+          "end": {
+            "monotonic": 9837750.359549522,
+            "wall": 1794636826.1958776
+          },
+          "first_token": {
+            "monotonic": 9837676.083688196,
+            "wall": 1794636751.9200158
+          },
+          "last_token": {
+            "monotonic": 9837750.357483955,
+            "wall": 1794636826.193812
+          },
+          "first_generated_event": {
+            "monotonic": 9837676.083688196,
+            "wall": 1794636751.9200158
+          },
+          "last_generated_event": {
+            "monotonic": 9837750.357483955,
+            "wall": 1794636826.193812
+          },
+          "usage": {
+            "prompt_tokens": 1385,
+            "completion_tokens": 845,
+            "total_tokens": 2230
+          },
+          "observed_usage": {
+            "prompt_tokens": 1385,
+            "completion_tokens": 845,
+            "total_tokens": 2230
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "6fd3ccb9dd5227f66ede0b9dc780ca0618a303ec6adaa2f9db40da5126d27890"
+        },
+        {
+          "case_id": "mmlu-pro-03046",
+          "wire_id": "hust-mm03-n-r01-l040000000000000",
+          "stage": "native-r01",
+          "lane": 4,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9837634.304118784,
+            "wall": 1794636710.140447
+          },
+          "end": {
+            "monotonic": 9837760.136994267,
+            "wall": 1794636835.9733229
+          },
+          "first_token": {
+            "monotonic": 9837681.030711832,
+            "wall": 1794636756.8670394
+          },
+          "last_token": {
+            "monotonic": 9837760.13496842,
+            "wall": 1794636835.9712965
+          },
+          "first_generated_event": {
+            "monotonic": 9837681.030711832,
+            "wall": 1794636756.8670394
+          },
+          "last_generated_event": {
+            "monotonic": 9837760.13496842,
+            "wall": 1794636835.9712965
+          },
+          "usage": {
+            "prompt_tokens": 1519,
+            "completion_tokens": 1405,
+            "total_tokens": 2924
+          },
+          "observed_usage": {
+            "prompt_tokens": 1519,
+            "completion_tokens": 1405,
+            "total_tokens": 2924
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "246d87610445bf2f9fcdb7a57916ffd6b12d9e14144f34de22f1d5a18fab626c"
+        },
+        {
+          "case_id": "mmlu-pro-03108",
+          "wire_id": "hust-mm03-n-r01-l050000000000000",
+          "stage": "native-r01",
+          "lane": 5,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9837634.30506578,
+            "wall": 1794636710.1413937
+          },
+          "end": {
+            "monotonic": 9837767.100457313,
+            "wall": 1794636842.9367855
+          },
+          "first_token": {
+            "monotonic": 9837681.031038549,
+            "wall": 1794636756.8673663
+          },
+          "last_token": {
+            "monotonic": 9837767.098348403,
+            "wall": 1794636842.9346762
+          },
+          "first_generated_event": {
+            "monotonic": 9837681.031038549,
+            "wall": 1794636756.8673663
+          },
+          "last_generated_event": {
+            "monotonic": 9837767.098348403,
+            "wall": 1794636842.9346762
+          },
+          "usage": {
+            "prompt_tokens": 1520,
+            "completion_tokens": 1748,
+            "total_tokens": 3268
+          },
+          "observed_usage": {
+            "prompt_tokens": 1520,
+            "completion_tokens": 1748,
+            "total_tokens": 3268
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "f6ff8b98795b1dfb830b8e26a7993d45175bbcdb7648cc8be226d4b3c7877be0"
+        },
+        {
+          "case_id": "mmlu-pro-03168",
+          "wire_id": "hust-mm03-n-r01-l060000000000000",
+          "stage": "native-r01",
+          "lane": 6,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9837634.304403748,
+            "wall": 1794636710.1407318
+          },
+          "end": {
+            "monotonic": 9837766.327535016,
+            "wall": 1794636842.163863
+          },
+          "first_token": {
+            "monotonic": 9837681.031383691,
+            "wall": 1794636756.8677115
+          },
+          "last_token": {
+            "monotonic": 9837766.325100012,
+            "wall": 1794636842.161428
+          },
+          "first_generated_event": {
+            "monotonic": 9837681.031383691,
+            "wall": 1794636756.8677115
+          },
+          "last_generated_event": {
+            "monotonic": 9837766.325100012,
+            "wall": 1794636842.161428
+          },
+          "usage": {
+            "prompt_tokens": 1511,
+            "completion_tokens": 1083,
+            "total_tokens": 2594
+          },
+          "observed_usage": {
+            "prompt_tokens": 1511,
+            "completion_tokens": 1083,
+            "total_tokens": 2594
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "f6b66c21d524dc4a3f275801adf1d999bde1829a116eabad60744bcbf799b324"
+        },
+        {
+          "case_id": "mmlu-pro-03230",
+          "wire_id": "hust-mm03-n-r01-l070000000000000",
+          "stage": "native-r01",
+          "lane": 7,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9837634.3057159,
+            "wall": 1794636710.1420438
+          },
+          "end": {
+            "monotonic": 9837775.747160515,
+            "wall": 1794636851.5834885
+          },
+          "first_token": {
+            "monotonic": 9837760.624309374,
+            "wall": 1794636836.460637
+          },
+          "last_token": {
+            "monotonic": 9837775.744816285,
+            "wall": 1794636851.5811443
+          },
+          "first_generated_event": {
+            "monotonic": 9837760.624309374,
+            "wall": 1794636836.460637
+          },
+          "last_generated_event": {
+            "monotonic": 9837775.744816285,
+            "wall": 1794636851.5811443
+          },
+          "usage": {
+            "prompt_tokens": 1501,
+            "completion_tokens": 1169,
+            "total_tokens": 2670
+          },
+          "observed_usage": {
+            "prompt_tokens": 1501,
+            "completion_tokens": 1169,
+            "total_tokens": 2670
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "437de70d96324844ccbbb70e8a882ae77e002c851d1a1591e29d3cbf24a45264"
+        }
+      ],
+      "controlled_index": [
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-n-r01-l000000000000000",
+          "bytes": 35536,
+          "sha256": "b45a47ca17c0c9902728492b6ff286dbc4f799b505b245709ab5d9a09e171a39"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-n-r01-l000000000000000",
+          "bytes": 30082,
+          "sha256": "365d88ae1a8453e488296203e9baa003129ebb0edb2bbd13c198f9c0fd3290e2"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-n-r01-l010000000000000",
+          "bytes": 39359,
+          "sha256": "dd1de0c4662ce4b7e6dc76c122746b306435d1bcb3fdd4798b6ad8226ee40cbd"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-n-r01-l010000000000000",
+          "bytes": 32552,
+          "sha256": "8e1def4f6d32aee43946ce6bf5b12c490bd73ebc86b01bb9b5c826be9acb1457"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-n-r01-l020000000000000",
+          "bytes": 33376,
+          "sha256": "87b6466d3175a5e8f6f5b80877750f54189e82e0c870c8157a3795afc145b0df"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-n-r01-l020000000000000",
+          "bytes": 28538,
+          "sha256": "f8b24ffba0aa15e9516661d5c16a4d7dd9062ede26979d41c6e8f8c4d21170d9"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-n-r01-l030000000000000",
+          "bytes": 16524,
+          "sha256": "cf9536d420eb61381719ca1c756e70b696dea0503fb9790865075f1226acf7b0"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-n-r01-l030000000000000",
+          "bytes": 11381,
+          "sha256": "6fd3ccb9dd5227f66ede0b9dc780ca0618a303ec6adaa2f9db40da5126d27890"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-n-r01-l040000000000000",
+          "bytes": 27228,
+          "sha256": "da2b3542be1c1b5e304efc8a71e18a601d620e006227923e31d3314c03948f91"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-n-r01-l040000000000000",
+          "bytes": 19672,
+          "sha256": "246d87610445bf2f9fcdb7a57916ffd6b12d9e14144f34de22f1d5a18fab626c"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-n-r01-l050000000000000",
+          "bytes": 34700,
+          "sha256": "00bb7f8b903f85b6bec642c582d06657ca8960101af3bf31db21a6f86afb2b0d"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-n-r01-l050000000000000",
+          "bytes": 26667,
+          "sha256": "f6ff8b98795b1dfb830b8e26a7993d45175bbcdb7648cc8be226d4b3c7877be0"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-n-r01-l060000000000000",
+          "bytes": 25291,
+          "sha256": "caceb0a06c87b862d0db661eb7e2ddb53ae523bd4ba70a72df4ace20d91ae1a2"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-n-r01-l060000000000000",
+          "bytes": 17836,
+          "sha256": "f6b66c21d524dc4a3f275801adf1d999bde1829a116eabad60744bcbf799b324"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-n-r01-l070000000000000",
+          "bytes": 26154,
+          "sha256": "40c4b7494b033734a83d70235ef9c89b16c5d0a4f9e1751e46e44ec95678cd50"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-n-r01-l070000000000000",
+          "bytes": 17327,
+          "sha256": "437de70d96324844ccbbb70e8a882ae77e002c851d1a1591e29d3cbf24a45264"
+        }
+      ],
+      "actual_geometry": {
+        "go": true,
+        "actual_total_pool_blocks": 71,
+        "reserved_null_blocks": 1,
+        "usable_pool_blocks": 70,
+        "first_prefill_blocks_per_case": [
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "end_upper_blocks_per_case": [
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17
+        ],
+        "maximum_context_upper_blocks": 44,
+        "first_admission_upper_count": 7,
+        "pressure_possible": true,
+        "nominal_context_concurrency_for_description_only": 1.5909090909090908,
+        "fingerprint_sha256": "be4bc5dab96a33cca5b75c9bb8fa6f06f0ae24e062a23523801672ce15b66114",
+        "scope": "Prospectively frozen MMLU8 growth gate. No Evo4\u20136 nominal rule. EOS/timing may prevent real exposure; actual preemptions/calls/changed decisions remain separate."
+      },
+      "actual_waits_ok": true,
+      "owned_waits": [
+        {
+          "kind": "native-r01-owner",
+          "pid": 195910,
+          "actual_returncode": 0,
+          "wait_returned_unix": 1794636863.3493547
+        },
+        {
+          "kind": "native-r01-API",
+          "actual_returncode": 0,
+          "wait_returned_unix": 1794636862.7097173,
+          "api_pid": 196044
+        }
+      ],
+      "costs": {
+        "cold_model_initialization_seconds": 415.536236345768,
+        "owner_total_seconds": 571.428827047348,
+        "client_total_seconds": 142.0045886039734,
+        "api_owned_wait": {
+          "actual_returncode": 0,
+          "wait_returned_unix": 1794636862.7097173,
+          "api_pid": 196044
+        },
+        "scope": "Actual observed separate cold/admission/generation/cleanup times; unknown remains null"
+      },
+      "startup_telemetry": {
+        "present": true,
+        "sha256": "fa8eef2aef35d17c6e94cdd384b38a4446f6e9272a3272139baf57d85e077732",
+        "samples": 40,
+        "sample_errors": 0,
+        "first_unix": 1794636293.2632918,
+        "last_unix": 1794636706.708575,
+        "memory_current_max_bytes": 11722756096,
+        "devices": [
+          {
+            "physical_npu": 6,
+            "hbm_used_max_mb": 41182,
+            "observations": 40
+          },
+          {
+            "physical_npu": 7,
+            "hbm_used_max_mb": 41185,
+            "observations": 40
+          }
+        ],
+        "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+      },
+      "generation_telemetry": {
+        "present": true,
+        "sha256": "1beb9e4a8d203f7ddeb029b2381add34589d388e864e4d36a714880ed6dce765",
+        "samples": 14,
+        "sample_errors": 0,
+        "first_unix": 1794636710.133189,
+        "last_unix": 1794636847.5497558,
+        "memory_current_max_bytes": 12480380928,
+        "devices": [
+          {
+            "physical_npu": 6,
+            "hbm_used_max_mb": 41671,
+            "observations": 14
+          },
+          {
+            "physical_npu": 7,
+            "hbm_used_max_mb": 41670,
+            "observations": 14
+          }
+        ],
+        "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+      }
+    },
+    {
+      "stage": "bidkv-r01",
+      "planned": 8,
+      "execution_status": "completed",
+      "stage_audit_passed": true,
+      "issues": [],
+      "summary": {
+        "planned": 8,
+        "recorded": 8,
+        "successful": 8,
+        "failed": 0,
+        "whole_batch_wall_seconds": 161.74589320831,
+        "accepted_output_tokens": 15665,
+        "output_tokens_per_second": 96.8494450726195,
+        "finish_stop": 8,
+        "finish_length": 0,
+        "unknown_final_usage": 0,
+        "no_final_content": 0,
+        "unresolved_no_final_content": 0,
+        "ttft_first_content_seconds": {
+          "samples": 8,
+          "mean": 45.87783755431883,
+          "p50": 37.03163550887257,
+          "p95": 98.66287718787785,
+          "p99": 123.10572787836192
+        },
+        "tpot_first_content_seconds": {
+          "samples": 8,
+          "mean": 0.052108189911158516,
+          "p50": 0.04974568569649197,
+          "p95": 0.09236103379318018,
+          "p99": 0.09685685062766211
+        },
+        "ttft_excluded_successful_records": 0,
+        "tpot_excluded_successful_records": 0,
+        "wire_audit_passed": true,
+        "quality": {
+          "denominator": 8,
+          "correct": 6,
+          "unparsed": 0,
+          "accuracy": 0.75,
+          "scope": "Original unchanged answer extractor, planned8denominator including failures/unreturned/out-of-range. Biology-prefix diagnostic, not formal200 or quality equivalence."
+        },
+        "counter_deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_queries_total": 0.0,
+          "vllm:num_preemptions_total": 95.0,
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_queries_total": 589737.0
+        },
+        "policy": {
+          "calls": 95,
+          "decisions": 95,
+          "selections": 1,
+          "abstentions": 94,
+          "failures": 0,
+          "invalid_selections": 0,
+          "changed_from_builtin": 1,
+          "legal": true,
+          "journals": [
+            {
+              "bytes": 230841,
+              "sha256": "2be1f7199c301e454934c2c8565ade24938cf8c411aa9f5d93d32b46cae32ef8",
+              "decision_events": 95
+            }
+          ]
+        },
+        "input_admission_passed": true
+      },
+      "records": [
+        {
+          "case_id": "mmlu-pro-02804",
+          "wire_id": "hust-mm03-b-r01-l000000000000000",
+          "stage": "bidkv-r01",
+          "lane": 0,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9838206.591312481,
+            "wall": 1794637282.4276407
+          },
+          "end": {
+            "monotonic": 9838337.33862588,
+            "wall": 1794637413.1749542
+          },
+          "first_token": {
+            "monotonic": 9838243.624632725,
+            "wall": 1794637319.4609606
+          },
+          "last_token": {
+            "monotonic": 9838337.336544283,
+            "wall": 1794637413.1728725
+          },
+          "first_generated_event": {
+            "monotonic": 9838243.624632725,
+            "wall": 1794637319.4609606
+          },
+          "last_generated_event": {
+            "monotonic": 9838337.336544283,
+            "wall": 1794637413.1728725
+          },
+          "usage": {
+            "prompt_tokens": 1369,
+            "completion_tokens": 1772,
+            "total_tokens": 3141
+          },
+          "observed_usage": {
+            "prompt_tokens": 1369,
+            "completion_tokens": 1772,
+            "total_tokens": 3141
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "b850f023573e8a2b8792b581ef5c0eab769d9e242de773fd2b74b705cce0af81"
+        },
+        {
+          "case_id": "mmlu-pro-02866",
+          "wire_id": "hust-mm03-b-r01-l010000000000000",
+          "stage": "bidkv-r01",
+          "lane": 1,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9838206.591704167,
+            "wall": 1794637282.4280322
+          },
+          "end": {
+            "monotonic": 9838341.344786271,
+            "wall": 1794637417.1811144
+          },
+          "first_token": {
+            "monotonic": 9838242.045802115,
+            "wall": 1794637317.88213
+          },
+          "last_token": {
+            "monotonic": 9838341.342618704,
+            "wall": 1794637417.1789465
+          },
+          "first_generated_event": {
+            "monotonic": 9838242.045802115,
+            "wall": 1794637317.88213
+          },
+          "last_generated_event": {
+            "monotonic": 9838341.342618704,
+            "wall": 1794637417.1789465
+          },
+          "usage": {
+            "prompt_tokens": 1562,
+            "completion_tokens": 2133,
+            "total_tokens": 3695
+          },
+          "observed_usage": {
+            "prompt_tokens": 1562,
+            "completion_tokens": 2133,
+            "total_tokens": 3695
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": false,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "7bd0ff33268f79e8a3f50a79351bb2b36baa22b7489a5ff2b9dadaad053ac53a"
+        },
+        {
+          "case_id": "mmlu-pro-02926",
+          "wire_id": "hust-mm03-b-r01-l020000000000000",
+          "stage": "bidkv-r01",
+          "lane": 2,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9838206.591973124,
+            "wall": 1794637282.428301
+          },
+          "end": {
+            "monotonic": 9838342.28569748,
+            "wall": 1794637418.1220255
+          },
+          "first_token": {
+            "monotonic": 9838242.045484615,
+            "wall": 1794637317.8818126
+          },
+          "last_token": {
+            "monotonic": 9838342.28396524,
+            "wall": 1794637418.1202934
+          },
+          "first_generated_event": {
+            "monotonic": 9838242.045484615,
+            "wall": 1794637317.8818126
+          },
+          "last_generated_event": {
+            "monotonic": 9838342.28396524,
+            "wall": 1794637418.1202934
+          },
+          "usage": {
+            "prompt_tokens": 1485,
+            "completion_tokens": 2262,
+            "total_tokens": 3747
+          },
+          "observed_usage": {
+            "prompt_tokens": 1485,
+            "completion_tokens": 2262,
+            "total_tokens": 3747
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "946e6b5ef0b9e1d567361a13662bbedeca3779197389808f1c53b55af8b6c39a"
+        },
+        {
+          "case_id": "mmlu-pro-02986",
+          "wire_id": "hust-mm03-b-r01-l030000000000000",
+          "stage": "bidkv-r01",
+          "lane": 3,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9838206.590800384,
+            "wall": 1794637282.4271286
+          },
+          "end": {
+            "monotonic": 9838318.55109998,
+            "wall": 1794637394.387428
+          },
+          "first_token": {
+            "monotonic": 9838220.47231434,
+            "wall": 1794637296.3086421
+          },
+          "last_token": {
+            "monotonic": 9838318.508235432,
+            "wall": 1794637394.3445632
+          },
+          "first_generated_event": {
+            "monotonic": 9838220.47231434,
+            "wall": 1794637296.3086421
+          },
+          "last_generated_event": {
+            "monotonic": 9838318.508235432,
+            "wall": 1794637394.3445632
+          },
+          "usage": {
+            "prompt_tokens": 1385,
+            "completion_tokens": 1002,
+            "total_tokens": 2387
+          },
+          "observed_usage": {
+            "prompt_tokens": 1385,
+            "completion_tokens": 1002,
+            "total_tokens": 2387
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "d1b6b917b476028c2248e59dbb3e6ffea84938d7f7fa171534cea5ea3c623fa7"
+        },
+        {
+          "case_id": "mmlu-pro-03046",
+          "wire_id": "hust-mm03-b-r01-l040000000000000",
+          "stage": "bidkv-r01",
+          "lane": 4,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9838206.592579665,
+            "wall": 1794637282.4289079
+          },
+          "end": {
+            "monotonic": 9838335.321087578,
+            "wall": 1794637411.1574156
+          },
+          "first_token": {
+            "monotonic": 9838243.624221908,
+            "wall": 1794637319.4605496
+          },
+          "last_token": {
+            "monotonic": 9838335.319068752,
+            "wall": 1794637411.1553967
+          },
+          "first_generated_event": {
+            "monotonic": 9838243.624221908,
+            "wall": 1794637319.4605496
+          },
+          "last_generated_event": {
+            "monotonic": 9838335.319068752,
+            "wall": 1794637411.1553967
+          },
+          "usage": {
+            "prompt_tokens": 1519,
+            "completion_tokens": 1719,
+            "total_tokens": 3238
+          },
+          "observed_usage": {
+            "prompt_tokens": 1519,
+            "completion_tokens": 1719,
+            "total_tokens": 3238
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "22394c8c4ed8b54d47bc3403a4040211c51e080d124ac522d5323353c6718325"
+        },
+        {
+          "case_id": "mmlu-pro-03108",
+          "wire_id": "hust-mm03-b-r01-l050000000000000",
+          "stage": "bidkv-r01",
+          "lane": 5,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9838206.59288354,
+            "wall": 1794637282.4292116
+          },
+          "end": {
+            "monotonic": 9838368.336693592,
+            "wall": 1794637444.1730218
+          },
+          "first_token": {
+            "monotonic": 9838243.624512315,
+            "wall": 1794637319.4608402
+          },
+          "last_token": {
+            "monotonic": 9838368.334541244,
+            "wall": 1794637444.1708694
+          },
+          "first_generated_event": {
+            "monotonic": 9838243.624512315,
+            "wall": 1794637319.4608402
+          },
+          "last_generated_event": {
+            "monotonic": 9838368.334541244,
+            "wall": 1794637444.1708694
+          },
+          "usage": {
+            "prompt_tokens": 1520,
+            "completion_tokens": 4561,
+            "total_tokens": 6081
+          },
+          "observed_usage": {
+            "prompt_tokens": 1520,
+            "completion_tokens": 4561,
+            "total_tokens": 6081
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": false,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "dd95e89cae41697f45ac45b8e76b661fbef1098e94259f0800da50d33a4b8109"
+        },
+        {
+          "case_id": "mmlu-pro-03168",
+          "wire_id": "hust-mm03-b-r01-l060000000000000",
+          "stage": "bidkv-r01",
+          "lane": 6,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9838206.593194924,
+            "wall": 1794637282.429523
+          },
+          "end": {
+            "monotonic": 9838339.85935265,
+            "wall": 1794637415.6956809
+          },
+          "first_token": {
+            "monotonic": 9838248.513740152,
+            "wall": 1794637324.3500679
+          },
+          "last_token": {
+            "monotonic": 9838339.856824053,
+            "wall": 1794637415.693152
+          },
+          "first_generated_event": {
+            "monotonic": 9838248.513740152,
+            "wall": 1794637324.3500679
+          },
+          "last_generated_event": {
+            "monotonic": 9838339.856824053,
+            "wall": 1794637415.693152
+          },
+          "usage": {
+            "prompt_tokens": 1511,
+            "completion_tokens": 1116,
+            "total_tokens": 2627
+          },
+          "observed_usage": {
+            "prompt_tokens": 1511,
+            "completion_tokens": 1116,
+            "total_tokens": 2627
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "a89e12d8c9898df853001a54e344473d521897395bee1fb8d239eabaa6c03a2b"
+        },
+        {
+          "case_id": "mmlu-pro-03230",
+          "wire_id": "hust-mm03-b-r01-l070000000000000",
+          "stage": "bidkv-r01",
+          "lane": 7,
+          "status": "ok",
+          "attempted": true,
+          "http_status": 200,
+          "start": {
+            "monotonic": 9838206.594317084,
+            "wall": 1794637282.430645
+          },
+          "end": {
+            "monotonic": 9838349.450678157,
+            "wall": 1794637425.2870061
+          },
+          "first_token": {
+            "monotonic": 9838335.810757635,
+            "wall": 1794637411.6470857
+          },
+          "last_token": {
+            "monotonic": 9838349.419759842,
+            "wall": 1794637425.2560878
+          },
+          "first_generated_event": {
+            "monotonic": 9838335.810757635,
+            "wall": 1794637411.6470857
+          },
+          "last_generated_event": {
+            "monotonic": 9838349.419759842,
+            "wall": 1794637425.2560878
+          },
+          "usage": {
+            "prompt_tokens": 1501,
+            "completion_tokens": 1100,
+            "total_tokens": 2601
+          },
+          "observed_usage": {
+            "prompt_tokens": 1501,
+            "completion_tokens": 1100,
+            "total_tokens": 2601
+          },
+          "finish_reason": "stop",
+          "observed_finish_reason": "stop",
+          "no_final_content": false,
+          "correct": true,
+          "unparsed": false,
+          "wire_audit_passed": true,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": "dcdc3aa5aa3167079949ed5d7d9ae6bbd60ac73005831ee0338d30fbc988b960"
+        }
+      ],
+      "controlled_index": [
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-b-r01-l000000000000000",
+          "bytes": 31890,
+          "sha256": "24a364e7d1c1b0b4ba97f45b9ade570d8c38e0d2b88e77c6cd197debf3f942b8"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-b-r01-l000000000000000",
+          "bytes": 26109,
+          "sha256": "b850f023573e8a2b8792b581ef5c0eab769d9e242de773fd2b74b705cce0af81"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-b-r01-l010000000000000",
+          "bytes": 35419,
+          "sha256": "4f82cd138c35a5b86bd8a870d8f9b8050aaf54022b12fbeecace1eacee6139f2"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-b-r01-l010000000000000",
+          "bytes": 29333,
+          "sha256": "7bd0ff33268f79e8a3f50a79351bb2b36baa22b7489a5ff2b9dadaad053ac53a"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-b-r01-l020000000000000",
+          "bytes": 33885,
+          "sha256": "d50df73fdc6162be7554a578ef251fc2747e7188da4110383c4afc03f482a022"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-b-r01-l020000000000000",
+          "bytes": 29996,
+          "sha256": "946e6b5ef0b9e1d567361a13662bbedeca3779197389808f1c53b55af8b6c39a"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-b-r01-l030000000000000",
+          "bytes": 17853,
+          "sha256": "a91f21071f1b7fbd6a4bb067b690f3625c63ef1d5ec4d2b5f8dc99bcbfe52db1"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-b-r01-l030000000000000",
+          "bytes": 13659,
+          "sha256": "d1b6b917b476028c2248e59dbb3e6ffea84938d7f7fa171534cea5ea3c623fa7"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-b-r01-l040000000000000",
+          "bytes": 31565,
+          "sha256": "c17da97b7377e1e1a3a090098555d9f104bd9967e26c793591715be034e3312a"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-b-r01-l040000000000000",
+          "bytes": 24197,
+          "sha256": "22394c8c4ed8b54d47bc3403a4040211c51e080d124ac522d5323353c6718325"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-b-r01-l050000000000000",
+          "bytes": 72284,
+          "sha256": "e4d65fdecf649eb818d164c6a09324ad2a72222877e131914f9baf205b8da30e"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-b-r01-l050000000000000",
+          "bytes": 66570,
+          "sha256": "dd95e89cae41697f45ac45b8e76b661fbef1098e94259f0800da50d33a4b8109"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-b-r01-l060000000000000",
+          "bytes": 25714,
+          "sha256": "aeef0fa8ee5e4eb6ea797e842b8e2dcfcab6f60cc52002bb499673a6700dcb9f"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-b-r01-l060000000000000",
+          "bytes": 18512,
+          "sha256": "a89e12d8c9898df853001a54e344473d521897395bee1fb8d239eabaa6c03a2b"
+        },
+        {
+          "kind": "record",
+          "wire_id": "hust-mm03-b-r01-l070000000000000",
+          "bytes": 25121,
+          "sha256": "0aed5c68a6e56abd318f7cb0dd2f04f102d032be9af8239ecea976d59f18ed3e"
+        },
+        {
+          "kind": "SSE",
+          "wire_id": "hust-mm03-b-r01-l070000000000000",
+          "bytes": 16787,
+          "sha256": "dcdc3aa5aa3167079949ed5d7d9ae6bbd60ac73005831ee0338d30fbc988b960"
+        }
+      ],
+      "actual_geometry": {
+        "go": true,
+        "actual_total_pool_blocks": 71,
+        "reserved_null_blocks": 1,
+        "usable_pool_blocks": 70,
+        "first_prefill_blocks_per_case": [
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10,
+          10
+        ],
+        "end_upper_blocks_per_case": [
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17,
+          17
+        ],
+        "maximum_context_upper_blocks": 44,
+        "first_admission_upper_count": 7,
+        "pressure_possible": true,
+        "nominal_context_concurrency_for_description_only": 1.5909090909090908,
+        "fingerprint_sha256": "be4bc5dab96a33cca5b75c9bb8fa6f06f0ae24e062a23523801672ce15b66114",
+        "scope": "Prospectively frozen MMLU8 growth gate. No Evo4\u20136 nominal rule. EOS/timing may prevent real exposure; actual preemptions/calls/changed decisions remain separate."
+      },
+      "actual_waits_ok": true,
+      "owned_waits": [
+        {
+          "kind": "bidkv-r01-owner",
+          "pid": 218357,
+          "actual_returncode": 0,
+          "wait_returned_unix": 1794637455.203726
+        },
+        {
+          "kind": "bidkv-r01-API",
+          "actual_returncode": 0,
+          "wait_returned_unix": 1794637454.584034,
+          "api_pid": 218383
+        }
+      ],
+      "costs": {
+        "cold_model_initialization_seconds": 415.78116374090314,
+        "owner_total_seconds": 591.0253155231476,
+        "client_total_seconds": 162.31867146492004,
+        "api_owned_wait": {
+          "actual_returncode": 0,
+          "wait_returned_unix": 1794637454.584034,
+          "api_pid": 218383
+        },
+        "scope": "Actual observed separate cold/admission/generation/cleanup times; unknown remains null"
+      },
+      "startup_telemetry": {
+        "present": true,
+        "sha256": "9da855fa70cf67220f95669346718292673345d5842486c8b3d2bccd2fbb95aa",
+        "samples": 40,
+        "sample_errors": 0,
+        "first_unix": 1794636865.5597956,
+        "last_unix": 1794637278.2645428,
+        "memory_current_max_bytes": 11505197056,
+        "devices": [
+          {
+            "physical_npu": 6,
+            "hbm_used_max_mb": 41228,
+            "observations": 40
+          },
+          {
+            "physical_npu": 7,
+            "hbm_used_max_mb": 41227,
+            "observations": 40
+          }
+        ],
+        "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+      },
+      "generation_telemetry": {
+        "present": true,
+        "sha256": "330dd3ff41afb3dd60c92fea59ba899b360923aa9cad8292f0663bd020c51518",
+        "samples": 16,
+        "sample_errors": 0,
+        "first_unix": 1794637282.4221957,
+        "last_unix": 1794637440.9814446,
+        "memory_current_max_bytes": 12480053248,
+        "devices": [
+          {
+            "physical_npu": 6,
+            "hbm_used_max_mb": 41671,
+            "observations": 16
+          },
+          {
+            "physical_npu": 7,
+            "hbm_used_max_mb": 41669,
+            "observations": 16
+          }
+        ],
+        "scope": "Observed container total and per-device HBM, not target-exclusive incremental consumption; startup and generation streams remain separate."
+      }
+    },
+    {
+      "stage": "bidkv-r02",
+      "planned": 8,
+      "execution_status": "not_executed",
+      "stage_audit_passed": false,
+      "issues": [],
+      "summary": {
+        "planned": 8,
+        "recorded": 0,
+        "successful": 0,
+        "failed": 8,
+        "whole_batch_wall_seconds": null,
+        "accepted_output_tokens": 0,
+        "output_tokens_per_second": null,
+        "finish_stop": 0,
+        "finish_length": 0,
+        "unknown_final_usage": 0,
+        "no_final_content": 0,
+        "unresolved_no_final_content": 0,
+        "ttft_first_content_seconds": {
+          "samples": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "tpot_first_content_seconds": {
+          "samples": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "ttft_excluded_successful_records": 0,
+        "tpot_excluded_successful_records": 0,
+        "wire_audit_passed": false,
+        "quality": {
+          "denominator": 8,
+          "correct": 0,
+          "unparsed": 8,
+          "accuracy": 0.0,
+          "scope": "Original unchanged answer extractor, planned8denominator including failures/unreturned/out-of-range. Biology-prefix diagnostic, not formal200 or quality equivalence."
+        },
+        "counter_deltas": null,
+        "policy": null,
+        "input_admission_passed": false
+      },
+      "records": [
+        {
+          "case_id": "mmlu-pro-02804",
+          "wire_id": "hust-mm03-b-r02-l000000000000000",
+          "stage": "bidkv-r02",
+          "lane": 0,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-02866",
+          "wire_id": "hust-mm03-b-r02-l010000000000000",
+          "stage": "bidkv-r02",
+          "lane": 1,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-02926",
+          "wire_id": "hust-mm03-b-r02-l020000000000000",
+          "stage": "bidkv-r02",
+          "lane": 2,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-02986",
+          "wire_id": "hust-mm03-b-r02-l030000000000000",
+          "stage": "bidkv-r02",
+          "lane": 3,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-03046",
+          "wire_id": "hust-mm03-b-r02-l040000000000000",
+          "stage": "bidkv-r02",
+          "lane": 4,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-03108",
+          "wire_id": "hust-mm03-b-r02-l050000000000000",
+          "stage": "bidkv-r02",
+          "lane": 5,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-03168",
+          "wire_id": "hust-mm03-b-r02-l060000000000000",
+          "stage": "bidkv-r02",
+          "lane": 6,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-03230",
+          "wire_id": "hust-mm03-b-r02-l070000000000000",
+          "stage": "bidkv-r02",
+          "lane": 7,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        }
+      ],
+      "controlled_index": [],
+      "actual_geometry": null,
+      "actual_waits_ok": false,
+      "owned_waits": [],
+      "costs": {
+        "cold_model_initialization_seconds": null,
+        "owner_total_seconds": null,
+        "client_total_seconds": null,
+        "api_owned_wait": {},
+        "scope": "Actual observed separate cold/admission/generation/cleanup times; unknown remains null"
+      },
+      "startup_telemetry": {
+        "present": false,
+        "samples": 0,
+        "memory_current_max_bytes": null,
+        "devices": []
+      },
+      "generation_telemetry": {
+        "present": false,
+        "samples": 0,
+        "memory_current_max_bytes": null,
+        "devices": []
+      }
+    },
+    {
+      "stage": "native-r02",
+      "planned": 8,
+      "execution_status": "not_executed",
+      "stage_audit_passed": false,
+      "issues": [],
+      "summary": {
+        "planned": 8,
+        "recorded": 0,
+        "successful": 0,
+        "failed": 8,
+        "whole_batch_wall_seconds": null,
+        "accepted_output_tokens": 0,
+        "output_tokens_per_second": null,
+        "finish_stop": 0,
+        "finish_length": 0,
+        "unknown_final_usage": 0,
+        "no_final_content": 0,
+        "unresolved_no_final_content": 0,
+        "ttft_first_content_seconds": {
+          "samples": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "tpot_first_content_seconds": {
+          "samples": 0,
+          "mean": null,
+          "p50": null,
+          "p95": null,
+          "p99": null
+        },
+        "ttft_excluded_successful_records": 0,
+        "tpot_excluded_successful_records": 0,
+        "wire_audit_passed": false,
+        "quality": {
+          "denominator": 8,
+          "correct": 0,
+          "unparsed": 8,
+          "accuracy": 0.0,
+          "scope": "Original unchanged answer extractor, planned8denominator including failures/unreturned/out-of-range. Biology-prefix diagnostic, not formal200 or quality equivalence."
+        },
+        "counter_deltas": null,
+        "policy": null,
+        "input_admission_passed": false
+      },
+      "records": [
+        {
+          "case_id": "mmlu-pro-02804",
+          "wire_id": "hust-mm03-n-r02-l000000000000000",
+          "stage": "native-r02",
+          "lane": 0,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-02866",
+          "wire_id": "hust-mm03-n-r02-l010000000000000",
+          "stage": "native-r02",
+          "lane": 1,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-02926",
+          "wire_id": "hust-mm03-n-r02-l020000000000000",
+          "stage": "native-r02",
+          "lane": 2,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-02986",
+          "wire_id": "hust-mm03-n-r02-l030000000000000",
+          "stage": "native-r02",
+          "lane": 3,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-03046",
+          "wire_id": "hust-mm03-n-r02-l040000000000000",
+          "stage": "native-r02",
+          "lane": 4,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-03108",
+          "wire_id": "hust-mm03-n-r02-l050000000000000",
+          "stage": "native-r02",
+          "lane": 5,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-03168",
+          "wire_id": "hust-mm03-n-r02-l060000000000000",
+          "stage": "native-r02",
+          "lane": 6,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        },
+        {
+          "case_id": "mmlu-pro-03230",
+          "wire_id": "hust-mm03-n-r02-l070000000000000",
+          "stage": "native-r02",
+          "lane": 7,
+          "status": "not_executed",
+          "attempted": null,
+          "http_status": null,
+          "start": null,
+          "end": null,
+          "first_token": null,
+          "last_token": null,
+          "first_generated_event": null,
+          "last_generated_event": null,
+          "usage": null,
+          "observed_usage": null,
+          "finish_reason": null,
+          "observed_finish_reason": null,
+          "no_final_content": null,
+          "correct": false,
+          "unparsed": true,
+          "wire_audit_passed": null,
+          "cached_tokens_reported": null,
+          "controlled_sse_sha256": null
+        }
+      ],
+      "controlled_index": [],
+      "actual_geometry": null,
+      "actual_waits_ok": false,
+      "owned_waits": [],
+      "costs": {
+        "cold_model_initialization_seconds": null,
+        "owner_total_seconds": null,
+        "client_total_seconds": null,
+        "api_owned_wait": {},
+        "scope": "Actual observed separate cold/admission/generation/cleanup times; unknown remains null"
+      },
+      "startup_telemetry": {
+        "present": false,
+        "samples": 0,
+        "memory_current_max_bytes": null,
+        "devices": []
+      },
+      "generation_telemetry": {
+        "present": false,
+        "samples": 0,
+        "memory_current_max_bytes": null,
+        "devices": []
+      }
+    }
+  ],
+  "pairs": [
+    {
+      "order": "AB",
+      "native_stage": "native-r01",
+      "bidkv_stage": "bidkv-r01",
+      "numeric_throughput_change_pct": 7.501798699342155,
+      "validated_pair": true,
+      "scope": "All predeclared pairs retained, never select a best pair"
+    },
+    {
+      "order": "BA",
+      "native_stage": "native-r02",
+      "bidkv_stage": "bidkv-r02",
+      "numeric_throughput_change_pct": null,
+      "validated_pair": false,
+      "scope": "All predeclared pairs retained, never select a best pair"
+    }
+  ],
+  "policy_activation_and_performance_separate": true
+}

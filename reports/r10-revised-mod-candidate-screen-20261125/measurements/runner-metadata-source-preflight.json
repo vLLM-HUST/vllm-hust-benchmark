@@ -1,0 +1,36 @@
+{
+  "schema": "vllm-hust-candidate-preflight/v1",
+  "candidate": "stable-runner-input-shape-metadata-reuse",
+  "base_sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+  "base_release": "full-answer-b1-20261124-r10",
+  "base_version": "2026.11.24.10",
+  "source_bindings": {
+    "runtime/ascend/vllm_ascend/worker/model_runner_v1.py": {
+      "frozen": "83da7d9c6c53f718322328bb43d80651a7cd62992a8d0e8d723d62769bd0b346",
+      "active": "c4abb07a6721501c161fb65224ef99beac7df8452f62fca2333d0a219e9b65bd"
+    },
+    "mods/betterscale/betterscale/models/qwen35/runtime-school.json": {
+      "frozen": "e56f01f12506b3d9cf34ed6b6861707818465fd8b7882a9bb79887724e6fac5b",
+      "active": "fdf20b33ce57477117db14ffc8bbc1e025353ca2f872a298d8e86f90963f6e92"
+    },
+    "mods/betterscale/betterscale/qwen35_school_pins.json": {
+      "frozen": "e3793e04929623a5c840725c88cc58250b3b035725d389a748fd31c6fb206084",
+      "active": "b373a9c9ab01a762d9efc429c90936b0b7afba9dd597f47359aed5dea8098fe2"
+    }
+  },
+  "generated_source_differential_checks": 1382,
+  "copy_triplets_executed": 813,
+  "identical_buffers": true,
+  "coverage": [
+    "single-token",
+    "ordered variable request partitions",
+    "same-total reordering",
+    "request-ID turnover",
+    "dummy capture invalidation",
+    "asynchronous producer fallback",
+    "context parallel fallback",
+    "changed buffer identity",
+    "feature disable and re-enable"
+  ],
+  "scope": "CPU execution of actual generated runtime statements. Online admission still requires two real rank parity receipts before request timing."
+}

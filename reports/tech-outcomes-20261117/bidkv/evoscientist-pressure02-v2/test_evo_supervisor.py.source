@@ -1,0 +1,70 @@
+"""Exercise actual POSIX cancellation using a harmless CPU-only child process."""
+
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
+
+
+class Cancellation(unittest.TestCase):
+    @unittest.skipUnless(
+        os.name == "posix", "POSIX process-group signal test; remote Linux must run it"
+    )
+    def test_term_is_forwarded_and_real_wait_is_saved(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder = Path(temporary)
+            (folder / "probe/metadata").mkdir(parents=True)
+            source = Path(__file__).with_name("supervisor.py").read_bytes()
+            (folder / "supervisor.py").write_bytes(source)
+            (folder / "controller.py").write_text(
+                "import os,sys,time,signal\nfrom pathlib import Path\n"
+                "ROOT=Path(__file__).parent\nDRIVER=ROOT\nPROBE=ROOT/'probe'\nPYTHON=sys.executable\n"
+                "def publication_admission(): pass\n"
+                "if __name__=='__main__':\n"
+                " signal.signal(signal.SIGTERM,lambda *_:sys.exit(0))\n"
+                " (ROOT/'child-ready').write_text(str(os.getpid()))\n"
+                " while True: time.sleep(0.05)\n"
+            )
+            process = subprocess.Popen(
+                [sys.executable, "-B", str(folder / "supervisor.py")], cwd=folder
+            )
+            child_pid = None
+            try:
+                cutoff = time.monotonic() + 5
+                while not (folder / "child-ready").exists():
+                    self.assertIsNone(process.poll())
+                    self.assertLess(time.monotonic(), cutoff)
+                    time.sleep(0.02)
+                child_pid = int((folder / "child-ready").read_text())
+                process.terminate()
+                self.assertEqual(process.wait(timeout=10), 0)
+                receipt = json.loads(
+                    (
+                        folder / "probe/metadata/controller-owned-supervisor.json"
+                    ).read_bytes()
+                )
+                self.assertEqual(receipt["phase"], "cancelled")
+                self.assertEqual(receipt["requested_signal"], signal.SIGTERM)
+                self.assertEqual(receipt["actual_child_returncode"], 0)
+                with self.assertRaises(ProcessLookupError):
+                    os.kill(child_pid, 0)
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=5)
+                if child_pid is not None:
+                    try:
+                        command = Path(f"/proc/{child_pid}/cmdline").read_bytes()
+                        if str(folder / "controller.py").encode() in command:
+                            os.kill(child_pid, signal.SIGTERM)
+                    except (FileNotFoundError, ProcessLookupError):
+                        pass
+
+
+if __name__ == "__main__":
+    unittest.main()

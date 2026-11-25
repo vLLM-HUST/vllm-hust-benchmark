@@ -1,0 +1,90 @@
+{
+  "schema": "controller-r8-mmlu256-native-compute/v1",
+  "engine_release": "full-answer-b1-20261117-r8",
+  "release": "r8",
+  "model": "Qwen3.5-35B-A3B",
+  "max_num_seqs": 36,
+  "state_resident_seats": 80,
+  "scope": {
+    "profile": "mmlu-fixed200-v1",
+    "requests": 200,
+    "input_tokens": 282265,
+    "output_tokens": 51200,
+    "max_completion_tokens": 256,
+    "dtype": "BF16",
+    "tp": 2,
+    "accelerator": "Ascend 910B2",
+    "ignore_eos": false,
+    "repetitions_per_arm": 3,
+    "clock": "EngineCoreProc monotonic_ns: first admission to post-drain TP2 fence",
+    "routing_before_first_admission_included": false,
+    "idle_after_first_admission_included": true
+  },
+  "attribution": "Same R8 engine via direct access and Request Throttling Controller",
+  "native_efficiency_certified": true,
+  "independent_reference": {
+    "arm": "B1",
+    "source_commit": "72a677b591f9c5c0d911e9a280759278bc0f4a74",
+    "source_sha256": "6611fee282b552092f8a807ad02ec517cbadaccde08423376acd7d6e8b439870",
+    "source_url": "https://github.com/DeepLinkNext/DeepLinkEngine/blob/72a677b591f9c5c0d911e9a280759278bc0f4a74/benchmark/reports/r8-compute-reference-20261119-v1/compute-reference/qualified-full-reference-statistics.json",
+    "target_times_used": false,
+    "work_flops_upper": 5438638334450385,
+    "critical_path_seconds_lower": "140.60316791316519",
+    "tflops_per_card_upper": "19.340383346872",
+    "repetitions": [
+      {
+        "source_sha256": "0407c570c288265d9b5038a7e2a87eb1e8ea87553551785c7f6695a073ab2a86",
+        "work_flops_upper": 1812879444816795,
+        "critical_path_seconds_lower": "46.86772263772173"
+      },
+      {
+        "source_sha256": "c5bea9d69988f75e68fe6c141965a13e23d8a34533a11fb84a00bff465c12a10",
+        "work_flops_upper": 1812879444816795,
+        "critical_path_seconds_lower": "46.86772263772173"
+      },
+      {
+        "source_sha256": "9a198f5dcb9e6a062b9caac2a69040508e82d4210c852fd8b007f1f671113746",
+        "work_flops_upper": 1812879444816795,
+        "critical_path_seconds_lower": "46.86772263772173"
+      }
+    ]
+  },
+  "arms": {
+    "direct": {
+      "all_requests_successful": 600,
+      "necessary_work_flops_lower": 5412183545956973,
+      "native_seconds_reported": "158.691158",
+      "native_seconds_upper": "158.691159",
+      "effective_tflops_per_card_lower": "17.052567956",
+      "efficiency_percent_lower": "88.1707",
+      "milestone_50_proven": true,
+      "target_90_proven": false
+    },
+    "controller": {
+      "all_requests_successful": 600,
+      "necessary_work_flops_lower": 5412201341986153,
+      "native_seconds_reported": "159.637219",
+      "native_seconds_upper": "159.637220",
+      "effective_tflops_per_card_lower": "16.951564747",
+      "efficiency_percent_lower": "87.6485",
+      "milestone_50_proven": true,
+      "target_90_proven": false
+    }
+  },
+  "handoff": {
+    "report_path": "reports/controller-r8-native-efficiency-20261123/README.md",
+    "formal_readback_url": "https://github.com/vLLM-HUST/request-throttling-controller/issues/6#issuecomment-7100253538",
+    "verified_replay_url": "https://github.com/vLLM-HUST/request-throttling-controller/pull/7#issuecomment-7120073160",
+    "replay_source_commit": "2b7158a5d7f1ef337bec0babf01f7ed743540cac",
+    "formal_archive_sha256": "de2de81c4f34562bec5b6b6830dce2f3a01caaf9eb4f639cb2aa70f115035998",
+    "replayed_archive_sha256": "3e4ca4ff2d6544820c6b810733933ed8d78c6416337f3ace9f937e38580f405c",
+    "paired_certificate_sha256": "ab50ac5e760bec485280c7417288be5ccad861cdef8cc7a39db3d34f07af0907",
+    "clean_native_clocks_sha256": "11f50fba0c2813d00bb7865e4a42e365e5ee82e77d65725cc070959a6002bd76",
+    "observed_arithmetic_sha256": "090e95c63140e2db4ddd6f09d44e3f56b4312ff53ee0e58ab6a916dd4129631c",
+    "arithmetic_audits_sha256": "bd4a28f5e115549c778e519199d39ddc6021fcdd50916f3c460683e6d465f3ae",
+    "controller_releases_verified": 600,
+    "timed_rounds_verified": 6,
+    "arithmetic_rounds_verified": 6,
+    "hardware_repeated_for_publication": false
+  }
+}

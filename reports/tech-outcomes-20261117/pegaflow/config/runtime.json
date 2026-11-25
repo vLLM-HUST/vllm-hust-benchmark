@@ -1,0 +1,52 @@
+{
+  "classification": "attempted-new-cohort; no formal performance result",
+  "packages_before_compatibility_rebuild": {
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0",
+    "pegaflow-llm-npu": "0.23.4",
+    "transformers": "5.5.4",
+    "tokenizers": "0.22.2",
+    "aiohttp": "3.14.3",
+    "maturin": "1.16.0",
+    "ruff": "0.17.5"
+  },
+  "framework_sources": {
+    "vllm": {
+      "origin": "https://github.com/vllm-project/vllm.git",
+      "commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665"
+    },
+    "vllm_ascend": {
+      "origin": "https://github.com/vllm-project/vllm-ascend",
+      "commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd"
+    }
+  },
+  "framework_sources_clean_at_attempt": true,
+  "model": "Qwen3.5-35B-A3B",
+  "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+  "pegaflow_base_commit": "2e4cd2e9a244f7aefd732a442f9662a2acc88049",
+  "pegaflow_compatibility_patch_sha256": "a6ad7dea875a199de4aa6452fdf27d530e597692a872d4ed68c49824e1874a03",
+  "pegaflow_code_pr": "https://github.com/vLLM-HUST/pegaflow-hust/pull/49",
+  "pegaflow_code_pr_commit": "e2cdc2f7b32d8294b54a74545c05d103e5a5ecaf",
+  "build_features": [
+    "ascend"
+  ],
+  "rdma_enabled": false,
+  "full_rebuilt_binary_and_build_receipts_retrieved": false,
+  "workload_tool_commit": "ef43ced21e870e2faa1122f89f831ddf39443bf6",
+  "prepared_workload_sha256": "c716290e07468920aa27084d423d0c7ff169bf71f8b58e81112bd2ec2e219e64",
+  "hardware": {
+    "chip": "Ascend 910B2",
+    "chips": 2,
+    "physical_devices": [
+      0,
+      7
+    ],
+    "logical_devices": [
+      0,
+      1
+    ],
+    "container_memory_limit_bytes": 68719476736
+  }
+}

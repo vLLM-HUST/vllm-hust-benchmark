@@ -1,0 +1,11 @@
+# Native真实零生成容量：允许小规模机制诊断，未证明触发
+
+13dc共同只读观察profile在完整五项退出后才启动。真实Native冷启动607.147882秒、8×16407输入token哈希及实际worker绑定均通过，至本快照0生成。原9份文件逐字节保留并由manifest校验。
+
+每rank实际45pool blocks、保留null1后44可用；4个group为FullAttention11层、Mamba10/10/10层。token
+block2048、每层page2138112bytes、descriptor合计1058365440bytes。按固定官方共享pool/group相加规则，首prefill18blocks/请求，最多首准入2；input稳态上界21、end上界23，2×23=46>44；65536context上界44可容。主端独立CPU重算容量JSON完全一致。go只表示压力可能，不是确切排程或已调用策略。
+
+**基于实际容量与时间成本、在任何生成前修订补充规模：**
+48请求/每臂3batch的40eb源保留为0执行方案；改为每臂1batch×8、共16请求、最大65536输出token。1GiB、16407输入、4096强制输出、相同Native→Bid顺序、相同默认优化和所有资格/缓存条件不变，原3600秒clock不重置、不延时。16请求新源须另行冻结和公共读回再release；没有看到结果后挑轮，也不修改正式672/720范围。
+
+原clock含两次冷启动和所有park；Candidate只有完成相同13dc准入、geometry完整指纹与Native一致且go相同时，才按最终release的明确条件预授权生成，实际confirmation随后公开。不一致0生成停止。所有partial、失败、0calls和负值均保留。原48方案与新16方案都不能替代正式EOS五项、普通16GiB/rank成绩或真实少卡成本。

@@ -1,0 +1,221 @@
+{
+  "schema": "pegaflow-historical-cpu-closure/v1",
+  "all_stages_passed": true,
+  "formal_stages": 14,
+  "planned_solver_requests": 1344,
+  "planned_judge_inputs": 720,
+  "verified_records": 2064,
+  "raw_sse_verified": 2064,
+  "original_manifest_files_verified": 4585,
+  "original_inventory_files": 6419,
+  "original_inventory_unchanged": true,
+  "quality_recomputation": [
+    {
+      "name": "quality-native-hle",
+      "original_sha256": "60ca9b923e86dd1d3f445f9a8ff478c8fb49dede9da875eb0a299c2ec5345b84",
+      "recomputed_sha256": "60ca9b923e86dd1d3f445f9a8ff478c8fb49dede9da875eb0a299c2ec5345b84",
+      "byte_identical": true,
+      "json_identical": true
+    },
+    {
+      "name": "quality-pegaflow-hle",
+      "original_sha256": "bd8435ece912019523da6a7d96c88c22eb113bbe889a43804106e1d49e826013",
+      "recomputed_sha256": "bd8435ece912019523da6a7d96c88c22eb113bbe889a43804106e1d49e826013",
+      "byte_identical": true,
+      "json_identical": true
+    },
+    {
+      "name": "quality-native-frontier",
+      "original_sha256": "c9fe3bccaa691c531e781bdd1dbb5a0e0cdbca5b2ba1c53b96f5bc3a537b56ca",
+      "recomputed_sha256": "c9fe3bccaa691c531e781bdd1dbb5a0e0cdbca5b2ba1c53b96f5bc3a537b56ca",
+      "byte_identical": true,
+      "json_identical": true
+    },
+    {
+      "name": "quality-pegaflow-frontier",
+      "original_sha256": "63f5b780b89c5734edd95359e13d67e46e75e6fc400729edb175e25f86f544eb",
+      "recomputed_sha256": "63f5b780b89c5734edd95359e13d67e46e75e6fc400729edb175e25f86f544eb",
+      "byte_identical": true,
+      "json_identical": true
+    }
+  ],
+  "source_admission": {
+    "driver": {
+      "manifest_sha256": "8e4ef4748eafd8ad0cdc6fd0c1d82df471576357cca2333ce1abc4abe168c34e",
+      "files_verified": 21
+    },
+    "analysis": {
+      "manifest_sha256": "782cecbbaac0757f388ece22f335dcceefb19bfb83345f79a1fa27ffbaa8b408",
+      "files_verified": 13
+    }
+  },
+  "c8_summary": {
+    "schema": "pegaflow-default-true-c8-paired-summary/v1",
+    "source_manifest_sha256": "8e4ef4748eafd8ad0cdc6fd0c1d82df471576357cca2333ce1abc4abe168c34e",
+    "native_requests": 343,
+    "pegaflow_requests": 341,
+    "failed": 0,
+    "all_records_independently_replayed": true,
+    "phases": [
+      {
+        "phase": "4096-warmup",
+        "native_requests": 16,
+        "native_failures": 0,
+        "native_window_tokens_per_second": 65.00399805455747,
+        "native_phase_elapsed_seconds_including_drain": 63.01150886999676,
+        "native_drain_seconds": 3.01150886999676,
+        "native_ttft_mean_seconds": 22.93846791418855,
+        "native_tpot_mean_seconds": 0.03287186487769384,
+        "pegaflow_requests": 16,
+        "pegaflow_failures": 0,
+        "pegaflow_window_tokens_per_second": 65.64205906268819,
+        "pegaflow_phase_elapsed_seconds_including_drain": 62.39901761899819,
+        "pegaflow_drain_seconds": 2.3990176189981867,
+        "pegaflow_ttft_mean_seconds": 22.670774087187965,
+        "pegaflow_tpot_mean_seconds": 0.03283417246714759,
+        "throughput_change_percent": 0.9815719451520488
+      },
+      {
+        "phase": "4096-formal",
+        "native_requests": 231,
+        "native_failures": 0,
+        "native_window_tokens_per_second": 194.7915418774593,
+        "native_phase_elapsed_seconds_including_drain": 303.5860768390121,
+        "native_drain_seconds": 3.586076839012094,
+        "native_ttft_mean_seconds": 1.5604510074282303,
+        "native_tpot_mean_seconds": 0.03493318805147139,
+        "pegaflow_requests": 231,
+        "pegaflow_failures": 0,
+        "pegaflow_window_tokens_per_second": 195.06065030537712,
+        "pegaflow_phase_elapsed_seconds_including_drain": 303.16724519999116,
+        "pegaflow_drain_seconds": 3.1672451999911573,
+        "pegaflow_ttft_mean_seconds": 1.538737439004668,
+        "pegaflow_tpot_mean_seconds": 0.03499837160421072,
+        "throughput_change_percent": 0.13815200871869493
+      },
+      {
+        "phase": "16384-warmup",
+        "native_requests": 16,
+        "native_failures": 0,
+        "native_window_tokens_per_second": 61.53234759067382,
+        "native_phase_elapsed_seconds_including_drain": 66.56661350298964,
+        "native_drain_seconds": 6.5666135029896395,
+        "native_ttft_mean_seconds": 12.228858137499628,
+        "native_tpot_mean_seconds": 0.08074541745514652,
+        "pegaflow_requests": 16,
+        "pegaflow_failures": 0,
+        "pegaflow_window_tokens_per_second": 62.908959223686374,
+        "pegaflow_phase_elapsed_seconds_including_drain": 65.1099628820084,
+        "pegaflow_drain_seconds": 5.1099628820084035,
+        "pegaflow_ttft_mean_seconds": 12.701073338249444,
+        "pegaflow_tpot_mean_seconds": 0.07584509074681324,
+        "throughput_change_percent": 2.2372161747672425
+      },
+      {
+        "phase": "16384-formal",
+        "native_requests": 80,
+        "native_failures": 0,
+        "native_window_tokens_per_second": 66.41050991777034,
+        "native_phase_elapsed_seconds_including_drain": 308.3849231899949,
+        "native_drain_seconds": 8.384923189994879,
+        "native_ttft_mean_seconds": 6.131142510610516,
+        "native_tpot_mean_seconds": 0.09607981915784358,
+        "pegaflow_requests": 78,
+        "pegaflow_failures": 0,
+        "pegaflow_window_tokens_per_second": 65.28350593829644,
+        "pegaflow_phase_elapsed_seconds_including_drain": 305.8659260560089,
+        "pegaflow_drain_seconds": 5.865926056008902,
+        "pegaflow_ttft_mean_seconds": 6.411773700821915,
+        "pegaflow_tpot_mean_seconds": 0.09714970042025547,
+        "throughput_change_percent": -1.6970265412347474
+      }
+    ],
+    "pega_actual_storage_activation": {
+      "engine_counter_deltas": {
+        "vllm:pega_load_success_total": 0.0,
+        "vllm:pega_load_failure_total": 0.0,
+        "vllm:pega_save_success_total": 2476.0,
+        "vllm:pega_save_failure_total": 0.0
+      },
+      "sidecar_save_bytes": 116256702464.0,
+      "sidecar_lazy_save_counters_absent_before": [
+        "pegaflow_save_bytes_total"
+      ],
+      "actual_storage_save_activated": true,
+      "restore_successes": 0.0,
+      "failures": 0.0,
+      "scope": "Actual cold storage-save path activation only. Fresh salts require zero restores; no cache-restore performance benefit established."
+    },
+    "comparison_scope": "Original60/300s submission windows with all requests drained; numerator includes drain tokens and denominator is actual phase end-start. Fixed256/ignoreEOS separate from five EOS metrics. Zero restores establishes no offload benefit; no Bid policy fields."
+  },
+  "actual_execution_receipts": {
+    "schema": "pegaflow-actual-wait-and-cleanup/v1",
+    "actual_wait_receipts": {
+      "sdk-restore-wait.json": {
+        "value": null,
+        "controlled_sha256": null
+      },
+      "cpu-admission-wait.json": {
+        "value": {
+          "phase": "exited",
+          "supervisor_pid": 96201,
+          "child_pid": 96202,
+          "child_start_ticks": "6876140",
+          "started_unix": 1794636357.8899915,
+          "started_monotonic": 68761.403557344,
+          "completed_unix": 1794636391.866837,
+          "completed_monotonic": 68795.380402369,
+          "child_returncode": 0,
+          "supervisor_returncode": 0,
+          "signals": []
+        },
+        "controlled_sha256": "b263fd3ac81c75405a151e0f1483e04668bcba293f6a26db02b8f730c792ad30"
+      },
+      "c8-controller-wait.json": {
+        "value": {
+          "phase": "exited",
+          "supervisor_pid": 96201,
+          "child_pid": 97147,
+          "child_start_ticks": "6879538",
+          "started_unix": 1794636391.870516,
+          "started_monotonic": 68795.384081581,
+          "completed_unix": 1794662116.893107,
+          "completed_monotonic": 94520.406672522,
+          "child_returncode": 0,
+          "supervisor_returncode": 0,
+          "signals": []
+        },
+        "controlled_sha256": "c836bb0e592f4bacf53cd66c950067554639de89eba22269f07546fb645f75b8"
+      },
+      "formal-controller-wait.json": {
+        "value": {
+          "phase": "exited",
+          "supervisor_pid": 175032,
+          "child_pid": 175033,
+          "child_start_ticks": "7137291",
+          "started_unix": 1794638969.40336,
+          "started_monotonic": 71372.916926964,
+          "completed_unix": 1794662116.8274632,
+          "completed_monotonic": 94520.341028845,
+          "child_returncode": 0,
+          "supervisor_returncode": 0,
+          "signals": []
+        },
+        "controlled_sha256": "00491067b5a551d7e825a5e8437683001058c690a9aa80cec55da7817d0eca45"
+      },
+      "input-admitted-launcher-wait.json": {
+        "value": null,
+        "controlled_sha256": null
+      }
+    },
+    "scope": "Only actual owned child wait/stop values are exported. Missing outer/phase returncode stays null; never infer it from an internal intended returncode, phase label or log.",
+    "resource_handoff_sha256": "682845dbda3dcf6f297fd724de9758dbbcc3485beba668f62747430dba4bf54f",
+    "publication_sha256": "7c6dd68897db0ee5e6fc30c9969327ddf7efc3652f329613d61b12b0bbd1fe57",
+    "pregen_input_publication_sha256": null,
+    "analysis_source_publication_sha256": null
+  },
+  "model_startups": 0,
+  "model_generation_requests": 0,
+  "new_experiments": 0,
+  "checked_unix": 1794817617.034997
+}

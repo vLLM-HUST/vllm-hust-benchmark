@@ -1,0 +1,454 @@
+"""Pega-specific numeric evidence; missing observations remain unknown, never zero."""
+
+import hashlib
+import json
+import math
+from pathlib import Path
+import re
+
+ENGINE = (
+    "vllm:pega_load_success_total",
+    "vllm:pega_save_success_total",
+    "vllm:pega_load_failure_total",
+    "vllm:pega_save_failure_total",
+)
+
+
+def read(path):
+    return json.loads(Path(path).read_bytes())
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def optional(path):
+    return read(path) if Path(path).is_file() else None
+
+
+def select(value, keys):
+    return {key: value.get(key) for key in keys} if isinstance(value, dict) else None
+
+
+def public_command(path):
+    value = optional(path)
+    if value is None:
+        return None
+    result = select(value, ["argv", "started_unix"])
+    environment = value.get("environment")
+    if isinstance(environment, dict):
+        result["environment"] = {
+            key: environment[key]
+            for key in [
+                "PYTHONPATH",
+                "LD_LIBRARY_PATH",
+                "ASCEND_HOME_PATH",
+                "ASCEND_TOOLKIT_HOME",
+                "HF_HUB_OFFLINE",
+                "VLLM_WORKER_MULTIPROC_METHOD",
+                "OMP_NUM_THREADS",
+                "MKL_NUM_THREADS",
+                "TMPDIR",
+                "VLLM_RPC_BASE_PATH",
+                "VLLM_CACHE_ROOT",
+                "TRITON_CACHE_DIR",
+                "TORCHINDUCTOR_CACHE_DIR",
+                "ASCEND_CACHE_PATH",
+                "ASCEND_WORK_PATH",
+                "ASCEND_RT_VISIBLE_DEVICES",
+                "LD_PRELOAD",
+            ]
+            if key in environment
+        }
+    return result
+
+
+def totals(path):
+    if not Path(path).is_file():
+        return None
+    result = {}
+    for line in Path(path).read_text().splitlines():
+        match = re.match(r"^([^#\s{]+)(?:\{.*\})?\s+([-+\d.eE]+)$", line)
+        if match:
+            key, value = match.groups()
+            number = float(value)
+            if not math.isfinite(number):
+                raise ValueError("Nonfinite metric: " + key)
+            result[key] = result.get(key, 0) + number
+    return result
+
+
+def deltas(before, after, names):
+    missing = [
+        name
+        for name in names
+        if before is None or after is None or name not in before or name not in after
+    ]
+    values = {
+        name: after[name] - before[name] if name not in missing else None
+        for name in names
+    }
+    return {
+        "deltas": values,
+        "missing": missing,
+        "counter_reset_seen": any(
+            value is not None and value < 0 for value in values.values()
+        ),
+    }
+
+
+def strict_prefix_cache(before, after):
+    required = {"vllm:prefix_cache_hits_total", "vllm:external_prefix_cache_hits_total"}
+    names = sorted(
+        required
+        | {
+            key
+            for snapshot in [before, after]
+            if snapshot
+            for key in snapshot
+            if "prefix_cache_hits" in key and key.endswith("_total")
+        }
+    )
+    prefix = deltas(before, after, names)
+    prefix["required"] = sorted(required)
+    prefix["passed"] = (
+        not prefix["missing"]
+        and not prefix["counter_reset_seen"]
+        and all(value == 0 for value in prefix["deltas"].values())
+    )
+    return prefix
+
+
+def strict_phase_cache(folder, arm):
+    folder = Path(folder)
+    before, after = (
+        totals(folder / "before-metrics.txt"),
+        totals(folder / "after-metrics.txt"),
+    )
+    prefix = strict_prefix_cache(before, after)
+    result = {
+        "arm": arm,
+        "prefix": prefix,
+        "prefix_counters_present": not prefix["missing"],
+        "required_prefix_counter_names": prefix["required"],
+        "external_connector_expected": arm == "pegaflow",
+        "engine_connector": None,
+    }
+    valid = prefix["passed"]
+    if arm == "pegaflow":
+        engine = deltas(before, after, ENGINE)
+        result["engine_connector"] = engine
+        result["external_snapshots_present"] = all(
+            (folder / (name + "-metrics.txt")).is_file()
+            for name in ["external-before", "external-after"]
+        )
+        valid = (
+            valid
+            and result["external_snapshots_present"]
+            and not engine["missing"]
+            and not engine["counter_reset_seen"]
+        )
+        valid = (
+            valid
+            and engine["deltas"][ENGINE[0]] == 0
+            and engine["deltas"][ENGINE[2]] == 0
+            and engine["deltas"][ENGINE[3]] == 0
+        )
+    result.update(
+        passed=bool(valid),
+        scope="Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used.",
+    )
+    return result
+
+
+def connector_evidence(root):
+    root = Path(root)
+    stages = []
+    for stage in read(root / "execution-checklist.json")["stages"]:
+        if stage["stage"] != "solver":
+            continue
+        folder = root / stage["name"]
+        proof = strict_phase_cache(folder, stage["arm"])
+        item = {"name": stage["name"], "arm": stage["arm"], "cache_admission": proof}
+        if stage["arm"] == "pegaflow":
+            service = root / "service-pegaflow"
+            paths = [
+                service / (position + "-" + stage["name"] + "-sidecar-metrics.txt")
+                for position in ["before", "after"]
+            ]
+            before, after = map(totals, paths)
+            keys = sorted(set(before or {}) | set(after or {}))
+            counters = [
+                key
+                for key in keys
+                if key.endswith(("_total", "_sum", "_count", "_bucket"))
+            ]
+            item["sidecar_metric_snapshots"] = {
+                "before": before,
+                "after": after,
+                "explicit_counter_deltas": deltas(before, after, counters),
+                "gauge_names": [key for key in keys if key not in counters],
+                "lazy_counters_absent_before": [
+                    key
+                    for key in after or {}
+                    if before is not None and key not in before
+                ],
+                "scope": "Counter deltas and gauge snapshots are distinct; gauge decreases are not counter resets. Missing metrics are unknown. Lazy sidecar positive activation is distinct from strict engine zero-restore proof; do not infer absent counters to zero.",
+            }
+        stages.append(item)
+    qualification = (
+        root.parent / "qualification/pegaflow-c8-01/mechanism-activation.json"
+    )
+    capacities = [
+        snapshot["pegaflow_pool_capacity_bytes"]
+        for item in stages
+        if "sidecar_metric_snapshots" in item
+        for snapshot in [
+            item["sidecar_metric_snapshots"]["before"],
+            item["sidecar_metric_snapshots"]["after"],
+        ]
+        if snapshot is not None and "pegaflow_pool_capacity_bytes" in snapshot
+    ]
+    return {
+        "schema": "pegaflow-external-kv-mechanism/v1",
+        "source_manifest_sha256": sha(root / "source-manifest.json")
+        if (root / "source-manifest.json").exists()
+        else None,
+        "stages": stages,
+        "qualification_actual_activation": optional(qualification),
+        "qualification_activation_sha256": sha(qualification)
+        if qualification.exists()
+        else None,
+        "benefit_scope": "Actual save/restore/failure/byte observations only. Zero successful restores do not establish an offload-cache benefit, regardless of numeric throughput sign. Native retains its own prefix-cache proof; no fabricated Bid0policy or internal-only assumption.",
+        "declared_host_pool": {
+            "argument": "30gb",
+            "declared_plan_gib": 30,
+            "verified_capacity_bytes": capacities[0]
+            if capacities and len(set(capacities)) == 1
+            else None,
+            "actual_capacity_gauge_observations": capacities,
+            "residency_metrics": [
+                "pegaflow_pool_used_bytes",
+                "pegaflow_cache_resident_bytes",
+                "pegaflow_inflight_bytes",
+            ],
+            "scope": "Actual capacity gauge verifies reservation separately from cache residency and total host memory/RSS. Missing is unknown. Do not infer exclusive MOD incremental memory from total container samples.",
+        },
+    }
+
+
+def runtime_overheads(root):
+    # Import only shared numeric parsing; this function is called after the
+    # exporter module has been fully initialized.
+    from export_pegaflow_numeric import telemetry
+
+    root = Path(root)
+    state = read(root / "execution-checklist.json")
+
+    def period(folder, name, stage_names):
+        lifecycle = optional(folder / "lifecycle-start.json")
+        prep = optional(folder / "preparation-ready.json")
+        model = optional(folder / "ready-model.json")
+        sidecar = optional(folder / "ready-sidecar.json")
+        stop = optional(folder / "stop.json")
+        streams = {
+            "startup-model": telemetry(folder / "startup-model-telemetry.jsonl"),
+            "startup-sidecar": telemetry(folder / "startup-sidecar-telemetry.jsonl"),
+        }
+        formal = []
+        for stage_name in stage_names:
+            observations = telemetry(root / stage_name / "telemetry.jsonl")
+            for row in observations:
+                row["stream_scope"] = "formal-" + stage_name
+            formal.extend(observations)
+        identity = optional(folder / "runtime-identity.json")
+        actual = None
+        if identity:
+            actual = {
+                "core_packages": identity.get("core_packages"),
+                "vllm": identity.get("vllm"),
+                "ascend": identity.get("ascend"),
+                "stock_imports": identity.get("actual_runtime_imports", {}).get(
+                    "observation"
+                ),
+                "actual81_weight_receipt": identity.get("actual81_weight_receipt"),
+                "ascend_carrier": select(
+                    identity.get("actual_ascend_common_carrier"),
+                    [
+                        "profile",
+                        "base_commit",
+                        "prepared_tree",
+                        "cpu_binding_original_sha256",
+                        "cpu_binding_prepared_sha256",
+                        "prepare_script_sha256",
+                        "source_files_verified",
+                        "cann_runtime_files_verified",
+                        "cann_runtime_bytes_verified",
+                        "source_admission_sha256",
+                    ],
+                ),
+            }
+        ready = (
+            {
+                "startup_seconds": prep.get("total_preparation_seconds"),
+                "ready_unix": prep.get("ready_unix"),
+                "scope": "Entire source admission+sidecar+model/graph+binding preparation",
+            }
+            if prep
+            else None
+        )
+        return {
+            "name": name,
+            "status": "ready"
+            if prep
+            else "initialization_failed_or_incomplete"
+            if folder.exists()
+            else "not_executed",
+            "physical_device_count": 2,
+            "process": select(
+                optional(folder / "processes.json"),
+                [
+                    "server_pid",
+                    "server_start_ticks",
+                    "sidecar_pid",
+                    "sidecar_start_ticks",
+                ],
+            ),
+            "ready": ready,
+            "lifecycle_start": select(
+                lifecycle, ["started_unix", "started_monotonic", "arm"]
+            ),
+            "model_ready": model,
+            "sidecar_ready": sidecar,
+            "stop": select(
+                stop,
+                ["stopped_unix", "server_exit_code", "sidecar_exit_code"],
+            ),
+            "sidecar_ready_to_owned_stop_observation_seconds": stop["stopped_unix"]
+            - sidecar["healthy_unix"]
+            if stop and sidecar and "stopped_unix" in stop and "healthy_unix" in sidecar
+            else None,
+            "sidecar_residency_scope": "Ready-to-stop observation interval plus actual capacity/used/resident gauges and host samples; not nominal30GiB multiplied into an inferred private RSS or monetary bill.",
+            "initialization_device_seconds": 2 * ready["startup_seconds"]
+            if ready and ready["startup_seconds"] is not None
+            else None,
+            "actual_runtime_identity": actual,
+            "command": public_command(folder / "command.json"),
+            "sidecar_command": public_command(folder / "sidecar-command.json"),
+            "source_admission_cost": select(
+                optional(folder / "source-admission-cost.json"),
+                ["seconds", "completed_unix"],
+            ),
+            "telemetry_numeric": formal,
+            "startup_telemetry_streams": streams,
+            "telemetry_scope": "Formal stage Samplers and model/sidecar startup streams remain separately timestamped; no resampling or merged-frequency assumption. Container/HBM totals are not exclusive MOD increments.",
+            "cleanup_npu_observation": cleanup(folder / "npu-release.txt"),
+            "cpu_binding_observations": [
+                select(
+                    optional(path),
+                    [
+                        "checked_unix",
+                        "requested_enable_cpu_binding",
+                        "upstream_default",
+                        "warning_or_skip_seen",
+                        "processes",
+                        "cpu_max",
+                        "cpuset_effective",
+                    ],
+                )
+                for path in sorted(folder.glob("cpu-binding-*.json"))
+            ],
+        }
+
+    periods = []
+    for arm in ["native", "pegaflow", "judge"]:
+        stages = [
+            s["name"]
+            for s in state["stages"]
+            if (
+                s["stage"] == "judge"
+                if arm == "judge"
+                else s["stage"] == "solver" and s["arm"] == arm
+            )
+        ]
+        periods.append(period(root / ("service-" + arm), "service-" + arm, stages))
+    qualification = [
+        period(
+            root.parent / "qualification" / ("service-" + arm),
+            "qualification-service-" + arm,
+            [],
+        )
+        for arm in ["native", "pegaflow"]
+    ]
+    return {
+        "schema": "pegaflow-runtime-overheads/v1",
+        "periods": periods,
+        "qualification_periods": qualification,
+        "scope": "Three formal fresh services and two separate C8 initializations. Sidecar initialization/reservation/residency are separate from model readiness. Missing is unknown, not zero; no currency pricing or effective-FLOP claim.",
+    }
+
+
+def cleanup(path):
+    path = Path(path)
+    return (
+        {
+            "controlled_sha256": sha(path),
+            "empty_allocated_npus_observed": path.read_text().count(
+                "No running processes found in NPU"
+            )
+            == 2,
+        }
+        if path.exists()
+        else None
+    )
+
+
+def execution_receipts(root, campaign):
+    root, campaign = Path(root), Path(campaign)
+    fields = [
+        "phase",
+        "supervisor_pid",
+        "child_pid",
+        "child_start_ticks",
+        "started_unix",
+        "started_monotonic",
+        "completed_unix",
+        "completed_monotonic",
+        "child_returncode",
+        "supervisor_returncode",
+        "signals",
+    ]
+    waits = {}
+    for name in [
+        "sdk-restore-wait.json",
+        "cpu-admission-wait.json",
+        "c8-controller-wait.json",
+        "formal-controller-wait.json",
+        "input-admitted-launcher-wait.json",
+    ]:
+        path = campaign / "metadata" / name
+        waits[name] = {
+            "value": select(optional(path), fields),
+            "controlled_sha256": sha(path) if path.exists() else None,
+        }
+    return {
+        "schema": "pegaflow-actual-wait-and-cleanup/v1",
+        "actual_wait_receipts": waits,
+        "scope": "Only actual owned child wait/stop values are exported. Missing outer/phase returncode stays null; never infer it from an internal intended returncode, phase label or log.",
+        "resource_handoff_sha256": sha(campaign / "resource-handoff.json")
+        if (campaign / "resource-handoff.json").exists()
+        else None,
+        "publication_sha256": sha(campaign / "publication.json")
+        if (campaign / "publication.json").exists()
+        else None,
+        "pregen_input_publication_sha256": sha(
+            campaign / "metadata/pregen-input-publication.json"
+        )
+        if (campaign / "metadata/pregen-input-publication.json").exists()
+        else None,
+        "analysis_source_publication_sha256": sha(
+            campaign / "metadata/analysis-publication.json"
+        )
+        if (campaign / "metadata/analysis-publication.json").exists()
+        else None,
+    }

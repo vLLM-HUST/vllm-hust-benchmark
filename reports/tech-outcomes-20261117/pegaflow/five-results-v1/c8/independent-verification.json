@@ -1,0 +1,298 @@
+{
+  "native": {
+    "passed": true,
+    "phases": [
+      {
+        "name": "4096-warmup",
+        "requests": 16,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 16,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 16
+        },
+        "all_sse_records_verified": true
+      },
+      {
+        "name": "4096-formal",
+        "requests": 231,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 231,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 231
+        },
+        "all_sse_records_verified": true
+      },
+      {
+        "name": "16384-warmup",
+        "requests": 16,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 16,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 16
+        },
+        "all_sse_records_verified": true
+      },
+      {
+        "name": "16384-formal",
+        "requests": 80,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 80,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 80
+        },
+        "all_sse_records_verified": true
+      }
+    ],
+    "total_requests": 343,
+    "scope": "Original synthetic C8 protocol; no invented numeric latency/SLO threshold or five-dataset quality claim",
+    "explicit_required_prefix_proofs": [
+      {
+        "phase": "4096-warmup",
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_hits_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false,
+        "required": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "passed": true
+      },
+      {
+        "phase": "4096-formal",
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_hits_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false,
+        "required": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "passed": true
+      },
+      {
+        "phase": "16384-warmup",
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_hits_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false,
+        "required": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "passed": true
+      },
+      {
+        "phase": "16384-formal",
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_hits_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false,
+        "required": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "passed": true
+      }
+    ]
+  },
+  "pegaflow": {
+    "passed": true,
+    "phases": [
+      {
+        "name": "4096-warmup",
+        "requests": 16,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 16,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 16
+        },
+        "all_sse_records_verified": true
+      },
+      {
+        "name": "4096-formal",
+        "requests": 231,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 231,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 231
+        },
+        "all_sse_records_verified": true
+      },
+      {
+        "name": "16384-warmup",
+        "requests": 16,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 16,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 16
+        },
+        "all_sse_records_verified": true
+      },
+      {
+        "name": "16384-formal",
+        "requests": 78,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 78,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 78
+        },
+        "all_sse_records_verified": true
+      }
+    ],
+    "total_requests": 341,
+    "scope": "Original synthetic C8 protocol; no invented numeric latency/SLO threshold or five-dataset quality claim",
+    "explicit_required_prefix_proofs": [
+      {
+        "phase": "4096-warmup",
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_hits_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false,
+        "required": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "passed": true
+      },
+      {
+        "phase": "4096-formal",
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_hits_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false,
+        "required": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "passed": true
+      },
+      {
+        "phase": "16384-warmup",
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_hits_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false,
+        "required": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "passed": true
+      },
+      {
+        "phase": "16384-formal",
+        "deltas": {
+          "vllm:external_prefix_cache_hits_total": 0.0,
+          "vllm:prefix_cache_hits_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false,
+        "required": [
+          "vllm:external_prefix_cache_hits_total",
+          "vllm:prefix_cache_hits_total"
+        ],
+        "passed": true
+      }
+    ],
+    "explicit_pega_engine_proofs": [
+      {
+        "phase": "4096-warmup",
+        "deltas": {
+          "vllm:pega_load_success_total": 0.0,
+          "vllm:pega_save_success_total": 64.0,
+          "vllm:pega_load_failure_total": 0.0,
+          "vllm:pega_save_failure_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false
+      },
+      {
+        "phase": "4096-formal",
+        "deltas": {
+          "vllm:pega_load_success_total": 0.0,
+          "vllm:pega_save_success_total": 924.0,
+          "vllm:pega_load_failure_total": 0.0,
+          "vllm:pega_save_failure_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false
+      },
+      {
+        "phase": "16384-warmup",
+        "deltas": {
+          "vllm:pega_load_success_total": 0.0,
+          "vllm:pega_save_success_total": 248.0,
+          "vllm:pega_load_failure_total": 0.0,
+          "vllm:pega_save_failure_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false
+      },
+      {
+        "phase": "16384-formal",
+        "deltas": {
+          "vllm:pega_load_success_total": 0.0,
+          "vllm:pega_save_success_total": 1240.0,
+          "vllm:pega_load_failure_total": 0.0,
+          "vllm:pega_save_failure_total": 0.0
+        },
+        "missing": [],
+        "counter_reset_seen": false
+      }
+    ]
+  }
+}

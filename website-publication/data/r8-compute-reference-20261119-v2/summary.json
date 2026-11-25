@@ -1,0 +1,389 @@
+{
+  "compute_reference": {
+    "schema": "one-click-current-compute-reference/v1",
+    "status": "measured",
+    "binding": {
+      "profile": "mmlu-fixed200-v1",
+      "quality_plan_sha256": "f4ed4ce5956c9ed08f360400b5a996ef92a217ce295d50648d4dc06443db768e",
+      "requests": 200,
+      "max_completion_tokens": 8192,
+      "temperature": 0,
+      "seed": 0,
+      "eos": "enabled",
+      "model": "/models/Qwen3.5-35B-A3B",
+      "physical_cards": [
+        1,
+        6
+      ],
+      "engine_release": "full-answer-b1-20261117-r8"
+    },
+    "historical_substitution_allowed": false,
+    "blockers": [],
+    "mode": "automatic_current_certification",
+    "capture_profile": {
+      "id": "submission-v2",
+      "max_tokens": 256,
+      "formal_repetitions": 3,
+      "ignore_eos": false,
+      "requests_per_repetition": 200
+    },
+    "plan": "plans/compute-reference/automatic-plan.json",
+    "plan_sha256": "83268a455f4e735fed3fbf393d2c7155a9b2ed06bd001fdc41924b4e9f1beb90",
+    "current_efficiency": null,
+    "milestone_met": true,
+    "final_numeric_met": false,
+    "stages": [
+      {
+        "id": "gdn-decode-independent-reference",
+        "implementation": "third-party-test-kit/qualify_gdn_reference.py",
+        "scope": "BF16 grouped-head recurrence outputs/FP32 owned pool; single-card batch1 operator calibration per card, not whole-model timing",
+        "status": "completed",
+        "returncode": 0,
+        "reused_qualification": true,
+        "original_receipt": "/data/shared_upload/workspace-eff9d567-21d6-4cbd-999e-2f3b066fddf6/vllm-hust-optimization-20261115/r8-reference-certification-20261119-r1/automatic-submission-v2-r1/compute-reference/gdn-decode/receipt.json",
+        "receipt_sha256": "5b2839ee1e4e995de4e36df6152b07a7be34bb1e16e1ee3cf7129e4b85946db1",
+        "original_plan_sha256": "2a5e82aa2880cd15eae521a1958baa737625d3fbe83db0c40b38e90228c6fb38",
+        "full_model_certificate": false
+      },
+      {
+        "id": "gdn-prefill-independent-reference",
+        "implementation": "third-party-test-kit/qualify_gdn_prefill_reference.py",
+        "scope": "Independent segmented WY/inverse/H-O algebra with declared BF16 intermediate storage, separate FP32/scalar oracle, real zero/stateful boundaries, empty capacity suffix, per-card operator calibration; not whole-model timing",
+        "status": "completed",
+        "returncode": 0,
+        "reused_qualification": true,
+        "original_receipt": "/data/shared_upload/workspace-eff9d567-21d6-4cbd-999e-2f3b066fddf6/vllm-hust-optimization-20261115/r8-reference-certification-20261119-r1/automatic-submission-v2-r1/compute-reference/gdn-prefill/receipt.json",
+        "receipt_sha256": "1ce5806db38e9c99475f2308bd4ee95dfdac2e8311ae83167b7e59cef87998fc",
+        "original_plan_sha256": "2a5e82aa2880cd15eae521a1958baa737625d3fbe83db0c40b38e90228c6fb38",
+        "full_model_certificate": false
+      },
+      {
+        "id": "raw-route-recorder-qualification",
+        "implementation": "third-party-test-kit/qualify_route_capture.py",
+        "scope": "Exact integer route copies through enabled/disabled graph replay, bounded overflow and unchanged inputs on both physical cards. Observer qualification only, not a reference performance sample.",
+        "status": "completed",
+        "returncode": 0,
+        "reused_qualification": true,
+        "original_receipt": "/data/shared_upload/workspace-eff9d567-21d6-4cbd-999e-2f3b066fddf6/vllm-hust-optimization-20261115/r8-reference-certification-20261119-r1/automatic-submission-v2-r1/compute-reference/route-recorder/receipt.json",
+        "receipt_sha256": "5672ba7f1d8709cf68148e65510b27a4496ea358e37cf44181e102dbe5635caa",
+        "original_plan_sha256": "2a5e82aa2880cd15eae521a1958baa737625d3fbe83db0c40b38e90228c6fb38",
+        "full_model_certificate": false
+      },
+      {
+        "id": "shape-matched-independent-reference-dag",
+        "implementation": "scripts/reference_final_stages.py",
+        "scope": "默认submission-v2核验并复算已封存的完整M01独立参考：原始F、完整关键路径参考时间、每卡参考上界及全部来源。不用dense子图替换，不用目标T或效率拟合。full-answer-v1的dense标定仍仅为独立诊断，不借用out256参考。",
+        "status": "completed",
+        "receipt_sha256": "72ab1a18af265d81963ae8a445a9bcdf165908dbe8c225c59a1d767d3043639e",
+        "full_model_certificate": false,
+        "pre_target_calibration_freeze_sha256": "344c38c4e90a9c5debfdeef50fa7579ec12c4d0dc098bad5c5a19d4f7a0bd138"
+      },
+      {
+        "id": "current-native-synchronized-timing",
+        "implementation": "scripts/run_native_reference.py",
+        "scope": "Fresh r8 native public token-prompt/DELTA-output client, fixed200/max8192/EOS, one predeclared full repetition, same194 synthetic warmup prompts and capacity coverage, two-rank fences, no profiler or per-step internals. Pure observer AST removals and inactive host aggregate are audited before/after; formal numerator eligibility still requires necessary-work/source correspondence.",
+        "status": "completed",
+        "returncode": 0,
+        "reused_model_stage": true,
+        "original_stage_source": "/data/shared_upload/workspace-eff9d567-21d6-4cbd-999e-2f3b066fddf6/vllm-hust-optimization-20261115/r8-reference-certification-20261119-r1/automatic-submission-v2-r1/compute-reference/native-current-timing",
+        "receipt_sha256": "0589060eebf15db9786db4af470a3604750810081ee78a74914fa785b088b8da",
+        "original_plan_sha256": "2a5e82aa2880cd15eae521a1958baa737625d3fbe83db0c40b38e90228c6fb38",
+        "full_model_certificate": false
+      },
+      {
+        "id": "baseline-native-synchronized-timing",
+        "implementation": "scripts/run_native_reference.py",
+        "scope": "Fresh original018/CANN8.5.1 native paired arm; source/profile admitted with original E24, MTP2 and FULL_AND_PIECEWISE configuration. Same fixed200/max8192/EOS,194 synthetic warmup, public client, two-rank fences and compile boundary as B1. Complete necessary-work and reference correspondence remain required.",
+        "status": "completed",
+        "returncode": 0,
+        "reused_model_stage": true,
+        "original_stage_source": "/data/shared_upload/workspace-eff9d567-21d6-4cbd-999e-2f3b066fddf6/vllm-hust-optimization-20261115/r8-reference-certification-20261119-r1/automatic-submission-v2-r1/compute-reference/native-baseline-timing",
+        "receipt_sha256": "fb4a860a41787a6c7fef52916c927417c2d399953559ae8c0acc6895018c0634",
+        "original_plan_sha256": "2a5e82aa2880cd15eae521a1958baa737625d3fbe83db0c40b38e90228c6fb38",
+        "full_model_certificate": false
+      },
+      {
+        "id": "current-http-work-observation",
+        "implementation": "scripts/reference_observation.py",
+        "scope": "New HTTP fixed200/max8192/EOS observation with rank/scheduler/SSE ID joins and genuine GDN segment geometry. This stage is instrumented and cannot supply the clean performance numerator.",
+        "status": "completed",
+        "returncode": 0,
+        "reused_model_stage": true,
+        "original_stage_source": "/data/shared_upload/workspace-eff9d567-21d6-4cbd-999e-2f3b066fddf6/vllm-hust-optimization-20261115/r8-reference-certification-20261119-r1/automatic-submission-v2-r1/compute-reference/http-current-work",
+        "receipt_sha256": "c0ac64b4328fbe20f2b0ed304b70aca52d9d573f258dd34d60acf973c0180a8b",
+        "original_plan_sha256": "2a5e82aa2880cd15eae521a1958baa737625d3fbe83db0c40b38e90228c6fb38",
+        "full_model_certificate": false,
+        "recovered_post_capture_cpu_derivation": true,
+        "original_receipt_completed": false,
+        "original_failure": "ValueError: Draft consumer reused or mismatched its latest actual producer",
+        "independent_recovery_source": "/data/shared_upload/workspace-eff9d567-21d6-4cbd-999e-2f3b066fddf6/vllm-hust-optimization-20261115/r8-reference-certification-20261119-r1/automatic-submission-v2-repaired-v3/compute-reference/model-resume-execution-guard/recovered-http-audit",
+        "independent_recovery_checksums_sha256": "51e2c59a5eae11108e7f697c46bd6f75c072761562d07ca1b61cfa01d8231abd"
+      },
+      {
+        "id": "complete-current-necessary-work",
+        "implementation": "scripts/reference_final_stages.py",
+        "scope": "Independently re-audit the sealed HTTP companion, loaded dimensions and both-rank producer closure; bind each native arm to reviewed cache/capacity/producer/scalar sources and derive its own complete necessary-F interval. Original018 one-token prompt recurrence remains an explicit envelope branch.",
+        "status": "completed",
+        "receipt_sha256": "26c526cfc137f4961ffba1b4e8df47b9f08c160045f81faa730f900ccc470ad5",
+        "full_model_certificate": false
+      },
+      {
+        "id": "independent-reference-dag-audit",
+        "implementation": "scripts/reference_final_stages.py",
+        "scope": "默认submission-v2重验原完整参考关键路径及原件，核对本轮200条完整token清单、14分片权重、BF16/TP2/910B2、原生计时、输出预算与三轮人口；分别保留原参考F/T和本轮F/T。",
+        "status": "completed",
+        "receipt_sha256": "bf900fefa40e7c0d55b8e1b97d07a77172576711d94c2a311ab771979ff23751",
+        "full_model_certificate": false
+      },
+      {
+        "id": "matched-current-numerator-and-recomputation",
+        "implementation": "scripts/reference_final_stages.py",
+        "scope": "本轮必要F下界除以本轮全部三次同步T得到每卡分子，再除以原完整参考F上界和参考时间下界复算的每卡分母。不同F不相消；不沿用历史效率；适用性或原件缺失保持非零与空效率。",
+        "status": "completed",
+        "receipt_sha256": "096bb4a9f9bd6a089a4ff1d6b45b6f2261901030ccde710e6fe26e4d04ff0c6c",
+        "full_model_certificate": true
+      }
+    ],
+    "arms": {
+      "B0": {
+        "F_interval": [
+          5412318178236308,
+          5441387470064231
+        ],
+        "T_seconds": "453.985942159",
+        "formal_repetitions": 3,
+        "achieved_tflops_per_card_interval": [
+          "5.960887414814207839599889975235439105155",
+          "5.992903044736226470834068230106964746968"
+        ],
+        "reference_F_interval": [
+          5487388087149780,
+          5488258327989369
+        ],
+        "reference_seconds_lower": "102.3231709195348958960064",
+        "reference_seconds_exact": null,
+        "reference_tflops_per_card_upper": "26.81825767648090573566921216250915821371",
+        "efficiency_lower_percent": "22.22697494640671988678248116022501679767",
+        "efficiency_exact_percent": null,
+        "original_reference_repetitions": [
+          {
+            "name": "uninstrumented-1",
+            "F_interval": [
+              1829129362383260,
+              1829419442663123
+            ],
+            "Tref_lower_seconds": "34.1077236398449652986688",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "0c51f8f42043eff8f82ec23888702cdd1583a9d68835135e32190c7514c8feff"
+          },
+          {
+            "name": "uninstrumented-2",
+            "F_interval": [
+              1829129362383260,
+              1829419442663123
+            ],
+            "Tref_lower_seconds": "34.1077236398449652986688",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "6db7784be4bb652d1d0179e6673f7405314a2cb5077adf0321c765cb152ab30d"
+          },
+          {
+            "name": "uninstrumented-3",
+            "F_interval": [
+              1829129362383260,
+              1829419442663123
+            ],
+            "Tref_lower_seconds": "34.1077236398449652986688",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "b91eb934d213473b74f2cc499f94b2c72d167682082a4e520254c9a6cb35eb82"
+          }
+        ],
+        "repetitions": [
+          {
+            "repetition": 1,
+            "F_interval": [
+              1804159232956559,
+              1813847989643210
+            ],
+            "T_seconds": "149.063354205",
+            "geometry_sha256": "8e14ce5f0298aefaa6a79efa64032c5da5179bab730903a4f5945f242ea2f4dc",
+            "timing_sha256": "d1e7eab183f3bbe14fa9ad043b4e0f1c45f8d45c4e012230d2ddc039ee91a16f",
+            "work_sha256": "1ac53e5e63d37820520fec54b473208322936babfd90a6b3c6130ef004e69c82",
+            "native_source_seal_sha256": "45943096b5e7116d0eaaf6f99f03d4e4542f1b04e587d094d3da538fce549f17"
+          },
+          {
+            "repetition": 2,
+            "F_interval": [
+              1804144929773416,
+              1813837266790113
+            ],
+            "T_seconds": "148.908074954",
+            "geometry_sha256": "c987cc58489af679241678c41fa873cb3bf2bd57d7c5149c4209a4d00208cbe8",
+            "timing_sha256": "5797030fd7d9b29974b4fe201c391567fd053c776f1b79207e937cc5124d0d61",
+            "work_sha256": "45c74f27250e1ff8334638d5da9d2b7da196118cb5adef23fafb674c9d7daabd",
+            "native_source_seal_sha256": "45943096b5e7116d0eaaf6f99f03d4e4542f1b04e587d094d3da538fce549f17"
+          },
+          {
+            "repetition": 3,
+            "F_interval": [
+              1804014015506333,
+              1813702213630908
+            ],
+            "T_seconds": "156.014513",
+            "geometry_sha256": "330b1aa3f76215d2961c9d6ee740bec8e9ee92e9b139589c2e9620b855d768e2",
+            "timing_sha256": "458767e1eb4f1bfe210b640c398deea6896bdc7842449f0c30cd2e82829f92dd",
+            "work_sha256": "7a1f94d1fcb677939e0f79fbd07ac7b0974b165eef93859843c80687d1d09e8b",
+            "native_source_seal_sha256": "45943096b5e7116d0eaaf6f99f03d4e4542f1b04e587d094d3da538fce549f17"
+          }
+        ],
+        "shared_work_cancellation_used": false,
+        "hardware_peak_utilization_percent": null,
+        "source_and_timing_qualified": true,
+        "full_model_certificate": true,
+        "statistic": "100 * C_current_lower / C_reference_upper; original F_reference and T_reference retained; sum all current repetitions before division"
+      },
+      "B1": {
+        "F_interval": [
+          5412083385456264,
+          5441167790478965
+        ],
+        "T_seconds": "155.837258899",
+        "formal_repetitions": 3,
+        "achieved_tflops_per_card_interval": [
+          "17.36453600279218294183427903544724296376",
+          "17.45785259866978032811554913924448878470"
+        ],
+        "reference_F_interval": [
+          5438115361780845,
+          5438638334450385
+        ],
+        "reference_seconds_lower": "140.60316791316519",
+        "reference_seconds_exact": null,
+        "reference_tflops_per_card_upper": "19.34038334687175052309470403284461724716",
+        "efficiency_lower_percent": "89.78382533250482332421774762109257529198",
+        "efficiency_exact_percent": null,
+        "original_reference_repetitions": [
+          {
+            "name": "uninstrumented-1",
+            "F_interval": [
+              1812705120593615,
+              1812879444816795
+            ],
+            "Tref_lower_seconds": "46.86772263772173",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "0407c570c288265d9b5038a7e2a87eb1e8ea87553551785c7f6695a073ab2a86"
+          },
+          {
+            "name": "uninstrumented-2",
+            "F_interval": [
+              1812705120593615,
+              1812879444816795
+            ],
+            "Tref_lower_seconds": "46.86772263772173",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "c5bea9d69988f75e68fe6c141965a13e23d8a34533a11fb84a00bff465c12a10"
+          },
+          {
+            "name": "uninstrumented-3",
+            "F_interval": [
+              1812705120593615,
+              1812879444816795
+            ],
+            "Tref_lower_seconds": "46.86772263772173",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "9a198f5dcb9e6a062b9caac2a69040508e82d4210c852fd8b007f1f671113746"
+          }
+        ],
+        "repetitions": [
+          {
+            "repetition": 1,
+            "F_interval": [
+              1804020997629578,
+              1813718590892487
+            ],
+            "T_seconds": "52.243462998",
+            "geometry_sha256": "44e679c8688495ec1c9d9b9dd7e596fffbc1dd31f358c235150e21604add218c",
+            "timing_sha256": "b2f8e221469d9213b59ae756bbade8bbc4786dec58ef7fae8374f00a3efd5db5",
+            "work_sha256": "ae9a303514311fd0bc6cdc7d536fc2ec7ab51ecccfb5f3b6e5f5733972779374",
+            "native_source_seal_sha256": "80a93a97928211d5cc44af1bcc2ad097c4c79f342106922293852ed95b0cd1f3"
+          },
+          {
+            "repetition": 2,
+            "F_interval": [
+              1804020997629578,
+              1813718590892487
+            ],
+            "T_seconds": "52.233316732",
+            "geometry_sha256": "44e679c8688495ec1c9d9b9dd7e596fffbc1dd31f358c235150e21604add218c",
+            "timing_sha256": "2cfaee878ab4b8d3eb16a912ab2cf90ab49d9f575d6a432e9e2eca8d133f1594",
+            "work_sha256": "ae9a303514311fd0bc6cdc7d536fc2ec7ab51ecccfb5f3b6e5f5733972779374",
+            "native_source_seal_sha256": "80a93a97928211d5cc44af1bcc2ad097c4c79f342106922293852ed95b0cd1f3"
+          },
+          {
+            "repetition": 3,
+            "F_interval": [
+              1804041390197108,
+              1813730608693991
+            ],
+            "T_seconds": "51.360479169",
+            "geometry_sha256": "f7c503a9fc499432621bce40f00fd69d8cce60c1dc915fcb5d6621a131357518",
+            "timing_sha256": "49afe4cae35d335dd24f188d4638b81f09974825c2229a5f757e815b4d83ebc5",
+            "work_sha256": "6091f9876ecb7dbc66e43c047a09716de83f88246cdaa20513f3ba5a7b471aa9",
+            "native_source_seal_sha256": "80a93a97928211d5cc44af1bcc2ad097c4c79f342106922293852ed95b0cd1f3"
+          }
+        ],
+        "shared_work_cancellation_used": false,
+        "hardware_peak_utilization_percent": null,
+        "source_and_timing_qualified": true,
+        "full_model_certificate": true,
+        "statistic": "100 * C_current_lower / C_reference_upper; original F_reference and T_reference retained; sum all current repetitions before division"
+      }
+    },
+    "effective_compute_gain_percent_interval": [
+      "189.7516591402901816671299671389404375662",
+      "192.8733824980976613982172066658244113307"
+    ],
+    "efficiency_lower_observed_percent": 89.78382533250482,
+    "efficiency_lower_observed_percent_decimal": "89.78382533250482332421774762109257529198",
+    "milestone_decision": "达成目标",
+    "final_decision": "未达成目标",
+    "below_threshold_interpretation": "A lower bound below a threshold does not prove the unknown exact efficiency is below it.",
+    "necessary_work_interval_preserved": true,
+    "historical_counts_or_times_reused": true,
+    "full_model_certificate": true,
+    "certificate_kind": "qualified_full_reference_denominator_reuse/v1",
+    "native_formal_repetitions_per_arm": 3,
+    "clean_native_clock_source_qualified": true,
+    "full_reference_denominator_qualified": true,
+    "qualified_full_reference_statistics_sha256": "6611fee282b552092f8a807ad02ec517cbadaccde08423376acd7d6e8b439870",
+    "original_reference_work_and_time_retained": true,
+    "original_efficiency_used": false,
+    "reference_reuse_scope": "original qualified same-condition reference denominator only; all current F/T freshly audited",
+    "shared_work_cancellation_used": false,
+    "efficiency_exact_percent": null,
+    "new_reference_inference_executed": false,
+    "operator_reference_executed": true
+  },
+  "target_3_4_1": {
+    "name": "有效算力效率 ≥50%",
+    "accepted": true,
+    "status": "current_workload_measured",
+    "display_value": "≥89.7838%",
+    "measured_value": 89.7838,
+    "measured_value_decimal": "89.78382533250482332421774762109257529198",
+    "value_kind": "certified_lower_bound",
+    "accepted_scope": "Current fixed MMLU200 native F/T with qualified original full-reference denominator",
+    "reason": "原完整参考的算量、参考时间与每卡分母已独立复算，并通过同工况输入、权重、精度、双卡及预算核验；本轮必要F和原生同步T重新计算分子，再除以原参考每卡上界。两份F不相消，未沿用旧效率。"
+  }
+}
