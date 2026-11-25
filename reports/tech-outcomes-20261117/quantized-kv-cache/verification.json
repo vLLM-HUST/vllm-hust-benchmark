@@ -1,0 +1,28 @@
+{
+  "verified_on": "2026-11-16",
+  "verification_type": "recalculation and integrity check of existing evidence; no model inference",
+  "operator": "hustcui (Codex-assisted)",
+  "historical_experiment_operator": "hustcui (maintainer confirmed)",
+  "performance_archive_check": {
+    "command": "python scripts/verify_a3_int8_kv.py",
+    "script_commit": "87b2c10325f9ca763925a98c05941741a0b0ea84",
+    "passed": true,
+    "archives": 3,
+    "runs": 30,
+    "requests": 7463,
+    "checks": [
+      "archive and member SHA256/byte sizes",
+      "continuous token-usage accounting",
+      "summary request counts",
+      "failure counts and latency gate outcomes"
+    ]
+  },
+  "quality_integrity_check": {
+    "passed": true,
+    "checks": [
+      "all archived scalar file hashes against manifest",
+      "all indexed external original file hashes against manifest"
+    ],
+    "limitation": "Integrity verification does not establish long-context quality or population noninferiority."
+  }
+}
