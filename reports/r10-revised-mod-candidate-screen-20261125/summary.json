@@ -311,7 +311,7 @@
       "schema": "vllm-hust-component-exploration/v1",
       "measurement_date": "2026-11-25",
       "candidate": "stable-runner-input-shape-metadata-reuse",
-      "scope": "component measurement and trace opportunity",
+      "scope": "component measurement, trace opportunity, and fixed ten-request online validation",
       "selection": "revised native R10",
       "baseline_release": "full-answer-b1-20261124-r10",
       "baseline_version": "2026.11.24.10",
@@ -414,21 +414,76 @@
       },
       "qualification": {
         "component_repeated_vectors_bit_equal": true,
-        "candidate_model_started": false,
+        "candidate_model_started": true,
         "official_4_1_to_4_4_completed": false,
         "actual_hit_ratio_observed": false,
-        "generated_source_preflight_passed": true
+        "generated_source_preflight_passed": true,
+        "actual_rank_hit_observed": true,
+        "online_validation_completed": true
       },
       "limits": [
         "A matching graph bucket is a necessary condition in this narrow trace screen. The real ordered partitions are unavailable in these logs.",
         "Perfect hit rate and full conversion of measured component savings are assumed for the opportunity estimates, which are not observed full-model or official results. The two parallel TP ranks are not added.",
         "The historical context trace has the same pinned Ascend worker source. Its elapsed denominator spans context warmup and 4K, 16K, 32K and four-tenant windows.",
-        "The online candidate still needs an admission guard for CPU-side dummy and asynchronous device-side writes."
+        "Ten online requests validated the path and quality on another physical host. The existing historical native receipt is usable for configuration and accuracy, while latency and throughput have no same-host causal comparison. Periodic rank counters are lower bounds, not an exact hit rate."
       ],
       "generated_source_preflight": {
         "generated_source_differential_checks": 1382,
         "evidence": "measurements/runner-metadata-source-preflight.json",
         "candidate_worker_sha256": "c4abb07a6721501c161fb65224ef99beac7df8452f62fca2333d0a219e9b65bd"
+      },
+      "online_validation": {
+        "request_plan_sha256": "0b8f6a85272a1882644dd35b6716e688e4829df8842b3ebdea6d8b585c6dbc66",
+        "platform": {
+          "chip": "910B2",
+          "tensor_parallel": 2,
+          "graph_mode": "FULL",
+          "graph_mixed_capture_tokens": 3072,
+          "mtp": 2,
+          "max_model_len": 65536
+        },
+        "candidate": {
+          "arm": "candidate",
+          "cases": 10,
+          "completed": 10,
+          "failed": 0,
+          "correct": 9,
+          "unparsed": 0,
+          "truncated": 1,
+          "request_plan_sha256": "0b8f6a85272a1882644dd35b6716e688e4829df8842b3ebdea6d8b585c6dbc66",
+          "wall_s": 69.23286958999233,
+          "output_tok_s": 379.68959189003203,
+          "mean_ttft_ms": 781.6348543099593,
+          "p95_ttft_ms": 1113.270425022347,
+          "mean_tpot_ms": 12.40456924277254,
+          "p95_tpot_ms": 13.5717374242172
+        },
+        "observed_counts_lower_bound_by_rank": {
+          "0": {
+            "observed_hits": 2560,
+            "observed_misses": 12,
+            "observed_fallbacks": 6
+          },
+          "1": {
+            "observed_hits": 2560,
+            "observed_misses": 12,
+            "observed_fallbacks": 6
+          }
+        },
+        "actual_first_hit_parity_rows_by_rank": {
+          "1": 3,
+          "0": 3
+        },
+        "cards_idle_after": true,
+        "historical_native": {
+          "quality_correct": 10,
+          "completed": 10,
+          "original_receipt_sha256": "9bc715927da920186a7fd0e2ae7c0c7963427e0867b51bd7827200ad68531b74"
+        },
+        "historical_native_performance_comparable": false,
+        "candidate_promoted": false,
+        "evidence": "measurements/runner-metadata-fixed-ten-online.json",
+        "source_provenance": "measurements/runner-metadata-online-provenance.json"
       }
     },
     "nd-paged-kv-writer-reshape-cache": {
@@ -803,6 +858,16 @@
       "path": "measurements/runner-metadata-source-preflight.json",
       "original_payload_sha256": "a72f712c13d88769a3f95b51c236d1f625bf034e7683a8babe0eb61270c8b85b",
       "archived_json_sha256": "a72f712c13d88769a3f95b51c236d1f625bf034e7683a8babe0eb61270c8b85b"
+    },
+    "runner-metadata-fixed-ten-online.json": {
+      "path": "measurements/runner-metadata-fixed-ten-online.json",
+      "original_payload_sha256": "beeeadbe2b0e81d03125027c009aa48af5517df01790de7ab550742a46e48e0c",
+      "archived_json_sha256": "beeeadbe2b0e81d03125027c009aa48af5517df01790de7ab550742a46e48e0c"
+    },
+    "runner-metadata-online-provenance.json": {
+      "path": "measurements/runner-metadata-online-provenance.json",
+      "original_payload_sha256": "d20b0fde3447a332822bb2e620d9de780f01b28028e1604350c63ee61b8fdde6",
+      "archived_json_sha256": "d20b0fde3447a332822bb2e620d9de780f01b28028e1604350c63ee61b8fdde6"
     }
   }
 }
