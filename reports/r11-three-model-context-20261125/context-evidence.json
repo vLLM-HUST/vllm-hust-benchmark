@@ -199,6 +199,175 @@
             }
           }
         },
+        "qwen35-decode-pressure": {
+          "milestone": true,
+          "final": false,
+          "ratios_16k_over_4k": {
+            "throughput": 0.6035038175428392,
+            "ttft_p95": 2.5389727838491454,
+            "ttft_p99": 2.628298346028626,
+            "tpot_p95": 1.5296970291650756,
+            "tpot_p99": 1.4629082863514111
+          },
+          "ratios_32k_max_over_min": {
+            "throughput": 1.5863118360559638,
+            "ttft_p95": 1.1531969392934545,
+            "ttft_p99": 1.1596594981794695,
+            "tpot_p95": 1.3263554449822437,
+            "tpot_p99": 1.097218273912174
+          },
+          "matched_pair_success_counts": {
+            "4096": {
+              "B0": 139,
+              "B1": 314
+            },
+            "16384": {
+              "B0": 74,
+              "B1": 193
+            },
+            "32768": {
+              "B0": 43,
+              "B1": 90
+            }
+          },
+          "metrics_by_lower_bound": {
+            "4096": {
+              "requests": 314,
+              "failed": 0,
+              "outputs_per_second": 265.8955881022939,
+              "ttft_ms": {
+                "mean": 984.9473060684124,
+                "p95": 2016.4964790455997,
+                "p99": 3660.7077840017155
+              },
+              "tpot_ms": {
+                "mean": 26.225022600838503,
+                "p95": 28.972711980196774,
+                "p99": 31.003452607832266
+              }
+            },
+            "16384": {
+              "requests": 193,
+              "failed": 0,
+              "outputs_per_second": 160.4690024875327,
+              "ttft_ms": {
+                "mean": 2742.2816248404324,
+                "p95": 5119.829679024406,
+                "p99": 9621.432213985827
+              },
+              "tpot_ms": {
+                "mean": 38.92940739035833,
+                "p95": 44.319471442962396,
+                "p99": 45.35520772550109
+              }
+            },
+            "32768": {
+              "requests": 90,
+              "failed": 0,
+              "outputs_per_second": 75.89365880864874,
+              "ttft_ms": {
+                "mean": 14798.41161597546,
+                "p95": 20132.308434986044,
+                "p99": 20989.784011035226
+              },
+              "tpot_ms": {
+                "mean": 47.31625956283833,
+                "p95": 60.552793278304094,
+                "p99": 64.88521838442003
+              }
+            }
+          },
+          "metrics_32k_five_windows": [
+            {
+              "requests": 24,
+              "failed": 0,
+              "outputs_per_second": 75.4988572115631,
+              "ttft_ms": {
+                "mean": 17410.69914679004,
+                "p95": 20478.303326992318,
+                "p99": 20989.784011035226
+              },
+              "tpot_ms": {
+                "mean": 31.271258549322678,
+                "p95": 48.91993215686514,
+                "p99": 59.13610803534039
+              }
+            },
+            {
+              "requests": 17,
+              "failed": 0,
+              "outputs_per_second": 50.273605300704816,
+              "ttft_ms": {
+                "mean": 14879.626841342542,
+                "p95": 20872.81199003337,
+                "p99": 20872.81199003337
+              },
+              "tpot_ms": {
+                "mean": 52.99983742056605,
+                "p95": 60.552793278304094,
+                "p99": 60.552793278304094
+              }
+            },
+            {
+              "requests": 16,
+              "failed": 0,
+              "outputs_per_second": 47.59395693552624,
+              "ttft_ms": {
+                "mean": 12976.477998741757,
+                "p95": 20287.685702962335,
+                "p99": 20287.685702962335
+              },
+              "tpot_ms": {
+                "mean": 56.1730264237792,
+                "p95": 61.46961280770198,
+                "p99": 61.46961280770198
+              }
+            },
+            {
+              "requests": 18,
+              "failed": 0,
+              "outputs_per_second": 52.66894987734797,
+              "ttft_ms": {
+                "mean": 14329.345096840472,
+                "p95": 18099.954377976246,
+                "p99": 18099.954377976246
+              },
+              "tpot_ms": {
+                "mean": 57.312155463418286,
+                "p95": 64.88521838442003,
+                "p99": 64.88521838442003
+              }
+            },
+            {
+              "requests": 15,
+              "failed": 0,
+              "outputs_per_second": 60.39801001750015,
+              "ttft_ms": {
+                "mean": 13032.983325934038,
+                "p95": 18565.73178997496,
+                "p99": 18565.73178997496
+              },
+              "tpot_ms": {
+                "mean": 45.10457988000578,
+                "p95": 61.114825070470424,
+                "p99": 61.114825070470424
+              }
+            }
+          ],
+          "b0_evidence_sha256": "0d234f1b14313806a2918a1ac66ee4f132f71f983446e3bd1e1c917ae352c920",
+          "b1_evidence_sha256": "2167deef8b8dbb174bda691fccffa6719c6283943a8cb366be82bc1263feb621",
+          "policy": "32K mixed budget 1536 with at least three runnable decodes, 2048 with two, 4096 with one",
+          "candidate_sources": {
+            "mods/betterscale/betterscale/models/qwen35/prefill_round_robin.py": {
+              "donor_sha256": "ba0c8c90cc5cf1b43e0d6dfa0a17f768f007300f4f9b86016f4eac477ff4b7a9",
+              "candidate_sha256": "7082d84b996ffcf1df23e0b35c68b5072f455feda17914aaeaf089b9a55da519"
+            },
+            "mods/microflow/hust_prefill_microflow/school028/host-contract.json": {
+              "donor_sha256": "a1ff475b2ea7fd6806f56c31e2db4a22b1d801b1051857b6cc398b77f0aa5f9a",
+              "candidate_sha256": "4a1dcca0eb96e64e78ecea76466cc049fcec39b2d1b32f71ade93821964695dd"
+            }
+          }
+        },
         "qwen35-small-mixed": {
           "milestone": true,
           "final": false,
