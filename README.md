@@ -40,6 +40,8 @@ V1：[从全新 CPU 工作区部署并运行一个真实 Agent](docs/SWE_BENCH_P
 
 Benchmark orchestration, workload data, immutable evidence and website publication sources.
 
+生信原生任务的代表模型执行、统计和复核入口见[生信 Benchmark 使用说明](docs/BIO_NATIVE_BENCHMARK.zh-CN.md)。
+
 GenNova 与 GenNova Autotune 的产品级独立测试结果统一维护在
 [GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)（私有仓库，需授权）。 历史
 MOD 证据入口见 [迁移记录](reports/gennova-mod-evidence-20261105/README.md)。
@@ -920,3 +922,5 @@ Qwen3.5-35B-A3B 配对参考： 快速预留 2–3 小时，全量预留 12–16
 
 [一键执行与完整公开指标](reports/five-datasets-standard-20261113/README.md)：
 15阶段由封存原件重新核验，新增推理0阶段；保留原日期、失败父批次与负结果。 五项范围已执行完成；HLE/Frontier评分未决及真实trace的16K输入覆盖限制仍阻止整体验收。
+
+生信原生任务的版本化注册、五类驱动接口及新增模型操作见 [接入指南](docs/BIO_ONBOARDING.zh-CN.md)。
