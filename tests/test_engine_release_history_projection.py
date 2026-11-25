@@ -402,23 +402,57 @@ def test_r10_archive_preserves_the_sealed_contiguous_restore_pairs():
     )
 
 
-def test_r10_default_is_bound_to_the_revised_35b_context_pair():
-    raw = (ROOT / "reports/r10-3072-context-20261124/summary.json").read_bytes()
-    measured = json.loads(raw)["isolated_r10_candidate"]
+def test_r10_current_assessment_binds_the_complete_revised_35b_run():
+    name = "r10-35b-paired-full-20261125"
+    folder = ROOT / "website-publication/data" / name
+    raw = (ROOT / "reports" / name / "summary.json").read_bytes()
+    assert (folder / "summary.json").read_bytes() == raw
+    source = json.loads(raw)
     catalog = json.loads(
         (ROOT / "website-publication/data/engine-release-history-v1.json").read_bytes()
     )
-    entry = next(
-        row for row in catalog["entries"] if row["id"] == catalog["default_release"]
+    entry = next(row for row in catalog["entries"] if row["id"] == "r10")
+    assert entry["release"] == source["engine_release"] == "full-answer-b1-20261124-r10"
+    assessment_raw = (folder / "acceptance.json").read_bytes()
+    assessment = json.loads(assessment_raw)
+    assert assessment["execution_complete"] is True
+    assert entry["submission_assessment"] == {
+        "path": f"data/{name}/acceptance.json",
+        "bytes": len(assessment_raw),
+        "sha256": hashlib.sha256(assessment_raw).hexdigest(),
+    }
+    for id_, gates in source["targets"].items():
+        assert gates == {
+            gate: assessment["targets"][id_][gate]["met"]
+            for gate in ("milestone", "final")
+        }
+    assert entry["compute_reference"]["arms"]["B1"]["efficiency_lower_percent"] == (
+        source["native_compute"]["arms"]["B1"]["efficiency_lower_percent"]
     )
-    assert entry["release"] == "full-answer-b1-20261124-r10"
-    assert entry["measurements"] == []
-    assert entry["r10_revision"]["assessment_4_3"] == measured["decision_4_3"]
-    supplement = entry["context_tenant_supplement"]
-    assert supplement["arm_seals"] == measured["arm_seals"]
-    assert supplement["quality_measured"] is False
-    assert supplement["effective_flops_certified"] is False
-    for case in supplement["comparisons"]:
+    assert entry["r10_revision"]["assessment_4_3"] == assessment["targets"]["4.3"]
+    assert assessment["targets"]["4.3"]["percentile_method"] == "nearest_rank"
+    assert entry["context_tenant_supplement"]["arm_seals"] == source["context"]["arm_seals"]
+    assert entry["context_tenant_supplement"]["quality_measured"] is False
+    assert entry["context_tenant_supplement"]["effective_flops_certified"] is False
+    for projected, actual in zip(
+        entry["context_tenant_supplement"]["comparisons"],
+        source["context"]["phases"], strict=True
+    ):
         for role in ("B0", "B1"):
-            for metric, value in measured["phases"][case["phase"]][role].items():
-                assert case[role]["metrics"][metric] == value
+            assert projected[role] == actual[role]
+    fixed = [row for row in entry["measurements"] if row["id"] in source["fixed_five"]]
+    assert [row["id"] for row in fixed] == ["mmlu", "hle", "frontier", "swe", "terminal"]
+    for row in fixed:
+        for role, arm in zip(("B0", "B1"), row["arms"], strict=True):
+            original = source["fixed_five"][row["id"]]["arms"][role]
+            assert arm["source_seal_sha256"] == original["source_seal_sha256"]
+            assert arm["output_tokens_per_second"] == original["output_tokens_per_second"]
+    continuous = json.loads((folder / "continuous-c8.json").read_bytes())
+    assert continuous["concurrency"] == 8
+    for row in entry["measurements"][5:]:
+        for role, arm in zip(("B0", "B1"), row["arms"], strict=True):
+            original = continuous["arms"][role]
+            assert arm["source_seal_sha256"] == original["source_seal"]
+            assert arm["output_tokens_per_second"] == (
+                original["formal"][row["id"]]["output_tokens_per_second"]
+            )

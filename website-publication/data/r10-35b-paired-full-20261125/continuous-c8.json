@@ -1,0 +1,61 @@
+{
+  "schema": "r10-qwen35b-matched-continuous-c8/v1",
+  "model": "Qwen3.5-35B-A3B",
+  "engine_release": "full-answer-b1-20261124-r10",
+  "baseline_id": "original018-cann8.5.1",
+  "concurrency": 8,
+  "arms": {
+    "B0": {
+      "source_seal": "9ce287da886e14b1e1f5bc3e263434abad4db05ad775da7eeca254d4462c3316",
+      "source_summary_sha256": "821226cc53c41dc28cf30ec7a085cc3344fff380af211d78292450698b54b4a6",
+      "formal": {
+        "4096-formal": {
+          "recorded": 160,
+          "successful": 160,
+          "failed": 0,
+          "successful_output_tokens": 40960,
+          "mean_ttft_ms": 1507.9743794776732,
+          "mean_tpot_ms": 54.03974924666103,
+          "cohort_wall_seconds": 308.5392704840051,
+          "output_tokens_per_second": 132.75457589481596
+        },
+        "16384-formal": {
+          "recorded": 75,
+          "successful": 75,
+          "failed": 0,
+          "successful_output_tokens": 19200,
+          "mean_ttft_ms": 5724.296071760667,
+          "mean_tpot_ms": 106.34807121901912,
+          "cohort_wall_seconds": 312.81944565696176,
+          "output_tokens_per_second": 61.37725856420942
+        }
+      }
+    },
+    "B1": {
+      "source_seal": "c4e01165a61a5e92b55e2d68b0c453ee8d0c09ae58d613d572f15087923d9f9e",
+      "source_summary_sha256": "efa02d7f0c3de3efa1875022fb9a6abc079c6d7b5119eb03d5cd16f8790c1dd8",
+      "formal": {
+        "4096-formal": {
+          "recorded": 483,
+          "successful": 483,
+          "failed": 0,
+          "successful_output_tokens": 123648,
+          "mean_ttft_ms": 580.5537386111168,
+          "mean_tpot_ms": 17.254891696550448,
+          "cohort_wall_seconds": 301.19527975597885,
+          "output_tokens_per_second": 410.52436180333444
+        },
+        "16384-formal": {
+          "recorded": 211,
+          "successful": 211,
+          "failed": 0,
+          "successful_output_tokens": 54016,
+          "mean_ttft_ms": 1997.6802954797288,
+          "mean_tpot_ms": 37.08180595232519,
+          "cohort_wall_seconds": 303.06975141802104,
+          "output_tokens_per_second": 178.22959812804373
+        }
+      }
+    }
+  }
+}
