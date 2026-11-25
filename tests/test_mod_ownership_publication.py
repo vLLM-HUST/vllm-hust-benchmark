@@ -11,7 +11,7 @@ def test_responsible_people_are_preserved_in_both_publication_sources():
     metadata = json.loads((DATA / "plugin-workshop-metadata.json").read_text())
     components = {item["id"]: item for item in catalog["components"]}
     expected = {
-        "muxpd": [("Irisuko", "毛潮云")],
+        "muxpd": [("Irisuko", "毛瀚云")],
         "kvcompress-ascend": [
             ("Jiawan23", "张家万"),
             ("kotoriqaq0", "韦若皓"),

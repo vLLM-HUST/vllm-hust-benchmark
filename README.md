@@ -1,5 +1,9 @@
 # vllm-hust-benchmark
 
+[轻量检出、索引维护和附件管理](docs/REPOSITORY_MAINTENANCE.md)提供日常代码维护入口。 数据导航统一检查使用
+`python scripts/refresh_data_navigation.py --check`。 网站当前发布源为
+[website-publication](website-publication/README.md)，由固定提交装配后发布。
+
 只安装独立数据组件、避免检出整个历史归档：见 [固定提交 wheel 安装](docs/workload-data/INSTALLATION.zh-CN.md)。
 
 可选的原始数据目录、读取适配与准备入口见 [Workload Data 使用说明](workload-preparation/README.md)；逐来源实际验证进度见
@@ -16,20 +20,22 @@ V1：[从全新 CPU 工作区部署并运行一个真实 Agent](docs/SWE_BENCH_P
 > removed. The execution scripts and historical design notes below are retained for reference only;
 > new PR validation is performed by the external fixed-machine dataset service.
 
-Wrapper benchmark repository for vllm-hust.
+Benchmark orchestration, workload data, immutable evidence and website publication sources.
 
 GenNova 与 GenNova Autotune 的产品级独立测试结果统一维护在
-[GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)（私有仓库，需授权）。
-本仓库仅保留一份来自历史 `inference-engine-project` 的
-[MOD 单项与组合测试证据固定快照](reports/gennova-mod-evidence-20261105/README.md)，用于发现和审计；
-它不是产品结果包、正式榜单提交或网站汇总副本。
+[GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)（私有仓库，需授权）。 历史
+MOD 证据入口见 [迁移记录](reports/gennova-mod-evidence-20261105/README.md)。
 
-The goal is to keep `vllm-hust-benchmark` as the stable entrypoint for running experiments, while
-the real benchmark implementations stay in `vllm-hust`. This repo resolves the sibling `vllm-hust`
-and `vllm-hust-website` repositories, invokes the benchmark entrypoints from there, and keeps result
-export and website publication flows in one place.
+Current data installation, task execution and publication entrypoints are linked above. The
+historical wrapper CLI delegates performance workloads to sibling `vllm-hust` checkouts and can
+export standard leaderboard snapshots. Its manual examples below describe that compatibility
+interface. Current website publication uses the committed `website-publication` source.
 
 ## Current Delivery Contract
+
+项目最终四目标及用户确认的同工况参考、35B模型解释另见
+[项目最终目标](reports/project-final-goals-20261113/README.md)；与下述V1.5里程碑分别展示和判定。
+最终要求为参考效率≥90%、吞吐≥2×且TTFT/TPOT降低≥20%、≥32K稳定、成本降低≥30%及多租户较高利用率；不将里程碑通过标成最终验收通过。
 
 [B0 实测基线与相对性能公式](docs/B0_BASELINE_METRICS.md)：`η_B0 = 100 × Q_B1 / Q_B0`，B0 = 100%。
 包含倍率、提升率、耗时、时延、成本及已有配对的可复算示例；独立标定效率 `η_ref` 单列。
@@ -57,8 +63,8 @@ For runtime comparisons, the wrapper now understands two execution targets:
 - `vllm`: the baseline checkout at `../reference-repos/vllm` (override with
   `VLLM_BASELINE_VLLM_REPO`)
 
-Use the already configured conda environment for this workspace. Do not rely on the system Python
-installation for benchmark execution or validation.
+Use the dependency environment specified by the selected task or tool. CPU repository validation
+uses the Python version and test extra declared in CI; model execution follows its pinned runtime.
 
 ## Local Validation Dependencies
 
@@ -125,15 +131,16 @@ Within that boundary, the important design point is:
 
 ## Measured experimental reports
 
-- [GenNova MOD 单项与组合测试证据归档（2026-11-05）](reports/gennova-mod-evidence-20261105/README.md)： 固定来源提交，整理
-  107 个结果入口、55 项接入记录、29 项组合影响和 90 项有边界的负结果； 没有新增测量，不进入正式榜单或网站发布。
-
 - [BetterScale + solver mixed graph pool (2026-10-20)](reports/betterscale-solver-mixed-pool-20261020/README.md):
   actual HTTP serving, C8/C16/C32 ×4K/8K, MMLU-Pro200 and HLE Gold text200, payload-free repeat
   receipts and card-rental costs. Solver-enabled measurements, not predictions, native-OFF
   comparisons, task accuracy or official fixed-target leaderboard submissions.
 
-## Quick Start
+## Historical Wrapper CLI Examples
+
+These manual commands describe the retained wrapper interface. For current data installation and
+task execution, use the guides at the top of this README. Website production publication follows
+`website-publication/README.md`; the retired HF/dispatch workflows do not run these examples.
 
 ```bash
 # show the active public target matrix; 3B perfgate profiles are excluded
@@ -878,3 +885,20 @@ pre-push hook additionally re-checks whitespace / conflict markers on main-bound
 <!-- workload-catalog:end -->
 
 StructEval的[原始数据、官方源码获取与独立客户端安装说明](docs/workload-data/STRUCTURED_ORIGINAL_SOURCES.zh-CN.md#%E8%BF%90%E8%A1%8C)已补齐，获取入口为[prepare_structeval_original_assets.py](scripts/prepare_structeval_original_assets.py)。它复用既有固定哈希下载器；获取/核验与原生任务、官方评分分别执行。非渲染完整协议与未完成的渲染/VQA模式分开登记，精确交付状态仍以唯一清单为准。
+
+## 五数据集固定标准
+
+[five-datasets-20261113-v1](docs/dataset-standards/five-datasets-v1/README.md)：MMLU 200、HLE 分层
+200、Frontier 160， SWE / Terminal 各 32 任务的公开 trace；固定 ID、顺序、来源、生成预算和统计口径。 质量与 trace
+推理性能分别报告；此入口不表示已有该标准的新实测成绩。
+
+## 测试范围与预计时长
+
+全量测试跑冻结的五项（MMLU200、HLE200、Frontier160、SWE/Terminal 各 32 任务 trace）； 快速测试只跑 MMLU200。双卡 910B2 /
+Qwen3.5-35B-A3B 配对参考： 快速预留 2–3 小时，全量预留 12–16 小时，含首次 C8；下载、安装、排队另计。
+这是阶段记录推算的排期范围，不是一轮全量实测，也不适用于所有引擎/硬件。 详见 [版本化运行指南](docs/dataset-standards/run-guide-v1.json)。
+
+## 固定五项完整结果（2026-11-13）
+
+[一键执行与完整公开指标](reports/five-datasets-standard-20261113/README.md)：
+15阶段由封存原件重新核验，新增推理0阶段；保留原日期、失败父批次与负结果。 五项范围已执行完成；HLE/Frontier评分未决及真实trace的16K输入覆盖限制仍阻止整体验收。

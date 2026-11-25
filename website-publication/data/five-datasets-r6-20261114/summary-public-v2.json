@@ -1,0 +1,3526 @@
+{
+  "schema": "sealed-five-dataset-comparison/v1",
+  "run_id": "five-datasets-r6-matched-20261114-r3",
+  "standard_id": "five-datasets-20261113-v1",
+  "scope": "all_five_frozen_profiles_not_all_upstream_items",
+  "report_date": "2026-11-14",
+  "aggregation_engine_commit": "d185e41a4ac14fe8e0082052092efbfe0ffd9170",
+  "evidence_mode": "composition_of_sealed_native_runs",
+  "single_new_native_run": false,
+  "execution_complete": true,
+  "formal_acceptance_complete": false,
+  "reused_stages": 10,
+  "new_inference_stages": 5,
+  "hardware": {
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "BF16",
+    "accelerator": "Ascend910B2",
+    "cards": 2,
+    "parallelism": "TP2"
+  },
+  "runtime": {
+    "B0": {
+      "vllm": "0.18.0+empty",
+      "vllm-ascend": "0.18.0",
+      "torch": "2.9.0+cpu",
+      "torch-npu": "2.9.0.post1+gitee7ba04",
+      "transformers": "4.57.6",
+      "triton-ascend": "3.2.0.dev20260322",
+      "source_map_sha256": "a357ad8cf1ff6f8797fb2d6476e71a0deef5ee0899a55ea32ed65f07fe7773bc"
+    },
+    "B1": {
+      "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+      "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+      "torch": "2.13.0+cpu",
+      "torch-npu": "2.13.0rc1",
+      "transformers": "5.14.1"
+    },
+    "actual_worker": "corrected_serving_runtime.CorrectedWorker",
+    "engine_release": "full-answer-b1-20261113-r6",
+    "serving_warmup": {
+      "policy": "observed-torch-triton-sealed-warmup-v2",
+      "cohorts": [
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 1
+        },
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 2
+        },
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 4
+        },
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 8
+        },
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 16
+        },
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 24
+        },
+        {
+          "minimum_prompt_tokens": 16384,
+          "concurrency": 16
+        }
+      ],
+      "input_source": "Original frozen C8 synthetic chat messages, validated token counts and token-ID hashes on each service",
+      "transport": "/v1/chat/completions; same request-scoped KV control path as formal traffic",
+      "request_seed": 17,
+      "output_tokens": 32,
+      "ignore_eos": true,
+      "no_prefix_reuse": true,
+      "modality_warmup": "HLE solver: original synthetic image-interface qualification on both arms",
+      "grammar_warmup": "HLE judge: same bounded-v2 generation schema, synthetic prompt,32-token non-scored response",
+      "formal_requests_unchanged": true,
+      "formal_clock_excludes_warmup": true,
+      "post_boundary_compilation": "fail-closed Torch/Dynamo and Triton; CANN not covered"
+    },
+    "task_serving_warmup": {
+      "policy": "observed-torch-triton-sealed-task-warmup-v3",
+      "cohorts": [
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 1
+        },
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 2
+        },
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 4
+        },
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 8
+        },
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 16
+        },
+        {
+          "minimum_prompt_tokens": 4096,
+          "concurrency": 24
+        },
+        {
+          "minimum_prompt_tokens": 16384,
+          "concurrency": 16
+        }
+      ],
+      "input_source": "Original frozen C8 synthetic chat messages, validated token counts and token-ID hashes on each service",
+      "transport": "/v1/chat/completions; same request-scoped KV control path as formal traffic",
+      "request_seed": 17,
+      "output_tokens": 32,
+      "ignore_eos": true,
+      "no_prefix_reuse": true,
+      "modality_warmup": "HLE solver: original synthetic image-interface qualification on both arms",
+      "grammar_warmup": "HLE judge: same bounded-v2 generation schema, synthetic prompt,32-token non-scored response",
+      "formal_requests_unchanged": true,
+      "formal_clock_excludes_warmup": true,
+      "post_boundary_compilation": "fail-closed Torch/Dynamo and Triton; CANN not covered",
+      "dense_decode_concurrencies": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        24
+      ],
+      "dense_prompt": "Synthetic unscored serving warmup. Continue writing the word warmup separated by spaces until the generation budget is reached.",
+      "dense_prompt_maximum_tokens": 128,
+      "reason": "Cover live-batch Triton tile variants before task measurement; short C8 outputs alone did not reach them"
+    },
+    "hle_configuration_note": "HLE uses the separately recorded multimodal configuration; other profiles remain text/trace. Original per-stage source/version identities are retained, not rewritten to the aggregation commit."
+  },
+  "datasets": [
+    {
+      "id": "mmlu",
+      "name": "MMLU-Pro fixed200",
+      "tasks_per_arm": 200,
+      "mode": "quality_and_inference",
+      "arms": {
+        "B0": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "length_stops": 20,
+          "successful_output_tokens": 690962,
+          "duration_seconds": 1320.0275400089959,
+          "output_tokens_per_second": 523.4451396334437,
+          "mean_ttft_ms": 514900.98275374004,
+          "mean_tpot_ms": 41.39897440598023,
+          "ttft_p50_ms": 491201.7692714981,
+          "ttft_p95_ms": 1064415.3418142542,
+          "ttft_p99_ms": 1098540.3780978506,
+          "tpot_p50_ms": 41.4146263032502,
+          "tpot_p95_ms": 45.07913051881364,
+          "tpot_p99_ms": 46.93906902153994,
+          "input_tokens_sum": 282265,
+          "input_tokens_min": 925,
+          "input_tokens_max": 2502,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 0,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 35.15537234014332,
+              "6": 34.820805478277585
+            },
+            "mean_percent": 34.988088909210454,
+            "covered_seconds": 1320.0275400089959,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.7257141535083065,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 27.202846015220565,
+          "source_stage_seal_sha256": "fa79fd934ad9a1f44c25b4c860b50070f6a31f63064a347c1e647644343bd80d",
+          "runtime_identity_sha256": "d00404b020f3c89a91cc320ddec02f8848cb608e2630a1c29ef30a31166ffaa7"
+        },
+        "B1": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "length_stops": 15,
+          "successful_output_tokens": 692792,
+          "duration_seconds": 662.3250148740044,
+          "output_tokens_per_second": 1046.0000520013448,
+          "mean_ttft_ms": 252597.97511056476,
+          "mean_tpot_ms": 21.04064792379745,
+          "ttft_p50_ms": 247162.9591969977,
+          "ttft_p95_ms": 531962.3704971977,
+          "ttft_p99_ms": 565567.3862807209,
+          "tpot_p50_ms": 21.18080880145979,
+          "tpot_p95_ms": 22.860849081726432,
+          "tpot_p99_ms": 23.345194726608717,
+          "input_tokens_sum": 282265,
+          "input_tokens_min": 925,
+          "input_tokens_max": 2502,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 0,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 69.04797890852615,
+              "6": 68.67173343521048
+            },
+            "mean_percent": 68.85985617186832,
+            "covered_seconds": 662.3250148740044,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.769533768499969,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 13.612998874732265,
+          "source_stage_seal_sha256": "89cf43c62a353281154681ddd6b2f628d901a70082f6b23c2d2378a8b1e62298",
+          "runtime_identity_sha256": "ddb9574ce023788320f0b717d372c866d9bb075d6d715a6785b4d7f53d6c8ad2"
+        }
+      },
+      "changes_percent": {
+        "output_tokens_per_second": 99.82992921356268,
+        "mean_ttft_ms": -50.94241736350036,
+        "mean_tpot_ms": -49.17591987313084,
+        "unit_cost_change_percent": -49.95744611752938,
+        "ai_core_utilization_gain_pp": 33.87176726265786
+      },
+      "quality": {
+        "B0": {
+          "planned_denominator": 200,
+          "recorded": 200,
+          "correct": 143,
+          "accuracy_pct_of_planned200": 71.5,
+          "truncated_recorded": 20,
+          "unparsed_recorded": 0,
+          "unreturned": 0,
+          "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801",
+          "scope": "Descriptive MMLU200 only; not the five-dataset acceptance suite"
+        },
+        "B1": {
+          "planned_denominator": 200,
+          "recorded": 200,
+          "correct": 147,
+          "accuracy_pct_of_planned200": 73.5,
+          "truncated_recorded": 15,
+          "unparsed_recorded": 0,
+          "unreturned": 0,
+          "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801",
+          "scope": "Descriptive MMLU200 only; not the five-dataset acceptance suite"
+        }
+      },
+      "judge_phases": null
+    },
+    {
+      "id": "hle",
+      "name": "HLE stratified200",
+      "tasks_per_arm": 200,
+      "mode": "quality_and_inference",
+      "arms": {
+        "B0": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 200,
+          "transport_completed": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 0,
+          "length_stops": 131,
+          "successful_output_tokens": 2278835,
+          "duration_seconds": 4065.1289085619937,
+          "output_tokens_per_second": 560.581238936927,
+          "mean_ttft_ms": 585.2417746647552,
+          "mean_tpot_ms": 27.527958668449397,
+          "actual_context_16k_cases": 131,
+          "ttft_p50_ms": 461.59563349647215,
+          "ttft_p95_ms": 1159.012182351578,
+          "ttft_p99_ms": 1282.0706886473636,
+          "tpot_p50_ms": 27.60825092089359,
+          "tpot_p95_ms": 29.074686074892327,
+          "tpot_p99_ms": 30.366705205574036,
+          "input_tokens_sum": 79752,
+          "input_tokens_min": 80,
+          "input_tokens_max": 3314,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 131,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 63.81558381732669,
+              "6": 63.67357973890772
+            },
+            "mean_percent": 63.74458177811721,
+            "covered_seconds": 4065.1289085619937,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.8062502425018465,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 25.400774306801765,
+          "source_stage_seal_sha256": "8900964f5c3e37ddf8ce818f4d55923db27f3b7dffdfa239b08dfe600a53de31",
+          "runtime_identity_sha256": "ac557d8fe5f2696048e448f403e5546a46538d5240ac4ee43efc18b1d430e89a"
+        },
+        "B1": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 200,
+          "transport_completed": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 0,
+          "length_stops": 126,
+          "successful_output_tokens": 2227181,
+          "duration_seconds": 2519.138233195001,
+          "output_tokens_per_second": 884.1043221257795,
+          "mean_ttft_ms": 315.4368257957685,
+          "mean_tpot_ms": 18.026925630840672,
+          "actual_context_16k_cases": 126,
+          "ttft_p50_ms": 238.86893750022864,
+          "ttft_p95_ms": 668.3366374505566,
+          "ttft_p99_ms": 1093.5347589167934,
+          "tpot_p50_ms": 17.476375035158895,
+          "tpot_p95_ms": 21.004574523463376,
+          "tpot_p99_ms": 21.787758865686193,
+          "input_tokens_sum": 79732,
+          "input_tokens_min": 80,
+          "input_tokens_max": 3313,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 126,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 67.97476734488036,
+              "6": 68.11224111122989
+            },
+            "mean_percent": 68.04350422805513,
+            "covered_seconds": 2519.138233195001,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.86034128999745,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 16.105788846984527,
+          "source_stage_seal_sha256": "d280c502eca2eab493d018b18d9527694fea1d9693d621a27e4f542f359dbb00",
+          "runtime_identity_sha256": "f1ce3cca46c5eed127ef09c590809864c8550d52a51dad544d0f98746a18e92c"
+        }
+      },
+      "changes_percent": {
+        "output_tokens_per_second": 57.712078235506794,
+        "mean_ttft_ms": -46.101450810400436,
+        "mean_tpot_ms": -34.51412126863638,
+        "unit_cost_change_percent": -36.593315414515715,
+        "ai_core_utilization_gain_pp": 4.298922449937919
+      },
+      "quality": {
+        "B0": {
+          "protocol": "HLE original evaluation prompts/schema on HLE-Verified; Qwen substitute; single trial; not official leaderboard replication",
+          "scoring_policy": "strict_json",
+          "selection": {
+            "subsets": [
+              "gold",
+              "revision"
+            ],
+            "modality": "all",
+            "excluded": 1611,
+            "profile": "fixed200-v1",
+            "selected": 200
+          },
+          "scope": "complete_selected_plan",
+          "judge_model": "qwen3.5-35b",
+          "solver_model": "qwen3.5-35b",
+          "contract_sha256": "5180b7a25764de206525fb9a9bba3ea9c55c7cf3aeebad898d2004ad5636f60c",
+          "solver_index_sha256": "152c48470cdeb2c135a722270b06d3ee157c7eb09064bb4760aee2e43a29dc05",
+          "judge_index_sha256": "35d182a89c2774119e9395bf58ba5d3d21167d21290f0eef52676d9c0446a84a",
+          "tracks": {
+            "gold": {
+              "total": 74,
+              "graded": 73,
+              "successes": 14,
+              "accuracy": 0.1891891891891892,
+              "unresolved": 1,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.08923765201696113,
+              "solver_failures": 0,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "solver_truncated": 44,
+              "judge_truncated": 1
+            },
+            "revision": {
+              "total": 126,
+              "graded": 124,
+              "successes": 40,
+              "accuracy": 0.31746031746031744,
+              "unresolved": 2,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.08127921021834193,
+              "solver_failures": 0,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "solver_truncated": 87,
+              "judge_truncated": 2
+            }
+          },
+          "groups": {
+            "gold/text": {
+              "total": 64,
+              "graded": 63,
+              "successes": 12,
+              "accuracy": 0.1875,
+              "unresolved": 1,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.09562653185047547,
+              "solver_failures": 0,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "solver_truncated": 43,
+              "judge_truncated": 1
+            },
+            "gold/image": {
+              "total": 10,
+              "graded": 10,
+              "successes": 2,
+              "accuracy": 0.2,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.24792256855720096,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 1,
+              "judge_truncated": 0
+            },
+            "revision/text": {
+              "total": 113,
+              "graded": 111,
+              "successes": 37,
+              "accuracy": 0.3274336283185841,
+              "unresolved": 2,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.08652588784622588,
+              "solver_failures": 0,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "solver_truncated": 85,
+              "judge_truncated": 2
+            },
+            "revision/image": {
+              "total": 13,
+              "graded": 13,
+              "successes": 3,
+              "accuracy": 0.23076923076923078,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.22903490301738305,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 0
+            }
+          },
+          "subjects": {
+            "gold/Biology/Medicine": {
+              "total": 14,
+              "graded": 14,
+              "successes": 2,
+              "accuracy": 0.14285714285714285,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.1833030277982336,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 4,
+              "judge_truncated": 0
+            },
+            "gold/Chemistry": {
+              "total": 2,
+              "graded": 2,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 0,
+              "judge_truncated": 0
+            },
+            "gold/Computer Science/AI": {
+              "total": 7,
+              "graded": 7,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 4,
+              "judge_truncated": 0
+            },
+            "gold/Engineering": {
+              "total": 5,
+              "graded": 5,
+              "successes": 2,
+              "accuracy": 0.4,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.4294144850840502,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 5,
+              "judge_truncated": 0
+            },
+            "gold/Humanities/Social Science": {
+              "total": 12,
+              "graded": 12,
+              "successes": 1,
+              "accuracy": 0.08333333333333333,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.15637976093353523,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 7,
+              "judge_truncated": 0
+            },
+            "gold/Math": {
+              "total": 24,
+              "graded": 23,
+              "successes": 8,
+              "accuracy": 0.3333333333333333,
+              "unresolved": 1,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.18860108793527774,
+              "solver_failures": 0,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "solver_truncated": 20,
+              "judge_truncated": 1
+            },
+            "gold/Other": {
+              "total": 7,
+              "graded": 7,
+              "successes": 1,
+              "accuracy": 0.14285714285714285,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.25922962793631443,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 1,
+              "judge_truncated": 0
+            },
+            "gold/Physics": {
+              "total": 3,
+              "graded": 3,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 3,
+              "judge_truncated": 0
+            },
+            "revision/Biology/Medicine": {
+              "total": 16,
+              "graded": 16,
+              "successes": 10,
+              "accuracy": 0.625,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.23722022995520428,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 0
+            },
+            "revision/Chemistry": {
+              "total": 13,
+              "graded": 13,
+              "successes": 1,
+              "accuracy": 0.07692307692307693,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.14485439144214035,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 7,
+              "judge_truncated": 0
+            },
+            "revision/Computer Science/AI": {
+              "total": 14,
+              "graded": 14,
+              "successes": 4,
+              "accuracy": 0.2857142857142857,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.23664319132398465,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 9,
+              "judge_truncated": 0
+            },
+            "revision/Math": {
+              "total": 81,
+              "graded": 79,
+              "successes": 25,
+              "accuracy": 0.30864197530864196,
+              "unresolved": 2,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.10059874455523903,
+              "solver_failures": 0,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "solver_truncated": 69,
+              "judge_truncated": 2
+            },
+            "revision/Physics": {
+              "total": 2,
+              "graded": 2,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 0,
+              "judge_truncated": 0
+            }
+          },
+          "calibration_error": null,
+          "calibration_note": "not implemented: pinned upstream binning omits final bin and crashes below 100 grades; raw confidence preserved; no silent replacement metric"
+        },
+        "B1": {
+          "protocol": "HLE original evaluation prompts/schema on HLE-Verified; Qwen substitute; single trial; not official leaderboard replication",
+          "scoring_policy": "strict_json",
+          "selection": {
+            "subsets": [
+              "gold",
+              "revision"
+            ],
+            "modality": "all",
+            "excluded": 1611,
+            "profile": "fixed200-v1",
+            "selected": 200
+          },
+          "scope": "complete_selected_plan",
+          "judge_model": "qwen3.5-35b",
+          "solver_model": "qwen3.5-35b",
+          "contract_sha256": "5180b7a25764de206525fb9a9bba3ea9c55c7cf3aeebad898d2004ad5636f60c",
+          "solver_index_sha256": "edf5f7cecb5daf6aa5f7d336832c929d1efc58265999d37a079905ebb49fb255",
+          "judge_index_sha256": "66946625606dc9421fbc138b01332f22a2f1b03553a5b5596824464476238f9c",
+          "tracks": {
+            "gold": {
+              "total": 74,
+              "graded": 74,
+              "successes": 15,
+              "accuracy": 0.20270270270270271,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.09159676321017363,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 36,
+              "judge_truncated": 0
+            },
+            "revision": {
+              "total": 126,
+              "graded": 124,
+              "successes": 34,
+              "accuracy": 0.2698412698412698,
+              "unresolved": 2,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.07750569694535306,
+              "solver_failures": 0,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "solver_truncated": 90,
+              "judge_truncated": 2
+            }
+          },
+          "groups": {
+            "gold/text": {
+              "total": 64,
+              "graded": 64,
+              "successes": 12,
+              "accuracy": 0.1875,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.09562653185047547,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 36,
+              "judge_truncated": 0
+            },
+            "gold/image": {
+              "total": 10,
+              "graded": 10,
+              "successes": 3,
+              "accuracy": 0.3,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.284030984225313,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 0,
+              "judge_truncated": 0
+            },
+            "revision/text": {
+              "total": 113,
+              "graded": 111,
+              "successes": 31,
+              "accuracy": 0.2743362831858407,
+              "unresolved": 2,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.08226709829365589,
+              "solver_failures": 0,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "solver_truncated": 87,
+              "judge_truncated": 2
+            },
+            "revision/image": {
+              "total": 13,
+              "graded": 13,
+              "successes": 3,
+              "accuracy": 0.23076923076923078,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.22903490301738305,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 3,
+              "judge_truncated": 0
+            }
+          },
+          "subjects": {
+            "gold/Biology/Medicine": {
+              "total": 14,
+              "graded": 14,
+              "successes": 2,
+              "accuracy": 0.14285714285714285,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.1833030277982336,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 4,
+              "judge_truncated": 0
+            },
+            "gold/Chemistry": {
+              "total": 2,
+              "graded": 2,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 0,
+              "judge_truncated": 0
+            },
+            "gold/Computer Science/AI": {
+              "total": 7,
+              "graded": 7,
+              "successes": 1,
+              "accuracy": 0.14285714285714285,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.25922962793631443,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 4,
+              "judge_truncated": 0
+            },
+            "gold/Engineering": {
+              "total": 5,
+              "graded": 5,
+              "successes": 1,
+              "accuracy": 0.2,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.3506154588719671,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 0
+            },
+            "gold/Humanities/Social Science": {
+              "total": 12,
+              "graded": 12,
+              "successes": 1,
+              "accuracy": 0.08333333333333333,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.15637976093353523,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 6,
+              "judge_truncated": 0
+            },
+            "gold/Math": {
+              "total": 24,
+              "graded": 24,
+              "successes": 8,
+              "accuracy": 0.3333333333333333,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.18860108793527774,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 16,
+              "judge_truncated": 0
+            },
+            "gold/Other": {
+              "total": 7,
+              "graded": 7,
+              "successes": 2,
+              "accuracy": 0.2857142857142857,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.3346640106136302,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 0
+            },
+            "gold/Physics": {
+              "total": 3,
+              "graded": 3,
+              "successes": 0,
+              "accuracy": 0.0,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.0,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 0
+            },
+            "revision/Biology/Medicine": {
+              "total": 16,
+              "graded": 16,
+              "successes": 10,
+              "accuracy": 0.625,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.23722022995520428,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 2,
+              "judge_truncated": 0
+            },
+            "revision/Chemistry": {
+              "total": 13,
+              "graded": 13,
+              "successes": 2,
+              "accuracy": 0.15384615384615385,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.1961337731926865,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 8,
+              "judge_truncated": 0
+            },
+            "revision/Computer Science/AI": {
+              "total": 14,
+              "graded": 14,
+              "successes": 3,
+              "accuracy": 0.21428571428571427,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.21494185260204676,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 11,
+              "judge_truncated": 0
+            },
+            "revision/Math": {
+              "total": 81,
+              "graded": 79,
+              "successes": 18,
+              "accuracy": 0.2222222222222222,
+              "unresolved": 2,
+              "complete_grading": false,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.09053887009971513,
+              "solver_failures": 0,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "solver_truncated": 68,
+              "judge_truncated": 2
+            },
+            "revision/Physics": {
+              "total": 2,
+              "graded": 2,
+              "successes": 1,
+              "accuracy": 0.5,
+              "unresolved": 0,
+              "complete_grading": true,
+              "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+              "wald_95_half_width": 0.6929646455628166,
+              "solver_failures": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "solver_truncated": 1,
+              "judge_truncated": 0
+            }
+          },
+          "calibration_error": null,
+          "calibration_note": "not implemented: pinned upstream binning omits final bin and crashes below 100 grades; raw confidence preserved; no silent replacement metric"
+        }
+      },
+      "judge_phases": {
+        "B0": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 197,
+          "transport_completed": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 3,
+          "length_stops": 3,
+          "successful_output_tokens": 47903,
+          "duration_seconds": 416.21738739799184,
+          "output_tokens_per_second": 115.09129952371404,
+          "mean_ttft_ms": 4237.633709539368,
+          "mean_tpot_ms": 124.9805780309819,
+          "actual_context_16k_cases": 131,
+          "ttft_p50_ms": 3649.6573469994473,
+          "ttft_p95_ms": 8574.099746449776,
+          "ttft_p99_ms": 16825.577191884367,
+          "tpot_p50_ms": 127.02835685949987,
+          "tpot_p95_ms": 157.84605195932585,
+          "tpot_p99_ms": 169.9393494276494,
+          "input_tokens_sum": 2384776,
+          "input_tokens_min": 440,
+          "input_tokens_max": 18665,
+          "input_at_least16384_cases": 131,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 131,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 49.99982440928728,
+              "6": 52.9408830729849
+            },
+            "mean_percent": 51.470353741136094,
+            "covered_seconds": 416.21738739799184,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.741291963495314,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 123.7208858514129
+        },
+        "B1": {
+          "planned": 200,
+          "recorded": 200,
+          "successful": 198,
+          "transport_completed": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 2,
+          "length_stops": 2,
+          "successful_output_tokens": 40662,
+          "duration_seconds": 416.9916267320077,
+          "output_tokens_per_second": 97.51274940139905,
+          "mean_ttft_ms": 3905.845843979332,
+          "mean_tpot_ms": 124.85697285604866,
+          "actual_context_16k_cases": 126,
+          "ttft_p50_ms": 3556.2155810039258,
+          "ttft_p95_ms": 7819.780561146759,
+          "ttft_p99_ms": 12550.672647997415,
+          "tpot_p50_ms": 127.04294619688044,
+          "tpot_p95_ms": 149.7921068799646,
+          "tpot_p99_ms": 160.30053245123037,
+          "input_tokens_sum": 2333305,
+          "input_tokens_min": 422,
+          "input_tokens_max": 18665,
+          "input_at_least16384_cases": 126,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 126,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 53.250879579911846,
+              "6": 46.012086967423194
+            },
+            "mean_percent": 49.63148327366752,
+            "covered_seconds": 416.9916267320077,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.874801250494784,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 146.0239570545829
+        }
+      }
+    },
+    {
+      "id": "frontier",
+      "name": "FrontierScience160",
+      "tasks_per_arm": 160,
+      "mode": "quality_and_inference",
+      "arms": {
+        "B0": {
+          "planned": 160,
+          "recorded": 160,
+          "successful": 160,
+          "transport_completed": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 0,
+          "length_stops": 39,
+          "successful_output_tokens": 1210662,
+          "duration_seconds": 3201.1253039079893,
+          "output_tokens_per_second": 378.19887853874474,
+          "mean_ttft_ms": 787.5949093815507,
+          "mean_tpot_ms": 38.23049302473081,
+          "actual_context_16k_cases": 39,
+          "ttft_p50_ms": 683.1600420046016,
+          "ttft_p95_ms": 1524.3194794507872,
+          "ttft_p99_ms": 1984.7861983257462,
+          "tpot_p50_ms": 37.433293712574454,
+          "tpot_p95_ms": 42.548360002336864,
+          "tpot_p99_ms": 44.79406665324202,
+          "input_tokens_sum": 61451,
+          "input_tokens_min": 94,
+          "input_tokens_max": 1660,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 39,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 31.08774795206898,
+              "6": 30.436477137525234
+            },
+            "mean_percent": 30.762112544797105,
+            "covered_seconds": 3201.1253039079893,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.784924904990476,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 37.65002579034738,
+          "source_stage_seal_sha256": "d69b275d70c89f5033d6ae50c8673dcab9ed4887e8c0f6d4fa44091b7eea96ab",
+          "runtime_identity_sha256": "1c22a6783a2ee3f1b28cbf3020aa5ab248769bf7975a5ddb73812a2c50d7d7ce"
+        },
+        "B1": {
+          "planned": 160,
+          "recorded": 160,
+          "successful": 160,
+          "transport_completed": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 0,
+          "length_stops": 35,
+          "successful_output_tokens": 1236290,
+          "duration_seconds": 1415.6355443329958,
+          "output_tokens_per_second": 873.3109344061448,
+          "mean_ttft_ms": 298.33174317491284,
+          "mean_tpot_ms": 17.31468094602831,
+          "actual_context_16k_cases": 35,
+          "ttft_p50_ms": 235.1602724957047,
+          "ttft_p95_ms": 655.1761536051345,
+          "ttft_p99_ms": 1054.2406469146954,
+          "tpot_p50_ms": 17.132940123181235,
+          "tpot_p95_ms": 19.300478004298828,
+          "tpot_p99_ms": 19.58542302348605,
+          "input_tokens_sum": 61451,
+          "input_tokens_min": 94,
+          "input_tokens_max": 1660,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 35,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 66.93593902862924,
+              "6": 67.64326924327348
+            },
+            "mean_percent": 67.28960413595135,
+            "covered_seconds": 1415.6355443329958,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.853110831492813,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 16.30484283418129,
+          "source_stage_seal_sha256": "4c5855e2b49af92992ac6906c049ee2ce9cae24a44e45271b0ee7281bba53919",
+          "runtime_identity_sha256": "73907e139c65f2334710f3d3ce1badf533fac3469cdec8cdd6ff9df718bf80c4"
+        }
+      },
+      "changes_percent": {
+        "output_tokens_per_second": 130.9131475430005,
+        "mean_ttft_ms": -62.12116919227243,
+        "mean_tpot_ms": -54.7097628721982,
+        "unit_cost_change_percent": -56.69367419567217,
+        "ai_core_utilization_gain_pp": 36.527491591154245
+      },
+      "quality": {
+        "B0": {
+          "protocol": "hust-qwen-judge-v3; Appendix B prompts; Qwen substitute; single trial; scoring_policy=mmlu_extract_first; not official replication",
+          "scoring_policy": "mmlu_extract_first",
+          "denominator_policy": "all_cases_invalid_as_nonsuccess",
+          "judge_model": "qwen3.5-35b",
+          "solver_model": "qwen3.5-35b",
+          "same_model_name": true,
+          "scope": "full_gold",
+          "contract_sha256": "863e66e8b39b885bab59ebaf94085b8c7a563eda76501e43cd0646075b28c239",
+          "solver_index_sha256": "6e86af943139ef1e98091b35cbd76728718082352c2a5f60785d538118bb08b7",
+          "judge_index_sha256": "cb818ea5fb503d6358ede5a94628d75d83a2cbd85059dada85f5292753ac25cb",
+          "tracks": {
+            "olympiad": {
+              "total": 100,
+              "graded": 98,
+              "successes": 64,
+              "solver_failures": 0,
+              "judge_unresolved": 2,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 4,
+              "judge_audit_flagged": 4,
+              "solver_truncated": 32,
+              "judge_truncated": 5,
+              "success_rate": 0.64,
+              "observed_success_lower_bound": 0.64,
+              "mean_research_score_valid_only": null
+            },
+            "research": {
+              "total": 60,
+              "graded": 58,
+              "successes": 6,
+              "solver_failures": 0,
+              "judge_unresolved": 2,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 2,
+              "judge_audit_flagged": 5,
+              "solver_truncated": 7,
+              "judge_truncated": 4,
+              "success_rate": 0.1,
+              "observed_success_lower_bound": 0.1,
+              "mean_research_score_valid_only": 2.544310344827586
+            }
+          },
+          "subjects": {
+            "olympiad/biology": {
+              "total": 10,
+              "graded": 9,
+              "successes": 3,
+              "solver_failures": 0,
+              "judge_unresolved": 1,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 0,
+              "judge_audit_flagged": 0,
+              "solver_truncated": 1,
+              "judge_truncated": 0,
+              "success_rate": 0.3,
+              "observed_success_lower_bound": 0.3,
+              "mean_research_score_valid_only": null
+            },
+            "olympiad/chemistry": {
+              "total": 40,
+              "graded": 40,
+              "successes": 25,
+              "solver_failures": 0,
+              "judge_unresolved": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 2,
+              "judge_audit_flagged": 2,
+              "solver_truncated": 15,
+              "judge_truncated": 2,
+              "success_rate": 0.625,
+              "observed_success_lower_bound": 0.625,
+              "mean_research_score_valid_only": null
+            },
+            "olympiad/physics": {
+              "total": 50,
+              "graded": 49,
+              "successes": 36,
+              "solver_failures": 0,
+              "judge_unresolved": 1,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 2,
+              "judge_audit_flagged": 2,
+              "solver_truncated": 16,
+              "judge_truncated": 3,
+              "success_rate": 0.72,
+              "observed_success_lower_bound": 0.72,
+              "mean_research_score_valid_only": null
+            },
+            "research/biology": {
+              "total": 20,
+              "graded": 19,
+              "successes": 2,
+              "solver_failures": 0,
+              "judge_unresolved": 1,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 1,
+              "judge_audit_flagged": 3,
+              "solver_truncated": 3,
+              "judge_truncated": 2,
+              "success_rate": 0.1,
+              "observed_success_lower_bound": 0.1,
+              "mean_research_score_valid_only": 2.9865789473684208
+            },
+            "research/chemistry": {
+              "total": 20,
+              "graded": 20,
+              "successes": 3,
+              "solver_failures": 0,
+              "judge_unresolved": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 0,
+              "judge_audit_flagged": 1,
+              "solver_truncated": 2,
+              "judge_truncated": 0,
+              "success_rate": 0.15,
+              "observed_success_lower_bound": 0.15,
+              "mean_research_score_valid_only": 2.9175
+            },
+            "research/physics": {
+              "total": 20,
+              "graded": 19,
+              "successes": 1,
+              "solver_failures": 0,
+              "judge_unresolved": 1,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 1,
+              "judge_audit_flagged": 1,
+              "solver_truncated": 2,
+              "judge_truncated": 2,
+              "success_rate": 0.05,
+              "observed_success_lower_bound": 0.05,
+              "mean_research_score_valid_only": 1.7092105263157895
+            }
+          }
+        },
+        "B1": {
+          "protocol": "hust-qwen-judge-v3; Appendix B prompts; Qwen substitute; single trial; scoring_policy=mmlu_extract_first; not official replication",
+          "scoring_policy": "mmlu_extract_first",
+          "denominator_policy": "all_cases_invalid_as_nonsuccess",
+          "judge_model": "qwen3.5-35b",
+          "solver_model": "qwen3.5-35b",
+          "same_model_name": true,
+          "scope": "full_gold",
+          "contract_sha256": "863e66e8b39b885bab59ebaf94085b8c7a563eda76501e43cd0646075b28c239",
+          "solver_index_sha256": "119b09088958ab57db54cc26e95e9ae39c000a37c1fb843867e63a7c0689189f",
+          "judge_index_sha256": "62eadcd3adf43bc9945674be511c2f5bd9d74e57b11bea726347bc081179aa54",
+          "tracks": {
+            "olympiad": {
+              "total": 100,
+              "graded": 95,
+              "successes": 61,
+              "solver_failures": 0,
+              "judge_unresolved": 5,
+              "judge_invalid": 5,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 1,
+              "judge_audit_flagged": 1,
+              "solver_truncated": 25,
+              "judge_truncated": 6,
+              "success_rate": 0.61,
+              "observed_success_lower_bound": 0.61,
+              "mean_research_score_valid_only": null
+            },
+            "research": {
+              "total": 60,
+              "graded": 57,
+              "successes": 2,
+              "solver_failures": 0,
+              "judge_unresolved": 3,
+              "judge_invalid": 3,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 7,
+              "judge_audit_flagged": 7,
+              "solver_truncated": 10,
+              "judge_truncated": 10,
+              "success_rate": 0.03333333333333333,
+              "observed_success_lower_bound": 0.03333333333333333,
+              "mean_research_score_valid_only": 2.465
+            }
+          },
+          "subjects": {
+            "olympiad/biology": {
+              "total": 10,
+              "graded": 10,
+              "successes": 1,
+              "solver_failures": 0,
+              "judge_unresolved": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 0,
+              "judge_audit_flagged": 0,
+              "solver_truncated": 0,
+              "judge_truncated": 0,
+              "success_rate": 0.1,
+              "observed_success_lower_bound": 0.1,
+              "mean_research_score_valid_only": null
+            },
+            "olympiad/chemistry": {
+              "total": 40,
+              "graded": 37,
+              "successes": 25,
+              "solver_failures": 0,
+              "judge_unresolved": 3,
+              "judge_invalid": 3,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 0,
+              "judge_audit_flagged": 0,
+              "solver_truncated": 14,
+              "judge_truncated": 3,
+              "success_rate": 0.625,
+              "observed_success_lower_bound": 0.625,
+              "mean_research_score_valid_only": null
+            },
+            "olympiad/physics": {
+              "total": 50,
+              "graded": 48,
+              "successes": 35,
+              "solver_failures": 0,
+              "judge_unresolved": 2,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 1,
+              "judge_audit_flagged": 1,
+              "solver_truncated": 11,
+              "judge_truncated": 3,
+              "success_rate": 0.7,
+              "observed_success_lower_bound": 0.7,
+              "mean_research_score_valid_only": null
+            },
+            "research/biology": {
+              "total": 20,
+              "graded": 18,
+              "successes": 0,
+              "solver_failures": 0,
+              "judge_unresolved": 2,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 3,
+              "judge_audit_flagged": 3,
+              "solver_truncated": 3,
+              "judge_truncated": 5,
+              "success_rate": 0.0,
+              "observed_success_lower_bound": 0.0,
+              "mean_research_score_valid_only": 2.7666666666666666
+            },
+            "research/chemistry": {
+              "total": 20,
+              "graded": 20,
+              "successes": 2,
+              "solver_failures": 0,
+              "judge_unresolved": 0,
+              "judge_invalid": 0,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 2,
+              "judge_audit_flagged": 2,
+              "solver_truncated": 4,
+              "judge_truncated": 2,
+              "success_rate": 0.1,
+              "observed_success_lower_bound": 0.1,
+              "mean_research_score_valid_only": 2.8289999999999997
+            },
+            "research/physics": {
+              "total": 20,
+              "graded": 19,
+              "successes": 0,
+              "solver_failures": 0,
+              "judge_unresolved": 1,
+              "judge_invalid": 1,
+              "judge_transport_failures": 0,
+              "judge_truncated_with_grade": 2,
+              "judge_audit_flagged": 2,
+              "solver_truncated": 3,
+              "judge_truncated": 3,
+              "success_rate": 0.0,
+              "observed_success_lower_bound": 0.0,
+              "mean_research_score_valid_only": 1.7960526315789473
+            }
+          }
+        }
+      },
+      "judge_phases": {
+        "B0": {
+          "planned": 160,
+          "recorded": 160,
+          "successful": 156,
+          "transport_completed": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 4,
+          "length_stops": 9,
+          "successful_output_tokens": 323810,
+          "duration_seconds": 503.72189164799056,
+          "output_tokens_per_second": 642.8348764843518,
+          "mean_ttft_ms": 1736.916157869382,
+          "mean_tpot_ms": 24.320681939246352,
+          "actual_context_16k_cases": 44,
+          "ttft_p50_ms": 966.4010170090478,
+          "ttft_p95_ms": 7830.946224590987,
+          "ttft_p99_ms": 12076.452115736609,
+          "tpot_p50_ms": 21.702082243830247,
+          "tpot_p95_ms": 35.595491200601,
+          "tpot_p99_ms": 52.00510970907171,
+          "input_tokens_sum": 1383938,
+          "input_tokens_min": 1212,
+          "input_tokens_max": 19683,
+          "input_at_least16384_cases": 41,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 44,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 70.72975900886681,
+              "6": 71.114113029189
+            },
+            "mean_percent": 70.9219360190279,
+            "covered_seconds": 503.72189164799056,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.8282390124950325,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 22.15063004785618
+        },
+        "B1": {
+          "planned": 160,
+          "recorded": 160,
+          "successful": 152,
+          "transport_completed": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": 8,
+          "length_stops": 16,
+          "successful_output_tokens": 334127,
+          "duration_seconds": 509.72988545999397,
+          "output_tokens_per_second": 655.4981560448919,
+          "mean_ttft_ms": 1621.167323962527,
+          "mean_tpot_ms": 24.832784289567847,
+          "actual_context_16k_cases": 41,
+          "ttft_p50_ms": 1003.534840499924,
+          "ttft_p95_ms": 7579.387210090494,
+          "ttft_p99_ms": 10642.432804445414,
+          "tpot_p50_ms": 22.191874496381285,
+          "tpot_p95_ms": 36.905319406372264,
+          "tpot_p99_ms": 49.41859000454244,
+          "input_tokens_sum": 1409665,
+          "input_tokens_min": 982,
+          "input_tokens_max": 19683,
+          "input_at_least16384_cases": 35,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 41,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 72.18744176238286,
+              "6": 72.43416914123479
+            },
+            "mean_percent": 72.31080545180882,
+            "covered_seconds": 509.72988545999397,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.775974296499044,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 21.722711802547042
+        }
+      }
+    },
+    {
+      "id": "swe",
+      "name": "SWE-bench Pro trace32",
+      "tasks_per_arm": 32,
+      "mode": "inference_only",
+      "arms": {
+        "B0": {
+          "planned": 64,
+          "recorded": 64,
+          "successful": 64,
+          "transport_completed": null,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": null,
+          "length_stops": 2,
+          "successful_output_tokens": 8161,
+          "duration_seconds": 163.56316192900704,
+          "output_tokens_per_second": 49.895098038898276,
+          "mean_ttft_ms": 3184.308897483106,
+          "mean_tpot_ms": 123.57968581742043,
+          "actual_context_16k_cases": 3,
+          "ttft_p50_ms": 2696.659010500298,
+          "ttft_p95_ms": 6771.174651852924,
+          "ttft_p99_ms": 11195.728387850244,
+          "tpot_p50_ms": 130.5472178655075,
+          "tpot_p95_ms": 158.22355575163493,
+          "tpot_p99_ms": 164.19516860813934,
+          "input_tokens_sum": 509607,
+          "input_tokens_min": 1519,
+          "input_tokens_max": 16350,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 3,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 27.926427449849022,
+              "6": 28.84902025382913
+            },
+            "mean_percent": 28.387723851839077,
+            "covered_seconds": 163.56316192900704,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.73112013550417,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 285.38269470406294,
+          "source_stage_seal_sha256": "0e3d21c1f84e1e71bd1a685ae287b815fe8d7d83580a4bf67dd325097ed98565",
+          "runtime_identity_sha256": "f081295619489f25dce3fc197ceebaba90bf3c8f2115c036ddeb583cf824c500"
+        },
+        "B1": {
+          "planned": 64,
+          "recorded": 64,
+          "successful": 64,
+          "transport_completed": null,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": null,
+          "length_stops": 1,
+          "successful_output_tokens": 6273,
+          "duration_seconds": 59.602209230011795,
+          "output_tokens_per_second": 105.24777656800892,
+          "mean_ttft_ms": 1932.5944579854877,
+          "mean_tpot_ms": 51.7398652774043,
+          "actual_context_16k_cases": 2,
+          "ttft_p50_ms": 1580.5663165010628,
+          "ttft_p95_ms": 3902.96705685032,
+          "ttft_p99_ms": 5262.4493921143585,
+          "tpot_p50_ms": 54.80658619334766,
+          "tpot_p95_ms": 73.85394655191479,
+          "tpot_p99_ms": 89.40901005068673,
+          "input_tokens_sum": 509607,
+          "input_tokens_min": 1519,
+          "input_tokens_max": 16350,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 2,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 77.24009305610002,
+              "6": 77.35169756926479
+            },
+            "mean_percent": 77.2958953126824,
+            "covered_seconds": 59.602209230011795,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.737604235007893,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 135.29214578384108,
+          "source_stage_seal_sha256": "d924ff8b9f39fd4a5f5b5ce676353e81c8e63813ddea00b823f562e54d58086c",
+          "runtime_identity_sha256": "e8c1794e2fd6b3e991ccbc1a792b29aee102ec7924ddd81d4a35d21cf6b5c2aa"
+        }
+      },
+      "changes_percent": {
+        "output_tokens_per_second": 110.93810956330343,
+        "mean_ttft_ms": -39.308825864443605,
+        "mean_tpot_ms": -58.13238645561374,
+        "unit_cost_change_percent": -52.5927295892497,
+        "ai_core_utilization_gain_pp": 48.90817146084333
+      },
+      "quality": null,
+      "judge_phases": null
+    },
+    {
+      "id": "terminal",
+      "name": "Terminal-Bench2.1 trace32",
+      "tasks_per_arm": 32,
+      "mode": "inference_only",
+      "arms": {
+        "B0": {
+          "planned": 48,
+          "recorded": 48,
+          "successful": 48,
+          "transport_completed": null,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": null,
+          "length_stops": 2,
+          "successful_output_tokens": 13539,
+          "duration_seconds": 154.00182199000847,
+          "output_tokens_per_second": 87.91454428947212,
+          "mean_ttft_ms": 4112.081142125741,
+          "mean_tpot_ms": 81.22718345935844,
+          "actual_context_16k_cases": 4,
+          "ttft_p50_ms": 3343.0812145015807,
+          "ttft_p95_ms": 10682.634848894666,
+          "ttft_p99_ms": 14020.630345855172,
+          "tpot_p50_ms": 75.08345772622457,
+          "tpot_p95_ms": 146.4759199267487,
+          "tpot_p99_ms": 157.89525661447692,
+          "input_tokens_sum": 462869,
+          "input_tokens_min": 2065,
+          "input_tokens_max": 16294,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 4,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 28.91706059677074,
+              "6": 31.10287192741891
+            },
+            "mean_percent": 30.009966262094824,
+            "covered_seconds": 154.00182199000847,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.713920642985613,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 161.96634636448155,
+          "source_stage_seal_sha256": "9a23a965625bb4404a6edba9f544496d483e7142ab5ceffcca1bce64da8fdb2b",
+          "runtime_identity_sha256": "4a95862da3c60dbc532f2ec9393c2233b01900472a16f5d90d50f0badfe36ede"
+        },
+        "B1": {
+          "planned": 48,
+          "recorded": 48,
+          "successful": 48,
+          "transport_completed": null,
+          "failed": 0,
+          "unreturned": 0,
+          "unresolved_grades": null,
+          "length_stops": 2,
+          "successful_output_tokens": 12775,
+          "duration_seconds": 61.184029368989286,
+          "output_tokens_per_second": 208.7963171395005,
+          "mean_ttft_ms": 2026.0279137073667,
+          "mean_tpot_ms": 35.19455920601563,
+          "actual_context_16k_cases": 4,
+          "ttft_p50_ms": 1777.2115885018138,
+          "ttft_p95_ms": 5347.881188295287,
+          "ttft_p99_ms": 6321.232170251752,
+          "tpot_p50_ms": 31.90451272841666,
+          "tpot_p95_ms": 68.68107900739169,
+          "tpot_p99_ms": 93.64105686960556,
+          "input_tokens_sum": 462869,
+          "input_tokens_min": 2065,
+          "input_tokens_max": 16294,
+          "input_at_least16384_cases": 0,
+          "input_at_least32768_cases": 0,
+          "input_plus_output_at_least32768_cases": 0,
+          "input_plus_output_at_least16384_cases": 4,
+          "sampled_utilization": {
+            "per_card_percent": {
+              "1": 77.50206822537429,
+              "6": 73.07697711342246
+            },
+            "mean_percent": 75.28952266939837,
+            "covered_seconds": 61.184029368989286,
+            "missing_seconds": 0.0,
+            "max_hold_age_seconds": 6.695360704514314,
+            "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+          },
+          "estimated_cny_per_million_output_tokens": 68.1965933400575,
+          "source_stage_seal_sha256": "e2f16ab279d12803a005ed43856afe28555832c2c19d34da661697af1fd0cc4b",
+          "runtime_identity_sha256": "d2acc95a802d16c64dd95f6f345ee46fe11d2fe0e2434ba53f821289d8a94fb3"
+        }
+      },
+      "changes_percent": {
+        "output_tokens_per_second": 137.49917471221443,
+        "mean_ttft_ms": -50.72986539706239,
+        "mean_tpot_ms": -56.67145196087584,
+        "unit_cost_change_percent": -57.89459053018887,
+        "ai_core_utilization_gain_pp": 45.279556407303545
+      },
+      "quality": null,
+      "judge_phases": null
+    }
+  ],
+  "continuous": {
+    "B0": {
+      "source_seal_sha256": "979df5e948c8a0f2b1312727fdf02f43c65f958c69389e667875c6c4a2ce1924",
+      "groups": {
+        "16384-formal": {
+          "recorded": 73,
+          "successful": 73,
+          "failed": 0,
+          "successful_output_tokens": 18688,
+          "mean_ttft_ms": 5645.442650068505,
+          "mean_tpot_ms": 110.9640982979321,
+          "cohort_wall_seconds": 312.67479561300024,
+          "output_tokens_per_second": 59.76816891608451
+        },
+        "16384-warmup": {
+          "recorded": 16,
+          "successful": 16,
+          "failed": 0,
+          "successful_output_tokens": 4096,
+          "mean_ttft_ms": 10081.987770937645,
+          "mean_tpot_ms": 95.59471878186314,
+          "cohort_wall_seconds": 71.97342640699935,
+          "output_tokens_per_second": 56.90989306022073
+        },
+        "4096-formal": {
+          "recorded": 152,
+          "successful": 152,
+          "failed": 0,
+          "successful_output_tokens": 38912,
+          "mean_ttft_ms": 1709.4214221250886,
+          "mean_tpot_ms": 56.21754155438561,
+          "cohort_wall_seconds": 307.07979921600054,
+          "output_tokens_per_second": 126.71624802199777
+        },
+        "4096-warmup": {
+          "recorded": 32,
+          "successful": 32,
+          "failed": 0,
+          "successful_output_tokens": 8192,
+          "mean_ttft_ms": 2433.983892218805,
+          "mean_tpot_ms": 54.12194608063734,
+          "cohort_wall_seconds": 65.95054090200028,
+          "output_tokens_per_second": 124.21429586412287
+        }
+      },
+      "all_requests_recorded": 273,
+      "failed_requests": 0,
+      "formal_seconds_per_context": 300,
+      "warmup_seconds_per_context": 60,
+      "concurrency": 8,
+      "input_context_tokens": [
+        4096,
+        16384
+      ]
+    },
+    "B1": {
+      "source_seal_sha256": "1a1bb903293271c80b948aa1f261149e08c135c4b086ed2a074985751c645afe",
+      "groups": {
+        "16384-formal": {
+          "recorded": 182,
+          "successful": 182,
+          "failed": 0,
+          "successful_output_tokens": 46592,
+          "mean_ttft_ms": 3715.9957444397387,
+          "mean_tpot_ms": 37.829714622516626,
+          "cohort_wall_seconds": 305.0576808020014,
+          "output_tokens_per_second": 152.73177150468365
+        },
+        "16384-warmup": {
+          "recorded": 40,
+          "successful": 40,
+          "failed": 0,
+          "successful_output_tokens": 10240,
+          "mean_ttft_ms": 5420.056376549564,
+          "mean_tpot_ms": 30.615874872451684,
+          "cohort_wall_seconds": 66.90331698199952,
+          "output_tokens_per_second": 153.05668630383593
+        },
+        "4096-formal": {
+          "recorded": 410,
+          "successful": 410,
+          "failed": 0,
+          "successful_output_tokens": 104960,
+          "mean_ttft_ms": 690.6729389245412,
+          "mean_tpot_ms": 20.395569694126934,
+          "cohort_wall_seconds": 302.9056311659988,
+          "output_tokens_per_second": 346.51056038796344
+        },
+        "4096-warmup": {
+          "recorded": 86,
+          "successful": 86,
+          "failed": 0,
+          "successful_output_tokens": 22016,
+          "mean_ttft_ms": 1032.929987290752,
+          "mean_tpot_ms": 18.746939661513494,
+          "cohort_wall_seconds": 63.77715020100004,
+          "output_tokens_per_second": 345.20200307813036
+        }
+      },
+      "all_requests_recorded": 718,
+      "failed_requests": 0,
+      "formal_seconds_per_context": 300,
+      "warmup_seconds_per_context": 60,
+      "concurrency": 8,
+      "input_context_tokens": [
+        4096,
+        16384
+      ]
+    }
+  },
+  "stability_assessment": {
+    "schema": "v15-stability-evidence-audit/v1",
+    "criterion": "3.4.3",
+    "execution_complete": true,
+    "profiles": {
+      "mmlu": {
+        "B0": {
+          "recorded": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 0,
+          "length_stops": 20,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 0,
+            "tpot_requests": 0,
+            "ttft_p95_ms": null,
+            "ttft_p99_ms": null,
+            "tpot_p95_ms": null,
+            "tpot_p99_ms": null
+          },
+          "source_seal_sha256": "fa79fd934ad9a1f44c25b4c860b50070f6a31f63064a347c1e647644343bd80d"
+        },
+        "B1": {
+          "recorded": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 0,
+          "length_stops": 15,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 0,
+            "tpot_requests": 0,
+            "ttft_p95_ms": null,
+            "ttft_p99_ms": null,
+            "tpot_p95_ms": null,
+            "tpot_p99_ms": null
+          },
+          "source_seal_sha256": "89cf43c62a353281154681ddd6b2f628d901a70082f6b23c2d2378a8b1e62298"
+        }
+      },
+      "hle": {
+        "B0": {
+          "recorded": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 131,
+          "length_stops": 131,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 131,
+            "tpot_requests": 131,
+            "ttft_p95_ms": 1152.9495340000722,
+            "ttft_p99_ms": 1281.307827596902,
+            "tpot_p95_ms": 27.82179587270293,
+            "tpot_p99_ms": 27.846492217121092
+          },
+          "source_seal_sha256": "8900964f5c3e37ddf8ce818f4d55923db27f3b7dffdfa239b08dfe600a53de31"
+        },
+        "B1": {
+          "recorded": 200,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 126,
+          "length_stops": 126,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 126,
+            "tpot_requests": 126,
+            "ttft_p95_ms": 513.7940227505169,
+            "ttft_p99_ms": 862.1196652566141,
+            "tpot_p95_ms": 17.702362073490345,
+            "tpot_p99_ms": 17.940576587591018
+          },
+          "source_seal_sha256": "d280c502eca2eab493d018b18d9527694fea1d9693d621a27e4f542f359dbb00"
+        }
+      },
+      "frontier": {
+        "B0": {
+          "recorded": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 39,
+          "length_stops": 39,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 39,
+            "tpot_requests": 39,
+            "ttft_p95_ms": 1524.4461059002788,
+            "ttft_p99_ms": 1812.4445253549482,
+            "tpot_p95_ms": 37.18345558513732,
+            "tpot_p99_ms": 37.58528222930591
+          },
+          "source_seal_sha256": "d69b275d70c89f5033d6ae50c8673dcab9ed4887e8c0f6d4fa44091b7eea96ab"
+        },
+        "B1": {
+          "recorded": 160,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 35,
+          "length_stops": 35,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 35,
+            "tpot_requests": 35,
+            "ttft_p95_ms": 1051.7861491025542,
+            "ttft_p99_ms": 1054.6175749157555,
+            "tpot_p95_ms": 17.0093636350969,
+            "tpot_p99_ms": 17.154309477139776
+          },
+          "source_seal_sha256": "4c5855e2b49af92992ac6906c049ee2ce9cae24a44e45271b0ee7281bba53919"
+        }
+      },
+      "swe": {
+        "B0": {
+          "recorded": 64,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 3,
+          "length_stops": 2,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 3,
+            "tpot_requests": 3,
+            "ttft_p95_ms": 8978.19448679511,
+            "ttft_p99_ms": 9281.542559755617,
+            "tpot_p95_ms": 64.78537284841217,
+            "tpot_p99_ms": 66.57515840397592
+          },
+          "source_seal_sha256": "0e3d21c1f84e1e71bd1a685ae287b815fe8d7d83580a4bf67dd325097ed98565"
+        },
+        "B1": {
+          "recorded": 64,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 2,
+          "length_stops": 1,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 2,
+            "tpot_requests": 2,
+            "ttft_p95_ms": 1671.5280555930804,
+            "ttft_p99_ms": 1673.8101007122896,
+            "tpot_p95_ms": 13.760063689272847,
+            "tpot_p99_ms": 13.878891883531121
+          },
+          "source_seal_sha256": "d924ff8b9f39fd4a5f5b5ce676353e81c8e63813ddea00b823f562e54d58086c"
+        }
+      },
+      "terminal": {
+        "B0": {
+          "recorded": 48,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 4,
+          "length_stops": 2,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 4,
+            "tpot_requests": 4,
+            "ttft_p95_ms": 6502.852876742689,
+            "ttft_p99_ms": 6897.599135342024,
+            "tpot_p95_ms": 89.7979295725652,
+            "tpot_p99_ms": 89.95690065643184
+          },
+          "source_seal_sha256": "9a23a965625bb4404a6edba9f544496d483e7142ab5ceffcca1bce64da8fdb2b"
+        },
+        "B1": {
+          "recorded": 48,
+          "failed": 0,
+          "unreturned": 0,
+          "input_at_least16384": 0,
+          "input_plus_output_at_least16384": 4,
+          "length_stops": 2,
+          "length_stop_budget_mismatches": 0,
+          "terminal_context_16k_cohort": {
+            "requests": 4,
+            "tpot_requests": 4,
+            "ttft_p95_ms": 5510.340489495865,
+            "ttft_p99_ms": 5745.614511494496,
+            "tpot_p95_ms": 37.529689152904325,
+            "tpot_p99_ms": 37.633053801557786
+          },
+          "source_seal_sha256": "e2f16ab279d12803a005ed43856afe28555832c2c19d34da661697af1fd0cc4b"
+        }
+      }
+    },
+    "stage_logs": {
+      "continuous-B0": {
+        "service_log_sha256": "f3b2bfe6230e5615bbbf8b6d3660e38ae837593b94b49afdd91382d46a64bf8a",
+        "receipt_sha256": "c9045ade4c6144445bf8fb2d69e8d818925336bc537372e6f707db71ca2e8dab",
+        "cleanup_sha256": "c803897e6f7c8cf4e461c8c7de71e26a6e9225d91c1fd7a5a05b9693f23358b6",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1476,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "continuous-B1": {
+        "service_log_sha256": "4d0677ad3182c59c21ec5f63835aaa700e68b1acf75f0f30d1fbba87a98e111b",
+        "receipt_sha256": "834c96c4cd61234148a75e06d89a0c11729b00945c8b4cf742a34658dd2758f6",
+        "cleanup_sha256": "6e5cbbe5938c5a256e257201b980eba54c0b6c933ea1ab0a7f60f10fdec588e2",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 1762,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "frontier-solver-B0": {
+        "service_log_sha256": "d56417c738687f35e0b2eaba07a7b433cd86643d054cb81490001dafa6cf001f",
+        "receipt_sha256": "b65131034327ec3234a4932f1b97dd2b732a374869bfc50a23ffa25dc42259bc",
+        "cleanup_sha256": "d261bbdb786d37456686954393ebebe814b65750f334c86ee56ba79879e092d2",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1908,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "frontier-solver-B1": {
+        "service_log_sha256": "ff9db179a2b0f19ba0518040af70a11967356fafaa961830e2f512ac82e99135",
+        "receipt_sha256": "690bb293d962b96493099ba4af27243dda77364b1b0f2eb3b5340228e3813956",
+        "cleanup_sha256": "d1a810f258ce0b6648ae2314bf774f6f6fe3c43c88bfa603e247d9b7ae421cdd",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 1384,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          1398,
+          1399,
+          1400,
+          1401,
+          1402,
+          1403,
+          1404,
+          1405
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "frontier-judge-B0": {
+        "service_log_sha256": "746e48223637548ebea3dbb9a60ca9ab99dd43b65e0ecc2f070d8b7b83dafa2b",
+        "receipt_sha256": "9a2cea58e03c80255afa6e5d0f11b5447148a5799376d55a17990cfb47507d2f",
+        "cleanup_sha256": "2b911e21000c90599f0f225521fc54958ae614e9ce75f2d4245b86448d0a36c3",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 1201,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "frontier-judge-B1": {
+        "service_log_sha256": "b1958a9f82a154dc388f069b58316d869f3db30fee16b71a1651944bfe6e3a98",
+        "receipt_sha256": "71f4fae10b919d986c3bdf7efa8adf59660d846b5af5e291ab250c8872d6d623",
+        "cleanup_sha256": "773617e54d6745ebaa9721c89fc2034de2e4348225a69462a4009e5a95d437a9",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1201,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          1215,
+          1216,
+          1217,
+          1218,
+          1219,
+          1220,
+          1221,
+          1222
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "hle-solver-B0": {
+        "service_log_sha256": "9ca3e0c0530f57ce07e3e08f51f63e89407702244fbb7c2b9b6d3a692ee40487",
+        "receipt_sha256": "bc48567b358cf8ba8a3014617357c632851208b6b2ea647d69fd4b5db1924a19",
+        "cleanup_sha256": "fccfcfd11fb54b0d5f159bcde4614eab0937672f03f0a1983f8d397e6cf2aab1",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1056,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "hle-solver-B1": {
+        "service_log_sha256": "da04cbf56b620f55316eb6e19e70f15e502de2eb6c3dca1359f5a2ecbb5dacc5",
+        "receipt_sha256": "fa8c6d0d08c26f26ce031439d2f348d4ebe240f4cb7f441785acb59d60d35b9a",
+        "cleanup_sha256": "e68f136634bd06c5479d63ace961a6c7c473fad0e56ac9e807b712086f33a63e",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1645,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          1659,
+          1660,
+          1661,
+          1662,
+          1663,
+          1664,
+          1665,
+          1666
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "hle-judge-B0": {
+        "service_log_sha256": "8261756dfeaf793db526262beed07a36b4c6fa2e01ec04acfa747f0f84574521",
+        "receipt_sha256": "6866a85e12f47d07f4cbef1fcb03d98980f2154aaa2eec77d246019cb3802c02",
+        "cleanup_sha256": "e672268aa6f99b761d6e803ba46376ba5c598aa98f627aaede051a556dd0a302",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1230,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          1243,
+          1244,
+          1245,
+          1246,
+          1247,
+          1248,
+          1249,
+          1250
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "hle-judge-B1": {
+        "service_log_sha256": "d8013ec47d36578e72d7192ed33b95c41e3a1b92ae06a45e84871339b8a17de3",
+        "receipt_sha256": "bae1d5c046fea9a56d35c1f255037df244813755fa70642753b849ddc652ca15",
+        "cleanup_sha256": "5481f366539d1f7eb7a01d6ffb4070d15788bac91f26cfb9a41069603c788723",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 1232,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "swe-trace-B0": {
+        "service_log_sha256": "196efd8e79d55fbe5646d500033d06ff58f4a3882e0ff477c85f133cb5c1665a",
+        "receipt_sha256": "f6182d0bde7fcc372d811aa2b780291c5e28ef805c2aefd9565220bada5f20b3",
+        "cleanup_sha256": "91b53880e6f1b8d8a6648298c89e05506c5b4c9c2049447c1902b31f6a3a3eb7",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1268,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "swe-trace-B1": {
+        "service_log_sha256": "88bceffe892196ff7c35da23a46e40a230a6216e3af01257a148dd7f49933679",
+        "receipt_sha256": "0c3fbb8b0441a37b0de35c5a23d8a018e1e52f4b9654cf21e2c64f5f322b948c",
+        "cleanup_sha256": "6d9b37e9862904176415bedcade86826a7a38da3d5880b894ef900067f398bd4",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 1086,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "terminal-trace-B0": {
+        "service_log_sha256": "40094e0b8cb16d82be59329f19080355a411b66fcafc1d13a5f6d19df5e63dbf",
+        "receipt_sha256": "30456e562602f31c086f1e09c337aea626759910f460bf6cc0142716ada3a609",
+        "cleanup_sha256": "66b64709801711bcab73351197cc4f758ce80759459b7a6321383efb5d53074b",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1235,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "terminal-trace-B1": {
+        "service_log_sha256": "5467ed9468820ae5d8fc3f02252c355e2074ae467665fccafec3ecc445404ab3",
+        "receipt_sha256": "ac2c7869553da3b229f66bfb19170798e6d260f70aa507625fcd7ec9eb83899b",
+        "cleanup_sha256": "84c221ddf72659875b6c1d07df3a3c1d87cfd33d9647dff587567b0447c11cc2",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          9,
+          15
+        ],
+        "shutdown_marker_line": 1054,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          1074,
+          1075,
+          1076,
+          1077,
+          1078,
+          1079,
+          1080,
+          1081
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "mmlu-B0": {
+        "service_log_sha256": "cf5638138093cf63668dca06eead94defd61640ecf2d4bd9a2860b3e5e3553a9",
+        "receipt_sha256": "daa2216ddbf2f2637896e84421d78c0dfd54eaa5b3a7645c3221cd33337e9024",
+        "cleanup_sha256": "302b775fb8833533fba7d20aca190e2958fb5d18e2f8c035975fa1bc79cebf3c",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1776,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      },
+      "mmlu-B1": {
+        "service_log_sha256": "89d270b038af2412de206d18c8275bc9207b2b554e594cfdd62b1f255bfc3604",
+        "receipt_sha256": "90d7f3e7b259227c6eecda2f70c8396b6e081e8829c8f5bd8a19d9a345cbe00a",
+        "cleanup_sha256": "5cc91b5df3eb69c18a54f7629596e562ba74b75a87886f04b0908254f84ce15d",
+        "completed": true,
+        "quiescent": true,
+        "cleanup_signals": [
+          15
+        ],
+        "shutdown_marker_line": 1474,
+        "error_lines_before_shutdown": [],
+        "error_lines_after_shutdown": [
+          1488,
+          1489,
+          1490,
+          1491,
+          1492,
+          1493,
+          1494,
+          1495
+        ],
+        "scope": "vLLM severity ERROR lines and explicit shutdown markers; post-shutdown errors remain recorded, not counted as serving failures. INFO/WARNING text about possible OOM is not an observed OOM."
+      }
+    },
+    "continuous": {
+      "B0": {
+        "source_seal_sha256": "979df5e948c8a0f2b1312727fdf02f43c65f958c69389e667875c6c4a2ce1924",
+        "continuous_phase_sha256": "e3aebde5d1d6d09b2d9798493605662543d91b361400c95473cf714b09187c63",
+        "all_recorded_requests": 273,
+        "failed_requests": 0,
+        "groups": {
+          "4096-formal": {
+            "requests": 152,
+            "tpot_requests": 152,
+            "ttft_p95_ms": 3016.806606399949,
+            "ttft_p99_ms": 5808.802098179539,
+            "tpot_p95_ms": 60.39419862450778,
+            "tpot_p99_ms": 61.62853494478573,
+            "input_at_least16384": 0,
+            "input_plus_output_at_least16384": 0,
+            "duration_including_drain_seconds": 307.07979921600054,
+            "output_tokens_per_second": 126.71624802199777,
+            "submission_cohorts": [
+              {
+                "start_seconds": 0,
+                "end_seconds": 60,
+                "requests": 32,
+                "tpot_requests": 32,
+                "ttft_p95_ms": 5773.906034899573,
+                "ttft_p99_ms": 6853.077883139395,
+                "tpot_p95_ms": 60.400829723920666,
+                "tpot_p99_ms": 61.31630143290678
+              },
+              {
+                "start_seconds": 60,
+                "end_seconds": 120,
+                "requests": 32,
+                "tpot_requests": 32,
+                "ttft_p95_ms": 2529.5850948005864,
+                "ttft_p99_ms": 3098.2288478100063,
+                "tpot_p95_ms": 59.834230547255046,
+                "tpot_p99_ms": 61.10330448140995
+              },
+              {
+                "start_seconds": 120,
+                "end_seconds": 180,
+                "requests": 30,
+                "tpot_requests": 30,
+                "ttft_p95_ms": 2729.13723990132,
+                "ttft_p99_ms": 2979.5417539507803,
+                "tpot_p95_ms": 59.31994821097617,
+                "tpot_p99_ms": 60.60802351485786
+              },
+              {
+                "start_seconds": 180,
+                "end_seconds": 240,
+                "requests": 28,
+                "tpot_requests": 28,
+                "ttft_p95_ms": 2533.1043726504495,
+                "ttft_p99_ms": 2922.169004230618,
+                "tpot_p95_ms": 60.23330471725535,
+                "tpot_p99_ms": 61.99369756851022
+              },
+              {
+                "start_seconds": 240,
+                "end_seconds": 300,
+                "requests": 30,
+                "tpot_requests": 30,
+                "ttft_p95_ms": 1966.1280011001506,
+                "ttft_p99_ms": 2016.9313177811455,
+                "tpot_p95_ms": 60.261358511961944,
+                "tpot_p99_ms": 60.85119374450619
+              }
+            ]
+          },
+          "16384-formal": {
+            "requests": 73,
+            "tpot_requests": 73,
+            "ttft_p95_ms": 14321.914817399707,
+            "ttft_p99_ms": 24667.257698519974,
+            "tpot_p95_ms": 119.44099038901827,
+            "tpot_p99_ms": 122.35130321129691,
+            "input_at_least16384": 73,
+            "input_plus_output_at_least16384": 73,
+            "duration_including_drain_seconds": 312.67479561300024,
+            "output_tokens_per_second": 59.76816891608451,
+            "submission_cohorts": [
+              {
+                "start_seconds": 0,
+                "end_seconds": 60,
+                "requests": 16,
+                "tpot_requests": 16,
+                "ttft_p95_ms": 24560.707633499987,
+                "ttft_p99_ms": 26691.708933899645,
+                "tpot_p95_ms": 118.51667443823709,
+                "tpot_p99_ms": 118.66514756529224
+              },
+              {
+                "start_seconds": 60,
+                "end_seconds": 120,
+                "requests": 15,
+                "tpot_requests": 15,
+                "ttft_p95_ms": 5623.541667299284,
+                "ttft_p99_ms": 6942.966745460288,
+                "tpot_p95_ms": 118.39620221804117,
+                "tpot_p99_ms": 118.72155049537433
+              },
+              {
+                "start_seconds": 120,
+                "end_seconds": 180,
+                "requests": 13,
+                "tpot_requests": 13,
+                "ttft_p95_ms": 6227.48069679983,
+                "ttft_p99_ms": 6284.050008160193,
+                "tpot_p95_ms": 122.381754785884,
+                "tpot_p99_ms": 122.50356108423233
+              },
+              {
+                "start_seconds": 180,
+                "end_seconds": 240,
+                "requests": 14,
+                "tpot_requests": 14,
+                "ttft_p95_ms": 6419.018966500606,
+                "ttft_p99_ms": 7147.372426101009,
+                "tpot_p95_ms": 118.93368660608188,
+                "tpot_p99_ms": 119.00935715494238
+              },
+              {
+                "start_seconds": 240,
+                "end_seconds": 300,
+                "requests": 15,
+                "tpot_requests": 15,
+                "ttft_p95_ms": 5839.484927100055,
+                "ttft_p99_ms": 6590.824891020237,
+                "tpot_p95_ms": 117.93903148627578,
+                "tpot_p99_ms": 118.22172642588245
+              }
+            ]
+          }
+        },
+        "ratio_16k_to_4k": {
+          "output_tokens_per_second": 0.47166933877105355,
+          "ttft_p95_ms": 4.747375846703844,
+          "ttft_p99_ms": 4.246530916632643,
+          "tpot_p95_ms": 1.9776897965254145,
+          "tpot_p99_ms": 1.9853028036592784
+        },
+        "scope": "Original synthetic closed-loop C8; not a five-dataset task window"
+      },
+      "B1": {
+        "source_seal_sha256": "1a1bb903293271c80b948aa1f261149e08c135c4b086ed2a074985751c645afe",
+        "continuous_phase_sha256": "d37ef76b63627a1b255f052aa0fae0009588bca90e046a7d259d465e225f54be",
+        "all_recorded_requests": 718,
+        "failed_requests": 0,
+        "groups": {
+          "4096-formal": {
+            "requests": 410,
+            "tpot_requests": 410,
+            "ttft_p95_ms": 1220.1365833989255,
+            "ttft_p99_ms": 2626.818642310027,
+            "tpot_p95_ms": 21.773459508821198,
+            "tpot_p99_ms": 22.36207795898899,
+            "input_at_least16384": 0,
+            "input_plus_output_at_least16384": 0,
+            "duration_including_drain_seconds": 302.9056311659988,
+            "output_tokens_per_second": 346.51056038796344,
+            "submission_cohorts": [
+              {
+                "start_seconds": 0,
+                "end_seconds": 60,
+                "requests": 85,
+                "tpot_requests": 85,
+                "ttft_p95_ms": 2626.8169768001826,
+                "ttft_p99_ms": 2626.9436235203466,
+                "tpot_p95_ms": 21.408779406272373,
+                "tpot_p99_ms": 21.67805864487309
+              },
+              {
+                "start_seconds": 60,
+                "end_seconds": 120,
+                "requests": 82,
+                "tpot_requests": 82,
+                "ttft_p95_ms": 1061.8519612004093,
+                "ttft_p99_ms": 1076.5527554493747,
+                "tpot_p95_ms": 21.85816556391835,
+                "tpot_p99_ms": 22.75542012689659
+              },
+              {
+                "start_seconds": 120,
+                "end_seconds": 180,
+                "requests": 81,
+                "tpot_requests": 81,
+                "ttft_p95_ms": 1063.464932001807,
+                "ttft_p99_ms": 1082.3995120015752,
+                "tpot_p95_ms": 21.65649866666154,
+                "tpot_p99_ms": 22.16777429725078
+              },
+              {
+                "start_seconds": 180,
+                "end_seconds": 240,
+                "requests": 81,
+                "tpot_requests": 81,
+                "ttft_p95_ms": 780.9401899976365,
+                "ttft_p99_ms": 975.6986203996348,
+                "tpot_p95_ms": 21.69639896077855,
+                "tpot_p99_ms": 21.944840800005135
+              },
+              {
+                "start_seconds": 240,
+                "end_seconds": 300,
+                "requests": 81,
+                "tpot_requests": 81,
+                "ttft_p95_ms": 756.657449001068,
+                "ttft_p99_ms": 785.8593556018604,
+                "tpot_p95_ms": 21.858598913725775,
+                "tpot_p99_ms": 22.561419580400553
+              }
+            ]
+          },
+          "16384-formal": {
+            "requests": 182,
+            "tpot_requests": 182,
+            "ttft_p95_ms": 8112.219920301502,
+            "ttft_p99_ms": 10175.404774560338,
+            "tpot_p95_ms": 45.99548093510142,
+            "tpot_p99_ms": 48.957219981326055,
+            "input_at_least16384": 182,
+            "input_plus_output_at_least16384": 182,
+            "duration_including_drain_seconds": 305.0576808020014,
+            "output_tokens_per_second": 152.73177150468365,
+            "submission_cohorts": [
+              {
+                "start_seconds": 0,
+                "end_seconds": 60,
+                "requests": 40,
+                "tpot_requests": 40,
+                "ttft_p95_ms": 10175.378661200193,
+                "ttft_p99_ms": 10175.740175382052,
+                "tpot_p95_ms": 45.78756291666793,
+                "tpot_p99_ms": 45.93590986450599
+              },
+              {
+                "start_seconds": 60,
+                "end_seconds": 120,
+                "requests": 34,
+                "tpot_requests": 34,
+                "ttft_p95_ms": 5245.275594299164,
+                "ttft_p99_ms": 5555.775227810919,
+                "tpot_p95_ms": 48.09253556646653,
+                "tpot_p99_ms": 52.756313368941896
+              },
+              {
+                "start_seconds": 120,
+                "end_seconds": 180,
+                "requests": 35,
+                "tpot_requests": 35,
+                "ttft_p95_ms": 3932.7923514010763,
+                "ttft_p99_ms": 3978.8383267397144,
+                "tpot_p95_ms": 47.57215105216007,
+                "tpot_p99_ms": 50.25750532101721
+              },
+              {
+                "start_seconds": 180,
+                "end_seconds": 240,
+                "requests": 37,
+                "tpot_requests": 37,
+                "ttft_p95_ms": 5059.455146599794,
+                "ttft_p99_ms": 5169.428379241144,
+                "tpot_p95_ms": 45.23098059136685,
+                "tpot_p99_ms": 45.879818709642514
+              },
+              {
+                "start_seconds": 240,
+                "end_seconds": 300,
+                "requests": 36,
+                "tpot_requests": 36,
+                "ttft_p95_ms": 5937.800001251162,
+                "ttft_p99_ms": 6441.89655395021,
+                "tpot_p95_ms": 45.45314262058502,
+                "tpot_p99_ms": 45.91389184372982
+              }
+            ]
+          }
+        },
+        "ratio_16k_to_4k": {
+          "output_tokens_per_second": 0.4407708998354355,
+          "ttft_p95_ms": 6.648616253848688,
+          "ttft_p99_ms": 3.873660941286787,
+          "tpot_p95_ms": 2.11245626430963,
+          "tpot_p99_ms": 2.1892965435104608
+        },
+        "scope": "Original synthetic closed-loop C8; not a five-dataset task window"
+      }
+    },
+    "quality_is_a_separate_assessment": true,
+    "total_context_includes_output": true,
+    "each_dataset_input_16k_is_not_required": true,
+    "cohort_method": "60 s bins by request submission; include complete request latency, including drain. All five bins retained. Percentiles interpolate at (n-1)q. These are diagnostic bins, not new acceptance thresholds.",
+    "limitations": [
+      "Task counts use terminal input+output length. They do not establish how long live context remained above16K; final usage alone cannot timestamp the crossing.",
+      "C8 keeps all original 60 s warmups and 300 s formal phases; it is separate synthetic evidence, not a replacement for the task-based continuous-window conclusion in V1.5.",
+      "No new numerical definition of abnormal steep rise is imposed. Observed 4K/16K ratios and consecutive cohorts are disclosed for review, not automatically labelled pass or engine failure.",
+      "Budget length termination is explicit, not silent truncation. Raw stream checks and successful transport do not prove semantic answer completeness."
+    ],
+    "status": "execution_complete_long_context_assessment_open"
+  },
+  "formal_targets": {
+    "3.4.1": {
+      "name": "有效算力效率 ≥50%",
+      "accepted": false,
+      "status": "reference_available_current_numerator_not_measured",
+      "display_value": "参考分母已复用；本轮分子待测",
+      "display_value_en": "Reference denominator reused; current numerator pending",
+      "measured_value": null,
+      "accepted_scope": null,
+      "reference_tflops_per_card_upper": "19.34038334687175052309470403284461724716",
+      "reference_statistics_path": "reference-denominator-v1.json",
+      "reference_interpretation": "同工况独立参考",
+      "reference_available": true,
+      "reference_statistics_reused": true,
+      "historical_evidence": {
+        "name": "有效算力效率 ≥50%",
+        "status": "历史原工况范围内达标；参考已重新核验",
+        "accepted": true,
+        "accepted_scope": "Existing qualified M01 fixed200/out256, three synchronized uninstrumented repetitions per arm",
+        "measured_value": 59.7572618332167,
+        "display_value": "≥59.76%",
+        "source_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/53541118b3461705f1e61532710ff0a759d59af0/reports/m01-qualified-pair-20261103/README.md",
+        "reason": "已有独立合格参考，原脚本已重新核验算量、三轮计时及关键路径。B1保守效率下界达到50%；适用于原out256工况，不套用到新out8192运行。"
+      },
+      "source_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/53541118b3461705f1e61532710ff0a759d59af0/reports/m01-qualified-pair-20261103/README.md",
+      "source_summary_sha256": "95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0",
+      "reason": "已有参考分母统计可复用；本轮效率由匹配工作域的必要算量和同步计时重新计算。旧59.7573%作为历史结果保留。",
+      "reason_en": "Reuse the existing reference denominator statistics. Recompute efficiency from current matched-workload arithmetic and synchronized timing; retain59.7573% only as a historical result.",
+      "calibration_scope": {
+        "dataset": "mmlu",
+        "profile": "fixed200-v1",
+        "tasks": 200,
+        "max_completion_tokens": 256,
+        "repetitions_per_arm": 3,
+        "frontend": "native_inproc"
+      }
+    },
+    "3.4.2": {
+      "name": "吞吐 ≥10%，TTFT/TPOT 各改善 ≥5%",
+      "status": "单一固定数据集达标",
+      "accepted": true,
+      "accepted_scope": "One complete fixed profile per target; all profile results disclosed",
+      "measured_value": null,
+      "display_value": "达标：mmlu, hle, frontier, swe, terminal",
+      "reason": "同一个固定数据集须同时满足该项目标的全部条件；符合条件：mmlu, hle, frontier, swe, terminal。五项结果与负收益均保留，不跨数据集拼接指标。成本为已披露的同费率估算，利用率增量单列，不另造‘明显改善’阈值。质量与专项稳定性另行报告。",
+      "numeric_threshold_met": true,
+      "qualifying_profiles": [
+        "mmlu",
+        "hle",
+        "frontier",
+        "swe",
+        "terminal"
+      ],
+      "numeric_results_by_profile": [
+        {
+          "dataset": "mmlu",
+          "throughput_ratio": 1.9982992921356268,
+          "mean_ttft_reduction_percent": 50.94241736350036,
+          "mean_tpot_reduction_percent": 49.17591987313084,
+          "numeric_threshold_met": true
+        },
+        {
+          "dataset": "hle",
+          "throughput_ratio": 1.577120782355068,
+          "mean_ttft_reduction_percent": 46.101450810400436,
+          "mean_tpot_reduction_percent": 34.51412126863638,
+          "numeric_threshold_met": true
+        },
+        {
+          "dataset": "frontier",
+          "throughput_ratio": 2.309131475430005,
+          "mean_ttft_reduction_percent": 62.12116919227243,
+          "mean_tpot_reduction_percent": 54.7097628721982,
+          "numeric_threshold_met": true
+        },
+        {
+          "dataset": "swe",
+          "throughput_ratio": 2.1093810956330343,
+          "mean_ttft_reduction_percent": 39.308825864443605,
+          "mean_tpot_reduction_percent": 58.13238645561374,
+          "numeric_threshold_met": true
+        },
+        {
+          "dataset": "terminal",
+          "throughput_ratio": 2.3749917471221442,
+          "mean_ttft_reduction_percent": 50.72986539706239,
+          "mean_tpot_reduction_percent": 56.67145196087584,
+          "numeric_threshold_met": true
+        }
+      ],
+      "acceptance_policy_id": "single-fixed-profile-20261114-v2",
+      "display_value_en": "Met: mmlu, hle, frontier, swe, terminal",
+      "reason_en": "One fixed profile must jointly satisfy this target; qualifying profiles: mmlu, hle, frontier, swe, terminal. All results and regressions remain visible. Never mix metrics across profiles. Cost uses the disclosed equal-rate estimate; utilization changes are reported without inventing a significance threshold. Quality and context stability remain separate."
+    },
+    "3.4.3": {
+      "name": "五数据集与16K稳定性",
+      "accepted": false,
+      "status": "固定五项执行完成；16K稳定性结论待复核",
+      "display_value": "Executed; 16K assessment open",
+      "reason": "固定五项两臂均已完成，无失败或未返回请求。按输入+输出计实际16K覆盖：hle131/126、frontier39/35、swe3/2、terminal4/4、mmlu0/0（B0/B1）。裁判未决与准确率另列，不作为本项稳定性失败。独立C8两臂4K/16K正式窗口均完成：B1吞吐346.51→152.73 token/s，TTFT P99为2.627→10.175秒；16K五个连续提交区间的TTFT P99为10.176、5.556、3.979、5.169、6.442秒。尚需完成大纲所要求的真实任务实际16K区间、可比负载和尾时延的联合判读；有限终态长度计数或合成C8不能单独替代该结论。未将其判成已证实的引擎稳定性失败。",
+      "evidence_path": "stability-audit-v1.json",
+      "quality_is_a_separate_assessment": true
+    },
+    "3.4.4": {
+      "name": "单位token成本降低 ≥10%及高负载利用率改善",
+      "status": "单一固定数据集达标",
+      "accepted": true,
+      "numeric_threshold_met": true,
+      "accepted_scope": "One complete fixed profile per target; all profile results disclosed",
+      "measured_value": null,
+      "display_value": "达标：mmlu, hle, frontier, swe, terminal",
+      "reason": "同一个固定数据集须同时满足该项目标的全部条件；符合条件：mmlu, hle, frontier, swe, terminal。五项结果与负收益均保留，不跨数据集拼接指标。成本为已披露的同费率估算，利用率增量单列，不另造‘明显改善’阈值。质量与专项稳定性另行报告。",
+      "qualifying_profiles": [
+        "mmlu",
+        "hle",
+        "frontier",
+        "swe",
+        "terminal"
+      ],
+      "numeric_results_by_profile": [
+        {
+          "dataset": "mmlu",
+          "equal_rate_unit_cost_reduction_percent": 49.95744611752938,
+          "ai_core_utilization_gain_pp": 33.87176726265786,
+          "numeric_threshold_met": true,
+          "observed_utilization_increased": true
+        },
+        {
+          "dataset": "hle",
+          "equal_rate_unit_cost_reduction_percent": 36.593315414515715,
+          "ai_core_utilization_gain_pp": 4.298922449937919,
+          "numeric_threshold_met": true,
+          "observed_utilization_increased": true
+        },
+        {
+          "dataset": "frontier",
+          "equal_rate_unit_cost_reduction_percent": 56.69367419567217,
+          "ai_core_utilization_gain_pp": 36.527491591154245,
+          "numeric_threshold_met": true,
+          "observed_utilization_increased": true
+        },
+        {
+          "dataset": "swe",
+          "equal_rate_unit_cost_reduction_percent": 52.5927295892497,
+          "ai_core_utilization_gain_pp": 48.90817146084333,
+          "numeric_threshold_met": true,
+          "observed_utilization_increased": true
+        },
+        {
+          "dataset": "terminal",
+          "equal_rate_unit_cost_reduction_percent": 57.89459053018887,
+          "ai_core_utilization_gain_pp": 45.279556407303545,
+          "numeric_threshold_met": true,
+          "observed_utilization_increased": true
+        }
+      ],
+      "acceptance_policy_id": "single-fixed-profile-20261114-v2",
+      "display_value_en": "Met: mmlu, hle, frontier, swe, terminal",
+      "reason_en": "One fixed profile must jointly satisfy this target; qualifying profiles: mmlu, hle, frontier, swe, terminal. All results and regressions remain visible. Never mix metrics across profiles. Cost uses the disclosed equal-rate estimate; utilization changes are reported without inventing a significance threshold. Quality and context stability remain separate."
+    }
+  },
+  "price_basis": {
+    "schema": "public-analogous-machine-price/v1",
+    "checked_date": "2026-10-29",
+    "timezone": "Asia/Shanghai",
+    "basis": "public_list_price_estimate_not_actual_invoice",
+    "provider": "天翼云",
+    "price_url": "https://www.ctyun.cn/document/10029787/10047957",
+    "billing_scope_url": "https://www.ctyun.cn/document/10029787/10030140",
+    "sku": "pak3.8xlarge.8",
+    "accelerator": "Ascend 910B",
+    "accelerator_count": 2,
+    "accelerator_memory_gb_each": 64,
+    "vcpu": 32,
+    "host_memory_gb": 256,
+    "currency": "CNY",
+    "instance_monthly_price": 36908,
+    "card_monthly_equivalent": 18454,
+    "billing_mode": "monthly_prepaid",
+    "included": [
+      "CPU",
+      "host memory",
+      "accelerator and accelerator memory"
+    ],
+    "separately_billed_not_in_this_estimate": [
+      "cloud disks",
+      "public network bandwidth"
+    ],
+    "month_days_for_analysis": 30,
+    "month_days_source": "explicit analytical convention, not provider billing-cycle claim",
+    "hardware_scope": "Analogous 910B 64GB cloud instance, not proof of identical 910B2 subtype, host or purchase terms.",
+    "policy": "Apply the same rate and accounting scope to both arms; do not infer actual allocation from TP degree. Price is not selected to meet a reduction target.",
+    "verification": "Provider HTML fetched and price table plus billing-scope text inspected on 2026-10-29; web price-page fetch failures retained in conversation, terminal HTTP fetch succeeded."
+  },
+  "source_provenance": {
+    "campaign_seal_sha256": "0ab8826ae8bbd0ef4f7295a25ccb094eb6862b857a5fcd0a726311d7e1240758",
+    "report_summary_sha256": "1afab22b2f5dcfb27270516e540fd90d1b6433b6af0e02e650dd9934859d57e9",
+    "report_seal_sha256": "4f71b7b83e29de8b2bfead0b0898a8e93eca93235de9d0c14f9e383dd3d39d97",
+    "reused_origins": [
+      {
+        "campaign_sha256": "7fa1cbeae5bdd4d177d6dae9f8f442db94b112f864a432e836761ac189817232",
+        "campaign_seal_sha256": "28457bf44a002c6aa18837fc1b68a99ed6bd3ee83db3c46cf45eead01b4699bd",
+        "plan_sha256": "ec9513ff8403dfcd43aae754324a9726b2a9fd3b6d8f32dbc3d62510e9f02d96",
+        "parent_status": "failed",
+        "stages": [
+          "continuous-B0"
+        ]
+      },
+      {
+        "campaign_sha256": "9fdb5347ad032a8d8d59488cea462e6ae58f1f0326598b4cc94399783cdc7a75",
+        "campaign_seal_sha256": "9518334204da7d137ce238142e730a1b8e4a3e457a7b2964bec2d0fc63845e98",
+        "plan_sha256": "64baf4e2b32e8dcbc07e3cf37915bd59488b3bab2af173338a452acebf0a9508",
+        "parent_status": "failed",
+        "stages": [
+          "continuous-B1"
+        ]
+      },
+      {
+        "campaign_sha256": "e6ae18c0df97f60909c183282c666ae86f390093ae7e2f5ccbc4203326456917",
+        "campaign_seal_sha256": "631e706133b16bfe3f0782c4eda731e9c0eee624c17aace0096ee0db387aeae5",
+        "plan_sha256": "62cc559124fb8e17bbe8dff844a6f9f1be1ff75da7f9ae3ed54e7118eb6677b0",
+        "parent_status": "failed",
+        "stages": [
+          "mmlu-pair",
+          "frontier-solver-B0",
+          "frontier-solver-B1",
+          "frontier-judge-B0",
+          "frontier-judge-B1",
+          "hle-solver-B0",
+          "hle-solver-B1",
+          "hle-judge-B0"
+        ]
+      }
+    ],
+    "stages": [
+      {
+        "name": "continuous-B0",
+        "status": "reused_verified",
+        "execution": "reused",
+        "source_index": 0,
+        "original_started": 1794575602.3833852,
+        "original_ended": 1794577635.9888184
+      },
+      {
+        "name": "continuous-B1",
+        "status": "reused_verified",
+        "execution": "reused",
+        "source_index": 1,
+        "original_started": 1794582895.680496,
+        "original_ended": 1794584942.2826943
+      },
+      {
+        "name": "mmlu-pair",
+        "status": "reused_verified",
+        "execution": "reused",
+        "source_index": 2,
+        "original_started": 1794627940.2423434,
+        "original_ended": 1794632636.3516014
+      },
+      {
+        "name": "frontier-solver-B0",
+        "status": "reused_verified",
+        "execution": "reused",
+        "source_index": 2,
+        "original_started": 1794632637.6942718,
+        "original_ended": 1794637170.3625739
+      },
+      {
+        "name": "frontier-solver-B1",
+        "status": "reused_verified",
+        "execution": "reused",
+        "source_index": 2,
+        "original_started": 1794637171.5975227,
+        "original_ended": 1794640040.0121498
+      },
+      {
+        "name": "frontier-judge-B0",
+        "status": "reused_verified",
+        "execution": "reused",
+        "source_index": 2,
+        "original_started": 1794640041.7380307,
+        "original_ended": 1794642081.9567485
+      },
+      {
+        "name": "frontier-judge-B1",
+        "status": "reused_verified",
+        "execution": "reused",
+        "source_index": 2,
+        "original_started": 1794642083.3552752,
+        "original_ended": 1794644396.0810344
+      },
+      {
+        "name": "hle-solver-B0",
+        "status": "reused_verified",
+        "execution": "reused",
+        "source_index": 2,
+        "original_started": 1794644397.6511023,
+        "original_ended": 1794649873.5223563
+      },
+      {
+        "name": "hle-solver-B1",
+        "status": "reused_verified",
+        "execution": "reused",
+        "source_index": 2,
+        "original_started": 1794649874.2907536,
+        "original_ended": 1794653868.5069196
+      },
+      {
+        "name": "hle-judge-B0",
+        "status": "reused_verified",
+        "execution": "reused",
+        "source_index": 2,
+        "original_started": 1794653869.061141,
+        "original_ended": 1794655913.004882
+      },
+      {
+        "name": "hle-judge-B1",
+        "status": "completed",
+        "execution": "new",
+        "source_index": null,
+        "original_started": 1794657747.462496,
+        "original_ended": 1794659772.2192004
+      },
+      {
+        "name": "swe-trace-B0",
+        "status": "completed",
+        "execution": "new",
+        "source_index": null,
+        "original_started": 1794659772.7517738,
+        "original_ended": 1794661057.2377822
+      },
+      {
+        "name": "swe-trace-B1",
+        "status": "completed",
+        "execution": "new",
+        "source_index": null,
+        "original_started": 1794661057.7866306,
+        "original_ended": 1794662540.705126
+      },
+      {
+        "name": "terminal-trace-B0",
+        "status": "completed",
+        "execution": "new",
+        "source_index": null,
+        "original_started": 1794662541.364153,
+        "original_ended": 1794663986.2554095
+      },
+      {
+        "name": "terminal-trace-B1",
+        "status": "completed",
+        "execution": "new",
+        "source_index": null,
+        "original_started": 1794663988.0712543,
+        "original_ended": 1794665760.5778596
+      }
+    ]
+  },
+  "metric_notes": {
+    "throughput": "Actual successful/completed output tokens divided by solver batch wall time. Judge traffic is separate.",
+    "tpot": "Per-request (completion-first content token)/(output_tokens-1), equal-weight mean; output_tokens>1 only.",
+    "percentiles": "Linear interpolation at (n-1)*q; finite samples, not continuous stability.",
+    "quality": "Original graders and planned denominators. Unresolved are nonsuccess, not confirmed incorrect; no statistical equivalence claim.",
+    "cost": "Same fixed historical public analogous-machine rate; sample estimate, not actual invoice.",
+    "reuse": "Every reused stage re-audited by the one-click runner; original source dates/controllers/failed parent statuses retained. No duplicated inference."
+  },
+  "milestone_assessment": {
+    "profile": "milestone-v1.5",
+    "targets": {
+      "3.4.1": {
+        "name": "有效算力效率 ≥50%",
+        "accepted": false,
+        "status": "reference_available_current_numerator_not_measured",
+        "display_value": "参考分母已复用；本轮分子待测",
+        "display_value_en": "Reference denominator reused; current numerator pending",
+        "measured_value": null,
+        "accepted_scope": null,
+        "reference_tflops_per_card_upper": "19.34038334687175052309470403284461724716",
+        "reference_statistics_path": "reference-denominator-v1.json",
+        "reference_interpretation": "同工况独立参考",
+        "reference_available": true,
+        "reference_statistics_reused": true,
+        "historical_evidence": {
+          "name": "有效算力效率 ≥50%",
+          "status": "历史原工况范围内达标；参考已重新核验",
+          "accepted": true,
+          "accepted_scope": "Existing qualified M01 fixed200/out256, three synchronized uninstrumented repetitions per arm",
+          "measured_value": 59.7572618332167,
+          "display_value": "≥59.76%",
+          "source_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/53541118b3461705f1e61532710ff0a759d59af0/reports/m01-qualified-pair-20261103/README.md",
+          "reason": "已有独立合格参考，原脚本已重新核验算量、三轮计时及关键路径。B1保守效率下界达到50%；适用于原out256工况，不套用到新out8192运行。"
+        },
+        "source_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/53541118b3461705f1e61532710ff0a759d59af0/reports/m01-qualified-pair-20261103/README.md",
+        "source_summary_sha256": "95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0",
+        "reason": "已有参考分母统计可复用；本轮效率由匹配工作域的必要算量和同步计时重新计算。旧59.7573%作为历史结果保留。",
+        "reason_en": "Reuse the existing reference denominator statistics. Recompute efficiency from current matched-workload arithmetic and synchronized timing; retain59.7573% only as a historical result.",
+        "calibration_scope": {
+          "dataset": "mmlu",
+          "profile": "fixed200-v1",
+          "tasks": 200,
+          "max_completion_tokens": 256,
+          "repetitions_per_arm": 3,
+          "frontend": "native_inproc"
+        }
+      },
+      "3.4.2": {
+        "name": "吞吐 ≥10%，TTFT/TPOT 各改善 ≥5%",
+        "status": "单一固定数据集达标",
+        "accepted": true,
+        "accepted_scope": "One complete fixed profile per target; all profile results disclosed",
+        "measured_value": null,
+        "display_value": "达标：mmlu, hle, frontier, swe, terminal",
+        "reason": "同一个固定数据集须同时满足该项目标的全部条件；符合条件：mmlu, hle, frontier, swe, terminal。五项结果与负收益均保留，不跨数据集拼接指标。成本为已披露的同费率估算，利用率增量单列，不另造‘明显改善’阈值。质量与专项稳定性另行报告。",
+        "numeric_threshold_met": true,
+        "qualifying_profiles": [
+          "mmlu",
+          "hle",
+          "frontier",
+          "swe",
+          "terminal"
+        ],
+        "numeric_results_by_profile": [
+          {
+            "dataset": "mmlu",
+            "throughput_ratio": 1.9982992921356268,
+            "mean_ttft_reduction_percent": 50.94241736350036,
+            "mean_tpot_reduction_percent": 49.17591987313084,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "hle",
+            "throughput_ratio": 1.577120782355068,
+            "mean_ttft_reduction_percent": 46.101450810400436,
+            "mean_tpot_reduction_percent": 34.51412126863638,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "frontier",
+            "throughput_ratio": 2.309131475430005,
+            "mean_ttft_reduction_percent": 62.12116919227243,
+            "mean_tpot_reduction_percent": 54.7097628721982,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "swe",
+            "throughput_ratio": 2.1093810956330343,
+            "mean_ttft_reduction_percent": 39.308825864443605,
+            "mean_tpot_reduction_percent": 58.13238645561374,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "terminal",
+            "throughput_ratio": 2.3749917471221442,
+            "mean_ttft_reduction_percent": 50.72986539706239,
+            "mean_tpot_reduction_percent": 56.67145196087584,
+            "numeric_threshold_met": true
+          }
+        ],
+        "acceptance_policy_id": "single-fixed-profile-20261114-v2",
+        "display_value_en": "Met: mmlu, hle, frontier, swe, terminal",
+        "reason_en": "One fixed profile must jointly satisfy this target; qualifying profiles: mmlu, hle, frontier, swe, terminal. All results and regressions remain visible. Never mix metrics across profiles. Cost uses the disclosed equal-rate estimate; utilization changes are reported without inventing a significance threshold. Quality and context stability remain separate."
+      },
+      "3.4.3": {
+        "name": "五数据集与16K稳定性",
+        "accepted": false,
+        "status": "固定五项执行完成；16K稳定性结论待复核",
+        "display_value": "Executed; 16K assessment open",
+        "reason": "固定五项两臂均已完成，无失败或未返回请求。按输入+输出计实际16K覆盖：hle131/126、frontier39/35、swe3/2、terminal4/4、mmlu0/0（B0/B1）。裁判未决与准确率另列，不作为本项稳定性失败。独立C8两臂4K/16K正式窗口均完成：B1吞吐346.51→152.73 token/s，TTFT P99为2.627→10.175秒；16K五个连续提交区间的TTFT P99为10.176、5.556、3.979、5.169、6.442秒。尚需完成大纲所要求的真实任务实际16K区间、可比负载和尾时延的联合判读；有限终态长度计数或合成C8不能单独替代该结论。未将其判成已证实的引擎稳定性失败。",
+        "evidence_path": "stability-audit-v1.json",
+        "quality_is_a_separate_assessment": true
+      },
+      "3.4.4": {
+        "name": "单位token成本降低 ≥10%及高负载利用率改善",
+        "status": "单一固定数据集达标",
+        "accepted": true,
+        "numeric_threshold_met": true,
+        "accepted_scope": "One complete fixed profile per target; all profile results disclosed",
+        "measured_value": null,
+        "display_value": "达标：mmlu, hle, frontier, swe, terminal",
+        "reason": "同一个固定数据集须同时满足该项目标的全部条件；符合条件：mmlu, hle, frontier, swe, terminal。五项结果与负收益均保留，不跨数据集拼接指标。成本为已披露的同费率估算，利用率增量单列，不另造‘明显改善’阈值。质量与专项稳定性另行报告。",
+        "qualifying_profiles": [
+          "mmlu",
+          "hle",
+          "frontier",
+          "swe",
+          "terminal"
+        ],
+        "numeric_results_by_profile": [
+          {
+            "dataset": "mmlu",
+            "equal_rate_unit_cost_reduction_percent": 49.95744611752938,
+            "ai_core_utilization_gain_pp": 33.87176726265786,
+            "numeric_threshold_met": true,
+            "observed_utilization_increased": true
+          },
+          {
+            "dataset": "hle",
+            "equal_rate_unit_cost_reduction_percent": 36.593315414515715,
+            "ai_core_utilization_gain_pp": 4.298922449937919,
+            "numeric_threshold_met": true,
+            "observed_utilization_increased": true
+          },
+          {
+            "dataset": "frontier",
+            "equal_rate_unit_cost_reduction_percent": 56.69367419567217,
+            "ai_core_utilization_gain_pp": 36.527491591154245,
+            "numeric_threshold_met": true,
+            "observed_utilization_increased": true
+          },
+          {
+            "dataset": "swe",
+            "equal_rate_unit_cost_reduction_percent": 52.5927295892497,
+            "ai_core_utilization_gain_pp": 48.90817146084333,
+            "numeric_threshold_met": true,
+            "observed_utilization_increased": true
+          },
+          {
+            "dataset": "terminal",
+            "equal_rate_unit_cost_reduction_percent": 57.89459053018887,
+            "ai_core_utilization_gain_pp": 45.279556407303545,
+            "numeric_threshold_met": true,
+            "observed_utilization_increased": true
+          }
+        ],
+        "acceptance_policy_id": "single-fixed-profile-20261114-v2",
+        "display_value_en": "Met: mmlu, hle, frontier, swe, terminal",
+        "reason_en": "One fixed profile must jointly satisfy this target; qualifying profiles: mmlu, hle, frontier, swe, terminal. All results and regressions remain visible. Never mix metrics across profiles. Cost uses the disclosed equal-rate estimate; utilization changes are reported without inventing a significance threshold. Quality and context stability remain separate."
+      }
+    },
+    "scope": "V1.5里程碑四项要求；本表不构成项目最终目标验收。"
+  },
+  "project_final_assessment": {
+    "schema": "project-final-goals-assessment/v1",
+    "profile": "project-final",
+    "goal_contract_id": "project4-final-20261113-v1",
+    "fully_specified": true,
+    "acceptance_established": false,
+    "confirmed_interpretation": {
+      "original_compute_term": "理论峰值",
+      "operational_compute_denominator": "同工况独立参考",
+      "confirmation": "理论峰值就解释为同工况参考，否则不可能实现。",
+      "formula": "eta_ref = 100 * C / C_ref = 100 * T_ref / T",
+      "same_effective_work_and_card_count_required": true,
+      "vendor_peak_is_not_used": true,
+      "model": "Qwen3.5-35B-A3B",
+      "model_scope_explanation_already_confirmed": true,
+      "original_model_wording": "代表性7B–13B模型（与主责单位确定）",
+      "model_explanation_source": "V1.5课题四35B调整及用户再次确认模型差异已解释；不重新设为阻塞项。"
+    },
+    "criterion_source": {
+      "kind": "user_supplied_document_excerpt_and_explicit_interpretation",
+      "document_pages": [
+        13,
+        14,
+        15
+      ],
+      "document_total_pages": 217,
+      "source_document_binary_available": false,
+      "source_excerpt": "reports/project-final-goals-20261113/source-excerpt.txt",
+      "source_excerpt_sha256": "b9ed0ea98970ee560e60ca3aa702d0f313421ca21135fb7cc177d6ae6d32825f",
+      "text_fidelity": "Normalized excerpt of the user-pasted text; not an independently verified source document or verbatim binary extract."
+    },
+    "acceptance_policy": {
+      "id": "single-fixed-profile-20261114-v2",
+      "source": "user_confirmed_interpretation_after_partial_execution",
+      "source_quote": "只要一个数据集达成目标就行。",
+      "minimum_qualifying_profiles": 1,
+      "joint_metrics_must_share_one_profile": true,
+      "all_five_numeric_passes_required": false,
+      "all_five_execution_and_result_disclosure_unchanged": true,
+      "compute_reference_profile": "mmlu-fixed200-v1",
+      "context_and_multi_tenant_requirements_unchanged": true
+    },
+    "targets": {
+      "3.4.1": {
+        "name": "单芯片有效算力",
+        "requirement": "同工况参考效率 ≥90%",
+        "requirement_en": "Workload-reference efficiency ≥90%",
+        "threshold_percent": 90,
+        "formula": "eta_ref = 100 * C / C_ref = 100 * T_ref / T",
+        "milestone_threshold_percent": 50,
+        "evidence_lower_bound_percent": "59.75726183321670061341678705592882024036",
+        "evidence_summary": "原MMLU200/out256效率下界≥59.76%；本轮效率需重算",
+        "evidence_summary_en": "Historical MMLU200/out256 lower bound≥59.76%; current efficiency requires recomputation",
+        "lower_bound_distance_to_target_pp": "30.24273816678329938658321294",
+        "source_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/53541118b3461705f1e61532710ff0a759d59af0/reports/m01-qualified-pair-20261103/summary.json",
+        "source_sha256": "95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0",
+        "criterion_source_verified": true,
+        "attainment": "not_demonstrated",
+        "reason": "原文“理论峰值”按用户确认解释为同工况独立参考，模型沿用已确认35B。历史out256的B1保守下界约59.76%，未证明90%；下界距离不是实际效率差距，不反推真实效率必低90%，不套用于本轮完整回答或全五项。"
+      },
+      "3.4.2": {
+        "name": "吞吐与时延",
+        "throughput_ratio_min": 2,
+        "throughput_gain_percent_min": 100,
+        "mean_ttft_reduction_percent_min": 20,
+        "mean_tpot_reduction_percent_min": 20,
+        "quality_and_service_requirements_unchanged": true,
+        "scenarios": "既定多轮对话、工具调用等典型场景；基准与可比资源沿用已确认配置。",
+        "requirement": "单一固定数据集：吞吐 ≥2×；平均TTFT/TPOT分别降低 ≥20%",
+        "requirement_en": "One fixed profile: throughput ≥2×; mean TTFT/TPOT each reduced ≥20%",
+        "evidence_summary": "符合全部数值门槛的固定数据集：frontier, swe, terminal",
+        "evidence_summary_en": "Fixed profiles meeting all numeric targets: frontier, swe, terminal",
+        "criterion_source_verified": true,
+        "attainment": "demonstrated",
+        "qualifying_profiles": [
+          "frontier",
+          "swe",
+          "terminal"
+        ],
+        "nonqualifying_profiles": [
+          "mmlu",
+          "hle"
+        ],
+        "any_profile_numeric_threshold_met": true,
+        "numeric_results_by_profile": [
+          {
+            "dataset": "mmlu",
+            "throughput_ratio": 1.9982992921356268,
+            "mean_ttft_reduction_percent": 50.94241736350036,
+            "mean_tpot_reduction_percent": 49.17591987313084,
+            "numeric_threshold_met": false
+          },
+          {
+            "dataset": "hle",
+            "throughput_ratio": 1.577120782355068,
+            "mean_ttft_reduction_percent": 46.101450810400436,
+            "mean_tpot_reduction_percent": 34.51412126863638,
+            "numeric_threshold_met": false
+          },
+          {
+            "dataset": "frontier",
+            "throughput_ratio": 2.309131475430005,
+            "mean_ttft_reduction_percent": 62.12116919227243,
+            "mean_tpot_reduction_percent": 54.7097628721982,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "swe",
+            "throughput_ratio": 2.1093810956330343,
+            "mean_ttft_reduction_percent": 39.308825864443605,
+            "mean_tpot_reduction_percent": 58.13238645561374,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "terminal",
+            "throughput_ratio": 2.3749917471221442,
+            "mean_ttft_reduction_percent": 50.72986539706239,
+            "mean_tpot_reduction_percent": 56.67145196087584,
+            "numeric_threshold_met": true
+          }
+        ],
+        "all_profile_numeric_thresholds_met": false,
+        "reason": "按用户确认，任一固定数据集在同一可比B0/B1工况同时满足吞吐、TTFT和TPOT全部数值门槛即可，不要求五项均达标。各项结果、负收益和未决数完整披露，不跨数据集拼接最好指标，不改写此前报告。数值达标不构成统计质量等价证明。"
+      },
+      "3.4.3": {
+        "name": "长上下文稳定性",
+        "context_tokens_min": 32768,
+        "requires_stable_throughput_curve": true,
+        "requires_stable_ttft_tpot_p95_p99": true,
+        "requires_no_obvious_performance_degradation": true,
+        "invented_numeric_tail_tolerance": null,
+        "requirement": "≥32K：吞吐平稳，TTFT/TPOT P95/P99稳定、无明显退化",
+        "requirement_en": "≥32K: stable throughput and TTFT/TPOT P95/P99, no obvious regression",
+        "evidence_summary": "本轮独立C8仅4K/16K；无可验收32K连续窗口",
+        "evidence_summary_en": "Current C8 covers4K/16K; no qualified32K continuous window",
+        "criterion_source_verified": true,
+        "attainment": "not_demonstrated",
+        "observed_input_at_least32768_cases": 0,
+        "observed_input_plus_output_at_least32768_cases": 0,
+        "continuous_32k_stability_verified": false,
+        "reason": "16K里程碑窗口不证明32K最终目标；偶发总上下文长度也不能代替连续吞吐曲线与P95/P99尾延迟稳定性证据。保留原文定性要求，不自行增加尾延迟阈值。"
+      },
+      "3.4.4": {
+        "name": "单位token成本与利用率",
+        "unit_token_cost_reduction_percent_min": 30,
+        "comparator": "国际主流开源框架；本项目按已确认B0配对及可比条件复核。",
+        "requires_high_multi_tenant_utilization": true,
+        "invented_numeric_utilization_threshold": null,
+        "requirement": "单位token成本降低 ≥30%；多租户场景维持较高利用率",
+        "requirement_en": "Unit token cost reduced ≥30%; high utilization with multiple tenants",
+        "evidence_summary": "各项同费率估算降幅单列；多租户证据未完成",
+        "evidence_summary_en": "Current equal-rate cost reductions are listed per profile; multi-tenant evidence incomplete",
+        "criterion_source_verified": true,
+        "attainment": "not_demonstrated",
+        "numeric_cost_results_by_profile": [
+          {
+            "dataset": "mmlu",
+            "equal_rate_unit_cost_reduction_percent": 49.95744611752938,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "hle",
+            "equal_rate_unit_cost_reduction_percent": 36.593315414515715,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "frontier",
+            "equal_rate_unit_cost_reduction_percent": 56.69367419567217,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "swe",
+            "equal_rate_unit_cost_reduction_percent": 52.5927295892497,
+            "numeric_threshold_met": true
+          },
+          {
+            "dataset": "terminal",
+            "equal_rate_unit_cost_reduction_percent": 57.89459053018887,
+            "numeric_threshold_met": true
+          }
+        ],
+        "qualifying_cost_profiles": [
+          "mmlu",
+          "hle",
+          "frontier",
+          "swe",
+          "terminal"
+        ],
+        "any_profile_cost_threshold_met": true,
+        "multi_tenant_utilization_verified": false,
+        "reason": "保留已确认国际主流开源框架B0与可比条件，费用为历史公开报价同费率估算，不是本机账单。单服务高负载利用率不能自动证明多租户要求；未发明“较高利用率”的数值门槛。"
+      }
+    },
+    "limits": "已确认同工况参考和35B模型解释；最终目标单独展示，里程碑通过不等于最终验收通过。"
+  },
+  "merge_requirements": {
+    "milestone_and_final_sections_required": true,
+    "both_sections_present": true,
+    "final_goal_sources_complete": true,
+    "reference_interpretation_recorded": true,
+    "model_scope_explanation_recorded": true,
+    "runtime_and_quality_review_resolved": true,
+    "ready_to_merge": true,
+    "merge_scope": "结果报告及来源核验就绪，不代表项目最终目标全部达到",
+    "project_final_attainment_is_independent": true,
+    "blockers": []
+  },
+  "milestone_numeric_requirements_met": false,
+  "report_revision_date": "2026-11-15",
+  "reference_reuse_correction": {
+    "schema": "qualified-reference-reuse-correction/v1",
+    "source_benchmark_commit": "53541118b3461705f1e61532710ff0a759d59af0",
+    "source_summary_sha256": "95c6bd465c4beb558cd25284e221a166e33634ea2f9b6d44364d2b1114863bd0",
+    "new_inference_executed": false,
+    "reason": "Reuse denominator statistics rather than an old efficiency score; distinguish available calibration from pending current numerator measurements.",
+    "denominator_statistics_sha256": "d943a8f85b87fb377b0aefc069348344be83b486d8a19f3521f87d1e0c0065f7",
+    "prior_summary_sha256": "8173587f10ff88b77839e6ae6648c16ef4a9abecbe3204639755759d50e921d2"
+  },
+  "compute_reference_statistics": {
+    "schema": "qualified-reference-denominator/v1",
+    "benchmark_commit": "53541118b3461705f1e61532710ff0a759d59af0",
+    "manifest_sha256": "5c7194b483d96e7a682183fa62c569737312d8139fc0b20b51e91a5479772ad6",
+    "unit": "TFLOP/s/card",
+    "interpretation": "Workload-specific independent reference; upper denominator from a certified reference-time lower bound",
+    "scope": {
+      "profile": "mmlu-fixed200-v1",
+      "requests": 200,
+      "input_tokens": 282265,
+      "output_tokens": 51200,
+      "max_completion_tokens": 256,
+      "dtype": "BF16",
+      "tp": 2,
+      "accelerator": "Ascend 910B2",
+      "frontend": "native_inproc",
+      "timing": "dual_rank_synchronized_after_warmup"
+    },
+    "calculation": {
+      "reference_upper_formula": "C_ref_upper = sum(F_upper) / (k * sum(T_ref_lower) * 1e12)",
+      "current_lower_formula": "C_current_lower = sum(F_current_lower) / (k * sum(T_current) * 1e12)",
+      "efficiency_lower_formula": "eta_lower = 100 * C_current_lower / C_ref_upper",
+      "shared_exact_work_formula": "Only when work is identical and cancellation is justified: eta_lower = 100 * sum(T_ref_lower) / sum(T_current)",
+      "reference_time_construction": "finish(v) = duration(v) + max(finish(parent)); T_ref_lower = max(finish(v)) over the certified retained dependency/resource graph",
+      "aggregation": "sum work and time across all repetitions before division; never average per-repeat rates or select the fastest repetition",
+      "chips": 2,
+      "flops_counting": "Necessary-work dependency closure; matrix multiply-add=2 operations; scalar catalog fixed; padding, redundant work and unused drafts excluded",
+      "reference_bound": "Certified retained graph and nonnegative omitted work give a time lower bound; combining F_upper and T_ref_lower gives a reference-compute upper bound",
+      "independence": "Target endpoint elapsed times and target efficiency are not inputs to reference calibration or DAG durations",
+      "applicability": "Workload, arithmetic/reference domains, dtype, card count and timing boundary must match; out256/native and out8192/HTTP are separate"
+    },
+    "arms": {
+      "B0": {
+        "sum_reference_seconds_lower": "102.3231709195348958960064",
+        "effective_flops_interval": [
+          5487388087149780,
+          5488258327989369
+        ],
+        "reference_tflops_per_card_upper": "26.81825767648090573566921216250915821371",
+        "reference_repetitions": [
+          {
+            "name": "uninstrumented-1",
+            "F_interval": [
+              1829129362383260,
+              1829419442663123
+            ],
+            "Tref_lower_seconds": "34.1077236398449652986688",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "0c51f8f42043eff8f82ec23888702cdd1583a9d68835135e32190c7514c8feff"
+          },
+          {
+            "name": "uninstrumented-2",
+            "F_interval": [
+              1829129362383260,
+              1829419442663123
+            ],
+            "Tref_lower_seconds": "34.1077236398449652986688",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "6db7784be4bb652d1d0179e6673f7405314a2cb5077adf0321c765cb152ab30d"
+          },
+          {
+            "name": "uninstrumented-3",
+            "F_interval": [
+              1829129362383260,
+              1829419442663123
+            ],
+            "Tref_lower_seconds": "34.1077236398449652986688",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "b91eb934d213473b74f2cc499f94b2c72d167682082a4e520254c9a6cb35eb82"
+          }
+        ]
+      },
+      "B1": {
+        "sum_reference_seconds_lower": "140.60316791316519",
+        "effective_flops_interval": [
+          5438115361780845,
+          5438638334450385
+        ],
+        "reference_tflops_per_card_upper": "19.34038334687175052309470403284461724716",
+        "reference_repetitions": [
+          {
+            "name": "uninstrumented-1",
+            "F_interval": [
+              1812705120593615,
+              1812879444816795
+            ],
+            "Tref_lower_seconds": "46.86772263772173",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "0407c570c288265d9b5038a7e2a87eb1e8ea87553551785c7f6695a073ab2a86"
+          },
+          {
+            "name": "uninstrumented-2",
+            "F_interval": [
+              1812705120593615,
+              1812879444816795
+            ],
+            "Tref_lower_seconds": "46.86772263772173",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "c5bea9d69988f75e68fe6c141965a13e23d8a34533a11fb84a00bff465c12a10"
+          },
+          {
+            "name": "uninstrumented-3",
+            "F_interval": [
+              1812705120593615,
+              1812879444816795
+            ],
+            "Tref_lower_seconds": "46.86772263772173",
+            "requests": 200,
+            "input_tokens": 282265,
+            "output_tokens": 51200,
+            "source_sha256": "9a198f5dcb9e6a062b9caac2a69040508e82d4210c852fd8b007f1f671113746"
+          }
+        ]
+      }
+    },
+    "domain_sha256": "7913a10bc39d5ca6e187b156d8c741a7f06023952d8dd376517b970b06077019"
+  }
+}

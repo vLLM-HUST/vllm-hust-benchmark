@@ -1,0 +1,303 @@
+"""Fixed original-first8 MMLU contracts and pure prospective trial gates."""
+
+import copy
+import hashlib
+import importlib.util
+import json
+import math
+from pathlib import Path
+
+ROOT = Path("/workspace/bidkv-five-datasets-20261113-01")
+PROBE = ROOT / "durable/probes/bidkv-mmlu8-pressure-03"
+DRIVER = Path(__file__).resolve().parent
+INPUT = PROBE / "input/mmlu-original"
+STAGES = ("native-r01", "bidkv-r01", "bidkv-r02", "native-r02")
+PROTOCOL_SHA = "8124492d6c59f53817116e27b32cd86c7b06c5ce59a45d1d77df56c080772c87"
+CORE = {
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0",
+    "transformers": "5.5.4",
+    "tokenizers": "0.22.2",
+}
+PROFILE = {
+    "max_model_len": 65536,
+    "dtype": "torch.bfloat16",
+    "tensor_parallel_size": 2,
+    "pipeline_parallel_size": 1,
+    "data_parallel_size": 1,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 4096,
+    "async_scheduling": True,
+    "kv_cache_memory_bytes": 1677721600,
+    "enable_prefix_caching": True,
+    "mamba_cache_mode": "align",
+    "speculative_num_tokens": 2,
+    "enable_cpu_binding": True,
+    "graph_mode": "FULL_AND_PIECEWISE",
+    "capture_sizes": [3, 6, 12, 24, 48],
+}
+
+
+def sha(path):
+    with Path(path).open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def digest(value):
+    return hashlib.sha256(
+        json.dumps(
+            value,
+            sort_keys=True,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode()
+    ).hexdigest()
+
+
+def read(path):
+    return json.loads(Path(path).read_bytes())
+
+
+def wire_id(stage, lane):
+    assert stage in STAGES and type(lane) is int and lane in range(8)
+    arm, repeat = stage.split("-")
+    return f"hust-mm03-{'n' if arm == 'native' else 'b'}-{repeat}-l{lane:02}".ljust(
+        32, "0"
+    )
+
+
+def load_inputs(root=INPUT, driver=DRIVER):
+    root, driver = Path(root), Path(driver)
+    assert sha(driver / "mmlu-fixed200.json") == PROTOCOL_SHA
+    protocol = read(driver / "mmlu-fixed200.json")
+    for name, expected in protocol["frozen_files_sha256"].items():
+        assert sha(root / name) == expected, "Original frozen MMLU input changed"
+    verified = read(root / "inputs/verified-mmlu-quality-inputs.json")["cases"]
+    recovered = read(root / "inputs/recovered-mmlu-cases.json")
+    plan = read(root / "inputs/mmlu-quality018-r2/quality-request-plan.json")
+    original_tokens = read(
+        root / "inputs/mmlu-quality018-r2/quality-tokenize-preflight.json"
+    )
+    assert (
+        len(verified)
+        == len(recovered)
+        == len(plan["requests"])
+        == len(original_tokens)
+        == 200
+    )
+    keys = ("case_id", "category", "source_row_sha256", "prompt_sha256")
+    assert [{key: row[key] for key in keys} for row in verified] == protocol["cases"]
+    assert (
+        [row["case_id"] for row in verified]
+        == [row["case_id"] for row in recovered]
+        == [row["case_id"] for row in original_tokens]
+    )
+    receipt = read(driver / "input-token-receipt.json")
+    assert receipt["protocol_sha256"] == PROTOCOL_SHA and receipt[
+        "selection_indices"
+    ] == list(range(8))
+    assert len(receipt["requests"]) == 8
+    selected = []
+    for lane in range(8):
+        case, body, frozen = (
+            verified[lane],
+            copy.deepcopy(plan["requests"][lane]),
+            receipt["requests"][lane],
+        )
+        assert (
+            case["case_id"] == frozen["case_id"]
+            and case["category"] == frozen["category"] == "biology"
+        )
+        assert digest(body) == frozen["original_request_body_sha256"]
+        assert body["model"] == "qwen3.5-35b" and body["max_completion_tokens"] == 8192
+        assert body["temperature"] == 0 and body["seed"] == 0
+        assert body["stream"] is True and body["stream_options"] == {
+            "include_usage": True
+        }
+        assert "ignore_eos" not in body and "chat_template_kwargs" not in body
+        assert frozen["input_tokens"] == original_tokens[lane]["count"]
+        assert (
+            frozen["original_token_ids_sha256"]
+            == original_tokens[lane]["token_ids_sha256"]
+        )
+        assert frozen["input_tokens"] + 8192 <= 65536
+        selected.append({"case": case, "body": body, "frozen": frozen})
+    return selected
+
+
+def load_grader(root=INPUT, driver=DRIVER):
+    pin = read(Path(driver) / "mmlu-fixed200.json")
+    path = Path(root) / "scorers/mmlu_pro_pyramidkv.py"
+    assert sha(path) == pin["frozen_files_sha256"]["scorers/mmlu_pro_pyramidkv.py"]
+    spec = importlib.util.spec_from_file_location(
+        "mmlu03_original_answer_extractor", path
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def check_tokens(value, frozen):
+    ids = value["tokens"]
+    assert isinstance(ids, list) and all(
+        type(token) is int and token >= 0 for token in ids
+    )
+    assert (
+        type(value["count"]) is int
+        and value["count"] == len(ids) == frozen["input_tokens"]
+    )
+    original = hashlib.sha256(json.dumps(ids).encode()).hexdigest()
+    compact = hashlib.sha256(
+        json.dumps(ids, separators=(",", ":")).encode()
+    ).hexdigest()
+    assert original == frozen["original_token_ids_sha256"]
+    assert compact == frozen["compact_token_ids_sha256"]
+    return {
+        "case_id": frozen["case_id"],
+        "tokens": value["count"],
+        "original_sha256": original,
+        "compact_sha256": compact,
+    }
+
+
+def geometry(payload, inputs):
+    ranks = payload["results"]
+    assert len(ranks) == 2 and {rank["rank"] for rank in ranks} == {0, 1}
+    fields = (
+        "num_blocks",
+        "groups",
+        "tensor_descriptors",
+        "actual_profile",
+        "observer_source_sha256",
+        "loaded_vllm_file",
+        "loaded_ascend_file",
+    )
+    common = [{key: rank[key] for key in fields} for rank in ranks]
+    assert common[0] == common[1] and ranks[0]["actual_profile"] == PROFILE
+    assert len(inputs) == 8 and all(
+        item["input_tokens"] + 8192 <= 65536 for item in inputs
+    )
+    first, end, maximum = [0] * 8, [0] * 8, 0
+    for group in ranks[0]["groups"]:
+        assert group["is_eagle_group"] is False
+        spec = group["spec"]
+        block = spec["block_size_tokens"]
+        assert type(block) is int and block > 0
+        if spec["type"] == "FullAttentionSpec":
+            assert (
+                spec["sliding_window"] is None and spec["attention_chunk_size"] is None
+            )
+            first = [
+                value + math.ceil(item["input_tokens"] / block)
+                for value, item in zip(first, inputs)
+            ]
+            end = [
+                value + math.ceil((item["input_tokens"] + 8192 + 2) / block)
+                for value, item in zip(end, inputs)
+            ]
+            maximum += math.ceil(65536 / block)
+        else:
+            assert spec["type"] == "MambaSpec" and spec["mamba_cache_mode"] == "align"
+            extra = spec["num_speculative_blocks"]
+            assert type(extra) is int and extra >= 0
+            first = [value + 1 + extra for value in first]
+            end = [value + 2 + extra for value in end]
+            maximum += 2 + extra
+    usable = ranks[0]["num_blocks"] - 1
+    admitted = 0
+    for index in range(8):
+        if sum(first[: index + 1]) > usable:
+            break
+        admitted += 1
+    pressure = admitted >= 2 and sum(end[:admitted]) > usable
+    return {
+        "go": maximum <= usable and pressure,
+        "actual_total_pool_blocks": ranks[0]["num_blocks"],
+        "reserved_null_blocks": 1,
+        "usable_pool_blocks": usable,
+        "first_prefill_blocks_per_case": first,
+        "end_upper_blocks_per_case": end,
+        "maximum_context_upper_blocks": maximum,
+        "first_admission_upper_count": admitted,
+        "pressure_possible": pressure,
+        "nominal_context_concurrency_for_description_only": usable / maximum,
+        "fingerprint_sha256": digest(common[0]),
+        "scope": "Prospectively frozen MMLU8 growth gate. No Evo4–6 nominal rule. EOS/timing may prevent real exposure; actual preemptions/calls/changed decisions remain separate.",
+    }
+
+
+def metric_delta(before, after):
+    names = {
+        "vllm:num_preemptions_total",
+        "vllm:prefix_cache_hits_total",
+        "vllm:external_prefix_cache_hits_total",
+    }
+    names |= {
+        key
+        for key in before | after
+        if "prefix_cache" in key and key.endswith("_total")
+    }
+    assert names <= before.keys() and names <= after.keys()
+    result = {name: after[name] - before[name] for name in sorted(names)}
+    assert all(math.isfinite(value) and value >= 0 for value in result.values())
+    return result
+
+
+def pilot_decision(native, bidkv, *, clean_runtime, same_geometry, actual_waits_ok):
+    failures = []
+    if not clean_runtime:
+        failures.append("outside_cpu_or_other_runtime_interference")
+    if not same_geometry:
+        failures.append("different_actual_geometry")
+    if not actual_waits_ok:
+        failures.append("missing_or_nonzero_actual_wait")
+    for summary in (native, bidkv):
+        if (
+            summary["successful"] != 8
+            or summary["failed"] != 0
+            or not summary["wire_audit_passed"]
+        ):
+            failures.append("incomplete_or_invalid_transport")
+        if (
+            summary["counter_deltas"]["vllm:prefix_cache_hits_total"] != 0
+            or summary["counter_deltas"]["vllm:external_prefix_cache_hits_total"] != 0
+        ):
+            failures.append("nonzero_cache_hits")
+        if (
+            not summary["input_admission_passed"]
+            or not summary["policy"]["legal"]
+            or summary["policy"]["failures"]
+            or summary["policy"]["invalid_selections"]
+        ):
+            failures.append("input_or_policy_integrity_failure")
+    if (
+        bidkv["counter_deltas"]["vllm:num_preemptions_total"] <= 0
+        or bidkv["policy"]["calls"] <= 0
+        or bidkv["policy"]["changed_from_builtin"] <= 0
+    ):
+        failures.append("no_candidate_mechanism_exposure")
+    a, b = native["output_tokens_per_second"], bidkv["output_tokens_per_second"]
+    gain = (
+        100 * (b / a - 1)
+        if type(a) in (int, float) and type(b) in (int, float) and a > 0
+        else None
+    )
+    if gain is None or gain < 5:
+        failures.append("throughput_gain_below_five_percent")
+    qa, qb = native["quality"], bidkv["quality"]
+    if (
+        qa["correct"] < 6
+        or qb["correct"] < qa["correct"]
+        or qb["unparsed"] > qa["unparsed"]
+        or bidkv["finish_length"] > native["finish_length"]
+    ):
+        failures.append("prospective_quality_triage_not_met")
+    return {
+        "run_reverse_confirmation": not failures,
+        "reasons": sorted(set(failures)),
+        "first_pair_throughput_change_pct": gain,
+        "scope": "Prospective cost triage only, not quality equivalence/statistical proof/final acceptance. Negative/partial firstAB remains reported with16remaining requests not executed.",
+    }

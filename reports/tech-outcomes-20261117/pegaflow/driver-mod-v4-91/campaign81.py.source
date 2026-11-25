@@ -1,0 +1,17 @@
+"""Thin formal launcher; the original same-directory payload owns its services."""
+
+from pathlib import Path
+import sys
+
+from service81 import ROOT, PERSIST
+from wait_record81 import run
+
+
+if __name__ == "__main__":
+    payload = Path(__file__).with_name("campaign81_payload.py")
+    raise SystemExit(
+        run(
+            [str(ROOT / ".venv/bin/python"), "-B", str(payload), *sys.argv[1:]],
+            PERSIST / "metadata/formal-controller-wait.json",
+        )
+    )

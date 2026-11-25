@@ -1,0 +1,97 @@
+{
+  "schema": "own-mod-binding/v1",
+  "test_target": "own_mod",
+  "mod_prompt_sha256": "43bc925a6ad749971a64e5244b86451f5d4cf3361e87423b1eda8ea0b0d04461",
+  "mod_repository": "https://github.com/vLLM-HUST/pegaflow-hust",
+  "mod_revision": "e2cdc2f7b32d8294b54a74545c05d103e5a5ecaf",
+  "base_runtime": {
+    "vllm": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+    "ascend": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+    "core_packages": {
+      "torch": "2.10.0+cpu",
+      "torch-npu": "2.10.0.post4",
+      "vllm": "0.23.0+empty",
+      "vllm-ascend": "0.23.0",
+      "transformers": "5.5.4",
+      "tokenizers": "0.22.2",
+      "CANN": "9.1 installedimage/path"
+    }
+  },
+  "B0": {
+    "target": "Native official0.23",
+    "activation": "No kv-transfer-config and no Pega sidecar",
+    "enable_cpu_binding": true,
+    "common_optimizations": [
+      "APC enabled",
+      "Mamba align",
+      "async scheduling",
+      "MTP2",
+      "FULL_AND_PIECEWISE graphs3,6,12,24,48"
+    ],
+    "resource_profile": {
+      "kv_gib_per_rank": 16,
+      "max_model_len": 65536,
+      "max_num_seqs": 16,
+      "batch_tokens": 4096,
+      "image": 1,
+      "video": 0,
+      "TP": 2,
+      "PP": 1,
+      "DP": 1,
+      "EP": false
+    }
+  },
+  "B1": {
+    "target": "PegaFlow e2 on the same official foundation",
+    "activation": {
+      "sidecar": "pegaflow-server --addr 127.0.0.1:18391 --http-addr 127.0.0.1:18392 --pool-size 30gb --devices 0,1",
+      "kv_connector": "PegaKVConnector",
+      "module": "pegaflow.connector",
+      "role": "kv_both",
+      "extra": {
+        "pegaflow.mode": "read_write",
+        "pegaflow.model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+        "pegaflow.host": "http://127.0.0.1",
+        "pegaflow.port": 18391
+      }
+    },
+    "all_B0_common_configuration_retained": true,
+    "necessary_actual_differences": [
+      "External sidecar and30GiB host pool plus its CPU/device overhead",
+      "Connector scheduler/worker callbacks and host saves/loads",
+      "Current HMA connector disables local hybrid prefix index for dense/recurrent async safety; this is a MOD-specific cost, not a reason to disable NativeAPC"
+    ]
+  },
+  "actual_activation_evidence": [
+    "Installed artifact bytes compared with prior e2 wheel manifest",
+    "BothTPworker cache-registration and source logs retained",
+    "PegaAPI initialized counters and sidecar snapshots",
+    "Actual per-phase save/load successes/failures and transferred byte deltas; zero restore counts do not establish benefit"
+  ],
+  "build_reuse": {
+    "source_build_script": "Existing qualified build_current.py, sourcee2cdc..., Rust1.100.0, Ascendonly(noRDMA)",
+    "commands": [
+      "cargo build --release --no-default-features --features ascend -p pegaflow-py --bin pegaflow-server-py --bin pegaflow-metaserver-py",
+      "python setup.py build_ext --inplace (python/pegaflow/npu_ipc_bindings)",
+      "maturin build --release --no-default-features --features ascend --interpreter <SDK>/bin/python",
+      "<SDK>/bin/python -m pip install --no-deps --force-reinstall <verified-wheel>"
+    ],
+    "wheel_sha256": "df687c8d1fe5650cc94a83371e94c1cb90f8e3b3a7c0a467e09fe75ca334f58b",
+    "cargo_lock_sha256": "ba3347636c828187272d29fd08e06b63b49ffb1c6c6aea2af76be6be5d08b175",
+    "new_campaign_rebuild_executed": false,
+    "scope": "Reuse actual already qualified source/artifact, not a new compilation success claim"
+  },
+  "default_cpu_binding": {
+    "official_default": true,
+    "evidence": "cpu-binding-audit.json, actual clean Ascend0.23 source5cb98...;ascend_config.py162 defaultsTrue, worker.py779-783 attempts binding and warns/skips onfailure",
+    "quota_vs_cpuset": "8CPU quota with effective0-191 cpuset/affinity does not justify manually disabling binding",
+    "action": "Both fresh MODarms explicitly requestTrue; record actual per-worker/per-thread affinity and warning markers; no manual hostsystemctl orIRQ modifications"
+  },
+  "uncertainty": [
+    "Same frozen finite tasks and original graders; no token-equality quality substitute",
+    "No inference retries/filtering/replacement; failure,lengthstop,unresolved planned denominators retained",
+    "All Native scopes before all Pega scopes then oneNativejudge; time drift and absence of independent formal repetitions retained",
+    "Five/C8 completion does not establish four project acceptance targets or inherited Engine historical benefits",
+    "Startup/compile/host/device overhead separately retained; no actual cloudbill claim"
+  ]
+}

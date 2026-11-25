@@ -1,0 +1,116 @@
+{
+  "benchmark_commit": "d67aea6eb3eb0dee271a01b4d66acce8b65bd034",
+  "website_commit": "8ec1b5a61ec4dd8f6564d6f75fe026424ca4f277",
+  "report_version": "V1.03",
+  "arms": [
+    {
+      "role": "B0",
+      "run": "joint-b0-r2",
+      "runtime": {
+        "role": "B0",
+        "vllm_version": "0.18.0",
+        "ascend_version": "0.18.0",
+        "plugins": "ascend,ascend_model_loader,ascend_kv_connector",
+        "plan_sha256": "4513aacb6644f88c5478887216db3328b350eb175b161ab503a0e0638c0ca3cb",
+        "cann": "cann-8.5.1"
+      },
+      "source_manifest_sha256": "a92bb21b67b2ca5534240d8afc14bb0f447a9217aae55f0bbfe93a11ce6467db",
+      "request_plan_sha256": "d8507a01d82daf0cf4e432f137bf062724889eaf7de0e8177d7a4bbd069a05f4",
+      "configuration": {
+        "arguments": {
+          "--max-model-len": "65536",
+          "--max-num-seqs": "24",
+          "--max-num-batched-tokens": "4096",
+          "--tensor-parallel-size": "2",
+          "--dtype": "bfloat16",
+          "--speculative-config": "{\"method\":\"mtp\",\"num_speculative_tokens\":2}",
+          "--compilation-config": "{\"mode\":3,\"cudagraph_mode\":\"FULL_AND_PIECEWISE\"}",
+          "--kv-cache-memory-bytes": "21474836480",
+          "--enable-prefix-caching": true
+        },
+        "source": "frozen_serve_args_and_hash_bound_spawn_entry",
+        "source_sha256": "388a70e2cdf24d89163944a281eb3d99f33b27854e171e89af485f6567fe4962"
+      }
+    },
+    {
+      "role": "B1",
+      "run": "joint-b1-r4",
+      "runtime": {
+        "role": "B1",
+        "vllm_version": "0.28.1.post1.dev143+gf18cf803c",
+        "ascend_version": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27.d20260909",
+        "worker": "corrected_serving_runtime.CorrectedWorker",
+        "plugins": "ascend,ascend_model,ascend_model_loader,ascend_kv_connector,kv_materialization,hust_m01_correction,hust_joint_packed",
+        "plan_sha256": "243c495d294e9a1a03c2cc4c3fca15d13ad5ead8a555b5f081f437f18e95a96f",
+        "cann": "cann-9.1.0"
+      },
+      "source_manifest_sha256": "f491fee9f2f14d6a0267a66d520b5d2e15cd68266f9354189e863ff40fac46b6",
+      "request_plan_sha256": "d8507a01d82daf0cf4e432f137bf062724889eaf7de0e8177d7a4bbd069a05f4",
+      "configuration": {
+        "arguments": {
+          "--max-model-len": "65536",
+          "--max-num-seqs": "24",
+          "--max-num-batched-tokens": "4096",
+          "--tensor-parallel-size": "2",
+          "--dtype": "bfloat16",
+          "--speculative-config": "{\"method\": \"mtp\", \"num_speculative_tokens\": 2}",
+          "--compilation-config": "{\"cudagraph_mode\": \"FULL\", \"cudagraph_capture_sizes\": [3, 6, 12, 16, 24, 32, 40, 48, 64, 80, 128, 256, 512, 1024, 1536, 2048, 4096], \"max_cudagraph_capture_size\": 4096}",
+          "--additional-config": "{\"state_cache_host_bytes\": 4294967296, \"enable_cpu_binding\": false, \"using_live_runtime\": true, \"state_resident_seats\": 36, \"state_cache_incremental\": true, \"state_cache_streaming\": true, \"state_cache_policy\": true, \"state_cache_partial_reclaim\": true, \"state_cache_watermark\": 0.7}",
+          "--kv-cache-memory-bytes": "21474836480",
+          "--gpu-memory-utilization": "0.9",
+          "--enable-prefix-caching": true
+        },
+        "source": "recorded_launch_command",
+        "source_sha256": "90c63a46d90d2d9120373e53a601f2054e170014c239e1b0555e2fe409b45620"
+      }
+    }
+  ],
+  "protocol": {
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "BF16",
+    "chip": "Ascend910B2",
+    "physical_cards": [
+      5,
+      6
+    ],
+    "reserved_cards": 2,
+    "tensor_parallel": 2,
+    "requests": 200,
+    "arrival": "one simultaneous arrival batch",
+    "max_completion_tokens": 8192,
+    "temperature": 0,
+    "request_seed": 0,
+    "warmups": 0,
+    "eos_enabled": true,
+    "max_num_seqs": 24,
+    "b1_host_state_budget_bytes_per_rank": 4294967296,
+    "request_timeout_seconds": 6600,
+    "output_denominator": "All successfully completed response tokens, including incorrect and length-stopped answers; not correct-answer-only token cost.",
+    "scorer": "Unchanged original extract_answer, including original fallback; score and length-stop breakdown both retained."
+  },
+  "private_originals": {
+    "source_capsule": "full-answer-frozen-sources-20261030-r4.tar.gz",
+    "source_capsule_sha256": "3b13f565c2b94c4c1ba7dbfa1a1a3ac6af222085ef4e74fefe50906a3bd9c961",
+    "policy": "Question text, gold options, full responses and implementation source stay in authorized private storage; original response SHA256 and public scalar recomputation remain available here.",
+    "completed_runs": [
+      {
+        "run": "joint-b0-r2",
+        "archive": "full-answer-b0-completed-20261030-r2.tar.gz",
+        "sha256": "0067422e9180f8e6e28157839104d0eee73c826ebc53627a0c5372f99414a172"
+      },
+      {
+        "run": "joint-b1-r4",
+        "archive": "joint-b1-r4-private-originals.tar.gz",
+        "sha256": "205bd92d54474cd47ff94e772e3127aea93d4958a5b5927d269ef6c82dc598a0",
+        "members": 428,
+        "bytes": 12471919
+      }
+    ]
+  },
+  "references": {
+    "outline": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/d67aea6eb3eb0dee271a01b4d66acce8b65bd034/reports/vllm-hust-midterm-20261019/milestone-v15/project4-v1.5.json",
+    "report": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/d67aea6eb3eb0dee271a01b4d66acce8b65bd034/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+    "tested_runtime": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/d67aea6eb3eb0dee271a01b4d66acce8b65bd034/reports/full-answer-joint-20261030/joint-summary.json",
+    "website_version_policy": "https://github.com/vLLM-HUST/vllm-hust-website/blob/8ec1b5a61ec4dd8f6564d6f75fe026424ca4f277/data/version_meta.json"
+  }
+}

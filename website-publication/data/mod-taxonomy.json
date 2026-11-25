@@ -174,6 +174,16 @@
       "lifecycle": "implemented_restricted",
       "evidence": "measured_beneficial"
     },
+    "ascend-attention-boundary": {
+      "kind": "runtime_mod",
+      "capability": "operators_attention",
+      "phases": [
+        "prefill",
+        "decode"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "runtime_effective_no_causal_attribution"
+    },
     "core-attention-boundary": {
       "kind": "runtime_mod",
       "capability": "operators_attention",
@@ -326,6 +336,25 @@
       ],
       "lifecycle": "implemented",
       "evidence": "functional_only"
+    },
+    "instance-controller": {
+      "kind": "control_plane",
+      "capability": "lifecycle_control",
+      "phases": [
+        "service_lifecycle"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "functionally_validated"
+    },
+    "kv-controller": {
+      "kind": "control_plane",
+      "capability": "kv_management",
+      "phases": [
+        "prefill",
+        "state_lifecycle"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "measured_mixed"
     },
     "request-throttling-controller": {
       "kind": "control_plane",
@@ -506,6 +535,177 @@
       ],
       "lifecycle": "qualification_pending",
       "evidence": "measured_mixed"
+    },
+    "graph-coverage": {
+      "kind": "tool_mod",
+      "capability": "execution_optimization",
+      "phases": [
+        "service_startup",
+        "prefill",
+        "decode"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "measured_beneficial"
+    },
+    "prefill-admission": {
+      "kind": "tool_mod",
+      "capability": "scheduling_routing",
+      "phases": [
+        "request_admission",
+        "prefill"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "measured_beneficial"
+    },
+    "sglang-prepared-dispatch": {
+      "kind": "runtime_mod",
+      "capability": "execution_optimization",
+      "phases": [
+        "decode"
+      ],
+      "lifecycle": "qualification_pending",
+      "evidence": "hardware_validation_pending"
+    },
+    "hust-m01-correction": {
+      "kind": "runtime_mod",
+      "capability": "kv_management",
+      "phases": [
+        "state_lifecycle"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "integration_tested"
+    },
+    "hust-joint-packed": {
+      "kind": "runtime_mod",
+      "capability": "kv_management",
+      "phases": [
+        "state_lifecycle"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "integration_tested"
+    },
+    "sealed-serving-warmup": {
+      "kind": "runtime_mod",
+      "capability": "startup_deployment",
+      "phases": [
+        "service_startup"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "integration_tested"
+    },
+    "guarded-progress-async": {
+      "kind": "runtime_mod",
+      "capability": "parallel_communication",
+      "phases": [
+        "state_lifecycle"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "integration_tested"
+    },
+    "capacity-tuning": {
+      "kind": "runtime_mod",
+      "capability": "scheduling_routing",
+      "phases": [
+        "request_admission",
+        "prefill",
+        "decode"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "integration_tested"
+    },
+    "short-prefill-tail": {
+      "kind": "runtime_mod",
+      "capability": "prefill_optimization",
+      "phases": [
+        "prefill"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "integration_tested"
+    },
+    "vllm-hust-extension-manager": {
+      "kind": "tool_mod",
+      "capability": "startup_deployment",
+      "phases": [
+        "service_startup",
+        "service_lifecycle"
+      ],
+      "lifecycle": "implemented",
+      "evidence": "integration_tested"
+    },
+    "cuda-mtp": {
+      "kind": "runtime_mod",
+      "capability": "decoding",
+      "phases": [
+        "decode"
+      ],
+      "lifecycle": "qualification_pending",
+      "evidence": "hardware_validation_pending"
+    },
+    "memory-tracker": {
+      "kind": "tool_mod",
+      "capability": "observability_evaluation",
+      "phases": [
+        "observability"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "no_performance_claim"
+    },
+    "ascend-mapped-kv-offload": {
+      "kind": "runtime_mod",
+      "capability": "kv_management",
+      "phases": [
+        "state_lifecycle"
+      ],
+      "lifecycle": "pending",
+      "evidence": "activation_pending"
+    },
+    "scheduler-policy-lab": {
+      "kind": "tool_mod",
+      "capability": "scheduling_routing",
+      "phases": [
+        "request_admission"
+      ],
+      "lifecycle": "research",
+      "evidence": "host_integration_pending"
+    },
+    "intern-s2": {
+      "kind": "runtime_mod",
+      "capability": "startup_deployment",
+      "phases": [
+        "service_startup",
+        "prefill",
+        "decode"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "integration_tested"
+    },
+    "state-page-copy": {
+      "kind": "runtime_mod",
+      "capability": "kv_management",
+      "phases": [
+        "state_lifecycle"
+      ],
+      "lifecycle": "implemented_restricted",
+      "evidence": "integration_tested"
+    },
+    "greedy-bf16-native": {
+      "kind": "runtime_mod",
+      "capability": "sampling",
+      "phases": [
+        "decode"
+      ],
+      "lifecycle": "qualification_pending",
+      "evidence": "measured_inconclusive"
+    },
+    "accepted-state-fusion": {
+      "kind": "runtime_mod",
+      "capability": "kv_management",
+      "phases": [
+        "decode",
+        "state_lifecycle"
+      ],
+      "lifecycle": "qualification_pending",
+      "evidence": "measured"
     }
   }
 }

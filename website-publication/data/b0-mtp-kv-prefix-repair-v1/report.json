@@ -1,0 +1,180 @@
+{
+  "schema": "deeplinkengine-mtp-selected-kv-prefix-repair/v1",
+  "scope": "patched-variants-only",
+  "engine_repository": "DeepLinkNext/DeepLinkEngine",
+  "verification_source_checkout": "0ba0d28b0a264e8b35bed8b61c099699883f9dba",
+  "model": "Qwen3.5-35B-A3B",
+  "accelerator": "Ascend 910B2",
+  "tensor_parallel_size": 2,
+  "workload": {
+    "companion_requests_per_version": 200,
+    "formal_repetitions_per_version": 3,
+    "requests_per_formal_repetition": 200,
+    "output_tokens_per_request": 256
+  },
+  "original_reference": {
+    "F_interval": [
+      5487388087149780,
+      5488258327989369
+    ],
+    "T_lower_seconds": "102.3231709195348958960064",
+    "C_upper_tflops_per_card": "26.81825767648090573566921216250915821371",
+    "benchmark_commit": "53541118b3461705f1e61532710ff0a759d59af0",
+    "evidence_manifest_sha256": "5c7194b483d96e7a682183fa62c569737312d8139fc0b20b51e91a5479772ad6"
+  },
+  "independent_third_party": false,
+  "versions": {
+    "0.23.0": {
+      "patch": "vllm-ascend-0.23.0-mtp-kv-prefix.patch",
+      "patch_sha256": "edd3704c00063dc7f1ae74bbcd4649136622703efdfd57dde59aee1172775c8e",
+      "upstream_image_manifest": "sha256:4ee78def8f33d59d48f116d1dfa793332c23c99ecab4f0d7dd5cd62d0fb4e6c1",
+      "upstream_release": "https://github.com/vllm-project/vllm-ascend/releases/tag/v0.23.0",
+      "target_path": "vllm-workspace/vllm-ascend/vllm_ascend/spec_decode/llm_base_proposer.py",
+      "unpatched_source_sha256": "4a90532c5c3667d9eb4fec666bf03c65a2f1c92cd402f731b644ef8fa2ed82ab",
+      "patched_source_sha256": "47e19ce7847a3de9ae6e4f55c630a54fecbb56846d450a42d729b8fb1ed3f8dc",
+      "original_release_ft_eligible": false,
+      "companion_requests": 200,
+      "ranks": {
+        "0": {
+          "calls": 868,
+          "selected_prefix_rows": 19304,
+          "widened_rows": 0,
+          "uniquely_bound_second_step_dispatches": {
+            "npu_fused_infer_attention_score.out": 730
+          }
+        },
+        "1": {
+          "calls": 868,
+          "selected_prefix_rows": 19304,
+          "widened_rows": 0,
+          "uniquely_bound_second_step_dispatches": {
+            "npu_fused_infer_attention_score.out": 730
+          }
+        }
+      },
+      "repaired_native_seal_sha256": "da9f649f52852cc85310e71e62ce5bbefa5750ce521839d282a1cebfc6a3cc57",
+      "repaired_companion_seal_sha256": "33a76b7ed2085c1d6fe6f1d52885f1faed8ca60a00094373c4ab0a38875f4e57",
+      "repetitions": [
+        {
+          "repetition": 1,
+          "F_interval": [
+            1804134855802163,
+            1813813841612094
+          ],
+          "T_seconds": "114.574940867",
+          "geometry_sha256": "e4acb75e0522571af1481ccbe8841bb7d40ac081fcb166458a6b29cd4338dff8",
+          "work_sha256": "690ff075b878672d52b29cc3f8aed576a8b5241a72cd8160f4362f8f9d9d3804",
+          "timing_sha256": "4c3b699473ac96d1bfe81c179eee5a610fd8dfc9e0ef33688a3da52b31fc79b0"
+        },
+        {
+          "repetition": 2,
+          "F_interval": [
+            1804134855802163,
+            1813813841612094
+          ],
+          "T_seconds": "115.16522918",
+          "geometry_sha256": "e4acb75e0522571af1481ccbe8841bb7d40ac081fcb166458a6b29cd4338dff8",
+          "work_sha256": "690ff075b878672d52b29cc3f8aed576a8b5241a72cd8160f4362f8f9d9d3804",
+          "timing_sha256": "894870abc951cceed937ce0c57fe86ab2aa8786cee92d86fb9eb86c15384ec14"
+        },
+        {
+          "repetition": 3,
+          "F_interval": [
+            1804134855802163,
+            1813813841612094
+          ],
+          "T_seconds": "113.413807505",
+          "geometry_sha256": "e4acb75e0522571af1481ccbe8841bb7d40ac081fcb166458a6b29cd4338dff8",
+          "work_sha256": "690ff075b878672d52b29cc3f8aed576a8b5241a72cd8160f4362f8f9d9d3804",
+          "timing_sha256": "8ace3197468d58755a6cad38f82f9646188b244d670c2a38683ccec8e2c52a36"
+        }
+      ],
+      "F_interval": [
+        5412404567406489,
+        5441441524836282
+      ],
+      "T_seconds": "343.153977552",
+      "tflops_per_card_interval": [
+        "7.886262321680822887365766319456344204515",
+        "7.928571254884712198173471457707289679308"
+      ],
+      "reference_normalized_lower_percent": "29.40631869831321182990787993437095341030"
+    },
+    "0.30.0": {
+      "patch": "vllm-ascend-0.30.0-mtp-kv-prefix.patch",
+      "patch_sha256": "7c78118d2cc584f0cde950cdad4025f02d5fd90f476e83e1d40c19f737785f4c",
+      "upstream_image_manifest": "sha256:61584d790fa3668e7c43f0eb50a3e3a86d94b3eed15bce5ac82391ed383df229",
+      "upstream_release": "https://github.com/vllm-project/vllm-ascend/releases/tag/v0.30.0",
+      "target_path": "vllm-workspace/vllm-ascend/vllm_ascend/spec_decode/llm_base_proposer.py",
+      "unpatched_source_sha256": "b4925648562de8cffd7bf678bf695d512c184d70484b949c42a40897793b8b07",
+      "patched_source_sha256": "2594460b9aeee5dfe9c9e8762c3d5bcfd9126dc89876c03f00d0b8c3573e9454",
+      "original_release_ft_eligible": false,
+      "companion_requests": 200,
+      "ranks": {
+        "0": {
+          "calls": 870,
+          "selected_prefix_rows": 19324,
+          "widened_rows": 0,
+          "uniquely_bound_second_step_dispatches": {
+            "npu_fused_infer_attention_score.out": 726
+          }
+        },
+        "1": {
+          "calls": 870,
+          "selected_prefix_rows": 19324,
+          "widened_rows": 0,
+          "uniquely_bound_second_step_dispatches": {
+            "npu_fused_infer_attention_score.out": 726
+          }
+        }
+      },
+      "repaired_native_seal_sha256": "3035cfcb0f1c2d116ffe832ed703814a8538006cee6a48fd4bc22a93af4333b8",
+      "repaired_companion_seal_sha256": "c8094016b150c5c1c9e8e81386b4ac1dabdb3e706d9dac69f020572270a277d7",
+      "repetitions": [
+        {
+          "repetition": 1,
+          "F_interval": [
+            1804075266553816,
+            1813802819277782
+          ],
+          "T_seconds": "102.49230778",
+          "geometry_sha256": "4f5a74d8d05e969d9e4431e540b6711e15952b77a8cdf922f4ba9d56c32476e6",
+          "work_sha256": "7a465a28fa076dc8f70196646ee9959ea3e7f7f2ad5fe877b55e033f12cb8aef",
+          "timing_sha256": "c7f7efdac976167bbb41e28663cad0cd7eb21c45daa4bdbfb66904bf1f7eb956"
+        },
+        {
+          "repetition": 2,
+          "F_interval": [
+            1804075056998042,
+            1813815698574660
+          ],
+          "T_seconds": "106.940227702",
+          "geometry_sha256": "009de5f05547d890cf61c35854673a43b11acca7671b03f2eb089eaa037c1a90",
+          "work_sha256": "90ea51c9258c19201444983bf479a1b420cb5d82353f083c8225b20437c10717",
+          "timing_sha256": "90a058d68bfe7b3343e6562d15604fac6700652cd6957e2aa500a5002eb542a2"
+        },
+        {
+          "repetition": 3,
+          "F_interval": [
+            1804075056998042,
+            1813815698574660
+          ],
+          "T_seconds": "105.651583204",
+          "geometry_sha256": "009de5f05547d890cf61c35854673a43b11acca7671b03f2eb089eaa037c1a90",
+          "work_sha256": "90ea51c9258c19201444983bf479a1b420cb5d82353f083c8225b20437c10717",
+          "timing_sha256": "a15eb50218c592360489dfd326d37e8f9688d68dbf8a155311b1ad73804f6e62"
+        }
+      ],
+      "F_interval": [
+        5412225380549900,
+        5441434216427102
+      ],
+      "T_seconds": "315.084118686",
+      "tflops_per_card_interval": [
+        "8.588540423935970232494944161255593039376",
+        "8.634891277795269844202191387118079713675"
+      ],
+      "reference_normalized_lower_percent": "32.02497540124672001061018663917869539342"
+    }
+  }
+}

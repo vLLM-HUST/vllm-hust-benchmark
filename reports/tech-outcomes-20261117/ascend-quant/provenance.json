@@ -1,0 +1,44 @@
+{
+ "schema_version": 1,
+ "scope": "Qwen3.5-35B-A3B W8A8/W4A8 quantisation evidence for 2026-11-17 tech outcomes",
+ "measurement_windows_utc": {
+  "perf_tp1": "2026-10-14, 2026-10-23",
+  "ppl_tp1": "2026-11-13",
+  "mmlu_tp1_gdn_w8a8": "2026-11-14T11:29:11Z..2026-11-14T16:32:46Z",
+  "longctx_p23": "2026-11-13",
+  "longctx_260k": "2026-11-16",
+  "longctx_bf16_anchor": "2026-11-16",
+  "longperf_c1": "2026-11-16",
+  "util99_19_22": "2026-11-16",
+  "longctx_262k": "2026-11-16"
+ },
+ "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+ "runtime": {
+  "vllm": "0.28.1.post1.dev143+gf18cf803c",
+  "vllm_commit": "f18cf803c5f63625e2c71253ddaf8b0bad0bad1a",
+  "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+  "vllm_ascend_commit": "74f0c0a272376412b51e1c1864803d5f3a0f1b5f",
+  "cann": "9.1.0",
+  "torch": "2.9.0",
+  "torch_npu": "2.9.0",
+  "transformers": "5.2.0",
+  "msmodelslim": "26.1.0"
+ },
+ "plans": {
+  "swe_prefix_reuse": "ac1fbf9885076c369fd25c5525d1163ff8b7945972cdf4c0c6d2d523ab7c1172",
+  "mmlu_pro_contract": "0a208ebbeec1afc9dea6d3b5e13d12863995d630ba34f60e510046292a63b5ca",
+  "mmlu_pro_adapter": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801",
+  "mmlu_pro_runner": "6c02a8bef434d59cb6688cbc0c6a6ec788b2749f6a6a5187b0798ee5c2c9ba18"
+ },
+ "evidence": {
+  "repo": "data/ (originals-manifest.json, SHA256SUMS)",
+  "release": "release:tech-outcomes-20261117-ascend-quant (release-manifest.json)",
+  "controlled": "controlled-location.json"
+ },
+ "known_gaps": [
+  "HLE is self-judged, single trial, formal_acceptance=false",
+  "MMLU-Pro BF16 baseline is published TP2; quant arms are TP1",
+  "19.22 GiB is an appendix: W8A8 arm auto-estimated, W4A8 arm explicit pin; both 820,136 tokens",
+  "full 262,144 capacity accepted both arms; task-level near-max 261K NIAH / 260.8K longgen; longgen C3 triggered at 260.8K (n=5, 3 truncated), direction opposite at 260K"
+ ]
+}

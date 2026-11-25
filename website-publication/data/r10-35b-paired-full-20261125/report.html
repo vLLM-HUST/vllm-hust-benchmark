@@ -1,0 +1,1992 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DeepLinkEngine B0/B1完整测试</title><style>body{font:16px system-ui;max-width:1100px;margin:40px auto;padding:0 20px;color:#17212b;background:#f8fafc}table{border-collapse:collapse;width:100%;background:white}th,td{padding:16px;border-bottom:1px solid #cbd5e1;text-align:left}.yes{color:#087443}.no{color:#b42318}details{background:white;padding:16px;margin:14px 0;border:1px solid #cbd5e1;border-radius:8px}summary{cursor:pointer}pre{white-space:pre-wrap;overflow-wrap:anywhere}img{width:100%;height:auto}a{color:#175cd3}</style><h1>DeepLinkEngine B0/B1 完整测试</h1><p>MMLU 200 · HLE 分层200 · Frontier 160 · SWE 64请求 · Terminal 48请求</p><table><tr><th>指标</th><th>里程碑</th><th>项目最终目标</th></tr><tr><th>4.1 有效算力</th><td class="yes">达成目标</td><td class="yes">达成目标</td></tr><tr><th>4.2 吞吐与时延</th><td class="yes">达成目标</td><td class="yes">达成目标</td></tr><tr><th>4.3 上下文稳定性</th><td class="yes">达成目标</td><td class="no">未达成目标</td></tr><tr><th>4.4 产能与成本</th><td class="yes">达成目标</td><td class="yes">达成目标</td></tr></table><p>4.4 按公开租赁报价折算。Ascend 910B2 8 卡服务器月租 15,000 元。B0 与 B1 均按 1,875 元/卡月、每月 30 天核算。<a href="https://news.smm.cn/news/TCNOQJBAJVZYJ73BMVU7G5GJZXQ462A4U6NN4CY">上海有色网（SMM） 2026-11-17 报价</a></p><h2>测试数据集与冻结输入</h2><table><tr><th>工况</th><th>数据来源与样本</th></tr><tr><th>MMLU-Pro</th><td>TIGER-Lab/MMLU-Pro test 固定 200 题</td></tr><tr><th>HLE-Verified</th><td>SKYLENAGE-AI/HLE-Verified 固定 200 题，Gold 74、Revision 126</td></tr><tr><th>FrontierScience</th><td>openai/frontierscience 固定 160 题，Olympiad 100、Research 60</td></tr><tr><th>SWE-bench Pro</th><td>公开轨迹 32 项任务，64 条请求</td></tr><tr><th>Terminal-Bench 2.1</th><td>公开轨迹 32 项任务，48 条请求</td></tr><tr><th>4.1 原生 F/T</th><td>MMLU-Pro 固定 200 题；最多输出 256 词元，每臂 3 轮</td></tr><tr><th>连续 C8（4K／16K）</th><td>合成输入</td></tr><tr><th>4K 长上下文</th><td>Terminal-Bench 2.1；[4096, 8192) 输入词元；5 条公开任务历史；terminal:dna-insert、terminal:db-wal-recovery、terminal:winning-avg-corewars、terminal:rstan-to-pystan、terminal:mcmc-sampling-stan</td></tr><tr><th>16K 长上下文</th><td>Terminal-Bench 2.1；[16384, 24576) 输入词元；5 条公开任务历史；terminal:dna-insert、terminal:db-wal-recovery、terminal:winning-avg-corewars、terminal:rstan-to-pystan、terminal:mcmc-sampling-stan</td></tr><tr><th>32K 长上下文</th><td>Terminal-Bench 2.1；[32768, 49152) 输入词元；5 条公开任务历史；terminal:dna-insert、terminal:db-wal-recovery、terminal:winning-avg-corewars、terminal:rstan-to-pystan、terminal:mcmc-sampling-stan</td></tr><tr><th>四租户 C24</th><td>Terminal-Bench 2.1；[4096, 8192) 输入词元；5 条公开任务历史；terminal:dna-insert、terminal:db-wal-recovery、terminal:winning-avg-corewars、terminal:rstan-to-pystan、terminal:mcmc-sampling-stan</td></tr></table><p>4.4 里程碑使用上表 MMLU-Pro 完整回答工况，结题使用上述四租户的 4K 历史。</p><details><summary>冻结引擎与 MOD 组合</summary><pre>{
+  &quot;release&quot;: &quot;full-answer-b1-20261124-r10&quot;,
+  &quot;mods&quot;: [
+    {
+      &quot;id&quot;: &quot;extension-manager&quot;,
+      &quot;name&quot;: &quot;Extension Manager&quot;,
+      &quot;version&quot;: &quot;full-answer-b1-20261113-r6&quot;
+    },
+    {
+      &quot;id&quot;: &quot;betterscale&quot;,
+      &quot;name&quot;: &quot;BetterScale&quot;,
+      &quot;version&quot;: &quot;full-answer-b1-20261113-r6&quot;
+    },
+    {
+      &quot;id&quot;: &quot;microflow&quot;,
+      &quot;name&quot;: &quot;Microflow&quot;,
+      &quot;version&quot;: &quot;full-answer-b1-20261113-r6&quot;
+    },
+    {
+      &quot;id&quot;: &quot;kv-materialization&quot;,
+      &quot;name&quot;: &quot;KV materialization&quot;,
+      &quot;version&quot;: &quot;full-answer-b1-20261113-r6&quot;
+    },
+    {
+      &quot;id&quot;: &quot;m01-correction&quot;,
+      &quot;name&quot;: &quot;M01 correction&quot;,
+      &quot;version&quot;: &quot;full-answer-b1-20261113-r6&quot;
+    },
+    {
+      &quot;id&quot;: &quot;packed-host&quot;,
+      &quot;name&quot;: &quot;Packed host state&quot;,
+      &quot;version&quot;: &quot;full-answer-b1-20261113-r6&quot;
+    },
+    {
+      &quot;id&quot;: &quot;sealed-serving-warmup&quot;,
+      &quot;name&quot;: &quot;Sealed serving warmup&quot;,
+      &quot;version&quot;: &quot;1.0.0&quot;
+    },
+    {
+      &quot;id&quot;: &quot;guarded-progress-async&quot;,
+      &quot;name&quot;: &quot;Guarded progress async&quot;,
+      &quot;version&quot;: &quot;1.0.0-rc1&quot;
+    },
+    {
+      &quot;id&quot;: &quot;capacity-tuning&quot;,
+      &quot;name&quot;: &quot;Capacity tuning&quot;,
+      &quot;version&quot;: &quot;0.2.0&quot;
+    },
+    {
+      &quot;id&quot;: &quot;short-prefill-tail&quot;,
+      &quot;name&quot;: &quot;Short prefill tail&quot;,
+      &quot;version&quot;: &quot;0.1.0&quot;
+    },
+    {
+      &quot;id&quot;: &quot;state-page-copy&quot;,
+      &quot;name&quot;: &quot;state-page-copy&quot;,
+      &quot;version&quot;: &quot;1.0.0&quot;
+    }
+  ]
+}</pre></details><h2>固定五项配对结果</h2><img src="fixed-five.svg" alt="五数据集B0/B1吞吐和时延"><p>MMLU规则评分；HLE/Frontier使用同一模型辅助评分，未决计入固定分母；SWE/Terminal为公开轨迹性能。</p><details><summary>4.1 有效算力：计算与判定详情</summary><pre>{
+  &quot;evidence_reason&quot;: &quot;原完整参考的算量、参考时间与每卡分母已独立复算，并通过同工况输入、权重、精度、双卡及预算核验；本轮必要F和原生同步T重新计算分子，再除以原参考每卡上界。两份F不相消，未沿用旧效率。&quot;,
+  &quot;milestone&quot;: {
+    &quot;met&quot;: true,
+    &quot;status&quot;: &quot;达成目标&quot;,
+    &quot;reason&quot;: &quot;本轮必要算量、同步计时和已核验同工况参考分母，效率下界≥50%。&quot;
+  },
+  &quot;final&quot;: {
+    &quot;met&quot;: true,
+    &quot;status&quot;: &quot;达成目标&quot;,
+    &quot;reason&quot;: &quot;同一效率下界≥90%。&quot;
+  },
+  &quot;efficiency_lower_percent&quot;: &quot;96.10799894845700291737166757805252550353&quot;,
+  &quot;certificate_kind&quot;: &quot;qualified_full_reference_denominator_reuse/v1&quot;
+}</pre></details><details><summary>4.2 吞吐与时延：计算与判定详情</summary><pre>{
+  &quot;milestone&quot;: {
+    &quot;met&quot;: true,
+    &quot;status&quot;: &quot;达成目标&quot;,
+    &quot;reason&quot;: &quot;同一数据集同时满足吞吐及两项平均时延：MMLU-Pro, HLE-Verified, FrontierScience, SWE-bench-Pro trace, TerminalBench 2.1 trace&quot;
+  },
+  &quot;final&quot;: {
+    &quot;met&quot;: true,
+    &quot;status&quot;: &quot;达成目标&quot;,
+    &quot;reason&quot;: &quot;同一数据集同时满足吞吐及两项平均时延：MMLU-Pro, FrontierScience, SWE-bench-Pro trace, TerminalBench 2.1 trace&quot;
+  },
+  &quot;datasets&quot;: {
+    &quot;mmlu&quot;: {
+      &quot;met&quot;: true,
+      &quot;quality&quot;: {
+        &quot;met&quot;: true,
+        &quot;status&quot;: &quot;达成目标&quot;,
+        &quot;reason&quot;: &quot;固定200题正确率绝对下降≤5个百分点。&quot;,
+        &quot;drop_pp&quot;: &quot;-3&quot;
+      },
+      &quot;execution_complete&quot;: true,
+      &quot;throughput_ratio&quot;: &quot;2.695587686205702840429460518&quot;,
+      &quot;ttft_ratio&quot;: &quot;0.3135476912734240068931099446&quot;,
+      &quot;tpot_ratio&quot;: &quot;0.5319276781056887728455585459&quot;
+    },
+    &quot;hle&quot;: {
+      &quot;met&quot;: true,
+      &quot;quality&quot;: {
+        &quot;met&quot;: true,
+        &quot;status&quot;: &quot;达成目标&quot;,
+        &quot;reason&quot;: &quot;固定计划分母；未决计非成功；HLE比较总体，Frontier分别比较两个赛道，绝对下降≤5个百分点。&quot;,
+        &quot;drop_pp&quot;: {
+          &quot;overall&quot;: &quot;-8&quot;
+        }
+      },
+      &quot;execution_complete&quot;: true,
+      &quot;throughput_ratio&quot;: &quot;1.830527841826267763530329416&quot;,
+      &quot;ttft_ratio&quot;: &quot;0.4680396420585887081497635888&quot;,
+      &quot;tpot_ratio&quot;: &quot;0.5648862403805439130504133423&quot;
+    },
+    &quot;frontier&quot;: {
+      &quot;met&quot;: true,
+      &quot;quality&quot;: {
+        &quot;met&quot;: true,
+        &quot;status&quot;: &quot;达成目标&quot;,
+        &quot;reason&quot;: &quot;固定计划分母；未决计非成功；HLE比较总体，Frontier分别比较两个赛道，绝对下降≤5个百分点。&quot;,
+        &quot;drop_pp&quot;: {
+          &quot;olympiad&quot;: &quot;1&quot;,
+          &quot;research&quot;: &quot;1.666666666666666666666666667&quot;
+        }
+      },
+      &quot;execution_complete&quot;: true,
+      &quot;throughput_ratio&quot;: &quot;2.561855937988348321238010431&quot;,
+      &quot;ttft_ratio&quot;: &quot;0.2967365860487897227629540814&quot;,
+      &quot;tpot_ratio&quot;: &quot;0.4068209313877139208152736424&quot;
+    },
+    &quot;swe&quot;: {
+      &quot;met&quot;: true,
+      &quot;quality&quot;: {
+        &quot;met&quot;: true,
+        &quot;status&quot;: &quot;达成目标&quot;,
+        &quot;reason&quot;: &quot;公开轨迹只测性能。&quot;
+      },
+      &quot;execution_complete&quot;: true,
+      &quot;throughput_ratio&quot;: &quot;2.975424421763796094797931164&quot;,
+      &quot;ttft_ratio&quot;: &quot;0.5345250428128339834887251379&quot;,
+      &quot;tpot_ratio&quot;: &quot;0.3451493792727880825670952768&quot;
+    },
+    &quot;terminal&quot;: {
+      &quot;met&quot;: true,
+      &quot;quality&quot;: {
+        &quot;met&quot;: true,
+        &quot;status&quot;: &quot;达成目标&quot;,
+        &quot;reason&quot;: &quot;公开轨迹只测性能。&quot;
+      },
+      &quot;execution_complete&quot;: true,
+      &quot;throughput_ratio&quot;: &quot;2.944490744515278508174753357&quot;,
+      &quot;ttft_ratio&quot;: &quot;0.4163213456175848276562425585&quot;,
+      &quot;tpot_ratio&quot;: &quot;0.3596767113838204161948345494&quot;
+    }
+  },
+  &quot;final_datasets&quot;: {
+    &quot;mmlu&quot;: {
+      &quot;met&quot;: true,
+      &quot;quality&quot;: {
+        &quot;met&quot;: true,
+        &quot;status&quot;: &quot;达成目标&quot;,
+        &quot;reason&quot;: &quot;固定200题正确率绝对下降≤5个百分点。&quot;,
+        &quot;drop_pp&quot;: &quot;-3&quot;
+      },
+      &quot;execution_complete&quot;: true,
+      &quot;throughput_ratio&quot;: &quot;2.695587686205702840429460518&quot;,
+      &quot;ttft_ratio&quot;: &quot;0.3135476912734240068931099446&quot;,
+      &quot;tpot_ratio&quot;: &quot;0.5319276781056887728455585459&quot;
+    },
+    &quot;hle&quot;: {
+      &quot;met&quot;: false,
+      &quot;quality&quot;: {
+        &quot;met&quot;: true,
+        &quot;status&quot;: &quot;达成目标&quot;,
+        &quot;reason&quot;: &quot;固定计划分母；未决计非成功；HLE比较总体，Frontier分别比较两个赛道，绝对下降≤5个百分点。&quot;,
+        &quot;drop_pp&quot;: {
+          &quot;overall&quot;: &quot;-8&quot;
+        }
+      },
+      &quot;execution_complete&quot;: true,
+      &quot;throughput_ratio&quot;: &quot;1.830527841826267763530329416&quot;,
+      &quot;ttft_ratio&quot;: &quot;0.4680396420585887081497635888&quot;,
+      &quot;tpot_ratio&quot;: &quot;0.5648862403805439130504133423&quot;
+    },
+    &quot;frontier&quot;: {
+      &quot;met&quot;: true,
+      &quot;quality&quot;: {
+        &quot;met&quot;: true,
+        &quot;status&quot;: &quot;达成目标&quot;,
+        &quot;reason&quot;: &quot;固定计划分母；未决计非成功；HLE比较总体，Frontier分别比较两个赛道，绝对下降≤5个百分点。&quot;,
+        &quot;drop_pp&quot;: {
+          &quot;olympiad&quot;: &quot;1&quot;,
+          &quot;research&quot;: &quot;1.666666666666666666666666667&quot;
+        }
+      },
+      &quot;execution_complete&quot;: true,
+      &quot;throughput_ratio&quot;: &quot;2.561855937988348321238010431&quot;,
+      &quot;ttft_ratio&quot;: &quot;0.2967365860487897227629540814&quot;,
+      &quot;tpot_ratio&quot;: &quot;0.4068209313877139208152736424&quot;
+    },
+    &quot;swe&quot;: {
+      &quot;met&quot;: true,
+      &quot;quality&quot;: {
+        &quot;met&quot;: true,
+        &quot;status&quot;: &quot;达成目标&quot;,
+        &quot;reason&quot;: &quot;公开轨迹只测性能。&quot;
+      },
+      &quot;execution_complete&quot;: true,
+      &quot;throughput_ratio&quot;: &quot;2.975424421763796094797931164&quot;,
+      &quot;ttft_ratio&quot;: &quot;0.5345250428128339834887251379&quot;,
+      &quot;tpot_ratio&quot;: &quot;0.3451493792727880825670952768&quot;
+    },
+    &quot;terminal&quot;: {
+      &quot;met&quot;: true,
+      &quot;quality&quot;: {
+        &quot;met&quot;: true,
+        &quot;status&quot;: &quot;达成目标&quot;,
+        &quot;reason&quot;: &quot;公开轨迹只测性能。&quot;
+      },
+      &quot;execution_complete&quot;: true,
+      &quot;throughput_ratio&quot;: &quot;2.944490744515278508174753357&quot;,
+      &quot;ttft_ratio&quot;: &quot;0.4163213456175848276562425585&quot;,
+      &quot;tpot_ratio&quot;: &quot;0.3596767113838204161948345494&quot;
+    }
+  }
+}</pre></details><details><summary>4.3 上下文稳定性：计算与判定详情</summary><pre>{
+  &quot;milestone&quot;: {
+    &quot;met&quot;: true,
+    &quot;status&quot;: &quot;达成目标&quot;,
+    &quot;reason&quot;: &quot;16K/4K吞吐≥50%，TTFT P95/P99比值≤3，TPOT P95/P99比值≤2；两臂完整且无失败。&quot;
+  },
+  &quot;final&quot;: {
+    &quot;met&quot;: false,
+    &quot;status&quot;: &quot;未达成目标&quot;,
+    &quot;reason&quot;: &quot;32K全部五个60秒窗口：吞吐max/min≤1.50，TTFT P95/P99≤2，TPOT P95/P99≤1.25；两臂完整且无失败。&quot;
+  },
+  &quot;percentile_method&quot;: &quot;nearest_rank&quot;,
+  &quot;blocking_errors&quot;: {
+    &quot;B0&quot;: [],
+    &quot;B1&quot;: []
+  },
+  &quot;measured_ratios&quot;: {
+    &quot;throughput&quot;: &quot;0.5938705069676319657720885357&quot;,
+    &quot;ttft_p95&quot;: &quot;2.058862389690799532174025846&quot;,
+    &quot;ttft_p99&quot;: &quot;2.692225477261891595446712274&quot;,
+    &quot;tpot_p95&quot;: &quot;1.530093627389314033803521385&quot;,
+    &quot;tpot_p99&quot;: &quot;1.557023979431168967078097964&quot;
+  },
+  &quot;measured_window_ratios&quot;: {
+    &quot;throughput&quot;: &quot;1.258234865416453699795671574&quot;,
+    &quot;ttft_p95&quot;: &quot;2.030629272480961729432858926&quot;,
+    &quot;ttft_p99&quot;: &quot;1.953470295581637621030796517&quot;,
+    &quot;tpot_p95&quot;: &quot;1.207351403422394102100245797&quot;,
+    &quot;tpot_p99&quot;: &quot;1.067009631251879266862210524&quot;
+  }
+}</pre></details><details><summary>4.4 产能与成本：计算与判定详情</summary><pre>{
+  &quot;milestone&quot;: {
+    &quot;met&quot;: true,
+    &quot;status&quot;: &quot;达成目标&quot;,
+    &quot;reason&quot;: &quot;MMLU200 完整回答满足质量和服务要求，按公开月租折算的单位成本下降≥10%，双卡 AI Core 提高≥10个百分点。&quot;,
+    &quot;evidence_status&quot;: &quot;published_rental&quot;
+  },
+  &quot;final&quot;: {
+    &quot;met&quot;: true,
+    &quot;status&quot;: &quot;达成目标&quot;,
+    &quot;reason&quot;: &quot;4K 四租户按公开月租折算的单位成本下降≥30%，B1 双卡 AI Core 均值≥80%，两臂各租户完整结束。&quot;,
+    &quot;evidence_status&quot;: &quot;published_rental&quot;
+  },
+  &quot;utilization_gain_pp&quot;: &quot;42.308810796851316&quot;,
+  &quot;four_tenant_ai_core_mean_percent&quot;: &quot;88.02360010109903&quot;,
+  &quot;unit_cost_reduction_percent&quot;: &quot;62.90233832431563436496389755&quot;,
+  &quot;four_tenant_cost_reduction_percent&quot;: &quot;65.84811977932538136252373447&quot;,
+  &quot;cost_basis&quot;: &quot;published_rental&quot;,
+  &quot;published_rental&quot;: {
+    &quot;published_date&quot;: &quot;2026-11-17&quot;,
+    &quot;model&quot;: &quot;Ascend 910B2&quot;,
+    &quot;server_monthly_price&quot;: 15000,
+    &quot;cards_per_server&quot;: 8,
+    &quot;source_url&quot;: &quot;https://news.smm.cn/news/TCNOQJBAJVZYJ73BMVU7G5GJZXQ462A4U6NN4CY&quot;,
+    &quot;publisher&quot;: &quot;上海有色网（SMM）&quot;,
+    &quot;currency&quot;: &quot;CNY&quot;,
+    &quot;monthly_cost_per_card_cny&quot;: &quot;1875&quot;,
+    &quot;days_per_month&quot;: 30,
+    &quot;evidence_path&quot;: &quot;evidence/indicator-4.4-cost-estimate.json&quot;,
+    &quot;evidence_sha256&quot;: &quot;17c85184d224536c139afa9bfb9af4428a23fb04f8f1012ebeef2b3fc7931b58&quot;
+  },
+  &quot;actual_cost_manifest_sha256&quot;: null,
+  &quot;formal_cost&quot;: {
+    &quot;mmlu&quot;: {
+      &quot;evidence_status&quot;: &quot;published_rental&quot;,
+      &quot;reduction_percent&quot;: &quot;62.90233832431563436496389755&quot;,
+      &quot;utilization&quot;: {
+        &quot;B0&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 36.25159271706394,
+            &quot;3&quot;: 36.4134463183187
+          },
+          &quot;mean_percent&quot;: 36.332519517691324,
+          &quot;covered_seconds&quot;: 1249.4292443799786,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.224181417550426,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        },
+        &quot;B1&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 78.52454090702167,
+            &quot;3&quot;: 78.75811972206363
+          },
+          &quot;mean_percent&quot;: 78.64133031454264,
+          &quot;covered_seconds&quot;: 463.569425663969,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.250301580992527,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        }
+      },
+      &quot;arms&quot;: {
+        &quot;B0&quot;: {
+          &quot;window_seconds&quot;: &quot;1249.4292443799786&quot;,
+          &quot;successful_output_tokens&quot;: 690754,
+          &quot;occupied_cards&quot;: 2,
+          &quot;measurement_seal_sha256&quot;: &quot;54e1c0b15b5aa15d13c7569345aa72e7a1da8d42fa91fbbd80e5c48838f4a0d5&quot;,
+          &quot;monthly_cost_per_card_cny&quot;: &quot;1875&quot;,
+          &quot;cost_per_million_output_tokens_cny&quot;: &quot;2.616884343914090767721456071&quot;
+        },
+        &quot;B1&quot;: {
+          &quot;window_seconds&quot;: &quot;463.569425663969&quot;,
+          &quot;successful_output_tokens&quot;: 690844,
+          &quot;occupied_cards&quot;: 2,
+          &quot;measurement_seal_sha256&quot;: &quot;55647a090f399d28ebc4d262060fe47af2b9ec41074d420f37835aafa6e05ab8&quot;,
+          &quot;monthly_cost_per_card_cny&quot;: &quot;1875&quot;,
+          &quot;cost_per_million_output_tokens_cny&quot;: &quot;0.9708029003492019028201038901&quot;
+        }
+      }
+    },
+    &quot;four_tenant&quot;: {
+      &quot;evidence_status&quot;: &quot;published_rental&quot;,
+      &quot;reduction_percent&quot;: &quot;65.84811977932538136252373447&quot;,
+      &quot;utilization&quot;: {
+        &quot;B0&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 29.215313303911437,
+            &quot;3&quot;: 30.009870368704775
+          },
+          &quot;mean_percent&quot;: 29.612591836308106,
+          &quot;covered_seconds&quot;: 313.5524993130239,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.193631918518804,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        },
+        &quot;B1&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 87.79710492273381,
+            &quot;3&quot;: 88.25009527946426
+          },
+          &quot;mean_percent&quot;: 88.02360010109903,
+          &quot;covered_seconds&quot;: 308.35052632098086,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.204619632975664,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        }
+      },
+      &quot;arms&quot;: {
+        &quot;B0&quot;: {
+          &quot;window_seconds&quot;: &quot;313.5524993130239&quot;,
+          &quot;successful_output_tokens&quot;: 42496,
+          &quot;occupied_cards&quot;: 2,
+          &quot;measurement_seal_sha256&quot;: &quot;0d234f1b14313806a2918a1ac66ee4f132f71f983446e3bd1e1c917ae352c920&quot;,
+          &quot;monthly_cost_per_card_cny&quot;: &quot;1875&quot;,
+          &quot;cost_per_million_output_tokens_cny&quot;: &quot;10.67476895813723304132327923&quot;
+        },
+        &quot;B1&quot;: {
+          &quot;window_seconds&quot;: &quot;308.35052632098086&quot;,
+          &quot;successful_output_tokens&quot;: 122368,
+          &quot;occupied_cards&quot;: 2,
+          &quot;measurement_seal_sha256&quot;: &quot;938ec8e50abe9bc391f4726a3735ea6fd5bba9b05c172a932a3c269de9207566&quot;,
+          &quot;monthly_cost_per_card_cny&quot;: &quot;1875&quot;,
+          &quot;cost_per_million_output_tokens_cny&quot;: &quot;3.645634308416783752394114172&quot;
+        }
+      }
+    }
+  },
+  &quot;formula&quot;: &quot;成本/百万输出词元=10^6×每卡月费×占卡数×正式区间秒数/(30×86400×成功输出词元数)。&quot;
+}</pre></details><details id="context-results"><summary>长上下文与四租户复算明细</summary><pre>{
+  &quot;receipt&quot;: {
+    &quot;status&quot;: &quot;completed&quot;,
+    &quot;failure&quot;: null
+  },
+  &quot;results&quot;: [
+    {
+      &quot;phase&quot;: &quot;4096-formal&quot;,
+      &quot;throughput_ratio&quot;: 2.340022026946373,
+      &quot;equal_rate_same_card_count_unit_cost_reduction_percent&quot;: 57.26535953574092,
+      &quot;mean_ttft_reduction_percent&quot;: 51.041686250842666,
+      &quot;mean_tpot_reduction_percent&quot;: 57.702578399051305,
+      &quot;B0&quot;: {
+        &quot;phase&quot;: &quot;4096-formal&quot;,
+        &quot;cohort&quot;: &quot;4096&quot;,
+        &quot;tenants&quot;: 1,
+        &quot;concurrency&quot;: 8,
+        &quot;status&quot;: &quot;completed&quot;,
+        &quot;metrics&quot;: {
+          &quot;requests&quot;: 139,
+          &quot;successful&quot;: 139,
+          &quot;failed&quot;: 0,
+          &quot;duration_seconds&quot;: 309.27357333595864,
+          &quot;output_tokens&quot;: 35584,
+          &quot;output_tokens_per_second&quot;: 115.05671052387558,
+          &quot;ttft_ms&quot;: {
+            &quot;mean&quot;: 2102.162570074509,
+            &quot;p95&quot;: 3916.6260340134613,
+            &quot;p99&quot;: 8808.370478975121
+          },
+          &quot;tpot_ms&quot;: {
+            &quot;mean&quot;: 60.77760248758305,
+            &quot;p95&quot;: 66.77846687448704,
+            &quot;p99&quot;: 73.75407431356828
+          }
+        },
+        &quot;utilization&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 32.46688990903807,
+            &quot;3&quot;: 32.036965849126105
+          },
+          &quot;mean_percent&quot;: 32.25192787908209,
+          &quot;covered_seconds&quot;: 309.27357333595864,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.210990447027143,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        },
+        &quot;windows&quot;: [
+          {
+            &quot;submission_window&quot;: 0,
+            &quot;start_monotonic&quot;: 391656.271162116,
+            &quot;submission_end_monotonic&quot;: 391716.271162116,
+            &quot;drain_end_monotonic&quot;: 391731.927422569,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 30,
+              &quot;successful&quot;: 30,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 75.65626045298995,
+              &quot;output_tokens&quot;: 7680,
+              &quot;output_tokens_per_second&quot;: 101.51175796974624,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 3020.0200915627647,
+                &quot;p95&quot;: 8808.370478975121,
+                &quot;p99&quot;: 10124.33753098594
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 60.755523348263665,
+                &quot;p95&quot;: 66.77846687448704,
+                &quot;p99&quot;: 69.66209268247636
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 1,
+            &quot;start_monotonic&quot;: 391716.271162116,
+            &quot;submission_end_monotonic&quot;: 391776.271162116,
+            &quot;drain_end_monotonic&quot;: 391790.361912688,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 26,
+              &quot;successful&quot;: 26,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 74.0907505719806,
+              &quot;output_tokens&quot;: 6656,
+              &quot;output_tokens_per_second&quot;: 89.83577502745861,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 2131.191454382273,
+                &quot;p95&quot;: 3916.6260340134613,
+                &quot;p99&quot;: 4118.468629952986
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 61.207112474804234,
+                &quot;p95&quot;: 70.51368019607503,
+                &quot;p99&quot;: 73.75407431356828
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 2,
+            &quot;start_monotonic&quot;: 391776.271162116,
+            &quot;submission_end_monotonic&quot;: 391836.271162116,
+            &quot;drain_end_monotonic&quot;: 391852.963624379,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 28,
+              &quot;successful&quot;: 28,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 76.69246226298856,
+              &quot;output_tokens&quot;: 7168,
+              &quot;output_tokens_per_second&quot;: 93.46420480568199,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 1648.4473577106005,
+                &quot;p95&quot;: 2616.1264759721234,
+                &quot;p99&quot;: 2638.024023035541
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 62.84143190364796,
+                &quot;p95&quot;: 66.39800416876325,
+                &quot;p99&quot;: 80.57632396093516
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 3,
+            &quot;start_monotonic&quot;: 391836.271162116,
+            &quot;submission_end_monotonic&quot;: 391896.271162116,
+            &quot;drain_end_monotonic&quot;: 391912.587622009,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 27,
+              &quot;successful&quot;: 27,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 76.31645989295794,
+              &quot;output_tokens&quot;: 6912,
+              &quot;output_tokens_per_second&quot;: 90.57023884093714,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 1623.8062255067268,
+                &quot;p95&quot;: 2601.9324850058183,
+                &quot;p99&quot;: 2702.0050450228155
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 61.79893378842319,
+                &quot;p95&quot;: 65.24218941180438,
+                &quot;p99&quot;: 66.78764602356573
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 4,
+            &quot;start_monotonic&quot;: 391896.271162116,
+            &quot;submission_end_monotonic&quot;: 391956.271162116,
+            &quot;drain_end_monotonic&quot;: 391965.541999245,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 28,
+              &quot;successful&quot;: 28,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 69.27083712897729,
+              &quot;output_tokens&quot;: 7168,
+              &quot;output_tokens_per_second&quot;: 103.4778890668479,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 2006.7758062484374,
+                &quot;p95&quot;: 3532.1386720170267,
+                &quot;p99&quot;: 3889.9467900046147
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 57.35374340684484,
+                &quot;p95&quot;: 65.51992117641859,
+                &quot;p99&quot;: 69.86134594110041
+              }
+            }
+          }
+        ],
+        &quot;per_tenant&quot;: {
+          &quot;tenant-0&quot;: {
+            &quot;requests&quot;: 139,
+            &quot;successful&quot;: 139,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 309.27357333595864,
+            &quot;output_tokens&quot;: 35584,
+            &quot;output_tokens_per_second&quot;: 115.05671052387558,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 2102.162570074509,
+              &quot;p95&quot;: 3916.6260340134613,
+              &quot;p99&quot;: 8808.370478975121
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 60.77760248758305,
+              &quot;p95&quot;: 66.77846687448704,
+              &quot;p99&quot;: 73.75407431356828
+            }
+          }
+        }
+      },
+      &quot;B1&quot;: {
+        &quot;phase&quot;: &quot;4096-formal&quot;,
+        &quot;cohort&quot;: &quot;4096&quot;,
+        &quot;tenants&quot;: 1,
+        &quot;concurrency&quot;: 8,
+        &quot;status&quot;: &quot;completed&quot;,
+        &quot;metrics&quot;: {
+          &quot;requests&quot;: 318,
+          &quot;successful&quot;: 318,
+          &quot;failed&quot;: 0,
+          &quot;duration_seconds&quot;: 302.36755379795795,
+          &quot;output_tokens&quot;: 81408,
+          &quot;output_tokens_per_second&quot;: 269.2352369738614,
+          &quot;ttft_ms&quot;: {
+            &quot;mean&quot;: 1029.1833465744276,
+            &quot;p95&quot;: 1980.62193201622,
+            &quot;p99&quot;: 3665.148917993065
+          },
+          &quot;tpot_ms&quot;: {
+            &quot;mean&quot;: 25.707358763121682,
+            &quot;p95&quot;: 29.118202266730734,
+            &quot;p99&quot;: 31.01257449015975
+          }
+        },
+        &quot;utilization&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 70.28831903099005,
+            &quot;3&quot;: 72.37857739802138
+          },
+          &quot;mean_percent&quot;: 71.33344821450572,
+          &quot;covered_seconds&quot;: 302.36755379795795,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.218089492525905,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        },
+        &quot;windows&quot;: [
+          {
+            &quot;submission_window&quot;: 0,
+            &quot;start_monotonic&quot;: 394447.702135556,
+            &quot;submission_end_monotonic&quot;: 394507.702135556,
+            &quot;drain_end_monotonic&quot;: 394514.306820154,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 65,
+              &quot;successful&quot;: 65,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 66.60468459798722,
+              &quot;output_tokens&quot;: 16640,
+              &quot;output_tokens_per_second&quot;: 249.83227682010312,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 1440.1044276498187,
+                &quot;p95&quot;: 3665.148917993065,
+                &quot;p99&quot;: 4168.3351949905045
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 24.301417706352357,
+                &quot;p95&quot;: 28.11394666285053,
+                &quot;p99&quot;: 31.41372028633258
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 1,
+            &quot;start_monotonic&quot;: 394507.702135556,
+            &quot;submission_end_monotonic&quot;: 394567.702135556,
+            &quot;drain_end_monotonic&quot;: 394573.378619641,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 64,
+              &quot;successful&quot;: 64,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 65.67648408497917,
+              &quot;output_tokens&quot;: 16384,
+              &quot;output_tokens_per_second&quot;: 249.4652420613846,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 1068.0671053005426,
+                &quot;p95&quot;: 2054.7061699908227,
+                &quot;p99&quot;: 2146.863456990104
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 25.446700074872734,
+                &quot;p95&quot;: 27.965415419563286,
+                &quot;p99&quot;: 36.73609118433852
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 2,
+            &quot;start_monotonic&quot;: 394567.702135556,
+            &quot;submission_end_monotonic&quot;: 394627.702135556,
+            &quot;drain_end_monotonic&quot;: 394634.876400342,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 63,
+              &quot;successful&quot;: 63,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 67.17426478595007,
+              &quot;output_tokens&quot;: 16128,
+              &quot;output_tokens_per_second&quot;: 240.09194669106785,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 861.7477573774061,
+                &quot;p95&quot;: 1216.4477560436353,
+                &quot;p99&quot;: 1239.6919279708527
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 27.195670413577435,
+                &quot;p95&quot;: 29.54040329410311,
+                &quot;p99&quot;: 35.26137250580587
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 3,
+            &quot;start_monotonic&quot;: 394627.702135556,
+            &quot;submission_end_monotonic&quot;: 394687.702135556,
+            &quot;drain_end_monotonic&quot;: 394694.719634347,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 63,
+              &quot;successful&quot;: 63,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 67.01749879098497,
+              &quot;output_tokens&quot;: 16128,
+              &quot;output_tokens_per_second&quot;: 240.65356497860674,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 903.3206482251574,
+                &quot;p95&quot;: 1527.8394059860148,
+                &quot;p99&quot;: 1718.0495490320027
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 26.16383605252591,
+                &quot;p95&quot;: 29.17647269011165,
+                &quot;p99&quot;: 31.01257449015975
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 4,
+            &quot;start_monotonic&quot;: 394687.702135556,
+            &quot;submission_end_monotonic&quot;: 394747.702135556,
+            &quot;drain_end_monotonic&quot;: 394750.066475692,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 63,
+              &quot;successful&quot;: 63,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 62.364340135944076,
+              &quot;output_tokens&quot;: 16128,
+              &quot;output_tokens_per_second&quot;: 258.6093264972193,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 859.014478114818,
+                &quot;p95&quot;: 1498.6434149905108,
+                &quot;p99&quot;: 1692.5936150364578
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 25.477940057197234,
+                &quot;p95&quot;: 28.270819953040164,
+                &quot;p99&quot;: 30.245326937167157
+              }
+            }
+          }
+        ],
+        &quot;per_tenant&quot;: {
+          &quot;tenant-0&quot;: {
+            &quot;requests&quot;: 318,
+            &quot;successful&quot;: 318,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 302.36755379795795,
+            &quot;output_tokens&quot;: 81408,
+            &quot;output_tokens_per_second&quot;: 269.2352369738614,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 1029.1833465744276,
+              &quot;p95&quot;: 1980.62193201622,
+              &quot;p99&quot;: 3665.148917993065
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 25.707358763121682,
+              &quot;p95&quot;: 29.118202266730734,
+              &quot;p99&quot;: 31.01257449015975
+            }
+          }
+        }
+      }
+    },
+    {
+      &quot;phase&quot;: &quot;16384-formal&quot;,
+      &quot;throughput_ratio&quot;: 2.628529290639664,
+      &quot;equal_rate_same_card_count_unit_cost_reduction_percent&quot;: 61.955911864438626,
+      &quot;mean_ttft_reduction_percent&quot;: 66.51124914259918,
+      &quot;mean_tpot_reduction_percent&quot;: 60.101457359111045,
+      &quot;B0&quot;: {
+        &quot;phase&quot;: &quot;16384-formal&quot;,
+        &quot;cohort&quot;: &quot;16384&quot;,
+        &quot;tenants&quot;: 1,
+        &quot;concurrency&quot;: 8,
+        &quot;status&quot;: &quot;completed&quot;,
+        &quot;metrics&quot;: {
+          &quot;requests&quot;: 74,
+          &quot;successful&quot;: 74,
+          &quot;failed&quot;: 0,
+          &quot;duration_seconds&quot;: 311.4302894049906,
+          &quot;output_tokens&quot;: 18944,
+          &quot;output_tokens_per_second&quot;: 60.829022238632724,
+          &quot;ttft_ms&quot;: {
+            &quot;mean&quot;: 7117.544820363086,
+            &quot;p95&quot;: 16659.616224002093,
+            &quot;p99&quot;: 27094.88654800225
+          },
+          &quot;tpot_ms&quot;: {
+            &quot;mean&quot;: 101.41819341855741,
+            &quot;p95&quot;: 114.91781141558735,
+            &quot;p99&quot;: 117.1319127489137
+          }
+        },
+        &quot;utilization&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 35.97684825503616,
+            &quot;3&quot;: 34.88168966110169
+          },
+          &quot;mean_percent&quot;: 35.429268958068924,
+          &quot;covered_seconds&quot;: 311.4302894049906,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.211811013985425,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        },
+        &quot;windows&quot;: [
+          {
+            &quot;submission_window&quot;: 0,
+            &quot;start_monotonic&quot;: 392034.466335969,
+            &quot;submission_end_monotonic&quot;: 392094.466335969,
+            &quot;drain_end_monotonic&quot;: 392124.431147956,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 16,
+              &quot;successful&quot;: 16,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 89.96481198701076,
+              &quot;output_tokens&quot;: 4096,
+              &quot;output_tokens_per_second&quot;: 45.52891191048547,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 10484.674087681924,
+                &quot;p95&quot;: 27094.88654800225,
+                &quot;p99&quot;: 27094.88654800225
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 105.51383747011892,
+                &quot;p95&quot;: 117.1319127489137,
+                &quot;p99&quot;: 117.1319127489137
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 1,
+            &quot;start_monotonic&quot;: 392094.466335969,
+            &quot;submission_end_monotonic&quot;: 392154.466335969,
+            &quot;drain_end_monotonic&quot;: 392184.354471815,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 15,
+              &quot;successful&quot;: 15,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 89.88813584600575,
+              &quot;output_tokens&quot;: 3840,
+              &quot;output_tokens_per_second&quot;: 42.71976455912489,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 5953.624117537402,
+                &quot;p95&quot;: 8764.222214987967,
+                &quot;p99&quot;: 8764.222214987967
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 106.23838091973715,
+                &quot;p95&quot;: 114.91781141558735,
+                &quot;p99&quot;: 114.91781141558735
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 2,
+            &quot;start_monotonic&quot;: 392154.466335969,
+            &quot;submission_end_monotonic&quot;: 392214.466335969,
+            &quot;drain_end_monotonic&quot;: 392243.411370039,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 15,
+              &quot;successful&quot;: 15,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 88.94503406999866,
+              &quot;output_tokens&quot;: 3840,
+              &quot;output_tokens_per_second&quot;: 43.17273066619961,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 6290.238208199541,
+                &quot;p95&quot;: 10045.307603955735,
+                &quot;p99&quot;: 10045.307603955735
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 102.22399114065018,
+                &quot;p95&quot;: 116.8539057177601,
+                &quot;p99&quot;: 116.8539057177601
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 3,
+            &quot;start_monotonic&quot;: 392214.466335969,
+            &quot;submission_end_monotonic&quot;: 392274.466335969,
+            &quot;drain_end_monotonic&quot;: 392304.870030869,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 15,
+              &quot;successful&quot;: 15,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 90.40369489998557,
+              &quot;output_tokens&quot;: 3840,
+              &quot;output_tokens_per_second&quot;: 42.476139987953225,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 6342.310372138551,
+                &quot;p95&quot;: 9595.113598974422,
+                &quot;p99&quot;: 9595.113598974422
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 105.20697637176555,
+                &quot;p95&quot;: 114.85702045873612,
+                &quot;p99&quot;: 114.85702045873612
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 4,
+            &quot;start_monotonic&quot;: 392274.466335969,
+            &quot;submission_end_monotonic&quot;: 392334.466335969,
+            &quot;drain_end_monotonic&quot;: 392345.892704635,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 13,
+              &quot;successful&quot;: 13,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 71.42636866599787,
+              &quot;output_tokens&quot;: 3328,
+              &quot;output_tokens_per_second&quot;: 46.593436879905056,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 6165.456987371167,
+                &quot;p95&quot;: 10062.351372966077,
+                &quot;p99&quot;: 10062.351372966077
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 85.51420668992712,
+                &quot;p95&quot;: 114.87512561565667,
+                &quot;p99&quot;: 114.87512561565667
+              }
+            }
+          }
+        ],
+        &quot;per_tenant&quot;: {
+          &quot;tenant-0&quot;: {
+            &quot;requests&quot;: 74,
+            &quot;successful&quot;: 74,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 311.4302894049906,
+            &quot;output_tokens&quot;: 18944,
+            &quot;output_tokens_per_second&quot;: 60.829022238632724,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 7117.544820363086,
+              &quot;p95&quot;: 16659.616224002093,
+              &quot;p99&quot;: 27094.88654800225
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 101.41819341855741,
+              &quot;p95&quot;: 114.91781141558735,
+              &quot;p99&quot;: 117.1319127489137
+            }
+          }
+        }
+      },
+      &quot;B1&quot;: {
+        &quot;phase&quot;: &quot;16384-formal&quot;,
+        &quot;cohort&quot;: &quot;16384&quot;,
+        &quot;tenants&quot;: 1,
+        &quot;concurrency&quot;: 8,
+        &quot;status&quot;: &quot;completed&quot;,
+        &quot;metrics&quot;: {
+          &quot;requests&quot;: 191,
+          &quot;successful&quot;: 191,
+          &quot;failed&quot;: 0,
+          &quot;duration_seconds&quot;: 305.8085869239876,
+          &quot;output_tokens&quot;: 48896,
+          &quot;output_tokens_per_second&quot;: 159.8908666752176,
+          &quot;ttft_ms&quot;: {
+            &quot;mean&quot;: 2383.57685205523,
+            &quot;p95&quot;: 4077.828004024923,
+            &quot;p99&quot;: 9867.407294979785
+          },
+          &quot;tpot_ms&quot;: {
+            &quot;mean&quot;: 40.46438114672237,
+            &quot;p95&quot;: 44.553575729357775,
+            &quot;p99&quot;: 48.28732214507409
+          }
+        },
+        &quot;utilization&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 84.0874538033146,
+            &quot;3&quot;: 82.1931661473713
+          },
+          &quot;mean_percent&quot;: 83.14030997534294,
+          &quot;covered_seconds&quot;: 305.8085869239876,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.2230337569490075,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        },
+        &quot;windows&quot;: [
+          {
+            &quot;submission_window&quot;: 0,
+            &quot;start_monotonic&quot;: 394813.303407662,
+            &quot;submission_end_monotonic&quot;: 394873.303407662,
+            &quot;drain_end_monotonic&quot;: 394885.555555525,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 40,
+              &quot;successful&quot;: 40,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 72.25214786297875,
+              &quot;output_tokens&quot;: 10240,
+              &quot;output_tokens_per_second&quot;: 141.72589054957174,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 3329.5134791260352,
+                &quot;p95&quot;: 9283.57845399296,
+                &quot;p99&quot;: 10040.631698968355
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 39.13097859911538,
+                &quot;p95&quot;: 43.6972316783652,
+                &quot;p99&quot;: 49.68600665497612
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 1,
+            &quot;start_monotonic&quot;: 394873.303407662,
+            &quot;submission_end_monotonic&quot;: 394933.303407662,
+            &quot;drain_end_monotonic&quot;: 394944.464039587,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 37,
+              &quot;successful&quot;: 37,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 71.16063192498405,
+              &quot;output_tokens&quot;: 9472,
+              &quot;output_tokens_per_second&quot;: 133.10730587644545,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 2517.920689128742,
+                &quot;p95&quot;: 4087.0515260030515,
+                &quot;p99&quot;: 4933.804882981349
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 40.005784749876895,
+                &quot;p95&quot;: 44.493615447187466,
+                &quot;p99&quot;: 44.553575729357775
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 2,
+            &quot;start_monotonic&quot;: 394933.303407662,
+            &quot;submission_end_monotonic&quot;: 394993.303407662,
+            &quot;drain_end_monotonic&quot;: 395004.894324034,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 38,
+              &quot;successful&quot;: 38,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 71.59091637196252,
+              &quot;output_tokens&quot;: 9728,
+              &quot;output_tokens_per_second&quot;: 135.8831607833675,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 2046.8912834169857,
+                &quot;p95&quot;: 3569.1688720253296,
+                &quot;p99&quot;: 4048.315131047275
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 41.53015887924235,
+                &quot;p95&quot;: 44.37590623525537,
+                &quot;p99&quot;: 48.28732214507409
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 3,
+            &quot;start_monotonic&quot;: 394993.303407662,
+            &quot;submission_end_monotonic&quot;: 395053.303407662,
+            &quot;drain_end_monotonic&quot;: 395065.772697861,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 38,
+              &quot;successful&quot;: 38,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 72.46929019899108,
+              &quot;output_tokens&quot;: 9728,
+              &quot;output_tokens_per_second&quot;: 134.23617056670764,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 1988.4056452842503,
+                &quot;p95&quot;: 3441.373570007272,
+                &quot;p99&quot;: 3862.1347079752013
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 42.52915123975077,
+                &quot;p95&quot;: 44.75816521569904,
+                &quot;p99&quot;: 45.09138990599918
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 4,
+            &quot;start_monotonic&quot;: 395053.303407662,
+            &quot;submission_end_monotonic&quot;: 395113.303407662,
+            &quot;drain_end_monotonic&quot;: 395119.108027507,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 38,
+              &quot;successful&quot;: 38,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 65.80461984500289,
+              &quot;output_tokens&quot;: 9728,
+              &quot;output_tokens_per_second&quot;: 147.83156597383993,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 1988.9023891867653,
+                &quot;p95&quot;: 3138.103702047374,
+                &quot;p99&quot;: 3669.805894023739
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 39.18394302084664,
+                &quot;p95&quot;: 45.215375062680856,
+                &quot;p99&quot;: 46.018456152923335
+              }
+            }
+          }
+        ],
+        &quot;per_tenant&quot;: {
+          &quot;tenant-0&quot;: {
+            &quot;requests&quot;: 191,
+            &quot;successful&quot;: 191,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 305.8085869239876,
+            &quot;output_tokens&quot;: 48896,
+            &quot;output_tokens_per_second&quot;: 159.8908666752176,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 2383.57685205523,
+              &quot;p95&quot;: 4077.828004024923,
+              &quot;p99&quot;: 9867.407294979785
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 40.46438114672237,
+              &quot;p95&quot;: 44.553575729357775,
+              &quot;p99&quot;: 48.28732214507409
+            }
+          }
+        }
+      }
+    },
+    {
+      &quot;phase&quot;: &quot;32768-formal&quot;,
+      &quot;throughput_ratio&quot;: 2.4999770326641695,
+      &quot;equal_rate_same_card_count_unit_cost_reduction_percent&quot;: 59.99963251925069,
+      &quot;mean_ttft_reduction_percent&quot;: 50.10213649059272,
+      &quot;mean_tpot_reduction_percent&quot;: 64.26351150264746,
+      &quot;B0&quot;: {
+        &quot;phase&quot;: &quot;32768-formal&quot;,
+        &quot;cohort&quot;: &quot;32768&quot;,
+        &quot;tenants&quot;: 1,
+        &quot;concurrency&quot;: 8,
+        &quot;status&quot;: &quot;completed&quot;,
+        &quot;metrics&quot;: {
+          &quot;requests&quot;: 43,
+          &quot;successful&quot;: 43,
+          &quot;failed&quot;: 0,
+          &quot;duration_seconds&quot;: 320.1273787120008,
+          &quot;output_tokens&quot;: 11008,
+          &quot;output_tokens_per_second&quot;: 34.38631223698999,
+          &quot;ttft_ms&quot;: {
+            &quot;mean&quot;: 20399.563820305724,
+            &quot;p95&quot;: 40696.284446981736,
+            &quot;p99&quot;: 54568.53835703805
+          },
+          &quot;tpot_ms&quot;: {
+            &quot;mean&quot;: 148.52376807786501,
+            &quot;p95&quot;: 166.32020268634912,
+            &quot;p99&quot;: 175.5018299292572
+          }
+        },
+        &quot;utilization&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 38.714419362365824,
+            &quot;3&quot;: 39.19931438961347
+          },
+          &quot;mean_percent&quot;: 38.95686687598965,
+          &quot;covered_seconds&quot;: 320.1273787120008,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.198680688510649,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        },
+        &quot;windows&quot;: [
+          {
+            &quot;submission_window&quot;: 0,
+            &quot;start_monotonic&quot;: 392430.921158569,
+            &quot;submission_end_monotonic&quot;: 392490.921158569,
+            &quot;drain_end_monotonic&quot;: 392540.683414655,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 10,
+              &quot;successful&quot;: 10,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 109.76225608598907,
+              &quot;output_tokens&quot;: 2560,
+              &quot;output_tokens_per_second&quot;: 23.323135759841392,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 27304.595148097724,
+                &quot;p95&quot;: 54568.53835703805,
+                &quot;p99&quot;: 54568.53835703805
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 156.90068961527453,
+                &quot;p95&quot;: 166.1621234706128,
+                &quot;p99&quot;: 166.1621234706128
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 1,
+            &quot;start_monotonic&quot;: 392490.921158569,
+            &quot;submission_end_monotonic&quot;: 392550.921158569,
+            &quot;drain_end_monotonic&quot;: 392605.55872772,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 9,
+              &quot;successful&quot;: 9,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 114.63756915100385,
+              &quot;output_tokens&quot;: 2304,
+              &quot;output_tokens_per_second&quot;: 20.098123303409427,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 17894.513182452,
+                &quot;p95&quot;: 19966.00102301454,
+                &quot;p99&quot;: 19966.00102301454
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 157.15903250278888,
+                &quot;p95&quot;: 175.5018299292572,
+                &quot;p99&quot;: 175.5018299292572
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 2,
+            &quot;start_monotonic&quot;: 392550.921158569,
+            &quot;submission_end_monotonic&quot;: 392610.921158569,
+            &quot;drain_end_monotonic&quot;: 392664.224550584,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 8,
+              &quot;successful&quot;: 8,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 113.3033920149901,
+              &quot;output_tokens&quot;: 2048,
+              &quot;output_tokens_per_second&quot;: 18.075363531297004,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 17998.538373140036,
+                &quot;p95&quot;: 20133.98316904204,
+                &quot;p99&quot;: 20133.98316904204
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 156.346110609279,
+                &quot;p95&quot;: 169.32691855301314,
+                &quot;p99&quot;: 169.32691855301314
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 3,
+            &quot;start_monotonic&quot;: 392610.921158569,
+            &quot;submission_end_monotonic&quot;: 392670.921158569,
+            &quot;drain_end_monotonic&quot;: 392723.116091787,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 8,
+              &quot;successful&quot;: 8,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 112.19493321800837,
+              &quot;output_tokens&quot;: 2048,
+              &quot;output_tokens_per_second&quot;: 18.253943750030917,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 18791.908950006473,
+                &quot;p95&quot;: 20299.332289025187,
+                &quot;p99&quot;: 20299.332289025187
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 157.7989747823677,
+                &quot;p95&quot;: 166.32020268634912,
+                &quot;p99&quot;: 166.32020268634912
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 4,
+            &quot;start_monotonic&quot;: 392670.921158569,
+            &quot;submission_end_monotonic&quot;: 392730.921158569,
+            &quot;drain_end_monotonic&quot;: 392751.044697043,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 8,
+              &quot;successful&quot;: 8,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 80.12353847402846,
+              &quot;output_tokens&quot;: 2048,
+              &quot;output_tokens_per_second&quot;: 25.56052864120381,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 18595.136945616105,
+                &quot;p95&quot;: 20344.496187986806,
+                &quot;p99&quot;: 20344.496187986806
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 111.24039444214705,
+                &quot;p95&quot;: 164.94723063135774,
+                &quot;p99&quot;: 164.94723063135774
+              }
+            }
+          }
+        ],
+        &quot;per_tenant&quot;: {
+          &quot;tenant-0&quot;: {
+            &quot;requests&quot;: 43,
+            &quot;successful&quot;: 43,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 320.1273787120008,
+            &quot;output_tokens&quot;: 11008,
+            &quot;output_tokens_per_second&quot;: 34.38631223698999,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 20399.563820305724,
+              &quot;p95&quot;: 40696.284446981736,
+              &quot;p99&quot;: 54568.53835703805
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 148.52376807786501,
+              &quot;p95&quot;: 166.32020268634912,
+              &quot;p99&quot;: 175.5018299292572
+            }
+          }
+        }
+      },
+      &quot;B1&quot;: {
+        &quot;phase&quot;: &quot;32768-formal&quot;,
+        &quot;cohort&quot;: &quot;32768&quot;,
+        &quot;tenants&quot;: 1,
+        &quot;concurrency&quot;: 8,
+        &quot;status&quot;: &quot;completed&quot;,
+        &quot;metrics&quot;: {
+          &quot;requests&quot;: 102,
+          &quot;successful&quot;: 102,
+          &quot;failed&quot;: 0,
+          &quot;duration_seconds&quot;: 303.75155918399105,
+          &quot;output_tokens&quot;: 26112,
+          &quot;output_tokens_per_second&quot;: 85.96499083049385,
+          &quot;ttft_ms&quot;: {
+            &quot;mean&quot;: 10178.946511570579,
+            &quot;p95&quot;: 19228.972727025393,
+            &quot;p99&quot;: 20563.658664992545
+          },
+          &quot;tpot_ms&quot;: {
+            &quot;mean&quot;: 53.07717929498079,
+            &quot;p95&quot;: 75.38523470581163,
+            &quot;p99&quot;: 77.76321423532185
+          }
+        },
+        &quot;utilization&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 95.3828017957323,
+            &quot;3&quot;: 95.46919133873033
+          },
+          &quot;mean_percent&quot;: 95.42599656723132,
+          &quot;covered_seconds&quot;: 303.75155918399105,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.219057952053845,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        },
+        &quot;windows&quot;: [
+          {
+            &quot;submission_window&quot;: 0,
+            &quot;start_monotonic&quot;: 395192.209714295,
+            &quot;submission_end_monotonic&quot;: 395252.209714295,
+            &quot;drain_end_monotonic&quot;: 395277.79242142,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 24,
+              &quot;successful&quot;: 24,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 85.58270712499507,
+              &quot;output_tokens&quot;: 6144,
+              &quot;output_tokens_per_second&quot;: 71.79020396055688,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 14729.19693650086,
+                &quot;p95&quot;: 20563.658664992545,
+                &quot;p99&quot;: 20840.683893009555
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 42.87172220293524,
+                &quot;p95&quot;: 64.40810356859812,
+                &quot;p99&quot;: 77.68236374112723
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 1,
+            &quot;start_monotonic&quot;: 395252.209714295,
+            &quot;submission_end_monotonic&quot;: 395312.209714295,
+            &quot;drain_end_monotonic&quot;: 395332.418619039,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 19,
+              &quot;successful&quot;: 19,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 80.20890474400949,
+              &quot;output_tokens&quot;: 4864,
+              &quot;output_tokens_per_second&quot;: 60.64164590607098,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 9243.876215686261,
+                &quot;p95&quot;: 14019.881224958226,
+                &quot;p99&quot;: 14019.881224958226
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 58.72837247446389,
+                &quot;p95&quot;: 77.76321423532185,
+                &quot;p99&quot;: 77.76321423532185
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 2,
+            &quot;start_monotonic&quot;: 395312.209714295,
+            &quot;submission_end_monotonic&quot;: 395372.209714295,
+            &quot;drain_end_monotonic&quot;: 395390.438310368,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 20,
+              &quot;successful&quot;: 20,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 78.22859607299324,
+              &quot;output_tokens&quot;: 5120,
+              &quot;output_tokens_per_second&quot;: 65.4492123982725,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 6702.487171956454,
+                &quot;p95&quot;: 10126.741963031236,
+                &quot;p99&quot;: 10668.544047046453
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 64.90471994487213,
+                &quot;p95&quot;: 77.42275903138386,
+                &quot;p99&quot;: 78.38459244322068
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 3,
+            &quot;start_monotonic&quot;: 395372.209714295,
+            &quot;submission_end_monotonic&quot;: 395432.209714295,
+            &quot;drain_end_monotonic&quot;: 395448.741572211,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 20,
+              &quot;successful&quot;: 20,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 76.53185791597934,
+              &quot;output_tokens&quot;: 5120,
+              &quot;output_tokens_per_second&quot;: 66.90024441352257,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 8552.25728689693,
+                &quot;p95&quot;: 13424.351214023773,
+                &quot;p99&quot;: 13467.103852017317
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 54.86104298804147,
+                &quot;p95&quot;: 72.44680954129709,
+                &quot;p99&quot;: 75.2973064157071
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 4,
+            &quot;start_monotonic&quot;: 395432.209714295,
+            &quot;submission_end_monotonic&quot;: 395492.209714295,
+            &quot;drain_end_monotonic&quot;: 395495.956878635,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 19,
+              &quot;successful&quot;: 19,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 63.747164339991286,
+              &quot;output_tokens&quot;: 4864,
+              &quot;output_tokens_per_second&quot;: 76.30143317525746,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 10738.067391003777,
+                &quot;p95&quot;: 15940.031172998715,
+                &quot;p99&quot;: 15940.031172998715
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 45.98929576550046,
+                &quot;p95&quot;: 73.46193525100163,
+                &quot;p99&quot;: 73.46193525100163
+              }
+            }
+          }
+        ],
+        &quot;per_tenant&quot;: {
+          &quot;tenant-0&quot;: {
+            &quot;requests&quot;: 102,
+            &quot;successful&quot;: 102,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 303.75155918399105,
+            &quot;output_tokens&quot;: 26112,
+            &quot;output_tokens_per_second&quot;: 85.96499083049385,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 10178.946511570579,
+              &quot;p95&quot;: 19228.972727025393,
+              &quot;p99&quot;: 20563.658664992545
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 53.07717929498079,
+              &quot;p95&quot;: 75.38523470581163,
+              &quot;p99&quot;: 77.76321423532185
+            }
+          }
+        }
+      }
+    },
+    {
+      &quot;phase&quot;: &quot;multi-tenant-formal&quot;,
+      &quot;throughput_ratio&quot;: 2.928096472400448,
+      &quot;equal_rate_same_card_count_unit_cost_reduction_percent&quot;: 65.84811977932537,
+      &quot;mean_ttft_reduction_percent&quot;: 34.35229038246459,
+      &quot;mean_tpot_reduction_percent&quot;: 70.32089929806948,
+      &quot;B0&quot;: {
+        &quot;phase&quot;: &quot;multi-tenant-formal&quot;,
+        &quot;cohort&quot;: &quot;4096&quot;,
+        &quot;tenants&quot;: 4,
+        &quot;concurrency&quot;: 24,
+        &quot;status&quot;: &quot;completed&quot;,
+        &quot;metrics&quot;: {
+          &quot;requests&quot;: 166,
+          &quot;successful&quot;: 166,
+          &quot;failed&quot;: 0,
+          &quot;duration_seconds&quot;: 313.5524993130239,
+          &quot;output_tokens&quot;: 42496,
+          &quot;output_tokens_per_second&quot;: 135.53073278990402,
+          &quot;ttft_ms&quot;: {
+            &quot;mean&quot;: 6034.711554574609,
+            &quot;p95&quot;: 23194.228359032422,
+            &quot;p99&quot;: 35616.098279017024
+          },
+          &quot;tpot_ms&quot;: {
+            &quot;mean&quot;: 151.3013773703274,
+            &quot;p95&quot;: 171.81751306269172,
+            &quot;p99&quot;: 179.3390290902964
+          }
+        },
+        &quot;utilization&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 29.215313303911437,
+            &quot;3&quot;: 30.009870368704775
+          },
+          &quot;mean_percent&quot;: 29.612591836308106,
+          &quot;covered_seconds&quot;: 313.5524993130239,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.193631918518804,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        },
+        &quot;windows&quot;: [
+          {
+            &quot;submission_window&quot;: 0,
+            &quot;start_monotonic&quot;: 392825.121466301,
+            &quot;submission_end_monotonic&quot;: 392885.121466301,
+            &quot;drain_end_monotonic&quot;: 392928.92468031,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 37,
+              &quot;successful&quot;: 37,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 103.80321400903631,
+              &quot;output_tokens&quot;: 9472,
+              &quot;output_tokens_per_second&quot;: 91.2495830733665,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 13001.246722874459,
+                &quot;p95&quot;: 35616.098279017024,
+                &quot;p99&quot;: 37374.35928202467
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 158.65764490333171,
+                &quot;p95&quot;: 178.7495857921849,
+                &quot;p99&quot;: 179.3390290902964
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 1,
+            &quot;start_monotonic&quot;: 392885.121466301,
+            &quot;submission_end_monotonic&quot;: 392945.121466301,
+            &quot;drain_end_monotonic&quot;: 392988.41567702,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 33,
+              &quot;successful&quot;: 33,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 103.29421071900288,
+              &quot;output_tokens&quot;: 8448,
+              &quot;output_tokens_per_second&quot;: 81.7858033010347,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 5224.047279579805,
+                &quot;p95&quot;: 8776.69078996405,
+                &quot;p99&quot;: 8801.2162920204
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 156.18406468303738,
+                &quot;p95&quot;: 174.0315031057096,
+                &quot;p99&quot;: 180.13643088622712
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 2,
+            &quot;start_monotonic&quot;: 392945.121466301,
+            &quot;submission_end_monotonic&quot;: 393005.121466301,
+            &quot;drain_end_monotonic&quot;: 393049.133595862,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 30,
+              &quot;successful&quot;: 30,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 104.01212956104428,
+              &quot;output_tokens&quot;: 7680,
+              &quot;output_tokens_per_second&quot;: 73.83754214447308,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 3951.299879498159,
+                &quot;p95&quot;: 6396.526706987061,
+                &quot;p99&quot;: 6523.175803013146
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 161.70270106198228,
+                &quot;p95&quot;: 172.07163503535057,
+                &quot;p99&quot;: 176.48601553736108
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 3,
+            &quot;start_monotonic&quot;: 393005.121466301,
+            &quot;submission_end_monotonic&quot;: 393065.121466301,
+            &quot;drain_end_monotonic&quot;: 393112.221359736,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 33,
+              &quot;successful&quot;: 33,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 107.09989343502093,
+              &quot;output_tokens&quot;: 8448,
+              &quot;output_tokens_per_second&quot;: 78.87963030631329,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 3162.004564576571,
+                &quot;p95&quot;: 5871.654450020287,
+                &quot;p99&quot;: 6422.98697901424
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 161.0027292355205,
+                &quot;p95&quot;: 173.91693186649468,
+                &quot;p99&quot;: 175.97703602343032
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 4,
+            &quot;start_monotonic&quot;: 393065.121466301,
+            &quot;submission_end_monotonic&quot;: 393125.121466301,
+            &quot;drain_end_monotonic&quot;: 393138.670204907,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 33,
+              &quot;successful&quot;: 33,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 73.5487386060413,
+              &quot;output_tokens&quot;: 8448,
+              &quot;output_tokens_per_second&quot;: 114.86260893271229,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 3801.129759725,
+                &quot;p95&quot;: 5911.874978046399,
+                &quot;p99&quot;: 6436.465227976441
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 119.01365305694536,
+                &quot;p95&quot;: 167.8104222941614,
+                &quot;p99&quot;: 171.81751306269172
+              }
+            }
+          }
+        ],
+        &quot;per_tenant&quot;: {
+          &quot;tenant-0&quot;: {
+            &quot;requests&quot;: 42,
+            &quot;successful&quot;: 42,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 313.5524993130239,
+            &quot;output_tokens&quot;: 10752,
+            &quot;output_tokens_per_second&quot;: 34.29090829624077,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 5649.397979882668,
+              &quot;p95&quot;: 17877.879406965803,
+              &quot;p99&quot;: 30327.036058995873
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 151.10507157061534,
+              &quot;p95&quot;: 174.0315031057096,
+              &quot;p99&quot;: 179.3390290902964
+            }
+          },
+          &quot;tenant-1&quot;: {
+            &quot;requests&quot;: 41,
+            &quot;successful&quot;: 41,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 313.5524993130239,
+            &quot;output_tokens&quot;: 10496,
+            &quot;output_tokens_per_second&quot;: 33.47445809871123,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 5513.0599526100705,
+              &quot;p95&quot;: 19650.620244035963,
+              &quot;p99&quot;: 33845.58892500354
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 154.26659945271965,
+              &quot;p95&quot;: 168.6497702274709,
+              &quot;p99&quot;: 173.91693186649468
+            }
+          },
+          &quot;tenant-2&quot;: {
+            &quot;requests&quot;: 42,
+            &quot;successful&quot;: 42,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 313.5524993130239,
+            &quot;output_tokens&quot;: 10752,
+            &quot;output_tokens_per_second&quot;: 34.29090829624077,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 6576.255666743409,
+              &quot;p95&quot;: 21428.19457803853,
+              &quot;p99&quot;: 35616.098279017024
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 148.0724832428168,
+              &quot;p95&quot;: 169.2696633960997,
+              &quot;p99&quot;: 171.81751306269172
+            }
+          },
+          &quot;tenant-3&quot;: {
+            &quot;requests&quot;: 41,
+            &quot;successful&quot;: 41,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 313.5524993130239,
+            &quot;output_tokens&quot;: 10496,
+            &quot;output_tokens_per_second&quot;: 33.47445809871123,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 6396.322118148219,
+              &quot;p95&quot;: 23194.228359032422,
+              &quot;p99&quot;: 37374.35928202467
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 151.8448966767974,
+              &quot;p95&quot;: 175.97703602343032,
+              &quot;p99&quot;: 180.13643088622712
+            }
+          }
+        }
+      },
+      &quot;B1&quot;: {
+        &quot;phase&quot;: &quot;multi-tenant-formal&quot;,
+        &quot;cohort&quot;: &quot;4096&quot;,
+        &quot;tenants&quot;: 4,
+        &quot;concurrency&quot;: 24,
+        &quot;status&quot;: &quot;completed&quot;,
+        &quot;metrics&quot;: {
+          &quot;requests&quot;: 478,
+          &quot;successful&quot;: 478,
+          &quot;failed&quot;: 0,
+          &quot;duration_seconds&quot;: 308.35052632098086,
+          &quot;output_tokens&quot;: 122368,
+          &quot;output_tokens_per_second&quot;: 396.8470605839657,
+          &quot;ttft_ms&quot;: {
+            &quot;mean&quot;: 3961.649917602996,
+            &quot;p95&quot;: 9188.870701007545,
+            &quot;p99&quot;: 11368.774504051544
+          },
+          &quot;tpot_ms&quot;: {
+            &quot;mean&quot;: 44.90488815314739,
+            &quot;p95&quot;: 55.89930952170535,
+            &quot;p99&quot;: 58.11882601576109
+          }
+        },
+        &quot;utilization&quot;: {
+          &quot;per_card_percent&quot;: {
+            &quot;2&quot;: 87.79710492273381,
+            &quot;3&quot;: 88.25009527946426
+          },
+          &quot;mean_percent&quot;: 88.02360010109903,
+          &quot;covered_seconds&quot;: 308.35052632098086,
+          &quot;missing_seconds&quot;: 0.0,
+          &quot;max_hold_age_seconds&quot;: 5.204619632975664,
+          &quot;method&quot;: &quot;Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth.&quot;
+        },
+        &quot;windows&quot;: [
+          {
+            &quot;submission_window&quot;: 0,
+            &quot;start_monotonic&quot;: 395559.568032877,
+            &quot;submission_end_monotonic&quot;: 395619.568032877,
+            &quot;drain_end_monotonic&quot;: 395632.012851491,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 96,
+              &quot;successful&quot;: 96,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 72.44481861399254,
+              &quot;output_tokens&quot;: 24576,
+              &quot;output_tokens_per_second&quot;: 339.2375116700645,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 5853.549657830929,
+                &quot;p95&quot;: 11368.774504051544,
+                &quot;p99&quot;: 12161.63102700375
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 41.88093596229937,
+                &quot;p95&quot;: 55.211917984335884,
+                &quot;p99&quot;: 56.52439070993341
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 1,
+            &quot;start_monotonic&quot;: 395619.568032877,
+            &quot;submission_end_monotonic&quot;: 395679.568032877,
+            &quot;drain_end_monotonic&quot;: 395694.269873292,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 96,
+              &quot;successful&quot;: 96,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 74.70184041501489,
+              &quot;output_tokens&quot;: 24576,
+              &quot;output_tokens_per_second&quot;: 328.98787852434606,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 3039.9507140834125,
+                &quot;p95&quot;: 4771.617400983814,
+                &quot;p99&quot;: 5086.84872102458
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 49.01484166261475,
+                &quot;p95&quot;: 56.83063816475481,
+                &quot;p99&quot;: 65.9621380746602
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 2,
+            &quot;start_monotonic&quot;: 395679.568032877,
+            &quot;submission_end_monotonic&quot;: 395739.568032877,
+            &quot;drain_end_monotonic&quot;: 395752.966310573,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 95,
+              &quot;successful&quot;: 95,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 73.39827769598924,
+              &quot;output_tokens&quot;: 24320,
+              &quot;output_tokens_per_second&quot;: 331.34292470365335,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 2880.0550462843507,
+                &quot;p95&quot;: 4770.31623799121,
+                &quot;p99&quot;: 5566.177730972413
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 47.89726227195357,
+                &quot;p95&quot;: 55.985208458778466,
+                &quot;p99&quot;: 62.97721185484061
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 3,
+            &quot;start_monotonic&quot;: 395739.568032877,
+            &quot;submission_end_monotonic&quot;: 395799.568032877,
+            &quot;drain_end_monotonic&quot;: 395816.491174813,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 96,
+              &quot;successful&quot;: 96,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 76.92314193601487,
+              &quot;output_tokens&quot;: 24576,
+              &quot;output_tokens_per_second&quot;: 319.48772997913244,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 4452.950288528275,
+                &quot;p95&quot;: 7948.220802994911,
+                &quot;p99&quot;: 8815.882503986359
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 42.79743680511993,
+                &quot;p95&quot;: 54.67255890994862,
+                &quot;p99&quot;: 57.14788572159687
+              }
+            }
+          },
+          {
+            &quot;submission_window&quot;: 4,
+            &quot;start_monotonic&quot;: 395799.568032877,
+            &quot;submission_end_monotonic&quot;: 395859.568032877,
+            &quot;drain_end_monotonic&quot;: 395867.913168694,
+            &quot;metrics&quot;: {
+              &quot;requests&quot;: 95,
+              &quot;successful&quot;: 95,
+              &quot;failed&quot;: 0,
+              &quot;duration_seconds&quot;: 68.34513581701322,
+              &quot;output_tokens&quot;: 24320,
+              &quot;output_tokens_per_second&quot;: 355.84097842916276,
+              &quot;ttft_ms&quot;: {
+                &quot;mean&quot;: 3566.3596612076567,
+                &quot;p95&quot;: 6118.984205008019,
+                &quot;p99&quot;: 6963.549443986267
+              },
+              &quot;tpot_ms&quot;: {
+                &quot;mean&quot;: 42.944716169322014,
+                &quot;p95&quot;: 54.79313352547002,
+                &quot;p99&quot;: 71.84131184716107
+              }
+            }
+          }
+        ],
+        &quot;per_tenant&quot;: {
+          &quot;tenant-0&quot;: {
+            &quot;requests&quot;: 118,
+            &quot;successful&quot;: 118,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 308.35052632098086,
+            &quot;output_tokens&quot;: 30208,
+            &quot;output_tokens_per_second&quot;: 97.9664291818158,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 4058.334406575788,
+              &quot;p95&quot;: 8635.830543993507,
+              &quot;p99&quot;: 11091.645654989406
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 45.03857028016493,
+              &quot;p95&quot;: 55.761435674503446,
+              &quot;p99&quot;: 56.801673360899386
+            }
+          },
+          &quot;tenant-1&quot;: {
+            &quot;requests&quot;: 120,
+            &quot;successful&quot;: 120,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 308.35052632098086,
+            &quot;output_tokens&quot;: 30720,
+            &quot;output_tokens_per_second&quot;: 99.62687713404996,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 4210.301673288147,
+              &quot;p95&quot;: 9372.23640299635,
+              &quot;p99&quot;: 10811.77829799708
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 43.82283053460936,
+              &quot;p95&quot;: 52.762330055017685,
+              &quot;p99&quot;: 57.18303270176893
+            }
+          },
+          &quot;tenant-2&quot;: {
+            &quot;requests&quot;: 119,
+            &quot;successful&quot;: 119,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 308.35052632098086,
+            &quot;output_tokens&quot;: 30464,
+            &quot;output_tokens_per_second&quot;: 98.79665315793288,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 3783.0714654615695,
+              &quot;p95&quot;: 9473.547155968845,
+              &quot;p99&quot;: 10542.03274199972
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 45.781813579047764,
+              &quot;p95&quot;: 56.27167406651721,
+              &quot;p99&quot;: 62.440043000056974
+            }
+          },
+          &quot;tenant-3&quot;: {
+            &quot;requests&quot;: 121,
+            &quot;successful&quot;: 121,
+            &quot;failed&quot;: 0,
+            &quot;duration_seconds&quot;: 308.35052632098086,
+            &quot;output_tokens&quot;: 30976,
+            &quot;output_tokens_per_second&quot;: 100.45710111016705,
+            &quot;ttft_ms&quot;: {
+              &quot;mean&quot;: 3796.392524411444,
+              &quot;p95&quot;: 8926.59009998897,
+              &quot;p99&quot;: 11368.774504051544
+            },
+            &quot;tpot_ms&quot;: {
+              &quot;mean&quot;: 44.985204661861,
+              &quot;p95&quot;: 55.84282542752358,
+              &quot;p99&quot;: 62.97721185484061
+            }
+          }
+        }
+      }
+    }
+  ]
+}</pre></details><details><summary>有效算力参考计算公式</summary><p>C本轮下界=ΣF本轮下界/(2×ΣT本轮×10¹²)；C参考上界=ΣF原参考上界/(2×ΣT原参考下界×10¹²)；η下界=100×C本轮下界/C参考上界。</p><p>本轮必要F及原生同步T，除以经核验复用的原同工况参考算力上界；不复用旧效率。</p></details><details><summary>原始报告、采样与复算记录</summary><p><a href="https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/reports/r10-35b-paired-full-20261125/README.md">五数据集与参考报告</a> · <a href="#context-results">长上下文与四租户复算明细</a> · <a href="summary.json">本页判定与原件哈希</a></p><pre>{
+  &quot;B0&quot;: {
+    &quot;clean&quot;: true,
+    &quot;errors&quot;: [],
+    &quot;logs&quot;: [
+      &quot;input-preparation.log&quot;,
+      &quot;service.log&quot;,
+      &quot;warmup.log&quot;,
+      &quot;client.log&quot;,
+      &quot;service/pinned-memory-preflight.log&quot;,
+      &quot;service/cann-logs/run/plog/plog-2871343_20261125123743964.log&quot;,
+      &quot;service/cann-logs/run/plog/plog-2870883_20261125123820997.log&quot;,
+      &quot;service/cann-logs/run/plog/plog-2871758_20261125123900317.log&quot;,
+      &quot;service/cann-logs/run/plog/plog-2871933_20261125123936507.log&quot;,
+      &quot;service/cann-logs/run/plog/plog-2872116_20261125124013741.log&quot;,
+      &quot;service/cann-logs/run/plog/plog-2872290_20261125124048780.log&quot;,
+      &quot;service/cann-logs/run/plog/plog-2872289_20261125124049131.log&quot;,
+      &quot;service/cann-logs/run/device-2/device-2871343_20261125123807293.log&quot;,
+      &quot;service/cann-logs/run/device-2/device-2872289_20261125124128313.log&quot;,
+      &quot;service/cann-logs/run/device-3/device-2871343_20261125123810891.log&quot;,
+      &quot;service/cann-logs/run/device-3/device-2872290_20261125124127905.log&quot;
+    ],
+    &quot;post_measurement_teardown&quot;: []
+  },
+  &quot;B1&quot;: {
+    &quot;clean&quot;: true,
+    &quot;errors&quot;: [],
+    &quot;logs&quot;: [
+      &quot;input-preparation.log&quot;,
+      &quot;service.log&quot;,
+      &quot;warmup.log&quot;,
+      &quot;client.log&quot;,
+      &quot;service/pinned-memory-preflight.log&quot;,
+      &quot;service/vllm-ascend-logs/vllm_ascend_20261125_132153_2897176.log&quot;,
+      &quot;service/vllm-ascend-logs/vllm_ascend_20261125_132154_2897175.log&quot;,
+      &quot;service/vllm-ascend-logs/vllm_ascend_20261125_132235_2897176.log&quot;,
+      &quot;service/vllm-ascend-logs/vllm_ascend_20261125_132235_2897175.log&quot;,
+      &quot;service/vllm-ascend-logs/vllm_ascend_20261125_133439_2896994.log&quot;
+    ],
+    &quot;post_measurement_teardown&quot;: [
+      &quot;service.log:4940: (APIServer pid=2895883) ERROR 11-25 14:00:44 [async_llm.py:829] Traceback (most recent call last):&quot;
+    ]
+  }
+}</pre></details></html>

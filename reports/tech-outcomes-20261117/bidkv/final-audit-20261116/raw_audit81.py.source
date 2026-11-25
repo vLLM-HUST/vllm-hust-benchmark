@@ -1,0 +1,142 @@
+"""CPU-only original-evidence recheck. All outputs are a new closeout directory."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import time
+import traceback
+
+PROJECT = Path('/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01')
+ROOT = Path('/workspace/bidkv-five-datasets-20261113-01')
+OUT = PROJECT/'analysis/final-closeout-20261116/bidkv-audit01'
+FORMAL = PROJECT/'results/five-datasets-mod-04'
+DRIVER = PROJECT/'sources/bidkv81-mod-v4'
+TOOLS = Path('/data/shared_upload/cybber695/five-datasets-20261113-v1-controlled/reference-tools')
+PLANS = TOOLS.parent/'plans'
+VERIFY = PROJECT/'analysis/verify-finite-records01.py'
+PYTHON = '/usr/local/python3.12.13/bin/python3'
+PUBLIC_INDEX = PROJECT/'analysis/bidkv81-five-results-v1/controlled-originals-index.json'
+
+
+def sha(path):
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def read(path):
+    return json.loads(path.read_bytes())
+
+
+def write(path, value):
+    temporary = path.with_suffix(path.suffix+'.tmp')
+    temporary.write_text(json.dumps(value, indent=2, allow_nan=False)+'\n', encoding='utf-8')
+    temporary.replace(path)
+
+
+def inventory():
+    return {str(path.relative_to(FORMAL)): {'bytes': path.stat().st_size, 'sha256': sha(path)}
+            for path in sorted(FORMAL.rglob('*')) if path.is_file()}
+
+
+def main():
+    os.umask(0o077)
+    os.nice(10)
+    state = {'schema':'bidkv-original-evidence-closeout/v1', 'phase':'starting',
+        'pid':os.getpid(), 'started_unix':time.time(), 'source_sha256':sha(Path(__file__)),
+        'scope':'CPU-only: actual original bytes, 2064 SSE/request replay, 4 unchanged grader recomputations; no HTTP/model/device/SDK operation',
+        'model_generation_requests':0, 'children':[], 'public_original_sse_readback':False,
+        'controlled_original_sse_readback':True}
+
+    def save():
+        write(OUT/'status.json', state)
+
+    def invoke(name, argv):
+        record={'name':name,'argv':argv,'started_unix':time.time(),'status':'running'}
+        state['phase']=name
+        state['children'].append(record)
+        save()
+        with (OUT/(name+'.log')).open('xb', buffering=0) as log:
+            child=subprocess.Popen(argv, stdout=log, stderr=subprocess.STDOUT,
+                env={**os.environ,'PYTHONDONTWRITEBYTECODE':'1','TMPDIR':str(OUT/'temp')}, cwd=OUT)
+            record['pid']=child.pid
+            save()
+            code=child.wait()
+        record.update(actual_returncode=code, ended_unix=time.time(), status='completed' if code==0 else 'failed')
+        save()
+        assert code==0, 'CPU original-evidence recheck failed; retain log: '+name
+
+    save()
+    try:
+        assert sha(VERIFY)=='c72cffc310c16151cc2dc4f2ee221197e2c9bffbec11f4cc0327e0265dc49e57'
+        assert sha(DRIVER/'source-manifest.json')=='2e28cbe231438325ba96038588ad23e2888a3d503a8bc220100a667a4475e434'
+        for name, expected in read(DRIVER/'source-manifest.json')['files'].items():
+            assert sha(DRIVER/name)==expected, 'Frozen driver differs: '+name
+        assert sha(PUBLIC_INDEX)=='39f80d50a02eaaaa806468f9a128027f079631afe3beac8773357d3e6cab4185'
+        if not ROOT.exists():
+            ROOT.mkdir()
+        link=ROOT/'durable'
+        if not link.exists():
+            link.symlink_to(PROJECT, target_is_directory=True)
+        assert link.resolve()==PROJECT.resolve()
+        state.update(phase='hashing-originals-before', runtime_python=PYTHON,
+            frozen_verifier_sha256=sha(VERIFY), frozen_driver_manifest_sha256=sha(DRIVER/'source-manifest.json'),
+            published_controlled_index_sha256=sha(PUBLIC_INDEX), scratch_alias=str(link))
+        save()
+        before=inventory()
+        write(OUT/'original-inventory-before.json', before)
+        for item in read(PUBLIC_INDEX)['files']:
+            assert before[item['path']]=={'bytes':item['bytes'],'sha256':item['sha256']}, 'Published original changed: '+item['path']
+        state['published_original_files_currently_hash_verified']=len(read(PUBLIC_INDEX)['files'])
+        checklist=read(FORMAL/'execution-checklist.json')
+        assert checklist['formal_complete'] and checklist['phase']=='completed' and len(checklist['stages'])==14
+        for stage in checklist['stages']:
+            name,dataset=stage['name'],stage['dataset']
+            command=[PYTHON,'-B',str(VERIFY),'--driver',str(DRIVER),'--tools',str(TOOLS),
+                '--plan',str(PLANS/dataset),'--root',str(FORMAL/name),'--dataset',dataset,
+                '--stage',stage['stage'],'--out',str(OUT/'verification'/(name+'.json'))]
+            if stage['stage']=='judge':
+                command.extend(['--responses',str(FORMAL/(stage['solver_arm']+'-'+dataset)/'evaluation')])
+            invoke('replay-'+name,command)
+        state['quality_recomputation']=[]
+        for dataset in ['hle','frontier']:
+            for arm in ['native','bidkv']:
+                name='quality-'+arm+'-'+dataset
+                target=OUT/name
+                invoke('recompute-'+name,[PYTHON,'-B',str(DRIVER/'finite.py'),'--dataset',dataset,
+                    '--stage','quality','--tools',str(TOOLS),'--plan',str(PLANS/dataset),
+                    '--out',str(target),'--responses',str(FORMAL/(arm+'-'+dataset)/'evaluation'),
+                    '--grades',str(FORMAL/('judge-'+arm+'-'+dataset)/'evaluation')])
+                original=FORMAL/name/'quality/summary.json'
+                recomputed=target/'quality/summary.json'
+                row={'name':name,'original_sha256':sha(original),'recomputed_sha256':sha(recomputed),
+                    'byte_identical':original.read_bytes()==recomputed.read_bytes()}
+                state['quality_recomputation'].append(row)
+                save()
+                assert row['byte_identical'], 'Original grader recomputation differs: '+name
+        state['phase']='hashing-originals-after'
+        save()
+        after=inventory()
+        write(OUT/'original-inventory-after.json',after)
+        assert before==after, 'Original inventory mutated during CPU audit'
+        totals={'solver':0,'judge':0}
+        for path in (OUT/'verification').glob('*.json'):
+            value=read(path)
+            assert value['planned']==value['recorded']==value['raw_sse_verified']
+            assert value['zero_reuse']['passed']
+            totals[value['stage']]+=value['raw_sse_verified']
+        assert totals=={'solver':1344,'judge':720}
+        state.update(phase='completed',completed_unix=time.time(),raw_sse_replayed=totals,
+            original_files_before_after_identical=True,original_file_count=len(before),
+            source_members_unchanged=True,actual_child_waits_completed=len(state['children']))
+        save()
+        print(json.dumps(state))
+    except BaseException as error:
+        state.update(phase='failed',failed_unix=time.time(),error=type(error).__name__+': '+str(error))
+        save()
+        traceback.print_exc()
+        raise
+
+
+if __name__=='__main__':
+    main()

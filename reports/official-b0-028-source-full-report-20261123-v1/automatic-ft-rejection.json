@@ -1,0 +1,76 @@
+{
+  "schema": "deeplinkengine-official-producer-prefix-rejection/v1",
+  "status": "ineligible",
+  "failure_kind": "observed-second-step-extent-outside-reviewed-producer-closure",
+  "error": "Observed official second-step KV extent is outside the selected-prefix producer closure (call=5, row=0, expected=1383, observed=1385)",
+  "first_counterexample": {
+    "window": "a7f95b0bbeb142e1a2a3a2553bb1398f",
+    "call": 5,
+    "wave": 5,
+    "row": 0,
+    "request": "bdce7ed1a4e2cd3fca692a66edd5fdd71822ff148bce3886b62cb4c9758b32c8",
+    "begin": 0,
+    "sample_index": 0,
+    "query_stop": 3,
+    "selected_position": 1381,
+    "first_pass_query_positions": [
+      1381,
+      1382,
+      1383
+    ],
+    "observed_step0_kv_extent": 1384,
+    "observed_step1_kv_extent": 1385,
+    "expected_selected_prefix_kv_extent": 1383,
+    "observed_step0_query_end": 3,
+    "observed_step1_query_end": 1,
+    "source_derived_second_step_write_position": 1382,
+    "actual_slot_values_or_kernel_access_trace_observed": false,
+    "raw_length_planes_modified": false
+  },
+  "source_family": "source-candidate-ascend-qwen35-mtp2/0.28.0rc1-source/v1",
+  "diagnostic_sources": {
+    "vllm-workspace/vllm-ascend/vllm_ascend/spec_decode/llm_base_proposer.py": {
+      "expected_sha256": "ba650e27ce8af63afc55c01c6dcaf5f6e9f3f0783c0224792db890d394da1e30",
+      "actual_sdk_sha256": null
+    },
+    "vllm-workspace/vllm-ascend/vllm_ascend/attention/attention_v1.py": {
+      "expected_sha256": "5c8190e390f31032322d166d5ca6dd3f884a59af308ac3aca9899b73fd3dd7f5",
+      "actual_sdk_sha256": null
+    }
+  },
+  "stage": "sealed-json-preflight",
+  "full_sdk_and_model_admission_performed": false,
+  "original_version_seal_sha256": "9dbedd5ca4e63806ad93c9bc0c8ae6a2677e2c6acc44a61a1f1378f54b408ee1",
+  "native_original_seal_sha256": "48a87f51fa93591fb12c4d88e5e33dcd6ac2a18a98e4406088f0a528f0e5b1c8",
+  "companion_original_seal_sha256": "c990f98a0926fc28042c5d89203220c463026769a27155ace267b9406cc2f318",
+  "selected_native_evidence_sha256": {
+    "native-plan.json": "d4ce65ecd65f7a8d3f85e65992ae02ca5df7ffac0a8a2091a030def3507e027d",
+    "receipt.json": "7ca8045328f07f9e8522bc5b4f15192c009d3b367c82b8eee8c057a729b02781",
+    "token-workload.json": "6e820e66d1eedf2d0d327031b91256d0a17f24ea087a7f5502eba6d3255cc9b3"
+  },
+  "selected_companion_evidence_sha256": {
+    "native-plan.json": "608c529ac63f1f9d5ed9030d913d73005c19c4bb25436b5c26b88ed70f444c70",
+    "receipt.json": "5311451087b43afad259c572d71bbfc152a4b7039bdc3fa524a57577b7c4c0f2",
+    "client/companion-receipt.json": "d6025ea4647deb81f4bf9a60179eb78efd5f0e58669f677259d139772e1e5447",
+    "token-workload.json": "6e820e66d1eedf2d0d327031b91256d0a17f24ea087a7f5502eba6d3255cc9b3",
+    "client/raw-work/core-end.json": "455a3c76250f957ca767259bee8f26098099a1e50adda85c486c63b4c8fbfc29",
+    "client/raw-work/workers-end.json": "87c4b81cee3414bc0528561ab3a3a883e31893fdd83d107441b98e262ff0ba13",
+    "client/raw-work/rank-0-drafts.jsonl": "0b8ab51b0f1e76301a9e23a67978d858653df92c769b70251a7746ec9e54ec11",
+    "client/raw-work/rank-1-drafts.jsonl": "0b8ab51b0f1e76301a9e23a67978d858653df92c769b70251a7746ec9e54ec11"
+  },
+  "fixed_population_preflight_verified": true,
+  "cpu_source_sha256": {
+    "official_ft_inputs.py": "4bb55c296b586a55572824e2df9eee7e2147cd081016cba8e02cf138867a0ec8",
+    "official_ft_audit.py": "06b35183655c36156fcdfaad4241285247ca230bca26c491ea275d8b8b701dd1"
+  },
+  "interpretation": "Observed upstream lengths are retained. The selected-prefix arithmetic adapter cannot certify this call; no missing suffix producer is replaced by zero.",
+  "actual_kernel_memory_access_or_slot_values_observed": false,
+  "upstream_runtime_correctness_certified": false,
+  "source_runtime_applicability_certified": false,
+  "necessary_work_certified": false,
+  "F_interval": null,
+  "efficiency_percent": null,
+  "original_native_timing_repeated": false,
+  "companion_repeated": false,
+  "original_evidence_modified": false
+}

@@ -1,0 +1,33 @@
+{
+  "arm": "bidkv",
+  "admission_profile": "identical model, SDK, TP2, graph, KV16GiB/rank, maxlen65536, seq16, batch4096, image1 as native-02",
+  "physical_npus": [
+    6,
+    7
+  ],
+  "logical_npus": [
+    0,
+    1
+  ],
+  "bridge_policy": "bidkv.adapters.vllm_hust.selector.BidkvPreemptionPolicy",
+  "enable_utility_victim_selection": true,
+  "utility_strategy": "bidkv",
+  "utility_kill_switch": false,
+  "gate": "Native C8 must complete successfully and release NPUs, then candidate128 actual token hashes, same public C8 transport, zero policy failure/fallback",
+  "zero_calls": "No selector benefit claimed when no native preemption decisions occur",
+  "generation_not_yet_started": true,
+  "additional_policy_defaults": {
+    "utility_completion_weight": 0.5,
+    "utility_preempt_weight": 0.3,
+    "utility_kv_gate": 0.0,
+    "utility_cooldown_s": 0.0,
+    "utility_min_running": 1,
+    "utility_liveness_preemptions": 2,
+    "utility_cascade_gain_ratio": 1.25,
+    "utility_snapshot_enabled": false,
+    "utility_snapshot_top_k": 3,
+    "utility_snapshot_history_size": 32,
+    "utility_epsilon": 1e-06,
+    "utility_default_max_tokens": 1024
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "phase": "failed",
+  "pid": 1088723,
+  "started_unix": 1794624993.7673829,
+  "planned_new_candidate_requests": 8,
+  "planned_new_native_requests": 0,
+  "carried_native_requests": 8,
+  "old_v2_status": "failed, unchanged",
+  "owned_waits": [
+    {
+      "receipt": "/workspace/bidkv-five-datasets-20261113-01/durable/probes/bidkv-pressure-01/bidkv/api-owned-wait.json",
+      "value": {
+        "actual_returncode": 0,
+        "wait_returned_unix": 1794625017.4919603,
+        "api_pid": 1058719
+      }
+    },
+    {
+      "receipt": "/workspace/bidkv-five-datasets-20261113-01/durable/probes/bidkv-pressure-01/metadata/bidkv-owned-supervisor.json",
+      "value": {
+        "phase": "completed",
+        "pid": 1058703,
+        "started_unix": 1794623961.1162257,
+        "command": [
+          "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+          "-B",
+          "/workspace/bidkv-five-datasets-20261113-01/durable/sources/bidkv81-pressure-admission-v1/admission_owner.py",
+          "--arm",
+          "bidkv"
+        ],
+        "source_sha256": "a5e93e9f0510cf30b584f527d4404862549cfd4ec66677400abc0ab3e30e086b",
+        "submitted_generation_requests": 0,
+        "authorization": "Parent explicitly authorized unchanged13dc Candidate0gen after v2guardfailure; originalclock unchanged",
+        "child_pid": 1058704,
+        "actual_child_returncode": 0,
+        "ended_unix": 1794625018.1157658
+      }
+    }
+  ],
+  "public_release": {
+    "source_manifest_sha256": "97b82126270fb015ff864807228cb5f28ffc05a4d9ce6293e80226d89fd0a950",
+    "admission_source_manifest_sha256": "13dc6b582f81008e081c31ce1cd75096ea706989db185bc9bbea96fbe23d44f9",
+    "public_commit": "e13f5fc48ecbd7e734ce4fd7b387f7354d8e4c4f",
+    "fixed_workload_go": true,
+    "capacity_report_sha256": "978b88210653f6fcdff39253e4c109a756a75726ebea0b97c43f39a892701e48",
+    "native_cache_rpc_sha256": "395b5b86ea9a63e1cc2b5e79d22e6ee24202633774fdcbc4925ee5190923ca1c",
+    "native_carry_audit_sha256": "428316f3d0d65a9495c8cca9d0ca551b7a3e55bb4673ad5eae105e8b74ae8121",
+    "candidate_identical_capacity_pre_authorized": true,
+    "readback_verified": true,
+    "verified_public_files": 434,
+    "new_candidate_planned": 8,
+    "new_native_planned": 0,
+    "all_original_native8_carried_without_selection": true,
+    "old_v2_status_must_remain_failed": true,
+    "original_clock_not_reset": true,
+    "scope": "Candidate-only corrective diagnostic; source and Native carry receipt independently verified. The small remaining original window may produce partial requests: retain all planned/failed/missing denominators, no full paired throughput from partial records. Never extend3600s or change4096/1GiB/600s. Original v2RC1/2 remain failures."
+  },
+  "source_manifest_sha256": "97b82126270fb015ff864807228cb5f28ffc05a4d9ce6293e80226d89fd0a950",
+  "client_pid": 1088724,
+  "client_started_unix": 1794624993.7804725,
+  "command": [
+    "/workspace/bidkv-five-datasets-20261113-01/.venv/bin/python",
+    "-B",
+    "/data/shared_upload/cybber695/bidkv-five-datasets-20261113-01/sources/bidkv81-pressure-driver-v3/pressure_client.py",
+    "--arm",
+    "bidkv",
+    "--repeat",
+    "1"
+  ],
+  "actual_client_returncode": 2,
+  "client_ended_unix": 1794625003.1265535,
+  "error": "AssertionError: Corrective fixedbatch failed, no retry",
+  "failed_unix": 1794625003.1280565
+}
