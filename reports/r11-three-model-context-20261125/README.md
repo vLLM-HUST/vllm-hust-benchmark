@@ -64,3 +64,20 @@ Core 为 88.03%。首窗差异见图档对照。 [35B 封存与复算](qwen35-rc
 
 Intern-S2 在 RC4 兼容入口完成 MMLU-Pro 两臂各 200 题。正确 164→161，吞吐 2.662×，平均 TTFT／TPOT 为 0.297×／0.542×。该数据集达到
 4.2 结题性能与质量门槛，五套整体仍待完成。 [Intern-S2 MMLU-Pro 配对](intern-s2-rc4-mmlu-paired.json)
+
+35B 自适应方案的 MMLU-Pro 两臂各 200 题，正确 147→140，吞吐 2.783×，平均 TTFT／TPOT 为 0.323×／0.526×。该套达成 4.2 结题门槛，4.4
+阶段单位成本按公开月租折算下降 64.06%，双卡利用率提高 42.79 个百分点。其余固定数据集及原生计时仍在跑。
+[35B MMLU-Pro 配对](qwen35-rc4-adaptive-mmlu200.json)
+
+Intern-S2 同卡 C8 上下文 16K 通过。32K TTFT P95／P99 达到 2.690×／2.650×，超过 2×。4K 四租户按公开月租折算降本 61.36%，双卡 AI Core
+87.45%，达到 4.4 结题门槛。 [Intern-S2 上下文与四租户](intern-s2-rc4-context-c24.json)
+
+Intern-S2 的 HLE200 两臂各完成 200 题与 200 条判分。正确 30→32，吞吐 1.841×，平均 TTFT／TPOT 0.524×／0.549×。该套达成 4.2
+阶段门槛，吞吐尚未达到 2× 结题门槛。 [Intern-S2 HLE200](intern-s2-rc4-hle200.json)
+
+9B 的 MMLU-Pro、FrontierMath、SWE-bench 和 Terminal-Bench 已完成固定口径。吞吐分别为同卡 B0 的
+3.344×、3.255×、2.305×、2.166×。SWE-bench 与 Terminal-Bench 是离线请求回放，HLE 的求解与判分另有回执。
+[9B 四项原始汇总](qwen9b-rc4-fixed-tracks-readback.json)
+
+9B 同卡原生三轮均完整返回每轮 51,200 个输出 token。中位原生吞吐为 B0 的 2.535×。独立必要算量和参考时间尚未核定，本次诊断未生成 4.1 效率。
+[9B 原生计时](qwen9b-rc4-native-clean-readback.json)
