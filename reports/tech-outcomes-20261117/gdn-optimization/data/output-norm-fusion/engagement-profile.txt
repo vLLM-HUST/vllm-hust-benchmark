@@ -1,0 +1,14 @@
+torch_npu profiler engagement check (2026-11-15)
+Each arm: 8 prompts, 512 in / 32 out; profile collected via vLLM --profiler-config.
+Counts are files containing the given string inside each profile tree.
+
+pattern                       gate=on   gate=off   meaning
+----------------------------  --------  ---------  -------------------------
+_output_norm_kernel                 6          0   fused Triton kernel
+gdn_output_norm_rearrange           2          0   custom op registration
+aclnnAddRmsNorm                     8          8   stock path still present
+MatMulV2                            -          4   control (checked off arm only)
+
+Conclusion: the fused kernel executed only when the gate was on, so a null
+serving result is not a 'gate did not fire' artefact.
+The raw profile trees (263 MB / 297 MB) are not uploaded; only this summary is.
