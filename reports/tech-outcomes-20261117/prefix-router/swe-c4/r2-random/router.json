@@ -1,0 +1,60 @@
+{
+  "listen": {
+    "host": "127.0.0.1",
+    "port": 18400
+  },
+  "policy": "random",
+  "runtime_profile": "public",
+  "allow_unversioned_replay": true,
+  "hash_block_size": 1152,
+  "default_backend": "node0",
+  "observe_request_timings": true,
+  "fingerprint": {
+    "tokenizer": "/models/Qwen3.5-35B-A3B",
+    "allow_cache_salt": true,
+    "hash_algorithm": "sha256"
+  },
+  "backends": [
+    {
+      "id": "node0",
+      "url": "http://127.0.0.1:18410",
+      "data_parallel_rank": 0,
+      "group_block_sizes": {
+        "0": 1152,
+        "1": 1152,
+        "2": 1152,
+        "3": 1152
+      },
+      "event_endpoint": "tcp://127.0.0.1:18510",
+      "replay_endpoint": "tcp://127.0.0.1:18610",
+      "pool": {
+        "max_connections": 16,
+        "max_pending_requests": 16,
+        "queue_timeout_s": 30,
+        "request_timeout_s": 1800,
+        "keepalive_timeout_s": 30
+      }
+    },
+    {
+      "id": "node1",
+      "url": "http://127.0.0.1:18411",
+      "data_parallel_rank": 0,
+      "group_block_sizes": {
+        "0": 1152,
+        "1": 1152,
+        "2": 1152,
+        "3": 1152
+      },
+      "event_endpoint": "tcp://127.0.0.1:18511",
+      "replay_endpoint": "tcp://127.0.0.1:18611",
+      "pool": {
+        "max_connections": 16,
+        "max_pending_requests": 16,
+        "queue_timeout_s": 30,
+        "request_timeout_s": 1800,
+        "keepalive_timeout_s": 30
+      }
+    }
+  ],
+  "random_seed": 20261115
+}

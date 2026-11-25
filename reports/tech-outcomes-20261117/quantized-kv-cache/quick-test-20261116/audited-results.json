@@ -1,0 +1,491 @@
+{
+  "schema": "int8-quick-audited/v1",
+  "measurement_date_local": "2026-11-16 Asia/Shanghai",
+  "experiment_operator": "hustcui",
+  "publication_audit": "Codex assisted; offline recomputation only, no new inference",
+  "claim_scope": "single-pair frozen MMLU-Pro 200 output-token-rate observation only; no historical A3 throughput, request-throughput gain, stable concurrency or quality-equivalence claim",
+  "arms": {
+    "B0": {
+      "planned": 200,
+      "actual": 200,
+      "successful": 200,
+      "failed": 0,
+      "uncompleted": 0,
+      "correct": 142,
+      "accuracy": 0.71,
+      "length_stops": 21,
+      "unparsed": 0,
+      "invalid": 4,
+      "judge_unresolved": 0,
+      "accepted_output_tokens": 689141,
+      "batch_wall_s": 669.6414255071431,
+      "ttft_s": {
+        "n": 200,
+        "mean": 23.64984047065489,
+        "p50": 23.180549366399646,
+        "p95": 42.796231424994765,
+        "p99": 44.29106873628683
+      },
+      "tpot_s": {
+        "n": 200,
+        "mean": 0.09621836459523522,
+        "p50": 0.09617299590103892,
+        "p95": 0.1177140184524132,
+        "p99": 0.12543308615672105
+      },
+      "tpot_excluded_count": 0,
+      "start_unix": 1794837241.8686943,
+      "end_unix": 1794837911.5101197,
+      "raw_sse_audited": 200,
+      "output_tokens_per_s": 1029.119426830694,
+      "device_seconds_per_million_output_tokens": 1943.4090425824124,
+      "requests_per_s": 0.2986673051902859,
+      "HBM_reparsed": {
+        "unit": "MB as printed by npu-smi; no MiB conversion asserted",
+        "samples": 117,
+        "first_unix": 1794837243.191916,
+        "last_unix": 1794837909.733542,
+        "observed_span_fraction_of_batch": 0.9953709563399705,
+        "largest_sample_gap_s": 7.143303632736206,
+        "per_card_observed_range_MB": {
+          "4": [
+            55431,
+            56942
+          ],
+          "7": [
+            55305,
+            56875
+          ]
+        },
+        "observed_max_two_card_sum_MB": 113817,
+        "scope": "sampled occupied HBM only, partial B1 coverage; no matched-load memory-saving claim"
+      },
+      "reported_KV_cache_capacity_tokens": 1293312
+    },
+    "B1": {
+      "planned": 200,
+      "actual": 200,
+      "successful": 200,
+      "failed": 0,
+      "uncompleted": 0,
+      "correct": 145,
+      "accuracy": 0.725,
+      "length_stops": 21,
+      "unparsed": 0,
+      "invalid": 1,
+      "judge_unresolved": 0,
+      "accepted_output_tokens": 705836,
+      "batch_wall_s": 671.2478602509946,
+      "ttft_s": {
+        "n": 200,
+        "mean": 29.25770500072278,
+        "p50": 28.600026499014348,
+        "p95": 53.51556564541533,
+        "p99": 55.35316336815245
+      },
+      "tpot_s": {
+        "n": 200,
+        "mean": 0.09628791624759424,
+        "p50": 0.09503870048487925,
+        "p95": 0.12220158352742717,
+        "p99": 0.14206151725000027
+      },
+      "tpot_excluded_count": 0,
+      "start_unix": 1794835353.0085194,
+      "end_unix": 1794836024.256379,
+      "raw_sse_audited": 200,
+      "output_tokens_per_s": 1051.52811918994,
+      "device_seconds_per_million_output_tokens": 1901.9938349729812,
+      "requests_per_s": 0.29795253265346056,
+      "HBM_reparsed": {
+        "unit": "MB as printed by npu-smi; no MiB conversion asserted",
+        "samples": 113,
+        "first_unix": 1794835375.5454626,
+        "last_unix": 1794836020.1852152,
+        "observed_span_fraction_of_batch": 0.9603602358266441,
+        "largest_sample_gap_s": 7.242348670959473,
+        "per_card_observed_range_MB": {
+          "4": [
+            56659,
+            56663
+          ],
+          "7": [
+            56592,
+            56593
+          ]
+        },
+        "observed_max_two_card_sum_MB": 113255,
+        "scope": "sampled occupied HBM only, partial B1 coverage; no matched-load memory-saving claim"
+      },
+      "reported_KV_cache_capacity_tokens": 2305832
+    }
+  },
+  "changes": {
+    "output_tokens_per_s_percent": 2.177462768170302,
+    "requests_per_s_percent": -0.2393206502365408,
+    "batch_wall_s_percent": 0.23989476795507336,
+    "output_token_volume_percent": 2.4225811553803878,
+    "ttft_mean_increase_percent": 23.71206070935752
+  },
+  "quality": {
+    "paired_cases": 200,
+    "B0_correct_B1_wrong": 21,
+    "B0_wrong_B1_correct": 24,
+    "exact_two_sided_McNemar_p": 0.765991824244793,
+    "paired_difference_approx_95CI_percentage_points": [
+      -5.08724075038385,
+      8.087240750383849
+    ],
+    "scope": "descriptive subset uncertainty only; no equivalence test or throughput repeat-run CI"
+  },
+  "continuous_C8_engineering": {
+    "4096": {
+      "B0": {
+        "warmup": {
+          "planned": 24,
+          "actual": 24,
+          "successful": 24,
+          "failed": 0,
+          "uncompleted": 0,
+          "length_stops": 24,
+          "accepted_output_tokens": 12288,
+          "batch_wall_s": 81.72572129126638,
+          "output_tokens_per_s": 150.3565805948189,
+          "ttft_s": {
+            "n": 24,
+            "mean": 1.8627329367445782,
+            "p50": 1.4147203145548701,
+            "p95": 4.225293738534673,
+            "p99": 4.752330160820857
+          },
+          "tpot_s": {
+            "n": 24,
+            "mean": 0.049477907839238486,
+            "p50": 0.05051904478713637,
+            "p95": 0.05124070734977576,
+            "p99": 0.05158811340753696
+          },
+          "tpot_excluded_count": 0,
+          "admission_seconds": 60,
+          "actual_phase_wall_s": 81.72643783316016,
+          "drain_s": 21.726437833160162,
+          "window_completed": 16,
+          "unfinished_at_window_end": 8,
+          "window_output_tokens_per_s": 136.53333333333333,
+          "full_admission_window_observed": true,
+          "scope": "engineering continuous C8 evidence; synthetic prose, not dataset quality or original reference-engine qualification"
+        },
+        "formal": {
+          "planned": 94,
+          "actual": 94,
+          "successful": 94,
+          "failed": 0,
+          "uncompleted": 0,
+          "length_stops": 94,
+          "accepted_output_tokens": 48128,
+          "batch_wall_s": 323.9099394530058,
+          "output_tokens_per_s": 148.58451111835242,
+          "ttft_s": {
+            "n": 94,
+            "mean": 1.4983029590146815,
+            "p50": 1.4338723700493574,
+            "p95": 2.202703082934019,
+            "p99": 4.306791546950113
+          },
+          "tpot_s": {
+            "n": 94,
+            "mean": 0.05001803681495351,
+            "p50": 0.04986711449778972,
+            "p95": 0.05117728236175111,
+            "p99": 0.05156048377594909
+          },
+          "tpot_excluded_count": 0,
+          "admission_seconds": 300,
+          "actual_phase_wall_s": 323.9109690915793,
+          "drain_s": 23.910969091579318,
+          "window_completed": 86,
+          "unfinished_at_window_end": 8,
+          "window_output_tokens_per_s": 146.77333333333334,
+          "full_admission_window_observed": true,
+          "scope": "engineering continuous C8 evidence; synthetic prose, not dataset quality or original reference-engine qualification"
+        }
+      },
+      "B1": {
+        "warmup": {
+          "planned": 21,
+          "actual": 21,
+          "successful": 21,
+          "failed": 0,
+          "uncompleted": 0,
+          "length_stops": 21,
+          "accepted_output_tokens": 10752,
+          "batch_wall_s": 83.76811340730637,
+          "output_tokens_per_s": 128.35432914336346,
+          "ttft_s": {
+            "n": 21,
+            "mean": 2.4992977525329305,
+            "p50": 1.8508310709148645,
+            "p95": 5.6718607526272535,
+            "p99": 6.25373772867024
+          },
+          "tpot_s": {
+            "n": 21,
+            "mean": 0.05103179195203396,
+            "p50": 0.05216957526846466,
+            "p95": 0.0536530266138643,
+            "p99": 0.053842256758763016
+          },
+          "tpot_excluded_count": 0,
+          "admission_seconds": 60,
+          "actual_phase_wall_s": 83.76880456041545,
+          "drain_s": 23.768804560415447,
+          "window_completed": 13,
+          "unfinished_at_window_end": 8,
+          "window_output_tokens_per_s": 110.93333333333334,
+          "full_admission_window_observed": true,
+          "scope": "engineering continuous C8 evidence; synthetic prose, not dataset quality or original reference-engine qualification"
+        },
+        "formal": {
+          "planned": 88,
+          "actual": 88,
+          "successful": 88,
+          "failed": 0,
+          "uncompleted": 0,
+          "length_stops": 88,
+          "accepted_output_tokens": 45056,
+          "batch_wall_s": 315.733054718934,
+          "output_tokens_per_s": 142.7028286287887,
+          "ttft_s": {
+            "n": 88,
+            "mean": 1.9251602976265447,
+            "p50": 1.8263687891885638,
+            "p95": 3.061782826436681,
+            "p99": 5.463401253512126
+          },
+          "tpot_s": {
+            "n": 88,
+            "mean": 0.05235017254909928,
+            "p50": 0.05232678625072898,
+            "p95": 0.05441368344757495,
+            "p99": 0.05448042533477065
+          },
+          "tpot_excluded_count": 0,
+          "admission_seconds": 300,
+          "actual_phase_wall_s": 315.7338225785643,
+          "drain_s": 15.733822578564286,
+          "window_completed": 80,
+          "unfinished_at_window_end": 8,
+          "window_output_tokens_per_s": 136.53333333333333,
+          "full_admission_window_observed": true,
+          "scope": "engineering continuous C8 evidence; synthetic prose, not dataset quality or original reference-engine qualification"
+        }
+      },
+      "output_tokens_per_s_change_percent_including_drain": -3.9584761865782747
+    },
+    "16384": {
+      "B0": {
+        "warmup": {
+          "planned": 16,
+          "actual": 16,
+          "successful": 16,
+          "failed": 0,
+          "uncompleted": 0,
+          "length_stops": 16,
+          "accepted_output_tokens": 8192,
+          "batch_wall_s": 80.65933472663164,
+          "output_tokens_per_s": 101.56295024951665,
+          "ttft_s": {
+            "n": 16,
+            "mean": 6.864966256427579,
+            "p50": 3.1769594005309045,
+            "p95": 17.07717614201829,
+            "p99": 18.457775248494
+          },
+          "tpot_s": {
+            "n": 16,
+            "mean": 0.06417265077863789,
+            "p50": 0.07027722866987032,
+            "p95": 0.07139871633108597,
+            "p99": 0.07182350830674361
+          },
+          "tpot_excluded_count": 0,
+          "admission_seconds": 60,
+          "actual_phase_wall_s": 80.66010912042111,
+          "drain_s": 20.66010912042111,
+          "window_completed": 8,
+          "unfinished_at_window_end": 8,
+          "window_output_tokens_per_s": 68.26666666666667,
+          "full_admission_window_observed": true,
+          "scope": "engineering continuous C8 evidence; synthetic prose, not dataset quality or original reference-engine qualification"
+        },
+        "formal": {
+          "planned": 64,
+          "actual": 64,
+          "successful": 64,
+          "failed": 0,
+          "uncompleted": 0,
+          "length_stops": 64,
+          "accepted_output_tokens": 32768,
+          "batch_wall_s": 314.8067558268085,
+          "output_tokens_per_s": 104.08925283048046,
+          "ttft_s": {
+            "n": 64,
+            "mean": 4.0305008983268635,
+            "p50": 3.128194029442966,
+            "p95": 11.626024675136419,
+            "p99": 17.408308989116914
+          },
+          "tpot_s": {
+            "n": 64,
+            "mean": 0.06884066810412355,
+            "p50": 0.07036013004721786,
+            "p95": 0.07154516526069601,
+            "p99": 0.0717949274893296
+          },
+          "tpot_excluded_count": 0,
+          "admission_seconds": 300,
+          "actual_phase_wall_s": 314.8074034387246,
+          "drain_s": 14.807403438724577,
+          "window_completed": 56,
+          "unfinished_at_window_end": 8,
+          "window_output_tokens_per_s": 95.57333333333334,
+          "full_admission_window_observed": true,
+          "scope": "engineering continuous C8 evidence; synthetic prose, not dataset quality or original reference-engine qualification"
+        }
+      },
+      "B1": {
+        "warmup": {
+          "planned": 15,
+          "actual": 15,
+          "successful": 15,
+          "failed": 0,
+          "uncompleted": 0,
+          "length_stops": 15,
+          "accepted_output_tokens": 7680,
+          "batch_wall_s": 87.56079314555973,
+          "output_tokens_per_s": 87.7104891824459,
+          "ttft_s": {
+            "n": 15,
+            "mean": 9.772408446359139,
+            "p50": 6.652230331674218,
+            "p95": 21.21226243721321,
+            "p99": 22.862946279440074
+          },
+          "tpot_s": {
+            "n": 15,
+            "mean": 0.06789669534610676,
+            "p50": 0.07365200510193866,
+            "p95": 0.0769537400999225,
+            "p99": 0.08016727851003903
+          },
+          "tpot_excluded_count": 0,
+          "admission_seconds": 60,
+          "actual_phase_wall_s": 87.56172731146216,
+          "drain_s": 27.561727311462164,
+          "window_completed": 7,
+          "unfinished_at_window_end": 8,
+          "window_output_tokens_per_s": 59.733333333333334,
+          "full_admission_window_observed": true,
+          "scope": "engineering continuous C8 evidence; synthetic prose, not dataset quality or original reference-engine qualification"
+        },
+        "formal": {
+          "planned": 56,
+          "actual": 56,
+          "successful": 56,
+          "failed": 0,
+          "uncompleted": 0,
+          "length_stops": 56,
+          "accepted_output_tokens": 28672,
+          "batch_wall_s": 313.09852098859847,
+          "output_tokens_per_s": 91.57500939151385,
+          "ttft_s": {
+            "n": 56,
+            "mean": 5.246975325463739,
+            "p50": 4.012938584201038,
+            "p95": 15.201007494470105,
+            "p99": 21.5761909831781
+          },
+          "tpot_s": {
+            "n": 56,
+            "mean": 0.0769406250917668,
+            "p50": 0.07918263328901388,
+            "p95": 0.08057624771243323,
+            "p99": 0.08108287566175608
+          },
+          "tpot_excluded_count": 0,
+          "admission_seconds": 300,
+          "actual_phase_wall_s": 313.09910872392356,
+          "drain_s": 13.099108723923564,
+          "window_completed": 48,
+          "unfinished_at_window_end": 8,
+          "window_output_tokens_per_s": 81.92,
+          "full_admission_window_observed": true,
+          "scope": "engineering continuous C8 evidence; synthetic prose, not dataset quality or original reference-engine qualification"
+        }
+      },
+      "output_tokens_per_s_change_percent_including_drain": -12.022608577417005
+    }
+  },
+  "source_identities": {
+    "vllm-hust": {
+      "commit": "4f61604bea01ce56afc320e0f0566166fd79a562",
+      "diff_sha256": "b493bafa7076c18d248d85685752fc960e27887d442b2ec641708451db00ed26",
+      "status_sha256": "ce628ee85cb1fad4ec51ba2b614f5321ffbd22e28c900ebe36dc344e04bc98f7"
+    },
+    "vllm-ascend-hust": {
+      "commit": "e5870e657a2add3182551c70bbad5919fc96d899",
+      "diff_sha256": "bf9fa9d9f38583f56ae877aca52bbea92f5662b425bd7ebe877e042c75faebfc",
+      "status_sha256": "6f4219e383eab7372829b7d5244b8cd8b8ca90c60777f6f3eb0012b7f7f6f410"
+    },
+    "vllm-ascend-quantized-kv-cache-hust": {
+      "commit": "0136fde6000384f4a25cec6bacbf68b4d48156e8",
+      "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "model_identity": "originals: evidence/model-manifest.json, post-run hashes only",
+  "activation": {
+    "actual_call_verified": true,
+    "receipt_in_archive": "B1-activation/activation-receipt.json",
+    "scope": "independent identical-config diagnostic, excluded from timed arms"
+  },
+  "limitations": [
+    "Single serial pair, fixed subset; no population quality equivalence claim.",
+    "B1 then B0, no repeated best-run selection; order effects remain.",
+    "Default compiler cache was shared; per-request KV reuse disabled and salts fresh. Initialization cost is separate.",
+    "B1 device sampling began after the first requests; partial coverage cannot establish whole-batch energy.",
+    "Continuous C8 uses newly disclosed synthetic prose, not the unavailable reference-runner frozen input; no formal C8 qualification claim.",
+    "The first C8 preflight rejected token-ID arrays; zero C8 inference requests were submitted in that failed attempt.",
+    "No price schedule, independent compute numerator, or full project acceptance tests measured.",
+    "Host tracked dirty diffs are archived; four untracked Ascend unit test files listed in status were not captured in the campaign. No experiment-time content can be reconstructed for those files.",
+    "Model file hashes were collected after inference, stable while hashing; no independently witnessed pre-run weight hash.",
+    "Runtime binaries/shared compiler cache are not fully snapshotted."
+  ],
+  "correction": "Original HBM=0 is a parser defect, not a measured zero; corrected fields above come from original npu-smi output. Original report remains byte-identical.",
+  "retained_failures": [
+    {
+      "path": "B1/continuous.log",
+      "phase": "preflight only",
+      "cause": "tokenize expects text, not token IDs",
+      "inference_requests": 0
+    },
+    {
+      "path": "B1-C8/activation",
+      "phase": "sampling diagnostic",
+      "cause": "OS denied py-spy attachment",
+      "performance_inclusion": false
+    },
+    {
+      "path": "B1-activation-failed-setup",
+      "phase": "observation diagnostic startup",
+      "cause": "diagnostic replaced CANN PYTHONPATH; acl unavailable",
+      "performance_inclusion": false
+    },
+    {
+      "path": "B1-activation-failed-observer",
+      "phase": "observation diagnostic startup",
+      "cause": "diagnostic wrapper did not preserve staticmethod binding",
+      "performance_inclusion": false
+    }
+  ]
+}
