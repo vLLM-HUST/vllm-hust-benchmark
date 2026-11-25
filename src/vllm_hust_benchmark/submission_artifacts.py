@@ -4,9 +4,10 @@ import json
 import re
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from jsonschema import Draft7Validator
+if TYPE_CHECKING:
+    from jsonschema import Draft7Validator
 
 from vllm_hust_benchmark.leaderboard_export import _sanitize_component_version
 from vllm_hust_benchmark.model_registry import normalize_model_identity_payload
