@@ -416,14 +416,330 @@
         "component_repeated_vectors_bit_equal": true,
         "candidate_model_started": false,
         "official_4_1_to_4_4_completed": false,
-        "actual_hit_ratio_observed": false
+        "actual_hit_ratio_observed": false,
+        "generated_source_preflight_passed": true
       },
       "limits": [
         "A matching graph bucket is a necessary condition in this narrow trace screen. The real ordered partitions are unavailable in these logs.",
         "Perfect hit rate and full conversion of measured component savings are assumed for the opportunity estimates, which are not observed full-model or official results. The two parallel TP ranks are not added.",
         "The historical context trace has the same pinned Ascend worker source. Its elapsed denominator spans context warmup and 4K, 16K, 32K and four-tenant windows.",
         "The online candidate still needs an admission guard for CPU-side dummy and asynchronous device-side writes."
-      ]
+      ],
+      "generated_source_preflight": {
+        "generated_source_differential_checks": 1382,
+        "evidence": "measurements/runner-metadata-source-preflight.json",
+        "candidate_worker_sha256": "c4abb07a6721501c161fb65224ef99beac7df8452f62fca2333d0a219e9b65bd"
+      }
+    },
+    "nd-paged-kv-writer-reshape-cache": {
+      "schema": "vllm-hust-component-exploration/v1",
+      "candidate": "nd-paged-kv-writer-reshape-cache",
+      "measurement_date": "2026-11-25",
+      "baseline_release": "full-answer-b1-20261124-r10",
+      "baseline_version": "2026.11.24.10",
+      "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+      "device": "Ascend 910B2, CANN 9.1",
+      "geometry": {
+        "model": "Qwen3.5-35B-A3B",
+        "distribution": "TP2 per-rank operand geometry",
+        "precision": "BF16",
+        "full_attention_layers": 10,
+        "kv_heads_per_rank": 1,
+        "head_dim": 256,
+        "page_tokens": 128,
+        "input_value_stride_elements": 4608
+      },
+      "baseline_operator": "npu_scatter_pa_kv_cache / Norm / int64",
+      "candidate_operator": "_npu_reshape_and_cache / int32",
+      "production_candidate_route_enabled": false,
+      "source_sha256": {
+        "runtime/ascend/vllm_ascend/device/device_op.py": "151f03a3344f2651317db0c9d5503a272dcdd61ff8b5712cbef4e112f6e4a013",
+        "runtime/ascend/vllm_ascend/device/hardware_profile.py": "e56dc122f252c4a1c705e8957bdee6babb780c2eeabd518d5a12f715d7daf481",
+        "runtime/ascend/vllm_ascend/attention/attention_v1.py": "ab53725b841070e62fdae81e9651a8a0d926651ed0cb640606829975b87feda2",
+        "runtime/engine-core/vllm/model_executor/models/qwen3_next.py": "4a27cf7b065c2097688421e6ea849704cef946f347978fb426abbc72b77f00b2",
+        "runtime/engine-core/vllm/model_executor/models/qwen3_5.py": "3abeac36180df7bd1bd96b1a7c698a8f212d92c063026420cbdd16d1980e90e6",
+        "runtime/engine-core/vllm/v1/worker/block_table.py": "976bfc2348f06d5ee1a867d28225b42ce654994906c3db5b1e91bac8eee0ed30"
+      },
+      "trials": {
+        "int64": {
+          "status": "rejected-during-operator-setup",
+          "rows": 3,
+          "measurements": 0,
+          "finding": "ATB code 13. Alternate BF16 ND writer requires int32 slot indices and rejects R10 int64.",
+          "operator_evidence": "measurements/nd-paged-kv-writer.json"
+        },
+        "int32_single_writer": {
+          "status": "complete",
+          "rounds": 7,
+          "calls_per_round": 32,
+          "cells": [
+            {
+              "rows": 3,
+              "seed": 20261128,
+              "slots_dtype": "torch.int64",
+              "inputs": {
+                "key_stride": [
+                  256,
+                  256,
+                  1
+                ],
+                "value_stride": [
+                  4608,
+                  256,
+                  1
+                ],
+                "contains_padding_slot": true
+              },
+              "numerics": "bitwise including untouched pages",
+              "cast_only_median_event_us": 41.4118766784668,
+              "eager": {
+                "event_median_us": {
+                  "native": 183.6625039577484,
+                  "candidate_per_layer_cast": 136.82937622070312,
+                  "candidate_precast": 99.96937215328217
+                },
+                "change_pct": -25.499558553235914,
+                "change_pct_precast": -45.568981148008234,
+                "change_pct_amortized_across_ten_FA_layers": -43.314199916886956
+              },
+              "graph": {
+                "event_median_us": {
+                  "native": 284.05436873435974,
+                  "candidate_per_layer_cast": 284.137487411499,
+                  "candidate_precast": 284.4200134277344
+                },
+                "change_pct": 0.029261538032177015,
+                "change_pct_precast": 0.1287234887475286,
+                "change_pct_amortized_across_ten_FA_layers": 1.5866090640682895
+              }
+            },
+            {
+              "rows": 24,
+              "seed": 20261149,
+              "slots_dtype": "torch.int64",
+              "inputs": {
+                "key_stride": [
+                  256,
+                  256,
+                  1
+                ],
+                "value_stride": [
+                  4608,
+                  256,
+                  1
+                ],
+                "contains_padding_slot": true
+              },
+              "numerics": "bitwise including untouched pages",
+              "cast_only_median_event_us": 41.28500074148178,
+              "eager": {
+                "event_median_us": {
+                  "native": 182.42500722408295,
+                  "candidate_per_layer_cast": 136.12374663352966,
+                  "candidate_precast": 98.93187135457993
+                },
+                "change_pct": -25.380983284643,
+                "change_pct_precast": -45.76847063897532,
+                "change_pct_amortized_across_ten_FA_layers": -43.505348857060355
+              },
+              "graph": {
+                "event_median_us": {
+                  "native": 286.4806354045868,
+                  "candidate_per_layer_cast": 285.3825092315674,
+                  "candidate_precast": 285.5150103569031
+                },
+                "change_pct": -0.3833160211574427,
+                "change_pct_precast": -0.33706468373333465,
+                "change_pct_amortized_across_ten_FA_layers": 1.1040449634571736
+              }
+            },
+            {
+              "rows": 96,
+              "seed": 20261221,
+              "slots_dtype": "torch.int64",
+              "inputs": {
+                "key_stride": [
+                  256,
+                  256,
+                  1
+                ],
+                "value_stride": [
+                  4608,
+                  256,
+                  1
+                ],
+                "contains_padding_slot": true
+              },
+              "numerics": "bitwise including untouched pages",
+              "cast_only_median_event_us": 39.86812382936478,
+              "eager": {
+                "event_median_us": {
+                  "native": 179.2212426662445,
+                  "candidate_per_layer_cast": 131.270632147789,
+                  "candidate_precast": 95.97812592983246
+                },
+                "change_pct": -26.75498161105362,
+                "change_pct_precast": -46.447126187732046,
+                "change_pct_amortized_across_ten_FA_layers": -44.222606190199755
+              },
+              "graph": {
+                "event_median_us": {
+                  "native": 286.5149974822998,
+                  "candidate_per_layer_cast": 289.9312376976013,
+                  "candidate_precast": 289.856880903244
+                },
+                "change_pct": 1.1923425458775672,
+                "change_pct_precast": 1.1663903985168034,
+                "change_pct_amortized_across_ten_FA_layers": 2.557875108905394
+              }
+            },
+            {
+              "rows": 3072,
+              "seed": 20264197,
+              "slots_dtype": "torch.int64",
+              "inputs": {
+                "key_stride": [
+                  256,
+                  256,
+                  1
+                ],
+                "value_stride": [
+                  4608,
+                  256,
+                  1
+                ],
+                "contains_padding_slot": true
+              },
+              "numerics": "bitwise including untouched pages",
+              "cast_only_median_event_us": 39.32499885559082,
+              "eager": {
+                "event_median_us": {
+                  "native": 178.0831217765808,
+                  "candidate_per_layer_cast": 130.73749840259552,
+                  "candidate_precast": 95.03062814474106
+                },
+                "change_pct": -26.58624966906413,
+                "change_pct_precast": -46.63692594968971,
+                "change_pct_amortized_across_ten_FA_layers": -44.4286875460005
+              },
+              "graph": {
+                "event_median_us": {
+                  "native": 287.258118391037,
+                  "candidate_per_layer_cast": 287.3168885707855,
+                  "candidate_precast": 287.234365940094
+                },
+                "change_pct": 0.020459014379725637,
+                "change_pct_precast": -0.008268678732570311,
+                "change_pct_amortized_across_ten_FA_layers": 1.3607091268679872
+              }
+            }
+          ],
+          "method": "One writer per eager call or graph replay. Candidate cast per call and precast arms."
+        },
+        "int32_ten_writer_graph": {
+          "status": "complete",
+          "rounds": 9,
+          "calls_per_round": 32,
+          "cells": [
+            {
+              "rows": 24,
+              "seed": 25112049,
+              "fa_layers": 10,
+              "whole_cache_bytes_bitwise": true,
+              "dynamic_slots_with_negative_padding": true,
+              "median": {
+                "native": {
+                  "event_us": 288.47187757492065,
+                  "wall_us": 292.30437394289766
+                },
+                "per_layer_cast": {
+                  "event_us": 285.90500354766846,
+                  "wall_us": 289.7455942729721
+                },
+                "per_graph_cast": {
+                  "event_us": 285.4762375354767,
+                  "wall_us": 289.1909061872866
+                }
+              },
+              "event_delta_percent": {
+                "per_layer_cast": -0.8898177697011511,
+                "per_graph_cast": -1.0384513265650819
+              }
+            },
+            {
+              "rows": 3072,
+              "seed": 25115097,
+              "fa_layers": 10,
+              "whole_cache_bytes_bitwise": true,
+              "dynamic_slots_with_negative_padding": true,
+              "median": {
+                "native": {
+                  "event_us": 316.7881369590759,
+                  "wall_us": 320.5206558050122
+                },
+                "per_layer_cast": {
+                  "event_us": 290.29375314712524,
+                  "wall_us": 293.9575006166706
+                },
+                "per_graph_cast": {
+                  "event_us": 289.1431152820587,
+                  "wall_us": 293.00968708412256
+                }
+              },
+              "event_delta_percent": {
+                "per_layer_cast": -8.363439384528892,
+                "per_graph_cast": -8.72665938263607
+              }
+            }
+          ],
+          "method": "Ten distinct single-rank FA writer updates inside one graph. Candidate casts per writer or once inside the graph."
+        }
+      },
+      "trace_opportunity": {
+        "revised_r10_native_mmlu_pro_ten_after_warmup": {
+          "bucket_replays_per_rank": {
+            "24": 653,
+            "3072": 0
+          },
+          "denominator_seconds": 68.91053621901665,
+          "idealized_supported_bucket_saving_ms": 1.9561529457569122,
+          "idealized_share_of_window_percent": 0.002838684841371311
+        },
+        "historical_3072_context_experiment_same_runner_sha": {
+          "bucket_replays_per_rank": {
+            "24": 6992,
+            "3072": 1397
+          },
+          "denominator_seconds": 1516.8669459819794,
+          "idealized_supported_bucket_saving_ms": 59.56561043858528,
+          "idealized_share_of_window_percent": 0.003926884331969149
+        }
+      },
+      "scope_limits": [
+        "Projection counts measured bucket dispatches, not proved candidate writer activations. Existing MicroFlow routing, padding and runtime ordering can change actual coverage. There is no per-operator writer time in the saved query metrics.",
+        "The projection assumes all observed replays in the two measured buckets reach the writer and exposes the entire component difference with no overlap. TP ranks execute in parallel. Unmeasured buckets and eager activity are excluded.",
+        "Historical elapsed denominator includes warmup, 4K, 16K, 32K C8 and multi-tenant windows and is not a new candidate test.",
+        "Temporary NPU component runs only. No model candidate, MMLU accuracy comparison, official 4.1–4.4, or R11 score."
+      ],
+      "decision": "archive-component-no-integration",
+      "timings": "measurements/nd-paged-kv-writer.json",
+      "raw_evidence": {
+        "int64": {
+          "original_evidence_archive": "kv-writer-int64-rejection-evidence.tar.gz",
+          "sha256": "8d3dfbfd1f5f0e97c4aad9e6e375cdcd6a2ab0c0d0183386dc04cd3cce69afff",
+          "probe_source": "run_kv_writer_int64_rejected.py"
+        },
+        "int32_single_writer": {
+          "original_evidence_archive": "kv-writer-int32-single-evidence.tar.gz",
+          "sha256": "5ef6ff05b3ef7d74cc85b9b6b64a42c77fbb81dd43dd07c008d394d2af0c9fce",
+          "probe_source": "run_kv_writer_component.py"
+        },
+        "int32_ten_writer_graph": {
+          "original_evidence_archive": "kv-writer-int32-ten-graph-evidence.tar.gz",
+          "sha256": "3dcf3f1f1bda749f174b9a7b9d9c9a5a9540c407974ef5453fe1d5cf6d0aa4b3",
+          "probe_source": "run_ten_kv_writer_graph.py"
+        }
+      }
     }
   },
   "candidate_full_acceptance_started": false,
@@ -477,6 +793,16 @@
       "path": "measurements/runner-metadata-wave-reuse.json",
       "original_payload_sha256": "16b666992a3b203e8976eb76c7465608b28c96c6504aa5d319f529dd5e6e2cfe",
       "archived_json_sha256": "16b666992a3b203e8976eb76c7465608b28c96c6504aa5d319f529dd5e6e2cfe"
+    },
+    "nd-paged-kv-writer.json": {
+      "path": "measurements/nd-paged-kv-writer.json",
+      "original_payload_sha256": "169655422a83b050be09f2e24a5ebe9d07d3d93bed17b53bfd84c719a0bb7218",
+      "archived_json_sha256": "169655422a83b050be09f2e24a5ebe9d07d3d93bed17b53bfd84c719a0bb7218"
+    },
+    "runner-metadata-source-preflight.json": {
+      "path": "measurements/runner-metadata-source-preflight.json",
+      "original_payload_sha256": "a72f712c13d88769a3f95b51c236d1f625bf034e7683a8babe0eb61270c8b85b",
+      "archived_json_sha256": "a72f712c13d88769a3f95b51c236d1f625bf034e7683a8babe0eb61270c8b85b"
     }
   }
 }
