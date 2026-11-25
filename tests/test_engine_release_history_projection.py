@@ -432,33 +432,47 @@ def test_r10_current_assessment_binds_the_complete_revised_35b_run():
             gate: assessment["targets"][id_][gate]["met"]
             for gate in ("milestone", "final")
         }
-    assert entry["compute_reference"]["arms"]["B1"]["efficiency_lower_percent"] == (
-        source["native_compute"]["arms"]["B1"]["efficiency_lower_percent"]
+    assert (
+        entry["compute_reference"]["arms"]["B1"]["efficiency_lower_percent"]
+        == (source["native_compute"]["arms"]["B1"]["efficiency_lower_percent"])
     )
     assert entry["r10_revision"]["assessment_4_3"] == assessment["targets"]["4.3"]
     assert assessment["targets"]["4.3"]["percentile_method"] == "nearest_rank"
-    assert entry["context_tenant_supplement"]["arm_seals"] == source["context"]["arm_seals"]
+    assert (
+        entry["context_tenant_supplement"]["arm_seals"]
+        == source["context"]["arm_seals"]
+    )
     assert entry["context_tenant_supplement"]["quality_measured"] is False
     assert entry["context_tenant_supplement"]["effective_flops_certified"] is False
     for projected, actual in zip(
         entry["context_tenant_supplement"]["comparisons"],
-        source["context"]["phases"], strict=True
+        source["context"]["phases"],
+        strict=True,
     ):
         for role in ("B0", "B1"):
             assert projected[role] == actual[role]
     fixed = [row for row in entry["measurements"] if row["id"] in source["fixed_five"]]
-    assert [row["id"] for row in fixed] == ["mmlu", "hle", "frontier", "swe", "terminal"]
+    assert [row["id"] for row in fixed] == [
+        "mmlu",
+        "hle",
+        "frontier",
+        "swe",
+        "terminal",
+    ]
     for row in fixed:
         for role, arm in zip(("B0", "B1"), row["arms"], strict=True):
             original = source["fixed_five"][row["id"]]["arms"][role]
             assert arm["source_seal_sha256"] == original["source_seal_sha256"]
-            assert arm["output_tokens_per_second"] == original["output_tokens_per_second"]
+            assert (
+                arm["output_tokens_per_second"] == original["output_tokens_per_second"]
+            )
     continuous = json.loads((folder / "continuous-c8.json").read_bytes())
     assert continuous["concurrency"] == 8
     for row in entry["measurements"][5:]:
         for role, arm in zip(("B0", "B1"), row["arms"], strict=True):
             original = continuous["arms"][role]
             assert arm["source_seal_sha256"] == original["source_seal"]
-            assert arm["output_tokens_per_second"] == (
-                original["formal"][row["id"]]["output_tokens_per_second"]
+            assert (
+                arm["output_tokens_per_second"]
+                == (original["formal"][row["id"]]["output_tokens_per_second"])
             )
