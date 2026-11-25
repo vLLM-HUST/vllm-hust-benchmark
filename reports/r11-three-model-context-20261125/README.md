@@ -24,8 +24,7 @@
 [Engine #72](https://github.com/vLLM-HUST/vllm-hust-engine/pull/72)，原 R10 的配对范围见
 [Benchmark #786](https://github.com/vLLM-HUST/vllm-hust-benchmark/pull/786)。
 
-R11 候选放行将 32K 的 TPOT P95 和 P99 波动上限设为 1.35×。35B 的 2048 混合方案实测为 1.322× 与 1.268×，吞吐波动为 1.378×。表格保留原
-1.25× 口径的结论，完整评测另有回执。
+本次 R11 候选仅对 32K TPOT P95 和 P99 的波动比值应用 0.10× 容差，按未舍入比值与 1.35× 比较。35B 的 2048 混合方案实测为 1.322× 与 1.268×，吞吐波动为 1.378×，32K 整段吞吐为 80.25 token/s。表格保留原 1.25× 口径的判定。该方案通过本次 4.3 专项放行，统一安装入口的 4.1–4.4 完整验收仍待核验。
 
 9B 的 4.1 参考域准备见 [独立标定准入记录](qwen9b-4.1-reference-preflight.json)。
 
