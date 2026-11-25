@@ -1,0 +1,43 @@
+Raw `vllm bench serve` result JSON (36 fields: per-request latencies[],
+p99 TTFT/TPOT/ITL, failed, duration, date, model_id, ...).
+
+These files are copied byte-for-byte except for one normalisation: a trailing
+newline is appended when the source JSON lacked one, as required by the
+repository's end-of-file hook. No other byte is changed, and every file is
+covered by SHA256SUMS-v1.
+The aggregate numbers quoted in REPORT-v1.md come from the driver's
+`results.json` (archived one level up as `abba-*.json`), not from these files.
+
+Files in this directory:
+
+  abba1-off.json
+  abba1-on.json
+  abba2-off.json
+  abba2-on.json
+  abba3-off.json
+  abba3-on.json
+  abba4-01-off.json
+  abba4-02-on.json
+  abba4-03-on.json
+  abba4-04-off.json
+  abba4-05-off.json
+  abba4-06-on.json
+  abba4-07-on.json
+  abba4-08-off.json
+  base8499-off.json
+  mbt16k-off.json
+
+COVERAGE LIMIT (round 1): the driver stored each arm's output in
+`<tag>/<arm>-bench/r.json`, so the second run of an arm overwrote the
+first. For these files only the LAST run of each arm survives:
+
+  abba1-off.json
+  abba1-on.json
+  abba2-off.json
+  abba2-on.json
+  abba3-off.json
+  abba3-on.json
+  base8499-off.json
+  mbt16k-off.json
+
+The complete per-run records are in the `abba-*.json` summaries.
