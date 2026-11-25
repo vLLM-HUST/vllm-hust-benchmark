@@ -12,6 +12,7 @@ def invoke(tmp_path, *args):
     return subprocess.run(
         [sys.executable, "-m", "vllm_hust_benchmark.cli", "experiment", *args],
         cwd=tmp_path,
+        check=False,
         env=env,
         capture_output=True,
         text=True,
@@ -19,8 +20,9 @@ def invoke(tmp_path, *args):
 
 
 def test_forwards_unmodified_arguments_cwd_and_status(tmp_path):
-    engine = tmp_path / "DeepLinkEngine"
-    engine.mkdir()
+    workspace = tmp_path / "workspace with spaces"
+    engine = workspace / "DeepLinkEngine"
+    engine.mkdir(parents=True)
     (engine / "deeplink.py").write_text(
         "import json, os, sys\nprint(json.dumps([os.getcwd(), sys.argv[1:]]))\nsys.exit(17)\n"
     )
@@ -31,9 +33,9 @@ def test_forwards_unmodified_arguments_cwd_and_status(tmp_path):
         "kv-control,instance-scaling",
         "--dry-run",
     ]
-    result = invoke(tmp_path, *args)
+    result = invoke(workspace, *args)
     assert result.returncode == 17
-    assert json.loads(result.stdout) == [str(tmp_path.resolve()), ["benchmark", *args]]
+    assert json.loads(result.stdout) == [str(workspace.resolve()), ["benchmark", *args]]
 
 
 def test_missing_engine_checkout(tmp_path):

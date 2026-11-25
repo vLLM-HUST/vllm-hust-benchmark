@@ -939,8 +939,12 @@ def main(argv: list[str] | None = None) -> int:
                 file=sys.stderr,
             )
             return 2
-        # The engine owns argument parsing, process signals, exit status and run receipts.
-        os.execv(sys.executable, [sys.executable, str(entry), "benchmark", *argv[1:]])
+        command = [sys.executable, str(entry), "benchmark", *argv[1:]]
+        if os.name == "nt":
+            # Windows execv can lose argument quoting and exits the wrapper early.
+            return subprocess.run(command, check=False).returncode
+        # Preserve native process and signal behavior on POSIX.
+        os.execv(sys.executable, command)
 
     parser = _build_parser()
     args = parser.parse_args(argv)
