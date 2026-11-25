@@ -415,7 +415,7 @@ def summarize(root, *, numeric=True):
                 "work": work,
             }
         )
-    return {
+    result = {
         "schema_version": 1,
         "suite_id": suite["id"],
         "pilot": manifest["pilot"],
@@ -428,6 +428,11 @@ def summarize(root, *, numeric=True):
         "rejected_inputs": sum(item["rejections"] for item in engine_runs),
         "throughput_scope": "sum of steady measurement windows including inter-call observation gaps",
     }
+    if "pairing" in suite:
+        from .bio_pair import paired_results
+
+        result["pairs"] = paired_results(root, manifest, suite, cases)
+    return result
 
 
 def render_markdown(summary):
@@ -446,6 +451,10 @@ def render_markdown(summary):
         lines.append(
             f"| {case['case_id']} | {case['independent_starts']} | {values['count']} | {values['mean_ms']:.3f} | {values['quantiles_ms']['0.5']:.3f} | {values['quantiles_ms']['0.9']:.3f} | {case['rates_per_second']['jobs']:.3f} |"
         )
+    if "pairs" in summary:
+        from .bio_pair import paired_markdown
+
+        lines.extend(paired_markdown(summary["pairs"]))
     iteration_cases = [
         case for case in summary["cases"] if "observed_iterations" in case["work"]
     ]

@@ -51,6 +51,7 @@ def source_snapshot(scientist, registry=None):
     benchmark_files = [
         "src/vllm_hust_benchmark/bio.py",
         "src/vllm_hust_benchmark/bio_report.py",
+        "src/vllm_hust_benchmark/bio_pair.py",
         "src/vllm_hust_benchmark/models.py",
         "pyproject.toml",
         "tests/test_bio_benchmark.py",

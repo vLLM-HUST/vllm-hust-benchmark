@@ -198,7 +198,7 @@ class Registry:
                 len(
                     next(
                         case[key]
-                        for key in ("cells", "sequences", "structures")
+                        for key in ("cells", "sequences", "structures", "alignments")
                         if key in case
                     )
                 )
