@@ -1,0 +1,589 @@
+{
+  "schema": "r10-revised-mod-component-exploration/v1",
+  "date": "2026-11-24",
+  "engine": {
+    "release": "full-answer-b1-20261124-r10",
+    "version": "2026.11.24.10",
+    "sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+    "source_commit": "bfd23cf66378c80972806b1aae9d1db4afe11b90"
+  },
+  "model": "Qwen3.5-35B-A3B",
+  "dtype": "BF16",
+  "accelerator": "Ascend 910B2",
+  "comparison": "Isolated candidate against the corresponding frozen R10 component; CPU admission and workload attribution are labeled.",
+  "candidate_model_runs": 0,
+  "candidate_full_acceptance_runs": 0,
+  "native_workload_reference": {
+    "scope": "10 MMLU-Pro requests concurrent, archived native workload for route attribution",
+    "receipt_sha256": "9bc715927da920186a7fd0e2ae7c0c7963427e0867b51bd7827200ad68531b74",
+    "geometry": {
+      "max_model_len": 65536,
+      "mixed_graph_capture": 3072,
+      "speculative_tokens": 2,
+      "tensor_parallel": 2
+    },
+    "metrics": {
+      "arm": "r10",
+      "cases": 10,
+      "completed": 10,
+      "failed": 0,
+      "correct": 10,
+      "unparsed": 0,
+      "truncated": 0,
+      "request_plan_sha256": "0b8f6a85272a1882644dd35b6716e688e4829df8842b3ebdea6d8b585c6dbc66",
+      "wall_s": 68.91053621901665,
+      "output_tok_s": 426.6836628080962,
+      "mean_ttft_ms": 775.5623346893117,
+      "p95_ttft_ms": 1155.9810995386215,
+      "mean_tpot_ms": 11.995539484699211,
+      "p95_tpot_ms": 13.686811400623293
+    }
+  },
+  "candidates": {
+    "gdn-dual-layout-key-3072": {
+      "disposition": "No model promotion: limited service opportunity",
+      "component": {
+        "release": "full-answer-b1-20261124-r10",
+        "physical_card": 4,
+        "scope": "exact BF16 preprocessor + K transpose",
+        "times": {
+          "started": "2026-11-24T23:01:20+08:00",
+          "ended": "2026-11-24T23:02:27+08:00"
+        },
+        "result_sha256": "b6ea8cbcec9f0ddb8a76242ea94e5b8582edd781bfe89f28783eb96526367b66",
+        "evidence_sha256": "0e3fbf230dda4aa1ee545dc3ae4f245aac5cf230353e9fa121bb5b1cc361c2a2",
+        "native_graph_us": 72.63786345720291,
+        "candidate_graph_us": 40.3233344356219,
+        "median_paired_save_us": 32.29885548353195,
+        "positive_pairs": 14,
+        "graph_replays_with_live_inputs": 3,
+        "eager_fixtures": 2,
+        "saved_pct": 44.48716892756658,
+        "eight_locks_released": true
+      },
+      "ten_item_route": {
+        "window_s": 69.11243629455566,
+        "per_rank_target_graph_counts": [
+          {
+            "1536": 2,
+            "3": 920,
+            "4096": 3,
+            "40": 382,
+            "24": 653,
+            "12": 475,
+            "6": 438
+          },
+          {
+            "1536": 2,
+            "3": 920,
+            "4096": 3,
+            "40": 382,
+            "24": 653,
+            "12": 475,
+            "6": 438
+          }
+        ],
+        "target_3072_count_per_rank": 0,
+        "bound_other_shapes_s_using_historical_component_timings": 0.0037059000000000003,
+        "bound_share_pct": 0.0053621319095242675
+      },
+      "formal_32k_route": {
+        "phase": "32768-formal",
+        "target_3072_count_per_rank": [
+          1131,
+          1131
+        ],
+        "published_raw_seal_sha256": "e6f398ce18cd924834b66aa55ec9a05c77f9f12205274e8a0bc4c98ed85b4622",
+        "formal_duration_s": 313.88445774599677,
+        "estimated_no_overlap_s": 1.0964319697022435,
+        "estimated_share_pct": 0.3493106914486043
+      }
+    },
+    "decode-kv-zero-page-grant": {
+      "decision": "Stop after CPU equivalence and service-impact estimate. No full model or device lease started for this candidate.",
+      "native_exact_release": "full-answer-b1-20261124-r10",
+      "native_case_output_tokens": 29403,
+      "native_case_wall_s": 68.91053621901665,
+      "median_grant_ns_saved": 959.0074999999999,
+      "optimistic_eight_grant_step_us": 7.672059999999999,
+      "if_one_eligible_grant_per_output_token_ms": 28.197697522499997,
+      "if_one_eligible_grant_per_output_token_wall_percentage": 0.04091928327604353,
+      "scope": "illustrative upper estimate under the one-grant-per-emitted-token proxy, no whole-model result; speculative rejection/padding may change the proxy",
+      "cpu_equivalence": {
+        "trials": 15360,
+        "fast_path_hit_cases": 63,
+        "outcomes_and_side_effects_equal": true,
+        "isolated_loop_median_ns": {
+          "native": 1641.9875,
+          "candidate": 682.98
+        },
+        "duration_change_percent": -58.40528627653987,
+        "scope": "CPU; matched exact instantiated source functions, mocked pool/lifecycle integration; no NPU"
+      }
+    },
+    "shared-expert-scalar-gate-projection-pack": {
+      "schema": "r10-revised-optimization-component-evidence/v1",
+      "release": "full-answer-b1-20261124-r10",
+      "public_sdk_sha256": "4331740a6a6c4508c161d28e457a71c60ffd6c340895b44cce021efa77b70ba0",
+      "candidate": "shared-expert-gate-up-and-scalar-gate-projection-pack",
+      "disposition": "component_only_small_opportunity_no_full_model_or_official_run",
+      "candidate_mechanism": "Rank-local gate+up GEMM [512,2048] plus replicated gate GEMM [1,2048] combine as one aligned [528,2048] GEMM. The small-row activation and sigmoid consume the exact slices. 15 padded columns add 30,720 MACs per row per site.",
+      "competing_prior_results": "Gemma residual-scale cache and shared-expert gate-multiply epilogue were screened out before using any hardware in this task. This candidate changes the preceding projections only. Older GDN QKV/BA projection packing measured distinct weights, a different operator consumer, and a different tensor shape.",
+      "baseline_scope": "Revised R10 same host/TP2 ten-item official-dataset screening window, after warmup, with FULL and 3072 capture and MTP2 enabled. 3072 was a checked fallback shape in the component, without a formal 3072 graph replay in this trace.",
+      "source_scope": "Single physical card 4 from 10202 emulated each real TP2 weight shard. Both achieved exact parity on the five sampled model layers. Paired device timing used shard 0. No end-to-end model output was produced by the candidate.",
+      "formal_start_epoch_s": 1795531488.9402778,
+      "formal_wall_s": 68.91053621901665,
+      "graphs_by_rank": {
+        "0": {
+          "target_graphs": {
+            "3": 920,
+            "6": 438,
+            "12": 475,
+            "24": 653,
+            "40": 382,
+            "1536": 2,
+            "4096": 3
+          },
+          "other_graphs_no_draft_identity": {
+            "3": 920,
+            "6": 438,
+            "12": 475,
+            "16": 495,
+            "24": 158,
+            "32": 382,
+            "1536": 2,
+            "4096": 3
+          },
+          "eligible_target_graphs": 1833,
+          "target_graphs_total": 2873,
+          "isolated_device_median_estimate_s": 0.23684381405512495,
+          "isolated_device_median_share_percent": 0.34369753458654,
+          "largest_observed_savings_per_size_estimate_s": 0.275992722551028,
+          "largest_observed_savings_per_size_share_percent": 0.4005087432114114
+        },
+        "1": {
+          "target_graphs": {
+            "3": 920,
+            "6": 438,
+            "12": 475,
+            "24": 653,
+            "40": 382,
+            "1536": 2,
+            "4096": 3
+          },
+          "other_graphs_no_draft_identity": {
+            "3": 920,
+            "6": 438,
+            "12": 475,
+            "16": 495,
+            "24": 158,
+            "32": 382,
+            "1536": 2,
+            "4096": 3
+          },
+          "eligible_target_graphs": 1833,
+          "target_graphs_total": 2873,
+          "isolated_device_median_estimate_s": 0.23684381405512495,
+          "isolated_device_median_share_percent": 0.34369753458654,
+          "largest_observed_savings_per_size_estimate_s": 0.275992722551028,
+          "largest_observed_savings_per_size_share_percent": 0.4005087432114114
+        }
+      },
+      "timing_shapes": {
+        "3": {
+          "site_count": 40,
+          "before_us": 519.5466677347819,
+          "after_us": 371.3266849517822,
+          "saved_us": 148.17166328430176,
+          "candidate_wins": 15
+        },
+        "6": {
+          "site_count": 40,
+          "before_us": 518.4849898020426,
+          "after_us": 397.77668317159015,
+          "saved_us": 120.91000874837238,
+          "candidate_wins": 15
+        },
+        "12": {
+          "site_count": 40,
+          "before_us": 529.2050043741862,
+          "after_us": 429.3733437856038,
+          "saved_us": 100.14168421427411,
+          "candidate_wins": 15
+        }
+      },
+      "calculation_limits": [
+        "Do not add the two TP ranks; they run together.",
+        "Other graph wrappers are retained as observed counts without assuming a draft identity.",
+        "The largest observed component saving per shape is an illustrative envelope, not an end-to-end speedup guarantee.",
+        "The engine iteration histogram has 2872 post-warmup iteration samples. The graph log has 2873 target replay records per rank and has a different scope."
+      ],
+      "input_sha256": {
+        "projection-evidence/component-device-mapping.txt": "16edde1882d422ac2b89e9f5973c857adf33bc19a58a9007875348f2efe00bff",
+        "projection-evidence/component-exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "projection-evidence/component-npu-after.txt": "9a4960b11e6167359f6cc6489b350f8a3c83e7e5acbd646ed3d11ad4e6ccee43",
+        "projection-evidence/component-npu-before.txt": "c86363b75e63ce748a3e664c90dcf2c1993e383be9a5da89670acef9c04a70f6",
+        "projection-evidence/component-result.json": "a5354a304c5a83e90810d802210d2e2a9877040c8a276804f5b8982fd581b8d7",
+        "projection-evidence/component.log": "87ad851a5ce088cad734e99091232931809e1bff9ce640dc81a4d60c17e45762",
+        "projection-evidence/cpu-result.json": "85e8830b4baecf36ca91a099525b998978f4a32f7af0562443e932d3b053d776",
+        "projection-evidence/kvmat-engine.jsonl": "65a4061b6c42c9af459a0a01ff7eb488b67fc78d3b93db0329759175ffb0c962",
+        "projection-evidence/metrics-after.prom": "b6362c75ba9822698fc2a435124e0aa2f0de7ac79d06f1ad6170780c740cfb51",
+        "projection-evidence/metrics-before.prom": "22d2238bf5a116300c73e046e8cb81cec4a9a1e8c5b37f2b4a380dbcb8f6a499",
+        "projection-evidence/microflow-1967702.jsonl": "f1b843acf27cfe7311aa06eed865540a80f87e01cbb62d4dc013db0f88074f25",
+        "projection-evidence/microflow-1967703.jsonl": "416a58d56294fd20aacb5683c53e0788b693be347054d0a5245ffab5ce2de31c",
+        "projection-evidence/summary.json": "96d21b83c01968bd4a9f69c14f526353378147f8d2c26d1be77a24ff62227732",
+        "projection-probe.py": "d8d08f0a395fbb781398e74e1dba37ae971c9a0d2348d4bd1b870349889e87a8",
+        "projection-namespace.sh": "497abbba8830aa3bc031f874faf76b72cc63d426c56d21ba03e1eb5e064094a7",
+        "projection-start.sh": "24f3f2448c7e00f7db97567ee57ed6b24a94d602ccd8f4b8aae483f1f1fa135b"
+      }
+    },
+    "bf16-gemm-tp-allreduce": {
+      "scope": "Two card ND BF16 2048-by-2048 projection + order-preserving HCCL SUM under AIV",
+      "lease_release": "both cards idle; 16 verified leases released",
+      "rank_receipts_sha256": {
+        "rank-0.json": "9ff94c0a51d96405c48cf97e51a3a9fc38463469b65e881a6fbe04b69803894a",
+        "rank-1.json": "1b6ec2148f08eac63218296d9fe25da3307afd1ed9d416fb0cf6198403672267"
+      },
+      "archive_sha256": "919e7ab78b1e6234e0ccb4fd9e6753d5483dccb249fbe4a59bc1b97aea504960",
+      "by_rank": {
+        "0": {
+          "physical_card": 4,
+          "passing_elements": 1398784,
+          "fused_dispatches": 91,
+          "timing": [
+            {
+              "rows": 3,
+              "native_us_p50": 18.14345084130764,
+              "fused_us_p50": 57.620324194431305,
+              "paired_regression_us_p50": 39.47404896219572,
+              "candidate_faster_pairs": 0,
+              "total_pairs": 14
+            },
+            {
+              "rows": 6,
+              "native_us_p50": 18.169283866882324,
+              "fused_us_p50": 58.66856624682744,
+              "paired_regression_us_p50": 40.53782423337301,
+              "candidate_faster_pairs": 0,
+              "total_pairs": 14
+            },
+            {
+              "rows": 12,
+              "native_us_p50": 18.444049482544266,
+              "fused_us_p50": 60.99175661802292,
+              "paired_regression_us_p50": 42.537784203886986,
+              "candidate_faster_pairs": 0,
+              "total_pairs": 14
+            },
+            {
+              "rows": 24,
+              "native_us_p50": 22.769831120967865,
+              "fused_us_p50": 65.7538945476214,
+              "paired_regression_us_p50": 43.01326846083005,
+              "candidate_faster_pairs": 0,
+              "total_pairs": 14
+            },
+            {
+              "rows": 40,
+              "native_us_p50": 27.332174281279244,
+              "fused_us_p50": 74.2046982049942,
+              "paired_regression_us_p50": 46.993387242158256,
+              "candidate_faster_pairs": 0,
+              "total_pairs": 14
+            }
+          ]
+        },
+        "1": {
+          "physical_card": 5,
+          "passing_elements": 1398784,
+          "fused_dispatches": 91,
+          "timing": [
+            {
+              "rows": 3,
+              "native_us_p50": 18.15043017268181,
+              "fused_us_p50": 57.664453983306885,
+              "paired_regression_us_p50": 39.49186267952125,
+              "candidate_faster_pairs": 0,
+              "total_pairs": 14
+            },
+            {
+              "rows": 6,
+              "native_us_p50": 18.27644556760788,
+              "fused_us_p50": 58.797771732012436,
+              "paired_regression_us_p50": 40.523736427227654,
+              "candidate_faster_pairs": 0,
+              "total_pairs": 14
+            },
+            {
+              "rows": 12,
+              "native_us_p50": 18.56954457859198,
+              "fused_us_p50": 61.10977878173192,
+              "paired_regression_us_p50": 42.558046678702034,
+              "candidate_faster_pairs": 0,
+              "total_pairs": 14
+            },
+            {
+              "rows": 24,
+              "native_us_p50": 22.803254425525665,
+              "fused_us_p50": 65.79784055550894,
+              "paired_regression_us_p50": 43.0273711681366,
+              "candidate_faster_pairs": 0,
+              "total_pairs": 14
+            },
+            {
+              "rows": 40,
+              "native_us_p50": 27.41858114798864,
+              "fused_us_p50": 74.28434739510217,
+              "paired_regression_us_p50": 46.93639278411865,
+              "candidate_faster_pairs": 0,
+              "total_pairs": 14
+            }
+          ]
+        }
+      },
+      "decision": "Reject before model test; candidate loses every paired timing."
+    },
+    "same-mask-bsnd-paged-verification": {
+      "status": "component_only_no_coherent_gain",
+      "rows": [
+        {
+          "context": 4093,
+          "batch": 4,
+          "query_rows": 3,
+          "length_cases": [
+            [
+              4093,
+              4080,
+              4067,
+              4054
+            ],
+            [
+              4052,
+              4041,
+              4030,
+              4019
+            ]
+          ],
+          "eager": {
+            "elapsed_device_event_change_percent": -0.6229513438924306,
+            "elapsed_host_median_us": {
+              "TND": 127.48024892061949,
+              "BSND": 126.86771030227344
+            },
+            "max_relative_l2_bsnd_vs_tnd": 0.0019382075406610966,
+            "max_relative_l2_bsnd_vs_fp32": 0.0022631529718637466,
+            "max_relative_l2_tnd_vs_fp32": 0.0022535910829901695,
+            "bitwise": false
+          },
+          "dynamic-graph": {
+            "elapsed_device_event_change_percent": 0.4769766166463185,
+            "elapsed_host_median_us": {
+              "TND": 597.2411672701128,
+              "BSND": 600.1837100484408
+            },
+            "max_relative_l2_bsnd_vs_tnd": 0.0019382075406610966,
+            "max_relative_l2_bsnd_vs_fp32": 0.0022631529718637466,
+            "max_relative_l2_tnd_vs_fp32": 0.0022535910829901695,
+            "bitwise": false
+          }
+        },
+        {
+          "context": 32749,
+          "batch": 4,
+          "query_rows": 3,
+          "length_cases": [
+            [
+              32749,
+              32736,
+              32723,
+              32710
+            ],
+            [
+              32708,
+              32697,
+              32686,
+              32675
+            ]
+          ],
+          "eager": {
+            "elapsed_device_event_change_percent": 0.8559272506716065,
+            "elapsed_host_median_us": {
+              "TND": 155.6205825181678,
+              "BSND": 156.26266637506583
+            },
+            "max_relative_l2_bsnd_vs_tnd": 0.00243042572401464,
+            "max_relative_l2_bsnd_vs_fp32": 0.0022914777509868145,
+            "max_relative_l2_tnd_vs_fp32": 0.0023021490778774023,
+            "bitwise": false
+          },
+          "dynamic-graph": {
+            "elapsed_device_event_change_percent": -1.435998551462403,
+            "elapsed_host_median_us": {
+              "TND": 636.1175013201622,
+              "BSND": 626.3852507496873
+            },
+            "max_relative_l2_bsnd_vs_tnd": 0.00243042572401464,
+            "max_relative_l2_bsnd_vs_fp32": 0.0022914777509868145,
+            "max_relative_l2_tnd_vs_fp32": 0.0023021490778774023,
+            "bitwise": false
+          }
+        },
+        {
+          "context": 16409,
+          "batch": 1,
+          "query_rows": 3,
+          "length_cases": [
+            [
+              16409
+            ],
+            [
+              16368
+            ]
+          ],
+          "eager": {
+            "elapsed_device_event_change_percent": 1.9310059641447497,
+            "elapsed_host_median_us": {
+              "TND": 122.77974989653255,
+              "BSND": 124.7239561052993
+            },
+            "max_relative_l2_bsnd_vs_tnd": 0.0020215725526213646,
+            "max_relative_l2_bsnd_vs_fp32": 0.002272632671520114,
+            "max_relative_l2_tnd_vs_fp32": 0.002230011625215411,
+            "bitwise": false
+          },
+          "dynamic-graph": {
+            "elapsed_device_event_change_percent": 0.25800121835946044,
+            "elapsed_host_median_us": {
+              "TND": 600.276624027174,
+              "BSND": 602.0695824796954
+            },
+            "max_relative_l2_bsnd_vs_tnd": 0.0020215725526213646,
+            "max_relative_l2_bsnd_vs_fp32": 0.002272632671520114,
+            "max_relative_l2_tnd_vs_fp32": 0.002230011625215411,
+            "bitwise": false
+          }
+        },
+        {
+          "context": 32749,
+          "batch": 8,
+          "query_rows": 3,
+          "length_cases": [
+            [
+              32749,
+              32736,
+              32723,
+              32710,
+              32697,
+              32684,
+              32671,
+              32658
+            ],
+            [
+              32708,
+              32697,
+              32686,
+              32675,
+              32664,
+              32653,
+              32642,
+              32631
+            ]
+          ],
+          "eager": {
+            "elapsed_device_event_change_percent": -1.2731810261911836,
+            "elapsed_host_median_us": {
+              "TND": 268.11566688896465,
+              "BSND": 264.18937583609176
+            },
+            "max_relative_l2_bsnd_vs_tnd": 0.002220229245722294,
+            "max_relative_l2_bsnd_vs_fp32": 0.0023161936551332474,
+            "max_relative_l2_tnd_vs_fp32": 0.002309085102751851,
+            "bitwise": false
+          },
+          "dynamic-graph": {
+            "elapsed_device_event_change_percent": 0.9279512393816747,
+            "elapsed_host_median_us": {
+              "TND": 666.1286679445766,
+              "BSND": 672.140835376922
+            },
+            "max_relative_l2_bsnd_vs_tnd": 0.002220229245722294,
+            "max_relative_l2_bsnd_vs_fp32": 0.0023161936551332474,
+            "max_relative_l2_tnd_vs_fp32": 0.002309085102751851,
+            "bitwise": false
+          }
+        }
+      ],
+      "archives_sha256": {
+        "short": "6e6db95475c39a18014c217319f83a4bc66155182bcc91ea5d08a31a884fc65f",
+        "long": "a5e6d215dbb8c3a9e61da8953c9680482bdea0c956961b69d604417d33b79f38"
+      },
+      "model_started": false,
+      "all_4_cells_same_mask_causal_reference_pass": true,
+      "card_released": true,
+      "scope": "Native CANN dynamically updated component graphs. An explicit host completion fence replaces inter-stream external event timing in ordered harness; no full-engine claim."
+    }
+  },
+  "local_seal": "8373ca0dd6e875ae486abb1d2a86364c682bf9e52f8e421b633dfd47b703a74f",
+  "files": {
+    "gdn-dual-k.json": {
+      "path": "measurements/gdn-dual-k.json",
+      "original_payload_sha256": "b6ea8cbcec9f0ddb8a76242ea94e5b8582edd781bfe89f28783eb96526367b66",
+      "archived_json_sha256": "b6ea8cbcec9f0ddb8a76242ea94e5b8582edd781bfe89f28783eb96526367b66"
+    },
+    "gemm-reduce-rank0.json": {
+      "path": "measurements/gemm-reduce-rank0.json",
+      "original_payload_sha256": "9ff94c0a51d96405c48cf97e51a3a9fc38463469b65e881a6fbe04b69803894a",
+      "archived_json_sha256": "9ff94c0a51d96405c48cf97e51a3a9fc38463469b65e881a6fbe04b69803894a"
+    },
+    "gemm-reduce-rank1.json": {
+      "path": "measurements/gemm-reduce-rank1.json",
+      "original_payload_sha256": "1b6ec2148f08eac63218296d9fe25da3307afd1ed9d416fb0cf6198403672267",
+      "archived_json_sha256": "1b6ec2148f08eac63218296d9fe25da3307afd1ed9d416fb0cf6198403672267"
+    },
+    "shared-expert-projection.json": {
+      "path": "measurements/shared-expert-projection.json",
+      "original_payload_sha256": "a5354a304c5a83e90810d802210d2e2a9877040c8a276804f5b8982fd581b8d7",
+      "archived_json_sha256": "a5354a304c5a83e90810d802210d2e2a9877040c8a276804f5b8982fd581b8d7"
+    },
+    "bsnd-4093-4-eager.json": {
+      "path": "measurements/bsnd-4093-4-eager.json",
+      "original_payload_sha256": "eb18727a66c466cb8ca925ca8f994cf18e47146c3e1627fe1adee4c0c48ce1d6",
+      "archived_json_sha256": "eb18727a66c466cb8ca925ca8f994cf18e47146c3e1627fe1adee4c0c48ce1d6"
+    },
+    "bsnd-4093-4-dynamic-graph.json": {
+      "path": "measurements/bsnd-4093-4-dynamic-graph.json",
+      "original_payload_sha256": "17e568dae9bf9790e4fb4dfc9a1f33c9376cfd144d21983d2882c0f368ef88a9",
+      "archived_json_sha256": "17e568dae9bf9790e4fb4dfc9a1f33c9376cfd144d21983d2882c0f368ef88a9"
+    },
+    "bsnd-16409-1-eager.json": {
+      "path": "measurements/bsnd-16409-1-eager.json",
+      "original_payload_sha256": "27dd91d23be54e54761874dfc11ac5c2e00477233d3fadcedec568f81173e315",
+      "archived_json_sha256": "27dd91d23be54e54761874dfc11ac5c2e00477233d3fadcedec568f81173e315"
+    },
+    "bsnd-16409-1-dynamic-graph.json": {
+      "path": "measurements/bsnd-16409-1-dynamic-graph.json",
+      "original_payload_sha256": "784d9c87bebc96ac86fc1ce1b9ba87c9abf8565d5c074d325602e1bf3167d2cd",
+      "archived_json_sha256": "784d9c87bebc96ac86fc1ce1b9ba87c9abf8565d5c074d325602e1bf3167d2cd"
+    },
+    "bsnd-32749-4-eager.json": {
+      "path": "measurements/bsnd-32749-4-eager.json",
+      "original_payload_sha256": "24e8f89363e8b7a105149ef3734442b7cc3ce503f1d9aa95250301896dbe45b1",
+      "archived_json_sha256": "24e8f89363e8b7a105149ef3734442b7cc3ce503f1d9aa95250301896dbe45b1"
+    },
+    "bsnd-32749-4-dynamic-graph.json": {
+      "path": "measurements/bsnd-32749-4-dynamic-graph.json",
+      "original_payload_sha256": "8c2e5c6629633eeec56943920b2f315936cc7e7d658d00ba2d0df6d93f5b13ac",
+      "archived_json_sha256": "8c2e5c6629633eeec56943920b2f315936cc7e7d658d00ba2d0df6d93f5b13ac"
+    },
+    "bsnd-32749-8-eager.json": {
+      "path": "measurements/bsnd-32749-8-eager.json",
+      "original_payload_sha256": "eda9f0dc248cfa648d2b8e6cd74bfd0777fdc695002714d39a1c6643680534d4",
+      "archived_json_sha256": "eda9f0dc248cfa648d2b8e6cd74bfd0777fdc695002714d39a1c6643680534d4"
+    },
+    "bsnd-32749-8-dynamic-graph.json": {
+      "path": "measurements/bsnd-32749-8-dynamic-graph.json",
+      "original_payload_sha256": "d47e2af3c739a2b3160c70fdb40215605c19d85d6e1cda20b7b5280b56d6c586",
+      "archived_json_sha256": "d47e2af3c739a2b3160c70fdb40215605c19d85d6e1cda20b7b5280b56d6c586"
+    }
+  }
+}
