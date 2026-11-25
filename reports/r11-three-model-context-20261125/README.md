@@ -75,9 +75,18 @@ Intern-S2 同卡 C8 上下文 16K 通过。32K TTFT P95／P99 达到 2.690×／2
 Intern-S2 的 HLE200 两臂各完成 200 题与 200 条判分。正确 30→32，吞吐 1.841×，平均 TTFT／TPOT 0.524×／0.549×。该套达成 4.2
 阶段门槛，吞吐尚未达到 2× 结题门槛。 [Intern-S2 HLE200](intern-s2-rc4-hle200.json)
 
-9B 的 MMLU-Pro、FrontierMath、SWE-bench 和 Terminal-Bench 已完成固定口径。吞吐分别为同卡 B0 的
-3.344×、3.255×、2.305×、2.166×。SWE-bench 与 Terminal-Bench 是离线请求回放，HLE 的求解与判分另有回执。
+9B 的 MMLU-Pro、FrontierScience、SWE-bench-Pro 和 Terminal-Bench 2.1 已完成固定口径。吞吐分别为同卡 B0 的
+3.344×、3.255×、2.305×、2.166×。SWE-bench-Pro 与 Terminal-Bench 2.1 是离线请求回放，HLE 的求解与判分另有回执。
 [9B 四项原始汇总](qwen9b-rc4-fixed-tracks-readback.json)
 
 9B 同卡原生三轮均完整返回每轮 51,200 个输出 token。中位原生吞吐为 B0 的 2.535×。独立必要算量和参考时间尚未核定，本次诊断未生成 4.1 效率。
 [9B 原生计时](qwen9b-rc4-native-clean-readback.json)
+
+9B 的 HLE200 补判已封存，两臂各完成 200 条，正确 43→45。HLE B1 使用单独核验的 RC4 图像入口，吞吐 1.750×，达阶段门槛。至此五套已齐，4.2 综合通过结题门槛。
+[9B HLE 完整配对](qwen9b-rc4-hle-quality-readback.json)
+
+35B 另一次同卡专项保持 1.25× 门槛。TPOT P95／P99 波动为 1.389×／1.143×，结题未过。正式日志审计保留其关停错误标记。
+[35B 独立候选专项](qwen35-rc4-finishable-formal-context.json)
+
+35B 独立候选的五窗、图回放和关停秒级边界已复核。第二窗的 P95 命中该窗最大请求 TPOT。关停日志的分类没有改变 1.389× 的结题数值。
+[五窗与关停回执对照](qwen35-rc4-finishable-32k-diagnostic.json)

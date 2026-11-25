@@ -1,0 +1,270 @@
+{
+  "model": "Qwen3.5-9B",
+  "dataset": "HLE",
+  "cases_per_arm": 200,
+  "runtime": "full-answer-b1-20261125-r11-rc4+qwen9b-hle-vision",
+  "physical_cards": [
+    4,
+    5
+  ],
+  "completion_admission_sha256": "6c7e7309788c1dc3b0b639614e2e1d2793da847c371ed7a4c8f35e3c4aa1f7c4",
+  "completed_campaign_summary_sha256": "905630dcda4818687478e707e0f2fa6439b1bacc4e90ac32c3fec543110718d6",
+  "original_failed_campaign_preserved": true,
+  "audit_sha256": "b4c633c7127b4775362177ea2167607c22e1c45a5374fd8b7b6692178a54c84f",
+  "actual_judge_launch_sha256": "51aa99f0be09e58d9308f3e7e085fe069c46b0a52b2adac2f564908b0dee7013",
+  "actual_solver_vision_binding": {
+    "vision_profile_sha256": "85ea1d62b7d6c19b069b0ee62a3c6791bd644e1410ab11a0d88e2f527139cd5d",
+    "live_rc4_binding_sha256": "85f24142803e9c27c1be66fc73d3b64b31b09863433356f4fa3eadf25016c9ed",
+    "actual_b0_launch_sha256": "db85ed85a22e92d2e7f831ba8300a49fc7b31be1ea57fdf8ee42a8df1a2ebd7d",
+    "actual_rc4_vision_launch_sha256": "f7270fd5881d7b00eed318fc8ee2beafe62ff4dac51a276c0487de1407d5c813"
+  },
+  "arms": {
+    "b0": {
+      "quality": {
+        "protocol": "HLE original evaluation prompts/schema on HLE-Verified; Qwen substitute; single trial; not official leaderboard replication",
+        "scoring_policy": "strict_json",
+        "selection": {
+          "subsets": [
+            "gold",
+            "revision"
+          ],
+          "modality": "all",
+          "excluded": 1611,
+          "profile": "fixed200-v1",
+          "selected": 200
+        },
+        "scope": "complete_selected_plan",
+        "judge_model": "qwen3.5-9b",
+        "solver_model": "qwen3.5-9b",
+        "contract_sha256": "3b1c2c5b5eed5f80759361f7ec0923fa6422220e47999fcc9a501c3fb758f11d",
+        "calibration_error": null,
+        "calibration_note": "not implemented: pinned upstream binning omits final bin and crashes below 100 grades; raw confidence preserved; no silent replacement metric",
+        "tracks": {
+          "gold": {
+            "total": 74,
+            "graded": 74,
+            "successes": 16,
+            "accuracy": 0.21621621621621623,
+            "unresolved": 0,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 25,
+            "judge_truncated": 0
+          },
+          "revision": {
+            "total": 126,
+            "graded": 125,
+            "successes": 27,
+            "accuracy": 0.21428571428571427,
+            "unresolved": 1,
+            "solver_failures": 0,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "solver_truncated": 53,
+            "judge_truncated": 1
+          }
+        },
+        "groups": {
+          "gold/text": {
+            "total": 64,
+            "graded": 64,
+            "successes": 13,
+            "accuracy": 0.203125,
+            "unresolved": 0,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 24,
+            "judge_truncated": 0
+          },
+          "gold/image": {
+            "total": 10,
+            "graded": 10,
+            "successes": 3,
+            "accuracy": 0.3,
+            "unresolved": 0,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 1,
+            "judge_truncated": 0
+          },
+          "revision/text": {
+            "total": 113,
+            "graded": 112,
+            "successes": 25,
+            "accuracy": 0.22123893805309736,
+            "unresolved": 1,
+            "solver_failures": 0,
+            "judge_invalid": 1,
+            "judge_transport_failures": 0,
+            "solver_truncated": 50,
+            "judge_truncated": 1
+          },
+          "revision/image": {
+            "total": 13,
+            "graded": 13,
+            "successes": 2,
+            "accuracy": 0.15384615384615385,
+            "unresolved": 0,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 3,
+            "judge_truncated": 0
+          }
+        }
+      },
+      "judge_status_counts": {
+        "ok": 199,
+        "invalid_judge": 1
+      },
+      "response_evaluation_index_sha256": "bc08f277ad1ddbe9380fd31026335ec2ad7226e6ac6b90ec6baa2781a8f65cc0",
+      "judge_evaluation_index_sha256": "79ab3a49db7f313308b6495b0c98d097e92af0beaf25aeca4121c51bd51f5bf4"
+    },
+    "b1": {
+      "quality": {
+        "protocol": "HLE original evaluation prompts/schema on HLE-Verified; Qwen substitute; single trial; not official leaderboard replication",
+        "scoring_policy": "strict_json",
+        "selection": {
+          "subsets": [
+            "gold",
+            "revision"
+          ],
+          "modality": "all",
+          "excluded": 1611,
+          "profile": "fixed200-v1",
+          "selected": 200
+        },
+        "scope": "complete_selected_plan",
+        "judge_model": "qwen3.5-9b",
+        "solver_model": "qwen3.5-9b",
+        "contract_sha256": "3b1c2c5b5eed5f80759361f7ec0923fa6422220e47999fcc9a501c3fb758f11d",
+        "calibration_error": null,
+        "calibration_note": "not implemented: pinned upstream binning omits final bin and crashes below 100 grades; raw confidence preserved; no silent replacement metric",
+        "tracks": {
+          "gold": {
+            "total": 74,
+            "graded": 74,
+            "successes": 16,
+            "accuracy": 0.21621621621621623,
+            "unresolved": 0,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 23,
+            "judge_truncated": 0
+          },
+          "revision": {
+            "total": 126,
+            "graded": 126,
+            "successes": 29,
+            "accuracy": 0.23015873015873015,
+            "unresolved": 0,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 52,
+            "judge_truncated": 0
+          }
+        },
+        "groups": {
+          "gold/text": {
+            "total": 64,
+            "graded": 64,
+            "successes": 14,
+            "accuracy": 0.21875,
+            "unresolved": 0,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 22,
+            "judge_truncated": 0
+          },
+          "gold/image": {
+            "total": 10,
+            "graded": 10,
+            "successes": 2,
+            "accuracy": 0.2,
+            "unresolved": 0,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 1,
+            "judge_truncated": 0
+          },
+          "revision/text": {
+            "total": 113,
+            "graded": 113,
+            "successes": 28,
+            "accuracy": 0.24778761061946902,
+            "unresolved": 0,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 50,
+            "judge_truncated": 0
+          },
+          "revision/image": {
+            "total": 13,
+            "graded": 13,
+            "successes": 1,
+            "accuracy": 0.07692307692307693,
+            "unresolved": 0,
+            "solver_failures": 0,
+            "judge_invalid": 0,
+            "judge_transport_failures": 0,
+            "solver_truncated": 2,
+            "judge_truncated": 0
+          }
+        }
+      },
+      "judge_status_counts": {
+        "ok": 200
+      },
+      "response_evaluation_index_sha256": "ef0cb0fcab9a1dc2592cd75b9584a09f97c998978a7940c21c8c32c5be1ef2e3",
+      "judge_evaluation_index_sha256": "2e67c091fa0b07def166127c6c56b59986032c7da58aa7108b47a26aa8f16c60"
+    }
+  },
+  "candidate_protocol_performance_ratios": {
+    "throughput_ratio": "1.750079622136865093679286608",
+    "ttft_ratio": "0.6682886160591073295782235698",
+    "tpot_ratio": "0.5941423828510173342911264144"
+  },
+  "isolated_candidate_hle_gates": {
+    "milestone": true,
+    "final": false
+  },
+  "hle_quality_gate": {
+    "met": true,
+    "status": "达成目标",
+    "reason": "固定计划分母；未决计非成功；HLE比较总体，Frontier分别比较两个赛道，绝对下降≤5个百分点。",
+    "drop_pp": {
+      "overall": "-1"
+    }
+  },
+  "4.2": {
+    "fixed_five_complete": true,
+    "candidate_gates": {
+      "milestone": true,
+      "final": true
+    },
+    "passing_tracks": {
+      "milestone": [
+        "mmlu",
+        "hle",
+        "frontier",
+        "swe",
+        "terminal"
+      ],
+      "final": [
+        "mmlu",
+        "frontier",
+        "swe",
+        "terminal"
+      ]
+    },
+    "stock_rc4_full_scope_qualified": false
+  }
+}
