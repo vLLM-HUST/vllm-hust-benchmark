@@ -11,6 +11,24 @@
 数据检索与维护入口（Agent）：[数据索引与读写指南](DATA_INDEX.md) ·
 [机器可读集合索引](docs/data-index.json)。覆盖原始运行、报告、历史归档、网站来源和契约，明确读取、 追加、订正与验证规则；不移动或覆盖历史证据。
 
+### 单组 B0/B1 实验
+
+安装本仓库的 CLI（`python -m pip install .`），并在站点执行机准备含单组入口的
+[DeepLinkEngine](https://github.com/DeepLinkNext/DeepLinkEngine) checkout、站点配置及引擎运行环境。 `experiment`
+将参数原样交给该 checkout 的 `deeplink.py benchmark`。默认使用工作区下的 `DeepLinkEngine` 目录，也可用 `DEEPLINKENGINE_ROOT`
+指定已核验版本。相对路径按当前工作目录解析。
+
+```bash
+export DEEPLINKENGINE_ROOT=/path/to/DeepLinkEngine
+common=(--config "$DEEPLINKENGINE_ROOT/experiments/mmlu-pro-200-out256.json" --site "$SITE_CONFIG" --replicas 1 --tp 2)
+vllm-hust-benchmark experiment "${common[@]}" --engine b0-original018 --dry-run
+vllm-hust-benchmark experiment "${common[@]}" --engine b1-r8
+vllm-hust-benchmark experiment "${common[@]}" --engine b1-r8 --controllers request-throttling
+```
+
+每条执行命令独立运行一组。引擎版本和实例数决定数据面，站点 RIDE 管理所选控制器。 省略 `--controllers` 即直连引擎。示例的固定 MMLU-Pro 200 题、256-token
+配置用于服务路径检查。 其他协议的支持范围以 DeepLinkEngine 的工作负载实现为准。R10 固定五项、历史 `run-both` 和真实 Agent 保留各自入口。
+
 SWE-bench Pro
 V1：[从全新 CPU 工作区部署并运行一个真实 Agent](docs/SWE_BENCH_PRO.zh-CN.md#%E6%96%B0%E7%94%A8%E6%88%B7%E6%8E%A8%E8%8D%90%E5%85%A5%E5%8F%A3)。
 安装入口自动准备固定源码、独立客户端依赖、V1 数据和 ARM 任务镜像；只连接已有模型 API，无需 Controller。 平台管理员先提供独立 Docker

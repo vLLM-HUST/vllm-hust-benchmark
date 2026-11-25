@@ -270,6 +270,10 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    subparsers.add_parser(
+        "experiment", add_help=False, help="Run one DeepLinkEngine benchmark group."
+    )
+
     repos_parser = subparsers.add_parser(
         "show-repos",
         help="Show the resolved sibling repository layout used by the wrapper.",
@@ -919,6 +923,29 @@ def _format_leaderboard_map(benchmark_type: str | None, tag: str | None) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    if argv is None:
+        argv = sys.argv[1:]
+    if argv[:1] == ["experiment"]:
+        root = os.environ.get("DEEPLINKENGINE_ROOT")
+        engine = (
+            Path(root).expanduser()
+            if root
+            else resolve_repo_layout().workspace_root / "DeepLinkEngine"
+        )
+        entry = engine.resolve() / "deeplink.py"
+        if not entry.is_file():
+            print(
+                f"Missing {entry}. Set DEEPLINKENGINE_ROOT to a DeepLinkEngine checkout.",
+                file=sys.stderr,
+            )
+            return 2
+        command = [sys.executable, str(entry), "benchmark", *argv[1:]]
+        if os.name == "nt":
+            # Windows execv can lose argument quoting and exits the wrapper early.
+            return subprocess.run(command, check=False).returncode
+        # Preserve native process and signal behavior on POSIX.
+        os.execv(sys.executable, command)
+
     parser = _build_parser()
     args = parser.parse_args(argv)
 
