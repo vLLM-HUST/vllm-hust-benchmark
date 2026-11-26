@@ -654,13 +654,13 @@
       "upstream_repository": null,
       "summary_en": "DiffSpec 48b1828 implements committed-query retrieval, graph-padding exclusion, TP score aggregation and compact draft KV for the pinned Qwen3.5-35B-A3B / Specforge Eagle3 lane on Core 762f85b3 and Ascend 4e57439e.",
       "summary_zh": "DiffSpec 48b1828 已在 Core 762f85b3 与 Ascend 4e57439e 上实现 committed-query retrieval、graph padding 排除、TP 分数聚合与紧凑 draft KV，当前固定评测组合为 Qwen3.5-35B-A3B / Specforge Eagle3。",
-      "public_effect_en": "Implementation review is complete, but no benchmark-custodied functional or performance result exists for the current immutable target/draft revisions. Qualification remains pending; no acceleration conclusion is published.",
-      "public_effect_zh": "实现审核已完成，但当前固定 target/draft revision 尚无由 benchmark 托管的功能或性能结果。资格状态仍为待验证，不发布加速结论。",
-      "public_effect_status": "pending",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-ascend-hust-diffspec#supported-evaluation-configuration",
+      "public_effect_en": "DiffSpec 48b1828 passed the scoped Ascend 910B2 TP4 / draft TP4 BF16 PIECEWISE regression. Two real requests each produced 256 tokens. Across 21 controlled two-request-plus-dummy cycles the dummy row and rejected suffix were excluded; all four ranks agreed on selected chunks and token digests in 24 of 24 cycles. Full output equivalence, HTTP serving, accuracy and performance for 48b1828 remain unverified. The separate 2026-10-30 implementation (1294c95 plus frozen patches) recorded 1.37× and 1.48× median end-to-end output throughput versus native linear Eagle3 for 32K input with 2K and 8K outputs, respectively.",
+      "public_effect_zh": "DiffSpec 48b1828 通过昇腾 910B2 TP4／draft TP4 BF16 PIECEWISE 专项功能回归。两条真实请求各完成 256 token，21 个受控双请求加 dummy 周期均排除了 dummy 和拒绝后缀，四个 rank 的选块及 token 摘要在 24/24 个周期一致。48b1828 的完整输出等价、HTTP serving、准确率与性能仍待核验。2026-10-30 冻结实现 1294c95 加固化补丁的历史配对中，32K 输入、2K／8K 输出的端到端输出吞吐中位数分别为原生 linear Eagle3 的 1.37× 和 1.48×。",
+      "public_effect_status": "functional",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/0c21c5b323d6d8f213d92d1ea248963651a303c2/reports/tech-outcomes-20261117/diffspec/README.md",
       "functional_compatibility": {
-        "status": "pending",
-        "scope": "Qwen/Qwen3.5-35B-A3B@59d61f3c + jiapingW/Qwen3.5-35B-A3B-Eagle3-Specforge@d07a277e · Ascend TP4 BF16 PIECEWISE"
+        "status": "passed",
+        "scope": "Pinned Qwen3.5-35B-A3B @59d61f3c / Specforge Eagle3 @d07a277e · TP4 BF16 PIECEWISE · scoped two-request plus dummy regression (#680)"
       },
       "effectiveness_qualifications": [
         {
@@ -685,13 +685,13 @@
           "Ascend 910B2 · TP4 / draft TP4 · BF16 · PIECEWISE graph"
         ],
         "models": [
-          "Qwen/Qwen3.5-35B-A3B@59d61f3c — qualification pending",
+          "Qwen/Qwen3.5-35B-A3B@59d61f3c — scoped functional regression passed",
           "jiapingW/Qwen3.5-35B-A3B-Eagle3-Specforge@d07a277e — required draft"
         ],
-        "requirements_en": "Use the pinned target/draft revisions with PP1, prefix caching and async scheduling disabled, native linear verification and PIECEWISE graph execution. Installed, configured and enabled are intent states; runtime effectiveness and performance require fresh TP4 benchmark custody.",
-        "requirements_zh": "必须使用固定 target/draft revision、PP1、关闭 prefix caching 与 async scheduling，并采用 native linear verification 和 PIECEWISE graph。installed、configured、enabled 仅表示意图；runtime effectiveness 与性能结论需要新的 TP4 benchmark 托管证据。"
+        "requirements_en": "Use the pinned target/draft revisions with PP1, prefix caching and async scheduling disabled, native linear verification and PIECEWISE graph execution. The verified scope is the two-request regression with controlled graph padding; wider serving and matched performance verification remain pending.",
+        "requirements_zh": "使用固定 target/draft revision、PP1、关闭 prefix caching 与 async scheduling，并采用 native linear verification 和 PIECEWISE graph。已验证范围为受控图填充下的双请求功能回归；更完整的服务验证及配对性能仍待核验。"
       },
-      "evidence_level": "cpu_smoke",
+      "evidence_level": "hardware_verified",
       "advisors": [
         {
           "name_zh": "黄禹",
@@ -704,7 +704,8 @@
           "login": "dzcixy",
           "name": "杜忠承"
         }
-      ]
+      ],
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/0c21c5b323d6d8f213d92d1ea248963651a303c2/reports/tech-outcomes-20261117/diffspec/PERFORMANCE.md"
     },
     {
       "id": "vspec",
@@ -1221,10 +1222,10 @@
       "upstream_repository": null,
       "summary_en": "Installable external prefix/lifecycle-aware router with bounded backend pools, request-load accounting, authoritative KV-event recovery, OpenAI-compatible forwarding, and health/readiness/metrics endpoints. R10 3072 revision, a CPU loopback routed requests using synthetic KV events. Default and trusted modes rejected the legacy event protocol. The frozen resident cache does not emit the needed events, so no two-replica performance test was run.",
       "summary_zh": "可独立安装的外部前缀与生命周期感知 Router，提供有界 backend 连接池、请求负载核算、权威 KV 事件恢复、OpenAI 兼容转发以及健康、就绪和指标接口。 R10 3072 修订版 · CPU 回环验证通过合成 KV 事件驱动选路。默认和可信模式拒绝旧事件协议；冻结驻留缓存缺少对应的实际事件，未进行双副本性能测试。",
-      "public_effect_en": "Three matched 900-second rounds at C1/C2/C4/C8/C16 reported 0.96%–17.52% higher throughput than the same two-replica random-routing deployment. Source-integrity gaps in several Prometheus files prevent per-request causal attribution.",
-      "public_effect_zh": "C1/C2/C4/C8/C16 各三轮匹配的 900 秒实验，相对相同双副本随机路由部署记录到 0.96%–17.52% 的吞吐提升。部分 Prometheus 源文件存在完整性缺口，不能作逐请求因果归因。",
-      "public_effect_status": "beneficial",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/fd2ab4d3a28dac6dd49697081611389d069f9d57/website-publication/data/leaderboard_prefix_routing_mean_evidence.json",
+      "public_effect_en": "On 2× Ascend 910B2 with two TP1 replicas, matched Prefix versus random routing raised cache hits from 24.44% to 47.88% and reduced median P95 TTFT from 223.80 to 174.80 ms; request throughput was 3.9542 versus 3.9538 req/s. The independent 35B SWE C4 diagnostic reduced P95 TTFT by 36.98% with a 0.56% decrease in output throughput. The evidence reports both settings separately.",
+      "public_effect_zh": "2× 昇腾 910B2 双 TP1 的匹配对照中，Prefix 相比随机路由的缓存命中率由 24.44% 升至 47.88%，三轮 P95 TTFT 中位数由 223.80 降至 174.80 ms，请求吞吐为 3.9542 对 3.9538 req/s。独立插件的 35B SWE C4 诊断中，P95 TTFT 降低 36.98%，输出吞吐降低 0.56%。证据按工况分别给出。",
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/0c21c5b323d6d8f213d92d1ea248963651a303c2/reports/tech-outcomes-20261117/prefix-router/README.md",
       "compatibility": {
         "status": "experimental",
         "host": "External router over vLLM-HUST request fingerprint and KV events",
