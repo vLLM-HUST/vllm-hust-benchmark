@@ -1,0 +1,98 @@
+"""Independent on-disk audit and compact report for the SWE pressure subset."""
+import gzip
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+
+def read(path):
+    return json.loads(path.read_bytes())
+
+
+def digest(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                    separators=(',', ':')).encode()).hexdigest()
+
+
+def main(root):
+    data=read(root/'comparison.json')
+    manifest=read(root/'input-manifest.json')
+    expected={x['case_id']:x for x in manifest}
+    audits={}
+    records={}
+    for arm in ['B0','B1']:
+        rows=[read(p) for p in (root/arm).glob('swe-turn-*/requests/*.json')]
+        actual={x['case_id']:x for x in rows}
+        assert len(rows)==len(actual)==len(expected)==1016
+        for identity,row in actual.items():
+            assert row['status']=='ok' and row['http_status']==200
+            assert row['usage']['completion_tokens']==32 and row['finish_reason']=='length'
+            assert row['usage']['prompt_tokens']==expected[identity]['prompt_tokens']
+            assert digest(row['request'])==expected[identity]['request_sha256']
+            capture=Path(row['stream_capture'])
+            assert hashlib.sha256(capture.read_bytes()).hexdigest()==row['stream_sha256']
+            with gzip.open(capture,'rt') as stream:
+                assert sum(1 for _ in stream)>0
+        wall=max(x['end']['monotonic'] for x in rows)-min(x['start']['monotonic'] for x in rows)
+        summary=data['arms'][arm]
+        assert abs(wall-summary['solver_batch_wall_seconds'])<1e-6
+        assert sum(x['usage']['completion_tokens'] for x in rows)==summary['accepted_output_tokens']==32512
+        records[arm]=actual
+        audits[arm]=dict(requests=1016,output_tokens=32512,request_and_stream_hashes_verified=True,
+                         all_usage_prompt_lengths_match=True,solver_wall_recomputed=wall)
+    assert all(records['B0'][key]['request']==records['B1'][key]['request'] for key in expected)
+    audit=dict(passed=True,arms=audits,all_actual_request_bodies_identical=True,
+               comparison_sha256=hashlib.sha256((root/'comparison.json').read_bytes()).hexdigest())
+    (root/'audit.json').write_text(json.dumps(audit,indent=2)+'\n')
+    def counter(arm,prefix):
+        return next((v for k,v in data['arms'][arm]['counters'].items() if k.startswith(prefix+'{')),None)
+    lines=['# SWE 分层压力子集测试','',
+           '固定128任务池的前8轮完整历史，共1016请求/组；每请求固定32个输出token，两组均32512 token。Native与MOD完整请求体一致。保留冷轮，未执行工具或反馈模型答案，不属于网页标准质量分数。','',
+           '双方BF16/TP2、自动HBM .92、eager、maxseq128、batched4096、maxlen262144、APC+async，客户端并发128；MOD CPU14 GiB、FS64 GiB。','',
+           '| 指标 | Native | MOD | MOD/Native−1 |','|---|---:|---:|---:|']
+    for label,key,scale in [('全过程吞吐 tok/s','full_workflow_output_tokens_per_second',1),
+                            ('全过程耗时 s','full_workflow_wall_seconds',1),
+                            ('分轮墙钟吞吐 tok/s','phase_wall_output_tokens_per_second',1),
+                            ('TTFT均值 s','ttft_seconds',1),('TPOT均值 ms','tpot_seconds',1000)]:
+        a,b=[data['arms'][arm][key] for arm in ['B0','B1']]
+        if isinstance(a,dict):a,b=a['mean'],b['mean']
+        lines.append(f'| {label} | {a*scale:.4f} | {b*scale:.4f} | {(b/a-1)*100:+.2f}% |')
+    lines+=['','延迟与耗时变化为负表示改善。全过程包括分轮屏障、结果落盘、指标采集，不包括模型启动和分词核验。','',
+            '## 机制计数','', '| 计数 | Native | MOD |','|---|---:|---:|']
+    for label,key in [('CPU→HBM bytes','vllm:kv_offload_load_bytes_total'),
+                      ('HBM→CPU bytes','vllm:kv_offload_store_bytes_total'),
+                      ('FS读取 bytes','vllm:kv_tiering_fs_load_bytes_total'),
+                      ('FS写入 bytes','vllm:kv_tiering_fs_store_bytes_total'),
+                      ('外部命中 token','vllm:external_prefix_cache_hits_total'),
+                      ('实际计算prefill token','vllm:request_prefill_kv_computed_tokens_sum')]:
+        values=[]
+        for arm in ['B0','B1']:
+            value=counter(arm,key)
+            values.append('未注册' if value is None else str(value['delta']) if value['baseline_known'] else f"基线缺失；末值{value['after']}")
+        lines.append('| '+label+' | '+' | '.join(values)+' |')
+    lines+=['','计数基线说明：新引擎在正式请求前已做全量分词核验，未执行生成；部分分层指标在第一次请求后才注册，因此保留null基线，末值代表新引擎的累计观测量，未伪造delta。','',
+            '实际计算prefill：7137055→5588767，减少1548288 token（21.69%）；其中外部恢复1093632 token，实际local_cache_hit增加454656 token。不能把全部prefill节省都归因于外部恢复。','',
+            '## 容量与后台错误（不可省略）','',
+            '推理请求全部成功不等于后台分层无错误。最终FS错误/拒绝累计计数如下；计数是作业/分配尝试口径，不能当作失败请求数，也不能直接相加。','',
+            '| FS计数 | 新引擎末值 |','|---|---:|']
+    for suffix in ['load_errors','store_errors','capacity_rejections','queue_rejections','checksum_errors']:
+        value=counter('B1','vllm:kv_tiering_fs_'+suffix+'_total')
+        lines.append(f"| {suffix} | {value['after'] if value else '未注册'} |")
+    lines+=['','服务日志记录FS segment quota exhausted；64 GiB文件层在后半段达到配额，停止新增存储，保留的块仍可读取；GC计数为0。吞吐包含这一阶段成本。该结果证明本次有实际FS读取并有总体净收益，但不是无错误的三层容量验收。FS累计读取125.479 GB、写入68.702 GB为逻辑流量，含重复读取；不等于当前占用或物理磁盘流量。','',
+            '## 结论','',
+            '本次预先冻结的8轮诊断对子集观察到总体净收益：同输入、同输出工作量下，全流程吞吐+17.63%、耗时−14.98%、TTFT均值−24.94%；TPOT均值+6.81%变慢。后续应将容量耗尽与后台错误作为独立问题处理。仅本场景单对测量成立，不声称五项标准成绩普遍提升、全量SWE加速或独立重复稳定性。']
+    lines+=['','## 分轮结果','', '| 轮次 | 请求数 | Native tok/s | MOD tok/s | MOD H2D计数 |','|---|---:|---:|---:|---:|']
+    for phase in sorted((root/'B0').glob('swe-turn-*')):
+        a,b=[read(root/arm/phase.name/'summary.json') for arm in ['B0','B1']]
+        load=next((v for k,v in b['counters'].items() if k.startswith('vllm:kv_offload_load_bytes_total{')),None)
+        text='未注册' if load is None else str(load['delta']) if load['baseline_known'] else f"末值{load['after']}"
+        lines.append(f"| {phase.name} | {a['planned']} | {a['output_tokens_per_second']:.3f} | {b['output_tokens_per_second']:.3f} | {text} |")
+    lines+=['','范围：单组固定顺序配对、预先冻结的前8轮子集；不构成全量成绩、稳定性确认或任务成功率。FS计数是逻辑流量，文件系统位于Longhorn/ext4，不能据此声称物理SSD性能。缺失计数与零计数分开呈现。','',
+            'audit.json已核对全部2032条HTTP成功、固定输出量、输入身份、原始流哈希和汇总墙钟。']
+    (root/'REPORT.zh-CN.md').write_text('\n'.join(lines)+'\n')
+    print(json.dumps(dict(audit=audit,changes=data['changes_mod_over_native']),ensure_ascii=False))
+
+
+if __name__=='__main__':
+    main(Path(sys.argv[1]))

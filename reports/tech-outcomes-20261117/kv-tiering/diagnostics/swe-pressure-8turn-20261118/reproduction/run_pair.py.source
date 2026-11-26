@@ -1,0 +1,203 @@
+"""Own-MOD five-profile runner; frozen inputs and public reference SSE transport."""
+import copy,concurrent.futures,hashlib,importlib,json,os,signal,socket,subprocess,sys,time,traceback,urllib.request,uuid
+from pathlib import Path
+R=Path(__file__).resolve().parent
+sys.path.insert(0,str(R/'reference-sources'))
+from transport import call
+from measurement import summarize
+from observation import Sampler,snapshot,totals,zero_reuse
+for name in ['hle','frontier','mmlu']:
+ sys.path.insert(0,str(next((R/'clients').glob('*'+name+'*'))/'src'))
+from hust_eval_hle_verified import pipeline as hle
+from hust_eval_frontierscience import pipeline as frontier
+from hust_eval_mmlu_pro.mmlu_pro.scoring import extract_answer
+PORT=18396;BASE=f'http://127.0.0.1:{PORT}';MODEL='qwen3.5-35b'
+PLUGIN=next((R/'plugin-source').iterdir())
+CORE=Path('/root/CGCL/kv-tiering-bugfix-perf-20261106/core-mtp-offload-safe')
+ASCEND=Path('/root/CGCL/kv-tiering-bugfix-perf-20261106/ascend-feedback-identity-safe')
+SERVICE=None;LOG=None
+RUN=R/os.environ.get('KV_PAIR_RUN_NAME','run-04')
+def read(p):return json.loads(Path(p).read_bytes())
+def digest(v):return hashlib.sha256(json.dumps(v,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
+def save(p,v):
+ p=Path(p);p.parent.mkdir(parents=True,exist_ok=True);tmp=p.with_suffix(p.suffix+'.tmp');tmp.write_text(json.dumps(v,ensure_ascii=False,indent=2)+'\n');tmp.replace(p)
+def state(phase,**kw):save(RUN/'status.json',{'phase':phase,'wall':time.time(),'pid':os.getpid(),**kw});print(phase,kw,flush=True)
+def post(path,body):
+ req=urllib.request.Request(BASE+path,json.dumps(body).encode(),{'Content-Type':'application/json'})
+ with urllib.request.urlopen(req,timeout=180) as response:return json.load(response)
+def stop():
+ global SERVICE,LOG
+ if SERVICE is None:return
+ start=time.monotonic();forced=False
+ if SERVICE.poll() is None:
+  os.killpg(SERVICE.pid,signal.SIGTERM)
+  try:SERVICE.wait(timeout=120)
+  except subprocess.TimeoutExpired:
+   forced=True;os.killpg(SERVICE.pid,signal.SIGKILL);SERVICE.wait(timeout=30)
+ save(RUN/(CURRENT+'-cleanup.json'),{'returncode':SERVICE.returncode,'forced':forced,'seconds':time.monotonic()-start})
+ SERVICE=None
+ if LOG:LOG.close();LOG=None
+ subprocess.run(['npu-smi','info'],stdout=(RUN/(CURRENT+'-npu-after.txt')).open('w'),timeout=20)
+def start(arm,kv_config_path=None,service_options=None):
+ global SERVICE,LOG,CURRENT
+ CURRENT=arm
+ raw=subprocess.check_output(['npu-smi','info'],text=True,timeout=20)
+ if SERVICE is None:
+  deadline=time.monotonic()+120
+  while raw.count('No running processes found')!=2 and time.monotonic()<deadline:
+   time.sleep(3);raw=subprocess.check_output(['npu-smi','info'],text=True,timeout=20)
+ (RUN/(arm+'-npu-before.txt')).write_text(raw)
+ assert raw.count('No running processes found')==2,'NPU is occupied; never terminate unrelated processes'
+ with socket.socket() as s:
+  s.settimeout(2)
+  assert s.connect_ex(('127.0.0.1',PORT))!=0,'A live service owns the test port'
+ env=os.environ.copy();env.update({'PYTHONPATH':':'.join([str(PLUGIN/'src'),str(CORE),str(ASCEND),env.get('PYTHONPATH','')]),'VLLM_VERSION':'0.25.1','VLLM_WORKER_MULTIPROC_METHOD':'spawn','HF_HUB_OFFLINE':'1','OMP_NUM_THREADS':'2','TOKENIZERS_PARALLELISM':'false','VLLM_CACHE_ROOT':str(RUN/arm/'cache')})
+ argv=[sys.executable,'-u','-m','vllm.entrypoints.openai.api_server','--host','127.0.0.1','--port',str(PORT),'--model','/models/Qwen3.5-35B-A3B','--served-model-name',MODEL,'--dtype','bfloat16','--tensor-parallel-size','2','--max-model-len','65536','--max-num-seqs','24','--max-num-batched-tokens','4096','--gpu-memory-utilization','0.92','--enable-prefix-caching','--async-scheduling','--enable-prompt-tokens-details','--generation-config','vllm','--compilation-config',json.dumps({'cudagraph_mode':'FULL_AND_PIECEWISE','cudagraph_capture_sizes':[1,2,4,8,16,24]}),'--shutdown-timeout','60']
+ if service_options:
+  assert set(service_options)<= {'--max-model-len','--max-num-seqs','--enforce-eager'},'Unknown diagnostic service option'
+  for flag,value in service_options.items():
+   if flag=='--enforce-eager':
+    assert value is True
+    index=argv.index('--compilation-config');del argv[index:index+2];argv.append(flag)
+   else:
+    assert type(value) is int and value>0
+    argv[argv.index(flag)+1]=str(value)
+ if arm in ('B1','C8-B1'):
+  cfg=read(kv_config_path or PLUGIN/'examples/swe-prefix-replay.json');argv+=['--kv-transfer-config',json.dumps(cfg)]
+  assert os.statvfs('/dev/shm').f_bavail*os.statvfs('/dev/shm').f_frsize>=15*1024**3
+ save(RUN/(arm+'-command.json'),{'argv':argv,'env':{k:env.get(k) for k in ['PYTHONPATH','VLLM_VERSION','ASCEND_RT_VISIBLE_DEVICES','VLLM_WORKER_MULTIPROC_METHOD','VLLM_CACHE_ROOT','LD_PRELOAD','LD_LIBRARY_PATH']},'plugin_commit':'00d6a3ef2ade4ef7a105ee37458b84a5853b7d3f','plugin_sha256':{str(p.relative_to(PLUGIN)):hashlib.sha256(p.read_bytes()).hexdigest() for p in (PLUGIN/'src').rglob('*') if p.is_file() and p.suffix in ('.py','.json')}})
+ LOG=(RUN/(arm+'-server.log')).open('wb');SERVICE=subprocess.Popen(argv,cwd=PLUGIN,env=env,stdout=LOG,stderr=subprocess.STDOUT,start_new_session=True)
+ state('starting-'+arm,server_pid=SERVICE.pid);begin=time.monotonic()
+ while True:
+  if SERVICE.poll() is not None:raise RuntimeError(f'{arm} model startup failed: exit {SERVICE.returncode}; see server log')
+  if time.monotonic()-begin>1800:raise TimeoutError('model startup deadline')
+  try:
+   with urllib.request.urlopen(BASE+'/health',timeout=2) as q:
+    if q.status==200:break
+  except Exception:pass
+  time.sleep(3)
+ save(RUN/(arm+'-startup.json'),{'ready':True,'seconds':time.monotonic()-begin,'pid':SERVICE.pid})
+ state('qualifying-inputs-'+arm)
+
+def body_for(ds,t):
+ if ds=='mmlu':return dict(t['body'])
+ if ds=='hle':
+  content=[{'type':'text','text':t['problem']}]
+  if t['image']:content.append({'type':'image_url','image_url':{'url':t['image']}})
+  messages=[{'role':'system','content':hle.SYSTEM_PROMPT},{'role':'user','content':content}]
+ elif ds=='frontier':messages=[{'role':'user','content':t['problem']}]
+ else:return dict(t['body'],max_tokens=2048,temperature=0,seed=17,tool_choice='none',chat_template_kwargs={'enable_thinking':False})
+ return {'messages':messages,'max_tokens':16384,'temperature':0,'seed':17,'chat_template_kwargs':{'enable_thinking':False}}
+
+def qualify(arm):
+ receipts=[]
+ for ds in ['mmlu','swe','terminal']:
+  for t in read(R/'prepared'/f'{ds}.json'):
+   b=body_for(ds,t);tb={k:v for k,v in b.items() if k in ('messages','tools','chat_template_kwargs')};tb.update(model=MODEL,add_generation_prompt=True)
+   v=post('/tokenize',tb);ids=v['tokens'];n=len(ids)
+   if ds=='mmlu':assert ids==t['prompt_ids'],t['case_id']
+   else:
+    assert n==t['prompt_tokens'],(t['case_id'],n,t['prompt_tokens'])
+    assert digest(ids)==t['token_ids_sha256'],t['case_id']
+   receipts.append({'case_id':t['case_id'],'count':n,'token_ids_sha256':digest(ids)})
+ save(RUN/(arm+'-input-admission.json'),{'passed':True,'requests':receipts})
+
+def batch(arm,ds,tasks,bodies,concurrency,judge=False):
+ folder=RUN/arm/ds;folder.mkdir(parents=True,exist_ok=False)
+ before=snapshot(BASE,folder,'before');rows=[];state(arm+'-'+ds,planned=len(tasks),judge=judge)
+ def one(pair):
+  t,b=pair;b=dict(b,model=MODEL,stream=True,stream_options={'include_usage':True},cache_salt=uuid.uuid4().hex)
+  row=call({'base_url':BASE,'timeout':6600 if ds=='mmlu' else 1800 if judge or ds.startswith(('hle','frontier')) else 600},b,folder/'sse')
+  row.update(case_id=t['case_id'],input_identity=digest(t));save(folder/'requests'/(t['case_id']+'.json'),row)
+  return row
+ with concurrent.futures.ThreadPoolExecutor(max_workers=concurrency) as pool:
+  for row in pool.map(one,zip(tasks,bodies)):
+   rows.append(row);print(arm,ds,len(rows),row['status'],flush=True)
+ after=snapshot(BASE,folder,'after');summary=summarize([t['case_id'] for t in tasks],rows)
+ try:summary['zero_reuse']=zero_reuse(before,after,rows)
+ except Exception as e:summary['zero_reuse']={'passed':False,'error':str(e)}
+ a,b=totals(before),totals(after);summary['mechanism_counter_deltas']={k:b[k]-a[k] if k in a else None for k in b if any(x in k for x in ['kv_offload','kv_tiering'])};save(folder/'summary.json',summary)
+ if ds=='mmlu':
+  outcomes=[]
+  for t,row in zip(tasks,rows):
+   answer=extract_answer(row.get('content','')) if row['status']=='ok' else None
+   outcomes.append({'case_id':t['case_id'],'correct':answer==t['answer'] and answer in 'ABCDEFGHIJ'[:t['option_count']] if answer else False,'prediction':answer,'category':t['category']})
+  save(folder/'quality.json',{'planned':200,'correct':sum(x['correct'] for x in outcomes),'outcomes':outcomes})
+ return rows
+
+def main():
+ RUN.mkdir(exist_ok=False)
+ lock=(RUN/'controller.pid');lock.write_text(str(os.getpid())+'\n')
+ try:
+  state('freezing-plan')
+  from transformers import AutoTokenizer
+  tok=AutoTokenizer.from_pretrained('/models/Qwen3.5-35B-A3B',local_files_only=True)
+  trace=read(R/'protocol/public-agent-trace-fixed32-v1.json')
+  for name,h in trace['tokenizer_files'].items():assert hashlib.sha256((Path('/models/Qwen3.5-35B-A3B')/name).read_bytes()).hexdigest()==h
+  for ds in ['swe','terminal']:
+   tasks=read(R/'prepared'/f'{ds}.json')
+   for t in tasks:
+    b=copy.deepcopy(body_for(ds,t))
+    for msg in b['messages']:
+     for tc in msg.get('tool_calls',[]):
+      fn=tc.get('function',tc)
+      if isinstance(fn.get('arguments'),str):fn['arguments']=json.loads(fn['arguments'])
+    ids=tok.apply_chat_template(b['messages'],tools=b.get('tools'),tokenize=True,add_generation_prompt=True,enable_thinking=False,return_dict=False)
+    assert len(ids)==t['prompt_tokens'],(t['case_id'],len(ids),t['prompt_tokens']);t['token_ids_sha256']=digest(ids)
+   save(R/'prepared'/f'{ds}.json',tasks)
+  save(RUN/'input-manifest.json',{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in (R/'prepared').glob('*.json')})
+  save(RUN/'plan.json',{'plugin_commit':'00d6a3ef2ade4ef7a105ee37458b84a5853b7d3f','scope':['mmlu200','hle200','frontier160','swe64','terminal48'],'planned_solver_requests_per_arm':672,'stage_order':['C8-B0','C8-B1','B0','B1','shared-B0-judge'],'mtp':False,'graph_mode':'FULL_AND_PIECEWISE','c8':{'source':'acceptance-completion-20261029/continuous-raw.tar.gz:sources/continuous-inputs-r1.json','input_sha256':'17faf7a6e4ba31f55fb64dca577d41d85ebc8ca4381ccf68d8184cc1e5937802','warmup_seconds':60,'formal_seconds':300,'concurrency':8,'max_tokens':256,'ignore_eos':True,'separate_from_five':True},'started':time.time(),'source_sha256':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in R.glob('*.py')},'dependency_conflict':'vllm-ascend distribution declares transformers5.5.4; isolated client/runtime uses protocol5.14.1; actual import identities retained'})
+  solver={}
+  with Sampler(RUN):
+   import continuous,argparse
+   original_input_sha='17faf7a6e4ba31f55fb64dca577d41d85ebc8ca4381ccf68d8184cc1e5937802'
+   assert hashlib.sha256((R/'prepared/continuous-inputs.json').read_bytes()).hexdigest()==original_input_sha
+   continuous.INPUT_SHA=original_input_sha # Exact original public capsule; no request changes.
+   for c8arm in ['C8-B0','C8-B1']:
+    if c8arm=='C8-B0':
+     prior=R/'run-03/C8-B0-measurements'
+     completed=read(prior/'continuous.json')
+     assert completed['status']=='completed' and len(completed['phases'])==4
+     assert all(x['failed']==0 for x in completed['phases'])
+     assert read(prior/'plan.json')['input_sha256']==original_input_sha
+     assert read(prior/'tokenize-admission.json')['passed']
+     old=read(R/'run-03/C8-B0-command.json')
+     save(RUN/'reused-C8-B0.json',{'prior':str(prior),'reason':'Same host, inputs, source pins and model configuration; only controller directory/port admission fixes','command':old,'continuous_sha256':hashlib.sha256((prior/'continuous.json').read_bytes()).hexdigest()})
+     continue
+    start(c8arm)
+    try:
+     state('running-'+c8arm)
+     rc=continuous.main(argparse.Namespace(inputs=R/'prepared/continuous-inputs.json',out=RUN/(c8arm+'-measurements'),base_url=BASE,external_metrics_url=None))
+     if rc:raise RuntimeError(c8arm+' qualification failed; retain failure and stop campaign')
+    finally:stop()
+   for arm in ['B0','B1']:
+    start(arm);qualify(arm);solver[arm]={}
+    try:
+     for ds,concurrency in [('mmlu',200),('hle',16),('frontier',16),('swe',8),('terminal',8)]:
+      tasks=read(R/'prepared'/({'hle':'hle-tasks','frontier':'frontier-tasks'}.get(ds,ds)+'.json'));solver[arm][ds]=batch(arm,ds,tasks,[body_for(ds,t) for t in tasks],concurrency)
+    finally:stop()
+   start('judge')
+   try:
+    for arm in ['B0','B1']:
+     for ds in ['hle','frontier']:
+      tasks=read(R/'prepared'/f'{ds}-tasks.json');bodies=[]
+      for t,row in zip(tasks,solver[arm][ds]):
+       if ds=='hle':text=hle.JUDGE_PROMPT.format(question=t['problem'],response=row.get('content',''),correct_answer=t['answer'])
+       else:text=frontier.JUDGE_PROMPTS[t['track']].format_map({'problem':t['problem'],'answer':row.get('content',''),'reference answer':t['answer'],'rubric':t['answer']})
+       b={'messages':[{'role':'user','content':text}],'max_tokens':8192,'temperature':0,'seed':17,'chat_template_kwargs':{'enable_thinking':False}}
+       if ds=='hle':b['response_format']=hle.RESPONSE_FORMAT
+       bodies.append(b)
+      grades=batch('judge',arm+'-'+ds,tasks,bodies,16,True);quality=[]
+      for t,g,src in zip(tasks,grades,solver[arm][ds]):
+       try:
+        assert src['status']=='ok' and g['status']=='ok'
+        verdict=(hle if ds=='hle' else frontier).parse_grade(t['track'],g['content'],g['finish_reason'],policy='strict_json' if ds=='hle' else 'mmlu_extract_first')
+        quality.append(dict(case_id=t['case_id'],track=t['track'],resolved=True,**verdict))
+       except Exception as e:quality.append({'case_id':t['case_id'],'track':t['track'],'resolved':False,'error':str(e)})
+      save(RUN/arm/ds/'quality.json',{'planned':len(tasks),'correct':sum(x.get('correct') is True for x in quality),'unresolved':sum(not x['resolved'] for x in quality),'outcomes':quality})
+   finally:stop()
+  state('measurements-finished-publication-pending')
+ except BaseException as e:
+  state('failed',error=repr(e));traceback.print_exc();stop();return 2
+ return 0
+if __name__=='__main__':sys.exit(main())

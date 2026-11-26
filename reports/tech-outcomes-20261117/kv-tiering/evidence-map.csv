@@ -1,0 +1,11 @@
+requirement,status,public_evidence,controlled_original,limits
+128-task round records,covered for new SWE only,public/manifest.json; public/pressure-*-requests.jsonl.gz; public/pressure-*-phases.json.gz,controlled-location.json,128 task pool; max client concurrency 128; not 128 continuously running requests
+Cold round and complete process cost,covered,README.md#首轮与全流程成本; public/pressure-*-phases.json.gz,controlled-location.json,All 26 rounds and complete client wall included; engine startup excluded
+Actual KV recovery,HBM-CPU covered; FS not measured,public/pressure-default-phases.json.gz; public_evidence.py --check,pressure-complete-and-capacity-preflight.tar.gz,Counter deltas prove CPU/HBM payload transfer only; secondary_tiers=[]
+TTFT and TPOT tradeoff,covered with limitations,public/*-requests.jsonl.gz; analysis/full128-original-analysis.json; analysis/full32-original-analysis.json,controlled-location.json,Early write worsens TPOT; 32-task repetitions have no stable gain
+Old C16 FS result and TPOT 14.67 to 38.73 ms,not established; withdrawn from current claim,README.md#验收要求与证据入口,,No complete original chain established here; new SWE does not recover old originals
+Old C128 synthetic rounds and FS recovery,not covered,README.md#验收要求与证据入口,,Different data and HBM/layer configuration; no retroactive substitution
+Run config and implementation identity,covered with provenance limits,provenance/; preserved-members-sha256.json; reproduction/,swe32-complete-and-source-evidence.tar.gz,Historical uncommitted runtime matched by 18 payload hashes; full model bytes were not hashed
+Zero/negative results and failure retention,covered,public/r*-*.gz; analysis/full32-original-analysis.json; README.md#零负结果失败和质量边界,pressure-complete-and-capacity-preflight.tar.gz,Preflight failure is not a successful device run; half/interrupted runs excluded
+Task quality and official score,not established,README.md#零负结果失败和质量边界,,Eager diagnostic; fixed 32 outputs; no solve-rate or SLO-qualified acceptance
+"Contribution, compatibility and release scope",MOD documentation,https://github.com/vLLM-HUST/vllm-hust-kv-tiering/tree/00d6a3ef2ade4ef7a105ee37458b84a5853b7d3f,,Maintainer acceptance and Issue closure are separate from data indexing

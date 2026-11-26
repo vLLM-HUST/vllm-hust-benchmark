@@ -1,0 +1,187 @@
+"""Frozen SWE history prefix: equal-output Native versus CPU+FS diagnostic."""
+import concurrent.futures
+import copy
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import time
+import traceback
+
+import run_pair as engine
+from run_reuse_full import counter_evidence
+
+ROOT = Path(__file__).resolve().parent
+RUN = ROOT / 'swe-pressure-8turn-02'
+SOURCE = Path('/root/CGCL/kv-tiering-performance-recheck-20261116/swe128-pressure')
+OPTIONS = {'--max-model-len': 262144, '--max-num-seqs': 128, '--enforce-eager': True}
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def prepare():
+    source = engine.read(SOURCE / 'swe-plan.json')
+    audit = engine.read(SOURCE / 'swe-data-audit.json')
+    assert sha(SOURCE / 'swe-plan.json') == audit['plan_sha256']
+    assert audit['source_tasks'] == 128
+    tools = engine.read(SOURCE / 'swe-agent-v110-tools.json')['tools']
+    phases, manifest = [], []
+    for phase in source['phases'][:8]:
+        tasks = []
+        for record in phase['requests']:
+            tokens = engine.read(record['prompt_file'])
+            msgpath = Path(record['prompt_file']).with_name(Path(record['prompt_file']).stem + '-messages.json')
+            messages = engine.read(msgpath)
+            assert engine.digest(tokens) == record['prompt_sha256']
+            assert engine.digest(messages) == record['messages_sha256']
+            assert len(tokens) == record['prompt_tokens']
+            assert len(tokens) + 32 <= OPTIONS['--max-model-len']
+            # OpenAI wire schema requires JSON strings; the renderer parses them
+            # back to objects. The admission step checks exact original token IDs.
+            wire_messages = copy.deepcopy(messages)
+            for message in wire_messages:
+                for call in message.get('tool_calls', []):
+                    function = call['function']
+                    if isinstance(function['arguments'], dict):
+                        function['arguments'] = json.dumps(function['arguments'], ensure_ascii=False)
+            identity = phase['name'] + '-' + str(record['prefix_id'])
+            body = dict(model=engine.MODEL, messages=wire_messages, tools=tools, tool_choice='none',
+                        chat_template_kwargs={'enable_thinking': False}, temperature=0, seed=17,
+                        max_tokens=32, ignore_eos=True, stream=True,
+                        stream_options={'include_usage': True}, cache_salt='swe-history-pressure-8turn-v1')
+            tasks.append(dict(case_id=identity, source=record, body=body))
+            manifest.append(dict(case_id=identity, task_id=record['task_id'], source_index=record['source_index'],
+                                 prompt_tokens=len(tokens), prompt_sha256=record['prompt_sha256'],
+                                 messages_sha256=record['messages_sha256'], request_sha256=engine.digest(body)))
+        phases.append(dict(name=phase['name'], tasks=tasks))
+    assert len(phases) == 8 and len(manifest) == 1016
+    assert len({x['task_id'] for x in manifest}) == 128
+    engine.save(RUN / 'input-manifest.json', manifest)
+    engine.save(RUN / 'source-selection.json', engine.read(SOURCE / 'swe-selection.json'))
+    cfg = engine.read(ROOT / 'reuse-five-03/cpu-fs-config.json')
+    extra = cfg['kv_connector_extra_config']
+    extra['secondary_tiers'][0]['root_dir'] = str(RUN / 'B1/fs-cache')
+    assert extra['cpu_bytes_to_use'] == 14 * 1024**3
+    assert extra['secondary_tiers'][0]['max_storage_bytes'] == 64 * 1024**3
+    assert shutil.disk_usage(RUN).free > 80 * 1024**3
+    engine.save(RUN / 'cpu-fs-config.json', cfg)
+    engine.save(RUN / 'plan.json', dict(
+        purpose='Mechanism-specific partial SWE performance diagnostic; not official dataset score',
+        selection='First 8 history rounds of the pre-existing frozen 128-task pool, chosen before this run',
+        source_plan_sha256=sha(SOURCE / 'swe-plan.json'), inputs_sha256=engine.digest(manifest),
+        tasks=128, rounds=8, requests_per_arm=1016, order=['B0', 'B1'], repetitions=1,
+        client_concurrency=128, output_tokens_per_request=32, ignore_eos=True, temperature=0, seed=17,
+        service_options=OPTIONS, common_service='BF16 TP2, auto HBM .92, batch4096, APC+async, no MTP',
+        fixed_hbm_byte_limit=False, cpu_gib=14, fs_gib=64, source= str(SOURCE),
+        plugin_commit='00d6a3ef2ade4ef7a105ee37458b84a5853b7d3f',
+        client_sha256={p.name:sha(p) for p in [Path(__file__), ROOT/'run_pair.py',
+                      ROOT/'run_reuse_full.py', ROOT/'reference-sources/transport.py',
+                      ROOT/'reference-sources/measurement.py']},
+        cold_cost_included=True, no_tool_execution=True, no_generated_answer_feedback=True,
+        no_input_truncation_padding_or_duplicate_tasks=True,
+        primary_metric='Equal accepted output tokens / whole client wall; phase-wall throughput also retained',
+        mechanism='Report actual H2D, external hits and computed prefill; zero recovery is a valid negative outcome',
+        no_post_result_selection_or_extension=True,
+        limits=['Single fixed-order pair, not stability confirmation', 'No task success or answer quality claim',
+                'Eager and fixed-output diagnostic intentionally differs from graph/EOS standard profile'] ))
+    return phases
+
+
+def qualify(arm, phases):
+    receipts = []
+    for phase in phases:
+        for task in phase['tasks']:
+            body = {k:v for k,v in task['body'].items() if k in ('messages','tools','chat_template_kwargs')}
+            result = engine.post('/tokenize', dict(body, model=engine.MODEL, add_generation_prompt=True))
+            assert engine.digest(result['tokens']) == task['source']['prompt_sha256'], task['case_id']
+            receipts.append(dict(case_id=task['case_id'], token_count=len(result['tokens']),
+                                 token_sha256=engine.digest(result['tokens'])))
+        engine.state(arm+'-tokenizer-admission', checked=len(receipts), total=1016)
+    engine.save(RUN/(arm+'-input-admission.json'), dict(passed=True, records=receipts))
+
+
+def batch(arm, phase):
+    out = RUN/arm/phase['name']
+    out.mkdir(parents=True, exist_ok=False)
+    before = engine.snapshot(engine.BASE, out, 'before')
+    engine.state(arm+'-'+phase['name'], planned=len(phase['tasks']))
+
+    def one(task):
+        row = engine.call(dict(base_url=engine.BASE, timeout=1800), task['body'], out/'sse',
+                          fixed_length=True, require_zero_reuse=False)
+        row.update(case_id=task['case_id'], task_id=task['source']['task_id'],
+                   source_index=task['source']['source_index'], input_identity=engine.digest(task['body']))
+        if row['status']=='ok' and row['usage']['prompt_tokens'] != task['source']['prompt_tokens']:
+            row.update(status='prompt_usage_mismatch', expected_prompt_tokens=task['source']['prompt_tokens'])
+        engine.save(out/'requests'/(task['case_id']+'.json'), row)
+        return row
+
+    rows = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=128) as pool:
+        for future in concurrent.futures.as_completed([pool.submit(one,t) for t in phase['tasks']]):
+            row = future.result()
+            rows.append(row)
+            if len(rows)%16==0 or len(rows)==len(phase['tasks']):
+                print(arm,phase['name'],len(rows),row['status'],flush=True)
+    after = engine.snapshot(engine.BASE, out, 'after')
+    summary = engine.summarize([t['case_id'] for t in phase['tasks']], rows)
+    summary.pop('zero_cache_admission', None)
+    summary['quality_scope'] = 'Fixed-output performance only; not agent success or correctness'
+    summary['counters'] = counter_evidence(before, after)
+    engine.save(out/'summary.json', summary)
+    if summary['failed'] or summary['not_executed']:
+        raise RuntimeError('Retained failed requests; no retries or continuation to later phases')
+    assert summary['accepted_output_tokens'] == len(rows)*32
+    return rows,summary
+
+
+def main():
+    engine.RUN = RUN
+    RUN.mkdir(exist_ok=False)
+    (RUN/'controller.pid').write_text(str(os.getpid())+'\n')
+    engine.state('preparing-swe-pressure-subset')
+    try:
+        phases = prepare()
+        summaries={}
+        with engine.Sampler(RUN):
+            for arm in ['B0','B1']:
+                try:
+                    engine.start(arm,RUN/'cpu-fs-config.json',service_options=OPTIONS)
+                    qualify(arm,phases)
+                    begin=time.monotonic()
+                    raw_before=engine.snapshot(engine.BASE,RUN,arm+'-whole-before')
+                    rows,rounds=[],[]
+                    for phase in phases:
+                        records,summary=batch(arm,phase)
+                        rows.extend(records);rounds.append(summary)
+                    raw_after=engine.snapshot(engine.BASE,RUN,arm+'-whole-after')
+                    wall=time.monotonic()-begin
+                    summary=engine.summarize([t['case_id'] for p in phases for t in p['tasks']], rows)
+                    summary.pop('zero_cache_admission',None)
+                    summary.update(quality_scope='Fixed-output diagnostic; not quality',
+                                   full_workflow_wall_seconds=wall,
+                                   full_workflow_output_tokens_per_second=summary['accepted_output_tokens']/wall,
+                                   summed_round_wall_seconds=sum(s['solver_batch_wall_seconds'] for s in rounds),
+                                   phase_wall_output_tokens_per_second=summary['accepted_output_tokens']/sum(s['solver_batch_wall_seconds'] for s in rounds),
+                                   counters=counter_evidence(raw_before,raw_after))
+                    summaries[arm]=summary
+                    engine.save(RUN/arm/'summary.json',summary)
+                finally:
+                    engine.stop()
+            a,b=[summaries[x] for x in ['B0','B1']]
+            assert a['accepted_output_tokens']==b['accepted_output_tokens']==32512
+            changes={k:b[k]/a[k]-1 for k in ['full_workflow_output_tokens_per_second','full_workflow_wall_seconds','phase_wall_output_tokens_per_second']}
+            changes.update({k:b[k]['mean']/a[k]['mean']-1 for k in ['ttft_seconds','tpot_seconds']})
+            engine.save(RUN/'comparison.json',dict(arms=summaries,changes_mod_over_native=changes,
+                        scope='First 8 frozen rounds; cold included; single pair, no stability or quality claim'))
+        engine.state('performance-complete-report-pending')
+    except BaseException as error:
+        engine.state('failed',error=repr(error),traceback=traceback.format_exc())
+        raise
+
+
+if __name__=='__main__':
+    main()

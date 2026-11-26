@@ -1,0 +1,2972 @@
+[
+  {
+    "phase": "swe-turn-000",
+    "summary": {
+      "planned": 128,
+      "executed": 128,
+      "successful": 128,
+      "failed": 0,
+      "not_executed": 0,
+      "recorded": 128,
+      "length_stops": 128,
+      "solver_batch_wall_seconds": 33.82855783961713,
+      "accepted_output_tokens": 4096,
+      "output_tokens_per_second": 121.08112971943228,
+      "ttft_seconds": {
+        "samples": 128,
+        "mean": 14.001760837272741,
+        "p50": 13.973883664701134,
+        "p95": 25.01999707566574,
+        "p99": 25.932672792486848
+      },
+      "tpot_seconds": {
+        "samples": 128,
+        "mean": 0.34857764798770435,
+        "p50": 0.3730445739272381,
+        "p95": 0.38289598000476194,
+        "p99": 0.3834055171077771
+      },
+      "tpot_excluded_output_tokens_le_one": 0,
+      "null_cache_detail_count": 0,
+      "quality_scope": "Fixed-output performance only; not agent success or correctness",
+      "execution_records_complete": true,
+      "valid_transport": true,
+      "counters": {
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_legacy_store_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_load_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_lookup_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_lookup_misses_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 96.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_load_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_store_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_load_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_store_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_capacity_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_checksum_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_queue_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_gc_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_fs_gc_segments_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_attempt_blocks\"}": {
+          "before": null,
+          "after": 124.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_pending_blocks\"}": {
+          "before": null,
+          "after": 96.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_miss_blocks\"}": {
+          "before": null,
+          "after": 28.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_expired_sessions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_primary_reclaimed_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"policy\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"low_hbm_pressure\"}": {
+          "before": null,
+          "after": 98.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_offload_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_offload_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 317463.0,
+          "delta": 317463.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 245573.0,
+          "delta": 245573.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:num_preemptions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_compute\"}": {
+          "before": 0.0,
+          "after": 245573.0,
+          "delta": 245573.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_cache_hit\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"external_kv_transfer\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 128.0,
+          "delta": 128.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 245573.0,
+          "delta": 245573.0,
+          "baseline_known": true
+        }
+      }
+    }
+  },
+  {
+    "phase": "swe-turn-001",
+    "summary": {
+      "planned": 128,
+      "executed": 128,
+      "successful": 128,
+      "failed": 0,
+      "not_executed": 0,
+      "recorded": 128,
+      "length_stops": 128,
+      "solver_batch_wall_seconds": 35.59366928227246,
+      "accepted_output_tokens": 4096,
+      "output_tokens_per_second": 115.07664375698478,
+      "ttft_seconds": {
+        "samples": 128,
+        "mean": 13.320567838862189,
+        "p50": 11.861441663466394,
+        "p95": 26.205338968569414,
+        "p99": 27.691316889030862
+      },
+      "tpot_seconds": {
+        "samples": 128,
+        "mean": 0.36221028639157604,
+        "p50": 0.3826905179378246,
+        "p95": 0.39662871529167937,
+        "p99": 0.3968841603455404
+      },
+      "tpot_excluded_output_tokens_le_one": 0,
+      "null_cache_detail_count": 0,
+      "quality_scope": "Fixed-output performance only; not agent success or correctness",
+      "execution_records_complete": true,
+      "valid_transport": true,
+      "counters": {
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_legacy_store_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_misses_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 96.0,
+          "after": 312.0,
+          "delta": 216.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_capacity_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_checksum_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_queue_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_segments_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_attempt_blocks\"}": {
+          "before": 124.0,
+          "after": 427.0,
+          "delta": 303.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_pending_blocks\"}": {
+          "before": 96.0,
+          "after": 312.0,
+          "delta": 216.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_miss_blocks\"}": {
+          "before": 28.0,
+          "after": 115.0,
+          "delta": 87.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_expired_sessions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_primary_reclaimed_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"policy\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"low_hbm_pressure\"}": {
+          "before": 98.0,
+          "after": 204.0,
+          "delta": 106.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 317463.0,
+          "after": 787276.0,
+          "delta": 469813.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 49152.0,
+          "delta": 49152.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 245573.0,
+          "after": 476231.0,
+          "delta": 230658.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:num_preemptions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_compute\"}": {
+          "before": 245573.0,
+          "after": 476231.0,
+          "delta": 230658.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_cache_hit\"}": {
+          "before": 0.0,
+          "after": 49152.0,
+          "delta": 49152.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"external_kv_transfer\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 128.0,
+          "after": 256.0,
+          "delta": 128.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 245573.0,
+          "after": 476231.0,
+          "delta": 230658.0,
+          "baseline_known": true
+        }
+      }
+    }
+  },
+  {
+    "phase": "swe-turn-002",
+    "summary": {
+      "planned": 127,
+      "executed": 127,
+      "successful": 127,
+      "failed": 0,
+      "not_executed": 0,
+      "recorded": 127,
+      "length_stops": 127,
+      "solver_batch_wall_seconds": 82.7506211400032,
+      "accepted_output_tokens": 4064,
+      "output_tokens_per_second": 49.11141383608764,
+      "ttft_seconds": {
+        "samples": 127,
+        "mean": 32.7831649180707,
+        "p50": 30.902998597361147,
+        "p95": 69.30810539070517,
+        "p99": 73.8644964686036
+      },
+      "tpot_seconds": {
+        "samples": 127,
+        "mean": 0.43634529092015806,
+        "p50": 0.4564338090318826,
+        "p95": 0.5025334438909926,
+        "p99": 0.520772783216089
+      },
+      "tpot_excluded_output_tokens_le_one": 0,
+      "null_cache_detail_count": 0,
+      "quality_scope": "Fixed-output performance only; not agent success or correctness",
+      "execution_records_complete": true,
+      "valid_transport": true,
+      "counters": {
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 9972776960.0,
+          "delta": 9972776960.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 54.859195463359356,
+          "delta": 54.859195463359356,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 104.0,
+          "delta": 104.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 0.0,
+          "after": 9972776960.0,
+          "delta": 9972776960.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 4837539840.0,
+          "delta": 4837539840.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_legacy_store_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_misses_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 312.0,
+          "after": 1252.0,
+          "delta": 940.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 18.0,
+          "delta": 18.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_capacity_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_checksum_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_queue_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_segments_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_attempt_blocks\"}": {
+          "before": 427.0,
+          "after": 1301.0,
+          "delta": 874.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_pending_blocks\"}": {
+          "before": 312.0,
+          "after": 980.0,
+          "delta": 668.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_miss_blocks\"}": {
+          "before": 115.0,
+          "after": 306.0,
+          "delta": 191.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"primary_evicted_blocks\"}": {
+          "before": null,
+          "after": 0.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_submitted_blocks\"}": {
+          "before": null,
+          "after": 374.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_completed_blocks\"}": {
+          "before": null,
+          "after": 374.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_rejected_blocks\"}": {
+          "before": null,
+          "after": 15.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_expired_sessions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_primary_reclaimed_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"policy\"}": {
+          "before": 0.0,
+          "after": 20.0,
+          "delta": 20.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"low_hbm_pressure\"}": {
+          "before": 204.0,
+          "after": 330.0,
+          "delta": 126.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"admitted\"}": {
+          "before": null,
+          "after": 52.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"inflight_budget\"}": {
+          "before": null,
+          "after": 85.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_store_completed\"}": {
+          "before": null,
+          "after": 4.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"promotion_no_free_slot\"}": {
+          "before": null,
+          "after": 15.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"working_set_capacity\"}": {
+          "before": null,
+          "after": 9.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_offload_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 9972776960.0,
+          "delta": 9972776960.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_time_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": null,
+          "after": 54.859195463359356,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_offload_store_size_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": null,
+          "after": 104.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_offload_store_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": null,
+          "after": 9972776960.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 787276.0,
+          "after": 2673878.0,
+          "delta": 1886602.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 49152.0,
+          "after": 360448.0,
+          "delta": 311296.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 476231.0,
+          "after": 922485.0,
+          "delta": 446254.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:num_preemptions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_compute\"}": {
+          "before": 476231.0,
+          "after": 922485.0,
+          "delta": 446254.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_cache_hit\"}": {
+          "before": 49152.0,
+          "after": 217088.0,
+          "delta": 167936.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"external_kv_transfer\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 256.0,
+          "after": 383.0,
+          "delta": 127.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 476231.0,
+          "after": 922485.0,
+          "delta": 446254.0,
+          "baseline_known": true
+        }
+      }
+    }
+  },
+  {
+    "phase": "swe-turn-003",
+    "summary": {
+      "planned": 127,
+      "executed": 127,
+      "successful": 127,
+      "failed": 0,
+      "not_executed": 0,
+      "recorded": 127,
+      "length_stops": 127,
+      "solver_batch_wall_seconds": 155.5575062809512,
+      "accepted_output_tokens": 4064,
+      "output_tokens_per_second": 26.125386663502056,
+      "ttft_seconds": {
+        "samples": 127,
+        "mean": 63.23437647963691,
+        "p50": 63.39960745163262,
+        "p95": 118.1826263080351,
+        "p99": 146.8012713237293
+      },
+      "tpot_seconds": {
+        "samples": 127,
+        "mean": 0.4880451125953633,
+        "p50": 0.5083550116828373,
+        "p95": 0.539277869589146,
+        "p99": 0.5450728573854412
+      },
+      "tpot_excluded_output_tokens_le_one": 0,
+      "null_cache_detail_count": 0,
+      "quality_scope": "Fixed-output performance only; not agent success or correctness",
+      "execution_records_complete": true,
+      "valid_transport": true,
+      "counters": {
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 2137292800.0,
+          "delta": 2137292800.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 9972776960.0,
+          "after": 27401420800.0,
+          "delta": 17428643840.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 9.062898536212742,
+          "delta": 9.062898536212742,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 54.859195463359356,
+          "after": 222.8514391295612,
+          "delta": 167.99224366620183,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 26.0,
+          "delta": 26.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 0.0,
+          "after": 2137292800.0,
+          "delta": 2137292800.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 104.0,
+          "after": 424.0,
+          "delta": 320.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 9972776960.0,
+          "after": 27401420800.0,
+          "delta": 17428643840.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 17101127680.0,
+          "delta": 17101127680.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 4922408960.0,
+          "after": 36578590720.0,
+          "delta": 31656181760.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_legacy_store_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 403.0,
+          "delta": 403.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 809.0,
+          "delta": 809.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_misses_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 1252.0,
+          "after": 2417.0,
+          "delta": 1165.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 81.0,
+          "delta": 81.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 18.0,
+          "after": 191.0,
+          "delta": 173.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 13.0,
+          "delta": 13.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 34.0,
+          "delta": 34.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_capacity_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_checksum_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_queue_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 47.0,
+          "delta": 47.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_segments_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_attempt_blocks\"}": {
+          "before": 1301.0,
+          "after": 63711.0,
+          "delta": 62410.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_pending_blocks\"}": {
+          "before": 980.0,
+          "after": 47254.0,
+          "delta": 46274.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_miss_blocks\"}": {
+          "before": 306.0,
+          "after": 13846.0,
+          "delta": 13540.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"primary_evicted_blocks\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_submitted_blocks\"}": {
+          "before": 374.0,
+          "after": 1020.0,
+          "delta": 646.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_completed_blocks\"}": {
+          "before": 374.0,
+          "after": 1020.0,
+          "delta": 646.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_rejected_blocks\"}": {
+          "before": 15.0,
+          "after": 305.0,
+          "delta": 290.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_hit_blocks\"}": {
+          "before": null,
+          "after": 2306.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"load_submitted_blocks\"}": {
+          "before": null,
+          "after": 70.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"load_completed_blocks\"}": {
+          "before": null,
+          "after": 70.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_expired_sessions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_primary_reclaimed_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"policy\"}": {
+          "before": 20.0,
+          "after": 1168.0,
+          "delta": 1148.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"low_hbm_pressure\"}": {
+          "before": 330.0,
+          "after": 330.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"admitted\"}": {
+          "before": 52.0,
+          "after": 212.0,
+          "delta": 160.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"inflight_budget\"}": {
+          "before": 85.0,
+          "after": 85.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_store_completed\"}": {
+          "before": 4.0,
+          "after": 144.0,
+          "delta": 140.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"promotion_no_free_slot\"}": {
+          "before": 15.0,
+          "after": 305.0,
+          "delta": 290.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"working_set_capacity\"}": {
+          "before": 9.0,
+          "after": 53.0,
+          "delta": 44.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_failure\"}": {
+          "before": null,
+          "after": 47.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_promotion_completed\"}": {
+          "before": null,
+          "after": 68.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"waiting_for_safe_spill\"}": {
+          "before": null,
+          "after": 4.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_offload_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 2137292800.0,
+          "delta": 2137292800.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_time_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": null,
+          "after": 9.062898536212742,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_offload_load_size_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": null,
+          "after": 26.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_offload_load_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": null,
+          "after": 2137292800.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_offload_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 9972776960.0,
+          "after": 27401420800.0,
+          "delta": 17428643840.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_time_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 54.859195463359356,
+          "after": 222.8514391295612,
+          "delta": 167.99224366620183,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_size_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 104.0,
+          "after": 424.0,
+          "delta": 320.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 9972776960.0,
+          "after": 27401420800.0,
+          "delta": 17428643840.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 2673878.0,
+          "after": 72508626.0,
+          "delta": 69834748.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 360448.0,
+          "after": 565248.0,
+          "delta": 204800.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 922485.0,
+          "after": 1596074.0,
+          "delta": 673589.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 63488.0,
+          "delta": 63488.0,
+          "baseline_known": true
+        },
+        "vllm:num_preemptions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_compute\"}": {
+          "before": 922485.0,
+          "after": 1532586.0,
+          "delta": 610101.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_cache_hit\"}": {
+          "before": 217088.0,
+          "after": 348160.0,
+          "delta": 131072.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"external_kv_transfer\"}": {
+          "before": 0.0,
+          "after": 63488.0,
+          "delta": 63488.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 383.0,
+          "after": 510.0,
+          "delta": 127.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 922485.0,
+          "after": 1532586.0,
+          "delta": 610101.0,
+          "baseline_known": true
+        }
+      }
+    }
+  },
+  {
+    "phase": "swe-turn-004",
+    "summary": {
+      "planned": 127,
+      "executed": 127,
+      "successful": 127,
+      "failed": 0,
+      "not_executed": 0,
+      "recorded": 127,
+      "length_stops": 127,
+      "solver_batch_wall_seconds": 180.06460794713348,
+      "accepted_output_tokens": 4064,
+      "output_tokens_per_second": 22.56967677508942,
+      "ttft_seconds": {
+        "samples": 127,
+        "mean": 86.74862988395103,
+        "p50": 81.11680617928505,
+        "p95": 159.78752157660202,
+        "p99": 170.1655482700467
+      },
+      "tpot_seconds": {
+        "samples": 127,
+        "mean": 0.4629257420730343,
+        "p50": 0.4962660485518075,
+        "p95": 0.5356361606518828,
+        "p99": 0.5385932334320199
+      },
+      "tpot_excluded_output_tokens_le_one": 0,
+      "null_cache_detail_count": 0,
+      "quality_scope": "Fixed-output performance only; not agent success or correctness",
+      "execution_records_complete": true,
+      "valid_transport": true,
+      "counters": {
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 2137292800.0,
+          "after": 10686464000.0,
+          "delta": 8549171200.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 27401420800.0,
+          "after": 49703813120.0,
+          "delta": 22302392320.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 9.062898536212742,
+          "after": 52.1624063802883,
+          "delta": 43.09950784407556,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 222.8514391295612,
+          "after": 431.37904299236834,
+          "delta": 208.52760386280715,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 26.0,
+          "after": 130.0,
+          "delta": 104.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 2137292800.0,
+          "after": 10686464000.0,
+          "delta": 8549171200.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 424.0,
+          "after": 838.0,
+          "delta": 414.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 27401420800.0,
+          "after": 49703813120.0,
+          "delta": 22302392320.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 17101127680.0,
+          "after": 56947179520.0,
+          "delta": 39846051840.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 36621025280.0,
+          "after": 64373227520.0,
+          "delta": 27752202240.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_legacy_store_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 403.0,
+          "after": 1342.0,
+          "delta": 939.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 809.0,
+          "after": 2630.0,
+          "delta": 1821.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_misses_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 2417.0,
+          "after": 3953.0,
+          "delta": 1536.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 81.0,
+          "after": 240.0,
+          "delta": 159.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 191.0,
+          "after": 372.0,
+          "delta": 181.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 13.0,
+          "after": 27.0,
+          "delta": 14.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 34.0,
+          "after": 45.0,
+          "delta": 11.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_capacity_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_checksum_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_queue_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 47.0,
+          "after": 72.0,
+          "delta": 25.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_segments_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_attempt_blocks\"}": {
+          "before": 63711.0,
+          "after": 122044.0,
+          "delta": 58333.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_pending_blocks\"}": {
+          "before": 47254.0,
+          "after": 78843.0,
+          "delta": 31589.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_miss_blocks\"}": {
+          "before": 13846.0,
+          "after": 38005.0,
+          "delta": 24159.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"primary_evicted_blocks\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_submitted_blocks\"}": {
+          "before": 1020.0,
+          "after": 1853.0,
+          "delta": 833.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_completed_blocks\"}": {
+          "before": 1020.0,
+          "after": 1853.0,
+          "delta": 833.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_rejected_blocks\"}": {
+          "before": 305.0,
+          "after": 2011.0,
+          "delta": 1706.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_hit_blocks\"}": {
+          "before": 2306.0,
+          "after": 3185.0,
+          "delta": 879.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"load_submitted_blocks\"}": {
+          "before": 70.0,
+          "after": 350.0,
+          "delta": 280.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"load_completed_blocks\"}": {
+          "before": 70.0,
+          "after": 350.0,
+          "delta": 280.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_expired_sessions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_primary_reclaimed_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"policy\"}": {
+          "before": 1168.0,
+          "after": 2912.0,
+          "delta": 1744.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"low_hbm_pressure\"}": {
+          "before": 330.0,
+          "after": 330.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"admitted\"}": {
+          "before": 212.0,
+          "after": 419.0,
+          "delta": 207.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"inflight_budget\"}": {
+          "before": 85.0,
+          "after": 85.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_store_completed\"}": {
+          "before": 144.0,
+          "after": 327.0,
+          "delta": 183.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"promotion_no_free_slot\"}": {
+          "before": 305.0,
+          "after": 2011.0,
+          "delta": 1706.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"working_set_capacity\"}": {
+          "before": 53.0,
+          "after": 84.0,
+          "delta": 31.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_failure\"}": {
+          "before": 47.0,
+          "after": 72.0,
+          "delta": 25.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_promotion_completed\"}": {
+          "before": 68.0,
+          "after": 213.0,
+          "delta": 145.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"waiting_for_safe_spill\"}": {
+          "before": 4.0,
+          "after": 5.0,
+          "delta": 1.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 2137292800.0,
+          "after": 10686464000.0,
+          "delta": 8549171200.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_time_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 9.062898536212742,
+          "after": 52.1624063802883,
+          "delta": 43.09950784407556,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_size_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 26.0,
+          "after": 130.0,
+          "delta": 104.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 2137292800.0,
+          "after": 10686464000.0,
+          "delta": 8549171200.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 27401420800.0,
+          "after": 49703813120.0,
+          "delta": 22302392320.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_time_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 222.8514391295612,
+          "after": 431.37904299236834,
+          "delta": 208.52760386280715,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_size_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 424.0,
+          "after": 838.0,
+          "delta": 414.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 27401420800.0,
+          "after": 49703813120.0,
+          "delta": 22302392320.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 72508626.0,
+          "after": 121479141.0,
+          "delta": 48970515.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 565248.0,
+          "after": 829440.0,
+          "delta": 264192.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 1596074.0,
+          "after": 2550800.0,
+          "delta": 954726.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 63488.0,
+          "after": 317440.0,
+          "delta": 253952.0,
+          "baseline_known": true
+        },
+        "vllm:num_preemptions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_compute\"}": {
+          "before": 1532586.0,
+          "after": 2233360.0,
+          "delta": 700774.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_cache_hit\"}": {
+          "before": 348160.0,
+          "after": 438272.0,
+          "delta": 90112.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"external_kv_transfer\"}": {
+          "before": 63488.0,
+          "after": 317440.0,
+          "delta": 253952.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 510.0,
+          "after": 637.0,
+          "delta": 127.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 1532586.0,
+          "after": 2233360.0,
+          "delta": 700774.0,
+          "baseline_known": true
+        }
+      }
+    }
+  },
+  {
+    "phase": "swe-turn-005",
+    "summary": {
+      "planned": 127,
+      "executed": 127,
+      "successful": 127,
+      "failed": 0,
+      "not_executed": 0,
+      "recorded": 127,
+      "length_stops": 127,
+      "solver_batch_wall_seconds": 168.48160395491868,
+      "accepted_output_tokens": 4064,
+      "output_tokens_per_second": 24.121327816225094,
+      "ttft_seconds": {
+        "samples": 127,
+        "mean": 67.45320816828657,
+        "p50": 61.617250374518335,
+        "p95": 148.98674483867362,
+        "p99": 158.4721104707569
+      },
+      "tpot_seconds": {
+        "samples": 127,
+        "mean": 0.48898892495771723,
+        "p50": 0.48698234254674566,
+        "p95": 0.5510869877052403,
+        "p99": 0.554823067908686
+      },
+      "tpot_excluded_output_tokens_le_one": 0,
+      "null_cache_detail_count": 0,
+      "quality_scope": "Fixed-output performance only; not agent success or correctness",
+      "execution_records_complete": true,
+      "valid_transport": true,
+      "counters": {
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 10686464000.0,
+          "after": 20577812480.0,
+          "delta": 9891348480.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 49703813120.0,
+          "after": 57255198720.0,
+          "delta": 7551385600.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 52.1624063802883,
+          "after": 104.2518251342699,
+          "delta": 52.08941875398159,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 431.37904299236834,
+          "after": 492.3155400529504,
+          "delta": 60.93649706058204,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 130.0,
+          "after": 234.0,
+          "delta": 104.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 10686464000.0,
+          "after": 20577812480.0,
+          "delta": 9891348480.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 838.0,
+          "after": 952.0,
+          "delta": 114.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 49703813120.0,
+          "after": 57255198720.0,
+          "delta": 7551385600.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 56947179520.0,
+          "after": 102352158720.0,
+          "delta": 45404979200.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 64373227520.0,
+          "after": 68701552640.0,
+          "delta": 4328325120.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_legacy_store_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 1342.0,
+          "after": 2412.0,
+          "delta": 1070.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 2630.0,
+          "after": 4994.0,
+          "delta": 2364.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_misses_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 3953.0,
+          "after": 13775.0,
+          "delta": 9822.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 240.0,
+          "after": 391.0,
+          "delta": 151.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 372.0,
+          "after": 847.0,
+          "delta": 475.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 27.0,
+          "after": 27.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 45.0,
+          "after": 494.0,
+          "delta": 449.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_capacity_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 898.0,
+          "delta": 898.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_checksum_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_queue_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 72.0,
+          "after": 72.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_segments_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_attempt_blocks\"}": {
+          "before": 122044.0,
+          "after": 159568.0,
+          "delta": 37524.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_pending_blocks\"}": {
+          "before": 78843.0,
+          "after": 99051.0,
+          "delta": 20208.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_miss_blocks\"}": {
+          "before": 38005.0,
+          "after": 49525.0,
+          "delta": 11520.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"primary_evicted_blocks\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_submitted_blocks\"}": {
+          "before": 1853.0,
+          "after": 2118.0,
+          "delta": 265.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_completed_blocks\"}": {
+          "before": 1853.0,
+          "after": 2118.0,
+          "delta": 265.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_rejected_blocks\"}": {
+          "before": 2011.0,
+          "after": 7131.0,
+          "delta": 5120.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_hit_blocks\"}": {
+          "before": 3185.0,
+          "after": 3861.0,
+          "delta": 676.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"load_submitted_blocks\"}": {
+          "before": 350.0,
+          "after": 662.0,
+          "delta": 312.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"load_completed_blocks\"}": {
+          "before": 350.0,
+          "after": 662.0,
+          "delta": 312.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_expired_sessions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_primary_reclaimed_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"policy\"}": {
+          "before": 2912.0,
+          "after": 4185.0,
+          "delta": 1273.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"low_hbm_pressure\"}": {
+          "before": 330.0,
+          "after": 330.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"admitted\"}": {
+          "before": 419.0,
+          "after": 476.0,
+          "delta": 57.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"inflight_budget\"}": {
+          "before": 85.0,
+          "after": 85.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_store_completed\"}": {
+          "before": 327.0,
+          "after": 353.0,
+          "delta": 26.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"promotion_no_free_slot\"}": {
+          "before": 2011.0,
+          "after": 7131.0,
+          "delta": 5120.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"working_set_capacity\"}": {
+          "before": 84.0,
+          "after": 169.0,
+          "delta": 85.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_failure\"}": {
+          "before": 72.0,
+          "after": 521.0,
+          "delta": 449.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_promotion_completed\"}": {
+          "before": 213.0,
+          "after": 364.0,
+          "delta": 151.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"waiting_for_safe_spill\"}": {
+          "before": 5.0,
+          "after": 6.0,
+          "delta": 1.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 10686464000.0,
+          "after": 20577812480.0,
+          "delta": 9891348480.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_time_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 52.1624063802883,
+          "after": 104.2518251342699,
+          "delta": 52.08941875398159,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_size_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 130.0,
+          "after": 234.0,
+          "delta": 104.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 10686464000.0,
+          "after": 20577812480.0,
+          "delta": 9891348480.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 49703813120.0,
+          "after": 57255198720.0,
+          "delta": 7551385600.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_time_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 431.37904299236834,
+          "after": 492.3155400529504,
+          "delta": 60.93649706058204,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_size_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 838.0,
+          "after": 952.0,
+          "delta": 114.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 49703813120.0,
+          "after": 57255198720.0,
+          "delta": 7551385600.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 121479141.0,
+          "after": 157617381.0,
+          "delta": 36138240.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 829440.0,
+          "after": 1257472.0,
+          "delta": 428032.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 2550800.0,
+          "after": 3641474.0,
+          "delta": 1090674.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 317440.0,
+          "after": 636928.0,
+          "delta": 319488.0,
+          "baseline_known": true
+        },
+        "vllm:num_preemptions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_compute\"}": {
+          "before": 2233360.0,
+          "after": 3004546.0,
+          "delta": 771186.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_cache_hit\"}": {
+          "before": 438272.0,
+          "after": 632832.0,
+          "delta": 194560.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"external_kv_transfer\"}": {
+          "before": 317440.0,
+          "after": 636928.0,
+          "delta": 319488.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 637.0,
+          "after": 764.0,
+          "delta": 127.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 2233360.0,
+          "after": 3004546.0,
+          "delta": 771186.0,
+          "baseline_known": true
+        }
+      }
+    }
+  },
+  {
+    "phase": "swe-turn-006",
+    "summary": {
+      "planned": 126,
+      "executed": 126,
+      "successful": 126,
+      "failed": 0,
+      "not_executed": 0,
+      "recorded": 126,
+      "length_stops": 126,
+      "solver_batch_wall_seconds": 248.87057249154896,
+      "accepted_output_tokens": 4032,
+      "output_tokens_per_second": 16.20119228896344,
+      "ttft_seconds": {
+        "samples": 126,
+        "mean": 103.36901897706446,
+        "p50": 94.77098413230851,
+        "p95": 225.07192661985755,
+        "p99": 237.31121132685803
+      },
+      "tpot_seconds": {
+        "samples": 126,
+        "mean": 0.4779312679421536,
+        "p50": 0.4808925779446238,
+        "p95": 0.510996006729622,
+        "p99": 0.5208552178791573
+      },
+      "tpot_excluded_output_tokens_le_one": 0,
+      "null_cache_detail_count": 0,
+      "quality_scope": "Fixed-output performance only; not agent success or correctness",
+      "execution_records_complete": true,
+      "valid_transport": true,
+      "counters": {
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 20577812480.0,
+          "after": 27332935680.0,
+          "delta": 6755123200.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 57255198720.0,
+          "after": 57761464320.0,
+          "delta": 506265600.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 104.2518251342699,
+          "after": 133.87297337222844,
+          "delta": 29.62114823795855,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 492.3155400529504,
+          "after": 495.3601979613304,
+          "delta": 3.0446579083800316,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 234.0,
+          "after": 294.0,
+          "delta": 60.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 20577812480.0,
+          "after": 27332935680.0,
+          "delta": 6755123200.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 952.0,
+          "after": 958.0,
+          "delta": 6.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 57255198720.0,
+          "after": 57761464320.0,
+          "delta": 506265600.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 102352158720.0,
+          "after": 117755904000.0,
+          "delta": 15403745280.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 68701552640.0,
+          "after": 68701552640.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_legacy_store_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 2412.0,
+          "after": 2775.0,
+          "delta": 363.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 4994.0,
+          "after": 6671.0,
+          "delta": 1677.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_misses_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 13775.0,
+          "after": 33585.0,
+          "delta": 19810.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 391.0,
+          "after": 483.0,
+          "delta": 92.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 847.0,
+          "after": 1683.0,
+          "delta": 836.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 27.0,
+          "after": 27.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 494.0,
+          "after": 1329.0,
+          "delta": 835.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_capacity_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 898.0,
+          "after": 2568.0,
+          "delta": 1670.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_checksum_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_queue_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 72.0,
+          "after": 72.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_segments_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_attempt_blocks\"}": {
+          "before": 159568.0,
+          "after": 169220.0,
+          "delta": 9652.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_pending_blocks\"}": {
+          "before": 99051.0,
+          "after": 105585.0,
+          "delta": 6534.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_miss_blocks\"}": {
+          "before": 49525.0,
+          "after": 49833.0,
+          "delta": 308.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"primary_evicted_blocks\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_submitted_blocks\"}": {
+          "before": 2118.0,
+          "after": 2133.0,
+          "delta": 15.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_completed_blocks\"}": {
+          "before": 2118.0,
+          "after": 2133.0,
+          "delta": 15.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_rejected_blocks\"}": {
+          "before": 7131.0,
+          "after": 8792.0,
+          "delta": 1661.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_hit_blocks\"}": {
+          "before": 3861.0,
+          "after": 5010.0,
+          "delta": 1149.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"load_submitted_blocks\"}": {
+          "before": 662.0,
+          "after": 867.0,
+          "delta": 205.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"load_completed_blocks\"}": {
+          "before": 662.0,
+          "after": 867.0,
+          "delta": 205.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_expired_sessions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_primary_reclaimed_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"policy\"}": {
+          "before": 4185.0,
+          "after": 4554.0,
+          "delta": 369.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"low_hbm_pressure\"}": {
+          "before": 330.0,
+          "after": 330.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"admitted\"}": {
+          "before": 476.0,
+          "after": 479.0,
+          "delta": 3.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"inflight_budget\"}": {
+          "before": 85.0,
+          "after": 85.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_store_completed\"}": {
+          "before": 353.0,
+          "after": 354.0,
+          "delta": 1.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"promotion_no_free_slot\"}": {
+          "before": 7131.0,
+          "after": 8792.0,
+          "delta": 1661.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"working_set_capacity\"}": {
+          "before": 169.0,
+          "after": 277.0,
+          "delta": 108.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_failure\"}": {
+          "before": 521.0,
+          "after": 1356.0,
+          "delta": 835.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_promotion_completed\"}": {
+          "before": 364.0,
+          "after": 456.0,
+          "delta": 92.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"waiting_for_safe_spill\"}": {
+          "before": 6.0,
+          "after": 8.0,
+          "delta": 2.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"already_present\"}": {
+          "before": null,
+          "after": 1.0,
+          "delta": null,
+          "baseline_known": false
+        },
+        "vllm:kv_offload_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 20577812480.0,
+          "after": 27332935680.0,
+          "delta": 6755123200.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_time_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 104.2518251342699,
+          "after": 133.87297337222844,
+          "delta": 29.62114823795855,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_size_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 234.0,
+          "after": 294.0,
+          "delta": 60.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 20577812480.0,
+          "after": 27332935680.0,
+          "delta": 6755123200.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 57255198720.0,
+          "after": 57761464320.0,
+          "delta": 506265600.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_time_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 492.3155400529504,
+          "after": 495.3601979613304,
+          "delta": 3.0446579083800316,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_size_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 952.0,
+          "after": 958.0,
+          "delta": 6.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 57255198720.0,
+          "after": 57761464320.0,
+          "delta": 506265600.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 157617381.0,
+          "after": 170473338.0,
+          "delta": 12855957.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 1257472.0,
+          "after": 1449984.0,
+          "delta": 192512.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 3641474.0,
+          "after": 5022492.0,
+          "delta": 1381018.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 636928.0,
+          "after": 872448.0,
+          "delta": 235520.0,
+          "baseline_known": true
+        },
+        "vllm:num_preemptions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_compute\"}": {
+          "before": 3004546.0,
+          "after": 4150044.0,
+          "delta": 1145498.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_cache_hit\"}": {
+          "before": 632832.0,
+          "after": 720896.0,
+          "delta": 88064.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"external_kv_transfer\"}": {
+          "before": 636928.0,
+          "after": 872448.0,
+          "delta": 235520.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 764.0,
+          "after": 890.0,
+          "delta": 126.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 3004546.0,
+          "after": 4150044.0,
+          "delta": 1145498.0,
+          "baseline_known": true
+        }
+      }
+    }
+  },
+  {
+    "phase": "swe-turn-007",
+    "summary": {
+      "planned": 126,
+      "executed": 126,
+      "successful": 126,
+      "failed": 0,
+      "not_executed": 0,
+      "recorded": 126,
+      "length_stops": 126,
+      "solver_batch_wall_seconds": 322.50873831659555,
+      "accepted_output_tokens": 4032,
+      "output_tokens_per_second": 12.501986833119314,
+      "ttft_seconds": {
+        "samples": 126,
+        "mean": 141.12632919500567,
+        "p50": 139.41288560722023,
+        "p95": 298.0622590370476,
+        "p99": 310.7843807581812
+      },
+      "tpot_seconds": {
+        "samples": 126,
+        "mean": 0.4845347611431015,
+        "p50": 0.489947920079313,
+        "p95": 0.5289353630956142,
+        "p99": 0.5334638714895493
+      },
+      "tpot_excluded_output_tokens_le_one": 0,
+      "null_cache_detail_count": 0,
+      "quality_scope": "Fixed-output performance only; not agent success or correctness",
+      "execution_records_complete": true,
+      "valid_transport": true,
+      "counters": {
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 27332935680.0,
+          "after": 33472512000.0,
+          "delta": 6139576320.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 57761464320.0,
+          "after": 60207104000.0,
+          "delta": 2445639680.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 133.87297337222844,
+          "after": 161.53303948324174,
+          "delta": 27.660066111013293,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_total_time_total{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 495.3601979613304,
+          "after": 519.6505998754874,
+          "delta": 24.290401914156973,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 294.0,
+          "after": 344.0,
+          "delta": 50.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"CPU_to_GPU\"}": {
+          "before": 27332935680.0,
+          "after": 33472512000.0,
+          "delta": 6139576320.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_count{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 958.0,
+          "after": 1004.0,
+          "delta": 46.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\",transfer_type=\"GPU_to_CPU\"}": {
+          "before": 57761464320.0,
+          "after": 60207104000.0,
+          "delta": 2445639680.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 117755904000.0,
+          "after": 125478993920.0,
+          "delta": 7723089920.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 68701552640.0,
+          "after": 68701552640.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_legacy_store_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 2775.0,
+          "after": 2957.0,
+          "delta": 182.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 6671.0,
+          "after": 8140.0,
+          "delta": 1469.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_lookup_misses_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 33585.0,
+          "after": 61763.0,
+          "delta": 28178.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 483.0,
+          "after": 563.0,
+          "delta": 80.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_jobs_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 1683.0,
+          "after": 2502.0,
+          "delta": 819.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_load_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 27.0,
+          "after": 27.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_store_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 1329.0,
+          "after": 2148.0,
+          "delta": 819.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_capacity_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 2568.0,
+          "after": 4206.0,
+          "delta": 1638.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_checksum_errors_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_queue_rejections_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 72.0,
+          "after": 72.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_fs_gc_segments_total{engine=\"0\",model_name=\"qwen3.5-35b\",tier=\"hust_fs\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_attempt_blocks\"}": {
+          "before": 169220.0,
+          "after": 180177.0,
+          "delta": 10957.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_pending_blocks\"}": {
+          "before": 105585.0,
+          "after": 113927.0,
+          "delta": 8342.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_miss_blocks\"}": {
+          "before": 49833.0,
+          "after": 50079.0,
+          "delta": 246.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"primary_evicted_blocks\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_submitted_blocks\"}": {
+          "before": 2133.0,
+          "after": 2225.0,
+          "delta": 92.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"store_completed_blocks\"}": {
+          "before": 2133.0,
+          "after": 2225.0,
+          "delta": 92.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_rejected_blocks\"}": {
+          "before": 8792.0,
+          "after": 10124.0,
+          "delta": 1332.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"lookup_hit_blocks\"}": {
+          "before": 5010.0,
+          "after": 6047.0,
+          "delta": 1037.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"load_submitted_blocks\"}": {
+          "before": 867.0,
+          "after": 1050.0,
+          "delta": 183.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_pipeline_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",stage=\"load_completed_blocks\"}": {
+          "before": 867.0,
+          "after": 1050.0,
+          "delta": 183.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_expired_sessions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_primary_reclaimed_blocks_total{engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"policy\"}": {
+          "before": 4554.0,
+          "after": 4828.0,
+          "delta": 274.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"low_hbm_pressure\"}": {
+          "before": 330.0,
+          "after": 330.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"admitted\"}": {
+          "before": 479.0,
+          "after": 502.0,
+          "delta": 23.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"inflight_budget\"}": {
+          "before": 85.0,
+          "after": 85.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_store_completed\"}": {
+          "before": 354.0,
+          "after": 354.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"promotion_no_free_slot\"}": {
+          "before": 8792.0,
+          "after": 10124.0,
+          "delta": 1332.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"working_set_capacity\"}": {
+          "before": 277.0,
+          "after": 388.0,
+          "delta": 111.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_failure\"}": {
+          "before": 1356.0,
+          "after": 2175.0,
+          "delta": 819.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"secondary_promotion_completed\"}": {
+          "before": 456.0,
+          "after": 536.0,
+          "delta": 80.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"waiting_for_safe_spill\"}": {
+          "before": 8.0,
+          "after": 8.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_tiering_store_decisions_total{decision=\"observed\",engine=\"0\",model_name=\"qwen3.5-35b\",reason=\"already_present\"}": {
+          "before": 1.0,
+          "after": 1.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 27332935680.0,
+          "after": 33472512000.0,
+          "delta": 6139576320.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_time_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 133.87297337222844,
+          "after": 161.53303948324174,
+          "delta": 27.660066111013293,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_size_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 294.0,
+          "after": 344.0,
+          "delta": 50.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_load_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 27332935680.0,
+          "after": 33472512000.0,
+          "delta": 6139576320.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_bytes_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 57761464320.0,
+          "after": 60207104000.0,
+          "delta": 2445639680.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_time_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 495.3601979613304,
+          "after": 519.6505998754874,
+          "delta": 24.290401914156973,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_size_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 958.0,
+          "after": 1004.0,
+          "delta": 46.0,
+          "baseline_known": true
+        },
+        "vllm:kv_offload_store_size_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 57761464320.0,
+          "after": 60207104000.0,
+          "delta": 2445639680.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 170473338.0,
+          "after": 185544639.0,
+          "delta": 15071301.0,
+          "baseline_known": true
+        },
+        "vllm:prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 1449984.0,
+          "after": 1449984.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_queries_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 5022492.0,
+          "after": 6682399.0,
+          "delta": 1659907.0,
+          "baseline_known": true
+        },
+        "vllm:external_prefix_cache_hits_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 872448.0,
+          "after": 1093632.0,
+          "delta": 221184.0,
+          "baseline_known": true
+        },
+        "vllm:num_preemptions_total{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 0.0,
+          "after": 0.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_compute\"}": {
+          "before": 4150044.0,
+          "after": 5588767.0,
+          "delta": 1438723.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"local_cache_hit\"}": {
+          "before": 720896.0,
+          "after": 720896.0,
+          "delta": 0.0,
+          "baseline_known": true
+        },
+        "vllm:prompt_tokens_by_source_total{engine=\"0\",model_name=\"qwen3.5-35b\",source=\"external_kv_transfer\"}": {
+          "before": 872448.0,
+          "after": 1093632.0,
+          "delta": 221184.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_count{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 890.0,
+          "after": 1016.0,
+          "delta": 126.0,
+          "baseline_known": true
+        },
+        "vllm:request_prefill_kv_computed_tokens_sum{engine=\"0\",model_name=\"qwen3.5-35b\"}": {
+          "before": 4150044.0,
+          "after": 5588767.0,
+          "delta": 1438723.0,
+          "baseline_known": true
+        }
+      }
+    }
+  }
+]
