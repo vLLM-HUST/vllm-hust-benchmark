@@ -31,7 +31,7 @@
     },
     {
       "id": "vllm-hust-extension-manager",
-      "name": "vLLM-HUST Extension Manager",
+      "name": "Extension Manager",
       "artifact_type": "tool",
       "system_role": "extension_management",
       "integration_contracts": [
@@ -53,7 +53,23 @@
       "upstream_repository": null,
       "summary_en": "Provider-neutral discovery, compatibility, configuration, state, plan, render, check, and supervised-run layer. ECPA 0.3.0 is published as pinned GitHub Release artifacts after dual-Python CI, clean-wheel qualification, and one process-observed native Ascend lifecycle. This release does not promote every MOD, Provider, or performance claim to stable support.",
       "summary_zh": "Provider-neutral 的发现、兼容性、配置、状态、plan、render、check 与受监管运行层。ECPA 0.3.0 在双 Python CI、clean-wheel 验收及一次带进程观测证据的原生昇腾生命周期通过后，以固定 GitHub Release 制品发布；这不代表所有 MOD、Provider 或性能结论都自动升级为稳定支持。",
-      "evidence_level": "integration_tested"
+      "evidence_level": "integration_tested",
+      "name_en": "Extension Manager",
+      "name_zh": "扩展发现与启用管理",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Extension discovery, validation and activation are included in the frozen engine stack.",
+      "public_effect_zh": "扩展发现、校验与统一启用已接入冻结引擎。",
+      "public_effect_url": "https://vllm-hust.sage.org.ai/engine.html#composition",
+      "public_effect_status": "functional"
     },
     {
       "id": "vllm-production-stack",
@@ -218,11 +234,11 @@
     },
     {
       "id": "mooncake-vllm-connectors",
-      "name": "Mooncake vLLM Connectors",
+      "name": "Mooncake KV Storage and Transfer",
       "catalog_project_id": "mooncake",
       "catalog_primary_component": "mooncake-vllm-connectors",
-      "catalog_project_name_en": "Mooncake",
-      "catalog_project_name_zh": "Mooncake",
+      "catalog_project_name_en": "Mooncake KV Storage and Transfer",
+      "catalog_project_name_zh": "Mooncake KV 存储与传输",
       "catalog_project_summary_en": "One Mooncake project with two separately governed components: the external KV service and the official vLLM connector. They are shown together here; HUST validates the Ascend integration without claiming ownership of either upstream component.",
       "catalog_project_summary_zh": "同一个 Mooncake 项目包含两个治理边界不同的组件：外部 KV 服务与官方 vLLM connector。页面合并展示二者；HUST 只验证昇腾集成，不主张任一上游组件的所有权。",
       "catalog_role_en": "Official vLLM connector and the HUST-validated Ascend integration path.",
@@ -266,7 +282,22 @@
         "requirements_en": "A separately operated Mooncake service is required.",
         "requirements_zh": "需要单独运行并运维 Mooncake 服务。"
       },
-      "evidence_level": "integration_tested"
+      "evidence_level": "integration_tested",
+      "name_en": "Mooncake KV Storage and Transfer",
+      "name_zh": "Mooncake KV 存储与传输",
+      "upstream_creators": [
+        {
+          "name_en": "vLLM community",
+          "name_zh": "vLLM 社区",
+          "url": "https://github.com/vllm-project/vllm"
+        },
+        {
+          "name_en": "Mooncake community",
+          "name_zh": "Mooncake 社区",
+          "url": "https://github.com/kvcache-ai/Mooncake"
+        }
+      ],
+      "advisors": []
     },
     {
       "id": "pegaflow",
@@ -320,11 +351,11 @@
     },
     {
       "id": "pegaflow-vllm-connectors",
-      "name": "PegaFlow vLLM Connectors",
+      "name": "PegaFlow KV Transfer",
       "catalog_project_id": "pegaflow",
       "catalog_primary_component": "pegaflow-vllm-connectors",
-      "catalog_project_name_en": "PegaFlow",
-      "catalog_project_name_zh": "PegaFlow",
+      "catalog_project_name_en": "PegaFlow KV Transfer",
+      "catalog_project_name_zh": "PegaFlow KV 传输",
       "catalog_project_summary_en": "One PegaFlow project developed by the upstream PPIO / Novita AI team. The external KV service and its vLLM connector are shown as components of that project; HUST maintains only the Ascend/NPU and ECPA adaptation.",
       "catalog_project_summary_zh": "PegaFlow 是派欧云团队开发的一个项目。外部 KV 服务与 vLLM connector 在这里作为同一项目的两个组件合并展示；HUST 只维护昇腾/NPU 与 ECPA 国产化适配。",
       "catalog_role_en": "vLLM connector plus the HUST Ascend/NPU and ECPA adaptation.",
@@ -377,10 +408,10 @@
       "upstream_repository": "https://github.com/novitalabs/pegaflow",
       "summary_en": "This component connects vLLM-HUST to an operator-managed PegaFlow service and supplies the Ascend/NPU and ECPA adaptation for KV save/load. Manifest 0.3 packages the Host Provider in the runtime-owned Bundle and fails closed when the external service is unavailable; it does not start, scale, or repair that service, and it does not own stored-data lifecycle. The component is incubating, with performance evidence only for the pinned Qwen3.5-35B-A3B BF16 profile on Ascend 910B2; broader compatibility is not yet established.",
       "summary_zh": "本组件把 vLLM-HUST 接入由外部运维者管理的 PegaFlow 服务，并提供 KV save/load 的昇腾/NPU 与 ECPA 适配。Manifest 0.3 将 Host Provider 打包进 runtime 持有的 Bundle，外部服务不可用时执行 fail-closed；它不负责启动、扩缩或修复 PegaFlow 服务，也不接管已存数据的生命周期。组件当前处于孵化阶段，仅在 Ascend 910B2、Qwen3.5-35B-A3B BF16 的固定配置上形成性能证据，尚不能外推到其他模型、设备或拓扑。",
-      "public_effect_en": "On the exact Qwen3.5-35B BF16 setting, the five-point geometric-mean output-throughput change is +6.34% versus the shared Native series; C1 regresses while C2-C16 improve.",
-      "public_effect_zh": "在完全相同的 Qwen3.5-35B BF16 设定下，相对统一 Native 曲线，五点输出吞吐几何平均变化为 +6.34%；C1 回退，C2-C16 提升。",
+      "public_effect_en": "On the exact Qwen3.5-35B BF16 setting, the five-point geometric-mean output-throughput change is +6.34% versus the shared Native series; C1 regresses while C2-C16 improve. R10 offline 2,048-token block audit: the upper bounds are 20.35% and 1.61% of prompt tokens for 48 Terminal and 64 SWE requests, respectively. The frozen replay isolates each request’s cache. R10 GDN/MTP restoration and end-to-end gains remain unverified.",
+      "public_effect_zh": "在完全相同的 Qwen3.5-35B BF16 设定下，相对统一 Native 曲线，五点输出吞吐几何平均变化为 +6.34%；C1 回退，C2-C16 提升。 R10 离线前缀审计（2,048-token 整块）：Terminal 48 条和 SWE 64 条的理论上限各为 20.35% 和 1.61% 的输入 token。冻结回放逐请求隔离缓存；这两个比例不是实际命中率。尚未验证 GDN/MTP 状态恢复或 R10 整模收益。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-website/snapshot/docs/FRONTIER-QWEN35-PEGAFLOW.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json#L16",
       "compatibility": {
         "status": "verified",
         "host": "vLLM-HUST 0.25.1 reference runtime + vLLM-Ascend-HUST",
@@ -401,7 +432,9 @@
           "Qwen3.5-35B-A3B — unified BF16 setting verified"
         ]
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "name_en": "PegaFlow KV Transfer",
+      "name_zh": "PegaFlow KV 传输"
     },
     {
       "id": "adm",
@@ -490,9 +523,9 @@
     },
     {
       "id": "bidkv",
-      "name": "BidKV",
-      "name_en": "BidKV",
-      "name_zh": "BidKV",
+      "name": "BidKV Cache Preemption",
+      "name_en": "BidKV Cache Preemption",
+      "name_zh": "BidKV 缓存抢占策略",
       "artifact_type": "runtime_component",
       "system_role": "scheduler_policy",
       "integration_contracts": [
@@ -519,10 +552,10 @@
       "upstream_repository": null,
       "summary_en": "BidKV uses the merged vLLM-HUST preemption-policy API v1 with bounded safe abstention. The latest Qwen3.5-35B-A3B TP4 KV-pressure campaign preserves two positive C12 pairs, active policy selections, negative tuning trials and shutdown diagnostics; it remains separate from the older TP2/SWE and Qwen3.8 observations.",
       "summary_zh": "BidKV 使用已合并的 vLLM-HUST preemption-policy API v1 与有界安全弃权。最新 Qwen3.5-35B-A3B TP4 KV-pressure 实验保留两轮 C12 正向配对、真实策略选择、负向调参试验与退出诊断，并与旧 TP2/SWE 和 Qwen3.8 观察严格分开。",
-      "public_effect_en": "In the Qwen3.5 TP4 C12 cell with 512 MiB KV per NPU, two alternating-order pairs improved output throughput by 17.11% and 10.65% (13.83% geometric mean; 13.88% arithmetic mean). BidKV made 10 and 7 active selections with zero policy failures. Other retained cells are negative or not exercised, so this is a tested-cell result, not a general speedup claim.",
-      "public_effect_zh": "在 Qwen3.5 TP4 C12、每 NPU 512 MiB KV 的测试单元中，两轮交替顺序配对的输出吞吐分别提升 17.11% 与 10.65%（几何平均 13.83%，算术平均 13.88%）。BidKV 分别执行 10 与 7 次有效选择，策略失败为 0。其余保留单元为负向或未触发，因此这只是已测单元结果，不代表普遍加速。",
+      "public_effect_en": "In the Qwen3.5 TP4 C12 cell with 512 MiB KV per NPU, two alternating-order pairs improved output throughput by 17.11% and 10.65% (13.83% geometric mean; 13.88% arithmetic mean). BidKV made 10 and 7 active selections with zero policy failures. Other retained cells are negative or not exercised, so this is a tested-cell result, not a general speedup claim. BidKV passed 1,006 CPU checks against the frozen R10 preemption interface, covering the native selector and fail-closed behavior. In 1,000 synthetic pressure cases, 412 selected a different victim. The paired model pressure run is pending. The frozen R10 native pressure control completed 24 requests at concurrency 8 with 89 KV blocks. KV utilization hit 100% twice. The scheduler recorded zero native preemptions, so the BidKV arm was not started and paired performance remains unmeasured.",
+      "public_effect_zh": "在 Qwen3.5 TP4 C12、每 NPU 512 MiB KV 的测试单元中，两轮交替顺序配对的输出吞吐分别提升 17.11% 与 10.65%（几何平均 13.83%，算术平均 13.88%）。BidKV 分别执行 10 与 7 次有效选择，策略失败为 0。其余保留单元为负向或未触发，因此这只是已测单元结果，不代表普遍加速。 BidKV 与冻结 R10 抢占接口完成 1,006 组 CPU 核对，覆盖真实宿主选择器和异常回退。1,000 组模拟压力中，412 组选择与原生不同。该结果限于接口机制，整模压力配对待测。 冻结 R10 原生压力对照使用 89 个 KV 块、并发 8，完成 24 个请求。KV 使用率两次达到 100%，原生抢占为 0，BidKV 候选未启动，暂无配对性能结论。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-bidkv/snapshot/results/qwen35-evoscientist-20260929/README.md#high-concurrency-kv-pressure-result",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/550852d9c1e585dbc68321c5a4e712cc4d6b3f85/website-publication/data/r10-parallel-components-20261124/summary.json#L267",
       "functional_compatibility": {
         "status": "passed",
         "scope": "Qwen3.5-35B-A3B · Ascend TP4 · FULL_AND_PIECEWISE graph; Qwen3.8-27B · Ascend TP4 · FULL_DECODE_ONLY graph"
@@ -576,13 +609,23 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "MingqiWang-coder",
+          "name": "王明琪"
+        },
+        {
+          "login": "cybber695",
+          "name": "陈彦博"
+        }
       ]
     },
     {
       "id": "diffspec",
-      "name": "DiffSpec",
-      "name_en": "DiffSpec",
-      "name_zh": "DiffSpec",
+      "name": "DiffSpec Speculative Decoding",
+      "name_en": "DiffSpec Speculative Decoding",
+      "name_zh": "DiffSpec 投机解码",
       "artifact_type": "runtime_component",
       "system_role": "decoding_mechanism",
       "integration_contracts": [
@@ -655,6 +698,12 @@
           "name_en": "Yu Huang",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "dzcixy",
+          "name": "杜忠承"
+        }
       ]
     },
     {
@@ -695,12 +744,12 @@
       ],
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-vSpec",
       "upstream_repository": null,
-      "summary_en": "vSpec is an in-process speculative-decoding MOD for vLLM-HUST and vLLM-Ascend-HUST. It exposes Draft and EAGLE launchers, dynamic gamma, and online/profile adaptive control while keeping the host model registry unchanged through delayed plugin registration.",
-      "summary_zh": "vSpec 是面向 vLLM-HUST 与 vLLM-Ascend-HUST 的进程内投机解码 MOD，提供 Draft / EAGLE 启动器、动态 gamma 与 online/profile 自适应控制，并通过延迟插件注册保持宿主模型注册表不变。",
-      "public_effect_en": "The repository reports a same-card GSM8K B128 recovery result of 1.518x. That result is specific to the published Qwen2.5 configuration; adaptive control does not guarantee a gain for other models, batch sizes, or request distributions.",
-      "public_effect_zh": "仓库公开了同卡 GSM8K B128 的 1.518x 恢复验证；该结果仅适用于已发布的 Qwen2.5 配置，自适应控制不保证其他模型、batch 或请求分布同样获益。",
+      "summary_en": "vSpec is an in-process speculative-decoding MOD for vLLM-HUST and vLLM-Ascend-HUST. It exposes Draft and EAGLE launchers, dynamic gamma, and online/profile adaptive control while keeping the host model registry unchanged through delayed plugin registration. R10 3072 revision, the newer even-width speculation controller passed a standalone CPU switch and rollback check. The released stack uses fixed MTP2. Wider candidates were not activated or timed on this host.",
+      "summary_zh": "vSpec 是面向 vLLM-HUST 与 vLLM-Ascend-HUST 的进程内投机解码 MOD，提供 Draft / EAGLE 启动器、动态 gamma 与 online/profile 自适应控制，并通过延迟插件注册保持宿主模型注册表不变。 R10 3072 修订版 · 新版偶数投机宽度控制器完成独立 CPU 验证，覆盖切换和回退。当前发行仍固定 MTP2，新增宽度未在该宿主激活或测量。",
+      "public_effect_en": "The repository reports a same-card GSM8K B128 recovery result of 1.518x. That result is specific to the published Qwen2.5 configuration; adaptive control does not guarantee a gain for other models, batch sizes, or request distributions. R10 native MTP2 · 190 MMLU-Pro cases at concurrency 10: the first and second positions were accepted in 90.07% and 77.32% of 254,360 rounds. A trailing 32-round second-position acceptance gate below 40% flagged only 0.25% of rounds offline; about 60% of flagged rounds still accepted the second token. No matched vSpec run on R10. Revised R10 source and CPU admission checks covered only the vSpec MTP4/6 depth-increase route. The released FULL 3072 profile rejects MTP4. MTP6 exceeds the current graph buckets and resident GDN candidate capacity. Dynamic depth growth also requires a different pinned backend and state-transition protocol. No model-level timing or quality was measured.",
+      "public_effect_zh": "仓库公开了同卡 GSM8K B128 的 1.518x 恢复验证；该结果仅适用于已发布的 Qwen2.5 配置，自适应控制不保证其他模型、batch 或请求分布同样获益。 R10 原生 MTP2 · MMLU-Pro 190 题、并发 10：254,360 轮中，两个位置各有 90.07% 和 77.32% 的轮次接受。用过去 32 轮第二位置接受率低于 40% 作减步条件，离线只触发 0.25% 的轮次，其中约 60% 仍接受第二个 token。暂无 R10 vSpec 对照成绩。 新版 R10 的 vSpec 仅完成 MTP4／6 加深路线源码和 CPU 准入核对。保持 FULL 3072 时，MTP4 被发行配置拒绝。MTP6 超出当前图规格和常驻 GDN 候选容量。vSpec 的动态扩大还依赖另一套固定后端和状态转换协议。本轮未启动整模、未运行十题，暂无性能或准确率结果。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-vSpec/snapshot/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aee47f13128015b60eedff6781de9785b611359c/website-publication/data/r10-plugin-paired-mmlu10-20261125/summary.json#L60",
       "runtime_state_dimensions": [
         "installed",
         "configured",
@@ -730,13 +779,20 @@
         "requirements_en": "Use the published model pair and verify the host ABI with vllm-hust-vspec-doctor before enablement. Manager discovery is static; enabling requires an explicit compatibility check, and runtime effectiveness must be verified from live speculative-decoding counters.",
         "requirements_zh": "请使用已发布的模型组合，并在启用前通过 vllm-hust-vspec-doctor 核对宿主 ABI。Manager 仅作静态发现；启用前必须显式完成兼容性检查，运行时是否生效还需查看真实投机解码计数器。"
       },
-      "evidence_level": "hardware_verified"
+      "evidence_level": "hardware_verified",
+      "maintainer_profiles": [
+        {
+          "login": "Renty-0",
+          "name": "任天宇"
+        }
+      ],
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L355"
     },
     {
       "id": "latchmoe",
-      "name": "LatchMoE",
-      "name_en": "LatchMoE",
-      "name_zh": "LatchMoE",
+      "name": "LatchMoE Expert-Weight Offload",
+      "name_en": "LatchMoE Expert-Weight Offload",
+      "name_zh": "LatchMoE 专家权重卸载",
       "artifact_type": "runtime_component",
       "system_role": "operator_runtime",
       "integration_contracts": [
@@ -828,9 +884,9 @@
     },
     {
       "id": "opfuse",
-      "name": "OpFuse",
-      "name_en": "OpFuse — Operator Fusion",
-      "name_zh": "OpFuse（算子融合）",
+      "name": "OpFuse Operator Fusion",
+      "name_en": "OpFuse Operator Fusion",
+      "name_zh": "OpFuse 算子融合",
       "artifact_type": "runtime_component",
       "system_role": "operator_fusion",
       "integration_contracts": [
@@ -860,12 +916,12 @@
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-opfuse",
       "repository_visibility": "private",
       "upstream_repository": null,
-      "summary_en": "Default-off, single-mechanism operator-fusion runtime-patch plugin for vLLM-HUST on Ascend NPU, currently a scaffold from patch-plugin-template with the fusion mechanism target under design.",
-      "summary_zh": "面向 vLLM-HUST 昇腾 NPU 的默认关闭、单一机制算子融合运行时补丁插件，当前为 patch-plugin-template 脚手架，融合机制目标设计中。",
-      "public_effect_en": "No performance effect is claimed yet. The repository is a scaffold with differential tests passing; the operator-fusion mechanism has not been implemented or measured online.",
-      "public_effect_zh": "暂不主张任何性能效果。仓库当前为脚手架（差分测试通过）；算子融合机制尚未实现，也未做在线实测。",
+      "summary_en": "Default-off, single-mechanism operator-fusion runtime-patch plugin for vLLM-HUST on Ascend NPU, currently a scaffold from patch-plugin-template with the fusion mechanism target under design. R10 3072 revision, MoE shared-expert gate on one Ascend 910B2. The lookup fusion preserved native BF16 sigmoid bits on changing-input graph replay. Three and six rows were slightly faster. The tested 12 to 108 row cases regressed, so the experiment stopped at component level.",
+      "summary_zh": "面向 vLLM-HUST 昇腾 NPU 的默认关闭、单一机制算子融合运行时补丁插件，当前为 patch-plugin-template 脚手架，融合机制目标设计中。 R10 3072 修订版 · MoE 共享专家门控的独立 910B2 组件试验。原生 BF16 sigmoid 查表融合在重放中保持逐位一致。3、6 行略快，12 至 108 行均变慢；本轮停在组件级。",
+      "public_effect_en": "No performance effect is claimed yet. The repository is a scaffold with differential tests passing; the operator-fusion mechanism has not been implemented or measured online. A separate routed-expert output combine prototype for revised R10 was bitwise exact in 15 dynamic graph cells. Of 210 pairs, 200 were slower and the median in every cell rose by 0.035–1.713 μs. The prototype stopped at component screening.",
+      "public_effect_zh": "暂不主张任何性能效果。仓库当前为脚手架（差分测试通过）；算子融合机制尚未实现，也未做在线实测。 新版 R10 的独立路由专家输出归并原型，15 个动态图工况逐位一致。210 组配对中 200 组变慢，各档中位耗时增加 0.035–1.713 μs，停在组件验证。",
       "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-opfuse",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aee47f13128015b60eedff6781de9785b611359c/website-publication/data/r10-plugin-paired-mmlu10-20261125/summary.json#L11",
       "functional_compatibility": {
         "status": "preview",
         "scope": "scaffold only; not yet qualified on Ascend 910B2"
@@ -901,12 +957,13 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
-      ]
+      ],
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L9"
     },
     {
       "id": "ascend-adaptive-quantized-kv",
       "public_surface": false,
-      "name": "Adaptive Quantized KV",
+      "name": "Ascend Adaptive KV Quantization",
       "artifact_type": "runtime_component",
       "system_role": "kv_quantization_research",
       "integration_contracts": [
@@ -961,11 +1018,20 @@
         "requirements_en": "Observer and ACL Graph lifecycle contracts are not available yet.",
         "requirements_zh": "observer 与 ACL Graph 生命周期合同尚未提供。"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "name_en": "Ascend Adaptive KV Quantization",
+      "name_zh": "昇腾自适应 KV 量化",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "ascend-quant-toolkit",
-      "name": "Ascend Quant Toolkit",
+      "name": "Ascend Model Quantization Toolkit",
       "artifact_type": "tool",
       "system_role": "offline_model_quantization",
       "integration_contracts": [
@@ -1008,13 +1074,15 @@
       "public_effect_zh": "仅用于离线产物准备和合同校验。已验收包通过三个 Python 版本的 CPU CI、构建与 wheel/sdist 检查，覆盖混合 scheme 元数据、shard 清单及 fail-closed 拒绝；不声明在线延迟、吞吐、质量或 NPU 运行时收益。",
       "public_effect_status": "preview",
       "public_effect_url": "https://github.com/vLLM-HUST/vllm-ascend-quant-hust/tree/7fa9222f84bacaf190814e763691ac52e6bfbaa0",
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "name_en": "Ascend Model Quantization Toolkit",
+      "name_zh": "昇腾模型量化工具"
     },
     {
       "id": "kvcompress-ascend",
-      "name": "Ascend KV Compression",
-      "name_en": "Ascend KV Compression",
-      "name_zh": "昇腾 KV 压缩",
+      "name": "Ascend KV Cache Compression",
+      "name_en": "Ascend KV Cache Compression",
+      "name_zh": "昇腾 KV 缓存压缩",
       "artifact_type": "runtime_component",
       "system_role": "kv_state_manager",
       "integration_contracts": [
@@ -1096,7 +1164,7 @@
     },
     {
       "id": "prefix-router-migration",
-      "name": "Prefix Router",
+      "name": "Prefix-Aware Request Router",
       "artifact_type": "external_system",
       "system_role": "request_router",
       "integration_contracts": [
@@ -1151,8 +1219,8 @@
       "maturity": "experimental",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-prefix-router",
       "upstream_repository": null,
-      "summary_en": "Installable external prefix/lifecycle-aware router with bounded backend pools, request-load accounting, authoritative KV-event recovery, OpenAI-compatible forwarding, and health/readiness/metrics endpoints.",
-      "summary_zh": "可独立安装的外部前缀与生命周期感知 Router，提供有界 backend 连接池、请求负载核算、权威 KV 事件恢复、OpenAI 兼容转发以及健康、就绪和指标接口。",
+      "summary_en": "Installable external prefix/lifecycle-aware router with bounded backend pools, request-load accounting, authoritative KV-event recovery, OpenAI-compatible forwarding, and health/readiness/metrics endpoints. R10 3072 revision, a CPU loopback routed requests using synthetic KV events. Default and trusted modes rejected the legacy event protocol. The frozen resident cache does not emit the needed events, so no two-replica performance test was run.",
+      "summary_zh": "可独立安装的外部前缀与生命周期感知 Router，提供有界 backend 连接池、请求负载核算、权威 KV 事件恢复、OpenAI 兼容转发以及健康、就绪和指标接口。 R10 3072 修订版 · CPU 回环验证通过合成 KV 事件驱动选路。默认和可信模式拒绝旧事件协议；冻结驻留缓存缺少对应的实际事件，未进行双副本性能测试。",
       "public_effect_en": "Three matched 900-second rounds at C1/C2/C4/C8/C16 reported 0.96%–17.52% higher throughput than the same two-replica random-routing deployment. Source-integrity gaps in several Prometheus files prevent per-request causal attribution.",
       "public_effect_zh": "C1/C2/C4/C8/C16 各三轮匹配的 900 秒实验，相对相同双副本随机路由部署记录到 0.96%–17.52% 的吞吐提升。部分 Prometheus 源文件存在完整性缺口，不能作逐请求因果归因。",
       "public_effect_status": "beneficial",
@@ -1173,14 +1241,17 @@
         "requirements_en": "Operate the router as a separate service and keep tokenizer, block size, hash algorithm, host version and PYTHONHASHSEED aligned with workers. The published measurements compare Prefix ON with random routing, not with a no-proxy native server.",
         "requirements_zh": "Router 需作为独立服务运维，并与 worker 对齐 tokenizer、block size、hash algorithm、宿主版本及 PYTHONHASHSEED。已发布测量对比 Prefix ON 与随机路由，而非无代理 Native 服务。"
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "name_en": "Prefix-Aware Request Router",
+      "name_zh": "Prefix Router 前缀感知路由",
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L296"
     },
     {
       "id": "kv-tiering-migration",
       "public_surface": true,
-      "name": "KV Tiering",
-      "name_en": "KV Tiering",
-      "name_zh": "KV 分层",
+      "name": "KV Cache Tiering",
+      "name_en": "KV Cache Tiering",
+      "name_zh": "KV 缓存分层管理",
       "artifact_type": "runtime_component",
       "system_role": "kv_residency_provider",
       "integration_contracts": [
@@ -1234,14 +1305,20 @@
           "name_en": "Jin Zhao",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "JieYang2001",
+          "name": "杨杰"
+        }
       ]
     },
     {
       "id": "knorm-migration",
       "public_surface": true,
-      "name": "KNorm",
-      "name_en": "KNorm",
-      "name_zh": "KNorm",
+      "name": "KNorm KV Compression",
+      "name_en": "KNorm KV Compression",
+      "name_zh": "KNorm KV 压缩",
       "artifact_type": "runtime_component",
       "system_role": "kv_compression_method",
       "integration_contracts": [
@@ -1300,14 +1377,24 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "kotoriqaq0",
+          "name": "韦若皓"
+        },
+        {
+          "login": "SuccinctPaul",
+          "name": "程月甲"
+        }
       ]
     },
     {
       "id": "pyramidkv-ascend-migration",
       "public_surface": true,
-      "name": "PyramidKV Ascend",
-      "name_en": "PyramidKV Ascend",
-      "name_zh": "PyramidKV 昇腾版",
+      "name": "PyramidKV Cache Compression",
+      "name_en": "PyramidKV Cache Compression",
+      "name_zh": "PyramidKV 缓存压缩",
       "artifact_type": "runtime_component",
       "system_role": "kv_compression_provider",
       "integration_contracts": [],
@@ -1370,7 +1457,7 @@
     },
     {
       "id": "slicegpt-migration",
-      "name": "SliceGPT",
+      "name": "SliceGPT Model Pruning",
       "artifact_type": "tool",
       "system_role": "model_artifact_preparation",
       "integration_contracts": [
@@ -1430,11 +1517,13 @@
         "requirements_en": "Use the versioned converted artifact and pass host compatibility checks. Real-device model loading, inference correctness, rollback and performance still require qualification.",
         "requirements_zh": "需使用版本化转换产物并通过宿主兼容检查；真实设备模型加载、推理正确性、回滚和性能仍需验收。"
       },
-      "evidence_level": "integration_tested"
+      "evidence_level": "integration_tested",
+      "name_en": "SliceGPT Model Pruning",
+      "name_zh": "SliceGPT 模型剪枝"
     },
     {
       "id": "ride-control-plane",
-      "name": "RIDE Control Plane",
+      "name": "RIDE Cross-Instance Control Plane",
       "artifact_type": "external_system",
       "system_role": "control_plane",
       "integration_contracts": [],
@@ -1443,14 +1532,26 @@
       ],
       "deployment_topology": "separate_application",
       "delivery_model": "external_service",
-      "ownership": "community_integration",
-      "repository_relationship": "external_reference",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
       "maturity": "concept",
-      "canonical_repository": null,
+      "canonical_repository": "https://github.com/vLLM-HUST/ride",
       "upstream_repository": null,
       "summary_en": "External cross-instance decision system for admission, placement, routing, and global policy.",
       "summary_zh": "负责准入、放置、路由与全局策略的外部跨实例决策系统。",
-      "evidence_level": "descriptor_only"
+      "evidence_level": "descriptor_only",
+      "name_en": "RIDE Cross-Instance Control Plane",
+      "name_zh": "RIDE 跨实例服务控制面",
+      "maintainers": [
+        "yancanmao"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "yancanmao",
+          "name": "毛言粲"
+        }
+      ],
+      "advisors": []
     },
     {
       "id": "vllm-local-control-host",
@@ -1477,7 +1578,19 @@
       "upstream_repository": null,
       "summary_en": "Default-off core host that authenticates bounded same-UID Unix-socket actions and executes the fixed read-only health probe through a process boundary.",
       "summary_zh": "默认关闭的核心本地宿主：认证同 UID 的有界 Unix socket action，并通过进程边界执行固定只读健康探针。",
-      "evidence_level": "integration_tested"
+      "evidence_level": "integration_tested",
+      "name_en": "vLLM Local Control Host",
+      "name_zh": "vLLM 本地控制接口",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": []
     },
     {
       "id": "ride-runtime-bridge",
@@ -1503,13 +1616,25 @@
       "upstream_repository": null,
       "summary_en": "Separately built TLS 1.3 mutual-authentication sidecar that allowlists remote certificate fingerprints and transparently forwards bounded signed frames into the vLLM local control host.",
       "summary_zh": "独立构建的 TLS 1.3 双向认证 sidecar：按证书指纹允许远程身份，并将有界签名帧透明转发到 vLLM 本地控制宿主。",
-      "evidence_level": "integration_tested"
+      "evidence_level": "integration_tested",
+      "name_en": "RIDE Remote Runtime Sidecar",
+      "name_zh": "RIDE 远程运行时边车",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": []
     },
     {
       "id": "quantized-kv-cache-migration",
       "name": "Quantized KV Cache",
       "name_en": "Quantized KV Cache",
-      "name_zh": "量化 KV Cache",
+      "name_zh": "KV 缓存量化",
       "artifact_type": "runtime_component",
       "system_role": "kv_quantization_research",
       "integration_contracts": [],
@@ -1532,8 +1657,8 @@
       "maturity": "incubating",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-quantized-kv-cache-hust",
       "upstream_repository": null,
-      "summary_en": "Ascend runtime plugin for dynamic per-channel INT8 KV cache; legacy KIVI and packed-format work remains separate migration history.",
-      "summary_zh": "面向昇腾的动态 per-channel INT8 KV Cache 运行时插件；KIVI 与其他 packed 格式仍属于后续迁移范围。",
+      "summary_en": "Ascend runtime plugin for dynamic per-channel INT8 KV cache; legacy KIVI and packed-format work remains separate migration history. R10 3072 revision, Ascend 910B2 component probe at Qwen per-rank geometry. Dynamic INT8 halved per-layer KV tensor storage across six 4K to 32K cells, while paged decoding took about 21% to 23% longer. The released command line lacks the plugin's INT8 route, so model serving remained disabled.",
+      "summary_zh": "面向昇腾的动态 per-channel INT8 KV Cache 运行时插件；KIVI 与其他 packed 格式仍属于后续迁移范围。 R10 3072 修订版 · 910B2 组件试验。按 Qwen3.5 每 rank 的注意力几何，4K、16K、32K 共六格的动态 INT8 单层 KV 张量约减半，分页解码算子慢约 21% 至 23%。冻结 CLI 缺少插件的 int8 入口，整模未启用。",
       "public_effect_en": "Real Qwen2.5-14B single-card serving, prefill/decode, ACL Graph replay, and three OpenAI API requests are verified. No matched performance comparison has been published.",
       "public_effect_zh": "已验证 Qwen2.5-14B 单卡真实服务、prefill/decode、ACL Graph 回放及三次 OpenAI API 请求；尚无已发布的配对性能对比。",
       "public_effect_status": "validated",
@@ -1568,14 +1693,25 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
-      ]
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "hustcui",
+          "name": "崔钰嘉"
+        },
+        {
+          "login": "SuccinctPaul",
+          "name": "程月甲"
+        }
+      ],
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L121"
     },
     {
       "id": "simllm-migration",
       "public_surface": true,
-      "name": "SimLLM",
-      "name_en": "SimLLM",
-      "name_zh": "SimLLM",
+      "name": "SimLLM Approximate Prefix Reuse",
+      "name_en": "SimLLM Approximate Prefix Reuse",
+      "name_zh": "SimLLM 近似前缀复用",
       "artifact_type": "runtime_component",
       "system_role": "kv_reuse_policy",
       "integration_contracts": [
@@ -1634,7 +1770,13 @@
         "requirements_zh": "需通过 Extension Manager 显式启用并设置 VLLM_ASCEND_SIMLLM_ENABLED=1，同时匹配已测宿主内部接口、block size、cache 与 prefill 配置。近似复用依赖特定负载，长生成性能尚未验证。",
         "followup_url": "https://github.com/vLLM-HUST/vllm-ascend-simllm-hust/issues/2"
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "maintainer_profiles": [
+        {
+          "login": "GuMorming",
+          "name": "谷昌伟"
+        }
+      ]
     },
     {
       "id": "unified-communication-migration",
@@ -1700,13 +1842,19 @@
         "requirements_zh": "宿主接入已实现并保留原生回退。在多卡 HCCL/NCCL 正确性、故障与回滚验收记录完成前，独立扩展仍保持 import-only。",
         "followup_url": "https://github.com/vLLM-HUST/vllm-hust-unified-comm/issues/2"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "maintainer_profiles": [
+        {
+          "login": "machuanhu",
+          "name": "马川湖"
+        }
+      ]
     },
     {
       "id": "split-batch-full-graph-migration",
-      "name": "Split-Batch / Full-Graph Parallel",
-      "name_en": "Split-Batch / Full-Graph Parallel",
-      "name_zh": "分批次 / 全图并行",
+      "name": "Split-Batch and Full-Graph Parallelism",
+      "name_en": "Split-Batch and Full-Graph Parallelism",
+      "name_zh": "分批次与全图并行",
       "artifact_type": "runtime_component",
       "system_role": "graph_execution_policy",
       "integration_contracts": [],
@@ -1749,8 +1897,8 @@
       "maturity": "incubating",
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-split-batch-hust",
       "upstream_repository": null,
-      "summary_en": "Owner-led carrier for split-batch planning, dual-stream replay, and full-graph parallel execution; core retains graph-lifecycle ownership.",
-      "summary_zh": "split-batch 规划、双流 replay 与 full-graph 并行执行的原负责人迁移载体；graph 生命周期仍由 core 拥有。",
+      "summary_en": "Owner-led carrier for split-batch planning, dual-stream replay, and full-graph parallel execution; core retains graph-lifecycle ownership. R10 3072 revision, three upstream CPU prechecks passed. MTP2 and MRoPE each independently blocked activation. Split-Batch remained disabled on this host, with no device performance measurement.",
+      "summary_zh": "split-batch 规划、双流 replay 与 full-graph 并行执行的原负责人迁移载体；graph 生命周期仍由 core 拥有。 R10 3072 修订版 · 三项上游 CPU 预检通过。MTP2 和 MRoPE 各自触发拒绝；此组合未启用 Split-Batch，也未开展 NPU 性能评测。",
       "public_effect_en": "Capability preview: split-batch planning, dual-stream replay, and full-graph parallel execution. Public matched performance results are not available yet.",
       "public_effect_zh": "能力预览：split-batch 规划、双流 replay 与 full-graph 并行执行；尚无公开配对性能结果。",
       "public_effect_status": "preview",
@@ -1772,14 +1920,15 @@
         "requirements_zh": "默认关闭的 dual-pad planner 与前置检查可安装、可检查；激活前仍需 graph/worker 执行合同与昇腾验证。",
         "followup_url": "https://github.com/vLLM-HUST/vllm-ascend-split-batch-hust/issues/2"
       },
-      "evidence_level": "cpu_smoke"
+      "evidence_level": "cpu_smoke",
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7856f01da7e54c24e655dd42b2772e59ef5f9ed6/website-publication/data/r10-revised-mod-exploration-20261124/summary.json#L267"
     },
     {
       "id": "kv-transfer-observability-migration",
       "public_surface": true,
-      "name": "KV Transfer Observability",
-      "name_en": "KV Transfer Observability",
-      "name_zh": "KV 传输可观测性",
+      "name": "KV Transfer Tracing",
+      "name_en": "KV Transfer Tracing",
+      "name_zh": "KV 传输追踪",
       "artifact_type": "runtime_component",
       "system_role": "telemetry_provider",
       "integration_contracts": [
@@ -1837,6 +1986,16 @@
           "name_zh": "张书豪",
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
+        }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "xiehanlong834-gif",
+          "name": "谢汉龙"
+        },
+        {
+          "login": "Remygred",
+          "name": "刘世峰"
         }
       ]
     },
@@ -1911,7 +2070,7 @@
       "public_surface": false,
       "name": "Activation Sparsity",
       "name_en": "Activation Sparsity",
-      "name_zh": "激活稀疏",
+      "name_zh": "激活稀疏推理",
       "artifact_type": "runtime_component",
       "system_role": "operator_runtime",
       "integration_contracts": [],
@@ -2045,9 +2204,9 @@
     {
       "id": "qos-scheduler-migration",
       "public_surface": false,
-      "name": "QoS Scheduler",
-      "name_en": "QoS Scheduler",
-      "name_zh": "QoS 调度器",
+      "name": "QoS-Aware Scheduler",
+      "name_en": "QoS-Aware Scheduler",
+      "name_zh": "QoS 服务质量调度",
       "artifact_type": "runtime_component",
       "system_role": "scheduler_policy",
       "integration_contracts": [],
@@ -2178,9 +2337,9 @@
     },
     {
       "id": "tricard-clm-lifecycle",
-      "name": "Tricard CLM Lifecycle",
-      "name_en": "Tricard CLM Lifecycle",
-      "name_zh": "Tricard CLM 生命周期观察器",
+      "name": "Tricard Lifecycle Observation",
+      "name_en": "Tricard Lifecycle Observation",
+      "name_zh": "Tricard 生命周期观测",
       "artifact_type": "runtime_component",
       "system_role": "lifecycle_control_plane",
       "integration_contracts": [
@@ -2311,9 +2470,9 @@
     },
     {
       "id": "llm-serving-cost-pricing-model",
-      "name": "LLM Serving Cost Pricing Model",
-      "name_en": "LLM Serving Cost Pricing Model",
-      "name_zh": "LLM 服务成本定价模型",
+      "name": "Inference Service Cost Estimation",
+      "name_en": "Inference Service Cost Estimation",
+      "name_zh": "推理服务成本估算",
       "artifact_type": "tool",
       "system_role": "profiling_analysis",
       "integration_contracts": [
@@ -2347,10 +2506,6 @@
       "upstream_repository": null,
       "summary_en": "Serving cost/pricing analysis scaffold packaged as an explicit Manifest 0.3 offline CLI. Version 0.1.1 removes the misleading in-process load marker and serving launcher, so ECPA keeps it inspect-only by design.",
       "summary_zh": "已打包为显式 Manifest 0.3 离线 CLI 的服务成本/定价分析脚手架。0.1.1 移除了误导性的进程内加载标记与 serving launcher，因此 ECPA 按设计保持 inspect-only。",
-      "public_effect_en": "Analysis preview: repository tests, a pinned shared-workload integration, wheel construction, and clean-wheel removal pass. No in-process pricing action or performance claim is made.",
-      "public_effect_zh": "分析预览：仓库测试、固定 shared-workload 集成、wheel 构建与 clean-wheel 移除通过；不声明进程内定价动作或性能收益。",
-      "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/llm-serving-cost-pricing-model/pull/2",
       "compatibility": {
         "status": "inspect_only",
         "host": "Offline user CLI; no in-process serving carrier",
@@ -2371,9 +2526,9 @@
     },
     {
       "id": "clm-lifecycle",
-      "name": "CLM Lifecycle",
-      "name_en": "CLM Lifecycle",
-      "name_zh": "CLM 生命周期控制面",
+      "name": "CLM Request Lifecycle Observation",
+      "name_en": "CLM Request Lifecycle Observation",
+      "name_zh": "CLM 请求生命周期观测",
       "artifact_type": "runtime_component",
       "system_role": "lifecycle_control_plane",
       "integration_contracts": [
@@ -2439,9 +2594,9 @@
     },
     {
       "id": "kv-materialization-arrival-control",
-      "name": "KV Materialization Arrival Control",
-      "name_en": "KV Materialization Arrival Control",
-      "name_zh": "KV 物化到达控制",
+      "name": "KV Materialization and Recomputation",
+      "name_en": "KV Materialization and Recomputation",
+      "name_zh": "KV 物化与重算",
       "artifact_type": "runtime_component",
       "system_role": "kv_materialization_policy",
       "integration_contracts": [],
@@ -2568,9 +2723,9 @@
     },
     {
       "id": "betterscale",
-      "name": "BetterScale",
-      "name_en": "BetterScale",
-      "name_zh": "BetterScale",
+      "name": "BetterScale Execution and State Scheduling",
+      "name_en": "BetterScale Execution and State Scheduling",
+      "name_zh": "BetterScale 执行与状态调度",
       "artifact_type": "runtime_component",
       "system_role": "graph_execution_policy",
       "integration_contracts": [],
@@ -2601,12 +2756,12 @@
       "repository_visibility": "private",
       "upstream_repository": null,
       "documentation_url": "./betterscale.html",
-      "summary_en": "Less host waiting. More device execution. BetterScale publishes separate bounded observations for DeepSeek V4 Flash and a Qwen3.5 TP2 small-fish prototype; their models, runtimes and protocols are not pooled. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36.",
-      "summary_zh": "让设备少等调度，多做推理。BetterScale 分别公开 DeepSeek V4 Flash 与 Qwen3.5 TP2 small-fish 原型的有限观察；两者的模型、运行时与协议不会合并。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。",
-      "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim.",
-      "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。",
+      "summary_en": "Less host waiting. More device execution. BetterScale publishes separate bounded observations for DeepSeek V4 Flash and a Qwen3.5 TP2 small-fish prototype; their models, runtimes and protocols are not pooled. The frozen B1 r6 profile uses its asynchronous execution and state path at E24/R36. The R10 fusion experiment is recorded under Accepted Token State Fusion.",
+      "summary_zh": "让设备少等调度，多做推理。BetterScale 分别公开 DeepSeek V4 Flash 与 Qwen3.5 TP2 small-fish 原型的有限观察；两者的模型、运行时与协议不会合并。B1 r6 冻结组合使用其异步执行与状态管理路径，配置为 E24/R36。 已接受 Token 状态写回融合的 R10 试验记录见同名独立 MOD 条目。",
+      "public_effect_en": "Bounded HTTP output throughput vs respective native baseline: DP8 +39.63%, TP8 +35.17%. 0.3.1 carries the qualified DP startup implementation; results are reused, not remeasured. Retained retrieval: 32/32. No universal latency claim. An R10 single-card component test of 16-row resident-slot tiling. All six decode and mixed shapes passed bitwise checks on graph replay with changed inputs. At 54 live rows, decode fell from 21.45 to 8.74 μs and mixed from 33.90 to 15.16 μs. The 1/2/4/8-warp settings generated identical device binaries within each branch. Model-level validation is pending. The same-host, same-card MMLU-Pro ten-item screen used a historical R10 control. Output throughput +1.96%, P95 TTFT +2.29%, P95 TPOT −1.07%, batch wall time +2.16%, correct answers 10 to 9. Larger model-level validation is pending for R11.",
+      "public_effect_zh": "有限 HTTP 负载下，相对各自原生基线的输出吞吐：DP8 +39.63%，TP8 +35.17%。0.3.1 收进已验收的 DP 预热实现，沿用既有测量。检索子集 32/32；不声称所有延迟都改善。 冻结 R10 单卡组件对照中，驻留状态槽改为 16 行分块。六种解码和混合形状均通过动态输入图回放逐位核对。54 活跃行时，解码 21.45→8.74 μs，混合 33.90→15.16 μs。1／2／4／8 warp 在同一分支生成相同设备二进制。分块仅取得组件证据，整模待验证。 同机同卡分时 MMLU-Pro 十题初筛中，输出吞吐 +1.96%，P95 首字 +2.29%，P95 每 token 耗时 −1.07%，整批耗时 +2.16%，答对 10→9。这组数据用于整模初筛，R11 仍待扩大复核。",
       "public_effect_status": "measured",
-      "public_effect_url": "./betterscale.html#service-throughput",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e2481edfeb341e856ac11705336f8e872f423a23/website-publication/data/r10-parallel-components-20261124/summary.json#L5",
       "functional_compatibility": {
         "status": "passed",
         "scope": "DeepSeek-V4-Flash-0731-w8a8 · Ascend 910B2 TP8 / TP1-DP8-EP8, bounded K5 configurations"
@@ -2644,9 +2799,9 @@
     {
       "id": "ascend-attention-boundary",
       "public_surface": true,
-      "name": "Ascend Attention Boundary",
-      "name_en": "Ascend Attention Boundary",
-      "name_zh": "Ascend 注意力边界",
+      "name": "Ascend Attention Boundary Optimization",
+      "name_en": "Ascend Attention Boundary Optimization",
+      "name_zh": "昇腾注意力计算边界调优",
       "artifact_type": "runtime_component",
       "system_role": "attention_execution_policy",
       "integration_contracts": [],
@@ -2683,10 +2838,10 @@
       ],
       "summary_en": "Public preview of a default-off Ascend attention boundary component. The Qwen3.5 TP2+EP archive contains three valid 900-second repeats for OFF/ON at C1/C2/C4/C8/C16 and publishes the pre-declared median-throughput observation for each cell.",
       "summary_zh": "默认关闭的 Ascend 注意力边界组件公开预览。Qwen3.5 TP2+EP 归档在 OFF/ON 的 C1/C2/C4/C8/C16 每个单元均包含三次有效 900 秒重复，并公开预先声明的吞吐中位样本。",
-      "public_effect_en": "The repeat-backed ON/OFF observations are published as protocol evidence. Tokenizer identity is not independently proven and the non-selected raw repeats remain local, so no causal speedup or general performance result is claimed.",
-      "public_effect_zh": "具有重复实验支撑的 ON/OFF 观测作为协议证据发布。Tokenizer 身份尚未独立证明，未选中的重复实验原始文件仍为本地证据，因此不宣称因果加速或一般性能结论。",
+      "public_effect_en": "The repeat-backed ON/OFF observations are published as protocol evidence. Tokenizer identity is not independently proven and the non-selected raw repeats remain local, so no causal speedup or general performance result is claimed. R10 port of boundary search, same-card comparison on 10 concurrent MMLU-Pro items. Warmup logs show both ranks entering the modified search branch. Output throughput +9.90%, P95 TTFT −0.84%, P95 TPOT −1.65%, batch wall time −12.32%, correct answers 8 to 9 (1 correct to wrong, 2 wrong to correct). The screen does not qualify this port for R11.",
+      "public_effect_zh": "具有重复实验支撑的 ON/OFF 观测作为协议证据发布。Tokenizer 身份尚未独立证明，未选中的重复实验原始文件仍为本地证据，因此不宣称因果加速或一般性能结论。 冻结 R10 的边界搜索移植，MMLU-Pro 十题、并发 10、同卡对照。两 rank 在预热阶段均进入新搜索分支，生效证据来自预热。输出吞吐 +9.90%，P95 首 token 时延 −0.84%，P95 每 token 耗时 −1.65%，整批耗时 −12.32%，答对 8→9，其中 1 题由对变错、2 题由错变对。未达到 R11 整体验收条件。",
       "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-website-extra/snapshot/docs/FRONTIER-QWEN35-OP01-ATTENTION-BOUNDARY.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/47bf093e51616353a39fb0fd45567f1b8da4d200/website-publication/data/r10-attention-boundaries-20261124/summary.json#L88",
       "compatibility": {
         "status": "experimental",
         "host": "vLLM 0.23.0+empty + vLLM-Ascend 0.23.0.post1",
@@ -2710,9 +2865,9 @@
     {
       "id": "dla",
       "public_surface": false,
-      "name": "DLA",
-      "name_en": "DLA",
-      "name_zh": "DLA（解码长度感知准入/预占）",
+      "name": "DLA Output-Length-Aware Admission",
+      "name_en": "DLA Output-Length-Aware Admission",
+      "name_zh": "DLA 输出长度感知准入",
       "artifact_type": "runtime_component",
       "system_role": "scheduler_policy",
       "integration_contracts": [
@@ -2758,7 +2913,20 @@
         "requirements_en": "The Qwen3.5 card result belongs to a pinned known-output-budget carrier whose admission checks ran but took no control action; it does not qualify the learned predictor. Core PR vllm-HUST/vllm-hust#8 is still required for the legacy victim-selector group and predicted_length channel.",
         "requirements_zh": "Qwen3.5 卡片结果属于固定版本的已知输出预算 carrier；准入检查执行了，但没有采取控制动作，因此不能验证学习型预测器。旧 victim-selector 组与 predicted_length 通道仍需要 vllm-HUST/vllm-hust#8。"
       },
-      "evidence_level": "performance_verified"
+      "evidence_level": "performance_verified",
+      "maintainer_profiles": [
+        {
+          "login": "xiehanlong834-gif",
+          "name": "谢汉龙"
+        }
+      ],
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ]
     },
     {
       "id": "stateaxis-automatic-prefix-cache",
@@ -2942,8 +3110,8 @@
       "advisors": [],
       "repository_visibility": "private",
       "upstream_repository": null,
-      "summary_en": "Research MOD maintained by Shuhao Zhang. Historical startup diagnostics remain available with their original scope.",
-      "summary_zh": "由张书豪维护的研究 MOD。历史启动诊断按原范围保留。",
+      "summary_en": "Research MOD maintained by Shuhao Zhang. Historical startup diagnostics remain available with their original scope. R10 admission review found that the current manifest requires a StateAxis host and Qwen2. Frozen R10 uses Qwen3.5 MoE. No candidate was launched.",
+      "summary_zh": "由张书豪维护的研究 MOD。历史启动诊断按原范围保留。 R10 准入复核中，当前扩展清单限定 StateAxis 宿主和 Qwen2，冻结 R10 使用 Qwen3.5 MoE，未运行候选。",
       "public_effect_en": "A matched 3+3 real-NPU carrier diagnostic on Qwen3.5-35B-A3B BF16 TP2 reduced median process-to-Ready time from 337.70 s to 301.62 s (10.68%) and median weight iteration from 166.20 s to 107.15 s (35.53%). This is startup evidence, not a steady-state throughput claim or a formal ECPA ON/OFF qualification.",
       "public_effect_zh": "Qwen3.5-35B-A3B BF16 TP2 的 3+3 次真实 NPU 配对载体诊断中，进程到 Ready 的中位时间由 337.70 秒降至 301.62 秒（10.68%），权重迭代中位时间由 166.20 秒降至 107.15 秒（35.53%）。这是启动阶段证据，不代表稳态吞吐提升，也不是正式 ECPA ON/OFF 资格结果。",
       "public_effect_status": "preview",
@@ -2981,9 +3149,9 @@
     },
     {
       "id": "gdn-state-codec",
-      "name": "GDN State Codec",
-      "name_en": "GDN State Codec",
-      "name_zh": "GDN 状态编解码器",
+      "name": "GDN State Compression",
+      "name_en": "GDN State Compression",
+      "name_zh": "GDN 状态压缩与恢复",
       "artifact_type": "runtime_component",
       "system_role": "recurrent_state_compression",
       "integration_contracts": [
@@ -3097,8 +3265,8 @@
       "upstream_repository": null,
       "summary_en": "Opt-in Ascend operator optimization bundle with independently gated persistent MatMul allocation and Graph linear-SwiGLU fusion. Only the validated batch-invariant Graph/Triton path is affected.",
       "summary_zh": "可按优化项独立启用的 Ascend 算子优化包，包含 Persistent MatMul 冗余清零消除与 Graph Linear–SwiGLU 融合；仅影响已验证的 batch-invariant Graph/Triton 路径。",
-      "public_effect_en": "On Qwen2.5-7B-Instruct, Ascend 910B2/CANN 9.0.0, Graph/batch-invariant, a 64-request ShareGPT workload at concurrency 4 gave 3.82% lower steady-state TPOT and 5.24% higher output-token throughput across three matched rounds for linear-SwiGLU fusion. The published compatibility profile is a separate CANN 9.1 beta.3 line; cold-start performance and other paths are not covered by this result.",
-      "public_effect_zh": "在 Qwen2.5-7B-Instruct、Ascend 910B2/CANN 9.0.0、batch-invariant Graph 模式下，Linear–SwiGLU 融合于 ShareGPT 64 请求、并发 4 的三轮配对测试中，稳态 TPOT 降低 3.82%，输出 token 吞吐提高 5.24%。已发布的兼容配置是另一条 CANN 9.1 beta.3 版本线；该结果不覆盖冷启动及其他执行路径。",
+      "public_effect_en": "On Qwen2.5-7B-Instruct, Ascend 910B2/CANN 9.0.0, Graph/batch-invariant, a 64-request ShareGPT workload at concurrency 4 gave 3.82% lower steady-state TPOT and 5.24% higher output-token throughput across three matched rounds for linear-SwiGLU fusion. The published compatibility profile is a separate CANN 9.1 beta.3 line; cold-start performance and other paths are not covered by this result. R10 sealed launch and source review: batch-invariant dispatch was disabled on both ranks, so this persistent linear path was inactive. No R10 performance gain for the path was measured.",
+      "public_effect_zh": "在 Qwen2.5-7B-Instruct、Ascend 910B2/CANN 9.0.0、batch-invariant Graph 模式下，Linear–SwiGLU 融合于 ShareGPT 64 请求、并发 4 的三轮配对测试中，稳态 TPOT 降低 3.82%，输出 token 吞吐提高 5.24%。已发布的兼容配置是另一条 CANN 9.1 beta.3 版本线；该结果不覆盖冷启动及其他执行路径。 R10 启动及源码复核：两 rank 未启用 batch-invariant，未进入这条 persistent linear 路径，本轮没有为该路径登记 R10 性能增益。",
       "public_effect_status": "beneficial",
       "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/4709ab7ca83264c7c76cf4518044252ac4cb5164/archive/mod-git-20261022/vllm-hust-opset/snapshot/docs/optimizations/linear-swiglu-graph.md",
       "compatibility": {
@@ -3126,11 +3294,17 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "keridone",
+          "name": "周升晖"
+        }
       ]
     },
     {
       "id": "traceloom",
-      "name": "TraceLoom",
+      "name": "TraceLoom Inference Timeline Analysis",
       "artifact_type": "runtime_component",
       "system_role": "profiling_analysis",
       "integration_contracts": [],
@@ -3152,8 +3326,8 @@
       "summary_en": "Standalone timeline analysis and an opt-in vLLM runtime plugin. Organize profiler events into reusable structures, join supplied scheduler steps, and query or visualize the captured execution.",
       "summary_zh": "独立时间线分析工具与可选的 vLLM 运行时插件。将 profiler 事件组织成可复用结构，关联采集到的 scheduler step，以查询和可视化理解推理执行。",
       "evidence_level": "hardware_verified",
-      "name_en": "TraceLoom",
-      "name_zh": "TraceLoom",
+      "name_en": "TraceLoom Inference Timeline Analysis",
+      "name_zh": "TraceLoom 推理时间线分析",
       "repository_relationship": "organization_native",
       "public_surface": true,
       "documentation_url": "./traceloom.html",
@@ -3202,9 +3376,9 @@
     {
       "id": "instance-controller",
       "public_surface": true,
-      "name": "Instance Controller",
-      "name_en": "Instance Controller",
-      "name_zh": "实例控制器",
+      "name": "Instance Scaling Controller",
+      "name_en": "Instance Scaling Controller",
+      "name_zh": "实例扩缩容控制器",
       "artifact_type": "external_system",
       "system_role": "lifecycle_control_plane",
       "integration_contracts": [
@@ -3259,9 +3433,9 @@
     {
       "id": "kv-controller",
       "public_surface": true,
-      "name": "KV Controller",
-      "name_en": "KV Controller",
-      "name_zh": "KV 控制器",
+      "name": "Next-Turn KV Preparation Controller",
+      "name_en": "Next-Turn KV Preparation Controller",
+      "name_zh": "下一轮 KV 准备控制器",
       "artifact_type": "external_system",
       "system_role": "kv_state_manager",
       "integration_contracts": [
@@ -3328,7 +3502,7 @@
       "public_surface": true,
       "name": "Request Throttling Controller",
       "name_en": "Request Throttling Controller",
-      "name_zh": "请求节流控制器",
+      "name_zh": "请求限流控制器",
       "artifact_type": "bridge",
       "system_role": "request_admission_control_plane",
       "integration_contracts": [
@@ -3392,9 +3566,9 @@
     {
       "id": "core-attention-boundary",
       "public_surface": true,
-      "name": "Core Attention Boundary",
-      "name_en": "Core Attention Boundary",
-      "name_zh": "Core 注意力边界",
+      "name": "Core Attention Boundary Optimization",
+      "name_en": "Core Attention Boundary Optimization",
+      "name_zh": "核心注意力计算边界调优",
       "artifact_type": "runtime_component",
       "system_role": "attention_execution_policy",
       "integration_contracts": [],
@@ -3431,10 +3605,10 @@
       ],
       "summary_en": "Public preview of a default-off core attention boundary search component. The canonical Qwen3.5 TP2+EP C1/C2/C4/C8/C16 ON/OFF archive uses the reviewed workload and tokenizer and records startup activation plus runtime-effective events; those events are not isolated to each formal window, so no causal performance attribution is claimed. The measured MOD revision is publicly pinned by tag op02-measured-8b5ebb1.",
       "summary_zh": "默认关闭的 Core 注意力边界搜索组件，现作为公开 preview 发布。本地 canonical Qwen3.5 TP2+EP C1/C2/C4/C8/C16 ON/OFF 归档使用已核对的 workload 和 tokenizer，并记录了启动激活及 runtime-effective 事件；这些事件尚未隔离到每个正式窗口，因此不宣称性能因果归因。实测 MOD revision 已通过 tag op02-measured-8b5ebb1 公开固定。",
-      "public_effect_en": "The local C1/C2/C4/C8/C16 ON/OFF observations are retained as protocol evidence only. One observation per point does not establish a causal speedup or a general performance result.",
-      "public_effect_zh": "本地 C1/C2/C4/C8/C16 ON/OFF 观测仅作为协议证据保留；每个点只有一次观测，不能证明因果加速或一般性能结果。",
+      "public_effect_en": "The local C1/C2/C4/C8/C16 ON/OFF observations are retained as protocol evidence only. One observation per point does not establish a causal speedup or a general performance result. R10 port of boundary search, same-card comparison on 10 concurrent MMLU-Pro items. Both TP ranks were not confirmed on the new search branch, so the observations are diagnostic. Output throughput +8.57%, P95 TTFT −0.01%, P95 TPOT +0.04%, batch wall time +3.74%, correct answers 10 to 8 (2 correct to wrong, 0 wrong to correct). The screen does not qualify this port for R11.",
+      "public_effect_zh": "本地 C1/C2/C4/C8/C16 ON/OFF 观测仅作为协议证据保留；每个点只有一次观测，不能证明因果加速或一般性能结果。 冻结 R10 的边界搜索移植，MMLU-Pro 十题、并发 10、同卡对照。候选未取得双 rank 的搜索分支生效证据，以下只保留为运行诊断。输出吞吐 +8.57%，P95 首 token 时延 −0.01%，P95 每 token 耗时 +0.04%，整批耗时 +3.74%，答对 10→8，其中 2 题由对变错、0 题由错变对。未达到 R11 整体验收条件。",
       "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/e759add873a1f0a3d2f54b004c2eb650fc811245/archive/mod-git-20261022/website-source-vllm-hust-website-extra/snapshot/docs/FRONTIER-QWEN35-OP02-CORE-ATTENTION-BOUNDARY.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/47bf093e51616353a39fb0fd45567f1b8da4d200/website-publication/data/r10-attention-boundaries-20261124/summary.json#L11",
       "compatibility": {
         "status": "experimental",
         "host": "vLLM 0.23.0+empty + vLLM-Ascend 0.23.0.post1",
@@ -3607,9 +3781,9 @@
     },
     {
       "id": "runtime-micro-optimizations",
-      "name": "Runtime Micro-optimizations",
-      "name_en": "Runtime Micro-optimizations",
-      "name_zh": "运行时微开销优化集",
+      "name": "Inference Runtime Overhead Optimizations",
+      "name_en": "Inference Runtime Overhead Optimizations",
+      "name_zh": "推理运行时开销优化",
       "artifact_type": "runtime_component",
       "system_role": "runtime_overhead_optimization",
       "integration_contracts": [
@@ -3731,9 +3905,9 @@
     },
     {
       "id": "hybrid-spec",
-      "name": "Hybrid Spec",
-      "name_en": "Hybrid Spec",
-      "name_zh": "混合状态推测解码",
+      "name": "Hybrid-State Speculative Decoding",
+      "name_en": "Hybrid-State Speculative Decoding",
+      "name_zh": "Hybrid Spec 混合状态投机解码",
       "artifact_type": "runtime_component",
       "system_role": "speculative_decoding",
       "integration_contracts": [
@@ -3784,13 +3958,19 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "Li-changwu",
+          "name": "李昶吾"
+        }
       ]
     },
     {
       "id": "prefill-microflow",
-      "name": "Prefill Microflow",
-      "name_en": "Prefill Microflow",
-      "name_zh": "Prefill Microflow（GDN + FA）",
+      "name": "Microflow Prefill Pipeline",
+      "name_en": "Microflow Prefill Pipeline",
+      "name_zh": "Microflow 预填充流水线",
       "artifact_type": "runtime_component",
       "system_role": "prefill_pipeline_optimization",
       "integration_contracts": [
@@ -3817,8 +3997,8 @@
       "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-prefill-microflow",
       "repository_visibility": "public",
       "upstream_repository": null,
-      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification. The frozen B1 r6 profile enables the school028 GDN and FlashAttention path from 0.1.0.dev0.",
-      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。B1 r6 冻结组合启用了 0.1.0.dev0 的 school028 GDN 与 FlashAttention 路径。",
+      "summary_en": "Default-off BetterScale companion MOD that slices GDN and FA prefill execution into microflows for controlled ablation and qualification. The frozen B1 r6 profile enables the school028 GDN and FlashAttention path from 0.1.0.dev0. The R10 FA output-gate fusion matched the reference bit for bit for numeric BF16 outputs and classified the same non-numeric encodings. Grouped graph replay was roughly flat at 8 rows, around 4% slower at 54 rows and around 9% slower at 4096 rows. The component screen did not qualify the change for integration.",
+      "summary_zh": "BetterScale 的默认关闭联合扩展 MOD，将 GDN 与 FA 的 Prefill 执行切分为 microflow，用于独立安装、消融与资格验收。B1 r6 冻结组合启用了 0.1.0.dev0 的 school028 GDN 与 FlashAttention 路径。 冻结 R10 的 FA 输出门控融合的 BF16 数值输出逐位一致，非数值编码的分类也一致。分组图回放中，8 行接近持平，54 行慢约 4%，4096 行慢约 9%。组件筛选未达到集成条件。",
       "compatibility": {
         "status": "experimental",
         "host": "Pinned BetterScale shared host on vLLM-HUST + vllm-ascend-hust",
@@ -3841,13 +4021,20 @@
           "name_en": "Shuhao Zhang",
           "relationship": "internal"
         }
-      ]
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "CubeLander",
+          "name": "田景远"
+        }
+      ],
+      "documentation_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/550852d9c1e585dbc68321c5a4e712cc4d6b3f85/website-publication/data/r10-parallel-components-20261124/summary.json#L207"
     },
     {
       "id": "graph-coverage",
-      "name": "Graph Capture Coverage",
-      "name_en": "Graph Capture Coverage",
-      "name_zh": "图捕获覆盖配置",
+      "name": "Graph Capture Coverage Configuration",
+      "name_en": "Graph Capture Coverage Configuration",
+      "name_zh": "计算图捕获范围配置",
       "artifact_type": "runtime_component",
       "system_role": "graph_execution_policy",
       "integration_contracts": [],
@@ -3879,10 +4066,10 @@
         }
       ],
       "advisors": [],
-      "public_effect_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: at fixed budget 32, capture sizes [1,2,4] → [1,2,4,8,16,32] reduced median batch completion by 57.0% across five process pairs. Package CPU checks pass; capture memory/startup costs also increase.",
-      "public_effect_zh": "历史 Qwen3-0.6B FP16 / Ascend 910B2 TP1：保持总预算 32，捕获尺寸从 [1,2,4] 扩至 [1,2,4,8,16,32]，五组独立进程配对的批次完成时间中位数下降 57.0%。封装 CPU 检查通过；图内存与启动开销会增加。",
+      "public_effect_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: at fixed budget 32, capture sizes [1,2,4] → [1,2,4,8,16,32] reduced median batch completion by 57.0% across five process pairs. Package CPU checks pass; capture memory/startup costs also increase. R10 diagnostic: 24 fixed-output requests at concurrency 6/8/10 produced 78 FULL dispatches, all with zero dispatcher padding. CPU replay identified no missing capture size in this window. Other layers and workloads were outside scope. Revised R10 same-host same-card MMLU-Pro ten-request screen added only a 30-row bucket and retained FULL 3072 and MTP2. Both TP ranks recorded 410 replays. Output throughput +15.42%, P95 TTFT -10.24%, P95 TPOT -9.31%, truncations 1 to 0. The frozen first-match scorer gave 10/10 and 8/10. Both candidate responses explicitly ended with the correct A and G. Using the last explicit answer for both arms gives 10/10 each. A separate confirmation on the same host scored 9/10 under the same rule. Item 03290 hit the output limit without a final choice. The quality gate failed before 4.1–4.4. In a request-level trace of 03290, the 40-row arm started rechecking at token 769 and the 30-row arm at token 1,234. Both runs reached the 8,192-token limit without a terminal choice. Repeated reasoning also occurred at 40 rows. No specific engine correction was established, so the quality gate remains closed.",
+      "public_effect_zh": "历史 Qwen3-0.6B FP16 / Ascend 910B2 TP1：保持总预算 32，捕获尺寸从 [1,2,4] 扩至 [1,2,4,8,16,32]，五组独立进程配对的批次完成时间中位数下降 57.0%。封装 CPU 检查通过；图内存与启动开销会增加。 R10 诊断：并发 6／8／10，24 个固定输出请求，78 次 FULL 图分发，观测到的分发 padding 全为 0。CPU 按冻结分发器重放未发现需要增补的规格；结论仅限这个窗口和分发层。 新版 R10 同机同卡 MMLU-Pro 十题，仅新增 30 行图档并保留 FULL 3072 和 MTP2。两侧 TP 各命中 410 次，吞吐 +15.42%，P95 首字 -10.24%，P95 每 token -9.31%，截断 1→0。冻结评分原生 10/10、候选 8/10。逐题复算发现旧评分取了较早的声明，两道候选答复最终明确给出 A 和 G。统一按最后明确选项复算，两臂均为 10/10。 同机确认跑按同一规则为 9/10。03290 到达输出上限，未给出最终选项。质量门未通过，未启动 4.1–4.4。 03290 专项逐 token 追踪：原 40 行第 769 个 token 开始回查，30 行第 1,234 个 token 开始回查。两臂均到达 8,192 token 上限，缺少最终选项。40 行也复现反复推理，暂无明确引擎修法，质量门保持关闭。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/802cc5ca4a9da1e1e95f333d5dd2a3a4a53cbb63/reports/independent-inference-optimizations-20261113/graph-coverage/README.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/32abb95833c6ca0f9231b6c1303081ec43bfcea3/website-publication/data/r10-graph30-03290-trace-20261125/summary.json",
       "evidence_level": "hardware_verified",
       "compatibility": {
         "status": "experimental",
@@ -3906,9 +4093,9 @@
     },
     {
       "id": "prefill-admission",
-      "name": "Prefill Admission",
-      "name_en": "Prefill Admission",
-      "name_zh": "短请求准入配置",
+      "name": "Short-Request Prefill Admission",
+      "name_en": "Short-Request Prefill Admission",
+      "name_zh": "短请求预填充准入",
       "artifact_type": "runtime_component",
       "system_role": "scheduler_policy_research",
       "integration_contracts": [],
@@ -3940,10 +4127,10 @@
         }
       ],
       "advisors": [],
-      "public_effect_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: cap 224 at unchanged global budget 256 reduced short-request first-token latency by 68.17% (126.746 → 40.342 ms); batch completion increased 2.02%. Five process pairs, 60 unprofiled batches; exact token agreement.",
-      "public_effect_zh": "历史 Qwen3-0.6B FP16 / Ascend 910B2 TP1：全局预算保持 256、单请求 prefill 上限设为 224，短请求首字延迟下降 68.17%（126.746 → 40.342 ms），批次完成时间增加 2.02%。五组独立进程配对、60 个无 profiler 批次，输出 token 一致。",
+      "public_effect_en": "Historical Qwen3-0.6B FP16 / Ascend 910B2 TP1: cap 224 at unchanged global budget 256 reduced short-request first-token latency by 68.17% (126.746 → 40.342 ms); batch completion increased 2.02%. Five process pairs, 60 unprofiled batches; exact token agreement. R10 mechanism port with a 4,096-token step budget and a 3,072-token per-long-request cap. Synthetic C4/C8 short-request P50 TTFT changed +26.32%/-0.32%. Median batch time changed +11.31%/+20.31%. Exact token ID agreement 65/65. Five batches per shape with one process per arm on the same cards. The tested cap did not pass the performance screen.",
+      "public_effect_zh": "历史 Qwen3-0.6B FP16 / Ascend 910B2 TP1：全局预算保持 256、单请求 prefill 上限设为 224，短请求首字延迟下降 68.17%（126.746 → 40.342 ms），批次完成时间增加 2.02%。五组独立进程配对、60 个无 profiler 批次，输出 token 一致。 R10 机制移植，4,096-token 总预算，长请求单步上限 3,072。合成混合批次的 C4／C8 短请求首字 P50 +26.32%／-0.32%，整批耗时中位 +11.31%／+20.31%。输出 token ID一致 65／65。每规格五批，同卡各一次服务。该档位未通过性能筛选。",
       "public_effect_status": "measured",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/802cc5ca4a9da1e1e95f333d5dd2a3a4a53cbb63/reports/independent-inference-optimizations-20261113/prefill-admission/README.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/76dd9a02db21c307df80c685fba73c294a1bc8e6/website-publication/data/r10-unintegrated-mods-20261124/summary.json#L27",
       "evidence_level": "hardware_verified",
       "compatibility": {
         "status": "experimental",
@@ -3967,9 +4154,9 @@
     },
     {
       "id": "sglang-prepared-dispatch",
-      "name": "SGLang Prepared Dispatch",
-      "name_en": "SGLang Prepared Dispatch",
-      "name_zh": "SGLang 预封装派发",
+      "name": "SGLang Prepared Attention Dispatch",
+      "name_en": "SGLang Prepared Attention Dispatch",
+      "name_zh": "SGLang 注意力调用预封装",
       "artifact_type": "runtime_component",
       "system_role": "operator_dispatch",
       "integration_contracts": [],
@@ -4002,10 +4189,10 @@
         }
       ],
       "advisors": [],
-      "public_effect_en": "Historical measured core: median throughput +9.35% over the accepted batch-copy baseline, four independent pairs, exact token/top1-ID/logprob agreement. The packaged adapter passes CPU tests; its separate device requalification is pending.",
-      "public_effect_zh": "历史核心实现相对已接受的 batch-copy 基线，四组独立配对的吞吐提升中位数为 9.35%，token、top1 ID 与 logprob 一致。当前封装适配层已通过 CPU 测试，独立设备复验正在推进。",
+      "public_effect_en": "Historical measured core: median throughput +9.35% over the accepted batch-copy baseline, four independent pairs, exact token/top1-ID/logprob agreement. The packaged adapter passes CPU tests; its separate device requalification is pending. Revised R10 source review found that the target and MTP draft FULL paths bypass the host graph-update entry that this MOD optimizes. This was an integration review, without an R10 performance pair.",
+      "public_effect_zh": "历史核心实现相对已接受的 batch-copy 基线，四组独立配对的吞吐提升中位数为 9.35%，token、top1 ID 与 logprob 一致。当前封装适配层已通过 CPU 测试，独立设备复验正在推进。 新版 R10 源码复核：目标模型与 MTP draft 的 FULL 路径均绕过插件拟优化的宿主图更新入口。本次为接入核验，未进行 R10 性能对照。",
       "public_effect_status": "preview",
-      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/802cc5ca4a9da1e1e95f333d5dd2a3a4a53cbb63/reports/independent-inference-optimizations-20261113/sglang-prepared-dispatch/README.md",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aee47f13128015b60eedff6781de9785b611359c/website-publication/data/r10-plugin-paired-mmlu10-20261125/summary.json#L48",
       "evidence_level": "code_available",
       "compatibility": {
         "status": "experimental",
@@ -4029,9 +4216,9 @@
     },
     {
       "id": "hust-m01-correction",
-      "name": "M01 State Correction",
-      "name_en": "M01 State Correction",
-      "name_zh": "M01 状态校正",
+      "name": "Request State Correction",
+      "name_en": "Request State Correction",
+      "name_zh": "请求状态校正",
       "artifact_type": "runtime_component",
       "integration_contracts": [],
       "deployment_topology": "in_process",
@@ -4052,13 +4239,23 @@
         "worker"
       ],
       "summary_en": "The frozen B1 r6 composition restores hust-m01-correction 1.0 for request-state correction and live snapshot checks in CorrectedWorker. Qualification is scoped to the combined engine.",
-      "summary_zh": "B1 r6 冻结组合包含 hust-m01-correction 1.0，由 CorrectedWorker 执行请求状态校正与活动快照校验。验证范围为整套引擎。"
+      "summary_zh": "B1 r6 冻结组合包含 hust-m01-correction 1.0，由 CorrectedWorker 执行请求状态校正与活动快照校验。验证范围为整套引擎。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": []
     },
     {
       "id": "hust-joint-packed",
       "name": "Packed Pinned-Host State",
       "name_en": "Packed Pinned-Host State",
-      "name_zh": "锁页状态合并分配",
+      "name_zh": "锁页主机状态合并",
       "artifact_type": "runtime_component",
       "integration_contracts": [],
       "deployment_topology": "in_process",
@@ -4080,7 +4277,552 @@
         "native"
       ],
       "summary_en": "The frozen B1 r6 composition restores hust-joint-packed 1.0 to pack pinned host state per object and dtype, within a 4 GiB per-rank host-state budget. Qualification is scoped to the combined engine.",
-      "summary_zh": "B1 r6 冻结组合包含 hust-joint-packed 1.0，在每 rank 4 GiB 主机状态预算内，按对象及 dtype 合并锁页状态分配。验证范围为整套引擎。"
+      "summary_zh": "B1 r6 冻结组合包含 hust-joint-packed 1.0，在每 rank 4 GiB 主机状态预算内，按对象及 dtype 合并锁页状态分配。验证范围为整套引擎。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": []
+    },
+    {
+      "id": "cuda-mtp",
+      "name": "CUDA Multi-Token Prediction",
+      "name_en": "CUDA Multi-Token Prediction",
+      "name_zh": "CUDA 多词元预测（MTP）",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "maturity": "experimental",
+      "public_surface": true,
+      "repository_visibility": "public",
+      "summary_en": "CUDA activation carrier for Qwen3.5 native multi-token prediction. Bounded launch and functional checks ran on A6000 PP4/TP1.",
+      "summary_zh": "Qwen3.5 原生多词元预测的 CUDA 启用组件。已有 A6000 PP4/TP1 的有限启动与功能验证。",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-cuda-mtp",
+      "repository_relationship": "organization_native",
+      "system_role": "speculative_decoding",
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "delivery_model": "python_distribution",
+      "ownership": "original_contributor_maintained",
+      "evidence_level": "hardware_verified",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Bounded startup and functional checks cover A6000 PP4/TP1. The tested setup reduced available KV capacity and produced one answer mismatch; it does not establish a general speed or quality gain.",
+      "public_effect_zh": "已有 A6000 PP4/TP1 的有限启动与功能检查。该配置可用 KV 容量下降，且出现一次回答不一致；尚不能据此确认普遍的速度或质量收益。",
+      "public_effect_status": "preview",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-cuda-mtp#readme",
+      "deployment_topology": "in_process"
+    },
+    {
+      "id": "memory-tracker",
+      "name": "Ascend Graph Memory Tracker",
+      "name_en": "Ascend Graph Memory Tracker",
+      "name_zh": "昇腾计算图显存跟踪器",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "maturity": "experimental",
+      "public_surface": true,
+      "repository_visibility": "private",
+      "summary_en": "Captures Ascend graph-memory allocations and exports Perfetto traces. Hardware validation covers one 910B2 and bounded capture sizes.",
+      "summary_zh": "采集昇腾计算图捕获的显存分配并导出 Perfetto 轨迹。实测覆盖单张 910B2 和有限捕获规格。",
+      "maintainers": [
+        "CubeLander"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "CubeLander",
+          "name": "田景远"
+        }
+      ],
+      "system_role": "profiling_analysis",
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "delivery_model": "python_distribution",
+      "ownership": "original_contributor_maintained",
+      "repository_relationship": "organization_native",
+      "evidence_level": "hardware_verified",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ],
+      "deployment_topology": "in_process",
+      "canonical_repository": null
+    },
+    {
+      "id": "ascend-mapped-kv-offload",
+      "name": "Ascend Mapped-host KV Offload",
+      "name_en": "Ascend Mapped-host KV Offload",
+      "name_zh": "昇腾映射主机内存 KV 卸载",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "maturity": "experimental",
+      "public_surface": true,
+      "repository_visibility": "public",
+      "summary_en": "Mapped-host memory KV offload adaptation for Ascend. The package supports installation and inspection while host integration and device validation are pending.",
+      "summary_zh": "昇腾映射主机内存的 KV 卸载适配。目前可安装和检查，等待宿主接入和设备验证。",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-ascend-mapped-kv-offload-hust",
+      "repository_relationship": "organization_native",
+      "maintainers": [
+        "CubeLander"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "CubeLander",
+          "name": "田景远"
+        }
+      ],
+      "system_role": "kv_tiering",
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "delivery_model": "plugin_bundle",
+      "ownership": "original_contributor_maintained",
+      "evidence_level": "cpu_smoke",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ],
+      "deployment_topology": "in_process",
+      "public_effect_en": "Installation and inspection are available; host integration and device validation remain pending. No performance benefit is claimed.",
+      "public_effect_zh": "目前可安装与检查；宿主接入及设备验证待完成，尚无性能收益结论。",
+      "public_effect_status": "pending",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-ascend-mapped-kv-offload-hust#readme"
+    },
+    {
+      "id": "scheduler-policy-lab",
+      "name": "Scheduling Policy Research",
+      "name_en": "Scheduling Policy Research",
+      "name_zh": "调度策略研究与测试",
+      "artifact_type": "runtime_component",
+      "integration_contracts": [],
+      "maturity": "experimental",
+      "public_surface": true,
+      "repository_visibility": "public",
+      "summary_en": "Research workspace for scheduler policies, baseline ports and observability. Host-independent policy code has tests. vLLM runtime integration is pending.",
+      "summary_zh": "调度策略、基线迁移和观测研究工作区。宿主无关的策略代码已有测试，vLLM 运行接入待完成。",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-scheduler-policy-lab",
+      "repository_relationship": "organization_native",
+      "maintainers": [
+        "Tkhkrnx"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "Tkhkrnx",
+          "name": "彭浩然"
+        }
+      ],
+      "system_role": "scheduler_policy",
+      "execution_planes": [
+        "scheduler"
+      ],
+      "delivery_model": "source_toolkit",
+      "ownership": "original_contributor_maintained",
+      "evidence_level": "cpu_smoke",
+      "advisors": [
+        {
+          "name_zh": "张书豪",
+          "name_en": "Shuhao Zhang",
+          "relationship": "internal"
+        }
+      ],
+      "deployment_topology": "in_process"
+    },
+    {
+      "id": "sealed-serving-warmup",
+      "name": "Serving Warmup and Compilation Sealing",
+      "name_en": "Serving Warmup and Compilation Sealing",
+      "name_zh": "服务预热与编译封锁",
+      "artifact_type": "runtime_component",
+      "system_role": "startup_guard",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r8 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./engine.html#composition",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "Warms the prescribed serving shapes before readiness and rejects unprepared Torch/Triton compilation during measured requests. Delivered with the frozen B1 r8 engine.",
+      "summary_zh": "在服务就绪前完成规定形状的预热，并在正式请求中拦截未预热的 Torch/Triton 编译。 随冻结 B1 r8 引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Included in the r8 combined-engine validation.",
+      "public_effect_zh": "已纳入 r8 整套引擎的组合验证。",
+      "public_effect_url": "https://vllm-hust.sage.org.ai/engine.html#composition",
+      "public_effect_status": "functional"
+    },
+    {
+      "id": "guarded-progress-async",
+      "name": "Guarded Asynchronous Progress Copy",
+      "name_en": "Guarded Asynchronous Progress Copy",
+      "name_zh": "受保护的异步进度复制",
+      "artifact_type": "runtime_component",
+      "system_role": "kv_state_manager",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r8 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./engine.html#composition",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "Uses guarded asynchronous H2D progress copies with CorrectedWorker ownership and source-lifecycle checks in r8. Delivered with the frozen B1 r8 engine.",
+      "summary_zh": "r8 使用受保护的异步 H2D 进度复制，由 CorrectedWorker 检查状态拥有权与源生命周期。 随冻结 B1 r8 引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Included in the r8 combined-engine validation.",
+      "public_effect_zh": "已纳入 r8 整套引擎的组合验证。",
+      "public_effect_url": "https://vllm-hust.sage.org.ai/engine.html#composition",
+      "public_effect_status": "functional"
+    },
+    {
+      "id": "capacity-tuning",
+      "name": "Execution and Resident Capacity Tuning",
+      "name_en": "Execution and Resident Capacity Tuning",
+      "name_zh": "执行与常驻席位调优",
+      "artifact_type": "runtime_component",
+      "system_role": "scheduler_policy",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r8 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./engine.html#composition",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "The frozen r8 profile uses 36 execution seats and 54 resident seats to configure execution and state-residency capacity. Delivered with the frozen B1 r8 engine.",
+      "summary_zh": "冻结 r8 采用 36 个执行席位与 54 个常驻席位，调节并发执行和状态驻留容量。 随冻结 B1 r8 引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Included in the r8 combined-engine validation.",
+      "public_effect_zh": "已纳入 r8 整套引擎的组合验证。",
+      "public_effect_url": "https://vllm-hust.sage.org.ai/engine.html#composition",
+      "public_effect_status": "functional"
+    },
+    {
+      "id": "short-prefill-tail",
+      "name": "Short Prefill Tail Scheduling",
+      "name_en": "Short Prefill Tail Scheduling",
+      "name_zh": "短预填充尾段优先调度",
+      "artifact_type": "runtime_component",
+      "system_role": "scheduler_policy",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r8 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./engine.html#composition",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "Prioritizes eligible 1–256-token prefill tails in r8. Delivered with the frozen B1 r8 engine.",
+      "summary_zh": "r8 优先执行满足资格条件的 1–256 token 预填充尾段。 随冻结 B1 r8 引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Included in the r8 combined-engine validation.",
+      "public_effect_zh": "已纳入 r8 整套引擎的组合验证。",
+      "public_effect_url": "https://vllm-hust.sage.org.ai/engine.html#composition",
+      "public_effect_status": "functional"
+    },
+    {
+      "id": "intern-s2",
+      "name": "Intern-S2 Model Adapter",
+      "name_en": "Intern-S2 Model Adapter",
+      "name_zh": "Intern-S2（书生）模型适配",
+      "artifact_type": "runtime_component",
+      "system_role": "runtime_extension",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r9 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./b0-b1.html?release=r9",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "Adds a dedicated Intern-S2 worker, vocabulary checks and Ascend admission to the R9 engine. The Intern-S2 entry point ships with the engine.",
+      "summary_zh": "在 R9 引擎中接入 Intern-S2 专用 worker、词表检查和昇腾准入，随引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Native Intern-S2 integration completed MMLU-Pro 200 and 4K/16K closed-loop load at concurrency 8. Its development reference was the published Qwen R8 run. See the separate R9 Qwen results for the Original018 comparison.",
+      "public_effect_zh": "书生原生集成完成 MMLU-Pro 200 题及 4K／16K、并发 8 闭环压测，开发对照使用公开的 Qwen R8 参考。Original018 正式配对见独立的 R9 Qwen 结果。",
+      "public_effect_url": "./data/r9-intern-native-20261120/summary.json",
+      "public_effect_status": "functional"
+    },
+    {
+      "id": "state-page-copy",
+      "name": "State FA Page-Copy Adapter",
+      "name_en": "State FA Page-Copy Adapter",
+      "name_zh": "State FA 状态页复制适配",
+      "artifact_type": "runtime_component",
+      "system_role": "kv_state_manager",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "frozen B1 r9 runtime"
+      ],
+      "execution_planes": [
+        "worker"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "python_distribution",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native_component",
+      "maturity": "experimental",
+      "canonical_repository": null,
+      "documentation_url": "./b0-b1.html?release=r9",
+      "evidence_level": "integration_tested",
+      "public_surface": true,
+      "summary_en": "Adapts the State FA page-copy path to the engine-owned state storage shared by the R9 Qwen and Intern-S2 workers. It ships with the R9 engine.",
+      "summary_zh": "为 R9 的 Qwen 和 Intern-S2 worker 适配共用的引擎自有状态存储与 State FA 页复制路径，随引擎交付。",
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ],
+      "advisors": [],
+      "public_effect_en": "Included in the sealed R9 engine composition. The R9 results characterize the entire composition, with no isolated page-copy speed measurement.",
+      "public_effect_zh": "已纳入 R9 封存组合。R9 实测反映整套组合的表现，尚无页复制组件的独立性能对照。",
+      "public_effect_url": "./b0-b1.html?release=r9",
+      "public_effect_status": "functional"
+    },
+    {
+      "id": "greedy-bf16-native",
+      "name": "Native BF16 Greedy Sampling",
+      "name_en": "Native BF16 Greedy Sampling",
+      "name_zh": "BF16 直接贪心采样",
+      "artifact_type": "runtime_component",
+      "system_role": "decoding_mechanism",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "R10 Ascend rejection sampler source overlay"
+      ],
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "source_mod",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
+      "maturity": "experimental",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-greedy-bf16-native",
+      "public_surface": true,
+      "evidence_level": "measured",
+      "summary_en": "Takes a single row-wise argmax directly on BF16 full-vocabulary scores for eligible R10 greedy MTP requests, then selects target and bonus token IDs.",
+      "summary_zh": "符合条件的 R10 纯贪心 MTP 请求直接在 BF16 全词表分数上按行取一次最大值，再取目标和补位 token ID。",
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM-HUST Engine",
+        "versions": [
+          "R10 (2026.11.21.10) + experimental overlay"
+        ],
+        "platforms": [
+          "Ascend 910B2 ×2, TP2"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B"
+        ],
+        "requirements_en": "Tested with BF16, MTP2 and FULL graphs. The guarded path is limited to eligible all-greedy requests without extra sampling constraints or logprobs.",
+        "requirements_zh": "已测 BF16、MTP2、FULL 图。只对符合条件、无额外采样约束且无需 logprobs 的纯贪心请求启用。"
+      },
+      "public_effect_status": "inconclusive",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/tree/158d2619f6abfb78c42f6a33f5a8d5ed2a864b25/reports/greedy-bf16-v2-20261124",
+      "public_effect_en": "v2 shows mixed results on the same devices against frozen R10. R11 integration deferred. Over 200 MMLU-Pro cases, throughput changed +1.88%, mean TTFT changed +5.83% and correct answers went from 149 to 147. At closed-loop concurrency 8, 4K/16K throughput changed +0.54%/+0.01%. Terminal-Bench 2.1 offline replay P95 TPOT changed +21.42%. The report includes the fixed five profiles, request measurements and evidence gaps.",
+      "public_effect_zh": "v2 同卡冻结 R10 对照有取舍，暂缓集成 R11。MMLU-Pro 200 题吞吐 +1.88%、平均首字时延 +5.83%、答对 149→147。闭环连续压测 · 并发 8，4K／16K 吞吐分别 +0.54%／+0.01%。Terminal-Bench 2.1 离线回放的 P95 每 token 时延 +21.42%。报告保留固定五项、逐请求记录和待补证据。",
+      "repository_visibility": "public",
+      "upstream_creators": [
+        {
+          "name_en": "vLLM Ascend (base sampler)",
+          "name_zh": "vLLM Ascend（基础采样器）",
+          "url": "https://github.com/vllm-project/vllm-ascend"
+        }
+      ],
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ]
+    },
+    {
+      "id": "accepted-state-fusion",
+      "name": "Accepted Token State Fusion",
+      "name_en": "Accepted Token State Fusion",
+      "name_zh": "已接受 Token 状态写回融合",
+      "artifact_type": "runtime_component",
+      "system_role": "kv_state_manager",
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "R10 resident-state source overlay",
+        "Triton compile-only startup warmup"
+      ],
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "deployment_topology": "in_process",
+      "delivery_model": "source_mod",
+      "ownership": "hust_owned_subsystem",
+      "repository_relationship": "organization_native",
+      "maturity": "experimental",
+      "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-accepted-state-fusion",
+      "repository_visibility": "public",
+      "public_surface": true,
+      "evidence_level": "measured",
+      "summary_zh": "将已接受 token 的计数收集、活跃前缀写回和尾部填充融合成一次 Triton 调用。实验覆盖层默认关闭。",
+      "summary_en": "Fuses gathering accepted-token counts, writing the active prefix and filling the tail into one Triton launch. The experimental overlay is default-off.",
+      "compatibility": {
+        "status": "experimental",
+        "host": "vLLM-HUST Engine R10 · BetterScale",
+        "versions": [
+          "R10 2026.11.21.10"
+        ],
+        "platforms": [
+          "Ascend 910B2 ×2, TP2"
+        ],
+        "models": [
+          "Qwen3.5-35B-A3B BF16"
+        ],
+        "requirements_zh": "依赖冻结 R10 已集成的宿主状态路径。仅在基线准入后用隔离覆盖层启动，须在两个 rank 封存前完成预编译。覆盖输入按哈希校验。",
+        "requirements_en": "Depends on the resident-state path in frozen R10. Apply the isolated overlay after base admission and precompile on both ranks before sealing. Source and output identities are hash-verified."
+      },
+      "public_effect_status": "measured",
+      "public_effect_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/249cd6b44d0d63fcd3afe8d868ed542ac5969667/website-publication/data/accepted-state-fusion-20261124/summary.json",
+      "public_effect_zh": "910B2 组件对照中，8／10 活跃行同步完成时间从 162.89／158.30 μs 降到 69.22／67.50 μs。R10 并发 10 的 MMLU-Pro 十题整模筛选中，吞吐 −6.39%，P95 每 token 耗时 +3.22%，答对 10→6。未通过整模筛选。",
+      "public_effect_en": "910B2 component timing at 8/10 active rows changed from 162.89/158.30 μs to 69.22/67.50 μs. In the R10 ten-case MMLU-Pro screen at concurrency 10, throughput changed −6.39%, P95 TPOT +3.22%, and correct answers 10→6. The end-to-end screen did not pass.",
+      "public_effect_detail_zh": [
+        "144 组 CPU 一致性和 7 种 NPU 形状通过验证。整模筛选确认两个 TP rank 均在封存前预编译并在服务中执行该路径。",
+        "整模两臂同卡各一次。两场原生 R10 对照曾分别答对 7 和 10 题，答题差异只作为筛选观察。"
+      ],
+      "public_effect_detail_en": [
+        "144 CPU parity cases and seven device shapes passed. Both TP ranks precompiled before sealing and executed the path during serving.",
+        "The model screen used one session per arm on the same cards. Two native control runs scored 7 and 10 correct. Answer differences are screening observations."
+      ],
+      "upstream_creators": [
+        {
+          "name_en": "vLLM-HUST project",
+          "name_zh": "vLLM-HUST 项目",
+          "url": "https://github.com/vLLM-HUST"
+        }
+      ],
+      "advisors": [],
+      "maintainers": [
+        "ShuhaoZhangTony"
+      ],
+      "maintainer_profiles": [
+        {
+          "login": "ShuhaoZhangTony",
+          "name": "张书豪"
+        }
+      ]
     }
   ]
 }

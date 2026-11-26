@@ -1,0 +1,136 @@
+{
+  "schema": "vllm-hust-experimental-mod-evidence/v1",
+  "id": "accepted-state-fusion",
+  "name_en": "Accepted Token State Fusion",
+  "name_zh": "已接受 Token 状态写回融合",
+  "date": "2026-11-24",
+  "status": "experimental",
+  "reference": {
+    "engine": "2026.11.21.10",
+    "release": "full-answer-b1-20261121-r10",
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "BF16",
+    "device_model": "Ascend 910B2",
+    "tensor_parallel": 2,
+    "graph": "FULL",
+    "speculative_steps": 2
+  },
+  "configuration": {
+    "execution_seats": 36,
+    "resident_seats": 54,
+    "default_enabled": false,
+    "full_model_enabled_for_screen_only": true
+  },
+  "component_test": {
+    "kind": "candidate-component-only-cpu-and-ascend-910b2",
+    "baseline_source_sha256": "fd8e334e31fa385e55049c3234b5c17ee3949782cff1709a880f2da8522f707a",
+    "candidate_source_sha256": "e428fc00edc9bba73c902fede19048d412199b365ab4efb05848c7e85da6c186",
+    "cpu_parity_cases": 144,
+    "npu_shapes": [
+      0,
+      1,
+      8,
+      10,
+      21,
+      35,
+      36
+    ],
+    "graph_correctness_replays_per_shape": 3,
+    "shape_timings": [
+      {
+        "active_rows": 8,
+        "r10_eager_completion_us": 162.89,
+        "candidate_eager_completion_us": 69.22,
+        "r10_graph_event_us": 18.74,
+        "candidate_graph_event_us": 18.18
+      },
+      {
+        "active_rows": 10,
+        "r10_eager_completion_us": 158.3,
+        "candidate_eager_completion_us": 67.5,
+        "r10_graph_event_us": 18.58,
+        "candidate_graph_event_us": 18.05
+      }
+    ],
+    "scope": "Reorder seats, gather accepted-token counts and publish prefix and sentinel tail after the existing H2D; no end-to-end model load.",
+    "retained_component_record_sha256": "e47f442ce50b4cf22a793e7dfe72c248a47dfdcb7052d78b5b73c574af05a5db"
+  },
+  "end_to_end_screen": {
+    "all_sampled_peer_cards_idle": true,
+    "all_services_completed": true,
+    "arm_metrics": {
+      "candidate": {
+        "completion_tokens": 25888,
+        "correct": 6,
+        "mean_tpot_ms": 12.337329973091276,
+        "mean_ttft_ms": 827.5468974024989,
+        "output_tok_s": 383.317410017195,
+        "p95_tpot_ms": 13.894526893450763,
+        "p95_ttft_ms": 1157.895817804092,
+        "truncated": 0,
+        "wall_s": 67.53671845700592
+      },
+      "r10": {
+        "completion_tokens": 28592,
+        "correct": 10,
+        "mean_tpot_ms": 12.071057578298651,
+        "mean_ttft_ms": 828.5352220962523,
+        "output_tok_s": 409.4776370692657,
+        "p95_tpot_ms": 13.46147611913668,
+        "p95_ttft_ms": 1158.9449429535307,
+        "truncated": 1,
+        "wall_s": 69.82554701800109
+      }
+    },
+    "arm_records_sha256": {
+      "candidate": "4c2cf4d18a1aa1b83484415622212f6ac1005dff91c61a786d27b902906b51e4",
+      "r10": "fe71a9ad42ccf5bc6ea57e809856cb67ca6fa96aadb1d6f4932ed492a8cde8bd"
+    },
+    "both_arm_devices_idle_after_release": true,
+    "both_tp_ranks_activated": true,
+    "both_tp_ranks_compiled_before_seal": true,
+    "delta_percent": {
+      "mean_tpot_ms": 2.2059,
+      "mean_ttft_ms": -0.1193,
+      "output_tok_s": -6.3887,
+      "p95_tpot_ms": 3.217,
+      "p95_ttft_ms": -0.0905,
+      "wall_s": -3.2779
+    },
+    "experiment": "r10-accepted-state-publication-experimental",
+    "launch_recovery": {
+      "candidate_seeded_with_readback_triton_cache": true,
+      "fresh_control_reused": true,
+      "initial_candidate_failure": "kernel cache miss after JIT seal",
+      "startup_excluded_from_performance": true
+    },
+    "newly_correct": 0,
+    "newly_wrong": 4,
+    "receipt_sha256": "6244658ca0ff6cfc670ad1415c0497eaa4979c682ab1f6bafe22b4fc6b19241f",
+    "request_plan_sha256": "0b8f6a85272a1882644dd35b6716e688e4829df8842b3ebdea6d8b585c6dbc66",
+    "retained_raw_archive_sha256": "74257c8feffaafa946b7ae6a266db81b1a4588f8de3340bad3563fe62623bb4c",
+    "raw_streams_recomputed": 20,
+    "exact_output_text_pairs": 0,
+    "max_observed_output_tokens": {
+      "candidate": 7808,
+      "r10": 8192
+    }
+  },
+  "separate_native_runs": {
+    "same_node_cards_request_plan_and_launch": true,
+    "correct_across_separate_control_runs": [
+      7,
+      10
+    ],
+    "wall_s_across_separate_control_runs": [
+      70.3741455830168,
+      69.82554701800109
+    ]
+  },
+  "decision_en": "The component timing improved. The released experiment failed the R10 end-to-end integration screen and remains default-off.",
+  "decision_zh": "组件耗时有改善。该实验版本未通过 R10 整模筛选，默认关闭。",
+  "prior_component_evidence": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/5efdd90e62fe1af95adc2d8136cbfb5becbb4a0c/website-publication/data/r10-mod-followup-20261123/summary.json",
+  "prior_end_to_end_evidence": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/76dd9a02db21c307df80c685fba73c294a1bc8e6/website-publication/data/r10-unintegrated-mods-20261124/summary.json",
+  "mod_repository": "https://github.com/vLLM-HUST/vllm-hust-accepted-state-fusion",
+  "reproduction_revision": "914437e16a5a07f2588b4d5467ae2f1fb3ca676e"
+}

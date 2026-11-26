@@ -1,0 +1,199 @@
+{
+  "schema": "vllm-hust-independent-b0-rental-observations/v1",
+  "scope": "Independent historical B0 observations; no new inference or V2 pairing.",
+  "inference_reruns": 0,
+  "model": "Qwen3.5-35B-A3B",
+  "precision": "BF16",
+  "rental_quote": {
+    "provider": "上海有色网（SMM）",
+    "url": "https://news.smm.cn/news/TCNOQJBAJVZYJ73BMVU7G5GJZXQ462A4U6NN4CY",
+    "checked_date": "2026-11-17",
+    "cny_per_card_month": "1875"
+  },
+  "cost_formula": "1e6 * CNY_per_card_month * reserved_cards * elapsed_seconds / (30 * 86400 * successful_output_tokens)",
+  "mmlu_utilization_method": "Sample midpoint, clipped to the same original request window, time-weighted left hold.",
+  "c24_utilization_method": "Original sealed per-card formal window sampling.",
+  "sse_replay": {
+    "path": "data/official-b0-original-sse-replay-20261125-v1/replay-receipt.json",
+    "sha256": "ab53675b995725c3665abb18913a83b4a729745d5587a46af964294045e1a334",
+    "bytes": 18652
+  },
+  "rental_quote_source": {
+    "path": "data/r10-35b-paired-full-20261125/acceptance.json",
+    "sha256": "10453cce812b734e1ce64b857d25bfa0a29df8906d614079999668f9003ec176",
+    "bytes": 14104
+  },
+  "baselines": {
+    "official-0.23.0": {
+      "observations": {
+        "path": "data/official-b0-original-sse-replay-20261125-v1/official-b0-023-observations.json",
+        "sha256": "a5604da89b95f5f988cfb74363f12c5d25c0143dba0a567a03b569c0dc80f040",
+        "bytes": 77783
+      },
+      "workloads": {
+        "mmlu": {
+          "measurement_seal_sha256": "7f6b10975c1797472e66e30d9a507a9958d137f0d46e44d8c9165f8ecba250de",
+          "source_metric": {
+            "path": "mmlu/service/joint.json",
+            "sha256": "c0ad6ebd46dd705a36fe28cd8bb5b93b66dd146c0641d53a09fb8d43c72ab677"
+          },
+          "device_samples_sha256": "458b3a57d237305569d39a5d2071887392c804e1fbaaa391a95054d1077f9275",
+          "physical_cards": [
+            0,
+            7
+          ],
+          "duration_seconds": 705.8374928979902,
+          "successful_output_tokens": 672254,
+          "utilization": {
+            "per_card_percent": {
+              "0": 56.336862859860595,
+              "7": 56.1688712746384
+            },
+            "mean_percent": 56.2528670672495,
+            "covered_seconds": 705.8374928979902,
+            "missing_seconds": 0.0
+          },
+          "estimated_cny_per_million_successful_output_tokens": 1.519034365556038
+        },
+        "real-context-multi-tenant-formal": {
+          "measurement_seal_sha256": "0006f72894683be0ff6934bfde5caccc339dfdb63b3e33466a4f0d45a6f68ea5",
+          "source_metric": {
+            "path": "context/performance-summary.json",
+            "sha256": "c52f3e3b17691ec1d600a05929d1f0e3d0894b664dc2ad3519c20129613e5c34"
+          },
+          "device_samples_sha256": null,
+          "physical_cards": [
+            0,
+            7
+          ],
+          "duration_seconds": 305.8711049349513,
+          "successful_output_tokens": 70144,
+          "utilization": {
+            "per_card_percent": {
+              "0": 46.54364986493172,
+              "7": 44.733400033784974
+            },
+            "mean_percent": 45.63852494935835,
+            "covered_seconds": 305.8711049349513,
+            "missing_seconds": 0.0
+          },
+          "estimated_cny_per_million_successful_output_tokens": 6.3087627338689165
+        }
+      }
+    },
+    "candidate-0.28.0rc1-source": {
+      "observations": {
+        "path": "data/official-b0-original-sse-replay-20261125-v1/official-b0-028-source-observations.json",
+        "sha256": "462f8cdfc1d2404e78cbd9012a54102faac6e853288b5f5bc757645dfd129b02",
+        "bytes": 81787
+      },
+      "workloads": {
+        "mmlu": {
+          "measurement_seal_sha256": "77511d88367dc170820f20803a229d7618ebc8cda4ad0ff84b8382bd04d7459f",
+          "source_metric": {
+            "path": "mmlu/service/joint.json",
+            "sha256": "fff1aa4cdde6bd7399d31b057c504ed6047d1af3f106c479ea87a4a3a80938bb"
+          },
+          "device_samples_sha256": "583239bb667bffb0e14d36ae9e64f69c3755e7e098eaf04c9d360ab467cf8c46",
+          "physical_cards": [
+            0,
+            1
+          ],
+          "duration_seconds": 717.3780096700066,
+          "successful_output_tokens": 689823,
+          "utilization": {
+            "per_card_percent": {
+              "0": 56.86410830297872,
+              "1": 57.51486637957861
+            },
+            "mean_percent": 57.189487341278664,
+            "covered_seconds": 717.3780096700066,
+            "missing_seconds": 0.0
+          },
+          "estimated_cny_per_million_successful_output_tokens": 1.504550120652777
+        },
+        "real-context-multi-tenant-formal": {
+          "measurement_seal_sha256": "811586454e7dcc84645c8b6ede29dfcf469f638de7b3ca1b3f1432a245349eb6",
+          "source_metric": {
+            "path": "context/performance-summary.json",
+            "sha256": "5ba22984f7045f1dbabd0693cf8a2fd4e8bbe78943d46e9b6041401f8bbb7538"
+          },
+          "device_samples_sha256": "2d7a1d5681bc58e4256cc543ea02e449d6b3167c00bbc22213dd466a425cb3d9",
+          "physical_cards": [
+            0,
+            1
+          ],
+          "duration_seconds": 304.94884195399936,
+          "successful_output_tokens": 87552,
+          "utilization": {
+            "per_card_percent": {
+              "0": 54.5240804630427,
+              "1": 56.305345046378896
+            },
+            "mean_percent": 55.4147127547108,
+            "covered_seconds": 304.94884195399936,
+            "missing_seconds": 0.0
+          },
+          "estimated_cny_per_million_successful_output_tokens": 5.039148856649043
+        }
+      }
+    },
+    "official-0.30.0": {
+      "observations": {
+        "path": "data/official-b0-original-sse-replay-20261125-v1/official-b0-030-observations.json",
+        "sha256": "45cdf338bcf0bc64dead3dd4d85f29473766b639ad478097dd5aae798ed2b66f",
+        "bytes": 82152
+      },
+      "workloads": {
+        "mmlu": {
+          "measurement_seal_sha256": "7cba09ad04803d7b7d0a1af2d0ccba04e06eaf97c88cedaa417f279b92000337",
+          "source_metric": {
+            "path": "mmlu/service/joint.json",
+            "sha256": "3c9ce35fbda36a5ec1c27c71b75d8699a1b14c736f79c50bdb41cbdd6ab615db"
+          },
+          "device_samples_sha256": "877ee43262703e4360aa5061ba88fce39e1ee88012706bbecdb5898d9d12df61",
+          "physical_cards": [
+            0,
+            7
+          ],
+          "duration_seconds": 696.1718120160513,
+          "successful_output_tokens": 679774,
+          "utilization": {
+            "per_card_percent": {
+              "0": 58.835673503632684,
+              "7": 57.98698058451767
+            },
+            "mean_percent": 58.41132704407518,
+            "covered_seconds": 696.1718120160513,
+            "missing_seconds": 0.0
+          },
+          "estimated_cny_per_million_successful_output_tokens": 1.4816586322358882
+        },
+        "real-context-multi-tenant-formal": {
+          "measurement_seal_sha256": "df4e771cdd9511538c04da574adfaedfd2610e1cf81bc8f7223a3c1a4318c8a9",
+          "source_metric": {
+            "path": "context/performance-summary.json",
+            "sha256": "5c76f837eb087a4c7e2dd643e23a87ba43638497e7d1bf73e0930ced8c2bd740"
+          },
+          "device_samples_sha256": "fd72fc6e84232166e03e6dcbf0696b998b4b6ac92120933e435ae18d2ccd3719",
+          "physical_cards": [
+            0,
+            7
+          ],
+          "duration_seconds": 305.99264985800255,
+          "successful_output_tokens": 80384,
+          "utilization": {
+            "per_card_percent": {
+              "0": 46.957356852701615,
+              "7": 45.776011798086216
+            },
+            "mean_percent": 46.36668432539392,
+            "covered_seconds": 305.99264985800255,
+            "missing_seconds": 0.0
+          },
+          "estimated_cny_per_million_successful_output_tokens": 5.507286269000568
+        }
+      }
+    }
+  }
+}

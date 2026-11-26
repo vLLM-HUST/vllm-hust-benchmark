@@ -1,4 +1,7 @@
 # The publication index hashes bytes; keep text checkout bytes consistent.
+leaderboard-data/** -text
+docs/data-index.json text eol=lf
+docs/data-entrypoints.json text eol=lf
 website-publication/data/** text=auto eol=lf
 # Pinned upstream report snapshots are also verified by raw-byte SHA256.
 reports/gennova-mod-evidence-20261105/** text=auto eol=lf
@@ -10,5 +13,11 @@ website-publication/data/optimization-exploration-20261115-v1/** -text
 # Ascend-quant evidence: keep archived bytes verbatim (gzip/CSV/JSONL hashes).
 reports/tech-outcomes-20261117/ascend-quant/** -text
 
-# Frozen SWE metric snapshots retain exporter HELP-line endings for SHA verification.
-reports/tech-outcomes-20261117/kv-tiering/diagnostics/swe-pressure-8turn-20261118/numeric/*-metrics.txt -text whitespace=-blank-at-eol
+# Preserve the byte-pinned legacy website archive and source inventory.
+archive/website-legacy-20261118/** -text
+
+# Preserve trailing whitespace in the four SHA256-sealed SWE metric snapshots.
+reports/tech-outcomes-20261117/kv-tiering/diagnostics/swe-pressure-8turn-20261118/numeric/B0-whole-after-metrics.txt -text whitespace=-blank-at-eol
+reports/tech-outcomes-20261117/kv-tiering/diagnostics/swe-pressure-8turn-20261118/numeric/B0-whole-before-metrics.txt -text whitespace=-blank-at-eol
+reports/tech-outcomes-20261117/kv-tiering/diagnostics/swe-pressure-8turn-20261118/numeric/B1-whole-after-metrics.txt -text whitespace=-blank-at-eol
+reports/tech-outcomes-20261117/kv-tiering/diagnostics/swe-pressure-8turn-20261118/numeric/B1-whole-before-metrics.txt -text whitespace=-blank-at-eol

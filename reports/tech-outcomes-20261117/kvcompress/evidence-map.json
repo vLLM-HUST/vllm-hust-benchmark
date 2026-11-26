@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "kind": "historical-evidence-index-not-a-new-measurement",
+  "archive_commit": "aa041953616fa170014a0c7f43fb06bf1c59b846",
+  "custody_manifest": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aa041953616fa170014a0c7f43fb06bf1c59b846/archive/mod-targeted-20261023/compress-history/manifest.json",
+  "sources": [
+    {
+      "path": "archive/mod-targeted-20261023/compress-history/snapshot/docs/archive/results/public-long-context-benchmarks.md",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aa041953616fa170014a0c7f43fb06bf1c59b846/archive/mod-targeted-20261023/compress-history/snapshot/docs/archive/results/public-long-context-benchmarks.md",
+      "sha256": "7b133dd2ee8e19ab61ef547b533e6b458295ba4f1186a17d6a0b6d7a2f6285dd",
+      "bytes": 10650
+    },
+    {
+      "path": "archive/mod-targeted-20261023/compress-history/snapshot/docs/results/evidence/kvcompress-working-tree-20260920-qwen25-public-summary.json",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aa041953616fa170014a0c7f43fb06bf1c59b846/archive/mod-targeted-20261023/compress-history/snapshot/docs/results/evidence/kvcompress-working-tree-20260920-qwen25-public-summary.json",
+      "sha256": "271f3d1d45d40ef0cd44c2ea3e22613db39643cf4ddba73a0e6e750af487fcd4",
+      "bytes": 4694
+    },
+    {
+      "path": "archive/mod-targeted-20261023/compress-history/snapshot/docs/results/evidence/kvcompress-working-tree-20260920-qwen35-public-summary.json",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aa041953616fa170014a0c7f43fb06bf1c59b846/archive/mod-targeted-20261023/compress-history/snapshot/docs/results/evidence/kvcompress-working-tree-20260920-qwen35-public-summary.json",
+      "sha256": "01969f983898bb8d7637bc62e11858ceb14054544140152d2717c93713d114aa",
+      "bytes": 5260
+    },
+    {
+      "path": "archive/mod-targeted-20261023/compress-history/snapshot/docs/results/evidence/kvcompress-qwen35-20261017-v010-swe-pair.json",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aa041953616fa170014a0c7f43fb06bf1c59b846/archive/mod-targeted-20261023/compress-history/snapshot/docs/results/evidence/kvcompress-qwen35-20261017-v010-swe-pair.json",
+      "sha256": "60ae19818c5009dd34490f4131028a919638c8d3b53d598398a3af68271c0cda",
+      "bytes": 7126
+    },
+    {
+      "path": "archive/mod-targeted-20261023/compress-history/snapshot/docs/results/evidence/kvcompress-working-tree-20260920-qwen25-standard-summary.json",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aa041953616fa170014a0c7f43fb06bf1c59b846/archive/mod-targeted-20261023/compress-history/snapshot/docs/results/evidence/kvcompress-working-tree-20260920-qwen25-standard-summary.json",
+      "sha256": "d3a02c6e4eeae9559e9293e0619c19ef18df7a8f8020b1726f7243465dc1ea21",
+      "bytes": 8268
+    },
+    {
+      "path": "archive/mod-targeted-20261023/compress-history/snapshot/docs/archive/results/validation.md",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/aa041953616fa170014a0c7f43fb06bf1c59b846/archive/mod-targeted-20261023/compress-history/snapshot/docs/archive/results/validation.md",
+      "sha256": "86822ca5932a9fea6751499504c1d5125ae0e6bd998f163b17378924bceb4af5",
+      "bytes": 10857
+    }
+  ],
+  "cohorts": [
+    {
+      "id": "standard-14b",
+      "source": "kvcompress-working-tree-20260920-qwen25-public-summary.json",
+      "json_pointer": "/records/0",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "plugin_version": "0.6.0 working tree",
+      "metrics": {
+        "cases": 116,
+        "quality_baseline": 40.51724137931034,
+        "quality_candidate": 39.6551724137931,
+        "quality_delta_pp": -0.8620689655172384,
+        "request_throughput_delta_pct": 7.77642900536264,
+        "total_throughput_delta_pct": 7.766992930955108,
+        "ttft_delta_pct": 4.003820639668176,
+        "tpot_delta_pct": -4.336444251339522,
+        "e2e_delta_pct": -6.985544334709226,
+        "physical_kv_reduction_pct": 61.96136701337296,
+        "scheduler_commits": 116,
+        "worker_acks": 116,
+        "failed": 0,
+        "silent_truncations": 0
+      },
+      "raw_result_sha256": {
+        "baseline_result_sha256": "96372b4a6fcb22c4dfac02fb0c3807f6c92c5704addce04386d882ee606c82ad",
+        "candidate_result_sha256": "fddc5596642657eae855dd51267ac2669a450c11315bc251dc86987b27588b80",
+        "paired_result_sha256": "084037e554011ca583aed0f11d6877c5f5ffba3bdd650cf29fd9d6003e6ccf1c"
+      },
+      "test_scope": {
+        "benchmark": "LongBench-v2 eligible short stratum",
+        "cases": 116,
+        "input_tokens_min": 10171,
+        "input_tokens_max": 31869,
+        "service_max_model_len": 32768,
+        "excluded_medium_long_cases": 387,
+        "truncated_to_fit": false,
+        "model_precision": "FP16",
+        "tensor_parallel_size": 1,
+        "hardware": "1 x Ascend 910B2",
+        "runs_per_arm": 1,
+        "scope_source": "docs/archive/results/public-long-context-benchmarks.md",
+        "dataset_sha256": "06255143af59844e1983c6e92b4d72d743cfeff8295981edcf87be95b538be6c",
+        "dataset_sha256_json_pointer": "/records/0/dataset_sha256"
+      }
+    },
+    {
+      "id": "supplementary-35b",
+      "source": "kvcompress-working-tree-20260920-qwen35-public-summary.json",
+      "json_pointer": "/records/0",
+      "model": "Qwen/Qwen3.5-35B-A3B",
+      "plugin_version": "0.6.0 working tree",
+      "metrics": {
+        "cases": 110,
+        "quality_baseline": 47.27272727272727,
+        "quality_candidate": 47.27272727272727,
+        "quality_delta_pp": 0.0,
+        "request_throughput_delta_pct": -5.826605684133113,
+        "total_throughput_delta_pct": -5.826605684133113,
+        "ttft_delta_pct": 5.6600273030084525,
+        "tpot_delta_pct": 4.435206091636457,
+        "e2e_delta_pct": 4.972375201388446,
+        "physical_kv_reduction_pct": 63.75617792421746,
+        "scheduler_commits": 110,
+        "worker_acks": 220,
+        "failed": 0,
+        "silent_truncations": 0
+      },
+      "raw_result_sha256": {
+        "baseline_result_sha256": "d9773f4d9bc6cb5b6a80029b6eada413e54b38eb6f6f4961f89fe4f3502bcae1",
+        "candidate_result_sha256": "5702235b936c543c9341034636002cfbe6c370ce3533b277c4fe546d16c19f0b",
+        "paired_result_sha256": "3276005869da89f831cb82ccacb84ee0999f9b9c8063eecedf6cae024571294e"
+      }
+    }
+  ]
+}

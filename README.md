@@ -1,11 +1,33 @@
 # vllm-hust-benchmark
 
+[轻量检出、索引维护和附件管理](docs/REPOSITORY_MAINTENANCE.md)提供日常代码维护入口。 数据导航统一检查使用
+`python scripts/refresh_data_navigation.py --check`。 网站当前发布源为
+[website-publication](website-publication/README.md)，由固定提交装配后发布。
+
 只安装独立数据组件、避免检出整个历史归档：见 [固定提交 wheel 安装](docs/workload-data/INSTALLATION.zh-CN.md)。
 
 可选的原始数据目录、读取适配与准备入口见 [Workload Data 使用说明](workload-preparation/README.md)；逐来源实际验证进度见
 [数据集清单](docs/workload-data/DATASET_CHECKLIST.zh-CN.md)。目录登记不代表任务或性能已验证，不改变现有测试规范与结果。
 数据检索与维护入口（Agent）：[数据索引与读写指南](DATA_INDEX.md) ·
 [机器可读集合索引](docs/data-index.json)。覆盖原始运行、报告、历史归档、网站来源和契约，明确读取、 追加、订正与验证规则；不移动或覆盖历史证据。
+
+### 单组 B0/B1 实验
+
+安装本仓库的 CLI（`python -m pip install .`），并在站点执行机准备含单组入口的
+[DeepLinkEngine](https://github.com/DeepLinkNext/DeepLinkEngine) checkout、站点配置及引擎运行环境。 `experiment`
+将参数原样交给该 checkout 的 `deeplink.py benchmark`。默认使用工作区下的 `DeepLinkEngine` 目录，也可用 `DEEPLINKENGINE_ROOT`
+指定已核验版本。相对路径按当前工作目录解析。
+
+```bash
+export DEEPLINKENGINE_ROOT=/path/to/DeepLinkEngine
+common=(--config "$DEEPLINKENGINE_ROOT/experiments/mmlu-pro-200-out256.json" --site "$SITE_CONFIG" --replicas 1 --tp 2)
+vllm-hust-benchmark experiment "${common[@]}" --engine b0-original018 --dry-run
+vllm-hust-benchmark experiment "${common[@]}" --engine b1-r8
+vllm-hust-benchmark experiment "${common[@]}" --engine b1-r8 --controllers request-throttling
+```
+
+每条执行命令独立运行一组。引擎版本和实例数决定数据面，站点 RIDE 管理所选控制器。 省略 `--controllers` 即直连引擎。示例的固定 MMLU-Pro 200 题、256-token
+配置用于服务路径检查。 其他协议的支持范围以 DeepLinkEngine 的工作负载实现为准。R10 固定五项、历史 `run-both` 和真实 Agent 保留各自入口。
 
 SWE-bench Pro
 V1：[从全新 CPU 工作区部署并运行一个真实 Agent](docs/SWE_BENCH_PRO.zh-CN.md#%E6%96%B0%E7%94%A8%E6%88%B7%E6%8E%A8%E8%8D%90%E5%85%A5%E5%8F%A3)。
@@ -16,16 +38,18 @@ V1：[从全新 CPU 工作区部署并运行一个真实 Agent](docs/SWE_BENCH_P
 > removed. The execution scripts and historical design notes below are retained for reference only;
 > new PR validation is performed by the external fixed-machine dataset service.
 
-Wrapper benchmark repository for vllm-hust.
+Benchmark orchestration, workload data, immutable evidence and website publication sources.
+
+生信原生任务的代表模型执行、统计和复核入口见[生信 Benchmark 使用说明](docs/BIO_NATIVE_BENCHMARK.zh-CN.md)。
 
 GenNova 与 GenNova Autotune 的产品级独立测试结果统一维护在
 [GenNova-HUST/gennova-benchmark](https://github.com/GenNova-HUST/gennova-benchmark)（私有仓库，需授权）。 历史
 MOD 证据入口见 [迁移记录](reports/gennova-mod-evidence-20261105/README.md)。
 
-The goal is to keep `vllm-hust-benchmark` as the stable entrypoint for running experiments, while
-the real benchmark implementations stay in `vllm-hust`. This repo resolves the sibling `vllm-hust`
-and `vllm-hust-website` repositories, invokes the benchmark entrypoints from there, and keeps result
-export and website publication flows in one place.
+Current data installation, task execution and publication entrypoints are linked above. The
+historical wrapper CLI delegates performance workloads to sibling `vllm-hust` checkouts and can
+export standard leaderboard snapshots. Its manual examples below describe that compatibility
+interface. Current website publication uses the committed `website-publication` source.
 
 ## Current Delivery Contract
 
@@ -59,8 +83,8 @@ For runtime comparisons, the wrapper now understands two execution targets:
 - `vllm`: the baseline checkout at `../reference-repos/vllm` (override with
   `VLLM_BASELINE_VLLM_REPO`)
 
-Use the already configured conda environment for this workspace. Do not rely on the system Python
-installation for benchmark execution or validation.
+Use the dependency environment specified by the selected task or tool. CPU repository validation
+uses the Python version and test extra declared in CI; model execution follows its pinned runtime.
 
 ## Local Validation Dependencies
 
@@ -132,7 +156,11 @@ Within that boundary, the important design point is:
   receipts and card-rental costs. Solver-enabled measurements, not predictions, native-OFF
   comparisons, task accuracy or official fixed-target leaderboard submissions.
 
-## Quick Start
+## Historical Wrapper CLI Examples
+
+These manual commands describe the retained wrapper interface. For current data installation and
+task execution, use the guides at the top of this README. Website production publication follows
+`website-publication/README.md`; the retired HF/dispatch workflows do not run these examples.
 
 ```bash
 # show the active public target matrix; 3B perfgate profiles are excluded
@@ -894,3 +922,5 @@ Qwen3.5-35B-A3B 配对参考： 快速预留 2–3 小时，全量预留 12–16
 
 [一键执行与完整公开指标](reports/five-datasets-standard-20261113/README.md)：
 15阶段由封存原件重新核验，新增推理0阶段；保留原日期、失败父批次与负结果。 五项范围已执行完成；HLE/Frontier评分未决及真实trace的16K输入覆盖限制仍阻止整体验收。
+
+生信原生任务的版本化注册、五类驱动接口及新增模型操作见 [接入指南](docs/BIO_ONBOARDING.zh-CN.md)。

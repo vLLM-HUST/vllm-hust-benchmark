@@ -25,3 +25,7 @@ streams and diagnostic evidence are accessible to authorized collaborators in th
 HLE, FrontierScience, SWE-bench-Pro and Terminal-Bench 2.1 had no completed pair when this snapshot
 was taken. HLE image handling and host State restore passed hardware preflights. Those checks are
 reported separately from scored workload results.
+
+## 跨实验记录
+
+[SR探索台账与候选处置](../sr-exploration-20261120/README.md)汇总本实验、早期vSpec消融及其他已探索机制，记录不重复推荐原负收益配置的条件。该追加导航不改变上文实验身份、数据、失败或原件。

@@ -1,0 +1,30 @@
+{
+  "$schema": "operator-benchmark-evidence/v1-copy",
+  "operator": "gdn_conv_pack",
+  "device": "910B2 x1",
+  "shape": [
+    4096,
+    1,
+    4
+  ],
+  "layers": 30,
+  "bitwise_equal": true,
+  "calibers": {
+    "eager_single_call_us": {
+      "native": 4.48,
+      "packed": 0.1,
+      "method": "torch.npu.Event-style wall timing, 1000 iterations"
+    },
+    "graph_packed_step_us": {
+      "native": 0.56,
+      "packed": 0.66,
+      "method": "NPUGraph, 20 calls packed per replay, 30 replays"
+    }
+  },
+  "reference_us": {
+    "native": 308.62,
+    "packed": 0.2,
+    "native_30_layers_ms": 9.26,
+    "packed_30_layers_ms": 0.006
+  }
+}

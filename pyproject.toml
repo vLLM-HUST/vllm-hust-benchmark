@@ -15,6 +15,7 @@ dynamic = ["version"]
 dependencies = []
 
 [project.optional-dependencies]
+bio = ["numpy>=1.26", "jsonschema>=4.26,<5", "safetensors>=0.4"]
 test = [
   "pytest>=8",
   "numpy>=1.26",
@@ -29,6 +30,7 @@ publish = ["huggingface_hub>=0.20"]
 workload-validation = ["jsonschema==4.26.0"]
 
 [project.scripts]
+bio-benchmark = "vllm_hust_benchmark.bio:main"
 vllm-hust-benchmark = "vllm_hust_benchmark.cli:main"
 swe-bench-pro = "vllm_hust_benchmark.swe_bench_pro:main"
 perfgate = "vllm_hust_benchmark.perfgate:main"
