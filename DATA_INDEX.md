@@ -3,6 +3,10 @@
 先读 [agent.md](agent.md)，再用本页定位数据。索引只是导航，不证明实验通过、数据可比或 原件已恢复。不要因为文件位于 benchmark
 就把失败、诊断、估算、历史数据当作正式成绩。
 
+## 35B 双 devbox 多轮回放（2026-11-25）
+
+[直连与默认限流层的固定配对](reports/controller-35b-two-devbox-20261125/README.md)保留冻结输入、逐请求记录和分层图。
+
 ## DiffSpec 本轮补证（2026-11-15）
 
 [合并版功能回归与历史原生 Eagle3 配对](reports/tech-outcomes-20261117/diffspec/README.md)：固定 #11 的两真实请求加受控
