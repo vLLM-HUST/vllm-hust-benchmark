@@ -21,6 +21,11 @@ Qwen3.5-35B-A3B、BF16、双 Ascend 910B2、TP2。判据、样本及计时以
 - [B0 0.28 RC 源码候选观测](../website-publication/data/official-b0-028-source-full-report-20261123-v1/observations.json)
   保存五项、三个上下文长度和四租户的逐阶段结果。原整轮状态为 failed，F 与效率留空，算力资格为 ineligible。
 
+## R11 35B 固定五项与 4.1–4.4
+
+[`steady-mixed-1536` 全量证据](../reports/r11-35b-steady-mixed-1536-full-20261126/README.md)包含本轮原生计时、参考分母复算、固定五项、按原
+1.25× 通过的 32K TPOT 五窗口及四租户成本。四项结题均达成。
+
 ## r10 3072 修订版的 V5 4.3 证据
 
 [闭环连续压测配对与 4K 四租户回归](../reports/r10-3072-context-20261124/README.md)记录 Qwen3.5-35B-A3B BF16 TP2 的
