@@ -1,0 +1,76 @@
+{
+  "status": "measured",
+  "model": "Qwen3.5-35B-A3B",
+  "hardware": "2 devboxes, 2 TP2 replicas, 4 Ascend 910B2",
+  "workload": "56 SWE-smith traces x 2 programs x 3 turns",
+  "order": [
+    "direct",
+    "controller"
+  ],
+  "pairs": 1,
+  "source_sha256": {
+    "paired-result.json": "63eca6c02faf5e35a8a6b2649051f5bfed877f4bd1a3a84e44a01cee34dad839",
+    "verified-engine-pool.json": "3a33fec08bef04ae625ac2c107262b44b1ef45fdeb9fdd694f2528bdd5982915",
+    "plan.json": "3cec0ded9936523c2c25f4f684edac5b9d39330ac848c7adb29839c15a6d0c2e",
+    "direct-original-rounds.jsonl": "eafcf9798c798f9e9cb7a703511ca400979f4f7daf499a998ef907f64433ff3b",
+    "controller-original-rounds.jsonl": "dcf56d198f927be6c204e8fd058d247fb722e5b55202244d7ede5cec32bd299c"
+  },
+  "arms": {
+    "direct": {
+      "makespan_seconds": 654.9097,
+      "rounds_succeeded": 336,
+      "rounds_failed": 0,
+      "sessions_completed": 112,
+      "output_tokens_total": 43516,
+      "program_end_to_end_latency_seconds": {
+        "mean": 549.9017,
+        "p50": 547.9564,
+        "p90": 640.7016,
+        "p99": 652.8734,
+        "maximum": 654.9097
+      },
+      "request_ready_to_finish_seconds": {
+        "mean": 180.7178,
+        "p50": 191.8253,
+        "p90": 243.4606,
+        "p99": 342.2859,
+        "maximum": 363.3418
+      },
+      "engine_scrape_counter_deltas": {
+        "prefix_cache_hits_total": 0.0,
+        "prefix_cache_queries_total": 55230430.0,
+        "num_preemptions_total": 0.0
+      }
+    },
+    "controller": {
+      "makespan_seconds": 678.9627,
+      "rounds_succeeded": 336,
+      "rounds_failed": 0,
+      "sessions_completed": 112,
+      "output_tokens_total": 43516,
+      "program_end_to_end_latency_seconds": {
+        "mean": 555.6722,
+        "p50": 559.5088,
+        "p90": 639.1352,
+        "p99": 676.8216,
+        "maximum": 678.9627
+      },
+      "request_ready_to_finish_seconds": {
+        "mean": 182.6035,
+        "p50": 195.2133,
+        "p90": 246.3347,
+        "p99": 344.5991,
+        "maximum": 387.5618
+      },
+      "engine_scrape_counter_deltas": {
+        "prefix_cache_hits_total": 0.0,
+        "prefix_cache_queries_total": 55204908.0,
+        "num_preemptions_total": 0.0
+      }
+    }
+  },
+  "run_id": "myc-b1-delay-managed-pair-1125-r2",
+  "workload_sha256": "78e29e2a60ca71f9e87808cdea6277a4d353a6996e034398ea84267c377672a9",
+  "report_path": "reports/controller-35b-two-devbox-20261125/README.md",
+  "schema": "controller-two-devbox-pair/v1"
+}
