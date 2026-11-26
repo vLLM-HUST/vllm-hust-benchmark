@@ -1,0 +1,209 @@
+{
+  "schema": "vllm-hust-r11-adaptive-tpot-context-screen/v1",
+  "scope": "Qwen3.5-35B-A3B BF16 TP2, fixed Terminal-Bench 2.1 public request replay, C8, out256, nearest rank",
+  "measured_on": "100 cluster 10202",
+  "physical_devices": [
+    2,
+    3
+  ],
+  "release_qualified": false,
+  "selected_for_rc4": false,
+  "selection_reason": "RC4 selects the published 2048 mixed screen for its higher measured 32K output throughput under the approved 1.35 window tolerance.",
+  "source": {
+    "id": "r11-long-prefill-tpot-v1",
+    "status": "unpublished_candidate",
+    "parent_release": "full-answer-b1-20261124-r10",
+    "parent_commit": "bfd23cf66378c80972806b1aae9d1db4afe11b90",
+    "scope": "Keep full pure prefill and one-decoder cold bursts. 32K mixed cap 2048 for a lone decoder outside the initial burst and 1536 for multiple decoders.",
+    "files": {
+      "mods/betterscale/betterscale/models/qwen35/prefill_round_robin.py": {
+        "official_sha256": "ba0c8c90cc5cf1b43e0d6dfa0a17f768f007300f4f9b86016f4eac477ff4b7a9",
+        "prior_candidate_sha256": "1a7ed73312a5e2eb19a46d51bd084bf17870fcb4a0762f4de735c3978906cb4d",
+        "candidate_sha256": "95f4d46b8f9deb5c4e1ab0a65c1bf6ede9d6885b508b18720cbd1912464539e7"
+      },
+      "mods/microflow/hust_prefill_microflow/school028/host-contract.json": {
+        "official_sha256": "a1ff475b2ea7fd6806f56c31e2db4a22b1d801b1051857b6cc398b77f0aa5f9a",
+        "prior_candidate_sha256": "9e8b8f7e1afbfc734796b988c5de306cc9eea0263033d6a61806a4c18a373d94",
+        "candidate_sha256": "7eea7c0bfb9cb1fc0fcbc4a641c7359ab2bdedea057202f7dcbedb2394dad2ba"
+      }
+    }
+  },
+  "patch_sha256": "26c27bdf6ed2869cef77bff2b650bdd51cfd943e4753e528922d1535e67a3ebb",
+  "model_result_4_3": {
+    "milestone": {
+      "met": true,
+      "status": "达成目标",
+      "reason": "16K/4K吞吐≥50%，TTFT P95/P99比值≤3，TPOT P95/P99比值≤2；两臂完整且无失败。"
+    },
+    "final": {
+      "met": true,
+      "status": "达成目标",
+      "reason": "32K全部五个60秒窗口：吞吐max/min≤1.50，TTFT P95/P99≤2，TPOT P95/P99≤1.25；两臂完整且无失败。"
+    },
+    "percentile_method": "nearest_rank",
+    "blocking_errors": {
+      "B0": [],
+      "B1": []
+    },
+    "measured_ratios": {
+      "throughput": "0.6011003756295421901330081585",
+      "ttft_p95": "2.033028375716367891504178161",
+      "ttft_p99": "2.620118778205938913039518718",
+      "tpot_p95": "1.589791187865578870624082800",
+      "tpot_p99": "1.565046722781028376232681870"
+    },
+    "measured_window_ratios": {
+      "throughput": "1.283222064802527702217399093",
+      "ttft_p95": "1.116835737941899689253319657",
+      "ttft_p99": "1.116835737941899689253319657",
+      "tpot_p95": "1.147286936931948818938169034",
+      "tpot_p99": "1.136782168807451449232496410"
+    }
+  },
+  "complete": true,
+  "seals": {
+    "B0": "d5c8704cc4500b5ccf52eb0c5fe87e0bbc3f6cd41d36bcba13ca670124e93bd2",
+    "B1": "bb31b965176e550503143895550b6715c1348b2b7514b4ce5bd2dde48c7e53de"
+  },
+  "verified_files": {
+    "B0": 1524,
+    "B1": 3114
+  },
+  "quiescent": {
+    "B0": true,
+    "B1": true
+  },
+  "workload_contract_sha256": "3d5b3344e219080322872a0fd20357551fb519a9ebc648cf3659773a667b1d5c",
+  "formal_32k": {
+    "B0": {
+      "requests": 45,
+      "successful": 45,
+      "failed": 0,
+      "duration_seconds": 322.87395000405377,
+      "output_tokens": 11520,
+      "output_tokens_per_second": 35.67955853934752,
+      "ttft_ms": {
+        "mean": 19241.23017053482,
+        "p95": 40226.54213302303,
+        "p99": 54096.61851299461
+      },
+      "tpot_ms": {
+        "mean": 144.58636697123035,
+        "p95": 160.96009650203746,
+        "p99": 170.2944302470332
+      }
+    },
+    "B1": {
+      "requests": 93,
+      "successful": 93,
+      "failed": 0,
+      "duration_seconds": 312.8885329810437,
+      "output_tokens": 23808,
+      "output_tokens_per_second": 76.0909956436224,
+      "ttft_ms": {
+        "mean": 15473.622838452067,
+        "p95": 21183.667038974818,
+        "p99": 22558.60568297794
+      },
+      "tpot_ms": {
+        "mean": 44.158370710432514,
+        "p95": 59.145685651010886,
+        "p99": 65.15645185101997
+      }
+    }
+  },
+  "formal_32k_b1_windows": [
+    {
+      "requests": 23,
+      "successful": 23,
+      "failed": 0,
+      "duration_seconds": 93.82443682203302,
+      "output_tokens": 5888,
+      "output_tokens_per_second": 62.75550591546217,
+      "ttft_ms": {
+        "mean": 16672.72949700102,
+        "p95": 20965.518742974382,
+        "p99": 21127.92200903641
+      },
+      "tpot_ms": {
+        "mean": 42.569954823190464,
+        "p95": 56.791766517676926,
+        "p99": 57.316567447018244
+      }
+    },
+    {
+      "requests": 15,
+      "successful": 15,
+      "failed": 0,
+      "duration_seconds": 77.11843180301366,
+      "output_tokens": 3840,
+      "output_tokens_per_second": 49.793543647368864,
+      "ttft_ms": {
+        "mean": 14275.421839327706,
+        "p95": 21497.29600799037,
+        "p99": 21497.29600799037
+      },
+      "tpot_ms": {
+        "mean": 52.627393280527265,
+        "p95": 61.04974019199646,
+        "p99": 61.04974019199646
+      }
+    },
+    {
+      "requests": 19,
+      "successful": 19,
+      "failed": 0,
+      "duration_seconds": 76.12349384400295,
+      "output_tokens": 4864,
+      "output_tokens_per_second": 63.89617389301146,
+      "ttft_ms": {
+        "mean": 14541.847749956345,
+        "p95": 20198.67820898071,
+        "p99": 20198.67820898071
+      },
+      "tpot_ms": {
+        "mean": 44.266403870132315,
+        "p95": 59.82822072555256,
+        "p99": 59.82822072555256
+      }
+    },
+    {
+      "requests": 18,
+      "successful": 18,
+      "failed": 0,
+      "duration_seconds": 78.01245752203977,
+      "output_tokens": 4608,
+      "output_tokens_per_second": 59.067489300643636,
+      "ttft_ms": {
+        "mean": 16516.557961770257,
+        "p95": 22558.60568297794,
+        "p99": 22558.60568297794
+      },
+      "tpot_ms": {
+        "mean": 42.9037139712846,
+        "p95": 63.25036074518792,
+        "p99": 63.25036074518792
+      }
+    },
+    {
+      "requests": 18,
+      "successful": 18,
+      "failed": 0,
+      "duration_seconds": 72.88448595500086,
+      "output_tokens": 4608,
+      "output_tokens_per_second": 63.22333127031994,
+      "ttft_ms": {
+        "mean": 14880.537077448227,
+        "p95": 22424.49107405264,
+        "p99": 22424.49107405264
+      },
+      "tpot_ms": {
+        "mean": 40.27111616184984,
+        "p95": 65.15645185101997,
+        "p99": 65.15645185101997
+      }
+    }
+  ],
+  "accepted_without_tpot_tolerance": true,
+  "scorer_sha256": "1e5c302f2aee21e67b9b43840a6bb521dadda89ab9913572bf149cb94f339a21"
+}

@@ -1,0 +1,88 @@
+{
+  "schema": "9b-current-canonical-dense-decode-tail-projection/v1",
+  "runs": [
+    {
+      "arm": "B0",
+      "repetition": 1,
+      "graph_content_sha256": "c020f6724c60a22250b47041801b8c168db7b7bc74be17249a04cf7e0a9fce94",
+      "geometry_sha256": "9a1e30d837dc913280fd2c3fa79a91263e0c49b2396db4706323a27990a1f22a",
+      "cube_leaves": 30488,
+      "tp_joins": 6386,
+      "conditional_projection_graph_seconds": "4.33146542854309079344",
+      "calibration_method": "Per-rank median device seconds per exact graph replay, Kahn Decimal longest path"
+    },
+    {
+      "arm": "B0",
+      "repetition": 2,
+      "graph_content_sha256": "c020f6724c60a22250b47041801b8c168db7b7bc74be17249a04cf7e0a9fce94",
+      "geometry_sha256": "420c8fcbc09f808f82cff1128f9d0f943e1d75ceffb9a321ca5deb65b680beef",
+      "cube_leaves": 30488,
+      "tp_joins": 6386,
+      "conditional_projection_graph_seconds": "4.33146542854309079344",
+      "calibration_method": "Per-rank median device seconds per exact graph replay, Kahn Decimal longest path"
+    },
+    {
+      "arm": "B0",
+      "repetition": 3,
+      "graph_content_sha256": "d3155e539870c47e68aca639b76bc3dc51641a370a418c5a821ad09e7b501073",
+      "geometry_sha256": "082a15906f383ffee7b163240cc516b36bbe13622d74b211a76088a64e7be6cc",
+      "cube_leaves": 30488,
+      "tp_joins": 6386,
+      "conditional_projection_graph_seconds": "4.33414594385147093825",
+      "calibration_method": "Per-rank median device seconds per exact graph replay, Kahn Decimal longest path"
+    },
+    {
+      "arm": "B1",
+      "repetition": 1,
+      "graph_content_sha256": "7ca3bf33300f717d21ea9c0ba5ac6f55099fd85989be3077444c238e23e7d0de",
+      "geometry_sha256": "74dc2b78e3d41e5079f92ad5e410610e9a27e765f811351ba1b873dd7d869892",
+      "cube_leaves": 27528,
+      "tp_joins": 5766,
+      "conditional_projection_graph_seconds": "3.85130292449951169675",
+      "calibration_method": "Per-rank median device seconds per exact graph replay, Kahn Decimal longest path"
+    },
+    {
+      "arm": "B1",
+      "repetition": 2,
+      "graph_content_sha256": "8286ac10437e61b3ebfb08f1b6118266164179a1d1a161b2d170de67071d53ba",
+      "geometry_sha256": "7e9c933d9092f8f67b76ce9f78e77e7ae235ea75d37df3b2cab92bafd0616b2c",
+      "cube_leaves": 30784,
+      "tp_joins": 6448,
+      "conditional_projection_graph_seconds": "4.32056235124588010057",
+      "calibration_method": "Per-rank median device seconds per exact graph replay, Kahn Decimal longest path"
+    },
+    {
+      "arm": "B1",
+      "repetition": 3,
+      "graph_content_sha256": "040963071a0475bed9f01d1069d59c5a8e0df2d0737ff3694d125b720c31c178",
+      "geometry_sha256": "951b2d5d2da85fb1942abc93833aa41131d48d4b8b0193923a7091197261b043",
+      "cube_leaves": 29600,
+      "tp_joins": 6200,
+      "conditional_projection_graph_seconds": "4.14529821949005123879",
+      "calibration_method": "Per-rank median device seconds per exact graph replay, Kahn Decimal longest path"
+    }
+  ],
+  "original_projection_source_sha256": "4e35df3698a37435ce40eaf172fa45dfb0177d3294df8f52529d9f91df2793e6",
+  "calibration_sha256": "247fe1ebbb7b70d777ffd78673ae8ca97270a42ec4daa87bc8ce8e04e8a5d814",
+  "same_card": [
+    4,
+    5
+  ],
+  "component_calibration_source": "new exact same-card canonical per-rank dense BF16 probes",
+  "necessary_scope": "target decode tail, excludes last full attention layer",
+  "unrepresented": [
+    "target prefill",
+    "target final layer and vocabulary",
+    "MTP",
+    "nonmatrix work",
+    "GDN core",
+    "communication, movement and host scheduling"
+  ],
+  "formal_reference_seconds": null,
+  "efficiency_percent": null,
+  "formal_4_1_eligible": false,
+  "source_operation_runtime_applicability_certified": false,
+  "whole_model_wall_time_used": false,
+  "remote_directory": "/mnt/gennova-v41-private/nvme/r11-qwen9b-tail-recompute-20261125-J4b9kVBl",
+  "script_bytes": 10059
+}

@@ -1,0 +1,88 @@
+{
+  "schema": "vllm-hust-r11-qwen35-context-finishable-mixed-screen/v1",
+  "release": "full-answer-b1-20261125-r11-rc4-qwen35-finishable-mixed",
+  "model": "Qwen3.5-35B-A3B",
+  "rc4_commit": "6ae9e2a06ba5d057e37746e8d56e41a16b63ec36",
+  "source_and_contract": {
+    "release": "full-answer-b1-20261125-r11-rc4-qwen35-finishable-mixed",
+    "rc4_commit": "6ae9e2a06ba5d057e37746e8d56e41a16b63ec36",
+    "deployment_sha256": "87a0f5bdba1fb25b7b87ead4f951e02b02ae07999edf05ae2900bfc7526dcf70",
+    "installed_files_sha256": "adca2dd17793da6bf3b24297e96433e5b95f7a9457898dd8f34382aae387e5c5",
+    "base_release": "full-answer-b1-20261124-r10",
+    "scheduler_and_host_contract_sha256": {
+      "mods/betterscale/betterscale/models/qwen35/prefill_round_robin.py": "954b787ac34384805c7964549bf00ebbb7393a3911c131eeabf300cd66a6c671",
+      "mods/microflow/hust_prefill_microflow/school028/host-contract.json": "d8b055a3ba567b5200645e6e035d3bc15fa7d3af8bbed19f3a603662dfedb14b"
+    },
+    "b0_controller_sources_sha256": "21a4ec50bb179fdf134da669e244e4ec57aa83eed388cc796c44db05d864c37b",
+    "b0_seal_sha256": "0d234f1b14313806a2918a1ac66ee4f132f71f983446e3bd1e1c917ae352c920",
+    "contract_sha256": "3d5b3344e219080322872a0fd20357551fb519a9ebc648cf3659773a667b1d5c",
+    "physical_cards": [
+      2,
+      3
+    ],
+    "logical_cards": [
+      2,
+      3
+    ],
+    "no_prior_model_measurement": true,
+    "controller_adaptations": {
+      "scripts/context_baseline_reuse.py": {
+        "older": "ea17a7f601442d345387cd93dd1b6b485b23a35fefd7e9bbd9372d431dee1a7a",
+        "actual": "a14143002c9355b25964710b8abe17ef34ff4f497e73fa6bcffda6fc54163bb2"
+      },
+      "scripts/official_memory.py": {
+        "older": "53b7258de42be7a8a6c15ec1778c518c6b4de3f7e8b776bdd7463a5d07a46d24",
+        "actual": "8dd3adf7bb9850e88deb3077340efbd05b7a69c86008b2ebbaac6acf97276efc"
+      }
+    }
+  },
+  "arm_seals": {
+    "B0": "0d234f1b14313806a2918a1ac66ee4f132f71f983446e3bd1e1c917ae352c920",
+    "B1": "e4c064db7bf10694cc0a86acca02c7381a77895ea3de3594bf4559363148cdb0"
+  },
+  "exact_report_source_sha256": "1e5c302f2aee21e67b9b43840a6bb521dadda89ab9913572bf149cb94f339a21",
+  "target_4_3": {
+    "milestone": {
+      "met": false,
+      "status": "未达成目标",
+      "reason": "16K/4K吞吐≥50%，TTFT P95/P99比值≤3，TPOT P95/P99比值≤2；两臂完整且无失败。"
+    },
+    "final": {
+      "met": false,
+      "status": "未达成目标",
+      "reason": "32K全部五个60秒窗口：吞吐max/min≤1.50，TTFT P95/P99≤2，TPOT P95/P99≤1.25；两臂完整且无失败。"
+    },
+    "percentile_method": "nearest_rank",
+    "blocking_errors": {
+      "B0": [],
+      "B1": [
+        "service.log:4926: (APIServer pid=3187111) ERROR 11-26 00:34:52 [async_llm.py:829] Traceback (most recent call last):"
+      ]
+    },
+    "measured_ratios": {
+      "throughput": "0.6007677221528047259679638063",
+      "ttft_p95": "1.785846515316261125843031970",
+      "ttft_p99": "2.633318779280904507817270079",
+      "tpot_p95": "1.545342531851490617726913763",
+      "tpot_p99": "1.467008859742683892643862223"
+    },
+    "measured_window_ratios": {
+      "throughput": "1.386973622645024017074038106",
+      "ttft_p95": "1.349566979301937558279914899",
+      "ttft_p99": "1.349786680783485685573555896",
+      "tpot_p95": "1.388775871804669820565142891",
+      "tpot_p99": "1.142947051607495569648661089"
+    }
+  },
+  "target_4_4_four_tenant": {
+    "final": {
+      "met": false,
+      "status": "未达成目标",
+      "reason": "4K 四租户按公开月租折算的单位成本下降≥30%，B1 双卡 AI Core 均值≥80%，两臂各租户完整结束。",
+      "evidence_status": "published_rental"
+    },
+    "four_tenant_ai_core_mean_percent": null,
+    "four_tenant_cost_reduction_percent": "65.84869229011310079680856204"
+  },
+  "sample_scope": "Independent same-pair context and four-tenant supplement"
+}

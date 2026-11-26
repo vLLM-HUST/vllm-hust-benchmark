@@ -1,0 +1,99 @@
+{
+  "schema": "qwen35-9b-4.1-current-reference-coverage/v1",
+  "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+  "native_checkpoint_config_sha256": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+  "physical_cards": [
+    4,
+    5
+  ],
+  "measurement_boundary": "native BF16 TP2 original fixed200 × max256 per arm and repetition",
+  "same_card_completed_components": [
+    {
+      "family": "target decode tail dense projected GEMM",
+      "old_cases_repeated": 0,
+      "cases_per_rank": 648,
+      "canonical_repetitions": 5,
+      "evidence_sha256": "67c88dd07b99db870240b00b74a802d340969499ef55cdd96fc368ecfab81838"
+    },
+    {
+      "family": "4096-wide B1 hidden GemmaRMSNorm (plain/residual)",
+      "cases_per_rank": 216,
+      "canonical_repetitions": 3,
+      "evidence_sha256": "af0dc6cad1edf93881ab0787c5201ff4ef5b6657a25b1180a9acd116798d99b3"
+    },
+    {
+      "family": "6144-wide B1 canonical dense SwiGLU",
+      "cases_per_rank": 108,
+      "canonical_repetitions": 3,
+      "evidence_sha256": "af0dc6cad1edf93881ab0787c5201ff4ef5b6657a25b1180a9acd116798d99b3"
+    },
+    {
+      "family": "B1 rank-local BF16 vocabulary projection, N=124160, K=4096",
+      "cases_per_rank": 108,
+      "canonical_repetitions": 3,
+      "reference_sampler_change": "two hardcoded width sites only",
+      "evidence_sha256": "2c931feb6de381f713772dd8427d14eba6a428608e533533eba58cda0d973d3c"
+    }
+  ],
+  "recomputable_projection": {
+    "sha256": "77acecc55567e2ad7f48d1082ce81f88e80132558318bd9a8e27250d26da52d9"
+  },
+  "public_arithmetic_candidate": {
+    "sha256": "de293107fafb303049bac7897ee17935f33a44ebd39aa159b6511ef886f6e10e"
+  },
+  "recovered_collective_source": {
+    "sha256": "b1c0b06375e7ec723805d120d0857e8f9a6c90b581a0afd9420bcb78e8a46c0f"
+  },
+  "pending_reference_families": [
+    {
+      "family": "native prefill and final target attention layer complete DAG",
+      "reason": "exact retained work shape and lane/resource-order bindings missing"
+    },
+    {
+      "family": "MTP target hidden-state/KV producer closure and projection/attention/logits timing",
+      "reason": "distinct draft shape bundles and source-based episode cardinality not yet admitted"
+    },
+    {
+      "family": "GDN conv/preprocess/wy/ho/recurrent and gated norm",
+      "reason": "currents shapes must be tied to inside replay GDN mode and segmented counts before sampling"
+    },
+    {
+      "family": "FIA Q8/KV2/D256, mRoPE, Q/K norm and softmax",
+      "reason": "35B rank-local FIA dimensions must not stand in for 9B native dispatch"
+    },
+    {
+      "family": "TP HCCL, logits topk/select, movement, synchronization and metadata",
+      "reason": "exact collective/live shape and stream/resource DAG remain missing"
+    }
+  ],
+  "formal": {
+    "reference_time_available": false,
+    "formal_4_1_eligible": false,
+    "efficiency_percent": null,
+    "original_35b_reference_reuse_allowed": false
+  },
+  "source_admission_for_future_9b_gdn_panel": {
+    "kernel": "runtime/betterscale-distribution/betterscale/patches/qwen_gdn/libbs_gdn.so",
+    "kernel_sha256": "1c522f04a701d3423798b4b7f157737ef41956be25cf46842b6ba33c7ec41bea",
+    "matches_original_canonical_h_o_probe_binary": true,
+    "host_abi_sha256": "f99b8e76381933592a8fea29fad6f88cd507f36c0a592400e8ea956e21c2390e",
+    "rank_shape": {
+      "gdn_local_key_heads": 8,
+      "gdn_local_value_heads": 16,
+      "key_dim": 128,
+      "value_dim": 128
+    },
+    "production_mixed_core_sha256": "a9981e438e52702be1f3ad6b03a8e0f4c1d2e8b38161140c11a5b7896c10829b",
+    "production_pool_forward_source_verified": true,
+    "shape_and_state_invariance_pending": true
+  },
+  "source_repair_for_current_9b_mtp_observer": {
+    "uses_native_fia": true,
+    "graph_length_operand": "corrected AscendMetadata.seq_lens_list",
+    "expected_source_runtime_note": "9B dense integration keeps the original native task-update and host synchronization instead of adding Owned-FIA device length storage",
+    "attention_source_sha256": "451787b1f98c55faf6ffcff0574f959ae4d5cf39ea378e54cf640eed50170a2e",
+    "first_attempt_status": "rejected on a device-length field absent from this 9B path before any trace wave closed",
+    "first_attempt_cards_released": true,
+    "source_repaired_attempt_state_file": "observer-r2-state.json"
+  }
+}

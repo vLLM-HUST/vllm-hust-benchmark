@@ -1,0 +1,283 @@
+{
+  "schema": "vllm-hust-r11-rc4-qwen9b-fixed-track-readback/v1",
+  "runtime": "full-answer-b1-20261125-r11-rc4",
+  "engine_source_commit": "6ae9e2a06ba5d057e37746e8d56e41a16b63ec36",
+  "reference_arm": "same-model, same-card sealed B0",
+  "model": "qwen3.5-9b",
+  "checkpoint_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+  "cluster_node": 10204,
+  "physical_cards": [
+    4,
+    5
+  ],
+  "fixed_five_qualification": "HLE pending independent pair judge",
+  "tracks": {
+    "MMLU-Pro 200": {
+      "cases_per_arm": 200,
+      "quality": {
+        "populations": {
+          "b0": {
+            "planned": 200,
+            "completed": 200,
+            "failed": 0,
+            "correct": 140,
+            "explicit_budget_caps": 24,
+            "premature_length_request_indexes": [],
+            "service_met": true
+          },
+          "b1": {
+            "planned": 200,
+            "completed": 200,
+            "failed": 0,
+            "correct": 144,
+            "explicit_budget_caps": 23,
+            "premature_length_request_indexes": [],
+            "service_met": true
+          }
+        },
+        "accuracy_drop_pp": "-2",
+        "quality_drop_limit_pp": 5,
+        "quality_met": true,
+        "service_met": true,
+        "valid_explicit_max_budget_lengths_scored": true
+      },
+      "measurement": {
+        "b0": {
+          "successful": 200,
+          "failed": 0,
+          "successful_output_tokens": 728885,
+          "seconds": 1128.3440202709753,
+          "successful_output_tok_s": 645.9776335101736,
+          "ttft_ms": 424778.3274915532,
+          "tpot_ms": 31.59640258648706,
+          "p95_ttft_ms": 847046.6421046294,
+          "p99_ttft_ms": 877110.0698951591,
+          "p95_tpot_ms": 37.4802233062733,
+          "p99_tpot_ms": 43.827112251361754
+        },
+        "b1": {
+          "successful": 200,
+          "failed": 0,
+          "successful_output_tokens": 701576,
+          "seconds": 324.74779309198493,
+          "successful_output_tok_s": 2160.371879113212,
+          "ttft_ms": 105730.59025183931,
+          "tpot_ms": 14.541679184517614,
+          "p95_ttft_ms": 238250.2262259659,
+          "p99_ttft_ms": 246136.55719399912,
+          "p95_tpot_ms": 15.949362987170785,
+          "p99_tpot_ms": 16.4619299241405
+        }
+      },
+      "candidate_to_baseline_ratios": {
+        "throughput_ratio": 3.3443447064474685,
+        "ttft_ratio": 0.2489076852771915,
+        "tpot_ratio": 0.46023211486540255
+      },
+      "isolated_candidate_4_2_gates": {
+        "milestone": true,
+        "final": true
+      },
+      "evidence": [
+        {
+          "path": "mmlu-c24/canonical-goals.json",
+          "sha256": "88c56f75fe3bdca9bb0ce797f2645ec82162811223ac3515bd59223176dab1d7"
+        },
+        {
+          "path": "mmlu-c24/paired-metrics.json",
+          "sha256": "238938469dab5e6b793c24ecc9d2cb3a53574f016183b93a0671cf9a714c3bd4"
+        }
+      ]
+    },
+    "FrontierScience 160": {
+      "cases_per_arm": 160,
+      "candidate_to_baseline_ratios": {
+        "throughput_ratio": "3.254514454216989293529283374",
+        "ttft_ratio": "0.3199399331537661335328663233",
+        "tpot_ratio": "0.3356825890439528865702339687"
+      },
+      "quality_gate": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "固定计划分母；未决计非成功；HLE比较总体，Frontier分别比较两个赛道，绝对下降≤5个百分点。",
+        "drop_pp": {
+          "olympiad": "3",
+          "research": "3.333333333333333333333333333"
+        }
+      },
+      "judge": {
+        "b0": {
+          "status_counts": {
+            "ok": 151,
+            "invalid_judge": 9
+          },
+          "tracks": {
+            "olympiad": {
+              "total": 100,
+              "successes": 51,
+              "judge_invalid": 3,
+              "judge_transport_failures": 0
+            },
+            "research": {
+              "total": 60,
+              "successes": 4,
+              "judge_invalid": 6,
+              "judge_transport_failures": 0
+            }
+          }
+        },
+        "b1": {
+          "status_counts": {
+            "ok": 155,
+            "invalid_judge": 5
+          },
+          "tracks": {
+            "olympiad": {
+              "total": 100,
+              "successes": 48,
+              "judge_invalid": 2,
+              "judge_transport_failures": 0
+            },
+            "research": {
+              "total": 60,
+              "successes": 2,
+              "judge_invalid": 3,
+              "judge_transport_failures": 0
+            }
+          }
+        }
+      },
+      "measurement": {
+        "b0": {
+          "requests": 160,
+          "successful": 160,
+          "failed": 0,
+          "seconds": 2604.6913232009974,
+          "output_tokens": 1208229,
+          "output_tokens_per_second": 463.86648169701914,
+          "mean_ttft_ms": 674.6118202772777,
+          "mean_tpot_ms": 30.59037318982103
+        },
+        "b1": {
+          "requests": 160,
+          "successful": 160,
+          "failed": 0,
+          "seconds": 741.53443444398,
+          "output_tokens": 1119465,
+          "output_tokens_per_second": 1509.6601695097293,
+          "mean_ttft_ms": 215.83526068425272,
+          "mean_tpot_ms": 10.268655672179847
+        }
+      },
+      "judge_denominator_policy": "invalid judgement counted as a non-success on the original fixed cohort",
+      "isolated_candidate_4_2_gates": {
+        "milestone": true,
+        "final": true
+      },
+      "evidence": [
+        {
+          "path": "frontier-quality-audited/audit.json",
+          "sha256": "061578cf0d63a6a1864d7fd6e3ff73de8c51c663afb9f7422a1d98c8e17ac937"
+        }
+      ]
+    },
+    "SWE-bench-Pro 64": {
+      "cases_per_arm": 64,
+      "scope": "Fixed public request trace performance on the isolated exact 9B candidate",
+      "solve_rate_measured": false,
+      "measurement": {
+        "b0": {
+          "successful": 64,
+          "failed": 0,
+          "successful_output_tokens": 7231,
+          "seconds": 126.1613879739889,
+          "successful_output_tok_s": 57.31547596393628,
+          "ttft_ms": 2703.1281658437365,
+          "tpot_ms": 107.3772382627765,
+          "p95_ttft_ms": 5605.169643997215,
+          "p99_ttft_ms": 10270.813991024625,
+          "p95_tpot_ms": 144.71481771407915,
+          "p99_tpot_ms": 165.6672612996772
+        },
+        "b1": {
+          "successful": 64,
+          "failed": 0,
+          "successful_output_tokens": 8171,
+          "seconds": 61.85129283100832,
+          "successful_output_tok_s": 132.1071820167933,
+          "ttft_ms": 1866.0421318463705,
+          "tpot_ms": 48.14891786849413,
+          "p95_ttft_ms": 3988.132584025152,
+          "p99_ttft_ms": 5659.30188994389,
+          "p95_tpot_ms": 70.84954653848679,
+          "p99_tpot_ms": 86.87280256253871
+        }
+      },
+      "candidate_to_baseline_ratios": {
+        "successful_output_tok_s": 2.304912936602272,
+        "ttft_ms": 0.6903269165795979,
+        "tpot_ms": 0.4484089798497405,
+        "cny_per_million_successful_output_tokens": 0.43385586679648047
+      },
+      "isolated_candidate_4_2_gates": {
+        "milestone": true,
+        "final": true
+      },
+      "evidence": [
+        {
+          "path": "fixed-text/trace-paired-original-audit.json",
+          "sha256": "8b4c3372bbe285938944b931acc3d9ace87c1c1af24e2130a766ba4815c06709"
+        }
+      ]
+    },
+    "TerminalBench 2.1 48": {
+      "cases_per_arm": 48,
+      "scope": "Fixed public request trace performance on the isolated exact 9B candidate",
+      "solve_rate_measured": false,
+      "measurement": {
+        "b0": {
+          "successful": 48,
+          "failed": 0,
+          "successful_output_tokens": 15069,
+          "seconds": 148.76218591199722,
+          "successful_output_tok_s": 101.29590330780916,
+          "ttft_ms": 3123.604495660402,
+          "tpot_ms": 71.33091337425219,
+          "p95_ttft_ms": 8562.10324598942,
+          "p99_ttft_ms": 11763.906047970522,
+          "p95_tpot_ms": 141.80367571176387,
+          "p99_tpot_ms": 171.54047105176343
+        },
+        "b1": {
+          "successful": 48,
+          "failed": 0,
+          "successful_output_tokens": 14996,
+          "seconds": 68.33219647902297,
+          "successful_output_tok_s": 219.4573096242203,
+          "ttft_ms": 1995.9335580436648,
+          "tpot_ms": 30.766045708608768,
+          "p95_ttft_ms": 5536.693592031952,
+          "p99_ttft_ms": 6505.30953600537,
+          "p95_tpot_ms": 59.73668542470502,
+          "p99_tpot_ms": 102.71762430343325
+        }
+      },
+      "candidate_to_baseline_ratios": {
+        "successful_output_tok_s": 2.166497384966819,
+        "ttft_ms": 0.6389840841939493,
+        "tpot_ms": 0.43131433838773986,
+        "cny_per_million_successful_output_tokens": 0.46157452436311863
+      },
+      "isolated_candidate_4_2_gates": {
+        "milestone": true,
+        "final": true
+      },
+      "evidence": [
+        {
+          "path": "fixed-text/trace-paired-original-audit.json",
+          "sha256": "8b4c3372bbe285938944b931acc3d9ace87c1c1af24e2130a766ba4815c06709"
+        }
+      ]
+    }
+  }
+}
