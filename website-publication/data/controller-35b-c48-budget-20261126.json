@@ -1,0 +1,143 @@
+{
+  "schema": "controller-35b-budget/v1",
+  "model": "Qwen3.5-35B-A3B BF16",
+  "replicas": 1,
+  "tp": 2,
+  "concurrency": 48,
+  "programs": 48,
+  "initial_context_tokens": 40000,
+  "scheduler_budget_tokens": 327680,
+  "physical_capacity_tokens": 1869824,
+  "batch_rounds": 3,
+  "batch": {
+    "direct": {
+      "makespan_s": 1514.5489,
+      "steps_min": 5.704668895140989,
+      "output_tokens": 36046,
+      "output_tokens_sec": 23.799825809519916,
+      "program_p99_s": 1514.5489,
+      "request_p99_s": 817.9434,
+      "mean_waiting": 34.15863453815261,
+      "failures": 0,
+      "cache_served_pct": 0.0,
+      "lookup_hit_pct": 0.0,
+      "npu_hours_tp2": 0.8414160555555555,
+      "max_active_programs": null,
+      "paused": 0,
+      "resumed": 0,
+      "marked": 0,
+      "counters": {
+        "request_prefill_kv_computed_tokens_sum": 5849715.0,
+        "prompt_tokens_cached_total": 0.0,
+        "prompt_tokens_total": 5849715.0,
+        "generation_tokens_total": 36046.0,
+        "prefix_cache_hits_total": 0.0,
+        "prefix_cache_queries_total": 116598814.0,
+        "num_preemptions_total": 0.0
+      }
+    },
+    "default": {
+      "makespan_s": 1492.4803,
+      "steps_min": 5.789021134818329,
+      "output_tokens": 36046,
+      "output_tokens_sec": 24.151742572414523,
+      "program_p99_s": 1492.4803,
+      "request_p99_s": 1392.3065,
+      "mean_waiting": 26.997964721845317,
+      "failures": 0,
+      "cache_served_pct": 3.921148295258829,
+      "lookup_hit_pct": 0.20684084879160788,
+      "npu_hours_tp2": 0.8291557222222222,
+      "max_active_programs": 44,
+      "paused": 0,
+      "resumed": 16,
+      "marked": 0,
+      "counters": {
+        "request_prefill_kv_computed_tokens_sum": 5620339.0,
+        "prompt_tokens_cached_total": 229376.0,
+        "prompt_tokens_total": 5849715.0,
+        "generation_tokens_total": 36046.0,
+        "prefix_cache_hits_total": 229376.0,
+        "prefix_cache_queries_total": 110894923.0,
+        "num_preemptions_total": 0.0
+      }
+    },
+    "limited": {
+      "makespan_s": 713.4523,
+      "steps_min": 12.110129857314917,
+      "output_tokens": 36046,
+      "output_tokens_sec": 50.52334963388582,
+      "program_p99_s": 713.4523,
+      "request_p99_s": 680.386,
+      "mean_waiting": 0.7418899858956276,
+      "failures": 0,
+      "cache_served_pct": 59.587449986879705,
+      "lookup_hit_pct": 29.933933185180763,
+      "npu_hours_tp2": 0.3963623888888889,
+      "max_active_programs": 7,
+      "paused": 0,
+      "resumed": 43,
+      "marked": 0,
+      "counters": {
+        "request_prefill_kv_computed_tokens_sum": 2364019.0,
+        "prompt_tokens_cached_total": 3485696.0,
+        "prompt_tokens_total": 5849715.0,
+        "generation_tokens_total": 36046.0,
+        "prefix_cache_hits_total": 7798784.0,
+        "prefix_cache_queries_total": 26053322.0,
+        "num_preemptions_total": 0.0
+      }
+    }
+  },
+  "window_seconds": 600,
+  "maximum_rounds": 16,
+  "window": {
+    "direct": {
+      "request_success_total": 50.0,
+      "request_prefill_kv_computed_tokens_sum": 2002128.0,
+      "prompt_tokens_total": 2284405.0,
+      "prompt_tokens_cached_total": 0.0,
+      "generation_tokens_total": 10528.0,
+      "prefix_cache_hits_total": 0.0,
+      "prefix_cache_queries_total": 44692512.0,
+      "num_preemptions_total": 0.0,
+      "interval": [
+        0.03,
+        599.159
+      ],
+      "mean_waiting": 42.126929674099486
+    },
+    "default": {
+      "request_success_total": 54.0,
+      "request_prefill_kv_computed_tokens_sum": 2166145.0,
+      "prompt_tokens_total": 2366956.0,
+      "prompt_tokens_cached_total": 0.0,
+      "generation_tokens_total": 10360.0,
+      "prefix_cache_hits_total": 0.0,
+      "prefix_cache_queries_total": 46912825.0,
+      "num_preemptions_total": 0.0,
+      "interval": [
+        0.074,
+        599.572
+      ],
+      "mean_waiting": 33.00683760683761
+    },
+    "limited": {
+      "request_success_total": 221.0,
+      "request_prefill_kv_computed_tokens_sum": 1475399.0,
+      "prompt_tokens_total": 9978120.0,
+      "prompt_tokens_cached_total": 8486912.0,
+      "generation_tokens_total": 59651.0,
+      "prefix_cache_hits_total": 11493376.0,
+      "prefix_cache_queries_total": 15556950.0,
+      "num_preemptions_total": 0.0,
+      "interval": [
+        0.029,
+        599.645
+      ],
+      "mean_waiting": 0.3259005145797599
+    }
+  },
+  "programs_with_completed_step": 18,
+  "completed_programs": 11
+}
