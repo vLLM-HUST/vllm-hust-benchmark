@@ -38,7 +38,7 @@ def test_published_mod_links_resolve_to_benchmark_originals():
     found = set()
     prefix = (
         "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/"
-        "819b1975f346dca514f58880ca62518850100b2d/"
+        "4709ab7ca83264c7c76cf4518044252ac4cb5164/"
     )
     for component in registry["components"]:
         if component["id"] in expected:

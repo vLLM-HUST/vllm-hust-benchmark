@@ -93,6 +93,11 @@ def test_refuses_to_overwrite_or_write_inside_source(tmp_path):
 
 
 def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
+    advisor = {
+        "name_zh": "张书豪",
+        "name_en": "Shuhao Zhang",
+        "relationship": "internal",
+    }
     source = tmp_path / "source"
     (source / "data").mkdir(parents=True)
     (source / "assets").mkdir()
@@ -113,7 +118,20 @@ def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
                     "id": "betterscale",
                     "documentation_url": "./betterscale.html",
                     "canonical_repository": "https://github.com/vLLM-HUST/BetterScale",
-                }
+                    "advisors": [{**advisor, "private_note": "unpublished"}],
+                },
+                {
+                    "id": "traceloom",
+                    "documentation_url": "./traceloom.html",
+                    "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-perf-analyzer",
+                    "advisors": [advisor],
+                },
+                {
+                    "id": "stateaxis-async-kv-transfer",
+                    "maintainers": ["example-maintainer"],
+                    "canonical_repository": "https://github.com/private-example/transfer",
+                    "summary_en": "Internal notes for private-example.",
+                },
             ]
         },
         "data/mod-taxonomy.json": {"components": {"betterscale": {}}},
@@ -133,16 +151,83 @@ def test_betterscale_restores_only_the_reviewed_catalog_card(tmp_path):
     }
     catalog = output / "data/ecosystem.json"
     data = json.loads(catalog.read_text())
-    [card] = data["components"]
-    assert card["id"] == "betterscale"
+    cards = {item["id"]: item for item in data["components"]}
+    assert set(cards) == {"betterscale", *projection.PUBLIC_MOD_PREVIEWS}
+    assert cards["traceloom"]["advisors"] == [advisor]
+    assert "documentation_url" not in cards["traceloom"]
+    assert "canonical_repository" not in cards["traceloom"]
+    stateaxis = cards["stateaxis-async-kv-transfer"]
+    assert stateaxis["maintainers"] == ["example-maintainer"]
+    assert stateaxis["repository_visibility"] == "private"
+    assert "canonical_repository" not in stateaxis
+    assert "private-example" not in catalog.read_text(encoding="utf-8")
+    assert (
+        cards["ascend-mapped-kv-offload"]["compatibility"]["status"] == "inspect_only"
+    )
+    card = cards["betterscale"]
     assert "documentation_url" not in card
     assert "canonical_repository" not in card
+    assert card["advisors"] == [advisor]
     assert "375.45" in " ".join(card["public_effect_detail_en"])
     assert "209.68" in " ".join(card["public_effect_detail_zh"])
     card["documentation_url"] = "./betterscale.html"
     catalog.write_text(json.dumps(data), encoding="utf-8")
     with pytest.raises(AssertionError):
         projection.validate(output)
+
+
+def test_frozen_r6_mods_remain_public_after_projection(tmp_path):
+    source = tmp_path / "source"
+    data = source / "data"
+    data.mkdir(parents=True)
+    (source / "assets").mkdir()
+    for filename in (
+        "index.html",
+        "plugins.html",
+        "dataset-introductions.html",
+        "leaderboard-runs.html",
+        "assets/site.js",
+    ):
+        (source / filename).write_text("")
+    source_data = MODULE.parents[1] / "website-publication" / "data"
+    frozen = "five-datasets-r6-20261114/frozen-combination-v1.json"
+    for filename in (
+        "ecosystem.json",
+        "mod-taxonomy.json",
+        "plugin-workload-navigation.json",
+        frozen,
+    ):
+        path = data / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes((source_data / filename).read_bytes())
+    (data / "benchmark-source-manifest.json").write_text('{"files": []}')
+    output = tmp_path / "public"
+    projection.build(source, output, "test-policy")
+    projection.validate(output)
+
+    public = output / "data"
+    registry = json.loads((public / "ecosystem.json").read_text(encoding="utf-8"))
+    cards = {entry["id"]: entry for entry in registry["components"]}
+    classification = json.loads(
+        (public / "mod-taxonomy.json").read_text(encoding="utf-8")
+    )
+    expected = {
+        "betterscale",
+        "kv-materialization-arrival-control",
+        "prefill-microflow",
+        "hust-m01-correction",
+        "hust-joint-packed",
+    }
+    for identifier in expected:
+        assert "B1 r6" in cards[identifier]["summary_en"]
+        assert "B1 r6" in cards[identifier]["summary_zh"]
+        assert classification["components"][identifier]["kind"] == "runtime_mod"
+    for identifier in ("hust-m01-correction", "hust-joint-packed"):
+        card = cards[identifier]
+        assert card["canonical_repository"] is None
+        assert card["documentation_url"] == f"./data/{frozen}"
+        assert not any(key.startswith("public_effect_") for key in card)
+    assert (public / frozen).is_file()
 
 
 def test_combined_record_is_withheld_as_a_whole():
@@ -280,3 +365,69 @@ def test_c16_pair_is_restored_intact_only_in_its_evidence_file(tmp_path):
     manifest_path.write_text(json.dumps(manifest))
     with pytest.raises(AssertionError):
         projection.validate(output)
+
+
+def test_current_r8_reference_preserves_certificate_and_denominator_bytes(tmp_path):
+    """A published result must survive the policy projection with its source hashes."""
+    root = MODULE.parents[1]
+    catalog_path = root / "website-publication/data/engine-release-history-v1.json"
+    catalog = json.loads(catalog_path.read_bytes())
+    current = next(row for row in catalog["entries"] if row["id"] == "r8")[
+        "compute_reference"
+    ]
+    assert (
+        current["certificate_kind"] == "qualified_full_reference_denominator_reuse/v1"
+    )
+    source = tmp_path / "source"
+    (source / "data").mkdir(parents=True)
+    for name in (
+        "index.html",
+        "plugins.html",
+        "dataset-introductions.html",
+        "leaderboard-runs.html",
+    ):
+        (source / name).write_text("<main>Inference results</main>")
+    (source / "assets").mkdir()
+    (source / "assets/site.js").write_text("// shared presentation\n")
+    paths = [projection.PUBLIC_ENGINE_HISTORY_PATH] + [
+        current[key]["path"]
+        for key in ("chart", "report", "certificate", "reference_statistics")
+    ]
+    entries = []
+    for name in paths:
+        raw = (root / "website-publication" / name).read_bytes()
+        target = source / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(raw)
+        entries.append(
+            {
+                "website_path": name,
+                "benchmark_path": "website-publication/" + name,
+                "sha256": hashlib.sha256(raw).hexdigest(),
+                "bytes": len(raw),
+            }
+        )
+    (source / "data/benchmark-source-manifest.json").write_text(
+        json.dumps(
+            {
+                "repository": "vLLM-HUST/vllm-hust-benchmark",
+                "files": entries,
+            }
+        )
+    )
+    output = tmp_path / "public"
+    projection.build(source, output, "test-current-reference")
+    projection.validate(output)
+    for name in paths:
+        assert (output / name).read_bytes() == (source / name).read_bytes(), name
+    pair = json.loads((output / current["certificate"]["path"]).read_bytes())
+    stats_path = output / current["reference_statistics"]["path"]
+    assert (
+        pair["qualified_full_reference_statistics_sha256"]
+        == hashlib.sha256(stats_path.read_bytes()).hexdigest()
+    )
+    assert (
+        pair["arms"]["B1"]["efficiency_lower_percent"]
+        == current["arms"]["B1"]["efficiency_lower_percent"]
+    )
+    assert current["milestone_met"] is True and current["final_numeric_met"] is False

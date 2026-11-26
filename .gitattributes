@@ -1,10 +1,23 @@
 # The publication index hashes bytes; keep text checkout bytes consistent.
+leaderboard-data/** -text
+docs/data-index.json text eol=lf
+docs/data-entrypoints.json text eol=lf
 website-publication/data/** text=auto eol=lf
 # Pinned upstream report snapshots are also verified by raw-byte SHA256.
 reports/gennova-mod-evidence-20261105/** text=auto eol=lf
 reports/ride-control-plane-20261106/** text=auto eol=lf
-# Preserve exact raw-evidence and checksum bytes.
-reports/tech-outcomes-20261117/diffspec/** -text
-# Raw receipts include original CRLF and console spacing.
-reports/tech-outcomes-20261117/diffspec/functional/** -whitespace
-reports/tech-outcomes-20261117/diffspec/historical/** -whitespace
+
+# Frozen offline Tradeoff projection: preserve archive byte hashes, including CSV CRLF.
+website-publication/data/optimization-exploration-20261115-v1/** -text
+
+# Ascend-quant evidence: keep archived bytes verbatim (gzip/CSV/JSONL hashes).
+reports/tech-outcomes-20261117/ascend-quant/** -text
+
+# Preserve the byte-pinned legacy website archive and source inventory.
+archive/website-legacy-20261118/** -text
+
+# Preserve SHA256-sealed DiffSpec evidence bytes and archived line endings.
+reports/tech-outcomes-20261117/diffspec/** -text whitespace=cr-at-eol
+reports/tech-outcomes-20261117/diffspec/functional/attempt01/model.log -whitespace
+reports/tech-outcomes-20261117/diffspec/functional/attempt02/model.log -whitespace
+reports/tech-outcomes-20261117/diffspec/historical/submitted-to-merged.diff -whitespace

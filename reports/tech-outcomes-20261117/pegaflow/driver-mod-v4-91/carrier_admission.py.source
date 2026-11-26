@@ -1,0 +1,169 @@
+"""Admit the shared narrow Ascend CPU topology carrier and unchanged ABI files."""
+
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+
+BASE_COMMIT = "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd"  # pragma: allowlist secret -- fixed public official source
+ORIGINAL = "71719e397ab003b31ba5e46e1a6da4da658ae7221eeead04311b65ad4d12d533"  # pragma: allowlist secret -- fixed public source hash
+PATCHED = "b7a84571c349c22935414b2c5a4c6cf91223414f80c0954f797340ad0f1f55f2"  # pragma: allowlist secret -- shared public compatibility patch hash
+PREPARE = "fe00e47faa81a0a3713a368e79a53504290687f2f249e4bf693457c2f7341253"  # pragma: allowlist secret -- guarded public prepare script hash
+FILE = "vllm_ascend/cpu_binding.py"
+
+
+def sha(path):
+    with Path(path).open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def verify(root):
+    root = Path(root)
+    receipt = json.loads((root / "source-admission.json").read_bytes())
+    assert receipt["profile"] == "official-ascend0.23-single-chip-topology-compat/v2"
+    assert (
+        receipt["base_commit"] == BASE_COMMIT
+        and receipt["cpu_binding_original_sha256"] == ORIGINAL
+    )
+    assert (
+        receipt["cpu_binding_prepared_sha256"] == PATCHED
+        and receipt["prepare_script_sha256"] == PREPARE
+    )
+    assert receipt["upstream_source_modified"] is False
+    assert receipt["installed_runtime_resources_preserved"] is True
+    assert Path(receipt["prepared_tree"]).resolve() == root.resolve()
+    assert sha(Path(receipt["source"]) / FILE) == ORIGINAL, (
+        "Installed original source changed"
+    )
+    names = [item["path"] for item in receipt["source_files"]]
+    assert len(names) == len(set(names))
+    actual = {
+        path.relative_to(root).as_posix()
+        for path in root.rglob("*")
+        if path.is_file()
+        and "__pycache__" not in path.parts
+        and path != root / "source-admission.json"
+    }
+    assert actual == set(names), "Copied source/library inventory changed"
+    source = Path(receipt["source"])
+    source_names = {
+        path.relative_to(source).as_posix()
+        for path in (source / "vllm_ascend").rglob("*")
+        if path.is_file()
+        and "__pycache__" not in path.parts
+        and path.suffix not in {".pyc", ".pyo"}
+    }
+    assert source_names == set(names), "Installed runtime package inventory differs"
+    assert "vllm_ascend/_build_info.py" in names
+    cann_assets = [
+        name for name in names if name.startswith("vllm_ascend/_cann_ops_custom/")
+    ]
+    assert any(
+        name.endswith("/ascend910b/binary_info_config.json") for name in cann_assets
+    ), "Installed Ascend910B runtime operator metadata is missing"
+    libraries = []
+    links = []
+    for item in receipt["source_files"]:
+        path = root / item["path"]
+        assert path.resolve().is_relative_to(root.resolve())
+        expected = PATCHED if item["path"] == FILE else item["source_sha256"]
+        assert sha(path) == expected, "Copied source/library differs: " + item["path"]
+        assert sha(source / item["path"]) == item["source_sha256"], (
+            "Installed source/runtime bytes changed: " + item["path"]
+        )
+        if "source_symlink_target" in item:
+            assert (
+                path.is_symlink()
+                and os.readlink(path) == item["prepared_symlink_target"]
+            )
+            assert os.readlink(source / item["path"]) == item["source_symlink_target"]
+            links.append(
+                {
+                    "path": item["path"],
+                    "prepared_target": item["prepared_symlink_target"],
+                    "resolved_sha256": expected,
+                }
+            )
+        else:
+            assert not path.is_symlink()
+        if item["path"] != FILE:
+            assert path.stat().st_size == item["bytes"]
+        if path.suffix == ".so":
+            assert (
+                sha(Path(receipt["source"]) / item["path"]) == item["source_sha256"]
+            ), "Prebuilt ABI library changed"
+            libraries.append(
+                {"path": item["path"], "bytes": item["bytes"], "sha256": expected}
+            )
+    assert libraries, "No prebuilt ABI library evidence"
+    return {
+        "profile": receipt["profile"],
+        "base_commit": BASE_COMMIT,
+        "prepared_tree": str(root),
+        "cpu_binding_original_sha256": ORIGINAL,
+        "cpu_binding_prepared_sha256": PATCHED,
+        "prepare_script_sha256": PREPARE,
+        "source_files_verified": len(names),
+        "prebuilt_libraries_unchanged": libraries,
+        "installed_runtime_resources_preserved": True,
+        "cann_runtime_files_verified": len(cann_assets),
+        "cann_runtime_bytes_verified": sum(
+            item["bytes"]
+            for item in receipt["source_files"]
+            if item["path"] in cann_assets
+        ),
+        "relative_runtime_links_preserved": links,
+        "original_source_untouched": True,
+        "source_admission_sha256": sha(root / "source-admission.json"),
+    }
+
+
+def imported(root, python, environment):
+    root = Path(root)
+    env = {
+        **os.environ,
+        **environment,
+        "PYTHONPATH": str(root) + ":" + environment.get("PYTHONPATH", ""),
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "HF_HUB_OFFLINE": "1",
+    }
+    code = """import json,hashlib
+from pathlib import Path
+import vllm_ascend.cpu_binding as m
+p=Path(m.__file__)
+# Construct only the read-only topology input. DeviceInfo.__init__ also inspects
+# active workers and intentionally rejects an idle allocation, so do not call it
+# during this pre-model admission. No binding/migration/IRQ method is invoked.
+device=object.__new__(m.DeviceInfo)
+device.npu_map_info=device.get_npu_map_info()
+device.allowed_cpus=device.parse_allowed_cpus()
+affinity=device.parse_topo_affinity()
+assert set(affinity)=={0,1}, affinity
+assert all(set(cpus)&set(device.allowed_cpus) for cpus in affinity.values())
+print('__ASCEND_CARRIER__'+json.dumps({'path':str(p),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'binding_invoked':False,'physical_logical_map':device.npu_map_info,'logical_cpu_topology':affinity,'actual_allowed_cpus':device.allowed_cpus}))
+"""
+    result = subprocess.run(
+        [str(python), "-B", "-c", code],
+        env=env,
+        capture_output=True,
+        text=True,
+        timeout=180,
+    )
+    assert result.returncode == 0, (
+        "Fresh copied-Ascend import failed: " + result.stderr[-2000:]
+    )
+    marker = "__ASCEND_CARRIER__"
+    assert marker in result.stdout
+    observation = json.loads(result.stdout.rsplit(marker, 1)[1].strip())
+    assert (
+        Path(observation["path"]).resolve() == (root / FILE).resolve()
+        and observation["sha256"] == PATCHED
+    )
+    return {
+        "actual_returncode": result.returncode,
+        "module": observation,
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+        "scope": "Fresh real SDK import and source identity only; no thread binding/IRQ command invoked in this probe",
+    }

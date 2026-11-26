@@ -1,0 +1,770 @@
+{
+  "description": "Allowlisted fields from original per-study manifests; client environment package versions are not necessarily backend runtime versions. Hashes identify files but do not publish their content.",
+  "studies": {
+    "decode-weight-full-v1": {
+      "manifest": "present",
+      "workload_sha256": "ba78972ad43b979583ae76fa92a955c63e1babc2e7b9b33ab17f29240fa8aa4b",
+      "base_config_sha256": "d5aa4ae903ab0b6e23c38b82b8e690d7cf20a8fa59117e81330cba49a518f932",
+      "matrix_sha256": "f86e34ab9bb0bfb009a229e0af53763005a835fae6b2e3581a8b5f5d8f126998",
+      "router_lifecycle_source_sha256": "a97c7257d546876f34b850198482d58e6a5089a5460a0a8a04f4fa29030e7a3e",
+      "client_environment_dependencies": {
+        "aiohttp": "3.14.3",
+        "vllm-hust-prefix-router": "0.1.0a1",
+        "pyzmq": "27.1.0",
+        "msgspec": "0.21.1",
+        "vllm": "0.23.0+empty",
+        "vllm-ascend": "0.23.0",
+        "transformers": "5.5.4",
+        "torch": "2.10.0+cpu"
+      },
+      "client_python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+      "lifecycle_defaults": {
+        "prefill_load_weight": 1.0,
+        "active_request_weight": 0.0,
+        "decode_block_weight": 1.0,
+        "selection_temperature": 0.0,
+        "track_output_blocks": false,
+        "request_expiry_s": 300.0,
+        "active_decode_sequence_weight": 0.0,
+        "router_queue_weight": 0.0
+      },
+      "options": {
+        "stage": "synthetic",
+        "repetitions": 3,
+        "seed": 20261113,
+        "model": "qwen35",
+        "arrival": "gated",
+        "interval_s": 5,
+        "reuse_delay_s": 90,
+        "client_limit": 8,
+        "minimum_hit_tokens": 2048,
+        "scenario": "b0-saturated-node0",
+        "matrix_data": {
+          "arms": {
+            "baseline": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "decode1": [
+              "lifecycle",
+              1,
+              0
+            ],
+            "decode2": [
+              "lifecycle",
+              2,
+              0
+            ],
+            "decode4": [
+              "lifecycle",
+              4,
+              0
+            ]
+          },
+          "pools": [
+            8
+          ]
+        }
+      }
+    },
+    "queue-isolated-20261114": {
+      "manifest": "present",
+      "workload_sha256": "ada59f7ba6701a365ef9cc4dbaeca73afe705672fc30fade13bed95423498872",
+      "base_config_sha256": "653dfb7b72b516f1e16535f61f50cb90470235b498f499becf7d4d94672f95a3",
+      "matrix_sha256": "1f55b8b4069f884ae2a32c85e30f7886e3f66f1628c3d95971fe6fac09f878c3",
+      "router_lifecycle_source_sha256": "a97c7257d546876f34b850198482d58e6a5089a5460a0a8a04f4fa29030e7a3e",
+      "client_environment_dependencies": {
+        "aiohttp": "3.14.3",
+        "vllm-hust-prefix-router": "0.1.0a1",
+        "pyzmq": "27.1.0",
+        "msgspec": "0.21.1",
+        "vllm": "0.23.0+empty",
+        "vllm-ascend": "0.23.0",
+        "transformers": "5.5.4",
+        "torch": "2.10.0+cpu"
+      },
+      "client_python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+      "lifecycle_defaults": {
+        "prefill_load_weight": 1.0,
+        "active_request_weight": 0.0,
+        "decode_block_weight": 1.0,
+        "selection_temperature": 0.0,
+        "track_output_blocks": false,
+        "request_expiry_s": 300.0,
+        "active_decode_sequence_weight": 0.0,
+        "router_queue_weight": 0.0
+      },
+      "options": {
+        "stage": "synthetic",
+        "repetitions": 3,
+        "seed": 20261112,
+        "model": "qwen35",
+        "arrival": "gated",
+        "interval_s": 5,
+        "reuse_delay_s": 90,
+        "client_limit": 24,
+        "minimum_hit_tokens": 2048,
+        "scenario": "queue-node0",
+        "matrix_data": {
+          "arms": {
+            "baseline": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "queue1": [
+              "lifecycle",
+              0,
+              1
+            ],
+            "queue2": [
+              "lifecycle",
+              0,
+              2
+            ],
+            "queue4": [
+              "lifecycle",
+              0,
+              4
+            ]
+          },
+          "pools": [
+            4,
+            8
+          ]
+        }
+      }
+    },
+    "ordinary-phase-repair-v2-c8": {
+      "manifest": "present",
+      "workload_sha256": "bcee2b6f265901301895386f8299216dfd2c1c52892fb6c97dbdf5992b86096d",
+      "base_config_sha256": "4c9e5e4954cd2d2677a583f1a1b19e0ac9dfb9cae9eb05078c390a7327e07713",
+      "matrix_sha256": "d8aebbd9aebcc5471a6cb0892d552c51bd5c06f78f596eb86761801e5938f38d",
+      "router_lifecycle_source_sha256": "fb6e525f1e57f1c567f05e9c2b6c662f5568924e39b40feb8ab15cc457dbc6cd",
+      "client_environment_dependencies": {
+        "aiohttp": "3.14.3",
+        "vllm-hust-prefix-router": "0.1.0a1",
+        "pyzmq": "27.1.0",
+        "msgspec": "0.21.1",
+        "vllm": "0.23.0+empty",
+        "vllm-ascend": "0.23.0",
+        "transformers": "5.5.4",
+        "torch": "2.10.0+cpu"
+      },
+      "client_python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+      "lifecycle_defaults": {
+        "prefill_load_weight": 1.0,
+        "active_request_weight": 0.0,
+        "decode_block_weight": 1.0,
+        "selection_temperature": 0.0,
+        "track_output_blocks": false,
+        "request_expiry_s": 300.0,
+        "active_decode_sequence_weight": 0.0,
+        "router_queue_weight": 0.0
+      },
+      "options": {
+        "stage": "calibration",
+        "repetitions": 3,
+        "seed": 20261122,
+        "model": "qwen35",
+        "arrival": "burst",
+        "interval_s": 5,
+        "reuse_delay_s": 90,
+        "client_limit": 24,
+        "minimum_hit_tokens": 0,
+        "scenario": "ordinary-chat",
+        "matrix_data": {
+          "arms": {
+            "baseline": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "observed4": [
+              "lifecycle",
+              4,
+              0
+            ],
+            "occupied1": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "occupied4": [
+              "lifecycle",
+              0,
+              0
+            ]
+          },
+          "active_request_weights": {
+            "baseline": 0,
+            "observed4": 0,
+            "occupied1": 1,
+            "occupied4": 4
+          },
+          "pools": [
+            4
+          ]
+        }
+      }
+    },
+    "ordinary-phase-repair-v3-c2": {
+      "manifest": "present",
+      "workload_sha256": "bcee2b6f265901301895386f8299216dfd2c1c52892fb6c97dbdf5992b86096d",
+      "base_config_sha256": "4c9e5e4954cd2d2677a583f1a1b19e0ac9dfb9cae9eb05078c390a7327e07713",
+      "matrix_sha256": "d8aebbd9aebcc5471a6cb0892d552c51bd5c06f78f596eb86761801e5938f38d",
+      "router_lifecycle_source_sha256": "fb6e525f1e57f1c567f05e9c2b6c662f5568924e39b40feb8ab15cc457dbc6cd",
+      "client_environment_dependencies": {
+        "aiohttp": "3.14.3",
+        "vllm-hust-prefix-router": "0.1.0a1",
+        "pyzmq": "27.1.0",
+        "msgspec": "0.21.1",
+        "vllm": "0.23.0+empty",
+        "vllm-ascend": "0.23.0",
+        "transformers": "5.5.4",
+        "torch": "2.10.0+cpu"
+      },
+      "client_python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+      "lifecycle_defaults": {
+        "prefill_load_weight": 1.0,
+        "active_request_weight": 0.0,
+        "decode_block_weight": 1.0,
+        "selection_temperature": 0.0,
+        "track_output_blocks": false,
+        "request_expiry_s": 300.0,
+        "active_decode_sequence_weight": 0.0,
+        "router_queue_weight": 0.0
+      },
+      "options": {
+        "stage": "calibration",
+        "repetitions": 3,
+        "seed": 20261116,
+        "model": "qwen35",
+        "arrival": "burst",
+        "interval_s": 5,
+        "reuse_delay_s": 90,
+        "client_limit": 24,
+        "minimum_hit_tokens": 0,
+        "scenario": "ordinary-chat",
+        "matrix_data": {
+          "arms": {
+            "baseline": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "observed4": [
+              "lifecycle",
+              4,
+              0
+            ],
+            "occupied1": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "occupied4": [
+              "lifecycle",
+              0,
+              0
+            ]
+          },
+          "active_request_weights": {
+            "baseline": 0,
+            "observed4": 0,
+            "occupied1": 1,
+            "occupied4": 4
+          },
+          "pools": [
+            4
+          ]
+        }
+      }
+    },
+    "phase-controlled-v1": {
+      "manifest": "present",
+      "workload_sha256": "ba78972ad43b979583ae76fa92a955c63e1babc2e7b9b33ab17f29240fa8aa4b",
+      "base_config_sha256": "d5aa4ae903ab0b6e23c38b82b8e690d7cf20a8fa59117e81330cba49a518f932",
+      "matrix_sha256": "b045f8f5ac232ebd0aac3f1e0ed175bbcb0feb34c439637f51ba68a2a0a84d5d",
+      "router_lifecycle_source_sha256": "fb6e525f1e57f1c567f05e9c2b6c662f5568924e39b40feb8ab15cc457dbc6cd",
+      "client_environment_dependencies": {
+        "aiohttp": "3.14.3",
+        "vllm-hust-prefix-router": "0.1.0a1",
+        "pyzmq": "27.1.0",
+        "msgspec": "0.21.1",
+        "vllm": "0.23.0+empty",
+        "vllm-ascend": "0.23.0",
+        "transformers": "5.5.4",
+        "torch": "2.10.0+cpu"
+      },
+      "client_python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+      "lifecycle_defaults": {
+        "prefill_load_weight": 1.0,
+        "active_request_weight": 0.0,
+        "decode_block_weight": 1.0,
+        "selection_temperature": 0.0,
+        "track_output_blocks": false,
+        "request_expiry_s": 300.0,
+        "active_decode_sequence_weight": 0.0,
+        "router_queue_weight": 0.0
+      },
+      "options": {
+        "stage": "synthetic",
+        "repetitions": 3,
+        "seed": 20261113,
+        "model": "qwen35",
+        "arrival": "gated",
+        "interval_s": 5,
+        "reuse_delay_s": 90,
+        "client_limit": 8,
+        "minimum_hit_tokens": 2048,
+        "scenario": "b0-saturated-node0",
+        "matrix_data": {
+          "arms": {
+            "baseline": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "observed4": [
+              "lifecycle",
+              4,
+              0
+            ],
+            "occupied4": [
+              "lifecycle",
+              0,
+              0
+            ]
+          },
+          "active_request_weights": {
+            "baseline": 0,
+            "observed4": 0,
+            "occupied4": 4
+          },
+          "pools": [
+            8
+          ]
+        }
+      }
+    },
+    "phase-independent-32-c2-v1": {
+      "manifest": "present",
+      "workload_sha256": "e16fdc0e7a6c4a4b4f352f655b1dc570f33764b84381cff72ccc88b7e81c483f",
+      "base_config_sha256": "4c9e5e4954cd2d2677a583f1a1b19e0ac9dfb9cae9eb05078c390a7327e07713",
+      "matrix_sha256": "326b708de4c24456f35fb23f7e0cf1c64df2a39293113b9116e74e6fad4b881a",
+      "router_lifecycle_source_sha256": "fb6e525f1e57f1c567f05e9c2b6c662f5568924e39b40feb8ab15cc457dbc6cd",
+      "client_environment_dependencies": {
+        "aiohttp": "3.14.3",
+        "vllm-hust-prefix-router": "0.1.0a1",
+        "pyzmq": "27.1.0",
+        "msgspec": "0.21.1",
+        "vllm": "0.23.0+empty",
+        "vllm-ascend": "0.23.0",
+        "transformers": "5.5.4",
+        "torch": "2.10.0+cpu"
+      },
+      "client_python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+      "lifecycle_defaults": {
+        "prefill_load_weight": 1.0,
+        "active_request_weight": 0.0,
+        "decode_block_weight": 1.0,
+        "selection_temperature": 0.0,
+        "track_output_blocks": false,
+        "request_expiry_s": 300.0,
+        "active_decode_sequence_weight": 0.0,
+        "router_queue_weight": 0.0
+      },
+      "options": {
+        "stage": "calibration",
+        "repetitions": 3,
+        "seed": 20261116,
+        "model": "qwen35",
+        "arrival": "burst",
+        "interval_s": 5,
+        "reuse_delay_s": 90,
+        "client_limit": 24,
+        "minimum_hit_tokens": 0,
+        "scenario": "ordinary-chat",
+        "matrix_data": {
+          "arms": {
+            "baseline": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "occupied4": [
+              "lifecycle",
+              0,
+              0
+            ]
+          },
+          "active_request_weights": {
+            "baseline": 0,
+            "occupied4": 4
+          },
+          "pools": [
+            4
+          ]
+        }
+      }
+    },
+    "phase-independent-32-c8-v1": {
+      "manifest": "present",
+      "workload_sha256": "e16fdc0e7a6c4a4b4f352f655b1dc570f33764b84381cff72ccc88b7e81c483f",
+      "base_config_sha256": "4c9e5e4954cd2d2677a583f1a1b19e0ac9dfb9cae9eb05078c390a7327e07713",
+      "matrix_sha256": "326b708de4c24456f35fb23f7e0cf1c64df2a39293113b9116e74e6fad4b881a",
+      "router_lifecycle_source_sha256": "fb6e525f1e57f1c567f05e9c2b6c662f5568924e39b40feb8ab15cc457dbc6cd",
+      "client_environment_dependencies": {
+        "aiohttp": "3.14.3",
+        "vllm-hust-prefix-router": "0.1.0a1",
+        "pyzmq": "27.1.0",
+        "msgspec": "0.21.1",
+        "vllm": "0.23.0+empty",
+        "vllm-ascend": "0.23.0",
+        "transformers": "5.5.4",
+        "torch": "2.10.0+cpu"
+      },
+      "client_python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+      "lifecycle_defaults": {
+        "prefill_load_weight": 1.0,
+        "active_request_weight": 0.0,
+        "decode_block_weight": 1.0,
+        "selection_temperature": 0.0,
+        "track_output_blocks": false,
+        "request_expiry_s": 300.0,
+        "active_decode_sequence_weight": 0.0,
+        "router_queue_weight": 0.0
+      },
+      "options": {
+        "stage": "calibration",
+        "repetitions": 3,
+        "seed": 20261122,
+        "model": "qwen35",
+        "arrival": "burst",
+        "interval_s": 5,
+        "reuse_delay_s": 90,
+        "client_limit": 24,
+        "minimum_hit_tokens": 0,
+        "scenario": "ordinary-chat",
+        "matrix_data": {
+          "arms": {
+            "baseline": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "occupied4": [
+              "lifecycle",
+              0,
+              0
+            ]
+          },
+          "active_request_weights": {
+            "baseline": 0,
+            "occupied4": 4
+          },
+          "pools": [
+            4
+          ]
+        }
+      }
+    },
+    "phase-independent-128-c2-v1": {
+      "manifest": "present",
+      "workload_sha256": "87bcb5ad425646a0d30bf50ef2ac27852db76b313bd478d880912b83362e83ef",
+      "base_config_sha256": "4c9e5e4954cd2d2677a583f1a1b19e0ac9dfb9cae9eb05078c390a7327e07713",
+      "matrix_sha256": "326b708de4c24456f35fb23f7e0cf1c64df2a39293113b9116e74e6fad4b881a",
+      "router_lifecycle_source_sha256": "fb6e525f1e57f1c567f05e9c2b6c662f5568924e39b40feb8ab15cc457dbc6cd",
+      "client_environment_dependencies": {
+        "aiohttp": "3.14.3",
+        "vllm-hust-prefix-router": "0.1.0a1",
+        "pyzmq": "27.1.0",
+        "msgspec": "0.21.1",
+        "vllm": "0.23.0+empty",
+        "vllm-ascend": "0.23.0",
+        "transformers": "5.5.4",
+        "torch": "2.10.0+cpu"
+      },
+      "client_python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+      "lifecycle_defaults": {
+        "prefill_load_weight": 1.0,
+        "active_request_weight": 0.0,
+        "decode_block_weight": 1.0,
+        "selection_temperature": 0.0,
+        "track_output_blocks": false,
+        "request_expiry_s": 300.0,
+        "active_decode_sequence_weight": 0.0,
+        "router_queue_weight": 0.0
+      },
+      "options": {
+        "stage": "calibration",
+        "repetitions": 3,
+        "seed": 20261116,
+        "model": "qwen35",
+        "arrival": "burst",
+        "interval_s": 5,
+        "reuse_delay_s": 90,
+        "client_limit": 24,
+        "minimum_hit_tokens": 0,
+        "scenario": "ordinary-chat",
+        "matrix_data": {
+          "arms": {
+            "baseline": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "occupied4": [
+              "lifecycle",
+              0,
+              0
+            ]
+          },
+          "active_request_weights": {
+            "baseline": 0,
+            "occupied4": 4
+          },
+          "pools": [
+            4
+          ]
+        }
+      }
+    },
+    "phase-independent-128-c8-v1": {
+      "manifest": "present",
+      "workload_sha256": "87bcb5ad425646a0d30bf50ef2ac27852db76b313bd478d880912b83362e83ef",
+      "base_config_sha256": "4c9e5e4954cd2d2677a583f1a1b19e0ac9dfb9cae9eb05078c390a7327e07713",
+      "matrix_sha256": "326b708de4c24456f35fb23f7e0cf1c64df2a39293113b9116e74e6fad4b881a",
+      "router_lifecycle_source_sha256": "fb6e525f1e57f1c567f05e9c2b6c662f5568924e39b40feb8ab15cc457dbc6cd",
+      "client_environment_dependencies": {
+        "aiohttp": "3.14.3",
+        "vllm-hust-prefix-router": "0.1.0a1",
+        "pyzmq": "27.1.0",
+        "msgspec": "0.21.1",
+        "vllm": "0.23.0+empty",
+        "vllm-ascend": "0.23.0",
+        "transformers": "5.5.4",
+        "torch": "2.10.0+cpu"
+      },
+      "client_python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+      "lifecycle_defaults": {
+        "prefill_load_weight": 1.0,
+        "active_request_weight": 0.0,
+        "decode_block_weight": 1.0,
+        "selection_temperature": 0.0,
+        "track_output_blocks": false,
+        "request_expiry_s": 300.0,
+        "active_decode_sequence_weight": 0.0,
+        "router_queue_weight": 0.0
+      },
+      "options": {
+        "stage": "calibration",
+        "repetitions": 3,
+        "seed": 20261122,
+        "model": "qwen35",
+        "arrival": "burst",
+        "interval_s": 5,
+        "reuse_delay_s": 90,
+        "client_limit": 24,
+        "minimum_hit_tokens": 0,
+        "scenario": "ordinary-chat",
+        "matrix_data": {
+          "arms": {
+            "baseline": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "occupied4": [
+              "lifecycle",
+              0,
+              0
+            ]
+          },
+          "active_request_weights": {
+            "baseline": 0,
+            "occupied4": 4
+          },
+          "pools": [
+            4
+          ]
+        }
+      }
+    },
+    "single-factor-pilot-c4-v1": {
+      "manifest": "present",
+      "workload_sha256": "eaeeb309c06f7333b607d0d4f5eaca92c7a8f4262e6298cb8cf2c449b5c02c3b",
+      "base_config_sha256": "4c9e5e4954cd2d2677a583f1a1b19e0ac9dfb9cae9eb05078c390a7327e07713",
+      "matrix_sha256": "4318369dec53f8b1a5042c9d5455d60b314fd64de296be8a05d9ec1683672046",
+      "router_lifecycle_source_sha256": "fb6e525f1e57f1c567f05e9c2b6c662f5568924e39b40feb8ab15cc457dbc6cd",
+      "client_environment_dependencies": {
+        "aiohttp": "3.14.3",
+        "vllm-hust-prefix-router": "0.1.0a1",
+        "pyzmq": "27.1.0",
+        "msgspec": "0.21.1",
+        "vllm": "0.23.0+empty",
+        "vllm-ascend": "0.23.0",
+        "transformers": "5.5.4",
+        "torch": "2.10.0+cpu"
+      },
+      "client_python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+      "lifecycle_defaults": {
+        "prefill_load_weight": 1.0,
+        "active_request_weight": 0.0,
+        "decode_block_weight": 1.0,
+        "selection_temperature": 0.0,
+        "track_output_blocks": false,
+        "request_expiry_s": 300.0,
+        "active_decode_sequence_weight": 0.0,
+        "router_queue_weight": 0.0
+      },
+      "options": {
+        "stage": "calibration",
+        "repetitions": 3,
+        "seed": 20261118,
+        "model": "qwen35",
+        "arrival": "burst",
+        "interval_s": 5,
+        "reuse_delay_s": 90,
+        "client_limit": 24,
+        "minimum_hit_tokens": 0,
+        "scenario": "ordinary-chat",
+        "matrix_data": {
+          "arms": {
+            "baseline": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "request1": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "request2": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "request4": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "decode1": [
+              "lifecycle",
+              1,
+              0
+            ],
+            "decode2": [
+              "lifecycle",
+              2,
+              0
+            ],
+            "decode4": [
+              "lifecycle",
+              4,
+              0
+            ],
+            "queue1": [
+              "lifecycle",
+              0,
+              1
+            ],
+            "queue2": [
+              "lifecycle",
+              0,
+              2
+            ],
+            "queue4": [
+              "lifecycle",
+              0,
+              4
+            ]
+          },
+          "active_request_weights": {
+            "baseline": 0,
+            "request1": 1,
+            "request2": 2,
+            "request4": 4
+          },
+          "pools": [
+            2
+          ]
+        }
+      }
+    },
+    "queue-boundary-v1": {
+      "manifest": "present",
+      "workload_sha256": "ba667a7d77856db2668c3d83484ebcb73d9413b17ab32329bf2652faa8d12693",
+      "base_config_sha256": "653dfb7b72b516f1e16535f61f50cb90470235b498f499becf7d4d94672f95a3",
+      "matrix_sha256": "82b112c405da904d97ddfd7378d0fb84edccbf98b4b68107f8653cf3b19a4865",
+      "router_lifecycle_source_sha256": "fb6e525f1e57f1c567f05e9c2b6c662f5568924e39b40feb8ab15cc457dbc6cd",
+      "client_environment_dependencies": {
+        "aiohttp": "3.14.3",
+        "vllm-hust-prefix-router": "0.1.0a1",
+        "pyzmq": "27.1.0",
+        "msgspec": "0.21.1",
+        "vllm": "0.23.0+empty",
+        "vllm-ascend": "0.23.0",
+        "transformers": "5.5.4",
+        "torch": "2.10.0+cpu"
+      },
+      "client_python": "3.12.13 (main, Aug  3 2026, 03:58:42) [GCC 12.3.1 (openEuler 12.3.1-105.oe2403sp3)]",
+      "lifecycle_defaults": {
+        "prefill_load_weight": 1.0,
+        "active_request_weight": 0.0,
+        "decode_block_weight": 1.0,
+        "selection_temperature": 0.0,
+        "track_output_blocks": false,
+        "request_expiry_s": 300.0,
+        "active_decode_sequence_weight": 0.0,
+        "router_queue_weight": 0.0
+      },
+      "options": {
+        "stage": "synthetic",
+        "repetitions": 3,
+        "seed": 20261112,
+        "model": "qwen35",
+        "arrival": "gated",
+        "interval_s": 5,
+        "reuse_delay_s": 90,
+        "client_limit": 24,
+        "minimum_hit_tokens": 2048,
+        "scenario": "queued-node0",
+        "matrix_data": {
+          "arms": {
+            "baseline": [
+              "lifecycle",
+              0,
+              0
+            ],
+            "queue1": [
+              "lifecycle",
+              0,
+              1
+            ],
+            "queue2": [
+              "lifecycle",
+              0,
+              2
+            ],
+            "queue4": [
+              "lifecycle",
+              0,
+              4
+            ]
+          },
+          "active_request_weights": {
+            "baseline": 0
+          },
+          "pools": [
+            4
+          ]
+        }
+      }
+    }
+  }
+}

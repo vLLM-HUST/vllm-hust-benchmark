@@ -1,0 +1,122 @@
+"""Mocked wire checks for original finite semantics, without network or model."""
+
+import json
+import pytest
+import pressure_transport as transport
+from study_tools import summarize
+
+
+def capture(monkeypatch, *, content=True, done=True, usage=True):
+    events = [
+        {
+            "id": "chatcmpl-test",
+            "choices": [
+                {"delta": {"reasoning_content": "inert"}, "finish_reason": None}
+            ],
+        }
+    ]
+    if content:
+        events.append(
+            {
+                "id": "chatcmpl-test",
+                "choices": [
+                    {"delta": {"content": "The answer is (A)."}, "finish_reason": None}
+                ],
+            }
+        )
+    events.append(
+        {"id": "chatcmpl-test", "choices": [{"delta": {}, "finish_reason": "length"}]}
+    )
+    if usage:
+        events.append(
+            {
+                "id": "chatcmpl-test",
+                "choices": [],
+                "usage": {
+                    "prompt_tokens": 3,
+                    "completion_tokens": 4,
+                    "total_tokens": 7,
+                },
+            }
+        )
+    lines = []
+    for event in events:
+        lines.extend([b"data: " + json.dumps(event).encode() + b"\n", b"\n"])
+    if done:
+        lines.extend([b"data: [DONE]\n", b"\n"])
+
+    class Socket:
+        def settimeout(self, value):
+            pass
+
+    class Response:
+        status = 200
+
+        def __init__(self):
+            self.lines = iter(lines)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def readline(self):
+            return next(self.lines, b"")
+
+    class Connection:
+        def __init__(self, *args, **kwargs):
+            self.sock = Socket()
+
+        def connect(self):
+            pass
+
+        def request(self, method, route, payload, headers):
+            assert method == "POST" and route == "/v1/chat/completions"
+            assert "ignore_eos" not in json.loads(payload)
+
+        def getresponse(self):
+            return Response()
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(transport.http.client, "HTTPConnection", Connection)
+
+
+def invoke(tmp_path):
+    return transport.call(
+        {"base_url": "http://127.0.0.1:1", "timeout": 5},
+        {
+            "model": "inert",
+            "messages": [{"role": "user", "content": "inert"}],
+            "max_completion_tokens": 4,
+            "stream": True,
+            "stream_options": {"include_usage": True},
+        },
+        tmp_path,
+        require_zero_reuse=False,
+    )
+
+
+def test_original_finite_default_requires_final_content(monkeypatch, tmp_path):
+    capture(monkeypatch, content=False)
+    row = invoke(tmp_path)
+    assert row["status"] == "transport_error" and row["no_final_content"]
+    assert row["observed_usage"]["completion_tokens"] == 4
+    value = summarize([row])
+    assert value["successful"] == 0 and value["unknown_final_usage"] == 0
+
+
+@pytest.mark.parametrize("missing", ["done", "usage"])
+def test_incomplete_wire_never_accepted(monkeypatch, tmp_path, missing):
+    capture(monkeypatch, done=missing != "done", usage=missing != "usage")
+    row = invoke(tmp_path)
+    assert row["status"] == "transport_error"
+    assert summarize([row])["output_tokens_per_second"] is None
+
+
+def test_complete_finite_answer_still_passes(monkeypatch, tmp_path):
+    capture(monkeypatch)
+    row = invoke(tmp_path)
+    assert row["status"] == "ok" and row["first_token"] is not None

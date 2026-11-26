@@ -1,0 +1,78 @@
+{
+  "schema": "vllm-hust-context-tenant-supplement/v1",
+  "input_file": "acceptance-inputs.json",
+  "input_sha256": "5156a6ae436c7e32364a5ecbb028b52f26da1808be883c02e8e230defd556559",
+  "tokenizer_files": {
+    "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+    "config.json": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "chat_template.jinja": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"
+  },
+  "task_count": 5,
+  "cohorts": [
+    {
+      "min_tokens": 4096,
+      "max_tokens_exclusive": 8192,
+      "concurrency": 8
+    },
+    {
+      "min_tokens": 16384,
+      "max_tokens_exclusive": 24576,
+      "concurrency": 8
+    },
+    {
+      "min_tokens": 32768,
+      "max_tokens_exclusive": 49152,
+      "concurrency": 8
+    }
+  ],
+  "phases": [
+    {
+      "id": "4096",
+      "cohort": "4096",
+      "concurrency": 8,
+      "tenants": 1,
+      "warmup_seconds": 60,
+      "formal_seconds": 300
+    },
+    {
+      "id": "16384",
+      "cohort": "16384",
+      "concurrency": 8,
+      "tenants": 1,
+      "warmup_seconds": 60,
+      "formal_seconds": 300
+    },
+    {
+      "id": "32768",
+      "cohort": "32768",
+      "concurrency": 8,
+      "tenants": 1,
+      "warmup_seconds": 60,
+      "formal_seconds": 300
+    },
+    {
+      "id": "multi-tenant",
+      "cohort": "4096",
+      "concurrency": 24,
+      "tenants": 4,
+      "warmup_seconds": 60,
+      "formal_seconds": 300
+    }
+  ],
+  "output_tokens": 256,
+  "temperature": 0,
+  "seed": 17,
+  "ignore_eos": true,
+  "request_timeout_seconds": 600,
+  "automatic_retries": 0,
+  "measurement_window_seconds": 60,
+  "max_model_len_required": 49408,
+  "task_selection": "First five source-hash-ranked tasks in the frozen SWE32+Terminal32 population with one complete unchanged published request in each declared band; first eligible source-order request per band. No score, speed, answer, cropping or padding filter.",
+  "tenant_identity": "Four independent closed-loop client queues; OpenAI user field tenant-0..3 and unique per-request cache salts. Shared engine/resources; no security-isolation or dedicated-VM claim.",
+  "acceptance": "Preserve the original qualitative throughput/tail stability and high utilization criteria; no invented pass threshold. Complete execution produces measurements, not an automatic numerical pass.",
+  "source_tasks_are_not_concurrency": "Five distinct real histories; eight closed-loop lanes cycle the fixed cases, repetitions are not independent task samples.",
+  "five_fixed_datasets_unchanged": true,
+  "quality_measured": false,
+  "source_protocol_sha256": "eacf3628cda8d7accc2e39b20fce687b1deb1cb0b0f470e8b11c8dd4517f71f8"
+}

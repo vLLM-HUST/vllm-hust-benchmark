@@ -1,0 +1,898 @@
+{
+  "schema": "controller-product-results/v1",
+  "updated": "2026-11-18",
+  "default_release": "r8",
+  "releases": [
+    {
+      "id": "r8",
+      "label": "2026-11-18 · Engine r8 + Request Throttling Controller",
+      "engine_release": "full-answer-b1-20261117-r8",
+      "max_num_seqs": 36,
+      "state_resident_seats": 80,
+      "repetitions_per_arm": 1,
+      "report_path": "reports/controller-r8-20261118/README.md",
+      "result": {
+        "completed_pair": true,
+        "direct": {
+          "tasks": 112,
+          "completed_tasks": 112,
+          "unfinished_tasks": 0,
+          "successful_requests": 336,
+          "failed_requests": 0,
+          "elapsed_seconds": 302.0508,
+          "input_tokens": 5992408,
+          "cached_input_percent": 40.425251418127736,
+          "zero_hit_continuations": 88,
+          "output_tokens": 43516,
+          "cached_input_tokens": 2422446,
+          "first_round_cached_input_tokens": 0,
+          "task_latency_seconds": {
+            "mean": 243.0429,
+            "p50": 257.6987,
+            "p90": 292.3703,
+            "p99": 299.8964,
+            "maximum": 302.0508
+          },
+          "request_latency_seconds": {
+            "mean": 78.0199,
+            "p50": 69.0905,
+            "p90": 167.8705,
+            "p99": 261.2891,
+            "maximum": 282.5813
+          },
+          "controller_admission_seconds": {}
+        },
+        "request_throttling_controller": {
+          "tasks": 112,
+          "completed_tasks": 112,
+          "unfinished_tasks": 0,
+          "successful_requests": 336,
+          "failed_requests": 0,
+          "elapsed_seconds": 217.6042,
+          "input_tokens": 5992408,
+          "cached_input_percent": 62.63103246641417,
+          "zero_hit_continuations": 13,
+          "output_tokens": 43516,
+          "cached_input_tokens": 3753107,
+          "first_round_cached_input_tokens": 0,
+          "task_latency_seconds": {
+            "mean": 156.7288,
+            "p50": 168.0971,
+            "p90": 198.5525,
+            "p99": 205.6077,
+            "maximum": 217.6042
+          },
+          "request_latency_seconds": {
+            "mean": 49.6271,
+            "p50": 27.1181,
+            "p90": 142.2911,
+            "p99": 186.7184,
+            "maximum": 192.3118
+          },
+          "controller_admission_seconds": {}
+        },
+        "matched_prompt_token_hashes": 167,
+        "seconds_saved": 84.44659999999999,
+        "time_reduction_percent": 27.957747504724367
+      },
+      "profiles": [
+        {
+          "id": "mmlu",
+          "label": "MMLU-Pro",
+          "status": "complete",
+          "direct": {
+            "dataset": "mmlu",
+            "arm": "direct",
+            "planned": 200,
+            "returned": 200,
+            "successful": 200,
+            "release_errors": 0,
+            "elapsed_seconds": 496.9814958004281,
+            "output_tokens": 734969,
+            "input_tokens": 282265,
+            "finish_length": 26,
+            "source_sha256": "a70d8ada1c34676d52fb2a619cf4983cd5a0c5c21f25213978e1ee406c0a45da",
+            "client_concurrency": 200,
+            "business_timeout": -1,
+            "latency_seconds": {
+              "n": 200,
+              "mean": 237.17864096869715,
+              "p50": 228.53767163306475,
+              "p95": 464.15819803997874,
+              "p99": 487.28793330304325,
+              "max": 493.1085908655077,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_content_seconds": {
+              "n": 200,
+              "mean": 160.18129651990253,
+              "p50": 151.82458501774818,
+              "p95": 346.3631704393774,
+              "p99": 358.8969812672585,
+              "max": 368.9286582432687,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_output_seconds": {
+              "n": 200,
+              "mean": 160.18129651990253,
+              "p50": 151.82458501774818,
+              "p95": 346.3631704393774,
+              "p99": 358.8969812672585,
+              "max": 368.9286582432687,
+              "percentile_method": "nearest_rank"
+            },
+            "cached_input_tokens": 0,
+            "cached_input_percent": 0.0,
+            "measurement_only": true,
+            "quality_score": null,
+            "complete": true,
+            "output_tokens_per_second": 1478.8659260165696,
+            "quality": {
+              "planned": 200,
+              "correct": 148,
+              "unparsed": 0,
+              "accuracy_percent": 74.0,
+              "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801",
+              "scope": "Same original 200 questions and frozen answer extraction; not full MMLU-Pro"
+            }
+          },
+          "controller": {
+            "dataset": "mmlu",
+            "arm": "controller",
+            "planned": 200,
+            "returned": 200,
+            "successful": 200,
+            "release_errors": 0,
+            "elapsed_seconds": 515.4948921520263,
+            "output_tokens": 710244,
+            "input_tokens": 282265,
+            "finish_length": 22,
+            "source_sha256": "a70d8ada1c34676d52fb2a619cf4983cd5a0c5c21f25213978e1ee406c0a45da",
+            "client_concurrency": 200,
+            "business_timeout": -1,
+            "latency_seconds": {
+              "n": 200,
+              "mean": 248.3548780696839,
+              "p50": 226.30602771788836,
+              "p95": 462.67563102021813,
+              "p99": 493.0244460692629,
+              "max": 500.4771053418517,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_content_seconds": {
+              "n": 200,
+              "mean": 174.19849118298384,
+              "p50": 161.7350763976574,
+              "p95": 364.9304948616773,
+              "p99": 392.0987306451425,
+              "max": 399.78888309467584,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_output_seconds": {
+              "n": 200,
+              "mean": 174.19849118298384,
+              "p50": 161.7350763976574,
+              "p95": 364.9304948616773,
+              "p99": 392.0987306451425,
+              "max": 399.78888309467584,
+              "percentile_method": "nearest_rank"
+            },
+            "cached_input_tokens": 0,
+            "cached_input_percent": 0.0,
+            "measurement_only": true,
+            "quality_score": null,
+            "complete": true,
+            "output_tokens_per_second": 1377.7905674971064,
+            "quality": {
+              "planned": 200,
+              "correct": 145,
+              "unparsed": 0,
+              "accuracy_percent": 72.5,
+              "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801",
+              "scope": "Same original 200 questions and frozen answer extraction; not full MMLU-Pro"
+            }
+          },
+          "same_client_request_bodies": true,
+          "same_per_case_engine_prompt_tokens": true,
+          "time_reduction_percent": -3.725168141679181,
+          "output_token_change_percent": -3.364087464913486,
+          "output_throughput_change_percent": -6.834653280011451
+        },
+        {
+          "id": "hle",
+          "label": "Humanity’s Last Exam",
+          "status": "deferred",
+          "reason_zh": "按用户要求暂缓",
+          "reason_en": "Deferred by request"
+        },
+        {
+          "id": "frontier",
+          "label": "FrontierScience",
+          "status": "complete",
+          "direct": {
+            "dataset": "frontier",
+            "arm": "direct",
+            "planned": 160,
+            "returned": 160,
+            "successful": 160,
+            "release_errors": 0,
+            "elapsed_seconds": 1190.9711158657447,
+            "output_tokens": 1185854,
+            "input_tokens": 61451,
+            "finish_length": 39,
+            "source_sha256": "3cd6d875beeb3ae360b6b8582f5b294e5c0be73c65bc8eba486c0578a63b28b7",
+            "client_concurrency": 16,
+            "business_timeout": -1,
+            "latency_seconds": {
+              "n": 160,
+              "mean": 109.67668396970257,
+              "p50": 76.88392107374966,
+              "p95": 241.63715991191566,
+              "p99": 250.91141005419195,
+              "max": 254.15759789850563,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_content_seconds": {
+              "n": 160,
+              "mean": 0.27706651934422555,
+              "p50": 0.21318733505904675,
+              "p95": 0.8767507979646325,
+              "p99": 1.005003897473216,
+              "max": 1.0064584081992507,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_output_seconds": {
+              "n": 160,
+              "mean": 0.27706651934422555,
+              "p50": 0.21318733505904675,
+              "p95": 0.8767507979646325,
+              "p99": 1.005003897473216,
+              "max": 1.0064584081992507,
+              "percentile_method": "nearest_rank"
+            },
+            "cached_input_tokens": 0,
+            "cached_input_percent": 0.0,
+            "measurement_only": true,
+            "quality_score": null,
+            "complete": true,
+            "output_tokens_per_second": 995.7034089260637,
+            "quality": {
+              "protocol": "hust-qwen-judge-v3; Appendix B prompts; Qwen substitute; single trial; scoring_policy=mmlu_extract_first; not official replication",
+              "scoring_policy": "mmlu_extract_first",
+              "denominator_policy": "all_cases_invalid_as_nonsuccess",
+              "judge_model": "qwen3.5-35b",
+              "scope": "full_gold",
+              "tracks": {
+                "olympiad": {
+                  "total": 100,
+                  "graded": 97,
+                  "successes": 61,
+                  "solver_failures": 0,
+                  "judge_unresolved": 3,
+                  "judge_invalid": 3,
+                  "judge_transport_failures": 0,
+                  "judge_truncated_with_grade": 4,
+                  "judge_audit_flagged": 4,
+                  "solver_truncated": 32,
+                  "judge_truncated": 7,
+                  "success_rate": 0.61,
+                  "observed_success_lower_bound": 0.61,
+                  "mean_research_score_valid_only": null
+                },
+                "research": {
+                  "total": 60,
+                  "graded": 60,
+                  "successes": 4,
+                  "solver_failures": 0,
+                  "judge_unresolved": 0,
+                  "judge_invalid": 0,
+                  "judge_transport_failures": 0,
+                  "judge_truncated_with_grade": 9,
+                  "judge_audit_flagged": 9,
+                  "solver_truncated": 7,
+                  "judge_truncated": 9,
+                  "success_rate": 0.06666666666666667,
+                  "observed_success_lower_bound": 0.06666666666666667,
+                  "mean_research_score_valid_only": 2.509
+                }
+              }
+            }
+          },
+          "controller": {
+            "dataset": "frontier",
+            "arm": "controller",
+            "planned": 160,
+            "returned": 160,
+            "successful": 160,
+            "release_errors": 0,
+            "elapsed_seconds": 1229.3561994675547,
+            "output_tokens": 1221644,
+            "input_tokens": 61451,
+            "finish_length": 37,
+            "source_sha256": "3cd6d875beeb3ae360b6b8582f5b294e5c0be73c65bc8eba486c0578a63b28b7",
+            "client_concurrency": 16,
+            "business_timeout": -1,
+            "latency_seconds": {
+              "n": 160,
+              "mean": 113.80383217580966,
+              "p50": 84.1987820956856,
+              "p95": 243.3035030895844,
+              "p99": 248.42553195171058,
+              "max": 253.5893083754927,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_content_seconds": {
+              "n": 160,
+              "mean": 0.26453176339273343,
+              "p50": 0.22128955833613873,
+              "p95": 0.7296957951039076,
+              "p99": 0.832105839625001,
+              "max": 0.8342171469703317,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_output_seconds": {
+              "n": 160,
+              "mean": 0.26453176339273343,
+              "p50": 0.22128955833613873,
+              "p95": 0.7296957951039076,
+              "p99": 0.832105839625001,
+              "max": 0.8342171469703317,
+              "percentile_method": "nearest_rank"
+            },
+            "cached_input_tokens": 0,
+            "cached_input_percent": 0.0,
+            "measurement_only": true,
+            "quality_score": null,
+            "complete": true,
+            "output_tokens_per_second": 993.7266355585998,
+            "quality": {
+              "protocol": "hust-qwen-judge-v3; Appendix B prompts; Qwen substitute; single trial; scoring_policy=mmlu_extract_first; not official replication",
+              "scoring_policy": "mmlu_extract_first",
+              "denominator_policy": "all_cases_invalid_as_nonsuccess",
+              "judge_model": "qwen3.5-35b",
+              "scope": "full_gold",
+              "tracks": {
+                "olympiad": {
+                  "total": 100,
+                  "graded": 97,
+                  "successes": 64,
+                  "solver_failures": 0,
+                  "judge_unresolved": 3,
+                  "judge_invalid": 3,
+                  "judge_transport_failures": 0,
+                  "judge_truncated_with_grade": 3,
+                  "judge_audit_flagged": 3,
+                  "solver_truncated": 28,
+                  "judge_truncated": 5,
+                  "success_rate": 0.64,
+                  "observed_success_lower_bound": 0.64,
+                  "mean_research_score_valid_only": null
+                },
+                "research": {
+                  "total": 60,
+                  "graded": 59,
+                  "successes": 4,
+                  "solver_failures": 0,
+                  "judge_unresolved": 1,
+                  "judge_invalid": 1,
+                  "judge_transport_failures": 0,
+                  "judge_truncated_with_grade": 4,
+                  "judge_audit_flagged": 6,
+                  "solver_truncated": 9,
+                  "judge_truncated": 5,
+                  "success_rate": 0.06666666666666667,
+                  "observed_success_lower_bound": 0.06666666666666667,
+                  "mean_research_score_valid_only": 2.4879661016949153
+                }
+              }
+            }
+          },
+          "same_client_request_bodies": true,
+          "same_per_case_engine_prompt_tokens": true,
+          "time_reduction_percent": -3.2230070981954104,
+          "output_token_change_percent": 3.018078110796101,
+          "output_throughput_change_percent": -0.19853034043501064
+        },
+        {
+          "id": "swe",
+          "label": "SWE-bench Pro public trace",
+          "status": "complete",
+          "direct": {
+            "dataset": "swe",
+            "arm": "direct",
+            "planned": 64,
+            "returned": 64,
+            "successful": 64,
+            "release_errors": 0,
+            "elapsed_seconds": 61.76062979269773,
+            "output_tokens": 8180,
+            "input_tokens": 509607,
+            "finish_length": 2,
+            "source_sha256": "19aba0aa8b219bd9ce3f70d6d7120b6a0a86ed68af1b6a0142154c803209add6",
+            "client_concurrency": 8,
+            "business_timeout": -1,
+            "latency_seconds": {
+              "n": 64,
+              "mean": 6.192569413440651,
+              "p50": 4.800472691655159,
+              "p95": 7.618157711811364,
+              "p99": 57.7615354815498,
+              "max": 57.7615354815498,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_content_seconds": {
+              "n": 64,
+              "mean": 1.792746510458528,
+              "p50": 1.561326458118856,
+              "p95": 4.72085449192673,
+              "p99": 5.338155873119831,
+              "max": 5.338155873119831,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_output_seconds": {
+              "n": 64,
+              "mean": 1.792746510458528,
+              "p50": 1.561326458118856,
+              "p95": 4.72085449192673,
+              "p99": 5.338155873119831,
+              "max": 5.338155873119831,
+              "percentile_method": "nearest_rank"
+            },
+            "cached_input_tokens": 0,
+            "cached_input_percent": 0.0,
+            "measurement_only": true,
+            "quality_score": null,
+            "complete": true,
+            "output_tokens_per_second": 132.44683591240133,
+            "quality": {
+              "task_pass_rate": null,
+              "note": "Static trace inference; original tools/tasks were not executed."
+            }
+          },
+          "controller": {
+            "dataset": "swe",
+            "arm": "controller",
+            "planned": 64,
+            "returned": 64,
+            "successful": 64,
+            "release_errors": 0,
+            "elapsed_seconds": 60.55731814261526,
+            "output_tokens": 8204,
+            "input_tokens": 509607,
+            "finish_length": 2,
+            "source_sha256": "19aba0aa8b219bd9ce3f70d6d7120b6a0a86ed68af1b6a0142154c803209add6",
+            "client_concurrency": 8,
+            "business_timeout": -1,
+            "latency_seconds": {
+              "n": 64,
+              "mean": 6.137363258560072,
+              "p50": 4.879462553188205,
+              "p95": 7.843870188109577,
+              "p99": 56.84724050760269,
+              "max": 56.84724050760269,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_content_seconds": {
+              "n": 64,
+              "mean": 1.840790911897784,
+              "p50": 1.4817079091444612,
+              "p95": 4.503567463718355,
+              "p99": 5.459693224169314,
+              "max": 5.459693224169314,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_output_seconds": {
+              "n": 64,
+              "mean": 1.840790911897784,
+              "p50": 1.4817079091444612,
+              "p95": 4.503567463718355,
+              "p99": 5.459693224169314,
+              "max": 5.459693224169314,
+              "percentile_method": "nearest_rank"
+            },
+            "cached_input_tokens": 0,
+            "cached_input_percent": 0.0,
+            "measurement_only": true,
+            "quality_score": null,
+            "complete": true,
+            "output_tokens_per_second": 135.47495582085065,
+            "quality": {
+              "task_pass_rate": null,
+              "note": "Static trace inference; original tools/tasks were not executed."
+            }
+          },
+          "same_client_request_bodies": true,
+          "same_per_case_engine_prompt_tokens": true,
+          "time_reduction_percent": 1.9483474409529784,
+          "output_token_change_percent": 0.293398533007335,
+          "output_throughput_change_percent": 2.2862908634918897
+        },
+        {
+          "id": "terminal",
+          "label": "Terminal-Bench public trace",
+          "status": "complete",
+          "direct": {
+            "dataset": "terminal",
+            "arm": "direct",
+            "planned": 48,
+            "returned": 48,
+            "successful": 48,
+            "release_errors": 0,
+            "elapsed_seconds": 63.65705767646432,
+            "output_tokens": 15465,
+            "input_tokens": 462869,
+            "finish_length": 3,
+            "source_sha256": "e64264fe5445427076e455c3f0394e7346033af84751d495d3f20f3b02590fd1",
+            "client_concurrency": 8,
+            "business_timeout": -1,
+            "latency_seconds": {
+              "n": 48,
+              "mean": 9.483427095692605,
+              "p50": 4.972649600356817,
+              "p95": 32.92312487680465,
+              "p99": 57.85150349326432,
+              "max": 57.85150349326432,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_content_seconds": {
+              "n": 48,
+              "mean": 1.9501582741504535,
+              "p50": 1.4419364100322127,
+              "p95": 5.3722740933299065,
+              "p99": 6.662656353786588,
+              "max": 6.662656353786588,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_output_seconds": {
+              "n": 48,
+              "mean": 1.9501582741504535,
+              "p50": 1.4419364100322127,
+              "p95": 5.3722740933299065,
+              "p99": 6.662656353786588,
+              "max": 6.662656353786588,
+              "percentile_method": "nearest_rank"
+            },
+            "cached_input_tokens": 0,
+            "cached_input_percent": 0.0,
+            "measurement_only": true,
+            "quality_score": null,
+            "complete": true,
+            "output_tokens_per_second": 242.94242562388828,
+            "quality": {
+              "task_pass_rate": null,
+              "note": "Static trace inference; original tools/tasks were not executed."
+            }
+          },
+          "controller": {
+            "dataset": "terminal",
+            "arm": "controller",
+            "planned": 48,
+            "returned": 48,
+            "successful": 48,
+            "release_errors": 0,
+            "elapsed_seconds": 56.75058112759143,
+            "output_tokens": 12989,
+            "input_tokens": 462869,
+            "finish_length": 2,
+            "source_sha256": "e64264fe5445427076e455c3f0394e7346033af84751d495d3f20f3b02590fd1",
+            "client_concurrency": 8,
+            "business_timeout": -1,
+            "latency_seconds": {
+              "n": 48,
+              "mean": 8.80960001363807,
+              "p50": 4.533848689869046,
+              "p95": 37.37732941750437,
+              "p99": 56.27048642374575,
+              "max": 56.27048642374575,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_content_seconds": {
+              "n": 48,
+              "mean": 1.9496621240784104,
+              "p50": 1.5542972031980753,
+              "p95": 5.347542690113187,
+              "p99": 6.6216471856459975,
+              "max": 6.6216471856459975,
+              "percentile_method": "nearest_rank"
+            },
+            "time_to_first_output_seconds": {
+              "n": 48,
+              "mean": 1.9496621240784104,
+              "p50": 1.5542972031980753,
+              "p95": 5.347542690113187,
+              "p99": 6.6216471856459975,
+              "max": 6.6216471856459975,
+              "percentile_method": "nearest_rank"
+            },
+            "cached_input_tokens": 0,
+            "cached_input_percent": 0.0,
+            "measurement_only": true,
+            "quality_score": null,
+            "complete": true,
+            "output_tokens_per_second": 228.87871352007897,
+            "quality": {
+              "task_pass_rate": null,
+              "note": "Static trace inference; original tools/tasks were not executed."
+            }
+          },
+          "same_client_request_bodies": true,
+          "same_per_case_engine_prompt_tokens": true,
+          "time_reduction_percent": 10.849506403476756,
+          "output_token_change_percent": -16.010345942450694,
+          "output_throughput_change_percent": -5.788907420222299
+        }
+      ],
+      "quality_rows": [
+        {
+          "label_zh": "MMLU-Pro正确数 / 200",
+          "label_en": "MMLU-Pro correct / 200",
+          "direct": "148 / 200",
+          "controller": "145 / 200"
+        },
+        {
+          "label_zh": "FrontierScience Olympiad 达标数 / 总数",
+          "label_en": "FrontierScience Olympiad successes / total",
+          "direct": "61 / 100",
+          "controller": "64 / 100"
+        },
+        {
+          "label_zh": "FrontierScience Olympiad 评分未解析",
+          "label_en": "FrontierScience Olympiad unparsed grades",
+          "direct": 3,
+          "controller": 3
+        },
+        {
+          "label_zh": "FrontierScience Olympiad 评分传输失败",
+          "label_en": "FrontierScience Olympiad judge transport failures",
+          "direct": 0,
+          "controller": 0
+        },
+        {
+          "label_zh": "FrontierScience Research 达标数 / 总数",
+          "label_en": "FrontierScience Research successes / total",
+          "direct": "4 / 60",
+          "controller": "4 / 60"
+        },
+        {
+          "label_zh": "FrontierScience Research 评分未解析",
+          "label_en": "FrontierScience Research unparsed grades",
+          "direct": 0,
+          "controller": 1
+        },
+        {
+          "label_zh": "FrontierScience Research 评分传输失败",
+          "label_en": "FrontierScience Research judge transport failures",
+          "direct": 0,
+          "controller": 0
+        }
+      ],
+      "overrides": [
+        {
+          "zh": "引擎基于第八版；执行上限沿官方36。两组共同将任务状态驻留数54改为80，80不是vLLM默认值。",
+          "en": "Based on engine r8 with its execution limit of 36. Both arms change resident-state capacity from 54 to 80; 80 is not a vLLM default."
+        },
+        {
+          "zh": "两组共同覆盖逐请求强制重算，保留稳定program身份和跨轮状态复用；未宣称完全未改动的官方全部优化。",
+          "en": "Both arms override forced per-request recomputation to retain stable program identity and cross-turn state reuse; this is not an unmodified official stack."
+        },
+        {
+          "zh": "Controller由RIDE local独立管理，使用原版ThunderAgent；业务请求、转发与恢复不设timeout。",
+          "en": "RIDE local manages a separate controller using original ThunderAgent. Business requests, forwarding and restoration have no timeout."
+        }
+      ],
+      "scope_zh": "56份SWE-smith长度/工具等待模板各生成两个独立token-ID实例，共112个三轮程序、336次请求；新输入为合成token-ID，续轮继承模型真实输出。不是原始题目文本或完整Agent任务解决率。",
+      "scope_en": "56 SWE-smith length/tool-wait templates, each with two independent token-ID instances: 112 three-turn programs and 336 requests. New inputs are synthetic token IDs; continuations inherit real model outputs. This does not measure original task text or full Agent solve rate.",
+      "limitations_zh": "仅一次固定顺序配对；未证明最优或稳定收益。104个程序变快、8个变慢。缓存命中按输入token加权；引擎prefill计算减少，不代表所有状态驱逐问题已根治。",
+      "limitations_en": "One pair in fixed order; optimality and repeatability are unproven. 104 programs became faster and 8 slower. Cache hits are input-token weighted. Reduced prefill does not establish that all state-eviction issues are fixed.",
+      "quality_note_zh": "MMLU-Pro使用原提取器和200题分母；FrontierScience使用官网同款Qwen替代judge，未解析保留原分母，不等同官方judge评分。公开轨迹没有执行完整工具任务。HTTP时延不含等待客户端并发槽位；整批耗时包含该排队、release及收尾，评分另计。",
+      "quality_note_en": "MMLU-Pro uses the original extractor and 200-case denominator. FrontierScience uses the website’s Qwen substitute judge, retaining invalid grades in the planned denominator; these are not official-judge scores. Public traces do not execute complete tool tasks. HTTP latency excludes waiting for client worker slots; batch time includes this queue, release and teardown. Grading is timed separately.",
+      "changelog": [
+        {
+          "date": "2026-11-18",
+          "zh": "保留第六版30.06%历史结果；第八版另立运行，不重标旧成绩。",
+          "en": "Retain the historical r6 result of 30.06%. R8 is a separate run, not a relabelled measurement."
+        },
+        {
+          "date": "2026-11-18",
+          "zh": "第八版共同应用驻留80、跨轮复用、无业务timeout；模型与控制面分别冷启动和管理。",
+          "en": "Both r8 arms use resident capacity 80, cross-turn reuse and no business timeout. Model and controller have independent lifecycles."
+        },
+        {
+          "date": "2026-11-18",
+          "zh": "四项官网固定负载完成匹配对照和原评分，保留负收益、输出量变化与未解析评分；HLE暂缓。",
+          "en": "Four fixed website profiles completed matched comparisons and original scoring. Retain regressions, output-count differences and unparsed grades; HLE is deferred."
+        }
+      ]
+    },
+    {
+      "id": "r6",
+      "label": "2026-11-18 · Engine r6 historical pair",
+      "engine_release": "full-answer-b1-20261113-r6",
+      "max_num_seqs": 24,
+      "state_resident_seats": 80,
+      "repetitions_per_arm": 1,
+      "report_path": "reports/controller-resident80-9450-20261118/README.md",
+      "result": {
+        "completed_pair": true,
+        "direct": {
+          "tasks": 112,
+          "completed_tasks": 112,
+          "unfinished_tasks": 0,
+          "successful_requests": 336,
+          "failed_requests": 0,
+          "elapsed_seconds": 338.5452,
+          "input_tokens": 5992408,
+          "cached_input_percent": 35.20419504145913,
+          "zero_hit_continuations": 106,
+          "output_tokens": 43516,
+          "cached_input_tokens": 2109579,
+          "first_round_cached_input_tokens": 0,
+          "task_latency_seconds": {
+            "mean": 263.5096,
+            "p50": 274.2991,
+            "p90": 323.5998,
+            "p99": 333.2862,
+            "maximum": 338.5452
+          },
+          "request_latency_seconds": {
+            "mean": 85.194,
+            "p50": 70.3782,
+            "p90": 167.624,
+            "p99": 296.2031,
+            "maximum": 321.5779
+          },
+          "controller_admission_seconds": {},
+          "derived_uncached_input_tokens": 3882829,
+          "peak_cache_fraction_while_running": 0.9983277591973244,
+          "samples_in_motion": 324
+        },
+        "request_throttling_controller": {
+          "tasks": 112,
+          "completed_tasks": 112,
+          "unfinished_tasks": 0,
+          "successful_requests": 336,
+          "failed_requests": 0,
+          "elapsed_seconds": 236.7936,
+          "input_tokens": 5992408,
+          "cached_input_percent": 60.248234098879784,
+          "zero_hit_continuations": 21,
+          "output_tokens": 43516,
+          "cached_input_tokens": 3610320,
+          "first_round_cached_input_tokens": 0,
+          "task_latency_seconds": {
+            "mean": 174.0095,
+            "p50": 189.0868,
+            "p90": 222.2436,
+            "p99": 230.6464,
+            "maximum": 236.7936
+          },
+          "request_latency_seconds": {
+            "mean": 55.3841,
+            "p50": 37.4045,
+            "p90": 147.5586,
+            "p99": 209.2799,
+            "maximum": 211.9931
+          },
+          "controller_admission_seconds": {},
+          "derived_uncached_input_tokens": 2382088,
+          "peak_cache_fraction_while_running": 0.9983277591973244,
+          "samples_in_motion": 222
+        },
+        "matched_prompt_token_hashes": 170,
+        "seconds_saved": 101.75160000000002,
+        "time_reduction_percent": 30.055543543373236,
+        "runtime_command_match": {
+          "runtime_match": true,
+          "engine_arguments_match": true,
+          "normalized_command_sha256": "4a596d1589e9de250b6f8615b2f4eaa46c34983993b79d1a9213cb5f5792e594",
+          "vllm": "0.28.1.post1.dev143+gf18cf803c",
+          "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+          "cann": "/usr/local/Ascend/cann-9.1.0",
+          "plugins": "ascend,ascend_model,ascend_model_loader,ascend_kv_connector,hust_m01_correction,hust_joint_packed,ie_ascend_kv_copy"
+        },
+        "controller_drained": true,
+        "cache_hit_percentage_point_increase": 25.044039057420655
+      },
+      "profiles": [
+        {
+          "id": "mmlu",
+          "label": "MMLU-Pro",
+          "status": "not_run",
+          "reason_zh": "本历史配对未执行",
+          "reason_en": "Not run in this historical pair"
+        },
+        {
+          "id": "hle",
+          "label": "Humanity’s Last Exam",
+          "status": "not_run",
+          "reason_zh": "本历史配对未执行",
+          "reason_en": "Not run in this historical pair"
+        },
+        {
+          "id": "frontier",
+          "label": "FrontierScience",
+          "status": "not_run",
+          "reason_zh": "本历史配对未执行",
+          "reason_en": "Not run in this historical pair"
+        },
+        {
+          "id": "swe",
+          "label": "SWE-bench Pro public trace",
+          "status": "not_run",
+          "reason_zh": "本历史配对未执行",
+          "reason_en": "Not run in this historical pair"
+        },
+        {
+          "id": "terminal",
+          "label": "Terminal-Bench public trace",
+          "status": "not_run",
+          "reason_zh": "本历史配对未执行",
+          "reason_en": "Not run in this historical pair"
+        }
+      ],
+      "quality_rows": [],
+      "overrides": [
+        {
+          "zh": "第六版历史配对：执行上限24、任务状态驻留80，不是vLLM默认值。",
+          "en": "Historical r6 pair: execution limit 24 and resident-state capacity 80; these are not vLLM defaults."
+        },
+        {
+          "zh": "两组共同覆盖逐请求强制重算，保留稳定program身份和跨轮状态复用；未宣称完全未改动的官方全部优化。",
+          "en": "Both arms override forced per-request recomputation to retain stable program identity and cross-turn state reuse; this is not an unmodified official stack."
+        },
+        {
+          "zh": "Controller由RIDE local独立管理，使用原版ThunderAgent；业务请求、转发与恢复不设timeout。",
+          "en": "RIDE local manages a separate controller using original ThunderAgent. Business requests, forwarding and restoration have no timeout."
+        }
+      ],
+      "scope_zh": "56份SWE-smith长度/工具等待模板各生成两个独立token-ID实例，共112个三轮程序、336次请求；新输入为合成token-ID，续轮继承模型真实输出。不是原始题目文本或完整Agent任务解决率。",
+      "scope_en": "56 SWE-smith length/tool-wait templates, each with two independent token-ID instances: 112 three-turn programs and 336 requests. New inputs are synthetic token IDs; continuations inherit real model outputs. This does not measure original task text or full Agent solve rate.",
+      "limitations_zh": "第六版独立历史配对，不与第八版构成单参数消融；未独立重复。",
+      "limitations_en": "A separate historical r6 pair, not a single-variable ablation against r8; no independent repetitions.",
+      "quality_note_zh": "本历史配对未测任务解决率或这四项固定数据集。",
+      "quality_note_en": "This historical pair did not evaluate task solve rate or these four fixed profiles.",
+      "changelog": [
+        {
+          "date": "2026-11-18",
+          "zh": "9450 完成驻留数 80 的直连 B1 / B1 加原版 ThunderAgent 对照，112 个三轮任务全部完成。",
+          "en": "Completed the 9450 comparison at 80 resident states; all 112 three-turn tasks completed in both arms."
+        },
+        {
+          "date": "2026-11-18",
+          "zh": "继续补跑官网五项输入：MMLU-Pro 200、Humanity’s Last Exam 200、FrontierScience 160、SWE trace 64、Terminal-Bench trace 48。输入已冻结并传入9450客户端；两卡工作区因CPU配额不足排队，尚未提交请求。",
+          "en": "Prepared all five frozen website inputs. The 9450 two-card workspace is waiting for CPU capacity; no new model requests have been submitted."
+        },
+        {
+          "date": "2026-11-17",
+          "zh": "128个最多十轮任务的完整对照：直连393.30秒，限流396.72秒；缓存命中11.97%降至10.86%。保留负结果，第二次配对按用户要求取消。",
+          "en": "The 128-task, up-to-ten-turn comparison took 393.30 s directly and 396.72 s with throttling; cache hits fell from 11.97% to 10.86%. The second pair was cancelled at the user’s request."
+        },
+        {
+          "date": "2026-11-17",
+          "zh": "144个三轮任务对照：596.54秒降至564.87秒，缩短5.31%；缓存命中5.11%升至10.25%。不能与驻留数80的新配对合并统计。",
+          "en": "The 144-task three-turn comparison improved from 596.54 to 564.87 s (5.31%), with cache hits rising from 5.11% to 10.25%. It is a separate configuration from the 80-state pair."
+        },
+        {
+          "date": "2026-11-17",
+          "zh": "驻留数显式设为 80，执行上限固定 24；两组共同启用跨轮缓存。",
+          "en": "Set resident states explicitly to 80 and execution limit to 24, with cross-turn caching in both arms."
+        },
+        {
+          "date": "2026-11-17",
+          "zh": "单参数诊断中，省略驻留数后回退到 28；续轮命中率下降，保留诊断结果。",
+          "en": "Single-parameter diagnosis found that omission falls back to 28 resident states and reduces continuation hits."
+        },
+        {
+          "date": "2026-11-17",
+          "zh": "9443 设备占用冲突阻塞启动，随后转到 9450；下载故障恢复后完成运行。",
+          "en": "9443 device ownership conflicts blocked startup; the experiment moved to 9450 and completed after download recovery."
+        },
+        {
+          "date": "2026-11-04",
+          "zh": "保留历史四组回放、负结果和未解决的数值诊断，见原报告。",
+          "en": "Retain the historical four-arm replay, negative result and unresolved numerical diagnosis in the original report."
+        }
+      ]
+    }
+  ]
+}

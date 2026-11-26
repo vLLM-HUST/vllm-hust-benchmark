@@ -1,0 +1,347 @@
+{
+  "schema": "deeplinkengine-full-acceptance-report/v1",
+  "engine_release": "full-answer-b1-20261124-r10",
+  "execution_complete": true,
+  "targets": {
+    "4.1": {
+      "evidence_reason": "原完整参考的算量、参考时间与每卡分母已独立复算，并通过同工况输入、权重、精度、双卡及预算核验；本轮必要F和原生同步T重新计算分子，再除以原参考每卡上界。两份F不相消，未沿用旧效率。",
+      "milestone": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "本轮必要算量、同步计时和已核验同工况参考分母，效率下界≥50%。"
+      },
+      "final": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "同一效率下界≥90%。"
+      },
+      "efficiency_lower_percent": "96.10799894845700291737166757805252550353",
+      "certificate_kind": "qualified_full_reference_denominator_reuse/v1"
+    },
+    "4.2": {
+      "milestone": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "同一数据集同时满足吞吐及两项平均时延：MMLU-Pro, HLE-Verified, FrontierScience, SWE-bench-Pro trace, TerminalBench 2.1 trace"
+      },
+      "final": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "同一数据集同时满足吞吐及两项平均时延：MMLU-Pro, FrontierScience, SWE-bench-Pro trace, TerminalBench 2.1 trace"
+      },
+      "datasets": {
+        "mmlu": {
+          "met": true,
+          "quality": {
+            "met": true,
+            "status": "达成目标",
+            "reason": "固定200题正确率绝对下降≤5个百分点。",
+            "drop_pp": "-3"
+          },
+          "execution_complete": true,
+          "throughput_ratio": "2.695587686205702840429460518",
+          "ttft_ratio": "0.3135476912734240068931099446",
+          "tpot_ratio": "0.5319276781056887728455585459"
+        },
+        "hle": {
+          "met": true,
+          "quality": {
+            "met": true,
+            "status": "达成目标",
+            "reason": "固定计划分母；未决计非成功；HLE比较总体，Frontier分别比较两个赛道，绝对下降≤5个百分点。",
+            "drop_pp": {
+              "overall": "-8"
+            }
+          },
+          "execution_complete": true,
+          "throughput_ratio": "1.830527841826267763530329416",
+          "ttft_ratio": "0.4680396420585887081497635888",
+          "tpot_ratio": "0.5648862403805439130504133423"
+        },
+        "frontier": {
+          "met": true,
+          "quality": {
+            "met": true,
+            "status": "达成目标",
+            "reason": "固定计划分母；未决计非成功；HLE比较总体，Frontier分别比较两个赛道，绝对下降≤5个百分点。",
+            "drop_pp": {
+              "olympiad": "1",
+              "research": "1.666666666666666666666666667"
+            }
+          },
+          "execution_complete": true,
+          "throughput_ratio": "2.561855937988348321238010431",
+          "ttft_ratio": "0.2967365860487897227629540814",
+          "tpot_ratio": "0.4068209313877139208152736424"
+        },
+        "swe": {
+          "met": true,
+          "quality": {
+            "met": true,
+            "status": "达成目标",
+            "reason": "公开轨迹只测性能。"
+          },
+          "execution_complete": true,
+          "throughput_ratio": "2.975424421763796094797931164",
+          "ttft_ratio": "0.5345250428128339834887251379",
+          "tpot_ratio": "0.3451493792727880825670952768"
+        },
+        "terminal": {
+          "met": true,
+          "quality": {
+            "met": true,
+            "status": "达成目标",
+            "reason": "公开轨迹只测性能。"
+          },
+          "execution_complete": true,
+          "throughput_ratio": "2.944490744515278508174753357",
+          "ttft_ratio": "0.4163213456175848276562425585",
+          "tpot_ratio": "0.3596767113838204161948345494"
+        }
+      },
+      "final_datasets": {
+        "mmlu": {
+          "met": true,
+          "quality": {
+            "met": true,
+            "status": "达成目标",
+            "reason": "固定200题正确率绝对下降≤5个百分点。",
+            "drop_pp": "-3"
+          },
+          "execution_complete": true,
+          "throughput_ratio": "2.695587686205702840429460518",
+          "ttft_ratio": "0.3135476912734240068931099446",
+          "tpot_ratio": "0.5319276781056887728455585459"
+        },
+        "hle": {
+          "met": false,
+          "quality": {
+            "met": true,
+            "status": "达成目标",
+            "reason": "固定计划分母；未决计非成功；HLE比较总体，Frontier分别比较两个赛道，绝对下降≤5个百分点。",
+            "drop_pp": {
+              "overall": "-8"
+            }
+          },
+          "execution_complete": true,
+          "throughput_ratio": "1.830527841826267763530329416",
+          "ttft_ratio": "0.4680396420585887081497635888",
+          "tpot_ratio": "0.5648862403805439130504133423"
+        },
+        "frontier": {
+          "met": true,
+          "quality": {
+            "met": true,
+            "status": "达成目标",
+            "reason": "固定计划分母；未决计非成功；HLE比较总体，Frontier分别比较两个赛道，绝对下降≤5个百分点。",
+            "drop_pp": {
+              "olympiad": "1",
+              "research": "1.666666666666666666666666667"
+            }
+          },
+          "execution_complete": true,
+          "throughput_ratio": "2.561855937988348321238010431",
+          "ttft_ratio": "0.2967365860487897227629540814",
+          "tpot_ratio": "0.4068209313877139208152736424"
+        },
+        "swe": {
+          "met": true,
+          "quality": {
+            "met": true,
+            "status": "达成目标",
+            "reason": "公开轨迹只测性能。"
+          },
+          "execution_complete": true,
+          "throughput_ratio": "2.975424421763796094797931164",
+          "ttft_ratio": "0.5345250428128339834887251379",
+          "tpot_ratio": "0.3451493792727880825670952768"
+        },
+        "terminal": {
+          "met": true,
+          "quality": {
+            "met": true,
+            "status": "达成目标",
+            "reason": "公开轨迹只测性能。"
+          },
+          "execution_complete": true,
+          "throughput_ratio": "2.944490744515278508174753357",
+          "ttft_ratio": "0.4163213456175848276562425585",
+          "tpot_ratio": "0.3596767113838204161948345494"
+        }
+      }
+    },
+    "4.3": {
+      "milestone": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "16K/4K吞吐≥50%，TTFT P95/P99比值≤3，TPOT P95/P99比值≤2；两臂完整且无失败。"
+      },
+      "final": {
+        "met": false,
+        "status": "未达成目标",
+        "reason": "32K全部五个60秒窗口：吞吐max/min≤1.50，TTFT P95/P99≤2，TPOT P95/P99≤1.25；两臂完整且无失败。"
+      },
+      "percentile_method": "nearest_rank",
+      "blocking_errors": {
+        "B0": [],
+        "B1": []
+      },
+      "measured_ratios": {
+        "throughput": "0.5938705069676319657720885357",
+        "ttft_p95": "2.058862389690799532174025846",
+        "ttft_p99": "2.692225477261891595446712274",
+        "tpot_p95": "1.530093627389314033803521385",
+        "tpot_p99": "1.557023979431168967078097964"
+      },
+      "measured_window_ratios": {
+        "throughput": "1.258234865416453699795671574",
+        "ttft_p95": "2.030629272480961729432858926",
+        "ttft_p99": "1.953470295581637621030796517",
+        "tpot_p95": "1.207351403422394102100245797",
+        "tpot_p99": "1.067009631251879266862210524"
+      }
+    },
+    "4.4": {
+      "milestone": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "MMLU200 完整回答满足质量和服务要求，按公开月租折算的单位成本下降≥10%，双卡 AI Core 提高≥10个百分点。",
+        "evidence_status": "published_rental"
+      },
+      "final": {
+        "met": true,
+        "status": "达成目标",
+        "reason": "4K 四租户按公开月租折算的单位成本下降≥30%，B1 双卡 AI Core 均值≥80%，两臂各租户完整结束。",
+        "evidence_status": "published_rental"
+      },
+      "utilization_gain_pp": "42.308810796851316",
+      "four_tenant_ai_core_mean_percent": "88.02360010109903",
+      "unit_cost_reduction_percent": "62.90233832431563436496389755",
+      "four_tenant_cost_reduction_percent": "65.84811977932538136252373447",
+      "cost_basis": "published_rental",
+      "published_rental": {
+        "published_date": "2026-11-17",
+        "model": "Ascend 910B2",
+        "server_monthly_price": 15000,
+        "cards_per_server": 8,
+        "source_url": "https://news.smm.cn/news/TCNOQJBAJVZYJ73BMVU7G5GJZXQ462A4U6NN4CY",
+        "publisher": "上海有色网（SMM）",
+        "currency": "CNY",
+        "monthly_cost_per_card_cny": "1875",
+        "days_per_month": 30,
+        "evidence_path": "evidence/indicator-4.4-cost-estimate.json",
+        "evidence_sha256": "17c85184d224536c139afa9bfb9af4428a23fb04f8f1012ebeef2b3fc7931b58"
+      },
+      "actual_cost_manifest_sha256": null,
+      "formal_cost": {
+        "mmlu": {
+          "evidence_status": "published_rental",
+          "reduction_percent": "62.90233832431563436496389755",
+          "utilization": {
+            "B0": {
+              "per_card_percent": {
+                "2": 36.25159271706394,
+                "3": 36.4134463183187
+              },
+              "mean_percent": 36.332519517691324,
+              "covered_seconds": 1249.4292443799786,
+              "missing_seconds": 0.0,
+              "max_hold_age_seconds": 5.224181417550426,
+              "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+            },
+            "B1": {
+              "per_card_percent": {
+                "2": 78.52454090702167,
+                "3": 78.75811972206363
+              },
+              "mean_percent": 78.64133031454264,
+              "covered_seconds": 463.569425663969,
+              "missing_seconds": 0.0,
+              "max_hold_age_seconds": 5.250301580992527,
+              "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+            }
+          },
+          "arms": {
+            "B0": {
+              "window_seconds": "1249.4292443799786",
+              "successful_output_tokens": 690754,
+              "occupied_cards": 2,
+              "measurement_seal_sha256": "54e1c0b15b5aa15d13c7569345aa72e7a1da8d42fa91fbbd80e5c48838f4a0d5",
+              "monthly_cost_per_card_cny": "1875",
+              "cost_per_million_output_tokens_cny": "2.616884343914090767721456071"
+            },
+            "B1": {
+              "window_seconds": "463.569425663969",
+              "successful_output_tokens": 690844,
+              "occupied_cards": 2,
+              "measurement_seal_sha256": "55647a090f399d28ebc4d262060fe47af2b9ec41074d420f37835aafa6e05ab8",
+              "monthly_cost_per_card_cny": "1875",
+              "cost_per_million_output_tokens_cny": "0.9708029003492019028201038901"
+            }
+          }
+        },
+        "four_tenant": {
+          "evidence_status": "published_rental",
+          "reduction_percent": "65.84811977932538136252373447",
+          "utilization": {
+            "B0": {
+              "per_card_percent": {
+                "2": 29.215313303911437,
+                "3": 30.009870368704775
+              },
+              "mean_percent": 29.612591836308106,
+              "covered_seconds": 313.5524993130239,
+              "missing_seconds": 0.0,
+              "max_hold_age_seconds": 5.193631918518804,
+              "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+            },
+            "B1": {
+              "per_card_percent": {
+                "2": 87.79710492273381,
+                "3": 88.25009527946426
+              },
+              "mean_percent": 88.02360010109903,
+              "covered_seconds": 308.35052632098086,
+              "missing_seconds": 0.0,
+              "max_hold_age_seconds": 5.204619632975664,
+              "method": "Sampler clock midpoint; request interval clipped; left-hold, time weighted. A sample estimate, not continuous hardware truth."
+            }
+          },
+          "arms": {
+            "B0": {
+              "window_seconds": "313.5524993130239",
+              "successful_output_tokens": 42496,
+              "occupied_cards": 2,
+              "measurement_seal_sha256": "0d234f1b14313806a2918a1ac66ee4f132f71f983446e3bd1e1c917ae352c920",
+              "monthly_cost_per_card_cny": "1875",
+              "cost_per_million_output_tokens_cny": "10.67476895813723304132327923"
+            },
+            "B1": {
+              "window_seconds": "308.35052632098086",
+              "successful_output_tokens": 122368,
+              "occupied_cards": 2,
+              "measurement_seal_sha256": "938ec8e50abe9bc391f4726a3735ea6fd5bba9b05c172a932a3c269de9207566",
+              "monthly_cost_per_card_cny": "1875",
+              "cost_per_million_output_tokens_cny": "3.645634308416783752394114172"
+            }
+          }
+        }
+      },
+      "same_rate_estimate": {
+        "mmlu": {
+          "reduction_percent": "62.90233832431563436496389755"
+        },
+        "four_tenant": {
+          "reduction_percent": "65.84811977932538136252373447"
+        }
+      },
+      "formula": "成本/百万输出词元=10^6×每卡月费×占卡数×正式区间秒数/(30×86400×成功输出词元数)。",
+      "rental_quote": {
+        "provider": "上海有色网（SMM）",
+        "url": "https://news.smm.cn/news/TCNOQJBAJVZYJ73BMVU7G5GJZXQ462A4U6NN4CY",
+        "checked_date": "2026-11-17",
+        "cny_per_card_month": "1875"
+      }
+    }
+  }
+}

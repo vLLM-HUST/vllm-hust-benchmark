@@ -49,13 +49,11 @@ jobs:
 
       - name: Verify data navigation index
         run: |
-          python scripts/data_index.py --check
-          python scripts/data_entrypoints.py --check
-          python scripts/build_website_evidence_links.py --check
+          python scripts/refresh_data_navigation.py --check
 
       - name: Verify DiffSpec evidence bytes
         working-directory: reports/tech-outcomes-20261117/diffspec
-        run: sha256sum --check SHA256SUMS
+        run: sha256sum --check --strict SHA256SUMS
 
       - name: Verify PyramidKV rc2 functional acceptance capsule
         run: |

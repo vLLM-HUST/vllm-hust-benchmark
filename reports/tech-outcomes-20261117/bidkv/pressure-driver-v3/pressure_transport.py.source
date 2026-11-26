@@ -1,0 +1,206 @@
+"""Project HTTP/SSE transport with exact wire capture and no inference retries."""
+
+import base64
+import gzip
+import hashlib
+import http.client
+import json
+from pathlib import Path
+import time
+import urllib.parse
+import uuid
+
+
+def clock():
+    return {"monotonic": time.monotonic(), "wall": time.time()}
+
+
+def call(config, body, directory, *, fixed_length=False, require_zero_reuse=True):
+    """Return one retained attempt; null cache details require batch-level proof.
+
+    `first_token` is the first content-token event for finite dataset metrics.
+    `first_generated_event` additionally includes reasoning for the separately
+    frozen synthetic C8 protocol. Raw payload bytes and both clocks are kept.
+    """
+    if body.get("stream") is not True or body.get("stream_options") != {
+        "include_usage": True
+    }:
+        raise ValueError("Explicit streamed output and final usage are required")
+    maximum = body.get("max_tokens", body.get("max_completion_tokens"))
+    if type(maximum) is not int or maximum <= 0:
+        raise ValueError("A frozen positive output budget is required")
+    folder = Path(directory)
+    folder.mkdir(parents=True, exist_ok=True)
+    capture = folder / (uuid.uuid4().hex + ".sse.jsonl.gz")
+    payload = json.dumps(body, ensure_ascii=False).encode("utf-8")
+    target = urllib.parse.urlsplit(
+        config["base_url"].rstrip("/") + "/v1/chat/completions"
+    )
+    if target.scheme not in ("http", "https") or target.username or target.password:
+        raise ValueError("HTTP(S) endpoint without embedded credentials required")
+    connection_class = (
+        http.client.HTTPSConnection
+        if target.scheme == "https"
+        else http.client.HTTPConnection
+    )
+    connection = connection_class(
+        target.hostname, target.port, timeout=config["timeout"]
+    )
+    record = {
+        "request": body,
+        "attempted": False,
+        "status": "transport_error",
+        "stream_capture": str(capture),
+        "first_token": None,
+        "last_token": None,
+        "first_generated_event": None,
+        "last_generated_event": None,
+        "cached_tokens_reported": None,
+        "zero_reuse_proof": "requires unique salts and batch metric deltas",
+    }
+    text, reasoning = [], []
+    usage = finish = None
+    done = False
+    event_lines, event_stamp = [], None
+
+    def consume(data, stamp):
+        nonlocal usage, finish, done
+        if data.strip() == b"[DONE]":
+            done = True
+            return
+        event = json.loads(data)
+        identifier = event.get("id")
+        if identifier is not None:
+            if not isinstance(identifier, str) or record.get(
+                "server_request_id"
+            ) not in (None, identifier):
+                raise ValueError("Inconsistent SSE request identity")
+            record["server_request_id"] = identifier
+        if event.get("error"):
+            raise ValueError("Error event in retained SSE")
+        if event.get("usage") is not None:
+            usage = event["usage"]
+        for choice in event.get("choices", []):
+            delta = choice.get("delta") or {}
+            content = delta.get("content") or ""
+            thought = delta.get("reasoning_content") or delta.get("reasoning") or ""
+            if not isinstance(content, str) or not isinstance(thought, str):
+                raise ValueError("Unsupported non-text generated delta")
+            text.append(content)
+            reasoning.append(thought)
+            if content:
+                record["first_token"] = record["first_token"] or stamp
+                record["last_token"] = stamp
+            if content or thought:
+                record["first_generated_event"] = (
+                    record["first_generated_event"] or stamp
+                )
+                record["last_generated_event"] = stamp
+            finish = choice.get("finish_reason") or finish
+
+    record["start"] = clock()
+    record["started_unix"] = record["start"]["wall"]
+    try:
+        record["attempted"] = True
+        connection.connect()
+        socket = connection.sock
+        deadline = record["start"]["monotonic"] + config["timeout"]
+        socket.settimeout(max(0.001, deadline - time.monotonic()))
+        connection.request(
+            "POST", target.path, payload, {"Content-Type": "application/json"}
+        )
+        socket.settimeout(max(0.001, deadline - time.monotonic()))
+        with connection.getresponse() as response:
+            record["http_status"] = response.status
+            with gzip.open(capture, "wt", encoding="utf-8", newline="\n") as wire:
+                while True:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise TimeoutError("Whole request deadline exceeded")
+                    socket.settimeout(remaining)
+                    raw = response.readline()
+                    if not raw:
+                        break
+                    stamp = clock()
+                    wire.write(
+                        json.dumps(
+                            {"clock": stamp, "raw_b64": base64.b64encode(raw).decode()}
+                        )
+                        + "\n"
+                    )
+                    if raw.rstrip(b"\r\n") == b"":
+                        if event_lines:
+                            consume(b"\n".join(event_lines), event_stamp)
+                            event_lines, event_stamp = [], None
+                    elif raw.startswith(b"data:"):
+                        event_lines.append(raw[5:].lstrip(b" ").rstrip(b"\r\n"))
+                        event_stamp = stamp
+                if event_lines:
+                    consume(b"\n".join(event_lines), event_stamp)
+        record["end"] = clock()
+        if response.status != 200 or not done or finish not in ("stop", "length"):
+            raise ValueError("Incomplete HTTP/SSE completion")
+        if not isinstance(usage, dict):
+            raise ValueError("Missing final accepted-token usage")
+        count = usage.get("completion_tokens")
+        if type(count) is not int or not 0 < count <= maximum:
+            raise ValueError("Accepted output count violates the frozen budget")
+        if finish == "length" and count != maximum:
+            raise ValueError("Length termination before the requested output budget")
+        if fixed_length and (finish != "length" or count != maximum):
+            raise ValueError("Fixed-length synthetic qualification was not completed")
+        if record["first_generated_event"] is None:
+            raise ValueError("No generated content event")
+        details = usage.get("prompt_tokens_details")
+        if details is not None:
+            if not isinstance(details, dict):
+                raise ValueError("Malformed prompt cache details")
+            cached = details.get("cached_tokens")
+            if cached is not None and (type(cached) is not int or cached < 0):
+                raise ValueError("Malformed cached-token count")
+            record["cached_tokens_reported"] = cached
+            if require_zero_reuse and cached:
+                raise ValueError("Unexpected KV reuse with a fresh request salt")
+        content = "".join(text)
+        thought = "".join(reasoning)
+        if not fixed_length and (not content.strip() or record["first_token"] is None):
+            raise ValueError("Empty answer or missing content-token event")
+        if (
+            body.get("chat_template_kwargs", {}).get("enable_thinking") is False
+            and thought
+        ):
+            raise ValueError("Separate reasoning in a frozen thinking=false request")
+        result = {
+            "choices": [
+                {
+                    "message": {"role": "assistant", "content": content},
+                    "finish_reason": finish,
+                }
+            ],
+            "usage": usage,
+        }
+        record.update(
+            status="ok",
+            content=content,
+            reasoning=thought,
+            usage=usage,
+            finish_reason=finish,
+            response=result,
+            raw_response=json.dumps(result, ensure_ascii=False),
+        )
+    except Exception as error:
+        record["error"] = type(error).__name__ + ": " + str(error)
+    finally:
+        connection.close()
+        record["end"] = record.get("end") or clock()
+        record["elapsed_s"] = record["end"]["monotonic"] - record["start"]["monotonic"]
+        if usage is not None:
+            record["observed_usage"] = usage
+        if finish is not None:
+            record["observed_finish_reason"] = finish
+        record["stream_sha256"] = (
+            hashlib.sha256(capture.read_bytes()).hexdigest()
+            if capture.is_file()
+            else None
+        )
+    return record

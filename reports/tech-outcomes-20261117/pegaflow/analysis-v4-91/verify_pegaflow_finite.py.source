@@ -1,0 +1,323 @@
+"""Reconstruct completed finite-stage evidence from controlled SSE and frozen inputs."""
+
+import argparse
+import base64
+import gzip
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+import sys
+
+
+def sha(path):
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def replay(path):
+    content, reasoning, finish, usage = "", "", None, None
+    first = last = first_generated = last_generated = None
+    done = False
+    payloads, stamp = [], None
+
+    def consume():
+        nonlocal \
+            content, \
+            reasoning, \
+            finish, \
+            usage, \
+            first, \
+            last, \
+            first_generated, \
+            last_generated, \
+            done
+        raw = b"\n".join(payloads)
+        if raw.strip() == b"[DONE]":
+            done = True
+            return
+        payload = json.loads(raw)
+        assert not payload.get("error"), "Retained SSE error event"
+        if payload.get("usage") is not None:
+            usage = payload["usage"]
+        for choice in payload.get("choices", []):
+            delta = choice.get("delta") or {}
+            text = delta.get("content") or ""
+            thought = delta.get("reasoning_content") or delta.get("reasoning") or ""
+            content += text
+            reasoning += thought
+            if text:
+                first = first or stamp
+                last = stamp
+            if text or thought:
+                first_generated = first_generated or stamp
+                last_generated = stamp
+            finish = choice.get("finish_reason") or finish
+
+    with gzip.open(path, "rt", encoding="utf-8") as stream:
+        for line in stream:
+            event = json.loads(line)
+            raw = base64.b64decode(event["raw_b64"])
+            if raw.rstrip(b"\r\n") == b"":
+                if payloads:
+                    consume()
+                    payloads, stamp = [], None
+            elif raw.startswith(b"data:"):
+                payloads.append(raw[5:].lstrip(b" ").rstrip(b"\r\n"))
+                stamp = event["clock"]
+        if payloads:
+            consume()
+    assert done and usage is not None and finish in ["stop", "length"]
+    return {
+        "content": content,
+        "reasoning": reasoning,
+        "usage": usage,
+        "finish_reason": finish,
+        "first_token": first,
+        "last_token": last,
+        "first_generated_event": first_generated,
+        "last_generated_event": last_generated,
+    }
+
+
+def inspect(args):
+    sys.path.insert(0, str(args.driver))
+    import finite
+    from measurement import summarize
+    from observation import zero_reuse
+
+    finite.load_tools(args.tools)
+    state = json.loads((args.root / "status.json").read_bytes())
+    assert state["phase"] in ["completed", "failed"], (
+        "Stage must be quiescent before independent inspection"
+    )
+    records = [
+        json.loads(path.read_bytes())
+        for path in sorted((args.root / "evaluation/requests").glob("*.json"))
+    ]
+    actual = {row["case_id"]: row for row in records}
+    assert len(records) == len(actual), "Duplicate actual case"
+    module = contract = original_scorer = gold = tasks = None
+    if args.dataset == "mmlu":
+        from mmlu_scope import verify
+
+        verify(args.plan)
+        tasks = json.loads(
+            (args.plan / "inputs/verified-mmlu-quality-inputs.json").read_bytes()
+        )["cases"]
+        bodies = json.loads(
+            (
+                args.plan / "inputs/mmlu-quality018-r2/quality-request-plan.json"
+            ).read_bytes()
+        )["requests"]
+        expected = dict(zip([task["case_id"] for task in tasks], bodies, strict=True))
+        gold = {task["case_id"]: task["answer"] for task in tasks}
+        source = args.plan / "scorers/mmlu_pro_pyramidkv.py"
+        spec = importlib.util.spec_from_file_location("original_mmlu", source)
+        original_scorer = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(original_scorer)
+    elif args.dataset in ["swe", "terminal"]:
+        import agent_trace
+
+        contract, tasks = agent_trace.load_plan(args.plan)
+        expected = {
+            task["case_id"]: agent_trace.request_body(contract, task) for task in tasks
+        }
+        frozen = {
+            row["case_id"]: row
+            for row in json.loads(
+                (args.plan / "offline-token-id-freeze.json").read_bytes()
+            )
+        }
+        admitted = json.loads(
+            (args.root / "trace-tokenizer-admission.json").read_bytes()
+        )
+        assert admitted["complete"]
+        assert {row["case_id"] for row in admitted["checked"]} == set(expected)
+        for task in tasks:
+            capture = json.loads(
+                (args.root / "tokenize" / (task["case_id"] + ".json")).read_bytes()
+            )
+            assert capture["request"] == agent_trace.tokenization_body(contract, task)
+            digest = hashlib.sha256(
+                json.dumps(
+                    capture["response"]["tokens"], separators=(",", ":")
+                ).encode()
+            ).hexdigest()
+            assert (capture["response"]["count"], digest) == (
+                task["prompt_tokens"],
+                frozen[task["case_id"]]["token_ids_sha256"],
+            )
+    else:
+        from dataset_contract import client
+
+        module = client(args.dataset)
+        contract, tasks = module.load_plan(args.plan)
+        _, actual = module.verify_run(
+            args.root / "evaluation", sha(args.plan / "contract.json"), args.stage
+        )
+        records = list(actual.values())
+        upstream = (
+            module.verify_run(
+                args.responses, sha(args.plan / "contract.json"), "solver"
+            )[1]
+            if args.stage == "judge"
+            else None
+        )
+        expected = {}
+        for task in tasks:
+            if args.stage == "solver":
+                if args.dataset == "hle":
+                    content = [{"type": "text", "text": task["problem"]}]
+                    if task["image"]:
+                        content.append(
+                            {"type": "image_url", "image_url": {"url": task["image"]}}
+                        )
+                    messages = [
+                        {"role": "system", "content": contract["solver_prompt"]},
+                        {"role": "user", "content": content},
+                    ]
+                else:
+                    messages = [{"role": "user", "content": task["problem"]}]
+            else:
+                source = upstream[task["case_id"]]
+                if args.dataset == "hle":
+                    prompt = contract["judge_prompt"].format(
+                        question=task["problem"],
+                        response=source.get("content") or "",
+                        correct_answer=task["answer"],
+                    )
+                else:
+                    prompt = contract["judge_prompts"][task["track"]].format_map(
+                        {
+                            "problem": task["problem"],
+                            "answer": source.get("content") or "",
+                            "reference answer": task["answer"],
+                            "rubric": task["answer"],
+                        }
+                    )
+                messages = [{"role": "user", "content": prompt}]
+            body = module.request_body(contract[args.stage], messages)
+            body.update(stream=True, stream_options={"include_usage": True})
+            if args.stage == "judge" and args.dataset == "hle":
+                body["response_format"] = contract["judge_response_format"]
+            expected[task["case_id"]] = body
+    assert set(actual) <= set(expected), "Unknown response cases"
+    assert state["phase"] != "completed" or set(actual) == set(expected), (
+        "Successful stage omitted planned cases"
+    )
+    salted = []
+    for identity, row in actual.items():
+        if row.get("request") is None:
+            assert row["status"] == "solver_failed"
+            continue
+        body, wanted = dict(row["request"]), dict(expected[identity])
+        salt = body.pop("cache_salt")
+        wanted.pop("cache_salt", None)
+        assert body == wanted and salt and body.get("ignore_eos") is not True, (
+            "Actual request differs from frozen input or budget"
+        )
+        if module is not None:
+            assert (
+                module.digest(
+                    {key: value for key, value in row.items() if key != "record_sha256"}
+                )
+                == row["record_sha256"]
+            )
+            assert module.digest(row["request"]) == row["request_sha256"]
+        salted.append(row)
+        wire = Path(row["stream_capture"])
+        if row.get("stream_sha256") is not None:
+            assert (
+                wire.resolve().is_relative_to(args.root.resolve())
+                and sha(wire) == row["stream_sha256"]
+            )
+        if row["status"] not in ["ok", "invalid_judge"]:
+            continue
+        raw = replay(wire)
+        for key, value in raw.items():
+            assert row[key] == value, (
+                "Cached response/timing differs from raw SSE: " + key
+            )
+        maximum = body.get("max_tokens", body.get("max_completion_tokens"))
+        assert 0 < raw["usage"]["completion_tokens"] <= maximum
+        assert (
+            raw["finish_reason"] != "length"
+            or raw["usage"]["completion_tokens"] == maximum
+        )
+        if original_scorer is not None:
+            answer = original_scorer.extract_answer(raw["content"])
+            assert row["answer"] == answer and row["correct"] == (
+                answer == gold[identity]
+            )
+        if module is not None and args.stage == "judge":
+            task = next(task for task in tasks if task["case_id"] == identity)
+            try:
+                grade = module.parse_grade(
+                    task["track"],
+                    raw["content"],
+                    raw["finish_reason"],
+                    contract["scoring_policy"],
+                )
+            except (ValueError, TypeError):
+                assert row["status"] == "invalid_judge"
+            else:
+                assert row["status"] == "ok" and row["grade"] == grade
+    from pega_evidence import strict_phase_cache
+
+    cache_admission = strict_phase_cache(args.root, args.arm)
+    assert cache_admission["passed"], cache_admission
+    external = None
+    if (args.root / "external-before-metrics.txt").is_file():
+        external = (
+            (args.root / "external-before-metrics.txt").read_text(),
+            (args.root / "external-after-metrics.txt").read_text(),
+        )
+    proof = zero_reuse(
+        (args.root / "before-metrics.txt").read_text(),
+        (args.root / "after-metrics.txt").read_text(),
+        salted,
+        external_metrics=external,
+    )
+    result = {
+        "dataset": args.dataset,
+        "stage": args.stage,
+        "planned": len(expected),
+        "recorded": len(actual),
+        "raw_sse_verified": sum(
+            row["status"] in ["ok", "invalid_judge"] for row in records
+        ),
+        "zero_reuse": proof,
+        "pega_cache_admission": cache_admission,
+        "failed_records_retained": sum(
+            row["status"] not in ["ok", "invalid_judge", "solver_failed"]
+            for row in records
+        ),
+    }
+    if args.stage == "solver":
+        recomputed = summarize([task["case_id"] for task in tasks], records)
+        stored = json.loads((args.root / "summary.json").read_bytes())
+        for key, value in recomputed.items():
+            assert stored[key] == value, (
+                "Published metric differs from raw-record recomputation: " + key
+            )
+        result["metrics_recomputed"] = True
+    return result
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    for name in ["driver", "tools", "plan", "root", "out"]:
+        parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument(
+        "--dataset",
+        choices=["mmlu", "hle", "frontier", "swe", "terminal"],
+        required=True,
+    )
+    parser.add_argument("--arm", choices=["native", "pegaflow"], required=True)
+    parser.add_argument("--stage", choices=["solver", "judge"], default="solver")
+    parser.add_argument("--responses", type=Path)
+    args = parser.parse_args()
+    result = inspect(args)
+    args.out.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(result))

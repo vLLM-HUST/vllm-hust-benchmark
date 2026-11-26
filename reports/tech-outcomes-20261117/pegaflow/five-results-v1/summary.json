@@ -1,0 +1,1631 @@
+{
+  "schema": "pegaflow-five-numeric-export/v2",
+  "status": "completed",
+  "formal_complete": true,
+  "planned_solver_requests_per_arm": 672,
+  "planned_judge_inputs": 720,
+  "stages": [
+    {
+      "name": "native-mmlu",
+      "arm": "native",
+      "solver_arm": null,
+      "dataset": "mmlu",
+      "stage": "solver",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794639498.7025864,
+      "completed_unix": 1794640578.8941314,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 19,
+        "solver_batch_wall_seconds": 1079.4951817840047,
+        "accepted_output_tokens": 681897,
+        "output_tokens_per_second": 631.6813743189455,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 524.4526394169047,
+          "p50": 555.8363038569951,
+          "p95": 949.1151401329028,
+          "p99": 976.9435928238962
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.02399382161616509,
+          "p50": 0.022402634452486365,
+          "p95": 0.03721269428718427,
+          "p99": 0.050642198094334234
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "planned": 200,
+          "correct": 145,
+          "accuracy": 0.725,
+          "unparsed": 0,
+          "categories": {
+            "biology": {
+              "planned": 12,
+              "correct": 11
+            },
+            "business": {
+              "planned": 14,
+              "correct": 12
+            },
+            "chemistry": {
+              "planned": 18,
+              "correct": 15
+            },
+            "computer science": {
+              "planned": 7,
+              "correct": 4
+            },
+            "economics": {
+              "planned": 14,
+              "correct": 11
+            },
+            "engineering": {
+              "planned": 16,
+              "correct": 8
+            },
+            "health": {
+              "planned": 14,
+              "correct": 7
+            },
+            "history": {
+              "planned": 6,
+              "correct": 4
+            },
+            "law": {
+              "planned": 19,
+              "correct": 6
+            },
+            "math": {
+              "planned": 22,
+              "correct": 20
+            },
+            "other": {
+              "planned": 15,
+              "correct": 11
+            },
+            "philosophy": {
+              "planned": 9,
+              "correct": 6
+            },
+            "physics": {
+              "planned": 21,
+              "correct": 18
+            },
+            "psychology": {
+              "planned": 13,
+              "correct": 12
+            }
+          },
+          "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "mmlu",
+        "stage": "solver",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 200
+        },
+        "pega_cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "native-mmlu-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 200
+    },
+    {
+      "name": "native-hle",
+      "arm": "native",
+      "solver_arm": null,
+      "dataset": "hle",
+      "stage": "solver",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794640581.237406,
+      "completed_unix": 1794643381.0458012,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 122,
+        "solver_batch_wall_seconds": 2794.9172076569957,
+        "accepted_output_tokens": 2185583,
+        "output_tokens_per_second": 781.9848809876532,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 1.3811515061702084,
+          "p50": 0.7027797314949566,
+          "p95": 6.006697508845536,
+          "p99": 6.0193889946801935
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.020439909283541537,
+          "p50": 0.01952320766815127,
+          "p95": 0.026148574124910708,
+          "p99": 0.03225643836540715
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "hle",
+        "stage": "solver",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 200
+        },
+        "pega_cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "native-hle-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 200
+    },
+    {
+      "name": "native-frontier",
+      "arm": "native",
+      "solver_arm": null,
+      "dataset": "frontier",
+      "stage": "solver",
+      "planned": 160,
+      "status": "completed",
+      "started_unix": 1794643383.374882,
+      "completed_unix": 1794644955.6814506,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 160,
+        "executed": 160,
+        "successful": 160,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 160,
+        "length_stops": 35,
+        "solver_batch_wall_seconds": 1570.2406394269929,
+        "accepted_output_tokens": 1218583,
+        "output_tokens_per_second": 776.0485682275306,
+        "ttft_seconds": {
+          "samples": 160,
+          "mean": 1.1844811224000296,
+          "p50": 0.7014518020005198,
+          "p95": 5.593099042349786,
+          "p99": 6.203783419029933
+        },
+        "tpot_seconds": {
+          "samples": 160,
+          "mean": 0.019946687309462016,
+          "p50": 0.019709836413202265,
+          "p95": 0.022273919587477216,
+          "p99": 0.023216430057606152
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 160,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 160,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 160
+      },
+      "independent_verification": {
+        "dataset": "frontier",
+        "stage": "solver",
+        "planned": 160,
+        "recorded": 160,
+        "raw_sse_verified": 160,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 160,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 160
+        },
+        "pega_cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "native-frontier-requests.json",
+      "recorded": 160,
+      "sse_capture_files": 160,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 160
+    },
+    {
+      "name": "native-swe",
+      "arm": "native",
+      "solver_arm": null,
+      "dataset": "swe",
+      "stage": "solver",
+      "planned": 64,
+      "status": "completed",
+      "started_unix": 1794644958.0448437,
+      "completed_unix": 1794645195.8753107,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 64,
+        "executed": 64,
+        "successful": 64,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 64,
+        "length_stops": 2,
+        "solver_batch_wall_seconds": 234.00983007100876,
+        "accepted_output_tokens": 8182,
+        "output_tokens_per_second": 34.96434315394881,
+        "ttft_seconds": {
+          "samples": 64,
+          "mean": 7.818177786717797,
+          "p50": 5.396347409499867,
+          "p95": 25.96716515705261,
+          "p99": 43.13018941804153
+        },
+        "tpot_seconds": {
+          "samples": 64,
+          "mean": 0.23763128796262104,
+          "p50": 0.19430198507171553,
+          "p95": 0.5590597183496901,
+          "p99": 0.5962478493199125
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 64,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 64,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 64
+      },
+      "independent_verification": {
+        "dataset": "swe",
+        "stage": "solver",
+        "planned": 64,
+        "recorded": 64,
+        "raw_sse_verified": 64,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 64,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 64
+        },
+        "pega_cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "native-swe-requests.json",
+      "recorded": 64,
+      "sse_capture_files": 64,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 64
+    },
+    {
+      "name": "native-terminal",
+      "arm": "native",
+      "solver_arm": null,
+      "dataset": "terminal",
+      "stage": "solver",
+      "planned": 48,
+      "status": "completed",
+      "started_unix": 1794645198.2340302,
+      "completed_unix": 1794645374.135738,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 48,
+        "executed": 48,
+        "successful": 48,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 48,
+        "length_stops": 2,
+        "solver_batch_wall_seconds": 172.36834494399955,
+        "accepted_output_tokens": 12765,
+        "output_tokens_per_second": 74.05652124899846,
+        "ttft_seconds": {
+          "samples": 48,
+          "mean": 7.216352371874564,
+          "p50": 5.064949658997648,
+          "p95": 23.44519217224733,
+          "p99": 32.63817679363914
+        },
+        "tpot_seconds": {
+          "samples": 48,
+          "mean": 0.1155166590924951,
+          "p50": 0.09773358457255221,
+          "p95": 0.3112651528659928,
+          "p99": 0.38223946712639656
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 48,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 48,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 48
+      },
+      "independent_verification": {
+        "dataset": "terminal",
+        "stage": "solver",
+        "planned": 48,
+        "recorded": 48,
+        "raw_sse_verified": 48,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 48,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 48
+        },
+        "pega_cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "native-terminal-requests.json",
+      "recorded": 48,
+      "sse_capture_files": 48,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 48
+    },
+    {
+      "name": "pegaflow-mmlu",
+      "arm": "pegaflow",
+      "solver_arm": null,
+      "dataset": "mmlu",
+      "stage": "solver",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794645894.2543273,
+      "completed_unix": 1794646990.1383448,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 19,
+        "solver_batch_wall_seconds": 1095.2469831580092,
+        "accepted_output_tokens": 679048,
+        "output_tokens_per_second": 619.9953165285597,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 470.0614617684207,
+          "p50": 461.33686971399584,
+          "p95": 925.1585185615025,
+          "p99": 963.7618621933372
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.02410680280868653,
+          "p50": 0.022537036838052513,
+          "p95": 0.03747832662443222,
+          "p99": 0.04322675841859695
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "planned": 200,
+          "correct": 151,
+          "accuracy": 0.755,
+          "unparsed": 0,
+          "categories": {
+            "biology": {
+              "planned": 12,
+              "correct": 11
+            },
+            "business": {
+              "planned": 14,
+              "correct": 11
+            },
+            "chemistry": {
+              "planned": 18,
+              "correct": 12
+            },
+            "computer science": {
+              "planned": 7,
+              "correct": 4
+            },
+            "economics": {
+              "planned": 14,
+              "correct": 12
+            },
+            "engineering": {
+              "planned": 16,
+              "correct": 9
+            },
+            "health": {
+              "planned": 14,
+              "correct": 11
+            },
+            "history": {
+              "planned": 6,
+              "correct": 4
+            },
+            "law": {
+              "planned": 19,
+              "correct": 8
+            },
+            "math": {
+              "planned": 22,
+              "correct": 20
+            },
+            "other": {
+              "planned": 15,
+              "correct": 10
+            },
+            "philosophy": {
+              "planned": 9,
+              "correct": 7
+            },
+            "physics": {
+              "planned": 21,
+              "correct": 20
+            },
+            "psychology": {
+              "planned": 13,
+              "correct": 12
+            }
+          },
+          "scorer_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": {
+          "vllm:pega_load_success_total": 0.0
+        },
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "mmlu",
+        "stage": "solver",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": {
+            "vllm:pega_load_success_total": 0.0
+          },
+          "null_cache_details": 200
+        },
+        "pega_cache_admission": {
+          "arm": "pegaflow",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": true,
+          "engine_connector": {
+            "deltas": {
+              "vllm:pega_load_success_total": 0.0,
+              "vllm:pega_save_success_total": 12.0,
+              "vllm:pega_load_failure_total": 0.0,
+              "vllm:pega_save_failure_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "external_snapshots_present": true,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "pegaflow-mmlu-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 200
+    },
+    {
+      "name": "pegaflow-hle",
+      "arm": "pegaflow",
+      "solver_arm": null,
+      "dataset": "hle",
+      "stage": "solver",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794646992.541415,
+      "completed_unix": 1794649869.0901737,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 200,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 200,
+        "length_stops": 122,
+        "solver_batch_wall_seconds": 2872.220972166004,
+        "accepted_output_tokens": 2197823,
+        "output_tokens_per_second": 765.1998301309576,
+        "ttft_seconds": {
+          "samples": 200,
+          "mean": 1.4090201354341116,
+          "p50": 0.7207683684973745,
+          "p95": 5.98193618059886,
+          "p99": 5.991718237557507
+        },
+        "tpot_seconds": {
+          "samples": 200,
+          "mean": 0.02110793128274912,
+          "p50": 0.01998693759921799,
+          "p95": 0.027981309580607,
+          "p99": 0.037726787843885605
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 200,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": {
+          "vllm:pega_load_success_total": 0.0
+        },
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "hle",
+        "stage": "solver",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": {
+            "vllm:pega_load_success_total": 0.0
+          },
+          "null_cache_details": 200
+        },
+        "pega_cache_admission": {
+          "arm": "pegaflow",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": true,
+          "engine_connector": {
+            "deltas": {
+              "vllm:pega_load_success_total": 0.0,
+              "vllm:pega_save_success_total": 8.0,
+              "vllm:pega_load_failure_total": 0.0,
+              "vllm:pega_save_failure_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "external_snapshots_present": true,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "pegaflow-hle-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 200
+    },
+    {
+      "name": "pegaflow-frontier",
+      "arm": "pegaflow",
+      "solver_arm": null,
+      "dataset": "frontier",
+      "stage": "solver",
+      "planned": 160,
+      "status": "completed",
+      "started_unix": 1794649871.4726117,
+      "completed_unix": 1794651532.4918802,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 160,
+        "executed": 160,
+        "successful": 160,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 160,
+        "length_stops": 40,
+        "solver_batch_wall_seconds": 1659.0029887529963,
+        "accepted_output_tokens": 1255439,
+        "output_tokens_per_second": 756.7430610499752,
+        "ttft_seconds": {
+          "samples": 160,
+          "mean": 1.2154455498751304,
+          "p50": 0.7091274324993719,
+          "p95": 5.784998710201762,
+          "p99": 6.38634044891558
+        },
+        "tpot_seconds": {
+          "samples": 160,
+          "mean": 0.01971884300345263,
+          "p50": 0.019322792352527637,
+          "p95": 0.022299100262294938,
+          "p99": 0.02375675060906517
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 160,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 160,
+        "external_loads": {
+          "vllm:pega_load_success_total": 0.0
+        },
+        "null_cache_details": 160
+      },
+      "independent_verification": {
+        "dataset": "frontier",
+        "stage": "solver",
+        "planned": 160,
+        "recorded": 160,
+        "raw_sse_verified": 160,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 160,
+          "external_loads": {
+            "vllm:pega_load_success_total": 0.0
+          },
+          "null_cache_details": 160
+        },
+        "pega_cache_admission": {
+          "arm": "pegaflow",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": true,
+          "engine_connector": {
+            "deltas": {
+              "vllm:pega_load_success_total": 0.0,
+              "vllm:pega_save_success_total": 0.0,
+              "vllm:pega_load_failure_total": 0.0,
+              "vllm:pega_save_failure_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "external_snapshots_present": true,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "pegaflow-frontier-requests.json",
+      "recorded": 160,
+      "sse_capture_files": 160,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 160
+    },
+    {
+      "name": "pegaflow-swe",
+      "arm": "pegaflow",
+      "solver_arm": null,
+      "dataset": "swe",
+      "stage": "solver",
+      "planned": 64,
+      "status": "completed",
+      "started_unix": 1794651534.9807134,
+      "completed_unix": 1794651757.466407,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 64,
+        "executed": 64,
+        "successful": 64,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 64,
+        "length_stops": 1,
+        "solver_batch_wall_seconds": 218.77694711899676,
+        "accepted_output_tokens": 6256,
+        "output_tokens_per_second": 28.595334574246746,
+        "ttft_seconds": {
+          "samples": 64,
+          "mean": 7.795531130031122,
+          "p50": 5.829556787000911,
+          "p95": 24.471422196759516,
+          "p99": 39.545931353334
+        },
+        "tpot_seconds": {
+          "samples": 64,
+          "mean": 0.25009495766799744,
+          "p50": 0.2322178715466483,
+          "p95": 0.43966495828444596,
+          "p99": 0.5576186382094648
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 64,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 64,
+        "external_loads": {
+          "vllm:pega_load_success_total": 0.0
+        },
+        "null_cache_details": 64
+      },
+      "independent_verification": {
+        "dataset": "swe",
+        "stage": "solver",
+        "planned": 64,
+        "recorded": 64,
+        "raw_sse_verified": 64,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 64,
+          "external_loads": {
+            "vllm:pega_load_success_total": 0.0
+          },
+          "null_cache_details": 64
+        },
+        "pega_cache_admission": {
+          "arm": "pegaflow",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": true,
+          "engine_connector": {
+            "deltas": {
+              "vllm:pega_load_success_total": 0.0,
+              "vllm:pega_save_success_total": 402.0,
+              "vllm:pega_load_failure_total": 0.0,
+              "vllm:pega_save_failure_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "external_snapshots_present": true,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "pegaflow-swe-requests.json",
+      "recorded": 64,
+      "sse_capture_files": 64,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 64
+    },
+    {
+      "name": "pegaflow-terminal",
+      "arm": "pegaflow",
+      "solver_arm": null,
+      "dataset": "terminal",
+      "stage": "solver",
+      "planned": 48,
+      "status": "completed",
+      "started_unix": 1794651759.8912435,
+      "completed_unix": 1794651943.950398,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 48,
+        "executed": 48,
+        "successful": 48,
+        "failed": 0,
+        "not_executed": 0,
+        "recorded": 48,
+        "length_stops": 2,
+        "solver_batch_wall_seconds": 180.42940222199832,
+        "accepted_output_tokens": 13188,
+        "output_tokens_per_second": 73.0923000219977,
+        "ttft_seconds": {
+          "samples": 48,
+          "mean": 7.603368909980721,
+          "p50": 5.0179794340074295,
+          "p95": 23.422624840608474,
+          "p99": 32.526214581161184
+        },
+        "tpot_seconds": {
+          "samples": 48,
+          "mean": 0.1203146352199891,
+          "p50": 0.09458707260860486,
+          "p95": 0.32193416894887145,
+          "p99": 0.3744716348378319
+        },
+        "tpot_excluded_output_tokens_le_one": 0,
+        "null_cache_detail_count": 48,
+        "zero_cache_admission": "pending separate fresh-salt and engine-counter checks",
+        "quality_scope": "Original graders and planned denominators; trace task quality is not measured",
+        "execution_records_complete": true,
+        "valid_transport": true,
+        "quality": {
+          "measured": false,
+          "reason": "Trace replay only; no historical tools or task execution"
+        }
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 48,
+        "external_loads": {
+          "vllm:pega_load_success_total": 0.0
+        },
+        "null_cache_details": 48
+      },
+      "independent_verification": {
+        "dataset": "terminal",
+        "stage": "solver",
+        "planned": 48,
+        "recorded": 48,
+        "raw_sse_verified": 48,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 48,
+          "external_loads": {
+            "vllm:pega_load_success_total": 0.0
+          },
+          "null_cache_details": 48
+        },
+        "pega_cache_admission": {
+          "arm": "pegaflow",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": true,
+          "engine_connector": {
+            "deltas": {
+              "vllm:pega_load_success_total": 0.0,
+              "vllm:pega_save_success_total": 390.0,
+              "vllm:pega_load_failure_total": 0.0,
+              "vllm:pega_save_failure_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false
+          },
+          "external_snapshots_present": true,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0,
+        "metrics_recomputed": true
+      },
+      "numeric_records_file": "pegaflow-terminal-requests.json",
+      "recorded": 48,
+      "sse_capture_files": 48,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 48
+    },
+    {
+      "name": "judge-native-hle",
+      "arm": "native",
+      "solver_arm": "native",
+      "dataset": "hle",
+      "stage": "judge",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794652438.9703078,
+      "completed_unix": 1794656640.2933445,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 89,
+        "invalid_judge": 111,
+        "solver_failed": 0,
+        "transport_failures": 0,
+        "length_stops": 111,
+        "scope": "Judge traffic excluded from all solver throughput and cost; invalid/unresolved answers remain in planned denominator"
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "hle",
+        "stage": "judge",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 200
+        },
+        "pega_cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0
+      },
+      "numeric_records_file": "judge-native-hle-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 200
+    },
+    {
+      "name": "judge-pegaflow-hle",
+      "arm": "native",
+      "solver_arm": "pegaflow",
+      "dataset": "hle",
+      "stage": "judge",
+      "planned": 200,
+      "status": "completed",
+      "started_unix": 1794656642.648807,
+      "completed_unix": 1794660529.8872147,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 200,
+        "executed": 200,
+        "successful": 98,
+        "invalid_judge": 102,
+        "solver_failed": 0,
+        "transport_failures": 0,
+        "length_stops": 102,
+        "scope": "Judge traffic excluded from all solver throughput and cost; invalid/unresolved answers remain in planned denominator"
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 200,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 200
+      },
+      "independent_verification": {
+        "dataset": "hle",
+        "stage": "judge",
+        "planned": 200,
+        "recorded": 200,
+        "raw_sse_verified": 200,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 200,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 200
+        },
+        "pega_cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0
+      },
+      "numeric_records_file": "judge-pegaflow-hle-requests.json",
+      "recorded": 200,
+      "sse_capture_files": 200,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 200
+    },
+    {
+      "name": "judge-native-frontier",
+      "arm": "native",
+      "solver_arm": "native",
+      "dataset": "frontier",
+      "stage": "judge",
+      "planned": 160,
+      "status": "completed",
+      "started_unix": 1794660532.1908622,
+      "completed_unix": 1794661306.853412,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 160,
+        "executed": 160,
+        "successful": 153,
+        "invalid_judge": 7,
+        "solver_failed": 0,
+        "transport_failures": 0,
+        "length_stops": 14,
+        "scope": "Judge traffic excluded from all solver throughput and cost; invalid/unresolved answers remain in planned denominator"
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 160,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 160
+      },
+      "independent_verification": {
+        "dataset": "frontier",
+        "stage": "judge",
+        "planned": 160,
+        "recorded": 160,
+        "raw_sse_verified": 160,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 160,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 160
+        },
+        "pega_cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0
+      },
+      "numeric_records_file": "judge-native-frontier-requests.json",
+      "recorded": 160,
+      "sse_capture_files": 160,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 160
+    },
+    {
+      "name": "judge-pegaflow-frontier",
+      "arm": "native",
+      "solver_arm": "pegaflow",
+      "dataset": "frontier",
+      "stage": "judge",
+      "planned": 160,
+      "status": "completed",
+      "started_unix": 1794661309.263643,
+      "completed_unix": 1794662075.3984013,
+      "exit_code": 0,
+      "actual_client_returncode": null,
+      "summary": {
+        "planned": 160,
+        "executed": 160,
+        "successful": 155,
+        "invalid_judge": 5,
+        "solver_failed": 0,
+        "transport_failures": 0,
+        "length_stops": 18,
+        "scope": "Judge traffic excluded from all solver throughput and cost; invalid/unresolved answers remain in planned denominator"
+      },
+      "zero_reuse": {
+        "passed": true,
+        "prefix_hit_counter_deltas": {
+          "vllm:prefix_cache_hits_total": 0.0,
+          "vllm:external_prefix_cache_hits_total": 0.0
+        },
+        "unique_salts": 160,
+        "external_loads": "no external connector in this arm",
+        "null_cache_details": 160
+      },
+      "independent_verification": {
+        "dataset": "frontier",
+        "stage": "judge",
+        "planned": 160,
+        "recorded": 160,
+        "raw_sse_verified": 160,
+        "zero_reuse": {
+          "passed": true,
+          "prefix_hit_counter_deltas": {
+            "vllm:prefix_cache_hits_total": 0.0,
+            "vllm:external_prefix_cache_hits_total": 0.0
+          },
+          "unique_salts": 160,
+          "external_loads": "no external connector in this arm",
+          "null_cache_details": 160
+        },
+        "pega_cache_admission": {
+          "arm": "native",
+          "prefix": {
+            "deltas": {
+              "vllm:external_prefix_cache_hits_total": 0.0,
+              "vllm:prefix_cache_hits_total": 0.0
+            },
+            "missing": [],
+            "counter_reset_seen": false,
+            "required": [
+              "vllm:external_prefix_cache_hits_total",
+              "vllm:prefix_cache_hits_total"
+            ],
+            "passed": true
+          },
+          "prefix_counters_present": true,
+          "required_prefix_counter_names": [
+            "vllm:external_prefix_cache_hits_total",
+            "vllm:prefix_cache_hits_total"
+          ],
+          "external_connector_expected": false,
+          "engine_connector": null,
+          "passed": true,
+          "scope": "Exact initialized Pega engine counters plus prefix-hit deltas. Null per-request cache usage remains unknown; no Bid policy counters used."
+        },
+        "failed_records_retained": 0
+      },
+      "numeric_records_file": "judge-pegaflow-frontier-requests.json",
+      "recorded": 160,
+      "sse_capture_files": 160,
+      "unbound_sse_capture_files": 0,
+      "unbound_capture_scope": "Captured HTTP/SSE with no completed bound record; do not infer missing case mapping or final usage",
+      "http_attempts_in_bound_final_records": 160
+    }
+  ],
+  "classification": "Explicit numeric derivatives only; original questions, answers, dialogues, private Engine and raw SSE remain controlled",
+  "quality_summary_files": {
+    "quality-native-frontier": {
+      "file": "quality-native-frontier-summary.json",
+      "sha256": "c9fe3bccaa691c531e781bdd1dbb5a0e0cdbca5b2ba1c53b96f5bc3a537b56ca",
+      "controlled_path": "/data/shared_upload/cybber695/pegaflow91-five-datasets-20261114-04/formal-01/quality-native-frontier/quality/summary.json"
+    },
+    "quality-native-hle": {
+      "file": "quality-native-hle-summary.json",
+      "sha256": "60ca9b923e86dd1d3f445f9a8ff478c8fb49dede9da875eb0a299c2ec5345b84",
+      "controlled_path": "/data/shared_upload/cybber695/pegaflow91-five-datasets-20261114-04/formal-01/quality-native-hle/quality/summary.json"
+    },
+    "quality-pegaflow-frontier": {
+      "file": "quality-pegaflow-frontier-summary.json",
+      "sha256": "63f5b780b89c5734edd95359e13d67e46e75e6fc400729edb175e25f86f544eb",
+      "controlled_path": "/data/shared_upload/cybber695/pegaflow91-five-datasets-20261114-04/formal-01/quality-pegaflow-frontier/quality/summary.json"
+    },
+    "quality-pegaflow-hle": {
+      "file": "quality-pegaflow-hle-summary.json",
+      "sha256": "bd8435ece912019523da6a7d96c88c22eb113bbe889a43804106e1d49e826013",
+      "controlled_path": "/data/shared_upload/cybber695/pegaflow91-five-datasets-20261114-04/formal-01/quality-pegaflow-hle/quality/summary.json"
+    }
+  },
+  "input_inventory_provenance": {
+    "kind": "actual pre-generation verified inventory",
+    "receipt_sha256": "26c723adb1977c2ecc4d852a3cb8b883f914b6bfa5fbe4a6398735c316d21f4d"
+  },
+  "pregen_inventory_rechecked_at_export": true
+}

@@ -1,0 +1,324 @@
+diff --git a/examples/qwen35_three_datasets/paired.py b/examples/qwen35_three_datasets/paired.py
+index 0aca58f..ccbafda 100644
+--- a/examples/qwen35_three_datasets/paired.py
++++ b/examples/qwen35_three_datasets/paired.py
+@@ -250,8 +250,8 @@ def aligned_configs(
+     kv_budget = common["kv_cache_memory_bytes"]
+     if kv_budget is not None and (type(kv_budget) is not int or kv_budget <= 0):
+         raise ValueError("Use null for automatic KV allocation or a positive byte budget")
+-    if native_capacity not in (4, 6, 8):
+-        raise ValueError("Native MTP candidate capacity must be 4, 6 or 8")
++    if native_capacity not in (2, 4, 6, 8):
++        raise ValueError("Native MTP candidate capacity must be 2, 4, 6 or 8")
+     if not isinstance(common["compilation_config"], dict):
+         raise ValueError("compilation_config must be identical JSON for both arms")
+     if (
+@@ -502,6 +502,10 @@ def _server_env(setup: dict[str, Any], arm: str, run_dir: Path) -> dict[str, str
+             setup["paths"]["native_evaluation_static_dir"],
+             setup["paths"]["native_evaluation_dir"],
+         )
++        # Native's standalone backend assets live in the Python 3.11 venv.
++        # CANN's op_compiler inherits that PYTHONPATH, so use the matching
++        # interpreter instead of the host's Python 3.12 for static kernels.
++        env["HI_PYTHON"] = setup["paths"]["native_python"]
+     else:
+         # The dynamic backend is already in dynamic_python's site-packages.
+         # Do not expose Python 3.11 packages to CANN's Python 3.12 compiler.
+@@ -1410,12 +1414,44 @@ def _quality_from_summary(
+ 
+     if summary.get("contract_sha256") != solver["plan_contract_sha256"]:
+         raise RuntimeError("Judge summary belongs to a different frozen plan")
+-    track = "gold" if dataset == "hle-verified" else "olympiad"
+     tracks = summary["tracks"]
+     if dataset == "hle-verified":
+-        if tracks[track]["total"] != solver["case_count"]:
+-            raise RuntimeError("HLE Gold score does not cover the complete solver selection")
++        if set(tracks) != {"gold", "revision"} or sum(
++            stats["total"] for stats in tracks.values()
++        ) != solver["case_count"]:
++            raise RuntimeError("HLE score does not cover the complete mixed selection")
++        for stats in tracks.values():
++            if (
++                type(stats["total"]) is not int
++                or type(stats["successes"]) is not int
++                or type(stats["unresolved"]) is not int
++                or stats["total"] <= 0
++                or stats["successes"] < 0
++                or stats["unresolved"] < 0
++                or stats["successes"] + stats["unresolved"] > stats["total"]
++            ):
++                raise RuntimeError("HLE judge summary contains invalid track counts")
++        total = solver["case_count"]
++        successes = sum(stats["successes"] for stats in tracks.values())
++        unresolved = sum(stats["unresolved"] for stats in tracks.values())
++        return {
++            "track": "mixed",
++            "tracks": {
++                name: {
++                    "successes": tracks[name]["successes"],
++                    "total": tracks[name]["total"],
++                    "unresolved": tracks[name]["unresolved"],
++                }
++                for name in ("gold", "revision")
++            },
++            "successes": successes,
++            "total": total,
++            "unresolved": unresolved,
++            "observed_lower_bound": successes / total,
++            "scoring_policy": summary["scoring_policy"],
++        }
+     else:
++        track = "olympiad"
+         selected_tracks = solver["selected_tracks"]
+         if not isinstance(selected_tracks, dict) or sum(selected_tracks.values()) != solver[
+             "case_count"
+@@ -1498,14 +1534,18 @@ def score(args: argparse.Namespace) -> None:
+             "--output",
+             str(grades),
+         ]
+-        with (run_dir / "judge.log").open("x", encoding="utf-8") as log:
+-            subprocess.run(
+-                judge_cmd,
+-                env=_client_env(args.client_source),
+-                stdout=log,
+-                stderr=subprocess.STDOUT,
+-                check=True,
+-            )
++        if not (grades / "index.json").is_file():
++            resume_judge = (grades / "run.json").is_file()
++            if resume_judge:
++                judge_cmd.append("--resume")
++            with (run_dir / "judge.log").open("a" if resume_judge else "x", encoding="utf-8") as log:
++                subprocess.run(
++                    judge_cmd,
++                    env=_client_env(args.client_source),
++                    stdout=log,
++                    stderr=subprocess.STDOUT,
++                    check=True,
++                )
+         summary_cmd = prefix + [
+             "summary",
+             "--plan",
+@@ -1517,15 +1557,31 @@ def score(args: argparse.Namespace) -> None:
+             "--output",
+             str(summary_path),
+         ]
+-        with (run_dir / "summary.log").open("x", encoding="utf-8") as log:
+-            subprocess.run(
+-                summary_cmd,
+-                env=_client_env(args.client_source),
+-                stdout=log,
+-                stderr=subprocess.STDOUT,
+-                check=True,
+-            )
++        if not (summary_path / "summary.json").is_file():
++            with (run_dir / "summary.log").open("x", encoding="utf-8") as log:
++                subprocess.run(
++                    summary_cmd,
++                    env=_client_env(args.client_source),
++                    stdout=log,
++                    stderr=subprocess.STDOUT,
++                    check=True,
++                )
+         summary = read_json(summary_path / "summary.json")
++        if (
++            summary.get("solver_index_sha256") != sha256(Path(receipt["solver_output"]) / "index.json")
++            or summary.get("judge_index_sha256") != sha256(grades / "index.json")
++        ):
++            raise RuntimeError("Judge summary index hashes differ from saved solver/judge records")
++        tracks = summary.get("tracks", {})
++        transport_failures = sum(
++            int(stats.get("judge_transport_failures", 0))
++            for stats in tracks.values()
++        )
++        if transport_failures:
++            raise RuntimeError(
++                f"Judge transport failed for {transport_failures} cases; "
++                "refusing to write a quality receipt"
++            )
+     quality = _quality_from_summary(dataset, summary, receipt)
+     result = {
+         "schema_version": 1,
+@@ -1707,7 +1763,7 @@ def build_parser() -> argparse.ArgumentParser:
+     ):
+         p.add_argument("--" + name, required=True)
+     p.add_argument("--port", type=int, required=True)
+-    p.add_argument("--native-capacity", type=int, choices=(4, 6, 8), default=4)
++    p.add_argument("--native-capacity", type=int, choices=(2, 4, 6, 8), default=4)
+     p.set_defaults(fn=prepare)
+     p = sub.add_parser("run", help="start one arm, time one frozen solver selection, then stop it")
+     p.add_argument("--setup", required=True)
+diff --git a/examples/qwen35_three_datasets/test_examples.py b/examples/qwen35_three_datasets/test_examples.py
+index 3f5ef14..512f5ce 100644
+--- a/examples/qwen35_three_datasets/test_examples.py
++++ b/examples/qwen35_three_datasets/test_examples.py
+@@ -206,7 +206,7 @@ class PublicExampleTests(unittest.TestCase):
+     def test_auto_kv_and_native_depth_variants(self):
+         config = common_config()
+         config["kv_cache_memory_bytes"] = None
+-        for capacity in (4, 6, 8):
++        for capacity in (2, 4, 6, 8):
+             pair = paired.aligned_configs(
+                 config, "/models/qwen", "test-solver", 18080, capacity
+             )
+diff --git a/src/vllm_hust_vspec/_vendor/ascend_hust/overlay/vllm_ascend/attention/q35_native_host_batch.py b/src/vllm_hust_vspec/_vendor/ascend_hust/overlay/vllm_ascend/attention/q35_native_host_batch.py
+index 3a7bece..7811f41 100644
+--- a/src/vllm_hust_vspec/_vendor/ascend_hust/overlay/vllm_ascend/attention/q35_native_host_batch.py
++++ b/src/vllm_hust_vspec/_vendor/ascend_hust/overlay/vllm_ascend/attention/q35_native_host_batch.py
+@@ -7,12 +7,13 @@ import os
+ from pathlib import Path
+ 
+ import torch
+-from vllm_hust_vspec.backends.experimental_paths import require_current_npu_proof
+ 
+ PRIMITIVE = Path(os.environ.get('VSPEC_NATIVE_FIA_ARTIFACT_DIR', '/__vspec_artifacts_not_configured__'))
+ 
+ 
+ def verify_primitive():
++    from vllm_hust_vspec.backends.experimental_paths import require_current_npu_proof
++
+     proof_path = PRIMITIVE / 'primitive-native-audit-r1.json'
+     proof = json.loads(proof_path.read_text())
+     require_current_npu_proof(proof)
+diff --git a/src/vllm_hust_vspec/evaluation/evaluation_worker_common.py b/src/vllm_hust_vspec/evaluation/evaluation_worker_common.py
+index 3c54967..8716cde 100644
+--- a/src/vllm_hust_vspec/evaluation/evaluation_worker_common.py
++++ b/src/vllm_hust_vspec/evaluation/evaluation_worker_common.py
+@@ -18,13 +18,14 @@ class EvaluationMetadataMixin:
+         speculative = config.speculative_config
+         capacity = None if speculative is None else speculative.num_speculative_tokens
+         native_capacity = int(os.environ.get("VSPEC_EVAL_NATIVE_CAPACITY", "4"))
+-        if native_capacity not in (4, 6, 8):
+-            raise RuntimeError("VSPEC_EVAL_NATIVE_CAPACITY must be 4, 6, or 8")
++        if native_capacity not in (2, 4, 6, 8):
++            raise RuntimeError("VSPEC_EVAL_NATIVE_CAPACITY must be 2, 4, 6, or 8")
+         loaded = any(
+             name == "vllm_hust_vspec" or name.startswith("vllm_hust_vspec.") for name in sys.modules
+         )
+         if arm == "native" and (loaded or capacity != native_capacity):
+-            raise RuntimeError(f"Native evaluation loaded vSpec or is not MTP{native_capacity}")
++            loaded_names = sorted(name for name in sys.modules if name == "vllm_hust_vspec" or name.startswith("vllm_hust_vspec."))
++            raise RuntimeError(f"Native evaluation isolation/depth mismatch: loaded={loaded}, capacity={capacity}, expected={native_capacity}, modules={loaded_names[:12]}")
+         if arm == "dynamic" and (not loaded or capacity != 8):
+             raise RuntimeError("Dynamic evaluation did not load vSpec capacity 8")
+         cache = config.cache_config
+diff --git a/src/vllm_hust_vspec/evaluation_static/hot_static_options.py b/src/vllm_hust_vspec/evaluation_static/hot_static_options.py
+index d58652c..c76d0f8 100644
+--- a/src/vllm_hust_vspec/evaluation_static/hot_static_options.py
++++ b/src/vllm_hust_vspec/evaluation_static/hot_static_options.py
+@@ -36,11 +36,13 @@ def select(kwargs):
+         or any(type(value) is not int or not 1 <= value <= 208 for value in existing)
+         or existing != sorted(set(existing))
+         or 14 not in existing
+-        or 70 not in existing
++        or (max(existing) >= 70 and 70 not in existing)
+     ):
+-        raise ValueError("Unexpected static shape range")
++        raise ValueError(f"Unexpected static shape range: {existing}")
+     result = deepcopy(kwargs)
+     result["options"][_RANGE_KEY] = [value for value in HOT if value in existing]
++    if not result["options"][_RANGE_KEY]:
++        raise ValueError("No selected static shape is valid for this MTP depth")
+     return result
+ 
+ 
+diff --git a/src/vllm_hust_vspec/evaluation_static/native_static_worker.py b/src/vllm_hust_vspec/evaluation_static/native_static_worker.py
+index a03e334..03c8104 100644
+--- a/src/vllm_hust_vspec/evaluation_static/native_static_worker.py
++++ b/src/vllm_hust_vspec/evaluation_static/native_static_worker.py
+@@ -1,4 +1,4 @@
+-"""Standalone native MTP4 worker extension for matched evaluation.
++"""Standalone native fixed-depth MTP worker extension for matched evaluation.
+ 
+ The native child imports this file from its installed asset directory on
+ PYTHONPATH. Keep every import here top-level so loading this extension never
+@@ -31,7 +31,7 @@ _ORIGINAL_COMPILE, _STATISTICS = install_capture_guard(
+ _ORIGINAL_OPTIONS = install_hot_options(compiler_config)
+ 
+ 
+-def _require_native_mtp4(worker):
++def _require_native_mtp_depth(worker):
+     import torch.distributed as dist
+ 
+     root = Path(os.environ["HUST_VSPEC_PRIVATE_COMPILER_ROOT"]).resolve(strict=True)
+@@ -41,9 +41,13 @@ def _require_native_mtp4(worker):
+         name == "vllm_hust_vspec" or name.startswith("vllm_hust_vspec.") for name in sys.modules
+     ):
+         raise RuntimeError("Native worker imported the vSpec plugin")
+-    if worker.vllm_config.speculative_config.num_speculative_tokens != 4:
+-        raise RuntimeError("Native evaluation must use MTP4")
+-    return root, dist.get_rank()
++    depth = worker.vllm_config.speculative_config.num_speculative_tokens
++    if depth not in (2, 4, 6, 8):
++        raise RuntimeError("Native evaluation requires fixed MTP2, MTP4, MTP6 or MTP8")
++    expected = int(os.environ["VSPEC_EVAL_NATIVE_CAPACITY"])
++    if depth != expected:
++        raise RuntimeError("Native MTP depth differs from the frozen run setup")
++    return root, dist.get_rank(), depth
+ 
+ 
+ class NativeEvaluationWorker(EvaluationMetadataMixin, ReadOnlyStaticKernelWorkerObserver):
+@@ -51,7 +55,7 @@ class NativeEvaluationWorker(EvaluationMetadataMixin, ReadOnlyStaticKernelWorker
+         return self.get_vspec_readonly_compiler_state()
+ 
+     def get_eval_static_state(self):
+-        root, rank = _require_native_mtp4(self)
++        root, rank, depth = _require_native_mtp_depth(self)
+         if _STATISTICS["static_compilation_deferred_inside_capture"] <= 0 or not CALLS:
+             raise RuntimeError("Native capture-safe static compilation was not exercised")
+         for row in CALLS:
+@@ -64,7 +68,7 @@ class NativeEvaluationWorker(EvaluationMetadataMixin, ReadOnlyStaticKernelWorker
+             "static_install": snapshot(static_kernel, root, rank, os.getpid()),
+             "capture_safe_statistics": dict(_STATISTICS),
+             "compiler_option_calls": deepcopy(CALLS),
+-            "fixed_gamma": 4,
++            "fixed_gamma": depth,
+             "vspec_plugin_absent": True,
+             "common_hot_shape_rule": list(HOT),
+             "FX_math_and_all_capture_keys_unmodified": True,
+diff --git a/tests/test_evaluation_native_capacity.py b/tests/test_evaluation_native_capacity.py
+index cf6de7b..c018aab 100644
+--- a/tests/test_evaluation_native_capacity.py
++++ b/tests/test_evaluation_native_capacity.py
+@@ -26,7 +26,7 @@ class Worker(common.EvaluationMetadataMixin):
+         return {}
+ 
+ 
+-@pytest.mark.parametrize("width", [4, 6, 8])
++@pytest.mark.parametrize("width", [2, 4, 6, 8])
+ def test_native_capacity_matches_declared_arm(monkeypatch, width):
+     monkeypatch.setenv("VSPEC_EVAL_ARM", "native")
+     monkeypatch.setenv("VSPEC_EVAL_NATIVE_CAPACITY", str(width))
+@@ -38,5 +38,5 @@ def test_native_capacity_mismatch_is_rejected(monkeypatch):
+     monkeypatch.setenv("VSPEC_EVAL_ARM", "native")
+     monkeypatch.setenv("VSPEC_EVAL_NATIVE_CAPACITY", "6")
+     monkeypatch.setattr(common, "sys", NS(modules={}))
+-    with pytest.raises(RuntimeError, match="not MTP6"):
++    with pytest.raises(RuntimeError, match="capacity=4, expected=6"):
+         Worker(4).get_eval_metadata()
+diff --git a/tests/test_evaluation_static.py b/tests/test_evaluation_static.py
+index e0dbfdb..70fd084 100644
+--- a/tests/test_evaluation_static.py
++++ b/tests/test_evaluation_static.py
+@@ -82,6 +82,21 @@ def test_hot_shapes_preserve_supplied_options_and_validate_contract():
+         hot.select(bad)
+ 
+ 
++def test_hot_shapes_allow_native_mtp2_capture_range():
++    hot = _load("hot_static_options")
++    options = {
++        "options": {
++            "force_eager": True,
++            "inplace_pass": False,
++            "clone_input": False,
++            "clone_output": False,
++            "static_kernel_compile": True,
++            "_vllm_aclnn_static_kernel_sym_range": [3, 4, 8, 14, 35, 42, 48],
++        }
++    }
++    assert hot.select(options)["options"]["_vllm_aclnn_static_kernel_sym_range"] == [14, 42]
++
++
+ def test_single_hot_shape_preserves_all_capture_keys(monkeypatch):
+     monkeypatch.setenv("HUST_VSPEC_HOT_STATIC_SHAPES", "70")
+     hot = _load("hot_static_options")

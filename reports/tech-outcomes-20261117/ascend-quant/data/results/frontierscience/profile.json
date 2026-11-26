@@ -1,0 +1,59 @@
+{
+  "profile_id": "w8a8nr-tp2-mtp2-pinmax-seal-20261106",
+  "status": "expected_from_published_command",
+  "description": "EXPECTED configuration of the local 2-card Ascend 910B3 service for the 2026-11-06 seal-ready FrontierScience TP2 run: Qwen3.5-35B-A3B W8A8-NoRot mixed W4A8(experts)/W8A8(attn+GDN), TP2 on cards 0,1, MTP2, KV pin 35956596497 bytes per worker. Same runtime recipe as the 2026-11-04 TP2 and 2026-11-05 TP2 runs. For this run the engine defaults that the client's receipt can only see on the command line are passed explicitly and are recorded here: --dtype bfloat16, --disable-custom-all-reduce (the 910B3 runtime already reported it True), --enable-prefix-caching, --enable-chunked-prefill, --no-enforce-eager, and mode=3 in --compilation-config. MTP2 is on argv but is NOT in expect: the client's speculative_config log regex stops at \"SpeculativeConfig(method='mtp'\" and can never match the dict, which would force a spurious mismatch. Data only; the client never starts or controls the server.",
+  "model": {
+    "path": "/data/jxd/Qwen3.5-35B-A3B-W8A8-NoRot",
+    "served_name": "qwen35-a3b-w8a8nr-tp2",
+    "expected_revision": null,
+    "expected_revision_note": "Local msmodelslim artifact; no upstream revision. Not full-weight hashed by this client."
+  },
+  "launcher": ["vllm", "serve"],
+  "env": {
+    "ASCEND_RT_VISIBLE_DEVICES": "0,1",
+    "PERF_CACHE_ROOT": "/data/jxd/cache/cann91-pinmax-r4",
+    "VENDOR_OPP": "1",
+    "PERF_FIX_KERNELS_SO": "0",
+    "TORCHINDUCTOR_AUTOGRAD_CACHE": "0",
+    "VLLM_ENGINE_READY_TIMEOUT_S": "3600"
+  },
+  "serve_args": [
+    "--served-model-name", "qwen35-a3b-w8a8nr-tp2",
+    "--tensor-parallel-size", "2",
+    "--max-model-len", "262144",
+    "--trust-remote-code",
+    "--host", "127.0.0.1",
+    "--port", "8112",
+    "--gpu-memory-utilization", "0.95",
+    "--quantization", "ascend",
+    "--kv-cache-memory-bytes", "35956596497",
+    "--max-num-seqs", "16",
+    "--max-num-batched-tokens", "4096",
+    "--speculative-config", "{\"method\":\"mtp\",\"num_speculative_tokens\":2}",
+    "--compilation-config", "{\"max_cudagraph_capture_size\":256,\"cudagraph_mode\":\"FULL\",\"mode\":3}",
+    "--structured-outputs-config", "{\"backend\":\"xgrammar\",\"disable_any_whitespace\":true}",
+    "--dtype", "bfloat16",
+    "--disable-custom-all-reduce",
+    "--enable-prefix-caching",
+    "--enable-chunked-prefill",
+    "--no-enforce-eager"
+  ],
+  "expect": {
+    "dtype": "bfloat16",
+    "tensor_parallel_size": 2,
+    "pipeline_parallel_size": 1,
+    "data_parallel_size": 1,
+    "enable_expert_parallel": false,
+    "decode_context_parallel_size": null,
+    "disable_custom_all_reduce": true,
+    "gpu_memory_utilization": 0.95,
+    "max_model_len": 262144,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 4096,
+    "enable_prefix_caching": true,
+    "enable_chunked_prefill": true,
+    "enforce_eager": false,
+    "compilation_mode": 3,
+    "cudagraph_mode": "FULL"
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "schema_version": "quantized-kv-tech-outcomes/v1",
+  "scope": "int8_dynamic; functionality/capacity plus scoped single-pair frozen MMLU-Pro output-rate observation",
+  "performance_gain_claim": false,
+  "new_model_experiments": true,
+  "experiment_operator": "hustcui",
+  "operator_attribution": "Maintainer confirmation in the task conversation on 2026-11-16; historical Git authors retained.",
+  "existing_evidence": [
+    {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/87b2c10325f9ca763925a98c05941741a0b0ea84/reports/a3-int8-kv-20261104/README.md",
+      "git_commit": "87b2c10325f9ca763925a98c05941741a0b0ea84",
+      "path": "reports/a3-int8-kv-20261104/README.md",
+      "bytes": 5506,
+      "sha256": "e899ed801d07cd8db9cf5d8d7921d32e545b674419dd7460d1bfe6a8365a456f"
+    },
+    {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/87b2c10325f9ca763925a98c05941741a0b0ea84/reports/a3-int8-kv-20261104/configuration.json",
+      "git_commit": "87b2c10325f9ca763925a98c05941741a0b0ea84",
+      "path": "reports/a3-int8-kv-20261104/configuration.json",
+      "bytes": 1750,
+      "sha256": "23f2d85653b96707a88b62d06b9cd56e5d7baa1484c27a6f8f513fb85e28b784"
+    },
+    {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/87b2c10325f9ca763925a98c05941741a0b0ea84/reports/a3-int8-kv-20261104/results.json",
+      "git_commit": "87b2c10325f9ca763925a98c05941741a0b0ea84",
+      "path": "reports/a3-int8-kv-20261104/results.json",
+      "bytes": 23683,
+      "sha256": "7fa01e99ec7d0f5000304004ea754f3e84a268306fc598cf4a812c5014bd0a6d"
+    },
+    {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/87b2c10325f9ca763925a98c05941741a0b0ea84/reports/a3-int8-kv-20261104/evidence-manifest.json",
+      "git_commit": "87b2c10325f9ca763925a98c05941741a0b0ea84",
+      "path": "reports/a3-int8-kv-20261104/evidence-manifest.json",
+      "bytes": 59860,
+      "sha256": "2cda66c33643c933a0a8f6b465a9ebe341b13704662c1a2373f0dcb1e9b9fed2"
+    },
+    {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/87b2c10325f9ca763925a98c05941741a0b0ea84/reports/a3-int8-kv-20261104/quality-gsm8k-200-20261105/README.md",
+      "git_commit": "87b2c10325f9ca763925a98c05941741a0b0ea84",
+      "path": "reports/a3-int8-kv-20261104/quality-gsm8k-200-20261105/README.md",
+      "bytes": 4143,
+      "sha256": "dc3dda454bdab78313db22c77b0ebe38cd354b3de2fceb828888fd4de722630c"
+    },
+    {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/87b2c10325f9ca763925a98c05941741a0b0ea84/reports/a3-int8-kv-20261104/quality-gsm8k-200-20261105/manifest.json",
+      "git_commit": "87b2c10325f9ca763925a98c05941741a0b0ea84",
+      "path": "reports/a3-int8-kv-20261104/quality-gsm8k-200-20261105/manifest.json",
+      "bytes": 3584,
+      "sha256": "a952de594fd103548db9e2717da02edb94632058ea86f3b948f096df9d61f7c4"
+    },
+    {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/87b2c10325f9ca763925a98c05941741a0b0ea84/reports/a3-int8-kv-20261104/quality-gsm8k-200-20261105/summary.json",
+      "git_commit": "87b2c10325f9ca763925a98c05941741a0b0ea84",
+      "path": "reports/a3-int8-kv-20261104/quality-gsm8k-200-20261105/summary.json",
+      "bytes": 43425,
+      "sha256": "3281e92b4be223f3f858defa7145a1c044eea0bb2001e89157b576f8be6e9c71"
+    },
+    {
+      "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/87b2c10325f9ca763925a98c05941741a0b0ea84/reports/a3-int8-kv-20261104/quality-gsm8k-200-20261105/configuration.json",
+      "git_commit": "87b2c10325f9ca763925a98c05941741a0b0ea84",
+      "path": "reports/a3-int8-kv-20261104/quality-gsm8k-200-20261105/configuration.json",
+      "bytes": 8349,
+      "sha256": "3ed3ed55b2beb94e6bc660c8ef45700d9f2f08e552e389fa3698519dfa991ce2"
+    }
+  ],
+  "archive_member_hashes": "See pinned evidence-manifest.json; no duplicate archives uploaded.",
+  "quality_originals": {
+    "manifest": "quality-originals/manifest.json",
+    "download_and_verify": "quality-originals/README.md",
+    "source_directory_is_provenance_only": true,
+    "public_archive": true
+  },
+  "missing": [
+    "Historical startup log underlying 90.14/126.20 theoretical estimate",
+    "Same-load HBM savings evidence (new raw samples exist, but do not establish savings)",
+    "Task-quality evidence for historical long-context A3 runs",
+    "Complete experiment-time identity for historical A3; new campaign has post-run weight hashes and tracked diffs, but shared compiler cache/untracked unit tests not fully snapshotted"
+  ],
+  "historical_archive_branch": "archive/int8-kv-evidence-20261105",
+  "new_experiment_note": "Maintainer supplied completed 2026-11-16 campaign; this publication only audits offline, no new inference.",
+  "quick_test": {
+    "report": "quick-test-20261116/README.md",
+    "manifest": "quick-test-20261116/manifest.json",
+    "unrounded_results": "quick-test-20261116/audited-results.json",
+    "quality_pairs": "quick-test-20261116/quality-pairs.json",
+    "offline_verifier": "quick-test-20261116/verify.py",
+    "claim_type": "descriptive single-pair output token rate, not validated performance gain"
+  }
+}
