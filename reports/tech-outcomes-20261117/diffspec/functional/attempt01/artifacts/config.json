@@ -1,0 +1,41 @@
+{
+  "model": "/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model",
+  "dtype": "bfloat16",
+  "tensor_parallel_size": 4,
+  "max_model_len": 8192,
+  "max_num_seqs": 2,
+  "max_num_batched_tokens": 2048,
+  "limit_mm_per_prompt": {
+    "image": 0,
+    "video": 0
+  },
+  "gpu_memory_utilization": 0.75,
+  "enable_prefix_caching": false,
+  "async_scheduling": false,
+  "disable_log_stats": false,
+  "seed": 17,
+  "per_request_spec_decode_metrics": "summary",
+  "min_kv_cache_group_layers": 10,
+  "worker_extension_cls": "trace_worker.TraceWorker",
+  "compilation_config": {
+    "cudagraph_mode": "PIECEWISE",
+    "cudagraph_capture_sizes": [
+      4,
+      8,
+      12
+    ]
+  },
+  "speculative_config": {
+    "method": "eagle3",
+    "model": "/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/draft-matched",
+    "num_speculative_tokens": 4,
+    "draft_tensor_parallel_size": 4,
+    "enforce_eager": false,
+    "draft_context_policy": "diffspec",
+    "diffspec_verification_mode": "auto",
+    "diffspec_chunk_size": 64,
+    "diffspec_token_budget": 2048,
+    "diffspec_retrieval_interval": 4,
+    "diffspec_adaptive_profile": false
+  }
+}

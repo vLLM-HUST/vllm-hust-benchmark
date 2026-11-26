@@ -60,6 +60,7 @@ def test_real_git_sparse_patterns_preserve_inputs_and_complete_tracked_index(tmp
         "reports/tech-outcomes-20261117/muxpd/README.md",
         "reports/tech-outcomes-20261117/kv-tiering/README.md",
         "reports/tech-outcomes-20261117/kv-tiering/diagnostics/swe-pressure-8turn-20261118/README.md",
+        "reports/tech-outcomes-20261117/diffspec/README.md",
         "reports/tech-outcomes-20261117/vspec/README.md",
     ]
     omit = [
@@ -71,6 +72,7 @@ def test_real_git_sparse_patterns_preserve_inputs_and_complete_tracked_index(tmp
         "reports/five-datasets-standard-20261113/stability-audit-v1.json",
         "reports/tech-outcomes-20261117/muxpd/data/results/raw.json.gz",
         "reports/tech-outcomes-20261117/kv-tiering/diagnostics/swe-pressure-8turn-20261118/numeric/B0-requests.jsonl.gz",
+        "reports/tech-outcomes-20261117/diffspec/functional/attempt02/model.log",
     ]
     for name in keep + omit:
         path = repo / name
