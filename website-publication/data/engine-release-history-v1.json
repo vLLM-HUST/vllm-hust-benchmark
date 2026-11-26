@@ -1,7 +1,8 @@
 {
   "schema": "vllm-hust-engine-release-history/v1",
-  "default_release": "r10",
+  "default_release": "r11",
   "order": [
+    "r11",
     "r9",
     "r10",
     "r8",
@@ -7659,6 +7660,711 @@
         "path": "data/r10-35b-paired-full-20261125/report.html",
         "bytes": 91229,
         "sha256": "bf1d5a821e6cbdbf15191ac0e5b2d6d0c51ec9326858234e39e70a4ba47464a9"
+      }
+    },
+    {
+      "id": "r11",
+      "frozen_date": "2026-11-26",
+      "release": "full-answer-b1-20261126-r11",
+      "publication_status": "stable",
+      "release_url": "https://github.com/vLLM-HUST/vllm-hust-engine/releases/tag/full-answer-b1-20261126-r11",
+      "profile": {
+        "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/68725af63b5b3f3218c9f93a0825207e7a2c2f0e/engines/b1-r11-overlay.json",
+        "sha256": "bd31dbdbe3a740c8d9da49f80ea89403225a9c6157a001f78352be3e65401d2d",
+        "bytes": 1513
+      },
+      "mods": [
+        "Extension Manager",
+        "BetterScale",
+        "Microflow",
+        "KV materialization",
+        "M01 correction",
+        "Packed host state",
+        "Sealed serving warmup",
+        "Guarded progress async",
+        "Capacity tuning",
+        "Short prefill tail",
+        "intern-s2",
+        "state-page-copy"
+      ],
+      "settings": {
+        "E": 36,
+        "R": 54,
+        "MTP": 2,
+        "graph": "FULL · steady-mixed-1536",
+        "state_gib_per_rank": 4,
+        "kv_gib_per_rank": 20
+      },
+      "measurements": [
+        {
+          "id": "mmlu",
+          "label": "MMLU200",
+          "control": "B0",
+          "candidate": "r11",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "requests": 200,
+              "failed": 0,
+              "output_tokens": 708670,
+              "duration_seconds": 1315.2285655549495,
+              "output_tokens_per_second": 538.8188932020213,
+              "mean_ttft_ms": 516988.3782907954,
+              "mean_tpot_ms": 40.23379553407903,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "3cdd5b1fa83a2367a427d1d1645c99b4a86719a6361bfbb7cbd54d3e8e5fd7f7",
+              "correct": 147,
+              "truncated": 22,
+              "unparsed": 0
+            },
+            {
+              "role": "r11",
+              "requests": 200,
+              "failed": 0,
+              "output_tokens": 684729,
+              "duration_seconds": 457.76782910199836,
+              "output_tokens_per_second": 1495.799740543652,
+              "mean_ttft_ms": 144200.80528626218,
+              "mean_tpot_ms": 21.224644657640052,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "25c7fcbbe63a66d9887430cb1ea08ce335d412d9a9baf29757246c41f0e86947",
+              "correct": 153,
+              "truncated": 23,
+              "unparsed": 0
+            }
+          ]
+        },
+        {
+          "id": "hle",
+          "label": "HLE-Verified 200",
+          "control": "B0",
+          "candidate": "r11",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "requests": 200,
+              "failed": 0,
+              "output_tokens": 2079338,
+              "duration_seconds": 3742.684146423009,
+              "output_tokens_per_second": 555.5739994750246,
+              "mean_ttft_ms": 515.5343136526062,
+              "mean_tpot_ms": 27.805790126221254,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "b92f8914c0ff0f4da7e8b2ce6f8563ad3c0c0662dd7d5a762979c29ef0772d81"
+            },
+            {
+              "role": "r11",
+              "requests": 200,
+              "failed": 0,
+              "output_tokens": 2185737,
+              "duration_seconds": 2086.1689779520384,
+              "output_tokens_per_second": 1047.727687977465,
+              "mean_ttft_ms": 250.48571567574982,
+              "mean_tpot_ms": 15.464537399838072,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "704f410cc155a2ad196d17343ad91e507f115f4675975802ff1bb79cf61c6198"
+            }
+          ]
+        },
+        {
+          "id": "frontier",
+          "label": "FrontierScience 160",
+          "control": "B0",
+          "candidate": "r11",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "requests": 160,
+              "failed": 0,
+              "output_tokens": 1230121,
+              "duration_seconds": 3204.056142289017,
+              "output_tokens_per_second": 383.9261690093815,
+              "mean_ttft_ms": 759.1928025896777,
+              "mean_tpot_ms": 37.317124168287066,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "b1ec0fa9edd88848918d32284f41961126e01acc9fc22e2a0566532536df2f2a"
+            },
+            {
+              "role": "r11",
+              "requests": 160,
+              "failed": 0,
+              "output_tokens": 1240735,
+              "duration_seconds": 1239.9705597050488,
+              "output_tokens_per_second": 1000.6164987458517,
+              "mean_ttft_ms": 228.74713722339948,
+              "mean_tpot_ms": 15.104441308587164,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "927d1fbbd8e710858ad63c9cef0cba12b45454c616fc72aaec2cd0d856fbb1ae"
+            }
+          ]
+        },
+        {
+          "id": "swe",
+          "label": "SWE-bench Pro",
+          "control": "B0",
+          "candidate": "r11",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "requests": 64,
+              "failed": 0,
+              "output_tokens": 8161,
+              "duration_seconds": 154.80811803101096,
+              "output_tokens_per_second": 52.71687366140062,
+              "mean_ttft_ms": 2971.660795689786,
+              "mean_tpot_ms": 115.99350513156192,
+              "ttft_p95_ms": 6166.943702299611,
+              "ttft_p99_ms": 10003.494328877998,
+              "tpot_p95_ms": 149.1235681199116,
+              "tpot_p99_ms": 153.3965271381104,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "f7ddaad92bee842d16fb1e3a0cd73481aaa1d17fe5da43a5e1c7d469657d2511"
+            },
+            {
+              "role": "r11",
+              "requests": 64,
+              "failed": 0,
+              "output_tokens": 6269,
+              "duration_seconds": 51.29392334597651,
+              "output_tokens_per_second": 122.2172060755758,
+              "mean_ttft_ms": 1579.053204281081,
+              "mean_tpot_ms": 46.32198468941773,
+              "ttft_p95_ms": 3561.384439910759,
+              "ttft_p99_ms": 4607.1794960903935,
+              "tpot_p95_ms": 64.94041418785248,
+              "tpot_p99_ms": 76.00496185037693,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "565377cf640cbd699507dbc46e728411ae86dfec41781576db4e7dcfb7ed1255"
+            }
+          ]
+        },
+        {
+          "id": "terminal",
+          "label": "Terminal-Bench 2.1",
+          "control": "B0",
+          "candidate": "r11",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "requests": 48,
+              "failed": 0,
+              "output_tokens": 13312,
+              "duration_seconds": 168.5201195810223,
+              "output_tokens_per_second": 78.99353521167994,
+              "mean_ttft_ms": 3644.680858880747,
+              "mean_tpot_ms": 83.64699442269688,
+              "ttft_p95_ms": 8151.761387960867,
+              "ttft_p99_ms": 12239.589979765007,
+              "tpot_p95_ms": 151.40627795140426,
+              "tpot_p99_ms": 157.0016511445466,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "745b8e4c4a64bee08cf8871c5d3770eeada16f8dfb1207f836d7a95803a3ac24"
+            },
+            {
+              "role": "r11",
+              "requests": 48,
+              "failed": 0,
+              "output_tokens": 14143,
+              "duration_seconds": 56.94408243900398,
+              "output_tokens_per_second": 248.3664569562494,
+              "mean_ttft_ms": 1685.954565838377,
+              "mean_tpot_ms": 30.240640355285358,
+              "ttft_p95_ms": 4649.66744655103,
+              "ttft_p99_ms": 5466.429265161279,
+              "tpot_p95_ms": 58.861030941308506,
+              "tpot_p99_ms": 80.80240643575199,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "e8b3b425f83d5b3d42bcb5e533dade7c5e1fa30f8a507f6670144f1da602fde6"
+            }
+          ]
+        },
+        {
+          "id": "real-context-4096-formal",
+          "label": "4K–8K",
+          "control": "B0",
+          "candidate": "r11",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "requests": 137,
+              "failed": 0,
+              "output_tokens": 35072,
+              "duration_seconds": 310.88907162100077,
+              "output_tokens_per_second": 112.81194226973548,
+              "ttft_p95_ms": 3872.0024400390685,
+              "ttft_p99_ms": 8995.971373980865,
+              "tpot_p95_ms": 67.66885909817967,
+              "tpot_p99_ms": 71.04235501553607,
+              "mean_ttft_ms": 2074.95708328444,
+              "mean_tpot_ms": 62.02012381463046,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "d5c8704cc4500b5ccf52eb0c5fe87e0bbc3f6cd41d36bcba13ca670124e93bd2"
+            },
+            {
+              "role": "r11",
+              "requests": 313,
+              "failed": 0,
+              "output_tokens": 80128,
+              "duration_seconds": 304.01526237797225,
+              "output_tokens_per_second": 263.5657150014379,
+              "ttft_p95_ms": 1922.4588590441272,
+              "ttft_p99_ms": 3688.113848969806,
+              "tpot_p95_ms": 29.183015258818426,
+              "tpot_p99_ms": 30.33554945095424,
+              "mean_ttft_ms": 1000.7817191717114,
+              "mean_tpot_ms": 26.427435748707506,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "17686872020d75c4e13e4c520cd4621c4f745e74894305f49944cb5389bc7322"
+            }
+          ],
+          "workload": "terminal-replay-c8"
+        },
+        {
+          "id": "real-context-16384-formal",
+          "label": "16K–24K",
+          "control": "B0",
+          "candidate": "r11",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "requests": 76,
+              "failed": 0,
+              "output_tokens": 19456,
+              "duration_seconds": 316.94101674098056,
+              "output_tokens_per_second": 61.38681638640788,
+              "ttft_p95_ms": 16256.05684099719,
+              "ttft_p99_ms": 27179.96460798895,
+              "tpot_p95_ms": 113.37147139209122,
+              "tpot_p99_ms": 116.4968959726941,
+              "mean_ttft_ms": 7137.492065621987,
+              "mean_tpot_ms": 100.02343448834247,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "d5c8704cc4500b5ccf52eb0c5fe87e0bbc3f6cd41d36bcba13ca670124e93bd2"
+            },
+            {
+              "role": "r11",
+              "requests": 189,
+              "failed": 0,
+              "output_tokens": 48384,
+              "duration_seconds": 303.6974896119791,
+              "output_tokens_per_second": 159.3164305105653,
+              "ttft_p95_ms": 4563.985084008891,
+              "ttft_p99_ms": 9548.380999010988,
+              "tpot_p95_ms": 45.370961113732456,
+              "tpot_p99_ms": 48.06414141579915,
+              "mean_ttft_ms": 2316.9079339230266,
+              "mean_tpot_ms": 41.01408612532371,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "17686872020d75c4e13e4c520cd4621c4f745e74894305f49944cb5389bc7322"
+            }
+          ],
+          "workload": "terminal-replay-c8"
+        },
+        {
+          "id": "real-context-32768-formal",
+          "label": "32K–48K",
+          "control": "B0",
+          "candidate": "r11",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "requests": 45,
+              "failed": 0,
+              "output_tokens": 11520,
+              "duration_seconds": 322.87395000405377,
+              "output_tokens_per_second": 35.67955853934752,
+              "ttft_p95_ms": 40226.54213302303,
+              "ttft_p99_ms": 54096.61851299461,
+              "tpot_p95_ms": 160.96009650203746,
+              "tpot_p99_ms": 170.2944302470332,
+              "mean_ttft_ms": 19241.23017053482,
+              "mean_tpot_ms": 144.58636697123035,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "d5c8704cc4500b5ccf52eb0c5fe87e0bbc3f6cd41d36bcba13ca670124e93bd2"
+            },
+            {
+              "role": "r11",
+              "requests": 88,
+              "failed": 0,
+              "output_tokens": 22528,
+              "duration_seconds": 308.1092546150321,
+              "output_tokens_per_second": 73.11692090569518,
+              "ttft_p95_ms": 21786.04657901451,
+              "ttft_p99_ms": 23026.46859397646,
+              "tpot_p95_ms": 60.33523348228567,
+              "tpot_p99_ms": 63.097352066816875,
+              "mean_ttft_ms": 14670.068863318274,
+              "mean_tpot_ms": 51.22009214312791,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "17686872020d75c4e13e4c520cd4621c4f745e74894305f49944cb5389bc7322"
+            }
+          ],
+          "workload": "terminal-replay-c8"
+        },
+        {
+          "id": "real-context-multi-tenant-formal",
+          "label": "4K–8K · C24",
+          "control": "B0",
+          "candidate": "r11",
+          "baseline_id": "original018-cann8.5.1",
+          "arms": [
+            {
+              "role": "B0",
+              "requests": 168,
+              "failed": 0,
+              "output_tokens": 43008,
+              "duration_seconds": 315.3934908969677,
+              "output_tokens_per_second": 136.36299175891932,
+              "ttft_p95_ms": 24431.53528496623,
+              "ttft_p99_ms": 36668.0913149612,
+              "tpot_p95_ms": 169.2466507763967,
+              "tpot_p99_ms": 173.73446013331048,
+              "mean_ttft_ms": 5866.890856185082,
+              "mean_tpot_ms": 150.4193530105432,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "d5c8704cc4500b5ccf52eb0c5fe87e0bbc3f6cd41d36bcba13ca670124e93bd2"
+            },
+            {
+              "role": "r11",
+              "requests": 478,
+              "failed": 0,
+              "output_tokens": 122368,
+              "duration_seconds": 306.1994491800433,
+              "output_tokens_per_second": 399.6349448951765,
+              "ttft_p95_ms": 7194.662054011133,
+              "ttft_p99_ms": 11313.713726005517,
+              "tpot_p95_ms": 55.909279858757394,
+              "tpot_p99_ms": 65.2393108078589,
+              "mean_ttft_ms": 3626.1809990795136,
+              "mean_tpot_ms": 45.875003084278134,
+              "physical_cards": [
+                2,
+                3
+              ],
+              "source_seal_sha256": "17686872020d75c4e13e4c520cd4621c4f745e74894305f49944cb5389bc7322"
+            }
+          ],
+          "workload": "terminal-replay-c24"
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/c78d19ee59ee907d737c40674d58b3977c72997d/reports/r11-35b-steady-mixed-1536-full-20261126/README.md",
+          "sha256": "65160d9b7679258df6057f054c0d57b38460afe0f83da1c97caa4d54f4c6c926",
+          "bytes": 2072
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/c78d19ee59ee907d737c40674d58b3977c72997d/reports/r11-35b-steady-mixed-1536-full-20261126/summary.json",
+          "sha256": "8cc79e4f1b2c6c2541ba09561de7f010711ec593f7cdc2afe5c544e4d76c0441",
+          "bytes": 85870
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/c78d19ee59ee907d737c40674d58b3977c72997d/website-publication/data/context-tenant-a01-20261115/protocol-v1.json",
+          "sha256": "3d5b3344e219080322872a0fd20357551fb519a9ebc648cf3659773a667b1d5c",
+          "bytes": 2803
+        },
+        {
+          "url": "https://github.com/vLLM-HUST/vllm-hust-engine/blob/68725af63b5b3f3218c9f93a0825207e7a2c2f0e/mods/active-stack-r11.json",
+          "sha256": "cfc6f225293de7370ad2e8bc57abf5e9a245cee6ee76be827acff866236bf6e3",
+          "bytes": 5515
+        }
+      ],
+      "label_zh": "正式版 · steady-mixed-1536 · 35B 四项达标",
+      "label_en": "Stable · steady-mixed-1536 · 35B meets all four gates",
+      "scope_zh": "Qwen3.5-35B-A3B BF16 TP2，双 Ascend 910B2。固定 B0 original018 同机同卡配对。35B 的 4.1–4.4 全部达标。Qwen3.5-9B 和 Intern-S2 已验证兼容入口。",
+      "scope_en": "Qwen3.5-35B-A3B BF16 TP2 on two Ascend 910B2 cards. Matched against fixed B0 original018 on the same host and cards. The 35B model meets all 4.1–4.4 targets. Compatibility entry points were verified for Qwen3.5-9B and Intern-S2.",
+      "method_zh": "复用同机同卡的原始 B0 封存，B1 本轮实测。专项回放采用五条 Terminal-Bench 2.1 历史，每档预热 60 秒、正式提交 300 秒并排空，尾分位数采用最近秩法。",
+      "method_en": "Sealed matched B0 measurements were reused, and B1 was measured anew. Context replay uses five Terminal-Bench 2.1 histories, 60 seconds of warmup and 300 seconds of submissions per phase followed by drain. Tail quantiles use nearest rank.",
+      "baseline_id": "original018-cann8.5.1",
+      "full_acceptance": {
+        "models": [
+          {
+            "name": "Qwen3.5-35B-A3B",
+            "scope": "full-acceptance"
+          },
+          {
+            "name": "Qwen3.5-9B",
+            "scope": "compatibility-verified"
+          },
+          {
+            "name": "Intern-S2-Preview",
+            "scope": "compatibility-verified"
+          }
+        ],
+        "targets": {
+          "4.1": {
+            "milestone": {
+              "met": true
+            },
+            "final": {
+              "met": true
+            },
+            "efficiency_lower_percent": "96.46749377314988273402314374520877980857"
+          },
+          "4.2": {
+            "milestone": {
+              "met": true
+            },
+            "final": {
+              "met": true
+            },
+            "passing_final_datasets": [
+              "mmlu",
+              "frontier",
+              "swe",
+              "terminal"
+            ]
+          },
+          "4.3": {
+            "milestone": {
+              "met": true
+            },
+            "final": {
+              "met": true
+            },
+            "measured_ratios": {
+              "throughput": "0.6044656851885919183049560284",
+              "ttft_p95": "2.374035242698596273075506425",
+              "ttft_p99": "2.588960479535662802886294469",
+              "tpot_p95": "1.554704361812729773818598701",
+              "tpot_p99": "1.584416378991521332556946012"
+            },
+            "measured_window_ratios": {
+              "throughput": "1.497981407740669146031790905",
+              "ttft_p95": "1.164193058149466708097147784",
+              "ttft_p99": "1.164193058149466708097147784",
+              "tpot_p95": "1.027364708569553897186332967",
+              "tpot_p99": "1.052309506648201458724826375"
+            },
+            "tpot_spread_limit": "1.25",
+            "throughput_spread_limit": "1.50",
+            "ttft_spread_limit": "2.00"
+          },
+          "4.4": {
+            "milestone": {
+              "met": true
+            },
+            "final": {
+              "met": true
+            },
+            "four_tenant_cost_reduction_percent": "65.87811113598009474134356696",
+            "four_tenant_ai_core_mean_percent": "87.22692406525087",
+            "published_rental_url": "https://news.smm.cn/news/TCNOQJBAJVZYJ73BMVU7G5GJZXQ462A4U6NN4CY"
+          }
+        },
+        "measured_release": "full-answer-b1-20261126-r11-rc4-qwen35-steady-mixed",
+        "measured_source_commit": "aa4f87183ba4a4997fe796cc946413dd0e3ed8bb",
+        "published_source_commit": "68725af63b5b3f3218c9f93a0825207e7a2c2f0e",
+        "scheduler_profile": "steady-mixed-1536",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/c78d19ee59ee907d737c40674d58b3977c72997d/reports/r11-35b-steady-mixed-1536-full-20261126/README.md",
+        "evidence_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/c78d19ee59ee907d737c40674d58b3977c72997d/reports/r11-35b-steady-mixed-1536-full-20261126/summary.json",
+        "evidence_sha256": "8cc79e4f1b2c6c2541ba09561de7f010711ec593f7cdc2afe5c544e4d76c0441",
+        "context_input_sha256": "5156a6ae436c7e32364a5ecbb028b52f26da1808be883c02e8e230defd556559",
+        "context_window_seconds": 60,
+        "context_windows": [
+          {
+            "index": 0,
+            "requests": 19,
+            "throughput": 63.375466028053154,
+            "ttft": {
+              "mean": 16889.58574862428,
+              "p95": 23026.46859397646,
+              "p99": 23026.46859397646
+            },
+            "tpot": {
+              "mean": 45.98338109967553,
+              "p95": 61.60164125487391,
+              "p99": 61.60164125487391
+            }
+          },
+          {
+            "index": 1,
+            "requests": 20,
+            "throughput": 59.27135338614137,
+            "ttft": {
+              "mean": 14646.967621249496,
+              "p95": 21327.313362038694,
+              "p99": 22619.54948102357
+            },
+            "tpot": {
+              "mean": 55.22319949274271,
+              "p95": 60.33523348228567,
+              "p99": 63.097352066816875
+            }
+          },
+          {
+            "index": 2,
+            "requests": 16,
+            "throughput": 42.65865965135023,
+            "ttft": {
+              "mean": 14625.797360000433,
+              "p95": 20918.58018800849,
+              "p99": 20918.58018800849
+            },
+            "tpot": {
+              "mean": 52.55067881421294,
+              "p95": 60.82851889808023,
+              "p99": 60.82851889808023
+            }
+          },
+          {
+            "index": 3,
+            "requests": 16,
+            "throughput": 50.10660415152974,
+            "ttft": {
+              "mean": 14441.186111380375,
+              "p95": 20085.62486001756,
+              "p99": 20085.62486001756
+            },
+            "tpot": {
+              "mean": 55.75140798160539,
+              "p95": 59.960830599918744,
+              "p99": 59.960830599918744
+            }
+          },
+          {
+            "index": 4,
+            "requests": 17,
+            "throughput": 63.9018790368597,
+            "ttft": {
+              "mean": 12473.696634180242,
+              "p95": 19778.90903298976,
+              "p99": 19778.90903298976
+            },
+            "tpot": {
+              "mean": 46.846264065498424,
+              "p95": 61.31709177234192,
+              "p99": 61.31709177234192
+            }
+          }
+        ],
+        "pypi_version": "2026.11.26.11",
+        "pypi_url": "https://pypi.org/project/vllm-hust-engine/2026.11.26.11/",
+        "install_manifest_url": "https://github.com/vLLM-HUST/vllm-hust-website/releases/download/engine-wheels-r11-v1/r11-pip-requirements.txt",
+        "arm64_acceptance_url": "https://github.com/vLLM-HUST/vllm-hust-website/releases/download/engine-wheels-r11-v1/arm64-clean-install.json",
+        "enabled_components": [
+          {
+            "id": "vllm-hust-extension-manager",
+            "name": "Extension Manager",
+            "version": "full-answer-b1-20261113-r6"
+          },
+          {
+            "id": "betterscale",
+            "name": "BetterScale",
+            "version": "full-answer-b1-20261113-r6"
+          },
+          {
+            "id": "prefill-microflow",
+            "name": "Microflow",
+            "version": "full-answer-b1-20261113-r6"
+          },
+          {
+            "id": "kv-materialization-arrival-control",
+            "name": "KV materialization",
+            "version": "full-answer-b1-20261113-r6"
+          },
+          {
+            "id": "hust-m01-correction",
+            "name": "M01 correction",
+            "version": "full-answer-b1-20261113-r6"
+          },
+          {
+            "id": "hust-joint-packed",
+            "name": "Packed host state",
+            "version": "full-answer-b1-20261113-r6"
+          },
+          {
+            "id": "sealed-serving-warmup",
+            "name": "Sealed serving warmup",
+            "version": "1.0.0"
+          },
+          {
+            "id": "guarded-progress-async",
+            "name": "Guarded progress async",
+            "version": "1.0.0-rc1"
+          },
+          {
+            "id": "capacity-tuning",
+            "name": "Capacity tuning",
+            "version": "0.2.0"
+          },
+          {
+            "id": "short-prefill-tail",
+            "name": "Short prefill tail",
+            "version": "0.1.0"
+          },
+          {
+            "id": "intern-s2",
+            "name": "intern-s2",
+            "version": "1.0.0",
+            "condition": "intern-s2-only"
+          },
+          {
+            "id": "state-page-copy",
+            "name": "state-page-copy",
+            "version": "1.0.0",
+            "condition": "qualified-owned-state"
+          }
+        ]
       }
     }
   ],
