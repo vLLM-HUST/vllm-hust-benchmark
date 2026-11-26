@@ -62,9 +62,47 @@ def test_release_history_survives_actual_public_build(tmp_path):
         "r8",
         "r9",
         "r10",
+        "r11",
     }
+    assert value["default_release"] == "r11"
     assert {entry["id"] for entry in value["attempts"]} == {"r1", "r2", "r3"}
     assert json.loads((output / "data/unrelated.json").read_text()) == {"records": []}
+
+
+def test_r11_release_view_is_bound_to_the_verified_35b_report():
+    source = ROOT / "reports/r11-35b-steady-mixed-1536-full-20261126/summary.json"
+    raw = source.read_bytes()
+    report = json.loads(raw)
+    history = ROOT / "website-publication/data/engine-release-history-v1.json"
+    catalog = json.loads(history.read_bytes())
+    entry = next(item for item in catalog["entries"] if item["id"] == "r11")
+    published = entry["full_acceptance"]
+
+    assert published["evidence_sha256"] == hashlib.sha256(raw).hexdigest()
+    assert published["measured_release"] == report["release"]
+    assert published["measured_source_commit"] == report["rc4_engine_commit"]
+    assert published["models"][0] == {
+        "name": report["model"],
+        "scope": "full-acceptance",
+    }
+    assert {(item["name"], item["scope"]) for item in published["models"][1:]} == {
+        ("Qwen3.5-9B", "compatibility-verified"),
+        ("Intern-S2-Preview", "compatibility-verified"),
+    }
+    for id_, stages in report["official_targets"].items():
+        for stage in ("milestone", "final"):
+            assert published["targets"][id_][stage]["met"] == stages[stage]["met"]
+    assert (
+        published["targets"]["4.3"]["measured_window_ratios"]
+        == report["official_targets"]["4.3"]["measured_window_ratios"]
+    )
+    workload = catalog["context_workloads"][published["context_input_sha256"]]
+    assert workload["datasets"] == ["Terminal-Bench 2.1"]
+    assert {
+        row["label"]
+        for row in entry["measurements"]
+        if row.get("workload") == "terminal-replay-c8"
+    } == {"4K–8K", "16K–24K", "32K–48K"}
 
 
 def test_resigning_manifest_cannot_publish_changed_history(tmp_path):
