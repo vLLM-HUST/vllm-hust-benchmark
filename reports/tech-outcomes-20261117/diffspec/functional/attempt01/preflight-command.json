@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/root/diffspec-experiments/environments/diffspec-moe-venv/bin/python",
+    "-c",
+    "import json,inspect,torch,torch_npu,vllm,vllm_ascend,diffspec\nfrom diffspec.runtime import DiffSpecDraftCache\ndata={\"torch\":torch.__version__,\"torch_npu\":torch_npu.__version__,\n\"vllm\":vllm.__file__,\"ascend\":vllm_ascend.__file__,\"diffspec\":diffspec.__file__,\n\"runtime\":inspect.getsourcefile(DiffSpecDraftCache),\"devices\":[]}\nfor i in range(torch.npu.device_count()):\n p=torch.npu.get_device_properties(i)\n data[\"devices\"].append({\"runtime_index\":i,\"name\":p.name,\"uuid\":str(p.uuid)})\nprint(json.dumps(data,indent=2))\n"
+  ],
+  "environment": {
+    "PYTHONPATH": "/usr/local/Ascend/cann-9.1.0/python/site-packages:/root/diffspec-experiments/source-snapshots/diffspec-runtime-core-kvgroup-20261029:/root/diffspec-experiments/source-snapshots/diffspec-runtime-ascend-moe-20261030:/root/diffspec-experiments/runs/tech-outcomes-20261115-diffspec/source:/root/diffspec-experiments/runs/tech-outcomes-20261115-diffspec",
+    "VLLM_PLUGINS": "ascend,diffspec",
+    "ASCEND_RT_VISIBLE_DEVICES": "0,1,2,3",
+    "VLLM_CACHE_ROOT": "/root/diffspec-experiments/runs/tech-outcomes-20261115-diffspec/cache",
+    "ASCEND_CUSTOM_OPP_PATH": "/vllm-workspace/vllm-ascend/vllm_ascend/_cann_ops_custom/vendors/custom_transformer",
+    "LD_PRELOAD": "/vllm-workspace/vllm-ascend/vllm_ascend/_cann_ops_custom/vendors/custom_transformer/op_api/lib/libcust_opapi.so"
+  }
+}

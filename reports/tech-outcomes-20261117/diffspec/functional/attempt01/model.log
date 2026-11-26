@@ -1,0 +1,371 @@
+[W1115 15:01:50.647937278 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 11-15 15:01:59 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 11-15 15:01:59 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 11-15 15:01:59 [__init__.py:66] Loading plugin ascend
+INFO 11-15 15:01:59 [__init__.py:272] Platform plugin ascend is activated
+INFO 11-15 15:01:59 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+INFO 11-15 15:02:12 [api_utils.py:286] non-default args: {'dtype': 'bfloat16', 'seed': 17, 'max_model_len': 8192, 'tensor_parallel_size': 4, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.75, 'max_num_batched_tokens': 2048, 'max_num_seqs': 2, 'limit_mm_per_prompt': {'image': 0, 'video': 0}, 'speculative_config': {'method': 'eagle3', 'model': '/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/draft-matched', 'num_speculative_tokens': 4, 'draft_tensor_parallel_size': 4, 'enforce_eager': False, 'draft_context_policy': 'diffspec', 'diffspec_verification_mode': 'auto', 'diffspec_chunk_size': 64, 'diffspec_token_budget': 2048, 'diffspec_retrieval_interval': 4, 'diffspec_adaptive_profile': False}, 'per_request_spec_decode_metrics': 'summary', 'compilation_config': {'mode': None, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': [], 'ir_enable_torch_wrap': None, 'splitting_ops': None, 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': None, 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.PIECEWISE: 1>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [4, 8, 12], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': None, 'pass_config': {}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': None, 'static_all_moe_layers': []}, 'worker_extension_cls': 'trace_worker.TraceWorker', 'min_kv_cache_group_layers': 10, 'async_scheduling': False, 'model': '/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model'}
+INFO 11-15 15:02:40 [model.py:688] Resolved architecture: Qwen3_5MoeForConditionalGeneration
+INFO 11-15 15:02:40 [model.py:2025] Using max model len 8192
+WARNING 11-15 15:02:40 [model.py:985] Model does not support mm_device_do_normalize, forcing mm_device_do_normalize = False.
+INFO 11-15 15:02:43 [registry.py:141] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+INFO 11-15 15:02:43 [model.py:891] Disabled mm_prefix attention mode because multimodal inputs are configuration-disabled. Attention backends without mm_prefix support may now be selected.
+INFO 11-15 15:03:09 [model.py:688] Resolved architecture: LlamaForCausalLMEagle3
+INFO 11-15 15:03:09 [model.py:2025] Using max model len 262144
+INFO 11-15 15:03:09 [speculative.py:1591] Overriding draft model max model len from 262144 to 8192
+INFO 11-15 15:03:09 [scheduler.py:277] Chunked prefill is enabled with max_num_batched_tokens=2048.
+INFO 11-15 15:03:09 [patch_mamba_config.py:104] Setting attention block size to 1024 tokens to ensure that attention page size is >= mamba page size.
+INFO 11-15 15:03:09 [patch_mamba_config.py:119] Padding mamba page size by 2.66% to ensure that mamba page size and attention page size are exactly equal.
+INFO 11-15 15:03:09 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+WARNING 11-15 15:03:09 [vllm.py:1928] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens.
+INFO 11-15 15:03:09 [utils.py:224] No quantization signature detected from model files for "/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+WARNING 11-15 15:03:09 [platform.py:622] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+INFO 11-15 15:03:09 [platform.py:834] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+INFO 11-15 15:03:09 [ascend_config.py:161] Dynamic EPLB is False
+INFO 11-15 15:03:09 [ascend_config.py:162] The number of redundant experts is 0
+INFO 11-15 15:03:09 [platform.py:1138] FlashComm1 is disabled. Using flashinfer_all2allv as the all2all backend.
+INFO 11-15 15:03:09 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+INFO 11-15 15:03:09 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+[W1115 15:03:20.791330027 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 11-15 15:03:25 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 11-15 15:03:25 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 11-15 15:03:25 [__init__.py:66] Loading plugin ascend
+INFO 11-15 15:03:25 [__init__.py:272] Platform plugin ascend is activated
+INFO 11-15 15:03:25 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+(EngineCore pid=32122) INFO 11-15 15:03:39 [core.py:123] Initializing a V1 LLM engine (v0.23.0) with config: model='/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model', speculative_config=SpeculativeConfig(method='eagle3', model='/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/draft-matched', num_spec_tokens=4), tokenizer='/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load_format=auto, tensor_parallel_size=4, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=npu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='summary', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=17, served_model_name=/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::qwen4_exp_compute_ple_ngram_ids', 'vllm::qwen4_exp_ple_short_conv', 'vllm::qwen4_exp_qsa_with_output', 'vllm::linear_attention', 'vllm::qwen_gdn_attention_core', 'vllm::qwen_gdn_attention_core_fused_norm_packed', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::diffspec_capture_raw_kv', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update', 'vllm::mla_forward', 'vllm::dsa_forward'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.PIECEWISE: 1>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [4, 8, 12], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 12, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=32122) INFO 11-15 15:03:39 [multiproc_executor.py:153] DP group leader: node_rank=0, node_rank_within_dp=0, master_addr=127.0.0.1, mq_connect_ip=10.244.1.162 (local), world_size=4, local_world_size=4
+[W1115 15:03:42.732459109 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+[W1115 15:03:42.732459219 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+[W1115 15:03:42.787374896 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+[W1115 15:03:42.794015822 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+INFO 11-15 15:03:51 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 11-15 15:03:51 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 11-15 15:03:51 [__init__.py:66] Loading plugin ascend
+INFO 11-15 15:03:51 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 11-15 15:03:51 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 11-15 15:03:51 [__init__.py:66] Loading plugin ascend
+INFO 11-15 15:03:51 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 11-15 15:03:51 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 11-15 15:03:51 [__init__.py:66] Loading plugin ascend
+INFO 11-15 15:03:51 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 11-15 15:03:51 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 11-15 15:03:51 [__init__.py:66] Loading plugin ascend
+INFO 11-15 15:03:51 [__init__.py:272] Platform plugin ascend is activated
+INFO 11-15 15:03:51 [__init__.py:272] Platform plugin ascend is activated
+INFO 11-15 15:03:52 [__init__.py:272] Platform plugin ascend is activated
+INFO 11-15 15:03:52 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+INFO 11-15 15:03:52 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+INFO 11-15 15:03:52 [__init__.py:272] Platform plugin ascend is activated
+INFO 11-15 15:03:52 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+INFO 11-15 15:03:52 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+INFO 11-15 15:04:07 [worker_base.py:306] Injected <class 'trace_worker.TraceWorker'> into <class 'vllm_ascend.worker.worker.NPUWorker'> for extended collective_rpc calls ['install_trace', 'trace_status']
+INFO 11-15 15:04:07 [worker_base.py:306] Injected <class 'trace_worker.TraceWorker'> into <class 'vllm_ascend.worker.worker.NPUWorker'> for extended collective_rpc calls ['install_trace', 'trace_status']
+INFO 11-15 15:04:07 [worker_base.py:306] Injected <class 'trace_worker.TraceWorker'> into <class 'vllm_ascend.worker.worker.NPUWorker'> for extended collective_rpc calls ['install_trace', 'trace_status']
+INFO 11-15 15:04:07 [worker_base.py:306] Injected <class 'trace_worker.TraceWorker'> into <class 'vllm_ascend.worker.worker.NPUWorker'> for extended collective_rpc calls ['install_trace', 'trace_status']
+INFO 11-15 15:04:10 [registry.py:141] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+INFO 11-15 15:04:10 [registry.py:141] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+INFO 11-15 15:04:10 [registry.py:141] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+INFO 11-15 15:04:10 [ascend_config.py:161] Dynamic EPLB is False
+INFO 11-15 15:04:10 [ascend_config.py:162] The number of redundant experts is 0
+INFO 11-15 15:04:10 [ascend_config.py:161] Dynamic EPLB is False
+INFO 11-15 15:04:10 [ascend_config.py:162] The number of redundant experts is 0
+INFO 11-15 15:04:10 [registry.py:141] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+INFO 11-15 15:04:10 [ascend_config.py:161] Dynamic EPLB is False
+INFO 11-15 15:04:10 [ascend_config.py:162] The number of redundant experts is 0
+INFO 11-15 15:04:11 [ascend_config.py:161] Dynamic EPLB is False
+INFO 11-15 15:04:11 [ascend_config.py:162] The number of redundant experts is 0
+(Worker pid=33087) INFO 11-15 15:04:12 [parallel_state.py:1798] world_size=4 rank=2 local_rank=2 distributed_init_method=file:///tmp/vllm_dist_4b3c0cbd4f494c448a426911ea7c5f1b backend=hccl
+(Worker pid=33088) INFO 11-15 15:04:13 [parallel_state.py:1798] world_size=4 rank=3 local_rank=3 distributed_init_method=file:///tmp/vllm_dist_4b3c0cbd4f494c448a426911ea7c5f1b backend=hccl
+(Worker pid=33086) INFO 11-15 15:04:13 [parallel_state.py:1798] world_size=4 rank=1 local_rank=1 distributed_init_method=file:///tmp/vllm_dist_4b3c0cbd4f494c448a426911ea7c5f1b backend=hccl
+(Worker pid=33085) INFO 11-15 15:04:13 [parallel_state.py:1798] world_size=4 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_4b3c0cbd4f494c448a426911ea7c5f1b backend=hccl
+[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+(Worker pid=33085) INFO 11-15 15:04:13 [parallel_state.py:2142] rank 0 in world size 4 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank 0, EPLB rank N/A
+[Gloo] Rank 0 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 2 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 1 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[Gloo] Rank 3 is connected to 3 peer ranks. Expected number of connected peer ranks is : 3
+[rank0]:[W1115 15:04:13.875360948 NPUCachingAllocator.cpp:202] Warning: The current CANN and HDK(driver) versions require processing for 32 padding size, with memory allocation. (function operator())
+[rank1]:[W1115 15:04:13.875357808 NPUCachingAllocator.cpp:202] Warning: The current CANN and HDK(driver) versions require processing for 32 padding size, with memory allocation. (function operator())
+[rank2]:[W1115 15:04:13.875357978 NPUCachingAllocator.cpp:202] Warning: The current CANN and HDK(driver) versions require processing for 32 padding size, with memory allocation. (function operator())
+[rank3]:[W1115 15:04:13.875357998 NPUCachingAllocator.cpp:202] Warning: The current CANN and HDK(driver) versions require processing for 32 padding size, with memory allocation. (function operator())
+(Worker pid=33087) WARNING 11-15 15:04:14 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(Worker pid=33088) WARNING 11-15 15:04:14 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(Worker pid=33085) WARNING 11-15 15:04:14 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(Worker pid=33086) WARNING 11-15 15:04:14 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(Worker pid=33087) INFO 11-15 15:04:14 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(Worker pid=33088) INFO 11-15 15:04:14 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(Worker pid=33085) INFO 11-15 15:04:14 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(Worker pid=33086) INFO 11-15 15:04:14 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(Worker pid=33087) WARNING 11-15 15:04:14 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(Worker_TP2 pid=33087) INFO 11-15 15:04:14 [model_runner_v1.py:3788] Starting to load model /root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model...
+(Worker pid=33088) WARNING 11-15 15:04:14 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(Worker_TP3 pid=33088) INFO 11-15 15:04:14 [model_runner_v1.py:3788] Starting to load model /root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model...
+(Worker pid=33085) WARNING 11-15 15:04:14 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(Worker pid=33086) WARNING 11-15 15:04:14 [__init__.py:205] min_p and logit_bias parameters won't work with speculative decoding.
+(Worker_TP1 pid=33086) INFO 11-15 15:04:14 [model_runner_v1.py:3788] Starting to load model /root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model...
+(Worker_TP0 pid=33085) INFO 11-15 15:04:14 [model_runner_v1.py:3788] Starting to load model /root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model...
+(Worker_TP0 pid=33085) INFO 11-15 15:04:14 [interface.py:414] Using default backend AttentionBackendEnum.TORCH_SDPA for vit attention
+(Worker_TP0 pid=33085) INFO 11-15 15:04:14 [mm_encoder_attention.py:372] Using AttentionBackendEnum.TORCH_SDPA for MMEncoderAttention.
+(Worker_TP0 pid=33085) INFO 11-15 15:04:14 [qwen_gdn_linear_attn.py:167] Using Triton/FLA GDN prefill kernel (requested=auto, head_k_dim=128).
+(Worker_TP0 pid=33085) INFO 11-15 15:04:14 [qwen_gdn_linear_attn.py:519] GDN decode kernel: cuda
+(Worker_TP3 pid=33088) INFO 11-15 15:04:14 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(Worker_TP2 pid=33087) INFO 11-15 15:04:14 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(Worker_TP1 pid=33086) INFO 11-15 15:04:14 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(Worker_TP0 pid=33085) INFO 11-15 15:04:14 [platform.py:1350] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(Worker_TP3 pid=33088) INFO 11-15 15:04:15 [compilation.py:1107] Using OOT custom backend for compilation.
+(Worker_TP2 pid=33087) INFO 11-15 15:04:15 [compilation.py:1107] Using OOT custom backend for compilation.
+(Worker_TP1 pid=33086) INFO 11-15 15:04:15 [compilation.py:1107] Using OOT custom backend for compilation.
+(Worker_TP0 pid=33085) INFO 11-15 15:04:15 [compilation.py:1107] Using OOT custom backend for compilation.
+(Worker_TP2 pid=33087) INFO 11-15 15:04:16 [weight_utils.py:825] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
+(Worker_TP3 pid=33088) INFO 11-15 15:04:16 [weight_utils.py:825] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
+(Worker_TP1 pid=33086) INFO 11-15 15:04:16 [weight_utils.py:825] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
+(Worker_TP0 pid=33085) INFO 11-15 15:04:16 [weight_utils.py:863] Filesystem type for checkpoints: NFS4. Checkpoint size: 66.97 GiB. Available RAM: 118.03 GiB.
+(Worker_TP0 pid=33085) INFO 11-15 15:04:16 [weight_utils.py:825] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:   0% Completed | 0/14 [00:00<?, ?it/s]
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:   7% Completed | 1/14 [00:01<00:14,  1.13s/it]
+(Worker_TP1 pid=33086) INFO 11-15 15:04:17 [weight_utils.py:797] Prefetching checkpoint files: 10% (1/4)
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  14% Completed | 2/14 [00:02<00:13,  1.16s/it]
+(Worker_TP1 pid=33086) INFO 11-15 15:04:19 [weight_utils.py:797] Prefetching checkpoint files: 20% (2/4)
+(Worker_TP1 pid=33086) INFO 11-15 15:04:19 [weight_utils.py:797] Prefetching checkpoint files: 30% (3/4)
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  21% Completed | 3/14 [00:03<00:12,  1.16s/it]
+(Worker_TP3 pid=33088) INFO 11-15 15:04:19 [weight_utils.py:797] Prefetching checkpoint files: 10% (1/3)
+(Worker_TP3 pid=33088) INFO 11-15 15:04:19 [weight_utils.py:797] Prefetching checkpoint files: 20% (2/3)
+(Worker_TP3 pid=33088) INFO 11-15 15:04:19 [weight_utils.py:797] Prefetching checkpoint files: 30% (3/3)
+(Worker_TP1 pid=33086) INFO 11-15 15:04:19 [weight_utils.py:797] Prefetching checkpoint files: 40% (4/4)
+(Worker_TP3 pid=33088) INFO 11-15 15:04:19 [weight_utils.py:820] Prefetching checkpoint files into page cache finished in 3.61s
+(Worker_TP1 pid=33086) INFO 11-15 15:04:19 [weight_utils.py:820] Prefetching checkpoint files into page cache finished in 3.61s
+(Worker_TP0 pid=33085) INFO 11-15 15:04:19 [weight_utils.py:797] Prefetching checkpoint files: 10% (1/4)
+(Worker_TP0 pid=33085) INFO 11-15 15:04:20 [weight_utils.py:797] Prefetching checkpoint files: 20% (2/4)
+(Worker_TP0 pid=33085) INFO 11-15 15:04:20 [weight_utils.py:797] Prefetching checkpoint files: 30% (3/4)
+(Worker_TP2 pid=33087) INFO 11-15 15:04:20 [weight_utils.py:797] Prefetching checkpoint files: 10% (1/3)
+(Worker_TP2 pid=33087) INFO 11-15 15:04:20 [weight_utils.py:797] Prefetching checkpoint files: 20% (2/3)
+(Worker_TP0 pid=33085) INFO 11-15 15:04:20 [weight_utils.py:797] Prefetching checkpoint files: 40% (4/4)
+(Worker_TP0 pid=33085) INFO 11-15 15:04:20 [weight_utils.py:820] Prefetching checkpoint files into page cache finished in 4.21s
+(Worker_TP2 pid=33087) INFO 11-15 15:04:20 [weight_utils.py:797] Prefetching checkpoint files: 30% (3/3)
+(Worker_TP2 pid=33087) INFO 11-15 15:04:20 [weight_utils.py:820] Prefetching checkpoint files into page cache finished in 4.37s
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  29% Completed | 4/14 [00:04<00:11,  1.10s/it]
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  36% Completed | 5/14 [00:05<00:09,  1.04s/it]
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  43% Completed | 6/14 [00:06<00:08,  1.01s/it]
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  50% Completed | 7/14 [00:07<00:06,  1.01it/s]
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  57% Completed | 8/14 [00:08<00:05,  1.02it/s]
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  64% Completed | 9/14 [00:10<00:06,  1.22s/it]
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  71% Completed | 10/14 [00:12<00:06,  1.65s/it]
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  79% Completed | 11/14 [00:15<00:06,  2.12s/it]
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  86% Completed | 12/14 [00:18<00:04,  2.35s/it]
+(Worker_TP2 pid=33087) INFO 11-15 15:04:35 [model_runner_v1.py:3813] Loading drafter model...
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [utils.py:224] No quantization signature detected from model files for "/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [platform.py:834] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [ascend_config.py:161] Dynamic EPLB is False
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [ascend_config.py:162] The number of redundant experts is 0
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [llm_base_proposer.py:305] [spec_decode/base] Loading draft model: method=eagle3, load_format=None, model=/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/draft-matched
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [model_runner_v1.py:3813] Loading drafter model...
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [utils.py:224] No quantization signature detected from model files for "/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [platform.py:834] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [ascend_config.py:161] Dynamic EPLB is False
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [ascend_config.py:162] The number of redundant experts is 0
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [compilation.py:1107] Using OOT custom backend for compilation.
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [llm_base_proposer.py:305] [spec_decode/base] Loading draft model: method=eagle3, load_format=None, model=/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/draft-matched
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [weight_utils.py:825] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [weight_utils.py:820] Prefetching checkpoint files into page cache finished in 0.01s
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [compilation.py:1107] Using OOT custom backend for compilation.
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [weight_utils.py:825] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [weight_utils.py:820] Prefetching checkpoint files into page cache finished in 0.00s
+(Worker_TP1 pid=33086) INFO 11-15 15:04:36 [model_runner_v1.py:3813] Loading drafter model...
+(Worker_TP1 pid=33086) INFO 11-15 15:04:36 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(Worker_TP1 pid=33086) INFO 11-15 15:04:36 [utils.py:224] No quantization signature detected from model files for "/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(Worker_TP1 pid=33086) INFO 11-15 15:04:36 [platform.py:834] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+(Worker_TP1 pid=33086) INFO 11-15 15:04:36 [ascend_config.py:161] Dynamic EPLB is False
+(Worker_TP1 pid=33086) INFO 11-15 15:04:36 [ascend_config.py:162] The number of redundant experts is 0
+(Worker_TP1 pid=33086) INFO 11-15 15:04:36 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(Worker_TP1 pid=33086) INFO 11-15 15:04:36 [llm_base_proposer.py:305] [spec_decode/base] Loading draft model: method=eagle3, load_format=None, model=/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/draft-matched
+(Worker_TP1 pid=33086) INFO 11-15 15:04:36 [compilation.py:1107] Using OOT custom backend for compilation.
+(Worker_TP1 pid=33086) INFO 11-15 15:04:36 [weight_utils.py:825] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
+(Worker_TP1 pid=33086) INFO 11-15 15:04:36 [weight_utils.py:820] Prefetching checkpoint files into page cache finished in 0.00s
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:  93% Completed | 13/14 [00:20<00:02,  2.21s/it]
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [llm_base_proposer.py:447] [spec_decode/base] Detected EAGLE model without its own embed_tokens in the checkpoint. Sharing target model embedding weights with the draft model.
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [llm_base_proposer.py:447] [spec_decode/base] Detected EAGLE model without its own embed_tokens in the checkpoint. Sharing target model embedding weights with the draft model.
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [proposer.py:74] DiffSpec draft cache initialized: budget=2048, max_depth=4, max_nodes=50, memory=0.08 GiB
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [proposer.py:82] DiffSpec RoPE tables: target=1048576, draft=262144
+(Worker_TP2 pid=33087) INFO 11-15 15:04:36 [proposer.py:87] DiffSpec verification mode: configured=auto, resolved=linear; retrieval enabled on committed decode queries, interval=4
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [proposer.py:74] DiffSpec draft cache initialized: budget=2048, max_depth=4, max_nodes=50, memory=0.08 GiB
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [proposer.py:82] DiffSpec RoPE tables: target=1048576, draft=262144
+(Worker_TP3 pid=33088) INFO 11-15 15:04:36 [proposer.py:87] DiffSpec verification mode: configured=auto, resolved=linear; retrieval enabled on committed decode queries, interval=4
+(Worker_TP1 pid=33086) INFO 11-15 15:04:37 [llm_base_proposer.py:447] [spec_decode/base] Detected EAGLE model without its own embed_tokens in the checkpoint. Sharing target model embedding weights with the draft model.
+(Worker_TP1 pid=33086) INFO 11-15 15:04:37 [proposer.py:74] DiffSpec draft cache initialized: budget=2048, max_depth=4, max_nodes=50, memory=0.08 GiB
+(Worker_TP1 pid=33086) INFO 11-15 15:04:37 [proposer.py:82] DiffSpec RoPE tables: target=1048576, draft=262144
+(Worker_TP1 pid=33086) INFO 11-15 15:04:37 [proposer.py:87] DiffSpec verification mode: configured=auto, resolved=linear; retrieval enabled on committed decode queries, interval=4
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards: 100% Completed | 14/14 [00:21<00:00,  1.74s/it]
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards: 100% Completed | 14/14 [00:21<00:00,  1.52s/it]
+(Worker_TP0 pid=33085) 
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [default_loader.py:430] Loading weights took 21.26 seconds
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [model_runner_v1.py:3813] Loading drafter model...
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(Worker_TP0 pid=33085) WARNING 11-15 15:04:37 [vllm.py:1928] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens.
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [utils.py:224] No quantization signature detected from model files for "/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [platform.py:834] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [ascend_config.py:161] Dynamic EPLB is False
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [ascend_config.py:162] The number of redundant experts is 0
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [platform.py:1138] FlashComm1 is disabled. Using flashinfer_all2allv as the all2all backend.
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [llm_base_proposer.py:305] [spec_decode/base] Loading draft model: method=eagle3, load_format=None, model=/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/draft-matched
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [compilation.py:1107] Using OOT custom backend for compilation.
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [weight_utils.py:863] Filesystem type for checkpoints: NFS4. Checkpoint size: 0.44 GiB. Available RAM: 118.03 GiB.
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [weight_utils.py:825] Prefetching checkpoint files into page cache started (in background, num_threads=8, block_size=16777216 bytes)
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+(Worker_TP0 pid=33085) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00, 319.20it/s]
+(Worker_TP0 pid=33085) 
+(Worker_TP3 pid=33088) INFO 11-15 15:04:37 [model_runner_v1.py:3875] Loading model weights took 16.8895 GB
+(Worker_TP3 pid=33088) INFO 11-15 15:04:37 [model_runner_v1.py:3928] Model runner load_model total time: 23.76 seconds
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [default_loader.py:430] Loading weights took 0.44 seconds
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [llm_base_proposer.py:447] [spec_decode/base] Detected EAGLE model without its own embed_tokens in the checkpoint. Sharing target model embedding weights with the draft model.
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [proposer.py:74] DiffSpec draft cache initialized: budget=2048, max_depth=4, max_nodes=50, memory=0.08 GiB
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [proposer.py:82] DiffSpec RoPE tables: target=1048576, draft=262144
+(Worker_TP0 pid=33085) INFO 11-15 15:04:37 [proposer.py:87] DiffSpec verification mode: configured=auto, resolved=linear; retrieval enabled on committed decode queries, interval=4
+(Worker_TP2 pid=33087) INFO 11-15 15:04:37 [model_runner_v1.py:3875] Loading model weights took 16.8895 GB
+(Worker_TP2 pid=33087) INFO 11-15 15:04:37 [model_runner_v1.py:3928] Model runner load_model total time: 23.79 seconds
+(Worker_TP1 pid=33086) INFO 11-15 15:04:38 [model_runner_v1.py:3875] Loading model weights took 16.8895 GB
+(Worker_TP1 pid=33086) INFO 11-15 15:04:38 [model_runner_v1.py:3928] Model runner load_model total time: 24.48 seconds
+(Worker_TP0 pid=33085) INFO 11-15 15:04:38 [model_runner_v1.py:3875] Loading model weights took 16.8895 GB
+(Worker_TP0 pid=33085) INFO 11-15 15:04:38 [weight_utils.py:797] Prefetching checkpoint files: 10% (1/1)
+(Worker_TP0 pid=33085) INFO 11-15 15:04:38 [model_runner_v1.py:3928] Model runner load_model total time: 24.69 seconds
+(Worker_TP0 pid=33085) INFO 11-15 15:04:38 [weight_utils.py:820] Prefetching checkpoint files into page cache finished in 1.37s
+(EngineCore pid=32122) INFO 11-15 15:04:38 [utils.py:306] Using LBHNC KV cache layout.
+(Worker_TP3 pid=33088) INFO 11-15 15:04:52 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False}
+(Worker_TP1 pid=33086) INFO 11-15 15:04:52 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False}
+(Worker_TP0 pid=33085) INFO 11-15 15:04:52 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False}
+(Worker_TP0 pid=33085) INFO 11-15 15:04:52 [backends.py:1094] Using cache directory: /root/diffspec-experiments/runs/tech-outcomes-20261115-diffspec/cache/torch_compile_cache/27e2584fa2/rank_0_0/backbone for vLLM's torch.compile
+(Worker_TP0 pid=33085) INFO 11-15 15:04:52 [backends.py:1155] Dynamo bytecode transform time: 13.22 s
+(Worker_TP2 pid=33087) INFO 11-15 15:04:52 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False}
+(Worker_TP0 pid=33085) INFO 11-15 15:05:18 [backends.py:393] Compiling a graph for compile range (1, 2048) takes 24.16 s
+(Worker_TP0 pid=33085) INFO 11-15 15:05:23 [decorators.py:719] saved AOT compiled function to /root/diffspec-experiments/runs/tech-outcomes-20261115-diffspec/cache/torch_compile_cache/torch_aot_compile/29d8d86e3e3f3f430531408b726513d8e2405cb517879dfaa4b5a894c468d4ee/rank_0_0/model
+(Worker_TP0 pid=33085) INFO 11-15 15:05:23 [monitor.py:53] torch.compile took 43.57 s in total
+(Worker_TP0 pid=33085) INFO 11-15 15:05:24 [monitor.py:81] Initial profiling/warmup run took 1.72 s
+(Worker_TP3 pid=33088) INFO 11-15 15:05:25 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False}
+(Worker_TP0 pid=33085) INFO 11-15 15:05:25 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False}
+(Worker_TP0 pid=33085) INFO 11-15 15:05:25 [backends.py:1094] Using cache directory: /root/diffspec-experiments/runs/tech-outcomes-20261115-diffspec/cache/torch_compile_cache/27e2584fa2/rank_0_0/eagle_head for vLLM's torch.compile
+(Worker_TP0 pid=33085) INFO 11-15 15:05:25 [backends.py:1155] Dynamo bytecode transform time: 0.56 s
+(Worker_TP1 pid=33086) INFO 11-15 15:05:25 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False}
+(Worker_TP2 pid=33087) INFO 11-15 15:05:25 [compiler_interface.py:285] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False}
+(Worker_TP0 pid=33085) INFO 11-15 15:05:26 [backends.py:393] Compiling a graph for compile range (1, 2048) takes 0.72 s
+(Worker_TP0 pid=33085) INFO 11-15 15:05:26 [decorators.py:719] saved AOT compiled function to /root/diffspec-experiments/runs/tech-outcomes-20261115-diffspec/cache/torch_compile_cache/torch_aot_compile/e21c087da42365549bdcec4468d081dff6c83c30ea3ac91df0c858407d45bb98/rank_0_0/model
+(Worker_TP0 pid=33085) INFO 11-15 15:05:26 [monitor.py:53] torch.compile took 1.51 s in total
+(Worker_TP0 pid=33085) INFO 11-15 15:05:26 [monitor.py:81] Initial profiling/warmup run took 0.02 s
+(Worker_TP0 pid=33085) INFO 11-15 15:05:28 [worker.py:622] Available KV cache memory: 28.16 GiB
+(EngineCore pid=32122) WARNING 11-15 15:05:28 [kv_cache_utils.py:1341] Add 9 padding layers, may waste at most 900.00% KV cache memory
+(EngineCore pid=32122) WARNING 11-15 15:05:28 [kv_cache_utils.py:1908] Speculative decoding (method=eagle3) is enabled but no KV cache group could be identified as the draft model's, so every group -- including Mamba groups [2, 3, 4] -- will be treated as a draft group. A Mamba group cannot satisfy the widened lookup window that implies, so prefix-cache reuse across requests will be disabled and any external KV offload tier will store without ever serving a hit.
+(EngineCore pid=32122) INFO 11-15 15:05:28 [kv_cache_utils.py:2060] GPU KV cache size: 417,940 tokens, Maximum concurrency for 8,192 tokens per request: 51.02x
+(Worker_TP2 pid=33087) INFO 11-15 15:05:29 [kernel_warmup.py:41] Starting Triton kernel warmup.
+(Worker_TP1 pid=33086) INFO 11-15 15:05:29 [kernel_warmup.py:41] Starting Triton kernel warmup.
+(Worker_TP3 pid=33088) INFO 11-15 15:05:29 [kernel_warmup.py:41] Starting Triton kernel warmup.
+(Worker_TP0 pid=33085) INFO 11-15 15:05:29 [kernel_warmup.py:41] Starting Triton kernel warmup.
+(Worker_TP1 pid=33086) INFO 11-15 15:05:29 [kernel_warmup.py:33] rejection_sampler Triton warmup complete in 0.136s.
+(Worker_TP2 pid=33087) INFO 11-15 15:05:29 [kernel_warmup.py:33] rejection_sampler Triton warmup complete in 0.136s.
+(Worker_TP0 pid=33085) INFO 11-15 15:05:29 [kernel_warmup.py:33] rejection_sampler Triton warmup complete in 0.134s.
+(Worker_TP3 pid=33088) INFO 11-15 15:05:29 [kernel_warmup.py:33] rejection_sampler Triton warmup complete in 0.136s.
+(Worker_TP1 pid=33086) INFO 11-15 15:05:29 [kernel_warmup.py:33] penalties Triton warmup complete in 0.046s.
+(Worker_TP0 pid=33085) INFO 11-15 15:05:29 [kernel_warmup.py:33] penalties Triton warmup complete in 0.046s.
+(Worker_TP3 pid=33088) INFO 11-15 15:05:29 [kernel_warmup.py:33] penalties Triton warmup complete in 0.046s.
+(Worker_TP2 pid=33087) INFO 11-15 15:05:29 [kernel_warmup.py:33] penalties Triton warmup complete in 0.046s.
+(Worker_TP1 pid=33086) INFO 11-15 15:05:29 [kernel_warmup.py:33] rms Triton warmup complete in 0.000s.
+(Worker_TP0 pid=33085) INFO 11-15 15:05:29 [kernel_warmup.py:33] rms Triton warmup complete in 0.000s.
+(Worker_TP2 pid=33087) INFO 11-15 15:05:29 [kernel_warmup.py:33] rms Triton warmup complete in 0.000s.
+(Worker_TP3 pid=33088) INFO 11-15 15:05:29 [kernel_warmup.py:33] rms Triton warmup complete in 0.000s.
+(Worker_TP1 pid=33086) INFO 11-15 15:05:29 [kernel_warmup.py:49] Triton kernel warmup finished in 0.183s.
+(Worker_TP2 pid=33087) INFO 11-15 15:05:29 [kernel_warmup.py:49] Triton kernel warmup finished in 0.183s.
+(Worker_TP3 pid=33088) INFO 11-15 15:05:29 [kernel_warmup.py:49] Triton kernel warmup finished in 0.183s.
+(Worker_TP0 pid=33085) INFO 11-15 15:05:29 [kernel_warmup.py:49] Triton kernel warmup finished in 0.180s.
+(Worker_TP0 pid=33085) INFO 11-15 15:05:29 [gpu_model_runner.py:6936] Rank 0: Torch profiler disabled for CUDA graph capture
+(Worker_TP0 pid=33085) Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   0%|          | 0/3 [00:00<?, ?it/s](Worker_TP0 pid=33085) INFO 11-15 15:05:31 [acl_graph.py:252] Replaying aclgraph
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  33%|███▎      | 1/3 [00:01<00:02,  1.44s/it]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  67%|██████▋   | 2/3 [00:02<00:01,  1.11s/it]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 3/3 [00:03<00:00,  1.00it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 3/3 [00:03<00:00,  1.06s/it]
+(Worker_TP0 pid=33085) INFO 11-15 15:05:34 [gpu_model_runner.py:6982] Graph capturing finished in 5 secs, took 0.06 GiB
+(Worker_TP0 pid=33085) INFO 11-15 15:05:34 [worker.py:820] Free memory on device (60.56/60.96 GiB) on startup. Desired GPU memory utilization is (0.75, 45.72 GiB). Actual usage: 16.89 GiB for weights, 0.23 GiB for peak activation, 0.44 GiB for non-torch memory, 0.06 GiB for NPU graph memory. Replace gpu_memory_utilization with `--kv-cache-memory=30008248832` (27.95 GiB) to fit into requested memory, or `--kv-cache-memory=45948811776` (42.79 GiB) to fully utilize NPU free memory. Current KV cache memory: 28.16 GiB. After warmup: torch reserved memory 45.13 GiB, torch allocated memory 45.07 GiB.
+(Worker_TP3 pid=33088) INFO 11-15 15:05:34 [worker.py:820] Free memory on device (60.58/60.96 GiB) on startup. Desired GPU memory utilization is (0.75, 45.72 GiB). Actual usage: 16.89 GiB for weights, 0.23 GiB for peak activation, 0.44 GiB for non-torch memory, 0.06 GiB for NPU graph memory. Replace gpu_memory_utilization with `--kv-cache-memory=30008601088` (27.95 GiB) to fit into requested memory, or `--kv-cache-memory=45971790336` (42.81 GiB) to fully utilize NPU free memory. Current KV cache memory: 28.16 GiB. After warmup: torch reserved memory 45.13 GiB, torch allocated memory 45.07 GiB.
+(Worker_TP1 pid=33086) INFO 11-15 15:05:34 [worker.py:820] Free memory on device (60.59/60.96 GiB) on startup. Desired GPU memory utilization is (0.75, 45.72 GiB). Actual usage: 16.89 GiB for weights, 0.23 GiB for peak activation, 0.44 GiB for non-torch memory, 0.06 GiB for NPU graph memory. Replace gpu_memory_utilization with `--kv-cache-memory=30008543744` (27.95 GiB) to fit into requested memory, or `--kv-cache-memory=45976070656` (42.82 GiB) to fully utilize NPU free memory. Current KV cache memory: 28.16 GiB. After warmup: torch reserved memory 45.13 GiB, torch allocated memory 45.07 GiB.
+(Worker_TP2 pid=33087) INFO 11-15 15:05:35 [worker.py:820] Free memory on device (60.59/60.96 GiB) on startup. Desired GPU memory utilization is (0.75, 45.72 GiB). Actual usage: 16.89 GiB for weights, 0.23 GiB for peak activation, 0.44 GiB for non-torch memory, 0.06 GiB for NPU graph memory. Replace gpu_memory_utilization with `--kv-cache-memory=30009281024` (27.95 GiB) to fit into requested memory, or `--kv-cache-memory=45974571520` (42.82 GiB) to fully utilize NPU free memory. Current KV cache memory: 28.16 GiB. After warmup: torch reserved memory 45.13 GiB, torch allocated memory 45.07 GiB.
+(Worker_TP1 pid=33086) INFO 11-15 15:05:46 [cpu_binding.py:538] [cpu_bind_mode] mode=topo_affinity rank=1 visible_npus=[0, 1, 2, 3]
+(Worker_TP1 pid=33086) WARNING 11-15 15:05:46 [worker.py:832] Bind cpus failed in rank1: CPUs available in 'Cpus_allowed_list' conflict with NUMA affinity. Skip binding cpu.
+(Worker_TP0 pid=33085) INFO 11-15 15:05:46 [cpu_binding.py:538] [cpu_bind_mode] mode=topo_affinity rank=0 visible_npus=[0, 1, 2, 3]
+(Worker_TP0 pid=33085) WARNING 11-15 15:05:46 [worker.py:832] Bind cpus failed in rank0: CPUs available in 'Cpus_allowed_list' conflict with NUMA affinity. Skip binding cpu.
+(Worker_TP3 pid=33088) INFO 11-15 15:05:46 [cpu_binding.py:538] [cpu_bind_mode] mode=topo_affinity rank=3 visible_npus=[0, 1, 2, 3]
+(Worker_TP3 pid=33088) WARNING 11-15 15:05:46 [worker.py:832] Bind cpus failed in rank3: CPUs available in 'Cpus_allowed_list' conflict with NUMA affinity. Skip binding cpu.
+(Worker_TP2 pid=33087) INFO 11-15 15:05:46 [cpu_binding.py:538] [cpu_bind_mode] mode=topo_affinity rank=2 visible_npus=[0, 1, 2, 3]
+(Worker_TP2 pid=33087) WARNING 11-15 15:05:46 [worker.py:832] Bind cpus failed in rank2: CPUs available in 'Cpus_allowed_list' conflict with NUMA affinity. Skip binding cpu.
+(EngineCore pid=32122) INFO 11-15 15:05:46 [core.py:361] init engine (profile, create kv cache, warmup model) took 68.02 s (compilation: 45.40 s)
+(EngineCore pid=32122) INFO 11-15 15:05:50 [registry.py:141] All limits of multimodal modalities supported by the model are set to 0, running in text-only mode.
+(EngineCore pid=32122) INFO 11-15 15:05:50 [ascend_config.py:161] Dynamic EPLB is False
+(EngineCore pid=32122) INFO 11-15 15:05:50 [ascend_config.py:162] The number of redundant experts is 0
+(EngineCore pid=32122) INFO 11-15 15:05:50 [kernel.py:372] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(EngineCore pid=32122) WARNING 11-15 15:05:50 [vllm.py:1928] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens.
+(EngineCore pid=32122) INFO 11-15 15:05:50 [utils.py:224] No quantization signature detected from model files for "/root/diffspec-experiments/models-and-views/qwen35-moe-diagnosis-20261030/target-model". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(EngineCore pid=32122) INFO 11-15 15:05:50 [platform.py:834] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+(EngineCore pid=32122) INFO 11-15 15:05:50 [platform.py:1138] FlashComm1 is disabled. Using flashinfer_all2allv as the all2all backend.
+(EngineCore pid=32122) INFO 11-15 15:05:50 [platform.py:1327] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(EngineCore pid=32122) INFO 11-15 15:05:50 [compilation.py:329] Enabled custom fusions: norm_quant, act_quant
+INFO 11-15 15:05:53 [hf.py:589] Detected the chat template content format to be 'openai'. You can set `--chat-template-content-format` to override this.
+[rank0]:[W1115 15:06:03.372458599 ArgSortKernelNpuOpApi.cpp:41] Warning: Warning: kernel [ArgSort] can not support dtype int32 or int64 on AiCore, Now this kernel is running on AiCpu.If you are more concerned about high-performance execution,please cast dtype to float32. (function operator())
+[rank3]:[W1115 15:06:03.372458629 ArgSortKernelNpuOpApi.cpp:41] Warning: Warning: kernel [ArgSort] can not support dtype int32 or int64 on AiCore, Now this kernel is running on AiCpu.If you are more concerned about high-performance execution,please cast dtype to float32. (function operator())
+[rank1]:[W1115 15:06:03.372509719 ArgSortKernelNpuOpApi.cpp:41] Warning: Warning: kernel [ArgSort] can not support dtype int32 or int64 on AiCore, Now this kernel is running on AiCpu.If you are more concerned about high-performance execution,please cast dtype to float32. (function operator())
+[rank2]:[W1115 15:06:03.372895853 ArgSortKernelNpuOpApi.cpp:41] Warning: Warning: kernel [ArgSort] can not support dtype int32 or int64 on AiCore, Now this kernel is running on AiCpu.If you are more concerned about high-performance execution,please cast dtype to float32. (function operator())
+INFO 11-15 15:06:15 [loggers.py:310] Engine 000: Avg prompt throughput: 340.1 tokens/s, Avg generation throughput: 1.4 tokens/s, Running: 2 reqs, Waiting: 0 reqs, GPU KV cache usage: 2.7%, Prefix cache hit rate: 0.0%
+INFO 11-15 15:06:15 [metrics.py:120] SpecDecoding metrics: Mean acceptance length: 3.09, Accepted throughput: 0.93 tokens/s, Drafted throughput: 1.77 tokens/s, Accepted: 23 tokens, Drafted: 44 tokens, Per-position acceptance rate: 0.909, 0.455, 0.364, 0.364, Avg Draft acceptance rate: 52.3%
+(Worker_TP0 pid=33085) INFO 11-15 15:06:17 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 6, 'retrieval_attempts': 32, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 21, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 1708.8667790715892, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 27, 'selected_slots': 2, 'target_tensor_parallel_size': 4}
+(Worker_TP3 pid=33088) INFO 11-15 15:06:17 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 6, 'retrieval_attempts': 32, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 21, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 1708.9565135538578, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 27, 'selected_slots': 2, 'target_tensor_parallel_size': 4}
+(Worker_TP1 pid=33086) INFO 11-15 15:06:17 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 6, 'retrieval_attempts': 32, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 21, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 1709.2358243341248, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 27, 'selected_slots': 2, 'target_tensor_parallel_size': 4}
+(Worker_TP2 pid=33087) INFO 11-15 15:06:17 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 6, 'retrieval_attempts': 32, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 21, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 1707.682214366893, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 27, 'selected_slots': 2, 'target_tensor_parallel_size': 4}
+(Worker_TP1 pid=33086) INFO 11-15 15:06:20 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 14, 'retrieval_attempts': 64, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 45, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 734.1355005545275, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 59, 'selected_slots': 2, 'target_tensor_parallel_size': 4}
+(Worker_TP3 pid=33088) INFO 11-15 15:06:20 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 14, 'retrieval_attempts': 64, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 45, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 734.0578357023852, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 59, 'selected_slots': 2, 'target_tensor_parallel_size': 4}
+(Worker_TP0 pid=33085) INFO 11-15 15:06:20 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 14, 'retrieval_attempts': 64, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 45, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 734.046126981931, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 59, 'selected_slots': 2, 'target_tensor_parallel_size': 4}
+(Worker_TP2 pid=33087) INFO 11-15 15:06:20 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 14, 'retrieval_attempts': 64, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 45, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 733.5585726957236, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 59, 'selected_slots': 2, 'target_tensor_parallel_size': 4}
+(Worker_TP3 pid=33088) INFO 11-15 15:06:24 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 22, 'retrieval_attempts': 96, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 69, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 468.33779561248696, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 91, 'selected_slots': 1, 'target_tensor_parallel_size': 4}
+(Worker_TP2 pid=33087) INFO 11-15 15:06:24 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 22, 'retrieval_attempts': 96, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 69, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 467.87158789282495, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 91, 'selected_slots': 1, 'target_tensor_parallel_size': 4}
+(Worker_TP0 pid=33085) INFO 11-15 15:06:24 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 22, 'retrieval_attempts': 96, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 69, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 468.33529010076415, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 91, 'selected_slots': 1, 'target_tensor_parallel_size': 4}
+(Worker_TP1 pid=33086) INFO 11-15 15:06:24 [runtime.py:1182] DiffSpec retrieval status: {'retrieval_count': 22, 'retrieval_attempts': 96, 'retrieval_skipped_prefill': 5, 'retrieval_skipped_no_snapshot': 0, 'retrieval_skipped_interval': 69, 'retrieval_skipped_no_committed_tokens': 0, 'retrieval_ms': 468.4588697484948, 'tree_cycles': 0, 'mean_tree_nodes': 0.0, 'mean_accepted_depth': 0.0, 'mean_emitted_tokens': 0.0, 'working_cache_tokens': 0, 'retrieval_cycle': 91, 'selected_slots': 1, 'target_tensor_parallel_size': 4}
+INFO 11-15 15:06:25 [core_client.py:689] [shutdown] MPClient: start timeout=default
+INFO 11-15 15:06:25 [core_client.py:691] [shutdown] MPClient: stopping engine manager
+INFO 11-15 15:06:25 [utils.py:620] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=32122) INFO 11-15 15:06:25 [core.py:1350] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=32122) INFO 11-15 15:06:25 [core.py:1501] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=32122) INFO 11-15 15:06:25 [core.py:1532] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=32122) INFO 11-15 15:06:25 [core.py:1363] [shutdown] EngineCore: exiting busy loop
+(EngineCore pid=32122) INFO 11-15 15:06:25 [multiproc_executor.py:472] [shutdown] Executor: waiting for worker exit count=4
+(Worker_TP0 pid=33085) INFO 11-15 15:06:25 [multiproc_executor.py:836] Parent process exited, terminating worker queues
+WARNING 11-15 15:06:30 [utils.py:640] [shutdown] Process manager: force killing remaining processes count=1
+WARNING 11-15 15:06:30 [utils.py:645] [shutdown] Process manager: force killing remaining process EngineCore pid 32122
+(EngineCore pid=32122) WARNING 11-15 15:06:30 [multiproc_executor.py:484] [shutdown] Executor: workers still running after grace period; sending SIGTERM count=4
+INFO 11-15 15:06:30 [core_client.py:693] [shutdown] MPClient: engine manager stopped
+INFO 11-15 15:06:30 [core_client.py:694] [shutdown] MPClient: cleaning up background resources
+INFO 11-15 15:06:30 [core_client.py:696] [shutdown] MPClient: complete
+/usr/local/python3.12.13/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 1 leaked shared_memory objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

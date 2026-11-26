@@ -1,0 +1,390 @@
+{
+  "schema": "vllm-hust-r11-qwen35-steady-mixed-context-screen/v1",
+  "release": "full-answer-b1-20261126-r11-rc4-qwen35-steady-mixed",
+  "model": "Qwen3.5-35B-A3B",
+  "rc4_commit": "6ae9e2a06ba5d057e37746e8d56e41a16b63ec36",
+  "source_and_contract": {
+    "release": "full-answer-b1-20261126-r11-rc4-qwen35-steady-mixed",
+    "rc4_commit": "6ae9e2a06ba5d057e37746e8d56e41a16b63ec36",
+    "deployment_sha256": "1af7f9e934a9671d2ff1e0483ab01b8a64876d7cb177b41ab9e02a9036f83fca",
+    "installed_files_sha256": "2442e30179a32ef9078f308f04d3256a426fa38008e5d39b249d81d13cdc8bad",
+    "base_release": "full-answer-b1-20261124-r10",
+    "scheduler_and_host_contract_sha256": {
+      "mods/betterscale/betterscale/models/qwen35/prefill_round_robin.py": "71d8b19cd1fc7b020065a2065a327a156735b5c312d9866edcfc12e45ea6345b",
+      "mods/microflow/hust_prefill_microflow/school028/host-contract.json": "668916cc8067f57f16a51be1941cc084079c649d678f67d62c052a1916fe7449"
+    },
+    "b0_controller_sources_sha256": "21a4ec50bb179fdf134da669e244e4ec57aa83eed388cc796c44db05d864c37b",
+    "b0_seal_sha256": "0d234f1b14313806a2918a1ac66ee4f132f71f983446e3bd1e1c917ae352c920",
+    "contract_sha256": "3d5b3344e219080322872a0fd20357551fb519a9ebc648cf3659773a667b1d5c",
+    "physical_cards": [
+      2,
+      3
+    ],
+    "logical_cards": [
+      2,
+      3
+    ],
+    "current_controller_changes": {
+      "runtime_overlay.py": {
+        "before_sha256": "0f6b6810d48edf606a4b8d23bfa05fec633a7e8b8f73d809dcf3134a755afe4d",
+        "after_sha256": "7275093af1d3e3496a8784fa362d79e7239578d0ca179c990cee34d3908a6294"
+      },
+      "context_baseline_reuse.py": {
+        "before_sha256": "a14143002c9355b25964710b8abe17ef34ff4f497e73fa6bcffda6fc54163bb2",
+        "after_sha256": "52c36db61ba7b0b73d5f0aaff907effe855514221eca67d5234b457b99ca9bbf"
+      }
+    },
+    "controller_adaptations": {
+      "scripts/context_baseline_reuse.py": {
+        "older": "ea17a7f601442d345387cd93dd1b6b485b23a35fefd7e9bbd9372d431dee1a7a",
+        "actual": "a14143002c9355b25964710b8abe17ef34ff4f497e73fa6bcffda6fc54163bb2"
+      },
+      "scripts/official_memory.py": {
+        "older": "53b7258de42be7a8a6c15ec1778c518c6b4de3f7e8b776bdd7463a5d07a46d24",
+        "actual": "8dd3adf7bb9850e88deb3077340efbd05b7a69c86008b2ebbaac6acf97276efc"
+      }
+    },
+    "previous_scheduler_sha256": "954b787ac34384805c7964549bf00ebbb7393a3911c131eeabf300cd66a6c671",
+    "graph_capture_sizes": [
+      3,
+      6,
+      12,
+      16,
+      24,
+      32,
+      40,
+      48,
+      64,
+      80,
+      96,
+      108,
+      128,
+      256,
+      512,
+      1024,
+      1536,
+      2048,
+      3072,
+      4096
+    ],
+    "reused_device_graph_geometry": true,
+    "qualification_scope": "same-card context and four tenants with strict 1.25 window limit",
+    "mixed_step_budget": 1536,
+    "enrolled_host": 10201
+  },
+  "arm_seals": {
+    "B0": "0d234f1b14313806a2918a1ac66ee4f132f71f983446e3bd1e1c917ae352c920",
+    "B1": "265b30317e89bf22f12d19175fc6cc5397ff23b27b0b3ff984737a2dae503ed0"
+  },
+  "exact_report_source_sha256": "1e5c302f2aee21e67b9b43840a6bb521dadda89ab9913572bf149cb94f339a21",
+  "target_4_3": {
+    "milestone": {
+      "met": true,
+      "status": "达成目标",
+      "reason": "16K/4K吞吐≥50%，TTFT P95/P99比值≤3，TPOT P95/P99比值≤2；两臂完整且无失败。"
+    },
+    "final": {
+      "met": true,
+      "status": "达成目标",
+      "reason": "32K全部五个60秒窗口：吞吐max/min≤1.50，TTFT P95/P99≤2，TPOT P95/P99≤1.25；两臂完整且无失败。"
+    },
+    "percentile_method": "nearest_rank",
+    "blocking_errors": {
+      "B0": [],
+      "B1": []
+    },
+    "measured_ratios": {
+      "throughput": "0.5961796488961707775595756607",
+      "ttft_p95": "2.259875456982188005845678439",
+      "ttft_p99": "2.632369212403862852378038734",
+      "tpot_p95": "1.555440091054247024238914206",
+      "tpot_p99": "1.510157748025972307186405420"
+    },
+    "measured_window_ratios": {
+      "throughput": "1.369942167429262626054731379",
+      "ttft_p95": "1.442690382417197555566940208",
+      "ttft_p99": "1.446331137542705824092060041",
+      "tpot_p95": "1.101200821873408363930477107",
+      "tpot_p99": "1.068479592759539286824776030"
+    }
+  },
+  "target_4_4_four_tenant": {
+    "final": {
+      "met": true,
+      "status": "达成目标",
+      "reason": "4K 四租户按公开月租折算的单位成本下降≥30%，B1 双卡 AI Core 均值≥80%，两臂各租户完整结束。",
+      "evidence_status": "published_rental"
+    },
+    "four_tenant_ai_core_mean_percent": "86.94027922693513",
+    "four_tenant_cost_reduction_percent": "65.95423485083623271179208734"
+  },
+  "sample_scope": "Independent same-pair context and four-tenant supplement",
+  "phase_metrics": {
+    "4096-formal": {
+      "B0": {
+        "requests": 139,
+        "successful": 139,
+        "failed": 0,
+        "output_tokens_per_second": 115.05671052387558,
+        "ttft_ms": {
+          "p95": 3916.6260340134613,
+          "p99": 8808.370478975121
+        },
+        "tpot_ms": {
+          "p95": 66.77846687448704,
+          "p99": 73.75407431356828
+        }
+      },
+      "B1": {
+        "requests": 317,
+        "successful": 317,
+        "failed": 0,
+        "output_tokens_per_second": 267.97192253008785,
+        "ttft_ms": {
+          "p95": 2017.986943013966,
+          "p99": 3662.5542999827303
+        },
+        "tpot_ms": {
+          "p95": 28.77290293724988,
+          "p99": 30.40958750974752
+        }
+      }
+    },
+    "16384-formal": {
+      "B0": {
+        "requests": 74,
+        "successful": 74,
+        "failed": 0,
+        "output_tokens_per_second": 60.829022238632724,
+        "ttft_ms": {
+          "p95": 16659.616224002093,
+          "p99": 27094.88654800225
+        },
+        "tpot_ms": {
+          "p95": 114.91781141558735,
+          "p99": 117.1319127489137
+        }
+      },
+      "B1": {
+        "requests": 190,
+        "successful": 190,
+        "failed": 0,
+        "output_tokens_per_second": 159.75940668801965,
+        "ttft_ms": {
+          "p95": 4560.399165027775,
+          "p99": 9641.195178031921
+        },
+        "tpot_ms": {
+          "p95": 44.754526764610965,
+          "p99": 45.92327419211905
+        }
+      }
+    },
+    "32768-formal": {
+      "B0": {
+        "requests": 43,
+        "successful": 43,
+        "failed": 0,
+        "output_tokens_per_second": 34.38631223698999,
+        "ttft_ms": {
+          "p95": 40696.284446981736,
+          "p99": 54568.53835703805
+        },
+        "tpot_ms": {
+          "p95": 166.32020268634912,
+          "p99": 175.5018299292572
+        }
+      },
+      "B1": {
+        "requests": 88,
+        "successful": 88,
+        "failed": 0,
+        "output_tokens_per_second": 72.69722296100257,
+        "ttft_ms": {
+          "p95": 22121.555808989797,
+          "p99": 22731.648296001367
+        },
+        "tpot_ms": {
+          "p95": 60.832618607902056,
+          "p99": 61.33756616070647
+        }
+      }
+    },
+    "multi-tenant-formal": {
+      "B0": {
+        "requests": 166,
+        "successful": 166,
+        "failed": 0,
+        "output_tokens_per_second": 135.53073278990402,
+        "ttft_ms": {
+          "p95": 23194.228359032422,
+          "p99": 35616.098279017024
+        },
+        "tpot_ms": {
+          "p95": 171.81751306269172,
+          "p99": 179.3390290902964
+        }
+      },
+      "B1": {
+        "requests": 475,
+        "successful": 475,
+        "failed": 0,
+        "output_tokens_per_second": 398.08396784771014,
+        "ttft_ms": {
+          "p95": 9338.132656994276,
+          "p99": 11260.323581984267
+        },
+        "tpot_ms": {
+          "p95": 55.06356218829751,
+          "p99": 58.41645311390725
+        }
+      }
+    }
+  },
+  "32k_submission_windows": {
+    "B0": [
+      {
+        "requests": 10,
+        "successful": 10,
+        "failed": 0,
+        "output_tokens_per_second": 23.323135759841392,
+        "ttft_ms": {
+          "p95": 54568.53835703805,
+          "p99": 54568.53835703805
+        },
+        "tpot_ms": {
+          "p95": 166.1621234706128,
+          "p99": 166.1621234706128
+        }
+      },
+      {
+        "requests": 9,
+        "successful": 9,
+        "failed": 0,
+        "output_tokens_per_second": 20.098123303409427,
+        "ttft_ms": {
+          "p95": 19966.00102301454,
+          "p99": 19966.00102301454
+        },
+        "tpot_ms": {
+          "p95": 175.5018299292572,
+          "p99": 175.5018299292572
+        }
+      },
+      {
+        "requests": 8,
+        "successful": 8,
+        "failed": 0,
+        "output_tokens_per_second": 18.075363531297004,
+        "ttft_ms": {
+          "p95": 20133.98316904204,
+          "p99": 20133.98316904204
+        },
+        "tpot_ms": {
+          "p95": 169.32691855301314,
+          "p99": 169.32691855301314
+        }
+      },
+      {
+        "requests": 8,
+        "successful": 8,
+        "failed": 0,
+        "output_tokens_per_second": 18.253943750030917,
+        "ttft_ms": {
+          "p95": 20299.332289025187,
+          "p99": 20299.332289025187
+        },
+        "tpot_ms": {
+          "p95": 166.32020268634912,
+          "p99": 166.32020268634912
+        }
+      },
+      {
+        "requests": 8,
+        "successful": 8,
+        "failed": 0,
+        "output_tokens_per_second": 25.56052864120381,
+        "ttft_ms": {
+          "p95": 20344.496187986806,
+          "p99": 20344.496187986806
+        },
+        "tpot_ms": {
+          "p95": 164.94723063135774,
+          "p99": 164.94723063135774
+        }
+      }
+    ],
+    "B1": [
+      {
+        "requests": 20,
+        "successful": 20,
+        "failed": 0,
+        "output_tokens_per_second": 56.42723443594914,
+        "ttft_ms": {
+          "p95": 22674.427399004344,
+          "p99": 22731.648296001367
+        },
+        "tpot_ms": {
+          "p95": 55.700617854930826,
+          "p99": 57.40639931389916
+        }
+      },
+      {
+        "requests": 18,
+        "successful": 18,
+        "failed": 0,
+        "output_tokens_per_second": 53.84290277209255,
+        "ttft_ms": {
+          "p95": 22121.555808989797,
+          "p99": 22121.555808989797
+        },
+        "tpot_ms": {
+          "p95": 60.42733404296907,
+          "p99": 60.42733404296907
+        }
+      },
+      {
+        "requests": 16,
+        "successful": 16,
+        "failed": 0,
+        "output_tokens_per_second": 48.132270446288274,
+        "ttft_ms": {
+          "p95": 18953.2818129519,
+          "p99": 18953.2818129519
+        },
+        "tpot_ms": {
+          "p95": 61.33756616070647,
+          "p99": 61.33756616070647
+        }
+      },
+      {
+        "requests": 16,
+        "successful": 16,
+        "failed": 0,
+        "output_tokens_per_second": 51.45609964442775,
+        "ttft_ms": {
+          "p95": 17552.824641985353,
+          "p99": 17552.824641985353
+        },
+        "tpot_ms": {
+          "p95": 61.10027490580893,
+          "p99": 61.10027490580893
+        }
+      },
+      {
+        "requests": 18,
+        "successful": 18,
+        "failed": 0,
+        "output_tokens_per_second": 65.9384268984796,
+        "ttft_ms": {
+          "p95": 15716.766171972267,
+          "p99": 15716.766171972267
+        },
+        "tpot_ms": {
+          "p95": 61.202868352890675,
+          "p99": 61.202868352890675
+        }
+      }
+    ]
+  }
+}
